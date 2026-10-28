@@ -40,8 +40,6 @@ val unitTestOnly: Boolean = gradle.startParameter.taskNames.isNotEmpty() &&
             "compiledebugunittestkotlin",
             "recordroborazzidebug",
             "verifyroborazzidebug",
-            "parityreport",
-            "paritymanifest",
         )
     }
 
@@ -599,13 +597,6 @@ tasks.withType<Test>().configureEach {
     // eating the whole 90-min CI job. Imported: inside this block `java`
     // resolves to the project's java extension, not the package.
     timeout.set(Duration.ofMinutes(45))
-    // android-app#30's parity gate (G2–G4) is armed against goldens that
-    // are not recorded yet, so it fails until the first sign-off. It runs
-    // only when asked (-ProbocoParity: the android-screenshots CI job), not
-    // in the default unit run that gates every PR.
-    if (!providers.gradleProperty("robocoParity").isPresent) {
-        filter { excludeTestsMatching("sh.roboco.android.parity.*") }
-    }
     systemProperty("jna.library.path", debugHostDir.absolutePath)
     systemProperty("robolectric.graphicsMode", "NATIVE")
     systemProperty("robolectric.pixelCopyRenderMode", "hardware")
@@ -615,46 +606,6 @@ tasks.withType<Test>().configureEach {
     systemProperty("roboco.generatedFonts", fontsDir.get().asFile.absolutePath)
     systemProperty("roboco.generatedLicenses", licensesDir.get().asFile.absolutePath)
     systemProperty("roboco.generatedChimes", chimesDir.get().asFile.absolutePath)
-}
-
-roborazzi {
-    // Reference images are committed goldens (ticket 14 extends this suite,
-    // ticket 30 owns the emulator-based part).
-    outputDir.set(file("src/test/screenshots"))
-}
-
-// ---------------------------------------------------------------------------
-// The iOS parity gate (android-app#30): the G5 report. G1 is Roborazzi's
-// `verifyRoborazziDebug`; G2–G4 are the `sh.roboco.android.parity` JVM
-// tests; this task writes the side-by-side board the reviewer walks
-// (`apps/android/parity/CHECKLIST.md`), uploaded by the
-// `android-screenshots` CI job on every run.
-// ---------------------------------------------------------------------------
-val parityDir: File = projectDir.parentFile.resolve("parity")
-
-val parityReport = tasks.register<roboco.gradle.ParityReport>("parityReport") {
-    group = "roboco"
-    description =
-        "Writes the iOS parity side-by-side board ([Android | iOS | abs-diff] per " +
-            "golden) plus index.html into build/parity/."
-    manifest.set(file(parityDir.resolve("manifest.json")))
-    goldens.from(fileTree("src/test/screenshots") { include("**/*.png") })
-    goldensRoot.set(file("src/test/screenshots"))
-    iosRefs.from(fileTree(parityDir.resolve("ios")) { include("**/*.png") })
-    iosRoot.set(parityDir.resolve("ios"))
-    outputDir.set(layout.buildDirectory.dir("parity"))
-}
-
-// G2's tooling (android-app#30): stub manifest entries for unlisted goldens,
-// and the sign-off mode (--sign=pending|all|<paths> --reviewer=… --date=…)
-// that pins reviewedSha256 to the recorded PNGs. See apps/android/parity/README.md.
-tasks.register<roboco.gradle.ParityManifest>("parityManifest") {
-    group = "roboco"
-    description =
-        "Adds stub parity-manifest entries for unlisted goldens; with --sign, pins " +
-            "reviewedSha256/reviewer/date for the reviewed entries."
-    manifest.set(file(parityDir.resolve("manifest.json")))
-    goldensDir.set(file("src/test/screenshots"))
 }
 
 dependencies {
