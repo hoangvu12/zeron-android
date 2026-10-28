@@ -1,4 +1,4 @@
-package sh.roboco.android.notify
+package sh.zeron.android.notify
 
 import android.app.Application
 import android.app.Notification
@@ -19,7 +19,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows
 import org.robolectric.annotation.Config
-import sh.roboco.android.R
+import sh.zeron.android.R
 
 /**
  * The notifier (android-app#28): versioned channels with the desktop
@@ -168,7 +168,7 @@ class NotifierTest {
         // behaviour under test — both are the ticket's copy.
         assertTrue(
             "the link-lost copy must be one of the two sentences",
-            text(lost) == "Roboco is trying to reconnect" || text(lost) == "Your device is offline",
+            text(lost) == "Zeron is trying to reconnect" || text(lost) == "Your device is offline",
         )
         assertEquals(NotificationCompat.CATEGORY_ERROR, lost.category)
         assertEquals("session-failed-v1", lost.channelId)
@@ -186,7 +186,7 @@ class NotifierTest {
         notifier.postBudgetExhausted()
         val budget = posted("budget")
         assertEquals("Background updates paused", title(budget))
-        assertEquals("Open Roboco to resume.", text(budget))
+        assertEquals("Open Zeron to resume.", text(budget))
         assertEquals("runs-v1", budget.channelId)
         notifier.cancelBudgetExhausted()
         assertNull(active("budget"))
@@ -243,7 +243,7 @@ class NotifierTest {
         // The tap opens the chat's deep link.
         val intent = targetIntent(notification.contentIntent)
         assertEquals(Intent.ACTION_VIEW, intent.action)
-        assertEquals("roboco://chat/engine:v1:a", intent.data.toString())
+        assertEquals("zeron://chat/engine:v1:a", intent.data.toString())
     }
 
     // -------------------------------------------------- branding
@@ -279,7 +279,7 @@ class NotifierTest {
         )
         assertEquals(0xFF4B4F9E.toInt(), ContextCompat.getColor(context, R.color.brand_ribbon))
         for ((name, n) in all) {
-            assertEquals("$name small icon", R.drawable.zi_roboco_bow, n.smallIcon.resId)
+            assertEquals("$name small icon", R.drawable.zi_zeron_bow, n.smallIcon.resId)
             assertEquals("$name accent", 0xFF4B4F9E.toInt(), n.color)
             assertNotNull("$name large icon", n.getLargeIcon())
         }

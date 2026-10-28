@@ -1,7 +1,7 @@
-package sh.roboco.android.debug
+package sh.zeron.android.debug
 
 import java.util.Locale
-import sh.roboco.android.design.Appearance
+import sh.zeron.android.design.Appearance
 
 /**
  * The intent-extra keys of the Transcript Lab (android-ui-parity #135),
@@ -29,7 +29,7 @@ internal const val LAB_EXTRA_IMAGES = "images"
  *  - `autostream` / `top` / `autoscroll` — the three scripts;
  *  - `meter` / `bench` — parsed here, owned by ticket 136 (the hitch
  *    meter and the scroll benchmark);
- *  - `appearance` — Roboco's addition for screenshots in both themes
+ *  - `appearance` — Zeron's addition for screenshots in both themes
  *    without touching the persisted preference (`system`/`light`/`dark`,
  *    case-insensitive, `null` = follow the app's setting).
  */

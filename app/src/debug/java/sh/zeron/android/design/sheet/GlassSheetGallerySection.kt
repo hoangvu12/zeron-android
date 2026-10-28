@@ -1,4 +1,4 @@
-package sh.roboco.android.design.sheet
+package sh.zeron.android.design.sheet
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,11 +24,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.GalleryBackdrop
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.GalleryBackdrop
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
 
 /**
  * The "Glass sheet" page of the debug design gallery (ticket 17):
@@ -59,7 +59,7 @@ import sh.roboco.android.design.uiStyle
  */
 @Composable
 fun GlassSheetGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     var open by rememberSaveable { mutableStateOf<SheetDemo?>(null) }
     var stacked by rememberSaveable { mutableStateOf(false) }
@@ -144,7 +144,7 @@ private enum class SheetDemo { SelectText, ToolDetail, NewSession }
 /** One plain-text button row (no Material controls). */
 @Composable
 private fun DemoButton(text: String, onClick: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     BasicText(
         text,
@@ -165,7 +165,7 @@ private fun DemoButton(text: String, onClick: () -> Unit) {
  */
 @Composable
 private fun SheetDemoContent(bottomInset: Dp, extra: String? = null, onExtra: () -> Unit = {}) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     var field by remember { mutableStateOf("") }
     LazyColumn(
@@ -198,7 +198,7 @@ private fun SheetDemoContent(bottomInset: Dp, extra: String? = null, onExtra: ()
         }
         items(200) { line ->
             BasicText(
-                "line ${line + 1}: $ roboco engine start --port ${8675 + line}",
+                "line ${line + 1}: $ zeron engine start --port ${8675 + line}",
                 Modifier.padding(horizontal = 16.dp, vertical = 1.dp),
                 style = uiStyle(Face.Mono, typeScale.bodyScaled(13f), palette.text),
             )

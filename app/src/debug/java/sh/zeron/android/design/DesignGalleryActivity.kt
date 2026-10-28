@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.app.Activity
 import android.content.Intent
@@ -57,9 +57,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import java.util.Locale
-import sh.roboco.android.core.Face
+import sh.zeron.android.core.Face
 
-private const val TAG = "RobocoGallery"
+private const val TAG = "ZeronGallery"
 
 private const val EXTRA_SECTION = "section"
 private const val EXTRA_APPEARANCE = "appearance"
@@ -70,10 +70,10 @@ private const val EXTRA_REDUCE = "reduce"
  * of this set in isolation, in light and dark, with reduce motion forced on
  * or off. Exists only in the debug build — `src/debug` + the debug manifest.
  *
- * Reached by `adb shell am start -n sh.roboco.android/.design.DesignGalleryActivity`
+ * Reached by `adb shell am start -n sh.zeron.android/.design.DesignGalleryActivity`
  * or through `MainActivity --es route gallery` ([GalleryLaunch]). Like iOS's
  * debug Transcript Lab (`-lab`), it is a plain debug screen on
- * `Palette.background` with an inline SemiBold 17 title; unlike iOS, Roboco
+ * `Palette.background` with an inline SemiBold 17 title; unlike iOS, Zeron
  * does not ship the gallery at all.
  */
 class DesignGalleryActivity : ComponentActivity() {
@@ -129,7 +129,7 @@ fun GalleryApp(start: GalleryStart) {
     var selected by rememberSaveable { mutableStateOf(Gallery.section(start.section)?.name) }
 
     GalleryProviders(Appearance.fromStored(appearance)) {
-        val dark = RobocoTheme.isDark
+        val dark = ZeronTheme.isDark
         val view = LocalView.current
         SideEffect {
             val window = (view.context as Activity).window
@@ -141,7 +141,7 @@ fun GalleryApp(start: GalleryStart) {
         val section = selected?.let(Gallery::section)
         BackHandler(enabled = selected != null) { selected = null }
 
-        Column(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+        Column(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
             GalleryTopBar(
                 title = section?.name ?: "Design Gallery",
                 sectionOpen = section != null,
@@ -169,7 +169,7 @@ private fun GalleryTopBar(
     onAppearance: (Appearance) -> Unit,
     onBack: () -> Unit,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Column(
         Modifier
@@ -237,7 +237,7 @@ private fun GalleryTopBar(
 /** One System/Light/Dark capsule (`MoreViewController.swift:200-202` copy). */
 @Composable
 private fun GallerySegment(text: String, selected: Boolean, onSelect: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Box(
         Modifier
@@ -265,7 +265,7 @@ private fun GallerySegment(text: String, selected: Boolean, onSelect: () -> Unit
 /** The process-wide Force reduce motion toggle (two-state: on ↔ follow system). */
 @Composable
 private fun GalleryForceToggle() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val on = ReduceMotion.debugOverride == true
     Box(
@@ -299,7 +299,7 @@ private fun GalleryForceToggle() {
  */
 @Composable
 private fun GalleryStatusLine() {
-    val dark = RobocoTheme.isDark
+    val dark = ZeronTheme.isDark
     val reduce = LocalReduceMotion.current
     val suffix = when (ReduceMotion.debugOverride) {
         true -> " (forced)"
@@ -316,7 +316,7 @@ private fun GalleryStatusLine() {
             LocalTypeScale.current.factor,
             Build.VERSION.SDK_INT,
         ),
-        style = uiStyle(Face.Mono, LocalTypeScale.current.fixed(11f), RobocoTheme.palette.secondary),
+        style = uiStyle(Face.Mono, LocalTypeScale.current.fixed(11f), ZeronTheme.palette.secondary),
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
     )
@@ -325,7 +325,7 @@ private fun GalleryStatusLine() {
 /** The section index: header plus one 48 dp row per section. */
 @Composable
 private fun GalleryIndex(onOpen: (GallerySection) -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val sections = Gallery.sections
     val bottom = WindowInsets.safeDrawing.asPaddingValues().calculateBottomPadding()
@@ -359,7 +359,7 @@ private fun GalleryIndex(onOpen: (GallerySection) -> Unit) {
 
 @Composable
 private fun IndexRow(section: GallerySection, onOpen: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Row(
         Modifier

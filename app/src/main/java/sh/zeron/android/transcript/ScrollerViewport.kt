@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.horizontalScroll
@@ -20,8 +20,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import kotlin.math.max
-import sh.roboco.android.design.horizontalScrollEdgeFade
-import uniffi.roboco_core.Scroller
+import sh.zeron.android.design.horizontalScrollEdgeFade
+import uniffi.zeron_core.Scroller
 
 /**
  * The constants of the transcript scrollers (ticket 116), all from the iOS
@@ -75,7 +75,7 @@ object ScrollerGeometry {
  * `ScrollState.maxValue` during measure and its setter clamps `value` to
  * the new max, so the offset rides content changes clamped, never
  * snapping back (iOS resets `contentOffset` to zero on every `configure`;
- * see the ticket's Roboco adaptation). A moved origin means a different
+ * see the ticket's Zeron adaptation). A moved origin means a different
  * scroller, so it starts at 0.
  *
  * Not `rememberSaveable`: the offset must not survive the row leaving the

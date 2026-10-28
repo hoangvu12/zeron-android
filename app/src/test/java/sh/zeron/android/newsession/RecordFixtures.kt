@@ -1,11 +1,11 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
-import uniffi.roboco_core.ChatIndicator
-import uniffi.roboco_core.DeviceView
-import uniffi.roboco_core.FrontPage
-import uniffi.roboco_core.ProjectView
-import uniffi.roboco_core.PullRequestGroups
-import uniffi.roboco_core.WorkspaceSnapshot
+import uniffi.zeron_core.ChatIndicator
+import uniffi.zeron_core.DeviceView
+import uniffi.zeron_core.FrontPage
+import uniffi.zeron_core.ProjectView
+import uniffi.zeron_core.PullRequestGroups
+import uniffi.zeron_core.WorkspaceSnapshot
 
 /**
  * UniFFI record fixtures shared by the #92 tests that need a

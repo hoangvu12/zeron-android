@@ -1,11 +1,11 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.ui.unit.Density
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import sh.roboco.android.design.LinearFontScaleDensity
-import sh.roboco.android.design.TypeScale
-import sh.roboco.android.design.iconBoxDp
+import sh.zeron.android.design.LinearFontScaleDensity
+import sh.zeron.android.design.TypeScale
+import sh.zeron.android.design.iconBoxDp
 
 /**
  * The header row's hand layout, pure (android-ui-parity #39):

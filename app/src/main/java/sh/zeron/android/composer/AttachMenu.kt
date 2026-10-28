@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import android.Manifest
 import android.content.ActivityNotFoundException
@@ -36,10 +36,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.glass.Menu
-import sh.roboco.android.design.glass.MenuIcon
-import sh.roboco.android.design.glass.MenuItem
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.glass.Menu
+import sh.zeron.android.design.glass.MenuIcon
+import sh.zeron.android.design.glass.MenuItem
 
 /** One row of the attach menu (android-ui-parity #87). */
 enum class AttachSource { Photos, Camera, Files, Paste }
@@ -71,7 +71,7 @@ fun attachMenu(hasCamera: Boolean, clipHasImage: Boolean, onPick: (AttachSource)
         add(
             MenuItem(
                 title = "Photo Library",
-                icon = MenuIcon.Symbol(RobocoIcons.PhotoOnRectangle),
+                icon = MenuIcon.Symbol(ZeronIcons.PhotoOnRectangle),
                 testTag = "attach-photos",
             ) { onPick(AttachSource.Photos) },
         )
@@ -79,7 +79,7 @@ fun attachMenu(hasCamera: Boolean, clipHasImage: Boolean, onPick: (AttachSource)
             add(
                 MenuItem(
                     title = "Take Photo",
-                    icon = MenuIcon.Symbol(RobocoIcons.Camera),
+                    icon = MenuIcon.Symbol(ZeronIcons.Camera),
                     testTag = "attach-camera",
                 ) { onPick(AttachSource.Camera) },
             )
@@ -87,7 +87,7 @@ fun attachMenu(hasCamera: Boolean, clipHasImage: Boolean, onPick: (AttachSource)
         add(
             MenuItem(
                 title = "Choose File",
-                icon = MenuIcon.Symbol(RobocoIcons.Folder),
+                icon = MenuIcon.Symbol(ZeronIcons.Folder),
                 testTag = "attach-files",
             ) { onPick(AttachSource.Files) },
         )
@@ -95,7 +95,7 @@ fun attachMenu(hasCamera: Boolean, clipHasImage: Boolean, onPick: (AttachSource)
             add(
                 MenuItem(
                     title = "Paste Image",
-                    icon = MenuIcon.Symbol(RobocoIcons.DocOnClipboard),
+                    icon = MenuIcon.Symbol(ZeronIcons.DocOnClipboard),
                     testTag = "attach-paste",
                 ) { onPick(AttachSource.Paste) },
             )
@@ -157,11 +157,11 @@ internal class PickImages : ActivityResultContract<Int, List<Uri>>() {
 class AttachPicker internal constructor(
     private val context: Context,
     private val clipboard: ClipboardManager?,
-    /** Roboco: the manifest's `CAMERA` permission decides the runtime grant step (138). */
+    /** Zeron: the manifest's `CAMERA` permission decides the runtime grant step (138). */
     private val cameraDeclared: Boolean,
     private val scope: CoroutineScope,
     private val resolver: ContentResolver,
-    /** The pending camera file's path; survives activity death (Roboco). */
+    /** The pending camera file's path; survives activity death (Zeron). */
     internal val pendingCamera: MutableState<String?>,
     private val limit: State<() -> Int>,
     private val deliver: State<(List<StagedImage>) -> Unit>,
@@ -445,7 +445,7 @@ fun clipHasImage(clipboard: ClipboardManager): Boolean =
 
 /**
  * True when the **merged** manifest requests `android.permission.CAMERA`.
- * Roboco-only: `ACTION_IMAGE_CAPTURE` throws `SecurityException` without
+ * Zeron-only: `ACTION_IMAGE_CAPTURE` throws `SecurityException` without
  * the runtime grant when the permission is declared (ticket 138's QR
  * scanner will declare it); when it is not declared, no grant is needed.
  * iOS's system camera UI handles its own permission.

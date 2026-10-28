@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -29,9 +29,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The row-meta-line goldens, pixel probes and semantics (android-ui-parity
@@ -70,8 +70,8 @@ class SessionRowMetaScreenshotTest {
 
     private fun shot(appearance: Appearance, file: String) {
         compose.setContent {
-            RobocoTheme(appearance) {
-                Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+            ZeronTheme(appearance) {
+                Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                     SessionRowMetaGallerySection()
                 }
             }
@@ -302,8 +302,8 @@ class SessionRowMetaScreenshotTest {
     fun switchingAppearanceRecoloursTheMetaLineWithoutRebinding() {
         var dark by mutableStateOf(false)
         compose.setContent {
-            RobocoTheme(if (dark) Appearance.Dark else Appearance.Light) {
-                Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+            ZeronTheme(if (dark) Appearance.Dark else Appearance.Light) {
+                Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                     SessionRow(SessionRowMetaFixtures.c)
                 }
             }
@@ -344,8 +344,8 @@ class SessionRowMetaScreenshotTest {
     /** The section host: no gallery frame, so row C starts at (0, 0). */
     private fun hostSection(appearance: Appearance) {
         compose.setContent {
-            RobocoTheme(appearance) {
-                Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+            ZeronTheme(appearance) {
+                Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                     SessionRowMetaGallerySection()
                 }
             }

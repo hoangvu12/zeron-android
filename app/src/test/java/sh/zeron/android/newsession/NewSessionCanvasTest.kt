@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
@@ -72,21 +72,21 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.composer.ComposerBar
-import sh.roboco.android.composer.ComposerController
-import sh.roboco.android.composer.ComposerMorphState
-import sh.roboco.android.composer.DeliveryMode
-import sh.roboco.android.composer.Drafts
-import sh.roboco.android.composer.FakePrefsStore
-import sh.roboco.android.composer.SendResult
-import sh.roboco.android.composer.StagedImage
-import sh.roboco.android.composer.rememberComposerController
-import sh.roboco.android.composer.rememberComposerMorphState
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.NoFeedback
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.GlassMenuHost
-import uniffi.roboco_core.FileMatch
+import sh.zeron.android.composer.ComposerBar
+import sh.zeron.android.composer.ComposerController
+import sh.zeron.android.composer.ComposerMorphState
+import sh.zeron.android.composer.DeliveryMode
+import sh.zeron.android.composer.Drafts
+import sh.zeron.android.composer.FakePrefsStore
+import sh.zeron.android.composer.SendResult
+import sh.zeron.android.composer.StagedImage
+import sh.zeron.android.composer.rememberComposerController
+import sh.zeron.android.composer.rememberComposerMorphState
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.NoFeedback
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.GlassMenuHost
+import uniffi.zeron_core.FileMatch
 
 /**
  * The New Session canvas's behaviour (android-ui-parity #93) — Robolectric
@@ -172,7 +172,7 @@ class NewSessionCanvasTest {
         insetsState.value = insets
         padState.value = hostPad
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 // The real ComposerBar's attach button needs a GlassMenuHost
                 // above it (rememberGlassMenuState throws without one;
                 // production mounts it in RootHosts).
@@ -443,7 +443,7 @@ class NewSessionCanvasTest {
     @Test
     fun theEmbeddedPageHasNoCloseA44dpRowAtTheInsetAndThePaneTitle() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 NewSessionCanvas(
                     harness = "claude-code",
                     embedded = true,
@@ -488,7 +488,7 @@ class NewSessionCanvasTest {
             // built from it too: `fixed(pt)` roundtrips dp through the
             // font-scale converter, so the rendered height must not move.
             CompositionLocalProvider(LocalDensity provides Density(base, fontScale.value)) {
-                RobocoTheme(Appearance.Light) {
+                ZeronTheme(Appearance.Light) {
                     NewSessionCanvas(
                         harness = "claude-code",
                         embedded = true,
@@ -637,7 +637,7 @@ class NewSessionCanvasTest {
     private fun mountMovingHost(focused: () -> Unit) {
         val state = NewSessionCanvasState()
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 val offset = remember { Animatable(300f) }
                 LaunchedEffect(Unit) { offset.animateTo(0f, tween(durationMillis = 300)) }
                 Box(
@@ -679,7 +679,7 @@ class NewSessionCanvasTest {
         var focused = 0
         val state = NewSessionCanvasState()
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 NewSessionFocusOnAppear(
                     focusOnAppear = true,
                     embedded = true,
@@ -701,7 +701,7 @@ class NewSessionCanvasTest {
         var focused = 0
         val state = NewSessionCanvasState()
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 NewSessionFocusOnAppear(
                     focusOnAppear = false,
                     embedded = true,
@@ -847,7 +847,7 @@ class NewSessionCanvasTest {
     fun thePageSeedsTheComposerWithTheModelInitialTextBeforeTheFirstFrame() {
         val page = newPage(prompt = "Fix tests")
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 GlassMenuHost { // the page's ComposerBar opens menus (see mountSheetCanvas)
                     NewSessionScreenBody(
                         ns = page.model,
@@ -869,7 +869,7 @@ class NewSessionCanvasTest {
     fun anEmptyPageShowsTheDescribeTheTaskPlaceholder() {
         val page = newPage(prompt = null)
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 GlassMenuHost { // the page's ComposerBar opens menus (see mountSheetCanvas)
                     NewSessionScreenBody(
                         ns = page.model,
@@ -892,7 +892,7 @@ class NewSessionCanvasTest {
     fun disposingThePageSavesTheDraftOnce() {
         val page = newPage(prompt = null)
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 var show by remember { mutableStateOf(true) }
                 if (show) {
                     GlassMenuHost { // the page's ComposerBar opens menus (see mountSheetCanvas)

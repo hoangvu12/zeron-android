@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,12 +22,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import sh.roboco.android.core.Face
-import sh.roboco.android.transcript.widgets.UploadRing
-import sh.roboco.android.transcript.widgets.UploadRingFixturePink
-import sh.roboco.android.transcript.widgets.UploadRingFixtureTeal
-import sh.roboco.android.transcript.widgets.UploadRingFixtureTile
-import sh.roboco.android.transcript.widgets.imageTileRadius
+import sh.zeron.android.core.Face
+import sh.zeron.android.transcript.widgets.UploadRing
+import sh.zeron.android.transcript.widgets.UploadRingFixturePink
+import sh.zeron.android.transcript.widgets.UploadRingFixtureTeal
+import sh.zeron.android.transcript.widgets.UploadRingFixtureTile
+import sh.zeron.android.transcript.widgets.imageTileRadius
 
 /**
  * The "Upload ring" section of the debug design gallery (ticket 67):
@@ -80,7 +80,7 @@ fun UploadRingGallerySection() {
 /** One fixture tile with its drawn percent under it. */
 @Composable
 private fun CaptionedFixtureTile(sizeDp: Float, p: Double, caption: String) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         UploadRingFixtureTile(sizeDp, p)
@@ -98,7 +98,7 @@ private fun CaptionedFixtureTile(sizeDp: Float, p: Double, caption: String) {
  */
 @Composable
 private fun UploadDemoRow() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val scope = rememberCoroutineScope()
     var p by remember { mutableStateOf<Double?>(null) }

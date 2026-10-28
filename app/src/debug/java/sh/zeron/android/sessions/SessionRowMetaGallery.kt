@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -9,12 +9,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LinearFontScaleDensity
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.PrState
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.TypeScale
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LinearFontScaleDensity
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.PrState
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.TypeScale
 
 /**
  * The "Row meta line" fixtures (android-ui-parity #38): rows C, D, E, H
@@ -101,7 +101,7 @@ internal object SessionRowMetaFixtures {
     /** X3: the draft tone (unreachable with today's core). */
     val x3 = row(
         "x3", "Draft tone", "claude-code", SessionRowVM.Status.Idle, false, "1d",
-        "roboco", true, 7, "main", PrState.Draft, 9u,
+        "zeron", true, 7, "main", PrState.Draft, 9u,
     )
 
     val all: List<SessionRowVM> = listOf(c, d, e, h, j, x1, x2, x3)
@@ -114,7 +114,7 @@ internal object SessionRowMetaFixtures {
  * slot default. Rows abut like iOS rows, so row C sits at section y 0.
  * Then rows C and E again at `k = 1.6` under ticket 22's
  * [LinearFontScaleDensity] (linear, so `factor = min(2, 1.6) = 1.6`
- * exactly) with [LocalTypeScale] re-provided — `RobocoTheme` computed it
+ * exactly) with [LocalTypeScale] re-provided — `ZeronTheme` computed it
  * from the outer density, so the override must replace both locals.
  * Height: 8 × 62 + 2 × 99 = 694 dp, 726 with the Scroll frame's padding
  * → shot height 760.
@@ -124,7 +124,7 @@ internal object SessionRowMetaFixtures {
  */
 @Composable
 fun SessionRowMetaGallerySection() {
-    val p = RobocoTheme.palette
+    val p = ZeronTheme.palette
     val outer = LocalDensity.current
     Column(Modifier.background(p.background)) {
         for (vm in SessionRowMetaFixtures.all) {
@@ -146,7 +146,7 @@ fun SessionRowMetaGallerySection() {
 @Preview(name = "Row meta – Light", widthDp = 402)
 @Composable
 private fun SessionRowMetaLightPreview() {
-    RobocoTheme(Appearance.Light) {
+    ZeronTheme(Appearance.Light) {
         SessionRowMetaGallerySection()
     }
 }
@@ -154,7 +154,7 @@ private fun SessionRowMetaLightPreview() {
 @Preview(name = "Row meta – Dark", widthDp = 402, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun SessionRowMetaDarkPreview() {
-    RobocoTheme(Appearance.Dark) {
+    ZeronTheme(Appearance.Dark) {
         SessionRowMetaGallerySection()
     }
 }

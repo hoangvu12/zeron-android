@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.content.ContentResolver
 import android.content.Context
@@ -108,9 +108,9 @@ val LocalReduceMotion = compositionLocalOf { false }
  * [ReduceMotion.debugOverride]) and provides [LocalReduceMotion]. Only readers
  * recompose when the value flips.
  *
- * `RobocoTheme` (ticket 01) wraps its content in this — whichever of tickets
+ * `ZeronTheme` (ticket 01) wraps its content in this — whichever of tickets
  * 01/04 landed second made that edit; ticket 35's app root relies on it being
- * inside `RobocoTheme`. `@Preview`s are safe: `LocalInspectionMode` suppresses
+ * inside `ZeronTheme`. `@Preview`s are safe: `LocalInspectionMode` suppresses
  * the ContentObserver registration (layoutlib has no real ContentResolver
  * observer support), so previews render with full motion unless
  * [ReduceMotion.debugOverride] is set.

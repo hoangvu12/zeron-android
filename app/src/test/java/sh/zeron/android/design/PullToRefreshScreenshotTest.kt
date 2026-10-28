@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,8 +17,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.core.Face
-import sh.roboco.android.shell.LargeTitleScaffold
+import sh.zeron.android.core.Face
+import sh.zeron.android.shell.LargeTitleScaffold
 
 /**
  * The pull-to-refresh goldens (android-ui-parity #48): the 21-dp cell
@@ -35,7 +35,7 @@ import sh.roboco.android.shell.LargeTitleScaffold
  * disc, no shadow; the rows below ride the gap.
  *
  * Record with
- * `./gradlew :app:recordRoborazziDebug --tests sh.roboco.android.design.PullToRefreshScreenshotTest`,
+ * `./gradlew :app:recordRoborazziDebug --tests sh.zeron.android.design.PullToRefreshScreenshotTest`,
  * verify with `:app:verifyRoborazziDebug --tests …`. Paths are relative
  * to the `roborazzi { outputDir }` (`src/test/screenshots`).
  */
@@ -52,11 +52,11 @@ class PullToRefreshScreenshotTest {
     private fun shot(appearance: Appearance, file: String, prepare: (PullToRefreshState) -> Unit) {
         compose.mainClock.autoAdvance = false
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 // Frozen at 0 ns: the spinner renders the cycle-0 pattern
                 // and the capture never starts a frame loop.
                 ProvideGlyphClock(frozenAtNanos = 0L) {
-                    val palette = RobocoTheme.palette
+                    val palette = ZeronTheme.palette
                     val typeScale = LocalTypeScale.current
                     val state = rememberPullToRefreshState(onRefresh = { delay(60_000) })
                     stateRef = state

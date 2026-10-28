@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -22,23 +22,23 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import java.util.Locale
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.AlertHost
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.ToastHost
-import sh.roboco.android.design.WallpaperArtwork
-import sh.roboco.android.design.WallpaperRender
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.design.wallpaperFixture
-import sh.roboco.android.shell.NavStack
-import sh.roboco.android.shell.NavStackHost
-import sh.roboco.android.shell.PlaceholderTabRoot
-import sh.roboco.android.shell.ShellRouteContent
-import sh.roboco.android.shell.TabId
-import sh.roboco.android.shell.TabRootRoute
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.AlertHost
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.ToastHost
+import sh.zeron.android.design.WallpaperArtwork
+import sh.zeron.android.design.WallpaperRender
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.design.wallpaperFixture
+import sh.zeron.android.shell.NavStack
+import sh.zeron.android.shell.NavStackHost
+import sh.zeron.android.shell.PlaceholderTabRoot
+import sh.zeron.android.shell.ShellRouteContent
+import sh.zeron.android.shell.TabId
+import sh.zeron.android.shell.TabRootRoute
 
 /**
  * The gallery's recorder: every call logs one line under the frame (the
@@ -116,7 +116,7 @@ private class GallerySessionsActions(
  */
 @Composable
 fun SessionsScreenGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val density = LocalDensity.current
     val listState = rememberLazyListState()
@@ -219,7 +219,7 @@ fun SessionsScreenGallerySection() {
 /** A toggle row: the label in `accent` when on, `secondary` when off. */
 @Composable
 private fun GalleryRow(text: String, selected: Boolean, style: TextStyle, onClick: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val ink = if (selected) palette.accent else palette.secondary
     BasicText(
         text,
@@ -240,7 +240,7 @@ private fun GalleryRow(text: String, selected: Boolean, style: TextStyle, onClic
 @Preview(name = "sessions screen gallery light")
 @Composable
 private fun SessionsScreenGalleryLightPreview() {
-    RobocoTheme(Appearance.Light) {
+    ZeronTheme(Appearance.Light) {
         AlertHost { ToastHost { SessionsScreenGallerySection() } }
     }
 }
@@ -248,7 +248,7 @@ private fun SessionsScreenGalleryLightPreview() {
 @Preview(name = "sessions screen gallery dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun SessionsScreenGalleryDarkPreview() {
-    RobocoTheme(Appearance.Dark) {
+    ZeronTheme(Appearance.Dark) {
         AlertHost { ToastHost { SessionsScreenGallerySection() } }
     }
 }

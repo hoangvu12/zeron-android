@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.graphics.Paint
 import android.graphics.text.LineBreakConfig
@@ -15,10 +15,10 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
-import sh.roboco.android.core.FontChain
-import uniffi.roboco_core.FaceRole
-import uniffi.roboco_core.debugLineStarts
-import uniffi.roboco_core.layoutFixtureMarkdown
+import sh.zeron.android.core.FontChain
+import uniffi.zeron_core.FaceRole
+import uniffi.zeron_core.debugLineStarts
+import uniffi.zeron_core.layoutFixtureMarkdown
 
 /**
  * Rust's line breaker against Android's own (ticket 115, the port of
@@ -65,11 +65,11 @@ class LineBreakAccuracyTest {
         assertFalse("the fixture must stay LF-only (android-app#05 pins it)", fixture.contains('\r'))
         val corpus = TextAccuracy.corpus(fixture)
         assertEquals("the corpus must be the 10 literals + 4 fixture paragraphs", 14, corpus.size)
-        // Acceptance preconditions: the literals are Roboco-branded and
+        // Acceptance preconditions: the literals are Zeron-branded and
         // string 6's invisible joiners survived the copy.
         assertTrue(
-            "corpus string 4 must name roboco-text (rename mapping)",
-            TextAccuracy.CORPUS_LITERALS[4].contains("roboco-text"),
+            "corpus string 4 must name zeron-text (rename mapping)",
+            TextAccuracy.CORPUS_LITERALS[4].contains("zeron-text"),
         )
         assertFalse(
             "no corpus literal may mention zeron (fixture renames are android-app#05's)",
@@ -156,7 +156,7 @@ class LineBreakAccuracyTest {
                         // stuck case (one line, memory climbing) from a per-call
                         // leak (cases advancing, memory climbing).
                         Log.d(
-                            "RobocoTextAccuracy",
+                            "ZeronTextAccuracy",
                             "case $cases $face ${size}pt w=$w text#$index len=${text.length} " +
                                 "native=${Debug.getNativeHeapAllocatedSize() / 1_048_576} MB",
                         )
@@ -254,14 +254,14 @@ class LineBreakAccuracyTest {
          * Corpus indices scored separately as the expected Android
          * divergence, each with the content that makes it a case (the
          * guard): #3 the URL literal, #4 the hard-hyphen literal
-         * (`roboco-text`, round 29), #8 the en-dash literal (Minikin treats
+         * (`zeron-text`, round 29), #8 the en-dash literal (Minikin treats
          * U+2013 as a line-breaking hyphen: Rust breaks after `en–`, Android
          * before it — round 33), #10 and #13 the fixture paragraphs with
          * links. See the comment at their use.
          */
         val MINIKIN_HYPHEN_URL_CASES = mapOf(
             3 to "://",
-            4 to "roboco-text",
+            4 to "zeron-text",
             8 to "–",
             10 to "://",
             13 to "://",

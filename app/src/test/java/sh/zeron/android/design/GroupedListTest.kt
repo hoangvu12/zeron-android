@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -47,7 +47,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.core.Face
+import sh.zeron.android.core.Face
 
 /**
  * The inset-grouped list (android-ui-parity #70): positions, the card
@@ -82,12 +82,12 @@ class GroupedListTest {
 
     private fun host(appearance: Appearance = Appearance.Light, content: @Composable () -> Unit) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 // Opaque page background behind the card: the rounded corners
                 // of the row's own clip are transparent, so pixel probes
                 // outside the card must not read the (uncertain) window
                 // background.
-                Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) { content() }
+                Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) { content() }
             }
         }
         compose.waitForIdle()
@@ -363,7 +363,7 @@ class GroupedListTest {
                     "Title",
                     GroupedPosition.Single,
                     subtitle = twoLineSubtitle,
-                    icon = RobocoIcons.SquareStack3dUp,
+                    icon = ZeronIcons.SquareStack3dUp,
                     testTag = "t2",
                     onClick = null,
                 )
@@ -383,13 +383,13 @@ class GroupedListTest {
                 GroupedRow(
                     "System",
                     GroupedPosition.First,
-                    icon = RobocoIcons.CircleLeftHalfFilled,
+                    icon = ZeronIcons.CircleLeftHalfFilled,
                     accessories = listOf(GroupedAccessory.Check(on = true)),
                     testTag = "r0",
                     onClick = null,
                 )
-                GroupedRow("Light", GroupedPosition.Middle, icon = RobocoIcons.SunMax, testTag = "r1", onClick = null)
-                GroupedRow("Dark", GroupedPosition.Last, icon = RobocoIcons.Moon, testTag = "r2", onClick = null)
+                GroupedRow("Light", GroupedPosition.Middle, icon = ZeronIcons.SunMax, testTag = "r1", onClick = null)
+                GroupedRow("Dark", GroupedPosition.Last, icon = ZeronIcons.Moon, testTag = "r2", onClick = null)
                 GroupedRow(
                     "Version",
                     GroupedPosition.Single,
@@ -436,9 +436,9 @@ class GroupedListTest {
     fun separatorPixelsRunWithTheTextColumnAndEnd16BeforeTheCard() {
         host {
             Column {
-                GroupedRow("A", GroupedPosition.First, icon = RobocoIcons.Plus, testTag = "a", onClick = null)
-                GroupedRow("B", GroupedPosition.Middle, icon = RobocoIcons.Plus, testTag = "b", onClick = null)
-                GroupedRow("C", GroupedPosition.Last, icon = RobocoIcons.Plus, testTag = "c", onClick = null)
+                GroupedRow("A", GroupedPosition.First, icon = ZeronIcons.Plus, testTag = "a", onClick = null)
+                GroupedRow("B", GroupedPosition.Middle, icon = ZeronIcons.Plus, testTag = "b", onClick = null)
+                GroupedRow("C", GroupedPosition.Last, icon = ZeronIcons.Plus, testTag = "c", onClick = null)
                 GroupedRow("D", GroupedPosition.First, testTag = "d", onClick = null)
                 GroupedRow("E", GroupedPosition.Last, testTag = "e", onClick = null)
             }
@@ -468,7 +468,7 @@ class GroupedListTest {
     fun accessoryInkCentresMatchTheMeasurements() {
         host {
             Column {
-                GroupedRow("Pair an engine", GroupedPosition.Single, icon = RobocoIcons.Plus, testTag = "chev", onClick = null)
+                GroupedRow("Pair an engine", GroupedPosition.Single, icon = ZeronIcons.Plus, testTag = "chev", onClick = null)
                 GroupedRow("Light", GroupedPosition.Single, accessories = listOf(GroupedAccessory.Check(on = true)), testTag = "check", onClick = null)
                 GroupedRow("Online", GroupedPosition.Single, accessories = listOf(GroupedAccessory.Dot(online = true)), testTag = "dot", onClick = null)
             }
@@ -572,13 +572,13 @@ class GroupedListTest {
         // content"): the appearance flips through state instead.
         var current by mutableStateOf(Appearance.Light)
         compose.setContent {
-            RobocoTheme(current) {
-                Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+            ZeronTheme(current) {
+                Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                     Column {
                         GroupedRow(
                             "Remove Wallpaper",
                             GroupedPosition.Single,
-                            icon = RobocoIcons.Trash,
+                            icon = ZeronIcons.Trash,
                             destructive = true,
                             accessories = emptyList(),
                             testTag = "danger",
@@ -621,7 +621,7 @@ class GroupedListTest {
     @Test
     fun pressedHighlightAppearsInstantlyAndFadesOutOver250ms() {
         compose.mainClock.autoAdvance = false
-        host { Column { GroupedRow("System", GroupedPosition.Single, icon = RobocoIcons.CircleLeftHalfFilled, testTag = "row", onClick = { }) } }
+        host { Column { GroupedRow("System", GroupedPosition.Single, icon = ZeronIcons.CircleLeftHalfFilled, testTag = "row", onClick = { }) } }
         val center = compose.onNodeWithTag("row").fetchSemanticsNode().boundsInRoot.center
 
         compose.onRoot().performTouchInput { down(center) }

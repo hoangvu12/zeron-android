@@ -1,4 +1,4 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
@@ -26,11 +26,11 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.shadows.ShadowLog
-import uniffi.roboco_core.EngineRoomRef
-import uniffi.roboco_core.EngineTransport
-import uniffi.roboco_core.PairedEngine
-import uniffi.roboco_core.RoomMemberRecord
-import uniffi.roboco_core.RoomRecord
+import uniffi.zeron_core.EngineRoomRef
+import uniffi.zeron_core.EngineTransport
+import uniffi.zeron_core.PairedEngine
+import uniffi.zeron_core.RoomMemberRecord
+import uniffi.zeron_core.RoomRecord
 import java.io.File
 import java.util.Base64
 

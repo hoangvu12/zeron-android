@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Box
@@ -8,11 +8,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.GalleryBackdrop
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.sheet.SheetHeaderRow
-import sh.roboco.android.design.sheet.SheetLeading
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.GalleryBackdrop
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.sheet.SheetHeaderRow
+import sh.zeron.android.design.sheet.SheetLeading
 
 /**
  * The placeholder New Session sheet (android-ui-parity #31): ✕ plus a
@@ -43,7 +43,7 @@ fun NewSessionSheetPlaceholder(scope: PageSheetScope) {
  */
 @Composable
 private fun NewSessionSheetPlaceholderStage(appearance: Appearance) {
-    RobocoTheme(appearance) {
+    ZeronTheme(appearance) {
         val state = rememberSheetHostState()
         state.presentSettledForPreview("new-session", SheetStyle.Page(grabber = true)) {
             NewSessionSheetPlaceholder(this)

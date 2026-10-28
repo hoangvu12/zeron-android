@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -19,9 +19,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The composer text field's goldens (android-ui-parity #57): gallery
@@ -34,7 +34,7 @@ import sh.roboco.android.design.RobocoTheme
  * The captures use roborazzi-compose's top-level [captureRoboImage] (it
  * launches its own headless activity — no compose rule), the
  * MentionStyleScreenshotTest convention. Record with
- * `./gradlew :app:recordRoborazziDebug --tests sh.roboco.android.composer.ComposerTextFieldScreenshotTest`,
+ * `./gradlew :app:recordRoborazziDebug --tests sh.zeron.android.composer.ComposerTextFieldScreenshotTest`,
  * verify with `:app:verifyRoborazziDebug --tests …`. Paths are relative
  * to the `roborazzi { outputDir }` (`src/test/screenshots`), landing
  * under `composer/`.
@@ -56,21 +56,21 @@ class ComposerTextFieldScreenshotTest {
     @Test
     fun composerTextFieldLight() {
         captureRoboImage("composer/composer_text_field_light.png") {
-            RobocoTheme(Appearance.Light) { ComposerTextFieldGalleryStages() }
+            ZeronTheme(Appearance.Light) { ComposerTextFieldGalleryStages() }
         }
     }
 
     @Test
     fun composerTextFieldDark() {
         captureRoboImage("composer/composer_text_field_dark.png") {
-            RobocoTheme(Appearance.Dark) { ComposerTextFieldGalleryStages() }
+            ZeronTheme(Appearance.Dark) { ComposerTextFieldGalleryStages() }
         }
     }
 
     @Test
     fun theStagesMeasureTheFieldAtTheTargetHeight() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.fillMaxSize().background(Palette.Light.background)) {
                     ComposerTextFieldGalleryStages()
                 }

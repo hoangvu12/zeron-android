@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -18,7 +18,7 @@ class UploadRingMathTest {
     fun thePendingPrefixesMatchBothClientFamilies() {
         // Upstream clients write `pending://` refs (RowView.swift:226).
         assertTrue(isPendingReference("pending://u1/a.png"))
-        // Roboco's own echo writes `pending/<uuid>/<name>` (android-app#08).
+        // Zeron's own echo writes `pending/<uuid>/<name>` (android-app#08).
         assertTrue(isPendingReference("pending/9f1c2a34-5b6d-4e7f-8a9b-0c1d2e3f4a5b/a.png"))
         // Real host paths are absolute — never pending.
         assertFalse(isPendingReference("/Users/x/a.png"))

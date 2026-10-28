@@ -1,4 +1,4 @@
-package sh.roboco.android.core
+package sh.zeron.android.core
 
 import android.app.Application
 import androidx.lifecycle.Lifecycle
@@ -24,7 +24,7 @@ import org.robolectric.annotation.Config
  * calls the sink in order (onForeground then afterForeground), `null`
  * sinks are dropped without a crash, a double install returns the same
  * instance and adds no second observer, the real install runs its calls
- * on the `roboco-lifecycle` thread, and `clientReady()` re-sends the
+ * on the `zeron-lifecycle` thread, and `clientReady()` re-sends the
  * current online value once.
  */
 @RunWith(RobolectricTestRunner::class)
@@ -34,7 +34,7 @@ class AppLifecycleHooksTest {
     /** A sink that records its calls and the threads they ran on. */
     private class RecordingSink : LifecycleSink {
         // Copy-on-write, not Collections.synchronizedList: the test thread
-        // iterates (any/count/all) while the roboco-lifecycle thread adds,
+        // iterates (any/count/all) while the zeron-lifecycle thread adds,
         // and a synchronized list's iterator is not guarded
         // (ConcurrentModificationException).
         val calls = CopyOnWriteArrayList<String>()
@@ -140,7 +140,7 @@ class AppLifecycleHooksTest {
     // ------------------------------------------------------------- install
 
     @Test
-    fun installRunsItsCallsOnTheRobocoLifecycleThread() {
+    fun installRunsItsCallsOnTheZeronLifecycleThread() {
         AppLifecycleHooks.install(
             app = ApplicationProvider.getApplicationContext<Application>(),
             lifecycle = owner.lifecycle,
@@ -151,8 +151,8 @@ class AppLifecycleHooksTest {
         stop()
         assertTrue("onBackground never ran: ${sink.calls}", sink.await("onBackground"))
         assertTrue(
-            "calls ran on ${sink.threads}, expected roboco-lifecycle",
-            sink.threads.all { it == "roboco-lifecycle" },
+            "calls ran on ${sink.threads}, expected zeron-lifecycle",
+            sink.threads.all { it == "zeron-lifecycle" },
         )
     }
 

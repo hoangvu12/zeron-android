@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.content.ClipboardManager
 import android.content.res.Configuration
@@ -28,29 +28,29 @@ import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.launch
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.glass.ProvideHazeState
-import sh.roboco.android.design.glass.rememberGlassMenuState
-import sh.roboco.android.session.SessionHeader
-import sh.roboco.android.session.copyTranscript
-import sh.roboco.android.session.sessionMenu
-import sh.roboco.android.sessions.ActionOutcome
-import sh.roboco.android.sessions.RowActions
-import sh.roboco.android.transcript.FramePoster
-import sh.roboco.android.transcript.TranscriptState
-import uniffi.roboco_core.LayoutFrame
-import uniffi.roboco_core.NoHandle
-import uniffi.roboco_core.SectionView
-import uniffi.roboco_core.StyleDesc
-import uniffi.roboco_core.TextSystem
-import uniffi.roboco_core.TranscriptView
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.glass.ProvideHazeState
+import sh.zeron.android.design.glass.rememberGlassMenuState
+import sh.zeron.android.session.SessionHeader
+import sh.zeron.android.session.copyTranscript
+import sh.zeron.android.session.sessionMenu
+import sh.zeron.android.sessions.ActionOutcome
+import sh.zeron.android.sessions.RowActions
+import sh.zeron.android.transcript.FramePoster
+import sh.zeron.android.transcript.TranscriptState
+import uniffi.zeron_core.LayoutFrame
+import uniffi.zeron_core.NoHandle
+import uniffi.zeron_core.SectionView
+import uniffi.zeron_core.StyleDesc
+import uniffi.zeron_core.TextSystem
+import uniffi.zeron_core.TranscriptView
 
 /**
  * The "Session ⋯ menu" page of the debug design gallery
  * (android-ui-parity #80): the header's pull-down, live — the real
- * [SessionHeader] (52) with "Fix the deploy script" / "roboco @ studio"
+ * [SessionHeader] (52) with "Fix the deploy script" / "zeron @ studio"
  * over ticket 22's striped [GalleryBackdrop], inside the gallery's own
  * [GlassMenuHost] (15) and [ToastHost] (14). Tapping ⋯ opens the real
  * menu content: Pin/Unpin, Copy Transcript, Archive.
@@ -147,7 +147,7 @@ fun SessionMenuGallerySection() {
                         val menuState = rememberGlassMenuState()
                         SessionHeader(
                             title = "Fix the deploy script",
-                            subtitle = "roboco @ studio",
+                            subtitle = "zeron @ studio",
                             edgeEngaged = true,
                             onMore = { anchor ->
                                 menuState.open(
@@ -212,7 +212,7 @@ private fun SessionMenuControls(
     onOffline: (Boolean) -> Unit,
     log: List<String>,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Column(
         Modifier.fillMaxWidth().padding(top = 12.dp),
@@ -239,7 +239,7 @@ private fun SessionMenuControls(
 /** The "label … value" toggle row (the chip-menu gallery's row shape). */
 @Composable
 private fun SessionMenuToggleRow(label: String, value: String, onClick: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Row(
         Modifier
@@ -291,11 +291,11 @@ private object SessionMenuNoopPoster : FramePoster {
 @Preview(name = "Session ⋯ menu light")
 @Composable
 private fun SessionMenuGalleryLightPreview() {
-    RobocoTheme(Appearance.Light) { SessionMenuGallerySection() }
+    ZeronTheme(Appearance.Light) { SessionMenuGallerySection() }
 }
 
 @Preview(name = "Session ⋯ menu dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun SessionMenuGalleryDarkPreview() {
-    RobocoTheme(Appearance.Dark) { SessionMenuGallerySection() }
+    ZeronTheme(Appearance.Dark) { SessionMenuGallerySection() }
 }

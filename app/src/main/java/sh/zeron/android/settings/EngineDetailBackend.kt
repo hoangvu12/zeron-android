@@ -1,8 +1,8 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
-import sh.roboco.android.pairing.PairedEngineStore
-import uniffi.roboco_core.CoreClient
-import uniffi.roboco_core.CoreException
+import sh.zeron.android.pairing.PairedEngineStore
+import uniffi.zeron_core.CoreClient
+import uniffi.zeron_core.CoreException
 
 /**
  * The Engine detail page's narrow FFI + store seam (android-ui-parity
@@ -31,10 +31,10 @@ interface EngineDetailBackend {
 }
 
 /**
- * The production backend: [client] is `RobocoApplication::clientOrNull`
+ * The production backend: [client] is `ZeronApplication::clientOrNull`
  * (null before the core is `Ready` — the page is unreachable then, but a
  * rename or forget racing a core restart must fail closed, not crash),
- * and [store] is `RobocoApplication.engineStore` (71). Each method
+ * and [store] is `ZeronApplication.engineStore` (71). Each method
  * resolves the client itself, so no client reference is captured across
  * calls.
  */

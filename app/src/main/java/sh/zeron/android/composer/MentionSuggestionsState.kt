@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import android.util.Log
 import androidx.compose.animation.core.Animatable
@@ -29,12 +29,12 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
-import sh.roboco.android.BuildConfig
-import sh.roboco.android.design.Feedback
-import sh.roboco.android.design.Haptic
-import sh.roboco.android.design.LocalFeedback
-import sh.roboco.android.design.Motion
-import uniffi.roboco_core.FileMatch
+import sh.zeron.android.BuildConfig
+import sh.zeron.android.design.Feedback
+import sh.zeron.android.design.Haptic
+import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.design.Motion
+import uniffi.zeron_core.FileMatch
 
 /**
  * iOS Mentions.swift:83 — the row title: the last **non-empty** `/`-piece
@@ -93,7 +93,7 @@ internal data class AnchorKey(val topLeftInWindow: Offset, val size: IntSize) {
  * can clear it, and the *animated* visibility lives here
  * ([progress], driven by the layer).
  *
- * iOS races fixed on purpose (see the ticket's Roboco adaptation):
+ * iOS races fixed on purpose (see the ticket's Zeron adaptation):
  * - blur also **cancels** the in-flight search (iOS lets it finish and a
  *   late result could reopen the card over a resting capsule);
  * - a result that arrives while unfocused or disabled is dropped;
@@ -208,7 +208,7 @@ class MentionSuggestionsState internal constructor(
     }
 
     /**
-     * `updateMentionQuery` (`:336-359`) with Roboco's `canWrite` gate:
+     * `updateMentionQuery` (`:336-359`) with Zeron's `canWrite` gate:
      * recompute the query synchronously, cancel the pending job, and on a
      * query debounce [debounceMs] before searching. The result is applied
      * only when the job was not cancelled, the query string still matches,
@@ -295,7 +295,7 @@ fun MentionSuggestionsBinding(state: MentionSuggestionsState, isFocused: () -> B
     val slot = LocalMentionLayerSlot.current
     if (slot == null && BuildConfig.DEBUG && !warnedAboutMissingHost) {
         warnedAboutMissingHost = true
-        Log.w("RobocoMentions", "no MentionSuggestionsHost: the card will never show")
+        Log.w("ZeronMentions", "no MentionSuggestionsHost: the card will never show")
     }
     DisposableEffect(slot, state) {
         slot?.state = state

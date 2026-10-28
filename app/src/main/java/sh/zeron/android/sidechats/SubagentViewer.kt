@@ -1,4 +1,4 @@
-package sh.roboco.android.sidechats
+package sh.zeron.android.sidechats
 
 import android.content.ClipboardManager
 import android.util.Log
@@ -37,47 +37,47 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import sh.roboco.android.RobocoApplication
-import sh.roboco.android.core.Face
-import sh.roboco.android.core.TextEngine
-import sh.roboco.android.design.LocalToaster
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.StatusGlyph
-import sh.roboco.android.design.StatusGlyphKind
-import sh.roboco.android.design.Toaster
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.glass.Menu
-import sh.roboco.android.design.glass.MenuIcon
-import sh.roboco.android.design.glass.MenuItem
-import sh.roboco.android.design.glass.ProvideHazeState
-import sh.roboco.android.design.glass.rememberGlassMenuState
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.image.ImageViewerRequest
-import sh.roboco.android.image.LocalImageViewer
-import sh.roboco.android.session.SessionEventHub
-import sh.roboco.android.session.SessionHeader
-import sh.roboco.android.session.SessionHeaderDefaults
-import sh.roboco.android.session.copyTranscript
-import sh.roboco.android.shell.LocalNavEntry
-import sh.roboco.android.shell.LocalNavStack
-import sh.roboco.android.shell.NavEntry
-import sh.roboco.android.shell.NavRoute
-import sh.roboco.android.shell.NavStack
-import sh.roboco.android.transcript.AttachmentReader
-import sh.roboco.android.transcript.TranscriptActions
-import sh.roboco.android.transcript.TranscriptHost
-import sh.roboco.android.transcript.TranscriptImageBinding
-import sh.roboco.android.transcript.engineReconnects
-import sh.roboco.android.transcript.TranscriptImageLoader
-import sh.roboco.android.transcript.TranscriptState
-import sh.roboco.android.transcript.rememberLinkRouter
-import sh.roboco.android.transcript.transcriptBottomInset
-import sh.roboco.android.transcript.widgets.imageTileRadius
-import uniffi.roboco_core.CoreClient
-import uniffi.roboco_core.SessionHandle
-import uniffi.roboco_core.TextSystem
+import sh.zeron.android.ZeronApplication
+import sh.zeron.android.core.Face
+import sh.zeron.android.core.TextEngine
+import sh.zeron.android.design.LocalToaster
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.StatusGlyph
+import sh.zeron.android.design.StatusGlyphKind
+import sh.zeron.android.design.Toaster
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.glass.Menu
+import sh.zeron.android.design.glass.MenuIcon
+import sh.zeron.android.design.glass.MenuItem
+import sh.zeron.android.design.glass.ProvideHazeState
+import sh.zeron.android.design.glass.rememberGlassMenuState
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.image.ImageViewerRequest
+import sh.zeron.android.image.LocalImageViewer
+import sh.zeron.android.session.SessionEventHub
+import sh.zeron.android.session.SessionHeader
+import sh.zeron.android.session.SessionHeaderDefaults
+import sh.zeron.android.session.copyTranscript
+import sh.zeron.android.shell.LocalNavEntry
+import sh.zeron.android.shell.LocalNavStack
+import sh.zeron.android.shell.NavEntry
+import sh.zeron.android.shell.NavRoute
+import sh.zeron.android.shell.NavStack
+import sh.zeron.android.transcript.AttachmentReader
+import sh.zeron.android.transcript.TranscriptActions
+import sh.zeron.android.transcript.TranscriptHost
+import sh.zeron.android.transcript.TranscriptImageBinding
+import sh.zeron.android.transcript.engineReconnects
+import sh.zeron.android.transcript.TranscriptImageLoader
+import sh.zeron.android.transcript.TranscriptState
+import sh.zeron.android.transcript.rememberLinkRouter
+import sh.zeron.android.transcript.transcriptBottomInset
+import sh.zeron.android.transcript.widgets.imageTileRadius
+import uniffi.zeron_core.CoreClient
+import uniffi.zeron_core.SessionHandle
+import uniffi.zeron_core.TextSystem
 
 /** The viewer's copy, verbatim from upstream #899's `SubagentViewController`. */
 object SubagentCopy {
@@ -88,7 +88,7 @@ object SubagentCopy {
 
 /**
  * The header subtitle: iOS's `"Subagent · <parent title>"`, with the
- * Roboco addition of the live state while the subagent is not done —
+ * Zeron addition of the live state while the subagent is not done —
  * `"Running · …"` while it works (a background subagent keeps running
  * after its spawn call resolved) and `"Failed · …"` once it failed. Pure.
  */
@@ -104,7 +104,7 @@ fun subagentSubtitle(state: AgentState, parentTitle: String): String {
 /**
  * A subagent's transcript, read-only (android-next #06, the port of
  * upstream #899's `SubagentViewController`): the doc a spawn card links
- * to. Roboco's engine serves that doc itself — the same
+ * to. Zeron's engine serves that doc itself — the same
  * `WatchDocMessages` stream desktop's subagent tab subscribes to
  * (`crates/ui` `watch_subagent_doc`), never #899's edge blob — so the
  * transcript is live while the subagent runs, including the claude-code
@@ -275,7 +275,7 @@ class SubagentRoute internal constructor(
     private object CloseKey
 
     private companion object {
-        const val TAG = "RobocoSubagent"
+        const val TAG = "ZeronSubagent"
     }
 }
 
@@ -298,7 +298,7 @@ data class SubagentOpenRequest(
  * route. `null` when there is no client or the core refused the id.
  */
 suspend fun buildSubagentRoute(
-    app: RobocoApplication,
+    app: ZeronApplication,
     request: SubagentOpenRequest,
     io: CoroutineDispatcher = Dispatchers.IO,
 ): SubagentRoute? = withContext(io) {
@@ -329,7 +329,7 @@ suspend fun buildSubagentRoute(
     } catch (cancelled: CancellationException) {
         throw cancelled
     } catch (t: Throwable) {
-        Log.w("RobocoSubagent", "open subagent failed", t)
+        Log.w("ZeronSubagent", "open subagent failed", t)
         null
     }
 }
@@ -342,7 +342,7 @@ suspend fun buildSubagentRoute(
  * at a time; a failed open toasts "Couldn't open this subagent."
  */
 class SubagentOpener(
-    private val app: RobocoApplication,
+    private val app: ZeronApplication,
     private val nav: NavStack,
     private val entry: NavEntry,
     private val scope: CoroutineScope,
@@ -375,7 +375,7 @@ class SubagentOpener(
  */
 @Composable
 fun rememberSubagentOpener(): SubagentOpener? {
-    val app = LocalContext.current.applicationContext as? RobocoApplication ?: return null
+    val app = LocalContext.current.applicationContext as? ZeronApplication ?: return null
     val nav = LocalNavStack.current
     val entry = LocalNavEntry.current
     val toaster = LocalToaster.current
@@ -389,7 +389,7 @@ fun subagentMenu(onCopyTranscript: () -> Unit): Menu = Menu(
     children = listOf(
         MenuItem(
             title = "Copy Transcript",
-            icon = MenuIcon.Symbol(RobocoIcons.DocOnDoc),
+            icon = MenuIcon.Symbol(ZeronIcons.DocOnDoc),
             testTag = "subagent-menu-copy",
             action = onCopyTranscript,
         ),
@@ -406,7 +406,7 @@ fun subagentMenu(onCopyTranscript: () -> Unit): Menu = Menu(
 @Composable
 internal fun SubagentScreen(route: SubagentRoute, modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val toaster = LocalToaster.current
     val transcript = route.transcript
     val scope = rememberCoroutineScope()

@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -25,11 +25,11 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.BottomChromeInsets
-import sh.roboco.android.design.LocalBottomChrome
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.BottomChromeInsets
+import sh.zeron.android.design.LocalBottomChrome
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The Search screen's behaviour (android-ui-parity #49): the four
@@ -58,7 +58,7 @@ class SearchScreenTest {
     /** Hosts one fixture; the only `setContent` of each test. */
     private fun host(results: SearchResults) {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 ProvideGlyphClock(frozenAtNanos = 0L) {
                     CompositionLocalProvider(LocalBottomChrome provides BottomChromeInsets(24.dp, 150.dp)) {
                         SearchScreenContent(

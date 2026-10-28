@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
@@ -53,7 +53,7 @@ class StatusGlyphClockTest {
         var clock: GlyphClock? = null
         compose.mainClock.autoAdvance = false
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 ProvideGlyphClock {
                     clock = LocalGlyphClock.current
                     glyphs()
@@ -154,7 +154,7 @@ class StatusGlyphClockTest {
         var clock: GlyphClock? = null
         compose.mainClock.autoAdvance = false
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(LocalReduceMotion provides reduce) {
                     ProvideGlyphClock {
                         clock = LocalGlyphClock.current
@@ -184,7 +184,7 @@ class StatusGlyphClockTest {
         var recompositions = 0
         compose.mainClock.autoAdvance = false
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 ProvideGlyphClock {
                     SideEffect { recompositions++ }
                     StatusGlyph(StatusGlyphKind.Spinner)
@@ -203,7 +203,7 @@ class StatusGlyphClockTest {
     @Test
     fun theDefaultBoxIsTwelveDpAndScaleMultipliesIt() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 ProvideGlyphClock(frozenAtNanos = 0L) {
                     Row {
                         StatusGlyph(StatusGlyphKind.Spinner, modifier = Modifier.testTag("default"))
@@ -220,7 +220,7 @@ class StatusGlyphClockTest {
     @Test
     fun theCallerSizeWinsOverTheDefaultBox() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 ProvideGlyphClock(frozenAtNanos = 0L) {
                     StatusGlyph(StatusGlyphKind.Trailer, modifier = Modifier.testTag("caller").size(14.dp))
                 }
@@ -237,7 +237,7 @@ class StatusGlyphClockTest {
         var recomposed = 0
         compose.mainClock.autoAdvance = false
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 // No ProvideGlyphClock here: the theme still provides one,
                 // so also drop the local to exercise the true fallback path.
                 CompositionLocalProvider(LocalGlyphClock provides null) {
@@ -261,7 +261,7 @@ class StatusGlyphClockTest {
         var clock: GlyphClock? = null
         compose.mainClock.autoAdvance = false
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 ProvideGlyphClock {
                     clock = LocalGlyphClock.current
                     StatusGlyph(kind)

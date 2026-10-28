@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.ImageBitmapConfig
@@ -20,10 +20,10 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import sh.roboco.android.composer.Drafts
-import sh.roboco.android.composer.FakePrefsStore
-import sh.roboco.android.composer.StagedImage
-import sh.roboco.android.composer.foregroundAppScope
+import sh.zeron.android.composer.Drafts
+import sh.zeron.android.composer.FakePrefsStore
+import sh.zeron.android.composer.StagedImage
+import sh.zeron.android.composer.foregroundAppScope
 
 /**
  * [NewSessionModel] + [normalize] (android-ui-parity #92) — the page

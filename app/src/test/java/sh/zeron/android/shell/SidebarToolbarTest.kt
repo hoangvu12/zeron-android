@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.gestures.scrollBy
@@ -51,27 +51,27 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.ContextMenuHost
-import sh.roboco.android.design.Cue
-import sh.roboco.android.design.Feedback
-import sh.roboco.android.design.Haptic
-import sh.roboco.android.design.LocalFeedback
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.glass.GlassPressModifierScaleKey
-import sh.roboco.android.design.glass.GlassPressScaleKey
-import sh.roboco.android.sessions.FolderRoute
-import sh.roboco.android.sessions.LocalSidebarFixtures
-import sh.roboco.android.sessions.SessionSearch
-import sh.roboco.android.sessions.SessionsScreenActions
-import sh.roboco.android.sessions.SidebarFixtures
-import sh.roboco.android.sessions.sessionsOptionsMenu
-import sh.roboco.android.shell.tablet.Sidebar
-import sh.roboco.android.shell.tablet.SidebarRootRoute
-import sh.roboco.android.shell.tablet.SidebarState
-import sh.roboco.android.shell.tablet.sidebarGalleryFixtures
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ContextMenuHost
+import sh.zeron.android.design.Cue
+import sh.zeron.android.design.Feedback
+import sh.zeron.android.design.Haptic
+import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.glass.GlassPressModifierScaleKey
+import sh.zeron.android.design.glass.GlassPressScaleKey
+import sh.zeron.android.sessions.FolderRoute
+import sh.zeron.android.sessions.LocalSidebarFixtures
+import sh.zeron.android.sessions.SessionSearch
+import sh.zeron.android.sessions.SessionsScreenActions
+import sh.zeron.android.sessions.SidebarFixtures
+import sh.zeron.android.sessions.sessionsOptionsMenu
+import sh.zeron.android.shell.tablet.Sidebar
+import sh.zeron.android.shell.tablet.SidebarRootRoute
+import sh.zeron.android.shell.tablet.SidebarState
+import sh.zeron.android.shell.tablet.sidebarGalleryFixtures
 
 /**
  * The tablet sidebar's bottom toolbar (android-ui-parity #107) at
@@ -80,7 +80,7 @@ import sh.roboco.android.shell.tablet.sidebarGalleryFixtures
  * Robolectric reports none, so 12 dp, the row spanning y 744 → 788) plus
  * one test wired through the whole [Sidebar] over 105's fixture.
  *
- * The host mirrors the app root's order (`RobocoTheme`, a
+ * The host mirrors the app root's order (`ZeronTheme`, a
  * `GlassMenuHost` for 15's panel — the composition-local router and the
  * recorder actions stand in for 106 and 46) under a recording
  * [Feedback]: iOS fires no haptic for any of the three items.
@@ -206,7 +206,7 @@ class SidebarToolbarTest {
         content: @Composable () -> Unit,
     ) {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(
                     LocalLayoutDirection provides direction,
                     LocalFeedback provides feedback,
@@ -244,7 +244,7 @@ class SidebarToolbarTest {
     /** The whole sidebar (105) with the toolbar wired into its slot. */
     private fun mountSidebar() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(LocalFeedback provides feedback) {
                     ContextMenuHost {
                         GlassMenuHost(hazeState = rememberHazeState()) {

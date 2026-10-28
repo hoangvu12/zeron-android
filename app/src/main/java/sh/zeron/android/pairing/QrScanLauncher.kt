@@ -1,4 +1,4 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import android.app.Activity
 import android.content.ActivityNotFoundException
@@ -12,8 +12,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityOptionsCompat
-import sh.roboco.android.R
-import sh.roboco.android.design.LocalReduceMotion
+import sh.zeron.android.R
+import sh.zeron.android.design.LocalReduceMotion
 
 /**
  * The "Scan QR code" launch contract (android-ui-parity #138): opens

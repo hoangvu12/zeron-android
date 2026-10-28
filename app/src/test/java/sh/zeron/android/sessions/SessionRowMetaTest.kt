@@ -1,11 +1,11 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import sh.roboco.android.design.PrState
+import sh.zeron.android.design.PrState
 
 /**
  * The meta line's pure math (android-ui-parity #38):

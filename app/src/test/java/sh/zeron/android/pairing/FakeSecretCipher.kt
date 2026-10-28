@@ -1,4 +1,4 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import java.security.GeneralSecurityException
 import java.security.SecureRandom

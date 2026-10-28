@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
@@ -14,13 +14,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.IconInBox
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.ActivitySpinner
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.IconInBox
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.ActivitySpinner
+import sh.zeron.android.design.uiStyle
 
 /**
  * The tile's three states (ticket 137; iOS `TranscriptImageView.swift`'s
@@ -34,7 +34,7 @@ enum class ImageTileStatus { Loading, Loaded, Failed }
 
 /**
  * The tile's copy (ticket 137, verbatim from iOS except the one ADAPT:
- * "Check the **engine** connection." — Roboco names the paired machine an
+ * "Check the **engine** connection." — Zeron names the paired machine an
  * engine). [RetryActionLabel] is the TalkBack `onClick` label ("Retry",
  * because TalkBack prefixes "Double-tap to"); the verbatim iOS hint
  * [FailedHint] is kept for tests through [ImageTileHintKey].
@@ -110,7 +110,7 @@ internal fun imageStatusPlacement(tileH: Int, labelH: Int, spinnerH: Int, gapPx:
 @Composable
 internal fun ImageTileStatusOverlay(status: ImageTileStatus, compact: Boolean, modifier: Modifier = Modifier) {
     if (status == ImageTileStatus.Loaded) return // nothing overlays the picture
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     if (compact) {
         Box(
             modifier.clearAndSetSemantics {},
@@ -118,7 +118,7 @@ internal fun ImageTileStatusOverlay(status: ImageTileStatus, compact: Boolean, m
         ) {
             when (status) {
                 ImageTileStatus.Loading -> ActivitySpinner(palette.secondary, Modifier.size(20.dp))
-                ImageTileStatus.Failed -> IconInBox(RobocoIcons.ExclamationmarkTriangle, palette.secondary, 20.dp)
+                ImageTileStatus.Failed -> IconInBox(ZeronIcons.ExclamationmarkTriangle, palette.secondary, 20.dp)
                 ImageTileStatus.Loaded -> Unit
             }
         }

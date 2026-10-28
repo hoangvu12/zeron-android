@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.activity.BackEventCompat
 import androidx.activity.ComponentActivity
@@ -36,15 +36,15 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The tablet Settings form-sheet dialog's behaviour (android-ui-parity
  * #104) — Robolectric + compose-ui-test at the ticket's tablet window
  * (1280 × 800 dp, xhdpi, all insets 0, so `avail` = the window). The
- * fixture is the ticket's: `RobocoTheme { SheetHost(state) {
+ * fixture is the ticket's: `ZeronTheme { SheetHost(state) {
  * FakeSplit() } }` with the gallery's fake root
  * ([SettingsDialogFakeSplit]) and a fake [AppRouter] that records calls,
  * provided **around** the `SheetHost` exactly as 106 will provide the real
@@ -83,7 +83,7 @@ class SettingsDialogTest {
     fun setUp() {
         compose.mainClock.autoAdvance = false
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 // Provided around the SheetHost: the presenter captures
                 // this scope's locals, so the card sees the recording
                 // router (106 provides the real one at the split root).

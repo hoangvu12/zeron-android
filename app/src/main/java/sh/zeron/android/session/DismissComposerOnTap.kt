@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -7,7 +7,7 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastFirstOrNull
-import sh.roboco.android.transcript.TranscriptTapGate
+import sh.zeron.android.transcript.TranscriptTapGate
 
 /**
  * On the transcript host (android-ui-parity #81): observe single taps on

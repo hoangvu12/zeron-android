@@ -1,11 +1,11 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import uniffi.roboco_core.EngineState
-import uniffi.roboco_core.ParkReason
+import uniffi.zeron_core.EngineState
+import uniffi.zeron_core.ParkReason
 
 /**
  * The pure half of the Settings Devices section (android-ui-parity #102):
@@ -47,16 +47,16 @@ class DevicesRowsTest {
 
     @Test
     fun parkedIncompatibleShowsTheTrimmedSentence() {
-        val sentence = "  Studio needs a newer Roboco app. Update the app to connect. "
+        val sentence = "  Studio needs a newer Zeron app. Update the app to connect. "
         assertEquals(
-            "Studio needs a newer Roboco app. Update the app to connect.",
+            "Studio needs a newer Zeron app. Update the app to connect.",
             engineConnectionLabel(EngineState.Parked(ParkReason.INCOMPATIBLE), sentence),
         )
         assertEquals(
-            "Build box runs an older Roboco (0.9.1). Update Roboco on that device to connect.",
+            "Build box runs an older Zeron (0.9.1). Update Zeron on that device to connect.",
             engineConnectionLabel(
                 EngineState.Parked(ParkReason.INCOMPATIBLE),
-                "Build box runs an older Roboco (0.9.1). Update Roboco on that device to connect.",
+                "Build box runs an older Zeron (0.9.1). Update Zeron on that device to connect.",
             ),
         )
     }
@@ -173,12 +173,12 @@ class DevicesRowsTest {
                     id = "e4",
                     name = "Build box",
                     state = EngineState.Parked(ParkReason.INCOMPATIBLE),
-                    lastError = "Build box needs a newer Roboco app. Update the app to connect.",
+                    lastError = "Build box needs a newer Zeron app. Update the app to connect.",
                 ),
             ),
         )
         assertEquals(
-            "Build box needs a newer Roboco app. Update the app to connect.",
+            "Build box needs a newer Zeron app. Update the app to connect.",
             (rows[0] as DevicesRowSpec.Engine).label,
         )
     }

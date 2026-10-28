@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlinx.coroutines.CancellationException
@@ -18,8 +18,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import uniffi.roboco_core.SearchField
-import uniffi.roboco_core.SearchHit
+import uniffi.zeron_core.SearchField
+import uniffi.zeron_core.SearchHit
 
 /**
  * The Search model's logic (android-ui-parity #49) — plain JUnit +

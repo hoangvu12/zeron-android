@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -8,9 +8,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import uniffi.roboco_core.EngineRoomRef
-import uniffi.roboco_core.EngineState
-import uniffi.roboco_core.ParkReason
+import uniffi.zeron_core.EngineRoomRef
+import uniffi.zeron_core.EngineState
+import uniffi.zeron_core.ParkReason
 
 /**
  * The Engine detail page's pure model (android-ui-parity #140): every
@@ -105,7 +105,7 @@ class EngineDetailModelTest {
 
     @Test
     fun incompatibleShowsUpdateRequiredEvenWithALastError() {
-        val sentence = "Build box runs an older Roboco (0.8.0). Update Roboco on that device to connect."
+        val sentence = "Build box runs an older Zeron (0.8.0). Update Zeron on that device to connect."
         assertEquals(
             "Update required",
             engineStatusValue(EngineState.Parked(ParkReason.INCOMPATIBLE), sentence),
@@ -139,7 +139,7 @@ class EngineDetailModelTest {
 
     @Test
     fun theNoticeFooterShowsWhileConnected() {
-        val notice = "MacBook Pro runs Roboco 0.10.0, newer than this app (0.9.2)."
+        val notice = "MacBook Pro runs Zeron 0.10.0, newer than this app (0.9.2)."
         val lastError = "an old error"
         assertEquals(EngineFooter(notice, FooterTone.Notice), engineFooter(EngineState.Connected, notice, lastError))
         assertEquals(
@@ -364,7 +364,7 @@ class EngineDetailModelTest {
     private fun roomEngineView(
         roomLabel: String?,
         capabilities: List<String>,
-    ): uniffi.roboco_core.EngineView = engineView(
+    ): uniffi.zeron_core.EngineView = engineView(
         id = "e-room",
         name = "Studio",
         state = EngineState.Connected,

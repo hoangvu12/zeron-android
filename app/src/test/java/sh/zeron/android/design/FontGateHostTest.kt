@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.CompositionLocalProvider
@@ -15,8 +15,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.core.FontGate
-import sh.roboco.android.core.FontStatus
+import sh.zeron.android.core.FontGate
+import sh.zeron.android.core.FontStatus
 
 /**
  * The release-build gate and the fatal screen (Robolectric): a `Missing`

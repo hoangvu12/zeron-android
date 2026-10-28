@@ -1,4 +1,4 @@
-package sh.roboco.android.core
+package sh.zeron.android.core
 
 import android.icu.util.ULocale
 import java.util.Locale
@@ -9,7 +9,7 @@ import java.util.Locale
  * `fonts.xml`'s `NotoSansCJK-Regular.ttc` entries.
  *
  * iOS has no equivalent: `CTLine` picks its own fallback, which on a
- * Japanese device shows Chinese glyph forms for shared code points. Roboco
+ * Japanese device shows Chinese glyph forms for shared code points. Zeron
  * picks the variant from the **device locale** (upstream Android PR #621
  * always used Simplified Chinese), read once when the chain is first built
  * — a live locale change would need a full chain and width-cache rebuild,

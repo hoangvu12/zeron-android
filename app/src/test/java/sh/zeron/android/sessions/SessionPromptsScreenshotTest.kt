@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -28,22 +28,22 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.ActionSheetModel
-import sh.roboco.android.design.ActionSheetPanel
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.GalleryBackdrop
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoAlert
-import sh.roboco.android.design.RobocoAlertCard
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.actionSheetBottomGap
-import sh.roboco.android.design.actionSheetMaxCardHeight
-import sh.roboco.android.design.actionSheetWidth
-import sh.roboco.android.design.rgba
+import sh.zeron.android.design.ActionSheetModel
+import sh.zeron.android.design.ActionSheetPanel
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.GalleryBackdrop
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronAlert
+import sh.zeron.android.design.ZeronAlertCard
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.actionSheetBottomGap
+import sh.zeron.android.design.actionSheetMaxCardHeight
+import sh.zeron.android.design.actionSheetWidth
+import sh.zeron.android.design.rgba
 
 /**
  * Ticket 43's goldens: the five prompt **models** through the stateless
- * visuals of tickets 18/19 — [RobocoAlertCard] and [ActionSheetPanel],
+ * visuals of tickets 18/19 — [ZeronAlertCard] and [ActionSheetPanel],
  * both with `hazeState = null` (ticket 07's deterministic fallback fill,
  * same as 18's and 19's own goldens, so they never depend on how
  * Robolectric reports hardware acceleration) — over the gallery backdrop
@@ -77,15 +77,15 @@ class SessionPromptsScreenshotTest {
 
     /** The alert card centred, as ticket 18's host places it (minus the host). */
     @Composable
-    private fun SessionPromptAlertGolden(alert: RobocoAlert, fieldValue: TextFieldValue) {
-        Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+    private fun SessionPromptAlertGolden(alert: ZeronAlert, fieldValue: TextFieldValue) {
+        Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
             GalleryBackdrop(Modifier.matchParentSize())
             Box(Modifier.fillMaxSize().background(rgba(0x000000, 0.2)))
             Box(
                 Modifier.fillMaxSize().padding(16.dp),
                 contentAlignment = Alignment.Center,
             ) {
-                RobocoAlertCard(
+                ZeronAlertCard(
                     alert = alert,
                     fieldValue = fieldValue,
                     onFieldValueChange = {},
@@ -100,7 +100,7 @@ class SessionPromptsScreenshotTest {
     /** The sheet panel bottom-anchored, as ticket 19's overlay rests it (minus the animation). */
     @Composable
     private fun SessionPromptSheetGolden(model: ActionSheetModel) {
-        Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+        Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
             GalleryBackdrop(Modifier.matchParentSize())
             Box(Modifier.fillMaxSize().background(rgba(0x000000, 0.2)))
             BoxWithConstraints(Modifier.fillMaxSize()) {
@@ -132,9 +132,9 @@ class SessionPromptsScreenshotTest {
     private fun bounds(tag: String): Rect = compose.onNodeWithTag(tag).pxBounds()
 
     /** Sets the alert fixture, waits for it to settle, asserts nothing yet. */
-    private fun setAlert(appearance: Appearance, alert: RobocoAlert, fieldText: String = "") {
+    private fun setAlert(appearance: Appearance, alert: ZeronAlert, fieldText: String = "") {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 SessionPromptAlertGolden(alert, TextFieldValue(fieldText, TextRange(fieldText.length)))
             }
         }
@@ -144,7 +144,7 @@ class SessionPromptsScreenshotTest {
     /** Sets the sheet fixture, waits for it to settle. */
     private fun setSheet(appearance: Appearance, model: ActionSheetModel) {
         compose.setContent {
-            RobocoTheme(appearance) { SessionPromptSheetGolden(model) }
+            ZeronTheme(appearance) { SessionPromptSheetGolden(model) }
         }
         compose.waitForIdle()
     }

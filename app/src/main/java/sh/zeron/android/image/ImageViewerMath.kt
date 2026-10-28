@@ -1,4 +1,4 @@
-package sh.roboco.android.image
+package sh.zeron.android.image
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -8,8 +8,8 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sign
 import kotlin.math.sqrt
-import sh.roboco.android.design.UIScrollViewRubberBandC
-import sh.roboco.android.design.rubberBandOffset
+import sh.zeron.android.design.UIScrollViewRubberBandC
+import sh.zeron.android.design.rubberBandOffset
 
 /**
  * The image viewer's pure geometry (android-ui-parity #125): the port of
@@ -18,7 +18,7 @@ import sh.roboco.android.design.rubberBandOffset
  * double-tap target, the log-space half-resistance zoom overshoot, the
  * UIScrollView rubber band and the drag-to-dismiss numbers. Pure
  * functions over px floats, no Compose runtime, pinned by
- * [sh.roboco.android.image.ImageViewerMathTest] against the ticket's
+ * [sh.zeron.android.image.ImageViewerMathTest] against the ticket's
  * worked values.
  *
  * Coordinate system: `screen = content * z + T` where the content is the

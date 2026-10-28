@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -9,10 +9,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
-import sh.roboco.android.design.LocalReduceMotion
-import sh.roboco.android.shell.NavEntry
-import sh.roboco.android.shell.NavKind
-import sh.roboco.android.shell.NavStack
+import sh.zeron.android.design.LocalReduceMotion
+import sh.zeron.android.shell.NavEntry
+import sh.zeron.android.shell.NavKind
+import sh.zeron.android.shell.NavStack
 
 /**
  * The push/pop choreography of the Session screen (android-ui-parity #85)
@@ -184,7 +184,7 @@ val LocalSessionNavAlpha = staticCompositionLocalOf<SessionNavAlpha> { SessionNa
 
 /**
  * Remembers the entry's [SessionNavAlpha] and keeps its reduce-motion
- * flag fresh. Call where [sh.roboco.android.shell.LocalNavEntry] is
+ * flag fresh. Call where [sh.zeron.android.shell.LocalNavEntry] is
  * guaranteed (76's `SessionScreenRoute.Content()`); the gallery's
  * fixture session calls it inside its own `NavStackHost` content.
  */

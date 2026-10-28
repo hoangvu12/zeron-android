@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.gestures.FlingBehavior

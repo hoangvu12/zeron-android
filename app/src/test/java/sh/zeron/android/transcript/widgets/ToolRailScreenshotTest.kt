@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -14,8 +14,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The tool-rail goldens (ticket 121; recorded by `:app:recordRoborazziDebug`,
@@ -71,8 +71,8 @@ class ToolRailScreenshotTest {
 
     private fun shot(appearance: Appearance, file: String) {
         compose.setContent {
-            RobocoTheme(appearance) {
-                Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+            ZeronTheme(appearance) {
+                Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                     ToolRailFixture(RailFixture3, live = false, key = 1uL, token = null)
                 }
             }
@@ -85,8 +85,8 @@ class ToolRailScreenshotTest {
     fun toolRailDrawin208msLight() {
         compose.mainClock.autoAdvance = false
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
-                Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+            ZeronTheme(Appearance.Light) {
+                Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                     ToolRailFixture(railDemoSpec(2), live = true, key = 2uL, token = Any())
                 }
             }

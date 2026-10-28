@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
@@ -13,20 +13,20 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
-import sh.roboco.android.design.ActionSheetModel
-import sh.roboco.android.design.ActionSheetAction
-import sh.roboco.android.design.ActionSheetPresenter
-import sh.roboco.android.design.ActionSheetStyle
-import sh.roboco.android.design.AlertButton
-import sh.roboco.android.design.AlertButtonRole
-import sh.roboco.android.design.AlertField
-import sh.roboco.android.design.Alerts
-import sh.roboco.android.design.RobocoAlert
-import sh.roboco.android.design.Toaster
-import uniffi.roboco_core.CoreException
-import uniffi.roboco_core.EngineState
-import uniffi.roboco_core.EngineView
-import uniffi.roboco_core.WorkspaceSnapshot
+import sh.zeron.android.design.ActionSheetModel
+import sh.zeron.android.design.ActionSheetAction
+import sh.zeron.android.design.ActionSheetPresenter
+import sh.zeron.android.design.ActionSheetStyle
+import sh.zeron.android.design.AlertButton
+import sh.zeron.android.design.AlertButtonRole
+import sh.zeron.android.design.AlertField
+import sh.zeron.android.design.Alerts
+import sh.zeron.android.design.ZeronAlert
+import sh.zeron.android.design.Toaster
+import uniffi.zeron_core.CoreException
+import uniffi.zeron_core.EngineState
+import uniffi.zeron_core.EngineView
+import uniffi.zeron_core.WorkspaceSnapshot
 
 /** The forget flow's phases: `Idle`, or the sequence is running (taps ignored). */
 enum class ForgetPhase { Idle, Forgetting }
@@ -58,7 +58,7 @@ internal var engineDetailLogW: (String) -> Unit = { message ->
  * Scopes (the ticket's pitfall): [uiScope] is the page's
  * `rememberCoroutineScope()` and carries **only** the 1.5 s Copied timer
  * — everything FFI runs on [workScope], the application scope
- * (`RobocoApplication.appScope` + `Dispatchers.Main.immediate`), so a
+ * (`ZeronApplication.appScope` + `Dispatchers.Main.immediate`), so a
  * pop or the last-engine root swap never cancels a rename or forget
  * half-way. The FFI hops go through [io] (`Dispatchers.IO`).
  *
@@ -132,7 +132,7 @@ class EngineDetailState(
             return
         }
         alerts.show(
-            RobocoAlert(
+            ZeronAlert(
                 title = EngineDetailCopy.RenameTitle,
                 field = AlertField(
                     text = view.name.trim().ifEmpty { view.host },

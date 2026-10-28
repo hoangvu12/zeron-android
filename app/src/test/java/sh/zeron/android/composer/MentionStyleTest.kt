@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -9,7 +9,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertSame
 import org.junit.Test
-import sh.roboco.android.design.Palette
+import sh.zeron.android.design.Palette
 
 /**
  * [mentionRanges] and [MentionVisualTransformation.filter] on the plain

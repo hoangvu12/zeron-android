@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -16,8 +16,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The copy-code goldens (ticket 119; recorded by
@@ -72,8 +72,8 @@ class CopyCodeScreenshotTest {
 
     private fun shot(appearance: Appearance, copied: Boolean, file: String) {
         compose.setContent {
-            RobocoTheme(appearance) {
-                Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+            ZeronTheme(appearance) {
+                Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                     // The row origin: MARGIN_X 18 (rows.rs:124).
                     Column(Modifier.padding(start = 18.dp)) {
                         CopyCodeFixture(copied = copied)

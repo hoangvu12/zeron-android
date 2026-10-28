@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -31,10 +31,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
 import kotlin.math.ceil
-import sh.roboco.android.R
-import sh.roboco.android.core.Face
-import sh.roboco.android.core.GeistMetrics
-import sh.roboco.android.core.assetPath
+import sh.zeron.android.R
+import sh.zeron.android.core.Face
+import sh.zeron.android.core.GeistMetrics
+import sh.zeron.android.core.assetPath
 
 /**
  * The GeistMono-Medium [Typeface] for the tile's native `Paint` — the

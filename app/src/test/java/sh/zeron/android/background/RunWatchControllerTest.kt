@@ -1,4 +1,4 @@
-package sh.roboco.android.background
+package sh.zeron.android.background
 
 import android.app.Application
 import android.content.Intent
@@ -15,8 +15,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import sh.roboco.android.notify.Notifier
-import sh.roboco.android.notify.WorkingRun
+import sh.zeron.android.notify.Notifier
+import sh.zeron.android.notify.WorkingRun
 
 /**
  * The run-watching foreground service's lifecycle (android-app#28):

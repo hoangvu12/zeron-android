@@ -1,7 +1,7 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.icu.text.BreakIterator
-import sh.roboco.android.core.FontChain
+import sh.zeron.android.core.FontChain
 
 /**
  * Mono double-width clusters — the painter's half of ticket 60's measurer

@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import org.json.JSONArray
 import org.json.JSONObject

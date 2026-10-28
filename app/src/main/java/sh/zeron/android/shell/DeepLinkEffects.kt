@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -16,7 +16,7 @@ import androidx.compose.runtime.withFrameNanos
  * clear a newer router.
  *
  * Kept out of `DeepLinkHub.kt` so the hub itself stays plain-JVM
- * (no Compose, no `android.*`), and out of `RobocoAppContent.kt` because
+ * (no Compose, no `android.*`), and out of `ZeronAppContent.kt` because
  * ticket 108 carries these lines into its `ShellStateScope`.
  *
  * One instance per shell: the phone slot calls this with the router

@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import android.util.Log
 import androidx.compose.runtime.Composable
@@ -13,14 +13,14 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import sh.roboco.android.design.AlertButton
-import sh.roboco.android.design.AlertButtonRole
-import sh.roboco.android.design.AlertField
-import sh.roboco.android.design.Alerts
-import sh.roboco.android.design.LocalAlerts
-import sh.roboco.android.design.RobocoAlert
-import uniffi.roboco_core.CoreException
-import uniffi.roboco_core.FolderListing
+import sh.zeron.android.design.AlertButton
+import sh.zeron.android.design.AlertButtonRole
+import sh.zeron.android.design.AlertField
+import sh.zeron.android.design.Alerts
+import sh.zeron.android.design.LocalAlerts
+import sh.zeron.android.design.ZeronAlert
+import uniffi.zeron_core.CoreException
+import uniffi.zeron_core.FolderListing
 
 /**
  * The bottom bar's copy (android-ui-parity #111), verbatim from
@@ -32,8 +32,8 @@ internal object FolderWriteCopy {
     /** `status.text = "Creating folder…"`. */
     const val CreatingFolder = "Creating folder…"
 
-    /** `Roboco is disconnected.` — iOS's `Zeron is disconnected.` under the rename rule. */
-    const val Disconnected = "Roboco is disconnected."
+    /** `Zeron is disconnected.` — iOS's `Zeron is disconnected.` under the rename rule. */
+    const val Disconnected = "Zeron is disconnected."
 
     /** The engine's file-vs-folder message, matched exactly (space_paths.rs:36). */
     const val IsAFile = "the path is a file, not a folder"
@@ -182,7 +182,7 @@ class FolderBrowserActions(
     /**
      * `gitDetected`: the listing's own `.git` entry (iOS's only check)
      * OR-ed with 110's [FolderBrowserController.listingIsRepo] — the
-     * `isRepo` of the row that reached this folder, because Roboco
+     * `isRepo` of the row that reached this folder, because Zeron
      * listings hide dotfiles. The engine re-verifies either way.
      */
     private fun gitDetected(listing: FolderListing): Boolean =
@@ -201,7 +201,7 @@ class FolderBrowserActions(
         val listing = c.listing ?: return
         val path = listing.path
         alerts.show(
-            RobocoAlert(
+            ZeronAlert(
                 title = FolderWriteCopy.AlertTitle,
                 message = error ?: FolderWriteCopy.alertMessage(path, engine.name),
                 field = AlertField(
@@ -291,7 +291,7 @@ private const val LOG_TAG = "NewProject"
  * The engine error text: every `CoreException` variant's `reason`
  * (android-app#10's rename of the `message` field; UniFFI appends
  * `Exception` to variant names ending in `Error`, so `HostError` is
- * `HostException`), `Roboco is disconnected.` for a closed client, and
+ * `HostException`), `Zeron is disconnected.` for a closed client, and
  * the platform message otherwise.
  */
 internal fun folderErrorMessage(e: Throwable): String = when (e) {

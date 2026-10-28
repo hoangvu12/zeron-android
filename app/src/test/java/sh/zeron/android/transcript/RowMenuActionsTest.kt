@@ -1,18 +1,18 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
 import org.junit.Test
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.glass.MenuItem
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.glass.MenuItem
 
 /**
  * The row-menu item builder (android-ui-parity #128), plain JVM —
  * [rowMenuActions] is pure and [toMenu] builds pure data, so no
  * Robolectric: nothing here touches Android types beyond `R.drawable`
- * ints (the [sh.roboco.android.design.RobocoIcons] entries).
+ * ints (the [sh.zeron.android.design.ZeronIcons] entries).
  *
  * Every row of the ticket's table, including the Swift `??` quirk:
  * `("a", "")` yields **Copy only** — an empty `message` hides Select Text
@@ -86,9 +86,9 @@ class RowMenuActionsTest {
         assertEquals("Copy", RowMenuKind.Copy.title)
         assertEquals("Copy Message", RowMenuKind.CopyMessage.title)
         assertEquals("Select Text", RowMenuKind.SelectText.title)
-        assertSame(RobocoIcons.DocOnDoc, RowMenuKind.Copy.icon)
-        assertSame(RobocoIcons.DocOnClipboard, RowMenuKind.CopyMessage.icon)
-        assertSame(RobocoIcons.CharacterCursorIbeam, RowMenuKind.SelectText.icon)
+        assertSame(ZeronIcons.DocOnDoc, RowMenuKind.Copy.icon)
+        assertSame(ZeronIcons.DocOnClipboard, RowMenuKind.CopyMessage.icon)
+        assertSame(ZeronIcons.CharacterCursorIbeam, RowMenuKind.SelectText.icon)
         assertEquals("row-menu-copy", RowMenuKind.Copy.testTag)
         assertEquals("row-menu-copy-message", RowMenuKind.CopyMessage.testTag)
         assertEquals("row-menu-select-text", RowMenuKind.SelectText.testTag)

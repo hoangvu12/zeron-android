@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList
@@ -6,13 +6,13 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
-import uniffi.roboco_core.ChatIndicator
-import uniffi.roboco_core.FrontPage
-import uniffi.roboco_core.PullRequestGroups
-import uniffi.roboco_core.SectionView
-import uniffi.roboco_core.SessionGroup
-import uniffi.roboco_core.SessionRow
-import uniffi.roboco_core.WorkspaceSnapshot
+import uniffi.zeron_core.ChatIndicator
+import uniffi.zeron_core.FrontPage
+import uniffi.zeron_core.PullRequestGroups
+import uniffi.zeron_core.SectionView
+import uniffi.zeron_core.SessionGroup
+import uniffi.zeron_core.SessionRow
+import uniffi.zeron_core.WorkspaceSnapshot
 
 /**
  * The live-counts data and formatters (android-ui-parity #27): the summary

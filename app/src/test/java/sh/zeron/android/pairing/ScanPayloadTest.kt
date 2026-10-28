@@ -1,4 +1,4 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -52,7 +52,7 @@ class ScanPayloadTest {
 
     @Test
     fun theDeepLinkWrapperIsUnwrapped() {
-        val wrapped = "roboco://pair#url=http%3A%2F%2F192.168.1.10%3A27655%2Fpair%23token%3Dabc"
+        val wrapped = "zeron://pair#url=http%3A%2F%2F192.168.1.10%3A27655%2Fpair%23token%3Dabc"
         assertEquals(
             ScanVerdict.Pairing("http://192.168.1.10:27655/pair#token=abc"),
             classifyScan(wrapped, isPairingUrl),
@@ -61,7 +61,7 @@ class ScanPayloadTest {
 
     @Test
     fun theDeepLinkWrapperMatchesCaseInsensitivelyWithASlash() {
-        val wrapped = "ROBOCO://PAIR/#url=https%3A%2F%2Fe.example.ts.net%2Fpair%23token%3Dz"
+        val wrapped = "ZERON://PAIR/#url=https%3A%2F%2Fe.example.ts.net%2Fpair%23token%3Dz"
         assertEquals(
             ScanVerdict.Pairing("https://e.example.ts.net/pair#token=z"),
             classifyScan(wrapped, isPairingUrl),
@@ -74,15 +74,15 @@ class ScanPayloadTest {
         // URL's own #token=… survives unencoded.
         assertEquals(
             ScanVerdict.Pairing("http://h:1/pair#token=x"),
-            classifyScan("roboco://pair#url=http://h:1/pair#token=x", isPairingUrl),
+            classifyScan("zeron://pair#url=http://h:1/pair#token=x", isPairingUrl),
         )
     }
 
     @Test
     fun aTailcatInviteIsDeliveredNotRejected() {
         assertEquals(
-            ScanVerdict.Pairing("roboco-tailcat:abc"),
-            classifyScan("roboco-tailcat:abc", isPairingUrl),
+            ScanVerdict.Pairing("zeron-tailcat:abc"),
+            classifyScan("zeron-tailcat:abc", isPairingUrl),
         )
     }
 
@@ -93,13 +93,13 @@ class ScanPayloadTest {
     @Test
     fun aRoomInviteIsDeliveredNotRejected() {
         assertEquals(
-            ScanVerdict.Pairing("roboco-room:eyJ2IjoxfQ"),
-            classifyScan("roboco-room:eyJ2IjoxfQ", isPairingUrl),
+            ScanVerdict.Pairing("zeron-room:eyJ2IjoxfQ"),
+            classifyScan("zeron-room:eyJ2IjoxfQ", isPairingUrl),
         )
         // A QR code the camera read with surrounding noise still trims.
         assertEquals(
-            ScanVerdict.Pairing("roboco-room:eyJ2IjoxfQ"),
-            classifyScan("  roboco-room:eyJ2IjoxfQ \n", isPairingUrl),
+            ScanVerdict.Pairing("zeron-room:eyJ2IjoxfQ"),
+            classifyScan("  zeron-room:eyJ2IjoxfQ \n", isPairingUrl),
         )
     }
 
@@ -107,7 +107,7 @@ class ScanPayloadTest {
     fun aRoomInviteWithEmbeddedWhitespaceIsForeign() {
         assertEquals(
             ScanVerdict.Foreign,
-            classifyScan("roboco-room:eyJ 2IjoxfQ", isPairingUrl),
+            classifyScan("zeron-room:eyJ 2IjoxfQ", isPairingUrl),
         )
     }
 
@@ -121,8 +121,8 @@ class ScanPayloadTest {
             StandInParse(s) != null
         }
         assertEquals(
-            ScanVerdict.Pairing("roboco-room:eyJ2IjoxfQ"),
-            classifyScan("roboco-room:eyJ2IjoxfQ", counting),
+            ScanVerdict.Pairing("zeron-room:eyJ2IjoxfQ"),
+            classifyScan("zeron-room:eyJ2IjoxfQ", counting),
         )
         assertEquals(0, engineParseCalls)
     }
@@ -135,29 +135,29 @@ class ScanPayloadTest {
     }
 
     @Test
-    fun aForeignRobocoRouteIsForeign() {
-        assertEquals(ScanVerdict.Foreign, classifyScan("roboco://chat/1", isPairingUrl))
+    fun aForeignZeronRouteIsForeign() {
+        assertEquals(ScanVerdict.Foreign, classifyScan("zeron://chat/1", isPairingUrl))
     }
 
     @Test
     fun aWrapperWithoutAFragmentIsForeign() {
-        assertEquals(ScanVerdict.Foreign, classifyScan("roboco://pair", isPairingUrl))
+        assertEquals(ScanVerdict.Foreign, classifyScan("zeron://pair", isPairingUrl))
     }
 
     @Test
     fun aMalformedEscapeInsideTheWrapperIsForeign() {
-        assertEquals(ScanVerdict.Foreign, classifyScan("roboco://pair#url=%ZZ", isPairingUrl))
-        assertEquals(ScanVerdict.Foreign, classifyScan("roboco://pair#url=%2", isPairingUrl))
+        assertEquals(ScanVerdict.Foreign, classifyScan("zeron://pair#url=%ZZ", isPairingUrl))
+        assertEquals(ScanVerdict.Foreign, classifyScan("zeron://pair#url=%2", isPairingUrl))
     }
 
     @Test
     fun anEmptyWrapperValueIsForeign() {
-        assertEquals(ScanVerdict.Foreign, classifyScan("roboco://pair#url=", isPairingUrl))
+        assertEquals(ScanVerdict.Foreign, classifyScan("zeron://pair#url=", isPairingUrl))
     }
 
     @Test
     fun aWrapperWithAQueryBeforeTheFragmentFailsThePrefixGate() {
-        assertEquals(ScanVerdict.Foreign, classifyScan("roboco://pair?x=1#url=a", isPairingUrl))
+        assertEquals(ScanVerdict.Foreign, classifyScan("zeron://pair?x=1#url=a", isPairingUrl))
     }
 
     @Test
@@ -174,17 +174,17 @@ class ScanPayloadTest {
     fun aWrapperAroundANonPairingUrlIsForeign() {
         assertEquals(
             ScanVerdict.Foreign,
-            classifyScan("roboco://pair#url=https%3A%2F%2Fexample.com", isPairingUrl),
+            classifyScan("zeron://pair#url=https%3A%2F%2Fexample.com", isPairingUrl),
         )
     }
 
     @Test
     fun aNestedWrapperIsNotUnwrappedTwice() {
-        // One level only: the decoded `roboco://…` is not a pairing URL,
+        // One level only: the decoded `zeron://…` is not a pairing URL,
         // so it lands as Foreign, never recursively unwrapped.
         assertEquals(
             ScanVerdict.Foreign,
-            classifyScan("roboco://pair#url=roboco%3A%2F%2Fpair%23url%3Dx", isPairingUrl),
+            classifyScan("zeron://pair#url=zeron%3A%2F%2Fpair%23url%3Dx", isPairingUrl),
         )
     }
 
@@ -192,7 +192,7 @@ class ScanPayloadTest {
     fun aWrapperAroundAnInnerControlCharIsForeign() {
         assertEquals(
             ScanVerdict.Foreign,
-            classifyScan("roboco://pair#url=http%3A%2F%2Fh%2Fpa%0Air%23token%3Dx", isPairingUrl),
+            classifyScan("zeron://pair#url=http%3A%2F%2Fh%2Fpa%0Air%23token%3Dx", isPairingUrl),
         )
     }
 
@@ -208,32 +208,32 @@ class ScanPayloadTest {
 
     @Test
     fun decodePairLinkKeepsALiteralPlus() {
-        assertEquals("a+b", decodePairLink("roboco://pair#url=a+b"))
-        assertEquals("a+b", decodePairLink("roboco://pair#url=a%2Bb"))
+        assertEquals("a+b", decodePairLink("zeron://pair#url=a+b"))
+        assertEquals("a+b", decodePairLink("zeron://pair#url=a%2Bb"))
     }
 
     @Test
     fun decodePairLinkTakesTheFirstUrlParamOnly() {
-        assertEquals("a", decodePairLink("roboco://pair#url=a&url=b"))
-        assertEquals("http://h/pair#token=x", decodePairLink("roboco://pair#v=2&url=http://h/pair#token=x"))
+        assertEquals("a", decodePairLink("zeron://pair#url=a&url=b"))
+        assertEquals("http://h/pair#token=x", decodePairLink("zeron://pair#v=2&url=http://h/pair#token=x"))
     }
 
     @Test
     fun decodePairLinkRejectsWrongPrefixesAndKeys() {
-        assertNull(decodePairLink("roboco://chat#url=a"))
-        assertNull(decodePairLink("roboco://pairs#url=a"))
-        assertNull(decodePairLink("roboco://pair#URL=a"))
-        assertNull(decodePairLink("roboco://pair"))
-        assertNull(decodePairLink("roboco://pair?x=1#url=a"))
+        assertNull(decodePairLink("zeron://chat#url=a"))
+        assertNull(decodePairLink("zeron://pairs#url=a"))
+        assertNull(decodePairLink("zeron://pair#URL=a"))
+        assertNull(decodePairLink("zeron://pair"))
+        assertNull(decodePairLink("zeron://pair?x=1#url=a"))
     }
 
     @Test
     fun decodePairLinkTrimsAndRejectsBlankAndDirtyValues() {
         assertEquals(
             "http://h/pair#token=x",
-            decodePairLink("roboco://pair#url=%20http%3A%2F%2Fh%2Fpair%23token%3Dx%0A"),
+            decodePairLink("zeron://pair#url=%20http%3A%2F%2Fh%2Fpair%23token%3Dx%0A"),
         )
-        assertNull(decodePairLink("roboco://pair#url=%20%0A"))
+        assertNull(decodePairLink("zeron://pair#url=%20%0A"))
     }
 
     @Test
@@ -241,7 +241,7 @@ class ScanPayloadTest {
         // Double-encoded input decodes once; the parser rejects the rest.
         assertEquals(
             "http%3A%2F%2Fh%2Fpair%23token%3Dx",
-            decodePairLink("roboco://pair#url=http%253A%252F%252Fh%252Fpair%2523token%253Dx"),
+            decodePairLink("zeron://pair#url=http%253A%252F%252Fh%252Fpair%2523token%253Dx"),
         )
     }
 
@@ -274,8 +274,8 @@ class ScanPayloadTest {
 
     @Test
     fun theEncodedFragmentIsEverythingAfterTheFirstHash() {
-        assertEquals("url=a#b", PairingLinks.encodedFragment("roboco://pair#url=a#b"))
-        assertNotNull(PairingLinks.encodedFragment("roboco://pair#"))
-        assertNull(PairingLinks.encodedFragment("roboco://pair"))
+        assertEquals("url=a#b", PairingLinks.encodedFragment("zeron://pair#url=a#b"))
+        assertNotNull(PairingLinks.encodedFragment("zeron://pair#"))
+        assertNull(PairingLinks.encodedFragment("zeron://pair"))
     }
 }

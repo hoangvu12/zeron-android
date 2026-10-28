@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import androidx.compose.animation.core.AnimationState
 import androidx.compose.animation.core.DecayAnimationSpec

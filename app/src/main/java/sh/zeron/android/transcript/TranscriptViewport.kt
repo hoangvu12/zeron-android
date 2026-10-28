@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue

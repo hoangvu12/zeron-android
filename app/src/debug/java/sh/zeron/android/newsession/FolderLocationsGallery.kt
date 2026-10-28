@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -18,13 +18,13 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
-import uniffi.roboco_core.DriveEntry
-import uniffi.roboco_core.PreparedPath
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
+import uniffi.zeron_core.DriveEntry
+import uniffi.zeron_core.PreparedPath
 
 /**
  * The "Folder browser locations" section of the debug design gallery
@@ -192,7 +192,7 @@ fun FolderLocationsGallerySection() {
 /** One fixture: the caption, then the 90 dp header at the phone width. */
 @Composable
 private fun LocationsFixtureCard(label: String, spec: FolderLocationsSpec) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         BasicText(label, style = uiStyle(Face.Sans, ts.fixed(13f), palette.secondary))
@@ -207,8 +207,8 @@ private fun LocationsFixtureCard(label: String, spec: FolderLocationsSpec) {
 /** The preview stage: fixture A (or the given spec) on the plain background. */
 @Composable
 private fun FolderLocationsPreviewStage(appearance: Appearance, spec: FolderLocationsSpec) {
-    RobocoTheme(appearance) {
-        Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+    ZeronTheme(appearance) {
+        Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
             FolderLocationsStage(spec, Modifier.fillMaxWidth())
         }
     }

@@ -1,18 +1,18 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.unit.dp
 import java.text.Collator
 import java.util.Locale
-import sh.roboco.android.composer.ChipMenuProvider
-import sh.roboco.android.design.ProjectTile
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.glass.Menu
-import sh.roboco.android.design.glass.MenuElement
-import sh.roboco.android.design.glass.MenuIcon
-import sh.roboco.android.design.glass.MenuItem
-import sh.roboco.android.design.glass.MenuSection
-import sh.roboco.android.design.glass.hasContent
+import sh.zeron.android.composer.ChipMenuProvider
+import sh.zeron.android.design.ProjectTile
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.glass.Menu
+import sh.zeron.android.design.glass.MenuElement
+import sh.zeron.android.design.glass.MenuIcon
+import sh.zeron.android.design.glass.MenuItem
+import sh.zeron.android.design.glass.MenuSection
+import sh.zeron.android.design.glass.hasContent
 
 /**
  * The Project and Run on menus (android-ui-parity #113) — the port of
@@ -184,13 +184,13 @@ fun buildProjectMenu(
     val fixed = listOf(
         MenuItem(
             title = "No Project…",
-            icon = MenuIcon.Symbol(RobocoIcons.Tray),
+            icon = MenuIcon.Symbol(ZeronIcons.Tray),
             checked = draft.projectId == null,
             testTag = "project-menu-none",
         ) { onNoProject() },
         MenuItem(
             title = "New Project…",
-            icon = MenuIcon.Symbol(RobocoIcons.FolderBadgePlus),
+            icon = MenuIcon.Symbol(ZeronIcons.FolderBadgePlus),
             checked = false,
             testTag = "project-menu-new",
         ) { onNewProject() },
@@ -228,7 +228,7 @@ fun buildRunOnMenu(
             MenuItem(
                 title = p.deviceName,
                 subtitle = if (shared) p.path else if (p.online) "Online" else "Offline",
-                icon = MenuIcon.Symbol(RobocoIcons.Desktopcomputer),
+                icon = MenuIcon.Symbol(ZeronIcons.Desktopcomputer),
                 checked = p.id == draft.projectId,
                 testTag = "run-on-row",
             ) { onPickCheckout(p) }
@@ -238,7 +238,7 @@ fun buildRunOnMenu(
             MenuItem(
                 title = h.name,
                 subtitle = if (h.online) "Online" else "Offline",
-                icon = MenuIcon.Symbol(RobocoIcons.Desktopcomputer),
+                icon = MenuIcon.Symbol(ZeronIcons.Desktopcomputer),
                 checked = h.id == draft.hostId,
                 testTag = "run-on-row",
             ) { onPickHost(h) }

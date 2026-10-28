@@ -1,9 +1,9 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import android.util.Log
 import org.json.JSONException
 import org.json.JSONObject
-import sh.roboco.android.composer.DEFAULT_HARNESS
+import sh.zeron.android.composer.DEFAULT_HARNESS
 
 /**
  * What a new session will be created with (android-ui-parity #92) — the
@@ -120,7 +120,7 @@ object NewSessionDraftJson : NewSessionDraftCodec {
 
     /** Content-free: never the JSON, never ids. */
     private fun reset(): NewSessionDraft {
-        Log.w("Roboco", "newSessionDraft unreadable; reset")
+        Log.w("Zeron", "newSessionDraft unreadable; reset")
         return NewSessionDraft()
     }
 }

@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Box
@@ -30,19 +30,19 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.FadingText
-import sh.roboco.android.design.Icon
-import sh.roboco.android.design.IconInBox
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.Motion
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.StatusGlyph
-import sh.roboco.android.design.StatusGlyphKind
-import sh.roboco.android.design.SymbolWeight
-import sh.roboco.android.design.rememberSmoothRoundedShape
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.FadingText
+import sh.zeron.android.design.Icon
+import sh.zeron.android.design.IconInBox
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.Motion
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.StatusGlyph
+import sh.zeron.android.design.StatusGlyphKind
+import sh.zeron.android.design.SymbolWeight
+import sh.zeron.android.design.rememberSmoothRoundedShape
+import sh.zeron.android.design.uiStyle
 
 /**
  * The text before the first hard line break — the single line UIKit's
@@ -65,7 +65,7 @@ private fun firstLine(s: String): String {
  *
  * [sectionHeaderFrames] converts every dp constant to px itself (the row
  * height and the two font sizes are the only values that scale with
- * [sh.roboco.android.design.TypeScale.factor]; all dp inputs here are
+ * [sh.zeron.android.design.TypeScale.factor]; all dp inputs here are
  * fixed points, converted by the caller with `dp.roundToPx()`).
  */
 @Immutable
@@ -189,7 +189,7 @@ fun SectionHeaderRow(
     highlight: () -> Float,
     modifier: Modifier = Modifier,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
     val density = LocalDensity.current
     val titleStyle = uiStyle(Face.SansSemibold, ts.scaled(13.5f), palette.secondary)
@@ -225,7 +225,7 @@ fun SectionHeaderRow(
                     .graphicsLayer { rotationZ = angle.value },
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(RobocoIcons.ChevronDown, palette.tertiary, SectionHeaderTokens.ChevronPt, SymbolWeight.Semibold)
+                Icon(ZeronIcons.ChevronDown, palette.tertiary, SectionHeaderTokens.ChevronPt, SymbolWeight.Semibold)
             }
         },
         modifier = modifier
@@ -310,7 +310,7 @@ fun SectionHeaderRow(
  */
 @Composable
 private fun SectionLiveGlyph(live: SectionLive, modifier: Modifier = Modifier) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     Box(modifier.size(12.dp)) {
         when (live) {
             SectionLive.Spinner -> StatusGlyph(StatusGlyphKind.Spinner)
@@ -321,7 +321,7 @@ private fun SectionLiveGlyph(live: SectionLive, modifier: Modifier = Modifier) {
             // `WifiOff` has the default opticalScale 1.0, SymbolWeight
             // Regular: ≈10.75 dp wide ink, stroke 0.75 dp — the same as
             // the web's 12 px icon.
-            SectionLive.Offline -> IconInBox(RobocoIcons.WifiOff, palette.tertiary, box = 12.dp)
+            SectionLive.Offline -> IconInBox(ZeronIcons.WifiOff, palette.tertiary, box = 12.dp)
         }
     }
 }

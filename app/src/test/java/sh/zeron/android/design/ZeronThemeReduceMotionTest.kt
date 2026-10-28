@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.ui.test.junit4.createComposeRule
 import org.junit.After
@@ -12,7 +12,7 @@ import org.robolectric.annotation.GraphicsMode
 
 /**
  * Ticket 04's wrap (added by 04, the second of tickets 01/04 to land):
- * `RobocoTheme` provides `LocalReduceMotion` without the caller wrapping
+ * `ZeronTheme` provides `LocalReduceMotion` without the caller wrapping
  * anything in `ProvideReduceMotion` itself — ticket 35's app root relies on
  * this. The debug override flips the local without recreating the
  * composition.
@@ -20,7 +20,7 @@ import org.robolectric.annotation.GraphicsMode
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36])
-class RobocoThemeReduceMotionTest {
+class ZeronThemeReduceMotionTest {
 
     @get:Rule
     val compose = createComposeRule()
@@ -31,10 +31,10 @@ class RobocoThemeReduceMotionTest {
     }
 
     @Test
-    fun robocoThemeProvidesLocalReduceMotion() {
+    fun zeronThemeProvidesLocalReduceMotion() {
         val observed = mutableListOf<Boolean>()
         compose.setContent {
-            RobocoTheme {
+            ZeronTheme {
                 // No ProvideReduceMotion here: the theme wraps content itself.
                 observed.add(LocalReduceMotion.current)
             }

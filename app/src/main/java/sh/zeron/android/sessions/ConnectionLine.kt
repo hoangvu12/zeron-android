@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import android.content.res.Configuration
 import androidx.compose.animation.core.Animatable
@@ -38,18 +38,18 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.FadingText
-import sh.roboco.android.design.LocalReduceMotion
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.Motion
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.StatusGlyph
-import sh.roboco.android.design.StatusGlyphKind
-import sh.roboco.android.design.rememberSmoothRoundedShape
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.FadingText
+import sh.zeron.android.design.LocalReduceMotion
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.Motion
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.StatusGlyph
+import sh.zeron.android.design.StatusGlyphKind
+import sh.zeron.android.design.rememberSmoothRoundedShape
+import sh.zeron.android.design.uiStyle
 
 /** The connection line's fixed geometry and pressed-fill constants (dp; the line height itself scales with k). */
 private object ConnectionLineTokens {
@@ -90,7 +90,7 @@ private object ConnectionLineTokens {
  * as "Reconnecting…" or "Studio — Session revoked". Tapping it opens
  * Settings (the Devices section lists the engines, ticket 102).
  *
- * The look is the Roboco desktop and web "connection line" — a bare
+ * The look is the Zeron desktop and web "connection line" — a bare
  * glyph and a quiet caption with **no surface and no border**
  * (`connection-pill.tsx:6-51`, `shell.rs:7110-7163`); the metrics are
  * this app's own (12 dp `StatusGlyph`s, Geist Medium 13, the list's
@@ -116,7 +116,7 @@ private object ConnectionLineTokens {
  */
 @Composable
 fun ConnectionLine(ui: ConnectionLineUi, onTap: () -> Unit, modifier: Modifier = Modifier) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
     val reduce = LocalReduceMotion.current
     val style = uiStyle(Face.SansMedium, ts.scaled(13f), palette.secondary)
@@ -255,11 +255,11 @@ fun LazyListScope.connectionLineItem(ui: ConnectionLineUi?, onTap: () -> Unit) {
 
 @Composable
 private fun ConnectionLinePreviewBody(appearance: Appearance) {
-    RobocoTheme(appearance) {
+    ZeronTheme(appearance) {
         // Frozen at 0 ns: the spinner rows render the cycle-0 pattern and
         // the preview never starts a frame loop.
         ProvideGlyphClock(frozenAtNanos = 0L) {
-            Column(Modifier.background(RobocoTheme.palette.background)) {
+            Column(Modifier.background(ZeronTheme.palette.background)) {
                 ConnectionLine(
                     ConnectionLineUi(listOf(ConnectionLineEntry(ConnectionGlyph.Spinner, "Reconnecting…"))),
                     onTap = {},

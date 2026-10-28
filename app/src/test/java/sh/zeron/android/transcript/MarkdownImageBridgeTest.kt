@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.content.Context
 import android.os.Looper
@@ -38,14 +38,14 @@ import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import org.robolectric.shadows.ShadowChoreographer
-import sh.roboco.android.core.TextEngine
-import sh.roboco.android.core.UniffiSandbox
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.transcript.widgets.ImageTile
-import sh.roboco.android.transcript.widgets.imageTileRadius
-import uniffi.roboco_core.DebugEntry
-import uniffi.roboco_core.WidgetKind
+import sh.zeron.android.core.TextEngine
+import sh.zeron.android.core.UniffiSandbox
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.transcript.widgets.ImageTile
+import sh.zeron.android.transcript.widgets.imageTileRadius
+import uniffi.zeron_core.DebugEntry
+import uniffi.zeron_core.WidgetKind
 
 /**
  * The Rust markdown-image layout crosses the Kotlin bridge (ticket 137;
@@ -85,7 +85,7 @@ class MarkdownImageBridgeTest {
     @Test
     @Config(sdk = [36], qualifiers = "w393dp-h852dp-xxhdpi")
     fun theRustImageLayoutCrossesTheBridge() {
-        assumeTrue("host core library missing", runCatching { uniffi.roboco_core.coreVersion() }.isSuccess)
+        assumeTrue("host core library missing", runCatching { uniffi.zeron_core.coreVersion() }.isSuccess)
         UniffiSandbox.claimCallbacks()
         // Build the shared engine off the main looper first, as the app does.
         runBlocking { TextEngine.await() }
@@ -134,8 +134,8 @@ class MarkdownImageBridgeTest {
             val side = widget.w.coerceAtLeast(0f)
             val height = widget.h.coerceAtLeast(0f)
             compose.setContent {
-                RobocoTheme(Appearance.Light) {
-                    Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+                ZeronTheme(Appearance.Light) {
+                    Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                         TileSlot(side, height, path, widget.payload ?: "Image", actions)
                     }
                 }

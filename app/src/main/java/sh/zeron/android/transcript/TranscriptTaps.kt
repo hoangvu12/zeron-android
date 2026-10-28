@@ -1,8 +1,8 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import androidx.compose.runtime.Immutable
-import uniffi.roboco_core.LinkHit
-import uniffi.roboco_core.Scroller
+import uniffi.zeron_core.LinkHit
+import uniffi.zeron_core.Scroller
 
 /**
  * The horizontal link slop, dp: `CGRect.insetBy(dx: -4, …)`

@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import kotlin.coroutines.ContinuationInterceptor
 import kotlin.coroutines.CoroutineContext
@@ -15,7 +15,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import uniffi.roboco_core.CoreException
+import uniffi.zeron_core.CoreException
 
 /**
  * [QuestionActions] — android-ui-parity #91's routing, pinned on the

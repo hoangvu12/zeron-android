@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -24,15 +24,15 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.GlassMenuHost
 import kotlin.math.abs
 
 /**
  * The chip goldens (android-ui-parity #59), recorded by
- * `./gradlew :app:recordRoborazziDebug --tests sh.roboco.android.composer.ChipStripScreenshotTest`
+ * `./gradlew :app:recordRoborazziDebug --tests sh.zeron.android.composer.ChipStripScreenshotTest`
  * and verified by `verifyRoborazziDebug`:
  *
  *  - the whole "Composer chips" gallery section in light and dark, on a
@@ -73,8 +73,8 @@ class ChipStripScreenshotTest {
 
     private fun sectionShot(appearance: Appearance, file: String) {
         compose.setContent {
-            RobocoTheme(appearance) {
-                Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+            ZeronTheme(appearance) {
+                Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                     ChipStripGallerySection()
                 }
             }
@@ -111,7 +111,7 @@ class ChipStripScreenshotTest {
     @Test
     fun prOpenAndUntintedFillsBlendOverWhiteExactly() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 GlassMenuHost(hazeState = rememberHazeState()) {
                     Box(Modifier.fillMaxSize().background(Color.White).padding(16.dp)) {
                         ChipStrip(chipFixturePrStrips()[0], emptyMap(), canWrite = true, onChipTap = {})

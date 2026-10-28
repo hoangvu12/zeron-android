@@ -1,4 +1,4 @@
-package sh.roboco.android.design.glass
+package sh.zeron.android.design.glass
 
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
@@ -9,10 +9,10 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.gallery.ScrollEdgeEngagedMode
-import sh.roboco.android.design.gallery.ScrollEdgeEffectFixture
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.gallery.ScrollEdgeEngagedMode
+import sh.zeron.android.design.gallery.ScrollEdgeEffectFixture
 
 /**
  * The scroll-edge effect goldens (ticket 09): the ticket's fixture — the
@@ -31,7 +31,7 @@ import sh.roboco.android.design.gallery.ScrollEdgeEffectFixture
  * are kept as-is — they still lock the geometry and the gradient — and the
  * blur itself is checked on an API 33+ emulator (the ticket's manual step
  * 1). Record with
- * `:app:recordRoborazziDebug --tests sh.roboco.android.design.glass.ScrollEdgeEffectScreenshotTest`.
+ * `:app:recordRoborazziDebug --tests sh.zeron.android.design.glass.ScrollEdgeEffectScreenshotTest`.
  */
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -43,7 +43,7 @@ class ScrollEdgeEffectScreenshotTest {
 
     private fun shot(appearance: Appearance, blur: Boolean, file: String) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 ScrollEdgeEffectFixture(
                     mode = ScrollEdgeEngagedMode.Always,
                     blur = blur,

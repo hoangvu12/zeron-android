@@ -1,4 +1,4 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -26,23 +26,23 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
-import sh.roboco.android.R
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.shell.SheetHost
-import sh.roboco.android.shell.rememberSheetHostState
-import uniffi.roboco_core.EngineRoomRef
-import uniffi.roboco_core.EngineTransport
-import uniffi.roboco_core.PairedEngine
-import uniffi.roboco_core.PairException
-import uniffi.roboco_core.PairingTarget
-import uniffi.roboco_core.RoomException
-import uniffi.roboco_core.RoomInviteTarget
-import uniffi.roboco_core.RoomJoinResult
-import uniffi.roboco_core.RoomMemberRecord
-import uniffi.roboco_core.RoomRecord
+import sh.zeron.android.R
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.shell.SheetHost
+import sh.zeron.android.shell.rememberSheetHostState
+import uniffi.zeron_core.EngineRoomRef
+import uniffi.zeron_core.EngineTransport
+import uniffi.zeron_core.PairedEngine
+import uniffi.zeron_core.PairException
+import uniffi.zeron_core.PairingTarget
+import uniffi.zeron_core.RoomException
+import uniffi.zeron_core.RoomInviteTarget
+import uniffi.zeron_core.RoomJoinResult
+import uniffi.zeron_core.RoomMemberRecord
+import uniffi.zeron_core.RoomRecord
 
 /**
  * The "Pair page" page of the debug design gallery (android-ui-parity
@@ -84,7 +84,7 @@ fun PairPageGallerySection() {
 
 @Composable
 private fun PairPageGalleryBody(sink: GalleryPairingSink) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val pairPage = LocalPairPage.current
     var fixtureIndex by remember { mutableIntStateOf(0) }
@@ -136,7 +136,7 @@ private fun PairPageStaticFrame(fixture: PairGalleryFixture, modifier: Modifier 
     Box(
         modifier
             .requiredSize(393.dp, 852.dp)
-            .background(RobocoTheme.palette.background),
+            .background(ZeronTheme.palette.background),
     ) {
         PairPageContent(
             text = field,
@@ -155,7 +155,7 @@ private fun PairPageStaticFrame(fixture: PairGalleryFixture, modifier: Modifier 
 /** One toggle: SemiBold `text` when selected, Regular `secondary` when not. */
 @Composable
 private fun GalleryToggle(label: String, selected: Boolean, onSelect: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     BasicText(
         label,
@@ -257,7 +257,7 @@ private object GalleryPairingBackend : PairingBackend {
         val parsed = parse(url)
         return PairedEngine(
             engineId = "gallery-engine",
-            baseUrl = parsed?.baseUrl ?: "http://engine.roboco.gallery",
+            baseUrl = parsed?.baseUrl ?: "http://engine.zeron.gallery",
             credential = "gallery-credential",
             sessionId = "s1",
             label = "Gallery engine",
@@ -270,7 +270,7 @@ private object GalleryPairingBackend : PairingBackend {
     override suspend fun forget(engineId: String) {}
 
     override fun parseRoom(input: String): RoomInviteTarget? =
-        if (input.trim().startsWith("roboco-room:")) {
+        if (input.trim().startsWith("zeron-room:")) {
             RoomInviteTarget(name = "Gallery room", memberLabels = listOf("desktop", "server"))
         } else {
             null
@@ -284,7 +284,7 @@ private object GalleryPairingBackend : PairingBackend {
             label = "Gallery room",
             secret = "gallery-secret",
             members = listOf(
-                RoomMemberRecord(label = "desktop", address = "http://engine.roboco.gallery"),
+                RoomMemberRecord(label = "desktop", address = "http://engine.zeron.gallery"),
                 RoomMemberRecord(label = "server", address = "tcgalleryaddress"),
             ),
         )
@@ -293,7 +293,7 @@ private object GalleryPairingBackend : PairingBackend {
             engines = listOf(
                 PairedEngine(
                     engineId = "gallery-room-desktop",
-                    baseUrl = "http://engine.roboco.gallery",
+                    baseUrl = "http://engine.zeron.gallery",
                     credential = "gallery-credential",
                     sessionId = "s1",
                     label = "Gallery engine",

@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import android.graphics.Bitmap
 import android.graphics.Canvas

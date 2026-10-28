@@ -1,4 +1,4 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -49,22 +49,22 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.Cue
-import sh.roboco.android.design.Feedback
-import sh.roboco.android.design.Haptic
-import sh.roboco.android.design.LocalFeedback
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.BusySpinnerTag
-import sh.roboco.android.shell.SheetHost
-import sh.roboco.android.shell.SheetHostState
-import sh.roboco.android.shell.SheetStyle
-import uniffi.roboco_core.PairException
-import uniffi.roboco_core.PairedEngine
-import uniffi.roboco_core.RoomInviteTarget
-import uniffi.roboco_core.RoomJoinResult
-import uniffi.roboco_core.RoomRecord
-import uniffi.roboco_core.PairingTarget
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.Cue
+import sh.zeron.android.design.Feedback
+import sh.zeron.android.design.Haptic
+import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.BusySpinnerTag
+import sh.zeron.android.shell.SheetHost
+import sh.zeron.android.shell.SheetHostState
+import sh.zeron.android.shell.SheetStyle
+import uniffi.zeron_core.PairException
+import uniffi.zeron_core.PairedEngine
+import uniffi.zeron_core.RoomInviteTarget
+import uniffi.zeron_core.RoomJoinResult
+import uniffi.zeron_core.RoomRecord
+import uniffi.zeron_core.PairingTarget
 
 /**
  * The Pair page's Compose behaviour (android-ui-parity #72) — Robolectric
@@ -148,13 +148,13 @@ class PairPageTest {
         )
         model = pageModel
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(LocalFeedback provides feedback) {
                     SheetHost(state) {
                         Box(
                             Modifier
                                 .fillMaxSize()
-                                .background(RobocoTheme.palette.background)
+                                .background(ZeronTheme.palette.background)
                                 .testTag("behind"),
                         )
                     }
@@ -240,7 +240,7 @@ class PairPageTest {
     @Test
     fun aTailcatInviteShowsItsExpiryAndNoCleartextNote() {
         hostPage()
-        compose.onNodeWithTag("pair-url").performTextInput("roboco-tailcat:abc")
+        compose.onNodeWithTag("pair-url").performTextInput("zeron-tailcat:abc")
         awaitTag("pair-target")
         compose.onNodeWithText("Engine over Tailcat \u00B7 invite expires in 5 min").assertExists()
         compose.onNodeWithTag("pair-cleartext").assertDoesNotExist()
@@ -250,7 +250,7 @@ class PairPageTest {
     fun theBusyCapsuleSaysConnectingThroughTailcatForAnInvite() {
         val gate = CompletableDeferred<PairedEngine>()
         backend.pairImpl = { _, _ -> gate.await() }
-        hostPage(prefill = "roboco-tailcat:abc")
+        hostPage(prefill = "zeron-tailcat:abc")
         awaitTag("pair-target")
 
         compose.mainClock.autoAdvance = false
@@ -444,7 +444,7 @@ class PairPageTest {
     @Test
     fun aTailcatFailureShowsItsReasonBehindADetailsToggle() {
         backend.pairImpl = { _, _ -> throw PairException.TailcatUnreachable("invalid Tailcat address") }
-        hostPage(prefill = "roboco-tailcat:abc")
+        hostPage(prefill = "zeron-tailcat:abc")
         compose.onNodeWithTag("pair-submit").performClick()
         compose.waitForIdle()
 
@@ -515,7 +515,7 @@ class PairPageTest {
         // kinds — the substring pins it so the footer cannot silently
         // drop one.
         val hint = compose.onNodeWithText(
-            "Paste a pairing link, a roboco-tailcat: invite, or a roboco-room: room invite",
+            "Paste a pairing link, a zeron-tailcat: invite, or a zeron-room: room invite",
             substring = true,
         )
             .getBoundsInRoot()
@@ -628,7 +628,7 @@ class PairPageTest {
  */
 internal fun StandInParse(input: String): PairingTarget? {
     // android-next#02: a Tailcat invite, valid for five more minutes.
-    if (input.trim().startsWith("roboco-tailcat:")) {
+    if (input.trim().startsWith("zeron-tailcat:")) {
         return PairingTarget(
             baseUrl = "tailcat:3f9a12bc",
             host = "Tailcat",

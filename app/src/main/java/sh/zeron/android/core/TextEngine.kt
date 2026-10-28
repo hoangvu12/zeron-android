@@ -1,4 +1,4 @@
-package sh.roboco.android.core
+package sh.zeron.android.core
 
 import android.content.Context
 import android.os.Looper
@@ -6,15 +6,15 @@ import android.util.Log
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import sh.roboco.android.BuildConfig
-import uniffi.roboco_core.TextSystem
+import sh.zeron.android.BuildConfig
+import uniffi.zeron_core.TextSystem
 
 /**
  * The one process-wide [TextSystem] every transcript shares
  * (`TextEngine.shared`, `Fonts.swift:113-116`). Registered faces + the
  * [AndroidMeasurer] fallback, built lazily off the main thread: reading
  * 1.6 MB of assets, enumerating system fonts and copying the bytes across
- * JNA would stall first-frame rendering, so `RobocoApplication` calls
+ * JNA would stall first-frame rendering, so `ZeronApplication` calls
  * [prewarm] right after the font gate and consumers await through
  * [await] (ticket 61: `TranscriptView(TextEngine.await(), listener)`).
  *
@@ -23,7 +23,7 @@ import uniffi.roboco_core.TextSystem
  */
 object TextEngine {
 
-    private const val TAG = "Roboco"
+    private const val TAG = "Zeron"
 
     private val lock = Any()
 
@@ -42,13 +42,13 @@ object TextEngine {
     var builtOnMain: Boolean = false
         private set
 
-    /** Stores the application context; first call in `RobocoApplication.onCreate`. */
+    /** Stores the application context; first call in `ZeronApplication.onCreate`. */
     fun init(context: Context) {
         appContext = context.applicationContext
     }
 
     /**
-     * Starts one daemon thread (`roboco-text-engine`) that reads [shared],
+     * Starts one daemon thread (`zeron-text-engine`) that reads [shared],
      * so the main thread never builds it. Idempotent, and does nothing
      * when the startup font gate failed (release builds show the fatal
      * screen instead of the app).
@@ -71,7 +71,7 @@ object TextEngine {
                     if (BuildConfig.DEBUG) throw failure
                 }
             },
-            "roboco-text-engine",
+            "zeron-text-engine",
         ).apply {
             isDaemon = true
             start()

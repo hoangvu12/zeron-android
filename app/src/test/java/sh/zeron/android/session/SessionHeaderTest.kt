@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -49,8 +49,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * [SessionHeader]'s rendering and behaviour (android-ui-parity #52):
@@ -91,7 +91,7 @@ class SessionHeaderTest {
      */
     private fun host(
         title: String = SessionHeaderReferenceTitle,
-        subtitle: String = "roboco @ MacBook Pro",
+        subtitle: String = "zeron @ MacBook Pro",
         showBack: Boolean = true,
         engaged: Boolean = false,
         statusBarTop: Dp = 24.dp,
@@ -101,8 +101,8 @@ class SessionHeaderTest {
         behind: (@Composable () -> Unit)? = null,
     ) {
         compose.setContent {
-            RobocoTheme(appearance) {
-                Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+            ZeronTheme(appearance) {
+                Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                     if (behind != null) behind()
                     SessionHeader(
                         title = title,
@@ -255,14 +255,14 @@ class SessionHeaderTest {
         compose.setContent {
             val base = LocalDensity.current
             CompositionLocalProvider(LocalDensity provides Density(base.density, hostFontScale)) {
-                RobocoTheme(hostAppearance) {
+                ZeronTheme(hostAppearance) {
                     val width = hostWidth
                     val box = if (width != null) Modifier.width(width) else Modifier
-                    Box(box.fillMaxSize().background(RobocoTheme.palette.background)) {
+                    Box(box.fillMaxSize().background(ZeronTheme.palette.background)) {
                         if (behind != null) behind()
                         SessionHeader(
                             title = SessionHeaderReferenceTitle,
-                            subtitle = "roboco @ MacBook Pro",
+                            subtitle = "zeron @ MacBook Pro",
                             edgeEngaged = hostEngaged,
                             onMore = {},
                             showBack = true,
@@ -500,7 +500,7 @@ class SessionHeaderTest {
         val title = compose.onNodeWithTag("session-title").fetchSemanticsNode()
         assertTrue("the title is not a heading", title.config.contains(SemanticsProperties.Heading))
         compose.onNodeWithTag("session-title").assert(hasText("First\nsecond"))
-        compose.onNodeWithTag("session-subtitle").assert(hasText("roboco @ MacBook Pro"))
+        compose.onNodeWithTag("session-subtitle").assert(hasText("zeron @ MacBook Pro"))
         // UIKit's default labels: "Back" for the system back button, "More"
         // for the ellipsis bar button. Traversal within the group is tree
         // order: Back, title, subtitle, More, then the content outside.
@@ -515,11 +515,11 @@ class SessionHeaderTest {
         compose.mainClock.autoAdvance = false
         var title by mutableStateOf("Fix login")
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.fillMaxSize().background(background)) {
                     SessionHeader(
                         title = title,
-                        subtitle = "roboco @ MacBook Pro",
+                        subtitle = "zeron @ MacBook Pro",
                         edgeEngaged = false,
                         onMore = {},
                         showBack = true,
@@ -552,11 +552,11 @@ class SessionHeaderTest {
     fun rtlMirrorsTheCirclesAndFadesTheTitleOnItsLeft() {
         compose.setContent {
             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                RobocoTheme(Appearance.Light) {
+                ZeronTheme(Appearance.Light) {
                     Box(Modifier.fillMaxSize().background(background)) {
                         SessionHeader(
                             title = SessionHeaderReferenceTitle,
-                            subtitle = "roboco @ MacBook Pro",
+                            subtitle = "zeron @ MacBook Pro",
                             edgeEngaged = false,
                             onMore = {},
                             showBack = true,

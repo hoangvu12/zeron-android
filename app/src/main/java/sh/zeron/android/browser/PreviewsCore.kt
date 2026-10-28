@@ -1,11 +1,11 @@
-package sh.roboco.android.browser
+package sh.zeron.android.browser
 
-import uniffi.roboco_core.CoreClient
-import uniffi.roboco_core.CoreException
-import uniffi.roboco_core.PreviewPanel
-import uniffi.roboco_core.PreviewPanelListener
-import uniffi.roboco_core.PreviewPanelState
-import uniffi.roboco_core.PreviewProxyStatus
+import uniffi.zeron_core.CoreClient
+import uniffi.zeron_core.CoreException
+import uniffi.zeron_core.PreviewPanel
+import uniffi.zeron_core.PreviewPanelListener
+import uniffi.zeron_core.PreviewPanelState
+import uniffi.zeron_core.PreviewProxyStatus
 
 /**
  * The preview FFI seam of the agent-previews phone half (ticket 05) — the

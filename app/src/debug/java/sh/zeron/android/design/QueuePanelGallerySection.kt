@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,13 +21,13 @@ import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
-import sh.roboco.android.composer.QueueAction
-import sh.roboco.android.composer.QueuePanel
-import sh.roboco.android.composer.QueuePanelFixtures
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.glass.ProvideHazeState
-import sh.roboco.android.session.SessionChrome
+import sh.zeron.android.composer.QueueAction
+import sh.zeron.android.composer.QueuePanel
+import sh.zeron.android.composer.QueuePanelFixtures
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.glass.ProvideHazeState
+import sh.zeron.android.session.SessionChrome
 
 /**
  * The "Queue panel" page of the debug design gallery (android-ui-parity
@@ -58,7 +58,7 @@ import sh.roboco.android.session.SessionChrome
  * the ⋯ menu panels blur, and each stage's backdrop is a second source
  * of the same state so the cards themselves blur the stripes.
  *
- * Try it live (`adb shell am start -n sh.roboco.android/.MainActivity
+ * Try it live (`adb shell am start -n sh.zeron.android/.MainActivity
  * --es route gallery --es section queue_panel`): tap ⋯ on row 0 (Move Up
  * is greyed), pick Remove, then Add long row and watch the second row's
  * label fade at its tail with both ⋯ buttons still on the card.
@@ -70,14 +70,14 @@ fun QueuePanelGallerySection() {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             QueueGalleryCaption(
                 "Queue panel",
-                uiStyle(Face.SansSemibold, LocalTypeScale.current.fixed(17f), RobocoTheme.palette.text),
+                uiStyle(Face.SansSemibold, LocalTypeScale.current.fixed(17f), ZeronTheme.palette.text),
             )
             QueueGalleryCaption(
                 "Messages waiting for the turn to end, above the composer: one glass " +
                     "card, at most three rows, a +N more queued footer, a send-now button " +
                     "and a ⋯ menu (Edit / Move Up / Move Down / Remove). Long rows fade " +
                     "at the tail, never ellipsize.",
-                uiStyle(Face.Sans, LocalTypeScale.current.fixed(13f), RobocoTheme.palette.secondary),
+                uiStyle(Face.Sans, LocalTypeScale.current.fixed(13f), ZeronTheme.palette.secondary),
             )
             QueueFixtureStage("F1 — one row (48 dp card)", QueuePanelFixtures.F1, 96.dp, hazeState)
             QueueFixtureStage("F3 — three rows (128 dp card)", QueuePanelFixtures.F3, 176.dp, hazeState)
@@ -97,7 +97,7 @@ private fun QueueFixtureStage(
     hazeState: HazeState,
 ) {
     val typeScale = LocalTypeScale.current
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     QueueGalleryCaption(caption, uiStyle(Face.SansMedium, typeScale.fixed(12f), palette.tertiary))
     GlassStage(
         modifier = Modifier.width(378.dp),
@@ -123,7 +123,7 @@ private fun QueueFixtureStage(
 @Composable
 private fun QueueLiveDemo(hazeState: HazeState) {
     val typeScale = LocalTypeScale.current
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val toaster = LocalToaster.current
 
     var items by remember { mutableStateOf(QueuePanelFixtures.F3) }
@@ -214,7 +214,7 @@ private fun QueueGalleryCaption(text: String, style: TextStyle) {
 @Composable
 private fun QueueGalleryChip(text: String, onClick: () -> Unit) {
     val typeScale = LocalTypeScale.current
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     BasicText(
         text,
         style = uiStyle(Face.SansMedium, typeScale.fixed(14f), palette.accent),

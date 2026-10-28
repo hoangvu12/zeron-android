@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

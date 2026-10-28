@@ -1,4 +1,4 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import android.content.ClipboardManager
 import android.content.Context
@@ -75,30 +75,30 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
-import sh.roboco.android.R
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.GroupedAccessory
-import sh.roboco.android.design.GroupedFooter
-import sh.roboco.android.design.GroupedHeader
-import sh.roboco.android.design.GroupedListTokens
-import sh.roboco.android.design.GroupedPosition
-import sh.roboco.android.design.GroupedRow
-import sh.roboco.android.design.GroupedRowContainer
-import sh.roboco.android.design.Haptic
-import sh.roboco.android.design.LocalFeedback
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.ProminentGlassButton
-import sh.roboco.android.design.glass.ProminentGlassButtonDefaults
-import sh.roboco.android.design.settingsTag
-import sh.roboco.android.design.sheet.SheetHeaderRow
-import sh.roboco.android.design.sheet.SheetLeading
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.shell.PageSheetScope
-import uniffi.roboco_core.PairingTarget
-import uniffi.roboco_core.RoomInviteTarget
+import sh.zeron.android.R
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.GroupedAccessory
+import sh.zeron.android.design.GroupedFooter
+import sh.zeron.android.design.GroupedHeader
+import sh.zeron.android.design.GroupedListTokens
+import sh.zeron.android.design.GroupedPosition
+import sh.zeron.android.design.GroupedRow
+import sh.zeron.android.design.GroupedRowContainer
+import sh.zeron.android.design.Haptic
+import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.ProminentGlassButton
+import sh.zeron.android.design.glass.ProminentGlassButtonDefaults
+import sh.zeron.android.design.settingsTag
+import sh.zeron.android.design.sheet.SheetHeaderRow
+import sh.zeron.android.design.sheet.SheetLeading
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.shell.PageSheetScope
+import uniffi.zeron_core.PairingTarget
+import uniffi.zeron_core.RoomInviteTarget
 import kotlinx.coroutines.delay
 
 /**
@@ -194,7 +194,7 @@ internal fun PairPage(
 
     // The live parse of the trimmed field. `mapLatest` cancels the
     // previous parse on every keystroke; a blank field maps to null
-    // without a parse. A `roboco-room:` invite parses to the room target
+    // without a parse. A `zeron-room:` invite parses to the room target
     // (ticket 04) — never both: the room parser refuses anything the
     // engine parser accepts, and vice versa.
     LaunchedEffect(model) {
@@ -297,7 +297,7 @@ internal fun rememberClipboardHasText(clipboard: PairClipboard): State<Boolean> 
  * footers and the error line) and the full-width "Pair engine" capsule
  * (08) outside the scroll, 24 dp from the sides and 24 dp above
  * `max(ime, navigationBars)`. State is injected; the previews, the
- * gallery and the goldens compose it directly. A `roboco-room:` invite
+ * gallery and the goldens compose it directly. A `zeron-room:` invite
  * (ticket 04) swaps the target line for the room line and the capsule
  * for "Join room" — the field is the same one paste/scan fill.
  */
@@ -315,7 +315,7 @@ fun PairPageContent(
     onSubmit: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     Column(modifier.fillMaxSize().testTag("pair-page")) {
         SheetHeaderRow(
             title = stringResource(R.string.pair_title),
@@ -341,7 +341,7 @@ fun PairPageContent(
                 GroupedRow(
                     title = stringResource(R.string.pair_scan),
                     position = GroupedPosition.Last,
-                    icon = RobocoIcons.Camera,
+                    icon = ZeronIcons.Camera,
                     accessories = listOf(GroupedAccessory.Disclosure),
                     testTag = settingsTag("pair-scan"),
                     onClick = onScan,
@@ -447,7 +447,7 @@ private fun PairErrorLine(message: PairMessage) {
         is PairMessage.Verbatim -> message.text
     }
     val detail = (message as? PairMessage.Res)?.detail
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Column(Modifier.fillMaxWidth().padding(start = 32.dp, end = 32.dp, top = 12.dp)) {
         BasicText(
@@ -523,7 +523,7 @@ private fun RowScope.PairLinkField(
     showPaste: Boolean,
     onSubmit: () -> Unit,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     BasicTextField(
         state = text,
@@ -534,7 +534,7 @@ private fun RowScope.PairLinkField(
             .testTag("pair-url"),
         textStyle = uiStyle(Face.Sans, typeScale.fixed(16f), palette.text),
         // The caret and the handles; the selection wash comes from
-        // RobocoTheme's LocalTextSelectionColors.
+        // ZeronTheme's LocalTextSelectionColors.
         cursorBrush = SolidColor(palette.accent),
         lineLimits = TextFieldLineLimits.SingleLine,
         inputTransformation = StripLineBreaks,
@@ -571,7 +571,7 @@ private fun RowScope.PairLinkField(
  */
 @Composable
 private fun PairPasteBox(onPaste: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val source = remember { MutableInteractionSource() }
     val pressed by source.collectIsPressedAsState()
@@ -661,8 +661,8 @@ private val PairPagePreviewError = PairPagePreviewHttp.copy(
 @Composable
 private fun PairPagePreviewBody(appearance: Appearance, state: PairPagePreview) {
     val field = remember { TextFieldState(state.text) }
-    RobocoTheme(appearance) {
-        Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+    ZeronTheme(appearance) {
+        Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
             PairPageContent(
                 text = field,
                 target = state.target,
@@ -715,9 +715,9 @@ private fun PairPageHttpsDarkPreview() {
     PairPagePreviewBody(Appearance.Dark, PairPagePreviewHttps)
 }
 
-/** Ticket 04: a `roboco-room:` invite parsed — the room line + capsule. */
+/** Ticket 04: a `zeron-room:` invite parsed — the room line + capsule. */
 private val PairPagePreviewRoom = PairPagePreview(
-    text = "roboco-room:eyJ2IjoxLCJuYW1lIjoiSG9tZSBmbGVldCIsInNlY3JldCI6ImV4YW1wbGUiLCJtZW1iZXJzIjpbXX0",
+    text = "zeron-room:eyJ2IjoxLCJuYW1lIjoiSG9tZSBmbGVldCIsInNlY3JldCI6ImV4YW1wbGUiLCJtZW1iZXJzIjpbXX0",
     target = null,
     phase = PairPhase.Idle,
     showPaste = false,

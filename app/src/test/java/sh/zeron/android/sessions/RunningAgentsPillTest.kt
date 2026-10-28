@@ -1,11 +1,11 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
-import sh.roboco.android.core.Face
-import uniffi.roboco_core.ChatIndicator
-import uniffi.roboco_core.SessionRow
+import sh.zeron.android.core.Face
+import uniffi.zeron_core.ChatIndicator
+import uniffi.zeron_core.SessionRow
 
 /**
  * The sessions list's "● N" pill (android-next #06, upstream #899's

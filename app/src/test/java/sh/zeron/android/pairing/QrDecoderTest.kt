@@ -1,4 +1,4 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType

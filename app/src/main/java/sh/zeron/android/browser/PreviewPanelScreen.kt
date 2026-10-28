@@ -1,4 +1,4 @@
-package sh.roboco.android.browser
+package sh.zeron.android.browser
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -21,23 +21,23 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import sh.roboco.android.RobocoApplication
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.GroupedAccessory
-import sh.roboco.android.design.GroupedFooter
-import sh.roboco.android.design.GroupedPosition
-import sh.roboco.android.design.GroupedRow
-import sh.roboco.android.design.GroupedRowContainer
-import sh.roboco.android.design.LocalBottomChrome
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.groupedSection
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.shell.LargeTitleScaffold
-import sh.roboco.android.shell.LocalNavStack
-import uniffi.roboco_core.PreviewPanelPhase
-import uniffi.roboco_core.PreviewPanelState
-import uniffi.roboco_core.PreviewServiceRow
+import sh.zeron.android.ZeronApplication
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.GroupedAccessory
+import sh.zeron.android.design.GroupedFooter
+import sh.zeron.android.design.GroupedPosition
+import sh.zeron.android.design.GroupedRow
+import sh.zeron.android.design.GroupedRowContainer
+import sh.zeron.android.design.LocalBottomChrome
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.groupedSection
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.shell.LargeTitleScaffold
+import sh.zeron.android.shell.LocalNavStack
+import uniffi.zeron_core.PreviewPanelPhase
+import uniffi.zeron_core.PreviewPanelState
+import uniffi.zeron_core.PreviewServiceRow
 
 /**
  * The preview panel page's test tags (ticket 22's rule: the tags live with
@@ -79,7 +79,7 @@ fun PreviewPanelScreen(
     /** The Open action; the default pushes the browser entry on this stack. */
     onOpen: ((PreviewServiceRow) -> Unit)? = null,
 ) {
-    val app = LocalContext.current.applicationContext as? RobocoApplication
+    val app = LocalContext.current.applicationContext as? ZeronApplication
     val effectiveCore = core ?: remember(app) {
         app?.let { CorePreviewsCore(client = { it.clientOrNull() }) }
     }
@@ -161,7 +161,7 @@ fun PreviewPanelScreen(
 /** One centered note row over the grouped-card idiom (`AccountsStatusRow`). */
 private fun androidx.compose.foundation.lazy.LazyListScope.noteRow(text: String, tag: String) {
     item(key = tag, contentType = "grouped-row") {
-        val palette = RobocoTheme.palette
+        val palette = ZeronTheme.palette
         val typeScale = LocalTypeScale.current
         GroupedRowContainer(
             position = GroupedPosition.Single,

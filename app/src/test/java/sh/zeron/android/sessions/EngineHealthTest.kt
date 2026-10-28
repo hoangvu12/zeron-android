@@ -1,14 +1,14 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import uniffi.roboco_core.Connectivity
-import uniffi.roboco_core.ConnectivityState
-import uniffi.roboco_core.EngineState
-import uniffi.roboco_core.EngineView
-import uniffi.roboco_core.ParkReason
+import uniffi.zeron_core.Connectivity
+import uniffi.zeron_core.ConnectivityState
+import uniffi.zeron_core.EngineState
+import uniffi.zeron_core.EngineView
+import uniffi.zeron_core.ParkReason
 
 /**
  * [EngineHealth.compute] (android-ui-parity #50) — the Spec's steps 1–6:
@@ -189,8 +189,8 @@ class EngineHealthTest {
         )
         // The INCOMPATIBLE sentence: 06 fills it verbatim (trimmed).
         assertEquals(
-            ConnectionGlyph.DangerDot to "E needs a newer Roboco app. Update the app to connect.",
-            label(EngineState.Parked(ParkReason.INCOMPATIBLE), "  E needs a newer Roboco app. Update the app to connect.  "),
+            ConnectionGlyph.DangerDot to "E needs a newer Zeron app. Update the app to connect.",
+            label(EngineState.Parked(ParkReason.INCOMPATIBLE), "  E needs a newer Zeron app. Update the app to connect.  "),
         )
     }
 
@@ -224,10 +224,10 @@ class EngineHealthTest {
     @Test
     fun aLabelAlreadyStartingWithTheNameGetsNoPrefix() {
         assertEquals(
-            "MacBook Pro needs a newer Roboco app. Update the app to connect.",
+            "MacBook Pro needs a newer Zeron app. Update the app to connect.",
             EngineHealth.caption(
                 "MacBook Pro",
-                "MacBook Pro needs a newer Roboco app. Update the app to connect.",
+                "MacBook Pro needs a newer Zeron app. Update the app to connect.",
                 2,
             ),
         )
@@ -272,7 +272,7 @@ class EngineHealthTest {
             listOf(
                 ConnectionLineEntry(
                     ConnectionGlyph.DangerDot,
-                    "MacBook Pro needs a newer Roboco app. Update the app to connect.",
+                    "MacBook Pro needs a newer Zeron app. Update the app to connect.",
                 ),
             ),
             gracedCompute(
@@ -281,7 +281,7 @@ class EngineHealthTest {
                         "mbp",
                         "MacBook Pro",
                         EngineState.Parked(ParkReason.INCOMPATIBLE),
-                        lastError = "MacBook Pro needs a newer Roboco app. Update the app to connect.",
+                        lastError = "MacBook Pro needs a newer Zeron app. Update the app to connect.",
                     ),
                 ),
             ).line!!.entries,

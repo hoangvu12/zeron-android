@@ -1,4 +1,4 @@
-package sh.roboco.android.core
+package sh.zeron.android.core
 
 import java.util.Locale
 import org.junit.Assert.assertEquals

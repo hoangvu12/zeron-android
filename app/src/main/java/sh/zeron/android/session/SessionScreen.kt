@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
@@ -20,44 +20,44 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.RobocoApplication
-import sh.roboco.android.composer.QuestionActions
-import sh.roboco.android.composer.DeliveryMode
-import sh.roboco.android.composer.QuestionPort
-import sh.roboco.android.composer.SessionQuestionsSlot
-import sh.roboco.android.composer.rememberQuestionPanelState
-import sh.roboco.android.composer.SessionChipMenus
-import sh.roboco.android.composer.rememberChipMenuPlatform
-import sh.roboco.android.image.ImageViewerRequest
-import sh.roboco.android.image.LocalImageViewer
-import sh.roboco.android.composer.QueueAction
-import sh.roboco.android.composer.QueueActions
-import sh.roboco.android.composer.DraftKey
-import sh.roboco.android.composer.LocalDrafts
-import sh.roboco.android.composer.QueueEditPort
-import sh.roboco.android.composer.QueuePanel
-import sh.roboco.android.pairing.LocalPairPage
-import sh.roboco.android.composer.SessionDraftEffect
-import sh.roboco.android.composer.sessionDraftSaver
-import sh.roboco.android.shell.LocalNavEntry
-import sh.roboco.android.shell.LocalNavStack
-import sh.roboco.android.shell.NavEntryEffect
-import sh.roboco.android.shell.NavKind
-import sh.roboco.android.transcript.AttachmentReader
-import sh.roboco.android.transcript.LocalTranscriptTapGate
-import sh.roboco.android.transcript.TranscriptActions
-import sh.roboco.android.transcript.TranscriptHost
-import sh.roboco.android.transcript.TranscriptImageBinding
-import sh.roboco.android.transcript.TranscriptImageLoader
-import sh.roboco.android.transcript.TranscriptState
-import sh.roboco.android.transcript.TranscriptTapGate
-import sh.roboco.android.transcript.engineReconnects
-import sh.roboco.android.transcript.firstUserBubbleInRoot
-import sh.roboco.android.transcript.rememberLinkRouter
-import sh.roboco.android.transcript.transcriptBottomInset
-import sh.roboco.android.transcript.widgets.imageTileRadius
-import sh.roboco.android.accounts.SessionAccountUsage
-import sh.roboco.android.design.LocalToaster
+import sh.zeron.android.ZeronApplication
+import sh.zeron.android.composer.QuestionActions
+import sh.zeron.android.composer.DeliveryMode
+import sh.zeron.android.composer.QuestionPort
+import sh.zeron.android.composer.SessionQuestionsSlot
+import sh.zeron.android.composer.rememberQuestionPanelState
+import sh.zeron.android.composer.SessionChipMenus
+import sh.zeron.android.composer.rememberChipMenuPlatform
+import sh.zeron.android.image.ImageViewerRequest
+import sh.zeron.android.image.LocalImageViewer
+import sh.zeron.android.composer.QueueAction
+import sh.zeron.android.composer.QueueActions
+import sh.zeron.android.composer.DraftKey
+import sh.zeron.android.composer.LocalDrafts
+import sh.zeron.android.composer.QueueEditPort
+import sh.zeron.android.composer.QueuePanel
+import sh.zeron.android.pairing.LocalPairPage
+import sh.zeron.android.composer.SessionDraftEffect
+import sh.zeron.android.composer.sessionDraftSaver
+import sh.zeron.android.shell.LocalNavEntry
+import sh.zeron.android.shell.LocalNavStack
+import sh.zeron.android.shell.NavEntryEffect
+import sh.zeron.android.shell.NavKind
+import sh.zeron.android.transcript.AttachmentReader
+import sh.zeron.android.transcript.LocalTranscriptTapGate
+import sh.zeron.android.transcript.TranscriptActions
+import sh.zeron.android.transcript.TranscriptHost
+import sh.zeron.android.transcript.TranscriptImageBinding
+import sh.zeron.android.transcript.TranscriptImageLoader
+import sh.zeron.android.transcript.TranscriptState
+import sh.zeron.android.transcript.TranscriptTapGate
+import sh.zeron.android.transcript.engineReconnects
+import sh.zeron.android.transcript.firstUserBubbleInRoot
+import sh.zeron.android.transcript.rememberLinkRouter
+import sh.zeron.android.transcript.transcriptBottomInset
+import sh.zeron.android.transcript.widgets.imageTileRadius
+import sh.zeron.android.accounts.SessionAccountUsage
+import sh.zeron.android.design.LocalToaster
 
 /**
  * The Session screen (android-ui-parity #75) — the composition that stacks
@@ -235,7 +235,7 @@ fun SessionScreen(
     //    through its own router: http(s) links open a Custom Tab, image
     //    chips load the full image and open the viewer from the row's
     //    bounds, other schemes go to the system, and the iOS no-op
-    //    links (roboco-file:, file:, drive paths, scheme-less paths —
+    //    links (zeron-file:, file:, drive paths, scheme-less paths —
     //    decision TRANSCRIPT-D4) stay no-ops. 81 and 127 replace their
     //    own defaults here later.
     val viewer = LocalImageViewer.current
@@ -286,7 +286,7 @@ fun SessionScreen(
         { action: String ->
             if (action == "sign-in" && actionStack.top.id == actionEntry.id) {
                 actionStack.push(
-                    sh.roboco.android.accounts.errorCardLogInRoute(
+                    sh.zeron.android.accounts.errorCardLogInRoute(
                         hostDeviceId = controller.hostDeviceId,
                         harness = controller.harness,
                         limited = controller.chrome.value.limited != null,
@@ -447,7 +447,7 @@ fun SessionScreen(
     //     port (tests, previews, a fake core) the questions slot stays
     //     empty, exactly like the composer without commands.
     val app = LocalContext.current.applicationContext
-    val questionActions = if (questionPort != null && app is RobocoApplication) {
+    val questionActions = if (questionPort != null && app is ZeronApplication) {
         remember(questionPort) { QuestionActions(questionPort, app.appScope) }
     } else {
         null
@@ -472,7 +472,7 @@ fun SessionScreen(
     //     nav stack and the app toaster live.
     // Wave-10 38: the tabbed model picker the model chip opens (hosted
     // over the screen below, with the side-chats overlay).
-    val modelPicker = remember(controller) { sh.roboco.android.composer.ModelPickerController() }
+    val modelPicker = remember(controller) { sh.zeron.android.composer.ModelPickerController() }
     composerBinding?.let { binding ->
         val chipMenus = remember(controller) { controller.filler<SessionChipMenus>() }
         val usage = remember(controller) { controller.filler<SessionAccountUsage>() }
@@ -501,7 +501,7 @@ fun SessionScreen(
                 model.onOpenAccounts = {
                     if (usageStack.top.id == usageEntry.id) {
                         usageStack.push(
-                            sh.roboco.android.accounts.AgentAccountsRoute(
+                            sh.zeron.android.accounts.AgentAccountsRoute(
                                 deviceId = controller.hostDeviceId.ifEmpty { null },
                                 focusHarness = controller.harness,
                             ),
@@ -663,7 +663,7 @@ fun SessionScreen(
             modifier = Modifier.fillMaxSize(),
         )
     }
-    sh.roboco.android.composer.ModelPickerOverlay(modelPicker)
+    sh.zeron.android.composer.ModelPickerOverlay(modelPicker)
     overlay()
     }
 }

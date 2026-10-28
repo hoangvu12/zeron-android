@@ -1,4 +1,4 @@
-package sh.roboco.android.design.glass
+package sh.zeron.android.design.glass
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -24,11 +24,11 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.design.CapsuleShape
-import sh.roboco.android.design.Icon
-import sh.roboco.android.design.LocalIsDark
-import sh.roboco.android.design.RobocoIcon
-import sh.roboco.android.design.SymbolWeight
+import sh.zeron.android.design.CapsuleShape
+import sh.zeron.android.design.Icon
+import sh.zeron.android.design.LocalIsDark
+import sh.zeron.android.design.ZeronIcon
+import sh.zeron.android.design.SymbolWeight
 
 /**
  * One slot of a [GlassButtonGroup] (ticket 107): a 44 dp icon slot inside
@@ -47,7 +47,7 @@ import sh.roboco.android.design.SymbolWeight
  */
 @Immutable
 data class GlassGroupItem(
-    val icon: RobocoIcon,
+    val icon: ZeronIcon,
     val contentDescription: String,
     val testTag: String? = null,
     val interactionSource: MutableInteractionSource? = null,

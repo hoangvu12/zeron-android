@@ -1,4 +1,4 @@
-package sh.roboco.android.core
+package sh.zeron.android.core
 
 import android.app.UiModeManager
 import java.io.File
@@ -16,7 +16,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
-import sh.roboco.android.design.Appearance
+import sh.zeron.android.design.Appearance
 
 /**
  * [AppearanceController] and the [platformNightMode] mapping

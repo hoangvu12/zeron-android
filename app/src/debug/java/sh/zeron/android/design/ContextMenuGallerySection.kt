@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -30,11 +30,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.glass.Menu
-import sh.roboco.android.design.glass.MenuIcon
-import sh.roboco.android.design.glass.MenuItem
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.glass.Menu
+import sh.zeron.android.design.glass.MenuIcon
+import sh.zeron.android.design.glass.MenuItem
+import sh.zeron.android.design.uiStyle
 
 /**
  * The "Context menu" page of the debug design gallery (android-ui-parity
@@ -60,12 +60,12 @@ import sh.roboco.android.design.uiStyle
  *    placement.
  *
  * The section itself needs no host of its own: `GalleryProviders` wraps
- * the gallery in [ContextMenuHost] (outermost inside `RobocoTheme`), so
+ * the gallery in [ContextMenuHost] (outermost inside `ZeronTheme`), so
  * the top bar is dimmed and blurred too. No Material controls anywhere.
  */
 @Composable
 fun ContextMenuGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val capture = LocalGalleryCapture.current
 
@@ -171,7 +171,7 @@ private fun SessionLikeRow(
     onRemove: () -> Unit,
     height: Dp = 62.dp,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Box(
         Modifier
@@ -206,7 +206,7 @@ private fun TranscriptLikeRow(
     onLog: (String) -> Unit,
     menu: () -> Menu? = { transcriptMenu(onLog) },
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Box(
         Modifier
@@ -232,18 +232,18 @@ private fun TranscriptLikeRow(
 /** The session-row demo menu (tickets 44's items, trimmed to this gallery). */
 private fun sessionMenu(name: String, onLog: (String) -> Unit, onRemove: () -> Unit): Menu = Menu(
     children = listOf(
-        MenuItem("Pin", icon = MenuIcon.Symbol(RobocoIcons.Pin)) { onLog("Pin $name") },
-        MenuItem("Rename…", icon = MenuIcon.Symbol(RobocoIcons.Pencil)) { onLog("Rename…") },
-        MenuItem("Archive", icon = MenuIcon.Symbol(RobocoIcons.Archivebox), destructive = true) { onLog("Archive $name") },
-        MenuItem("Remove row", icon = MenuIcon.Symbol(RobocoIcons.Trash), destructive = true) { onRemove() },
+        MenuItem("Pin", icon = MenuIcon.Symbol(ZeronIcons.Pin)) { onLog("Pin $name") },
+        MenuItem("Rename…", icon = MenuIcon.Symbol(ZeronIcons.Pencil)) { onLog("Rename…") },
+        MenuItem("Archive", icon = MenuIcon.Symbol(ZeronIcons.Archivebox), destructive = true) { onLog("Archive $name") },
+        MenuItem("Remove row", icon = MenuIcon.Symbol(ZeronIcons.Trash), destructive = true) { onRemove() },
     ),
 )
 
 /** The transcript-row demo menu (ticket 128's items, trimmed to this gallery). */
 private fun transcriptMenu(onLog: (String) -> Unit): Menu = Menu(
     children = listOf(
-        MenuItem("Copy", icon = MenuIcon.Symbol(RobocoIcons.DocOnDoc)) { onLog("Copy") },
-        MenuItem("Select Text", icon = MenuIcon.Symbol(RobocoIcons.CharacterCursorIbeam)) { onLog("Select Text") },
+        MenuItem("Copy", icon = MenuIcon.Symbol(ZeronIcons.DocOnDoc)) { onLog("Copy") },
+        MenuItem("Select Text", icon = MenuIcon.Symbol(ZeronIcons.CharacterCursorIbeam)) { onLog("Select Text") },
     ),
 )
 

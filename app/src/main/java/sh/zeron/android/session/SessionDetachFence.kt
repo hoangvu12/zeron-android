@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.withTimeoutOrNull
@@ -56,7 +56,7 @@ class SessionDetachFence(private val timeoutMs: Long = 1000) {
     }
 
     companion object {
-        /** The production fence: [sh.roboco.android.shell.ShellStateScope] awaits it, ticket 51's `close()` tracks it. */
+        /** The production fence: [sh.zeron.android.shell.ShellStateScope] awaits it, ticket 51's `close()` tracks it. */
         val Default = SessionDetachFence()
     }
 }

@@ -1,4 +1,4 @@
-package sh.roboco.android.update
+package sh.zeron.android.update
 
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
@@ -16,7 +16,7 @@ import java.security.MessageDigest
  *
  * The comparison is over the SHA-256 of each signer's certificate bytes,
  * as sets: the same set means the same signer(s). Lineage/rotation
- * (past signing certificates) is intentionally **not** honoured — Roboco
+ * (past signing certificates) is intentionally **not** honoured — Zeron
  * has one release key with no rotation, and a strict comparison is the
  * safe default for an install-over.
  */

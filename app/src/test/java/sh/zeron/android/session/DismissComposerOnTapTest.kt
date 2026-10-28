@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
@@ -46,14 +46,14 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.composer.ComposerMorphState
-import sh.roboco.android.composer.composerInput
-import sh.roboco.android.composer.rememberComposerMorphState
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.transcript.LocalTranscriptTapGate
-import sh.roboco.android.transcript.TranscriptTapGate
-import sh.roboco.android.transcript.transcriptControl
+import sh.zeron.android.composer.ComposerMorphState
+import sh.zeron.android.composer.composerInput
+import sh.zeron.android.composer.rememberComposerMorphState
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.transcript.LocalTranscriptTapGate
+import sh.zeron.android.transcript.TranscriptTapGate
+import sh.zeron.android.transcript.transcriptControl
 
 /**
  * The transcript's tap-to-dismiss observer (android-ui-parity #81):
@@ -109,7 +109,7 @@ class DismissComposerOnTapTest {
     private fun mountGeneric() {
         field = TextFieldState("Half-written thought")
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(LocalTranscriptTapGate provides gate) {
                     val focusManager = LocalFocusManager.current
                     TapDismissStage(
@@ -129,7 +129,7 @@ class DismissComposerOnTapTest {
     private fun mountMorph() {
         field = TextFieldState("Half-written thought")
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(LocalTranscriptTapGate provides gate) {
                     val m = rememberComposerMorphState(
                         alwaysCard = false,

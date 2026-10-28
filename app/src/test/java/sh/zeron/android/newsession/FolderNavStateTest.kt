@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -13,11 +13,11 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import uniffi.roboco_core.CoreException
-import uniffi.roboco_core.DriveEntry
-import uniffi.roboco_core.FolderEntry
-import uniffi.roboco_core.FolderListing
-import uniffi.roboco_core.PreparedPath
+import uniffi.zeron_core.CoreException
+import uniffi.zeron_core.DriveEntry
+import uniffi.zeron_core.FolderEntry
+import uniffi.zeron_core.FolderListing
+import uniffi.zeron_core.PreparedPath
 
 /**
  * [FolderNavState] (android-ui-parity #112): the rail's drives load and

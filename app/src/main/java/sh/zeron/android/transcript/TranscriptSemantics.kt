@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.net.Uri
 import androidx.compose.foundation.layout.BoxScope
@@ -34,12 +34,12 @@ import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.semantics.verticalScrollAxisRange
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.design.RobocoTheme
-import uniffi.roboco_core.LayoutFrame
-import uniffi.roboco_core.LinkHit
-import uniffi.roboco_core.RowDisplay
-import uniffi.roboco_core.RowKind
-import uniffi.roboco_core.WidgetKind
+import sh.zeron.android.design.ZeronTheme
+import uniffi.zeron_core.LayoutFrame
+import uniffi.zeron_core.LinkHit
+import uniffi.zeron_core.RowDisplay
+import uniffi.zeron_core.RowKind
+import uniffi.zeron_core.WidgetKind
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.roundToInt
@@ -56,7 +56,7 @@ import kotlin.math.sign
  *    carrying the `row-*` test tag and the **custom actions** Copy /
  *    Copy Message / Select Text — 128's own [rowMenuActions] builder and
  *    [RowMenuPerformer], so the menu and the actions cannot diverge;
- *  - one **link node** per [uniffi.roboco_core.LinkHit] fragment, at its
+ *  - one **link node** per [uniffi.zeron_core.LinkHit] fragment, at its
  *    painted rect (unclipped, following its scroller's offset through the
  *    placement phase), labelled with the URL's encoded host, opening
  *    through 126's [TranscriptActions.openLink];
@@ -78,8 +78,8 @@ import kotlin.math.sign
  * A link node's label: the URL's encoded host, or the whole URL when
  * there is none (`URL(string:)?.host()` with Swift's default
  * `percentEncoded: true`, `RowView.swift:69`): `example.com` for
- * `https://example.com/docs`, `image` for a `roboco-preview://image`
- * chip, the full string for `mailto:`/`roboco-file:`/scheme-less URLs.
+ * `https://example.com/docs`, `image` for a `zeron-preview://image`
+ * chip, the full string for `mailto:`/`zeron-file:`/scheme-less URLs.
  */
 internal fun linkLabel(url: String): String =
     encodedHostOf(Uri.parse(url).encodedAuthority)?.takeIf { it.isNotEmpty() } ?: url
@@ -176,7 +176,7 @@ internal fun BoxScope.RowTextNode(
 
 /**
  * The row's link nodes — the **last** children of the row Box, one per
- * [uniffi.roboco_core.LinkHit] fragment in `d.links` order (a link that
+ * [uniffi.zeron_core.LinkHit] fragment in `d.links` order (a link that
  * wraps onto two lines gives two nodes with the same label, like iOS).
  * Position and size are the fragment's rect, dp, no slop; a fragment in
  * scroller `s` sits at `(scrollers[s].x + l.x − scrollerOffsetDp(s),
@@ -194,7 +194,7 @@ internal fun BoxScope.RowTextNode(
 @Composable
 internal fun BoxScope.RowLinkNodes(row: RealizedRow, d: RowDisplay, actions: () -> TranscriptActions) {
     val debug = LocalTranscriptA11yBounds.current
-    val stroke = RobocoTheme.palette.accent // #5B43E8 light / #8B7CF6 dark
+    val stroke = ZeronTheme.palette.accent // #5B43E8 light / #8B7CF6 dark
     val dens = LocalDensity.current.density // px per dp, for the click rects
     d.links.forEachIndexed { i, l ->
         val s = l.scroller?.toInt()

@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -23,12 +23,12 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
+import sh.zeron.android.core.Face
 
 
 /**
  * The "Icons" page of the design gallery (android-ui-parity #06): the whole
- * [RobocoIcons] registry grid, the weight and size ladders, [NumberCircle],
+ * [ZeronIcons] registry grid, the weight and size ladders, [NumberCircle],
  * the "Measured vs iOS" reference row and the swipe-action colour blocks.
  *
  * Ticket 22 registers it (`GallerySection("Icons") { IconsGallerySection() }`);
@@ -37,18 +37,18 @@ import sh.roboco.android.core.Face
  */
 @Composable
 fun IconsGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
 
     Column(Modifier.padding(horizontal = 12.dp)) {
-        GalleryLabel("registry — ${RobocoIcons.entries.size} glyphs", palette, typeScale)
+        GalleryLabel("registry — ${ZeronIcons.entries.size} glyphs", palette, typeScale)
         IconsGrid(palette, typeScale)
         Spacer(Modifier.height(20.dp))
 
         GalleryLabel("weight ladder — 17 pt", palette, typeScale)
-        WeightLadder(RobocoIcons.Plus, palette, typeScale)
+        WeightLadder(ZeronIcons.Plus, palette, typeScale)
         Spacer(Modifier.height(8.dp))
-        WeightLadder(RobocoIcons.Ellipsis, palette, typeScale)
+        WeightLadder(ZeronIcons.Ellipsis, palette, typeScale)
         Spacer(Modifier.height(20.dp))
 
         GalleryLabel("size ladder — folder, hairline = layout box", palette, typeScale)
@@ -88,7 +88,7 @@ private fun Caption(text: String, palette: Palette, typeScale: TypeScale) {
  */
 @Composable
 private fun IconsGrid(palette: Palette, typeScale: TypeScale) {
-    for (row in RobocoIcons.entries.chunked(4)) {
+    for (row in ZeronIcons.entries.chunked(4)) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             for (entry in row) {
                 IconCell(entry, palette, typeScale)
@@ -115,7 +115,7 @@ private fun IconCell(entry: RegistryEntry, palette: Palette, typeScale: TypeScal
 
 /** One glyph at 17 pt across the whole [SymbolWeight] ladder. */
 @Composable
-private fun WeightLadder(icon: RobocoIcon, palette: Palette, typeScale: TypeScale) {
+private fun WeightLadder(icon: ZeronIcon, palette: Palette, typeScale: TypeScale) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.Bottom,
@@ -143,7 +143,7 @@ private fun SizeLadder(palette: Palette) {
                     .size(iconBoxDp(sizePt))
                     .hairlineBorder(palette.tertiary, RectangleShape),
             ) {
-                Icon(RobocoIcons.Folder, palette.text, sizePt)
+                Icon(ZeronIcons.Folder, palette.text, sizePt)
             }
         }
     }
@@ -160,8 +160,8 @@ private fun NumberCircleRow(palette: Palette) {
             NumberCircle(n, palette.text, 17f)
         }
         NumberCircle(50, palette.text, 17f)
-        Icon(RobocoIcons.CheckmarkCircleFill, palette.accent, 17f)
-        Icon(RobocoIcons.CheckmarkSquareFill, palette.accent, 17f)
+        Icon(ZeronIcons.CheckmarkCircleFill, palette.accent, 17f)
+        Icon(ZeronIcons.CheckmarkSquareFill, palette.accent, 17f)
     }
 }
 
@@ -174,7 +174,7 @@ private fun NumberCircleRow(palette: Palette) {
  */
 private class IosMeasuredSample(
     val label: String,
-    val icon: RobocoIcon,
+    val icon: ZeronIcon,
     val sizePt: Float,
     val weight: SymbolWeight,
     val tint: (Palette) -> Color,
@@ -184,7 +184,7 @@ private class IosMeasuredSample(
 
 private fun measured(
     label: String,
-    icon: RobocoIcon,
+    icon: ZeronIcon,
     sizePt: Float,
     weight: SymbolWeight,
     tint: (Palette) -> Color,
@@ -194,14 +194,14 @@ private fun measured(
 
 /** The worked-examples table, ink boxes in pt (= dp). */
 private val measuredSamples = listOf(
-    measured("plus 15 sem", RobocoIcons.Plus, 15f, SymbolWeight.Semibold, Palette::accent, 12.4f, 12.4f),
-    measured("checkmark 17 sem", RobocoIcons.Checkmark, 17f, SymbolWeight.Semibold, Palette::accent, 14.8f, 14.8f),
-    measured("chevron.down 11 sem", RobocoIcons.ChevronDown, 11f, SymbolWeight.Semibold, Palette::tertiary, 9.6f, 5.2f),
-    measured("chevron.right 13 sem", RobocoIcons.ChevronRight, 13f, SymbolWeight.Semibold, Palette::tertiary, 7f, 11.3f),
-    measured("chevron.backward 17 sem", RobocoIcons.ChevronBackward, 17f, SymbolWeight.Semibold, Palette::text, 10.7f, 18.3f),
-    measured("ellipsis 17 med", RobocoIcons.Ellipsis, 17f, SymbolWeight.Medium, Palette::text, 20f, 4.3f),
-    measured("circle.lefthalf 20", RobocoIcons.CircleLeftHalfFilled, 20f, SymbolWeight.Regular, Palette::secondary, 21.7f, 21.7f),
-    measured("magnifier 22", RobocoIcons.Magnifyingglass, 22f, SymbolWeight.Regular, Palette::text, 23.5f, 23.5f),
+    measured("plus 15 sem", ZeronIcons.Plus, 15f, SymbolWeight.Semibold, Palette::accent, 12.4f, 12.4f),
+    measured("checkmark 17 sem", ZeronIcons.Checkmark, 17f, SymbolWeight.Semibold, Palette::accent, 14.8f, 14.8f),
+    measured("chevron.down 11 sem", ZeronIcons.ChevronDown, 11f, SymbolWeight.Semibold, Palette::tertiary, 9.6f, 5.2f),
+    measured("chevron.right 13 sem", ZeronIcons.ChevronRight, 13f, SymbolWeight.Semibold, Palette::tertiary, 7f, 11.3f),
+    measured("chevron.backward 17 sem", ZeronIcons.ChevronBackward, 17f, SymbolWeight.Semibold, Palette::text, 10.7f, 18.3f),
+    measured("ellipsis 17 med", ZeronIcons.Ellipsis, 17f, SymbolWeight.Medium, Palette::text, 20f, 4.3f),
+    measured("circle.lefthalf 20", ZeronIcons.CircleLeftHalfFilled, 20f, SymbolWeight.Regular, Palette::secondary, 21.7f, 21.7f),
+    measured("magnifier 22", ZeronIcons.Magnifyingglass, 22f, SymbolWeight.Regular, Palette::text, 23.5f, 23.5f),
 )
 
 @Composable
@@ -253,11 +253,11 @@ private fun MeasuredSampleCell(sample: IosMeasuredSample, palette: Palette) {
 @Composable
 private fun SwipeColourBlocks(palette: Palette) {
     val swipeGlyphs = listOf(
-        RobocoIcons.PinFill,
-        RobocoIcons.PinSlash,
-        RobocoIcons.ArchiveboxFill,
-        RobocoIcons.FolderFill,
-        RobocoIcons.TrayAndArrowUpFill,
+        ZeronIcons.PinFill,
+        ZeronIcons.PinSlash,
+        ZeronIcons.ArchiveboxFill,
+        ZeronIcons.FolderFill,
+        ZeronIcons.TrayAndArrowUpFill,
     )
     val swipeBlue = rgb(0x5E6AD2)
     for (plate in listOf(palette.accent, palette.secondary, swipeBlue)) {
@@ -286,11 +286,11 @@ private fun SwipeColourBlocks(palette: Palette) {
 @Preview(name = "Icons light")
 @Composable
 private fun IconsGalleryLightPreview() {
-    RobocoTheme(Appearance.Light) { IconsGallerySection() }
+    ZeronTheme(Appearance.Light) { IconsGallerySection() }
 }
 
 @Preview(name = "Icons dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun IconsGalleryDarkPreview() {
-    RobocoTheme(Appearance.Dark) { IconsGallerySection() }
+    ZeronTheme(Appearance.Dark) { IconsGallerySection() }
 }

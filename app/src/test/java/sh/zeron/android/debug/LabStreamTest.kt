@@ -1,10 +1,10 @@
-package sh.roboco.android.debug
+package sh.zeron.android.debug
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import uniffi.roboco_core.DebugEntry
+import uniffi.zeron_core.DebugEntry
 import kotlin.random.Random
 
 /**

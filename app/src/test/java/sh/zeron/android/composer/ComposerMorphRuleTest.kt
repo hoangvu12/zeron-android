@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -35,7 +35,7 @@ class ComposerMorphRuleTest {
         // itself pins the rule, so a future "draft holds the card" change
         // cannot slip in silently.
         val wantsCard = ComposerMorphRuleTest::class.java.classLoader
-            .loadClass("sh.roboco.android.composer.ComposerMorphKt")
+            .loadClass("sh.zeron.android.composer.ComposerMorphKt")
             .getMethod(
                 "wantsCard",
                 Boolean::class.java,

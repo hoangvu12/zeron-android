@@ -1,4 +1,4 @@
-package sh.roboco.android.sheets
+package sh.zeron.android.sheets
 
 import android.content.res.Configuration
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -35,17 +35,17 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlin.math.abs
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.sheet.GlassSheet
-import sh.roboco.android.design.sheet.GlassSheetState
-import sh.roboco.android.design.sheet.SheetDetent
-import sh.roboco.android.design.sheet.SheetHeader
-import sh.roboco.android.design.sheet.SheetTrailing
-import sh.roboco.android.design.sheet.rememberGlassSheetState
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.sheet.GlassSheet
+import sh.zeron.android.design.sheet.GlassSheetState
+import sh.zeron.android.design.sheet.SheetDetent
+import sh.zeron.android.design.sheet.SheetHeader
+import sh.zeron.android.design.sheet.SheetTrailing
+import sh.zeron.android.design.sheet.rememberGlassSheetState
+import sh.zeron.android.design.uiStyle
 
 /**
  * iOS `SelectTextViewController(text:title:mono:)` (`ios:Transcript/
@@ -92,7 +92,7 @@ fun SelectTextSheet(
     ),
 ) {
     val typeScale = LocalTypeScale.current
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val density = LocalDensity.current
     // viewDidLoad computes the font once (no adjustsFontForContentSizeCategory
     // anywhere in the iOS source), so the size survives a font-scale change
@@ -274,8 +274,8 @@ val SelectTextFontDpKey = SemanticsPropertyKey<Float>("SelectTextFontDp")
 
 @Composable
 private fun SelectTextSheetPreview(appearance: Appearance, mono: Boolean) {
-    RobocoTheme(appearance) {
-        val palette = RobocoTheme.palette
+    ZeronTheme(appearance) {
+        val palette = ZeronTheme.palette
         Box(Modifier.fillMaxSize().background(palette.background)) {
             val state = rememberGlassSheetState(
                 if (mono) SelectTextDefaults.MonoDetents else SelectTextDefaults.SansDetents,
@@ -318,7 +318,7 @@ private fun ToolDetailPreviewDark() {
 
 /** The preview's three-paragraph message. */
 private val ThreeParagraphMessage =
-    "Roboco connects directly to the engines you pair with it — no account, no cloud, no sync.\n\n" +
+    "Zeron connects directly to the engines you pair with it — no account, no cloud, no sync.\n\n" +
         "The transcript is painted straight from the Rust layout core, so the text in the list itself " +
         "cannot be selected. Select Text shows the whole message here, where the system selection " +
         "handles and the Copy toolbar work.\n\n" +
@@ -326,6 +326,6 @@ private val ThreeParagraphMessage =
 
 /** The preview's tool payload: 40 mono lines, the last one 160 characters. */
 private val ToolDetailPayload: String = buildString {
-    for (i in 1..39) appendLine("line $i: $ roboco engine start --port ${8674 + i}")
+    for (i in 1..39) appendLine("line $i: $ zeron engine start --port ${8674 + i}")
     append("k".repeat(160))
 }

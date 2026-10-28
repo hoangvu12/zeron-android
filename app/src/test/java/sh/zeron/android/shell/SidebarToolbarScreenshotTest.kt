@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -31,15 +31,15 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.GlassStage
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.glass.rememberGlassMenuState
-import sh.roboco.android.sessions.SessionsScreenActions
-import sh.roboco.android.sessions.sessionsOptionsMenu
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.GlassStage
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.glass.rememberGlassMenuState
+import sh.zeron.android.sessions.SessionsScreenActions
+import sh.zeron.android.sessions.sessionsOptionsMenu
 
 /**
  * The sidebar toolbar's goldens (android-ui-parity #107) — the previews'
@@ -66,7 +66,7 @@ import sh.roboco.android.sessions.sessionsOptionsMenu
  * byte-stable).
  *
  * Recorded by `./gradlew :app:recordRoborazziDebug --tests
- * sh.roboco.android.shell.SidebarToolbarScreenshotTest`, verified by
+ * sh.zeron.android.shell.SidebarToolbarScreenshotTest`, verified by
  * `:app:verifyRoborazziDebug`, then reviewed side by side with an iPad
  * (iOS 26) capture of the sidebar — the ticket's ★ values (44/88/16, the
  * press look) get one retune there. Paths are relative to
@@ -122,7 +122,7 @@ class SidebarToolbarScreenshotTest {
         content: @Composable BoxScope.() -> Unit,
     ) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 val haze = rememberHazeState()
                 CompositionLocalProvider(
                     LocalLayoutDirection provides direction,
@@ -263,7 +263,7 @@ class SidebarToolbarScreenshotTest {
      */
     private fun menuOpenShot(appearance: Appearance, file: String) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 GlassMenuHost(hazeState = rememberHazeState()) {
                     val menu = rememberGlassMenuState()
                     val haze = rememberHazeState()

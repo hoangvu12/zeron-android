@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -41,12 +41,12 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LinearFontScaleDensity
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.TypeScale
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LinearFontScaleDensity
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.TypeScale
 
 /**
  * The foldable header row's semantics, height, pressed fill and chevron
@@ -98,9 +98,9 @@ class SectionHeaderRowTest {
                 LocalDensity provides d,
                 LocalTypeScale provides TypeScale.from(d),
             ) {
-                RobocoTheme(Appearance.Light) {
+                ZeronTheme(Appearance.Light) {
                     ProvideGlyphClock(frozenAtNanos = 0L) {
-                        Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+                        Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                             row()
                         }
                     }
@@ -165,9 +165,9 @@ class SectionHeaderRowTest {
      */
     private fun hostClickable(state: () -> SectionHeaderState, onClick: () -> Unit = {}) {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 ProvideGlyphClock(frozenAtNanos = 0L) {
-                    Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+                    Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                         val src = remember { MutableInteractionSource() }
                         SectionHeaderRow(
                             state(),

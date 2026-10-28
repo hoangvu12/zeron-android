@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
@@ -9,7 +9,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import sh.roboco.android.R
+import sh.zeron.android.R
 
 /**
  * The licence-text completeness gate (android-ui-parity #101): every
@@ -21,8 +21,8 @@ import sh.roboco.android.R
  *
  * Also checks the four licence assets the About/Licenses screens read
  * (`licenses/LICENSE`, `THIRD_PARTY_NOTICES.md`, `Geist-OFL.txt`,
- * `vscode-symbols-LICENSE.txt` — staged by `syncRobocoFonts` /
- * `syncRobocoLicenses`) and that every staged SPDX asset is non-empty.
+ * `vscode-symbols-LICENSE.txt` — staged by `syncZeronFonts` /
+ * `syncZeronLicenses`) and that every staged SPDX asset is non-empty.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [36])
@@ -71,8 +71,8 @@ class AndroidLicenceTextsTest {
     @Test
     fun theLicenceAssetsTheScreensReadAreStaged() {
         for (path in listOf(
-            LicenseSources.RobocoLicense,
-            LicenseSources.RobocoNotices,
+            LicenseSources.ZeronLicense,
+            LicenseSources.ZeronNotices,
             LicenseSources.GeistOfl,
             LicenseSources.SymbolsLicense,
         )) {

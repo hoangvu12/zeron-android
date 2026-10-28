@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.CompositionLocalProvider
@@ -15,10 +15,10 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LinearFontScaleDensity
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LinearFontScaleDensity
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The shared session-list goldens (android-ui-parity #41): the fixture
@@ -34,7 +34,7 @@ import sh.roboco.android.design.RobocoTheme
  * the overlay anchor sits at (196.5, 408.5) exactly. Roborazzi paths are
  * relative to `roborazzi { outputDir }` (`src/test/screenshots`), so the
  * goldens land at `src/test/screenshots/sessions/`. Recorded by
- * `./gradlew :app:recordRoborazziDebug --tests sh.roboco.android.sessions.SessionListScreenshotTest`,
+ * `./gradlew :app:recordRoborazziDebug --tests sh.zeron.android.sessions.SessionListScreenshotTest`,
  * verified by `:app:verifyRoborazziDebug --tests …`, then reviewed side
  * by side with `pr-assets/group-by-project/1-off.png` (row and header
  * rhythm 62/40 dp, no gaps, no separators; row internals are 37/38/39's).
@@ -65,7 +65,7 @@ class SessionListScreenshotTest {
         val density = LinearFontScaleDensity(3f, fontScale)
         compose.setContent {
             CompositionLocalProvider(LocalDensity provides density) {
-                RobocoTheme(appearance) {
+                ZeronTheme(appearance) {
                     ProvideGlyphClock(frozenAtNanos = 0L) {
                         SessionList(
                             model = rememberSessionListModel(

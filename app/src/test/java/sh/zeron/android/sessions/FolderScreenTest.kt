@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.CompositionLocalProvider
@@ -33,23 +33,23 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.ActionSheetHost
-import sh.roboco.android.design.ActionSheetHostState
-import sh.roboco.android.design.AlertHost
-import sh.roboco.android.design.AlertHostState
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.ToastAnnouncer
-import sh.roboco.android.design.ToastHost
-import sh.roboco.android.design.ToasterState
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.shell.NavStack
-import sh.roboco.android.shell.NavStackHost
-import sh.roboco.android.shell.TabId
-import sh.roboco.android.shell.TabRootRoute
-import uniffi.roboco_core.SectionView
-import uniffi.roboco_core.WorkspaceSnapshot
+import sh.zeron.android.design.ActionSheetHost
+import sh.zeron.android.design.ActionSheetHostState
+import sh.zeron.android.design.AlertHost
+import sh.zeron.android.design.AlertHostState
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.ToastAnnouncer
+import sh.zeron.android.design.ToastHost
+import sh.zeron.android.design.ToasterState
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.shell.NavStack
+import sh.zeron.android.shell.NavStackHost
+import sh.zeron.android.shell.TabId
+import sh.zeron.android.shell.TabRootRoute
+import uniffi.zeron_core.SectionView
+import uniffi.zeron_core.WorkspaceSnapshot
 
 /**
  * The folder screens' behaviour (android-ui-parity #45): the section page
@@ -169,7 +169,7 @@ class FolderScreenTest {
         // at call time, so the screen is the resting top of the stack.
         stack.push(FolderFixtures.sectionRoute, animated = false)
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 // Frozen: the loading test's live spinner would otherwise keep the clock busy.
                 ProvideGlyphClock(frozenAtNanos = 0L) {
                 AlertHost(state = alerts) {

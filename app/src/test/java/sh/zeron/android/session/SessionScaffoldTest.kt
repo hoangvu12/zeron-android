@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,11 +29,11 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalReduceMotion
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalReduceMotion
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
 
 /**
  * [SessionScaffold] and [OpenRevealLayers] (android-ui-parity #75):
@@ -74,7 +74,7 @@ class SessionScaffoldTest {
     /** Composes the content and settles the first frames (the glass flag flip included). */
     private fun host(content: @Composable () -> Unit) {
         compose.setContent {
-            RobocoTheme(Appearance.Light) { content() }
+            ZeronTheme(Appearance.Light) { content() }
         }
         compose.waitForIdle()
         compose.mainClock.advanceTimeByFrame()
@@ -217,7 +217,7 @@ class SessionScaffoldTest {
         val headerSees = mutableListOf<Boolean>()
         val outerSees = mutableListOf<Boolean>()
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 outerSees += LocalReduceMotion.current
                 SessionScaffold(
                     reveal = reveal,

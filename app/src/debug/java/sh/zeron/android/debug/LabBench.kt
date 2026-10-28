@@ -1,4 +1,4 @@
-package sh.roboco.android.debug
+package sh.zeron.android.debug
 
 import android.app.Activity
 import android.hardware.display.DisplayManager
@@ -31,11 +31,11 @@ import androidx.metrics.performance.FrameDataApi31
 import androidx.metrics.performance.JankStats
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalIsDark
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.transcript.TranscriptPerf
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalIsDark
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.transcript.TranscriptPerf
 import java.io.File
 import java.io.IOException
 import java.util.Locale
@@ -47,8 +47,8 @@ import java.util.Locale
  * (`upstream/main:apps/ios/Zeron/Debug/TranscriptLabViewController.swift:150-180`).
  */
 
-/** The `RobocoLab` log tag (`NSLog("BENCH …")` becomes `Log.i` here). */
-internal const val LAB_LOG_TAG = "RobocoLab"
+/** The `ZeronLab` log tag (`NSLog("BENCH …")` becomes `Log.i` here). */
+internal const val LAB_LOG_TAG = "ZeronLab"
 
 /**
  * The frame budget source (the ADAPT of `targetTimestamp − timestamp`):
@@ -207,7 +207,7 @@ internal class JankTally {
 /**
  * The combined result JSON: `{"idle":…,"streaming":…,"idlePerf":…,
  * "streamingPerf":…,"jankstats":…}` in that key order, with no
- * whitespace (the iOS string interpolation shape, plus Roboco's
+ * whitespace (the iOS string interpolation shape, plus Zeron's
  * `jankstats`).
  */
 fun benchJson(idle: BenchResult, streaming: BenchResult, idlePerf: String, streamingPerf: String, jank: String): String =
@@ -255,7 +255,7 @@ internal suspend fun runLabBench(
 /**
  * Writes the JSON to `filesDir/bench.json` atomically (iOS writes
  * Documents and ignores errors with `try?`; here the write is logged and
- * continued). Roboco adaptation: `AtomicFile` keeps a partial file from
+ * continued). Zeron adaptation: `AtomicFile` keeps a partial file from
  * ever being read as a result.
  */
 internal fun writeBenchJson(dir: File, json: String) {
@@ -328,8 +328,8 @@ private fun BenchResultLabelDarkPreview() {
 
 @Composable
 private fun BenchResultLabelPreviewBody(appearance: Appearance) {
-    RobocoTheme(appearance) {
-        Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+    ZeronTheme(appearance) {
+        Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
             BenchResultLabel(FIXTURE_JSON)
         }
     }

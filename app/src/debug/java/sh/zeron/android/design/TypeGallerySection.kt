@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.util.Locale
-import sh.roboco.android.core.Face
+import sh.zeron.android.core.Face
 
 /**
  * A `Density` whose sp↔dp conversion is linear (android-ui-parity #22).
@@ -77,7 +77,7 @@ fun TypeGallerySection() {
 
 @Composable
 private fun FactorBlock(factor: Float, outer: Density) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val d = remember(outer.density, factor) { LinearFontScaleDensity(outer.density, factor) }
     val ts = remember(d) { TypeScale.from(d) }
     CompositionLocalProvider(LocalDensity provides d, LocalTypeScale provides ts) {
@@ -101,7 +101,7 @@ private fun FactorBlock(factor: Float, outer: Density) {
                 ts, palette,
             )
             TypeRow(
-                "roboco",
+                "zeron",
                 uiStyle(Face.Sans, ts.scaled(13.5f), palette.text),
                 "scaled(13.5) = ${roundHalfAway(13.5f * ts.factor).toInt()}",
                 ts, palette,

@@ -1,4 +1,4 @@
-package sh.roboco.android.image
+package sh.zeron.android.image
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -29,10 +29,10 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.rememberSmoothRoundedShape
-import sh.roboco.android.transcript.widgets.imageTileRadius
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.rememberSmoothRoundedShape
+import sh.zeron.android.transcript.widgets.imageTileRadius
 
 /**
  * Ticket 125's viewer goldens (recorded by `:app:recordRoborazziDebug`,
@@ -70,7 +70,7 @@ class ImageViewerScreenshotTest {
     @Config(sdk = [36], qualifiers = "w393dp-h852dp-xxhdpi")
     fun imageViewerZoomedLight() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) { ViewerGoldenHost(landscapeGolden) }
+            ZeronTheme(Appearance.Light) { ViewerGoldenHost(landscapeGolden) }
         }
         compose.waitForIdle()
         // Double tap at (100, 300) dp → 2.5× centred there, settled.
@@ -83,7 +83,7 @@ class ImageViewerScreenshotTest {
     @Config(sdk = [36], qualifiers = "w393dp-h852dp-xxhdpi")
     fun imageViewerDragLight() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) { ViewerGoldenHost(landscapeGolden) }
+            ZeronTheme(Appearance.Light) { ViewerGoldenHost(landscapeGolden) }
         }
         compose.waitForIdle()
         // A 200 dp dismiss drag, held (nothing animates while held).
@@ -98,7 +98,7 @@ class ImageViewerScreenshotTest {
     @Config(sdk = [36], qualifiers = "w393dp-h852dp-xxhdpi")
     fun imageViewerOpenMidwayLight() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) { ViewerGoldenHost(landscapeGolden, withTile = true, shown = false) }
+            ZeronTheme(Appearance.Light) { ViewerGoldenHost(landscapeGolden, withTile = true, shown = false) }
         }
         compose.waitForIdle()
         // A real zoom open out of the tile, frozen mid-flight at t ≈ 0.5.
@@ -137,7 +137,7 @@ class ImageViewerScreenshotTest {
 
     private fun shown(appearance: Appearance, file: String) {
         compose.setContent {
-            RobocoTheme(appearance) { ViewerGoldenHost(landscapeGolden) }
+            ZeronTheme(appearance) { ViewerGoldenHost(landscapeGolden) }
         }
         compose.waitForIdle()
         compose.onRoot().captureRoboImage(file)
@@ -157,7 +157,7 @@ class ImageViewerScreenshotTest {
         val state = remember { ImageViewerState() }
         if (shown) LaunchedEffect(state) { state.showForPreview(bitmap) }
         goldenState = state
-        val palette = RobocoTheme.palette
+        val palette = ZeronTheme.palette
         ImageViewerHost(state) {
             Box(Modifier.fillMaxSize().background(palette.background)) {
                 Box(

@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import java.io.File
 import java.util.concurrent.CopyOnWriteArrayList
@@ -7,26 +7,26 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
-import sh.roboco.android.core.Prefs
-import sh.roboco.android.core.WorkspaceCore
-import sh.roboco.android.core.WorkspaceFeed
-import sh.roboco.android.core.testPrefsStore
-import sh.roboco.android.design.Cue
-import sh.roboco.android.design.Feedback
-import sh.roboco.android.design.Haptic
-import uniffi.roboco_core.ChatIndicator
-import uniffi.roboco_core.Connectivity
-import uniffi.roboco_core.ConnectivityState
-import uniffi.roboco_core.CoreException
-import uniffi.roboco_core.EngineDiagnostics
-import uniffi.roboco_core.EngineState
-import uniffi.roboco_core.EngineView
-import uniffi.roboco_core.FrontPage
-import uniffi.roboco_core.PullRequestGroups
-import uniffi.roboco_core.SectionView
-import uniffi.roboco_core.SessionGroup
-import uniffi.roboco_core.SessionRow
-import uniffi.roboco_core.WorkspaceSnapshot
+import sh.zeron.android.core.Prefs
+import sh.zeron.android.core.WorkspaceCore
+import sh.zeron.android.core.WorkspaceFeed
+import sh.zeron.android.core.testPrefsStore
+import sh.zeron.android.design.Cue
+import sh.zeron.android.design.Feedback
+import sh.zeron.android.design.Haptic
+import uniffi.zeron_core.ChatIndicator
+import uniffi.zeron_core.Connectivity
+import uniffi.zeron_core.ConnectivityState
+import uniffi.zeron_core.CoreException
+import uniffi.zeron_core.EngineDiagnostics
+import uniffi.zeron_core.EngineState
+import uniffi.zeron_core.EngineView
+import uniffi.zeron_core.FrontPage
+import uniffi.zeron_core.PullRequestGroups
+import uniffi.zeron_core.SectionView
+import uniffi.zeron_core.SessionGroup
+import uniffi.zeron_core.SessionRow
+import uniffi.zeron_core.WorkspaceSnapshot
 
 /**
  * Fixture builders for the front-page tests (android-ui-parity #40):

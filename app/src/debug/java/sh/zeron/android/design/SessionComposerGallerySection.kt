@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -28,27 +28,27 @@ import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.delay
-import sh.roboco.android.composer.ComposerBar
-import sh.roboco.android.composer.ComposerController
-import sh.roboco.android.composer.DeliveryMode
-import sh.roboco.android.composer.MentionSuggestionsHost
-import sh.roboco.android.composer.StagedImage
-import sh.roboco.android.composer.ChipTint
-import sh.roboco.android.composer.previewMorphState
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.glass.ProvideHazeState
-import sh.roboco.android.session.ChipSource
-import sh.roboco.android.session.SendReporter
-import sh.roboco.android.session.SessionChrome
-import sh.roboco.android.session.SessionCommands
-import sh.roboco.android.session.SessionComposerSlot
-import sh.roboco.android.session.StatusPillRow
-import sh.roboco.android.session.rememberSessionComposer
-import sh.roboco.android.session.sessionChips
-import sh.roboco.android.transcript.RunwayHooks
-import uniffi.roboco_core.FileMatch
+import sh.zeron.android.composer.ComposerBar
+import sh.zeron.android.composer.ComposerController
+import sh.zeron.android.composer.DeliveryMode
+import sh.zeron.android.composer.MentionSuggestionsHost
+import sh.zeron.android.composer.StagedImage
+import sh.zeron.android.composer.ChipTint
+import sh.zeron.android.composer.previewMorphState
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.glass.ProvideHazeState
+import sh.zeron.android.session.ChipSource
+import sh.zeron.android.session.SendReporter
+import sh.zeron.android.session.SessionChrome
+import sh.zeron.android.session.SessionCommands
+import sh.zeron.android.session.SessionComposerSlot
+import sh.zeron.android.session.StatusPillRow
+import sh.zeron.android.session.rememberSessionComposer
+import sh.zeron.android.session.sessionChips
+import sh.zeron.android.transcript.RunwayHooks
+import uniffi.zeron_core.FileMatch
 
 /**
  * The "Session composer" page of the debug design gallery
@@ -57,7 +57,7 @@ import uniffi.roboco_core.FileMatch
  * [SendReporter] (the send-failure pill above the composer, 73) and a
  * local [RunwayHooks] stub — hosted like the session screen (a
  * [GlassMenuHost] for the chips and the attach menu, a
- * [sh.roboco.android.composer.MentionSuggestionsHost] for 86's card, a
+ * [sh.zeron.android.composer.MentionSuggestionsHost] for 86's card, a
  * haze-source backdrop for the glass).
  *
  * The chrome is a local `mutableStateOf` driven by the toggles below (no
@@ -85,7 +85,7 @@ import uniffi.roboco_core.FileMatch
  */
 @Composable
 fun SessionComposerGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
 
     var running by remember { mutableStateOf(false) }
@@ -105,7 +105,7 @@ fun SessionComposerGallerySection() {
     }
     val chrome = SessionChrome(
         title = "Session",
-        subtitle = "roboco @ Vu-PC",
+        subtitle = "zeron @ Vu-PC",
         running = running,
         canSteer = canSteer,
         canWrite = canWrite,
@@ -196,7 +196,7 @@ private fun galleryChipSource(contextStep: Int, prStep: Int): ChipSource {
 /** One gallery toggle row: label left, current value in accent right. */
 @Composable
 private fun GalleryToggleRow(label: String, value: String, onClick: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Row(
         Modifier
@@ -280,14 +280,14 @@ private class GalleryRunwayHooks(private val log: (String) -> Unit) : RunwayHook
 
 @Composable
 private fun SessionComposerPreviewBody(appearance: Appearance) {
-    RobocoTheme(appearance) {
+    ZeronTheme(appearance) {
         GlassMenuHost {
             ProvideHazeState {
                 MentionSuggestionsHost(Modifier.fillMaxWidth().height(160.dp)) {
                     Box(
                         Modifier
                             .fillMaxSize()
-                            .background(RobocoTheme.palette.background)
+                            .background(ZeronTheme.palette.background)
                             .hazeSource(LocalHazeState.current!!),
                     ) {
                         val scope = rememberCoroutineScope()

@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
@@ -57,13 +57,13 @@ import androidx.compose.ui.unit.dp
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
-import sh.roboco.android.core.Face
-import sh.roboco.android.core.GeistMetrics
-import sh.roboco.android.design.LocalReduceMotion
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.Motion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.core.GeistMetrics
+import sh.zeron.android.design.LocalReduceMotion
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.Motion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
 
 /**
  * The composer's text slot (android-ui-parity #57): **one**
@@ -134,7 +134,7 @@ fun ComposerTextField(
     onTextRect: ((Rect) -> Unit)? = null,
 ) {
     val typeScale = LocalTypeScale.current
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val density = LocalDensity.current
 
     // Fonts.ui(.sans, UIFontMetrics(.body).scaledValue(for: 16.5)):
@@ -308,7 +308,7 @@ fun ComposerTextField(
             textStyle = textStyle,
             // Palette.accent — the caret and the selection handles
             // (tintColor, :167); the selection wash comes from
-            // RobocoTheme's LocalTextSelectionColors.
+            // ZeronTheme's LocalTextSelectionColors.
             cursorBrush = SolidColor(palette.accent),
             keyboardOptions = ComposerKeyboardOptions,
             singleLine = false,

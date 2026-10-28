@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -23,13 +23,13 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import sh.roboco.android.RobocoApplication
-import sh.roboco.android.composer.ComposerController
-import sh.roboco.android.composer.DEFAULT_HARNESS
-import sh.roboco.android.composer.DraftKey
-import sh.roboco.android.composer.LocalDrafts
-import sh.roboco.android.composer.StagedImage
-import uniffi.roboco_core.SessionRow
+import sh.zeron.android.ZeronApplication
+import sh.zeron.android.composer.ComposerController
+import sh.zeron.android.composer.DEFAULT_HARNESS
+import sh.zeron.android.composer.DraftKey
+import sh.zeron.android.composer.LocalDrafts
+import sh.zeron.android.composer.StagedImage
+import uniffi.zeron_core.SessionRow
 
 /**
  * The New Session page's state holder (android-ui-parity #92) — the port
@@ -39,7 +39,7 @@ import uniffi.roboco_core.SessionRow
  * and mutate the draft **only through this model**.
  *
  * The page works on a **copy** of [store]'s draft (iOS `self.draft =
- * app.lastDraft`): [update] is the only mutation path, and — the Roboco
+ * app.lastDraft`): [update] is the only mutation path, and — the Zeron
  * adaptation — it persists every change, not only the close paths. The
  * text and the images live in the composer (93/94); [rememberDraft] is
  * the port of `viewWillDisappear` + `didEnterBackground`, [markCreated]
@@ -50,7 +50,7 @@ import uniffi.roboco_core.SessionRow
  * plain getters over it, so chip and menu readers (109/113/114) recompose
  * when any input changes. Main thread only.
  *
- * The stale-id rule (Roboco addition): iOS keeps a vanished `projectId`
+ * The stale-id rule (Zeron addition): iOS keeps a vanished `projectId`
  * and fails at create; [normalize] nulls ids that are not in the merged
  * workspace (offline engines keep their cached rows, so offline ≠
  * stale) and re-applies the defaults. It runs at init, on the first
@@ -68,7 +68,7 @@ class NewSessionModel(
     private val catalog: ModelCatalogSource,
     /** Main; cancelled on dispose — the options collection (never the fetches). */
     private val pageScope: CoroutineScope,
-    /** The fetches run here (`RobocoApplication.appScope`), so they outlive the page. */
+    /** The fetches run here (`ZeronApplication.appScope`), so they outlive the page. */
     private val appScope: CoroutineScope,
     private val io: CoroutineDispatcher = Dispatchers.IO,
     private val main: CoroutineDispatcher = Dispatchers.Main.immediate,
@@ -142,7 +142,7 @@ class NewSessionModel(
             }
         }
         // The late store load (the tablet launch page, 106, and a
-        // `roboco://new` cold start can open the page before `warm()`
+        // `zeron://new` cold start can open the page before `warm()`
         // finished): once it lands, an untouched page takes over the
         // stored draft; a touched one keeps the user's pick. A side chat's
         // draft never comes from the store.
@@ -194,7 +194,7 @@ class NewSessionModel(
 
     /**
      * Every menu pick (113/114) goes through here: `draft = transform(draft)`,
-     * persisted at once (the Roboco adaptation — every iOS exit path saved
+     * persisted at once (the Zeron adaptation — every iOS exit path saved
      * the same draft anyway), then [loadModels]. A no-op transform
      * changes nothing.
      */
@@ -331,7 +331,7 @@ fun sideChatDraft(parent: SideChatParent): NewSessionDraft = NewSessionDraft(
 
 /**
  * The stale-id rule and the defaults (ticket 92's Normalize table, the
- * iOS `viewDidLoad` defaults `:177-181` plus the Roboco stale rule), in
+ * iOS `viewDidLoad` defaults `:177-181` plus the Zeron stale rule), in
  * order: stale project, stale host, first project, first online host /
  * first host. Pure, so it is unit-tested directly; returns the draft
  * unchanged when nothing applies.
@@ -369,7 +369,7 @@ fun normalize(d: NewSessionDraft, o: NewSessionOptions): NewSessionDraft {
  */
 @Composable
 fun rememberNewSessionModel(prompt: String?, side: SideChatParent? = null): NewSessionModel {
-    val app = LocalContext.current.applicationContext as RobocoApplication
+    val app = LocalContext.current.applicationContext as ZeronApplication
     val pageScope = rememberCoroutineScope()
     val model = remember(prompt, side) {
         val feed = app.workspaceFeed

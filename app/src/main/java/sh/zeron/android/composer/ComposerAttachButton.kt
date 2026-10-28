@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,11 +18,11 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.design.CapsuleShape
-import sh.roboco.android.design.Icon
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.SymbolWeight
+import sh.zeron.android.design.CapsuleShape
+import sh.zeron.android.design.Icon
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.SymbolWeight
 
 /**
  * The composer's attach `+` capsule (android-ui-parity #55): the 34 × 34
@@ -38,7 +38,7 @@ import sh.roboco.android.design.SymbolWeight
  * `Glass.PressScale` swell (no source evidence that `.filled()` scales).
  * It is a draw-phase overlay, so a press never recomposes the button.
  *
- * [enabled] is a Roboco addition (ticket 79, offline read-only): the glyph
+ * [enabled] is a Zeron addition (ticket 79, offline read-only): the glyph
  * drops to `Palette.tertiary` and taps are ignored; iOS never disables `+`.
  *
  * @param modifier must stay **first** in the chain: ticket 78 passes 56's
@@ -54,7 +54,7 @@ fun ComposerAttachButton(
     enabled: Boolean = true,
     interactionSource: MutableInteractionSource? = null,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val source = interactionSource ?: remember { MutableInteractionSource() }
     val pressed by source.collectIsPressedAsState()
     // Draw-time overlay, not a palette role (ticket 01's no-copy rule is
@@ -83,7 +83,7 @@ fun ComposerAttachButton(
     ) {
         // The button carries the label; the glyph stays decorative.
         Icon(
-            RobocoIcons.Plus,
+            ZeronIcons.Plus,
             tint = if (enabled) palette.text else palette.tertiary,
             sizePt = 15f,
             weight = SymbolWeight.Semibold,

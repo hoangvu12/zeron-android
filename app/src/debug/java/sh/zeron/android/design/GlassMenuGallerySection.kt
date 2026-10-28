@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -29,18 +29,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.delay
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.glass.GlassMenuPanel
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.glass.Menu
-import sh.roboco.android.design.glass.MenuElement
-import sh.roboco.android.design.glass.MenuIcon
-import sh.roboco.android.design.glass.MenuItem
-import sh.roboco.android.design.glass.MenuLine
-import sh.roboco.android.design.glass.MenuSection
-import sh.roboco.android.design.glass.MenuTrigger
-import sh.roboco.android.design.glass.glassMenu
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.glass.GlassMenuPanel
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.glass.Menu
+import sh.zeron.android.design.glass.MenuElement
+import sh.zeron.android.design.glass.MenuIcon
+import sh.zeron.android.design.glass.MenuItem
+import sh.zeron.android.design.glass.MenuLine
+import sh.zeron.android.design.glass.MenuSection
+import sh.zeron.android.design.glass.MenuTrigger
+import sh.zeron.android.design.glass.glassMenu
+import sh.zeron.android.design.uiStyle
 
 /**
  * The "GlassMenu" page of the debug design gallery (android-ui-parity #15),
@@ -59,7 +59,7 @@ import sh.roboco.android.design.uiStyle
  */
 @Composable
 fun GlassMenuGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val haze = rememberHazeState()
 
@@ -197,7 +197,7 @@ private fun DemoButton(
     onClick: (() -> Unit)? = null,
     menu: () -> Menu,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     BasicText(
         text,
@@ -212,7 +212,7 @@ private fun DemoButton(
 /** One static fixture panel with its caption. */
 @Composable
 private fun StaticPanel(caption: String, lines: List<MenuLine>) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Label(caption, uiStyle(Face.Sans, typeScale.fixed(12f), palette.secondary))
@@ -238,19 +238,19 @@ private fun Label(text: String, style: TextStyle) {
 /** A — delivery menu (title, subtitle row, destructive row). */
 fun fixtureALines(): List<MenuLine> = listOf(
     MenuLine.Title("While the agent works"),
-    MenuLine.Row(MenuItem("Queue for next turn", icon = MenuIcon.Symbol(RobocoIcons.QueueForNextTurn)) {}),
+    MenuLine.Row(MenuItem("Queue for next turn", icon = MenuIcon.Symbol(ZeronIcons.QueueForNextTurn)) {}),
     MenuLine.Row(
-        MenuItem("Steer now", subtitle = "Deliver into the running turn", icon = MenuIcon.Symbol(RobocoIcons.ArrowTurnDownRight)) {},
+        MenuItem("Steer now", subtitle = "Deliver into the running turn", icon = MenuIcon.Symbol(ZeronIcons.ArrowTurnDownRight)) {},
     ),
-    MenuLine.Row(MenuItem("Stop and send", icon = MenuIcon.Symbol(RobocoIcons.StopCircle), destructive = true) {}),
+    MenuLine.Row(MenuItem("Stop and send", icon = MenuIcon.Symbol(ZeronIcons.StopCircle), destructive = true) {}),
 )
 
 /** B — queue row ⋯ (disabled row, disabled destructive row — both keep icon ink). */
 fun fixtureBLines(): List<MenuLine> = listOf(
-    MenuLine.Row(MenuItem("Edit", icon = MenuIcon.Symbol(RobocoIcons.Pencil)) {}),
-    MenuLine.Row(MenuItem("Move Up", icon = MenuIcon.Symbol(RobocoIcons.ArrowUp), disabled = true) {}),
-    MenuLine.Row(MenuItem("Move Down", icon = MenuIcon.Symbol(RobocoIcons.ArrowDown)) {}),
-    MenuLine.Row(MenuItem("Remove", icon = MenuIcon.Symbol(RobocoIcons.Trash), destructive = true, disabled = true) {}),
+    MenuLine.Row(MenuItem("Edit", icon = MenuIcon.Symbol(ZeronIcons.Pencil)) {}),
+    MenuLine.Row(MenuItem("Move Up", icon = MenuIcon.Symbol(ZeronIcons.ArrowUp), disabled = true) {}),
+    MenuLine.Row(MenuItem("Move Down", icon = MenuIcon.Symbol(ZeronIcons.ArrowDown)) {}),
+    MenuLine.Row(MenuItem("Remove", icon = MenuIcon.Symbol(ZeronIcons.Trash), destructive = true, disabled = true) {}),
 )
 
 /** C — model menu (inline sections with brand marks, one pending deferred). */
@@ -287,37 +287,37 @@ private fun pendingModelRows(): MenuElement.Deferred =
 private fun deliveryMenu(pick: (String) -> Unit): Menu = Menu(
     title = "While the agent works",
     children = listOf(
-        MenuItem("Queue for next turn", icon = MenuIcon.Symbol(RobocoIcons.QueueForNextTurn)) { pick("Queue for next turn") },
-        MenuItem("Steer now", subtitle = "Deliver into the running turn", icon = MenuIcon.Symbol(RobocoIcons.ArrowTurnDownRight)) { pick("Steer now") },
-        MenuItem("Stop and send", icon = MenuIcon.Symbol(RobocoIcons.StopCircle), destructive = true) { pick("Stop and send") },
+        MenuItem("Queue for next turn", icon = MenuIcon.Symbol(ZeronIcons.QueueForNextTurn)) { pick("Queue for next turn") },
+        MenuItem("Steer now", subtitle = "Deliver into the running turn", icon = MenuIcon.Symbol(ZeronIcons.ArrowTurnDownRight)) { pick("Steer now") },
+        MenuItem("Stop and send", icon = MenuIcon.Symbol(ZeronIcons.StopCircle), destructive = true) { pick("Stop and send") },
     ),
 )
 
 private fun attachMenu(): Menu = Menu(
     children = listOf(
-        MenuItem("Photo Library", icon = MenuIcon.Symbol(RobocoIcons.PhotoOnRectangle)) {},
-        MenuItem("Take Photo", icon = MenuIcon.Symbol(RobocoIcons.Camera)) {},
-        MenuItem("Choose File", icon = MenuIcon.Symbol(RobocoIcons.Folder)) {},
-        MenuItem("Paste Image", icon = MenuIcon.Symbol(RobocoIcons.DocOnClipboard)) {},
+        MenuItem("Photo Library", icon = MenuIcon.Symbol(ZeronIcons.PhotoOnRectangle)) {},
+        MenuItem("Take Photo", icon = MenuIcon.Symbol(ZeronIcons.Camera)) {},
+        MenuItem("Choose File", icon = MenuIcon.Symbol(ZeronIcons.Folder)) {},
+        MenuItem("Paste Image", icon = MenuIcon.Symbol(ZeronIcons.DocOnClipboard)) {},
     ),
 )
 
 private fun sessionRowMenu(pick: (String) -> Unit): Menu = Menu(
     children = listOf(
-        MenuItem("Pin", icon = MenuIcon.Symbol(RobocoIcons.Pin)) { pick("Pin") },
+        MenuItem("Pin", icon = MenuIcon.Symbol(ZeronIcons.Pin)) { pick("Pin") },
         MenuSection(
             title = "Move to Section",
-            icon = MenuIcon.Symbol(RobocoIcons.Folder),
+            icon = MenuIcon.Symbol(ZeronIcons.Folder),
             inline = false,
             children = listOf(
-                MenuItem("Bugs", icon = MenuIcon.Symbol(RobocoIcons.Folder)) { pick("Move to Section › Bugs") },
-                MenuItem("Research", icon = MenuIcon.Symbol(RobocoIcons.Folder)) { pick("Move to Section › Research") },
-                MenuItem("No Section", icon = MenuIcon.Symbol(RobocoIcons.Tray)) { pick("No Section") },
-                MenuItem("New Section…", icon = MenuIcon.Symbol(RobocoIcons.FolderBadgePlus)) { pick("New Section…") },
+                MenuItem("Bugs", icon = MenuIcon.Symbol(ZeronIcons.Folder)) { pick("Move to Section › Bugs") },
+                MenuItem("Research", icon = MenuIcon.Symbol(ZeronIcons.Folder)) { pick("Move to Section › Research") },
+                MenuItem("No Section", icon = MenuIcon.Symbol(ZeronIcons.Tray)) { pick("No Section") },
+                MenuItem("New Section…", icon = MenuIcon.Symbol(ZeronIcons.FolderBadgePlus)) { pick("New Section…") },
             ),
         ),
-        MenuItem("Rename…", icon = MenuIcon.Symbol(RobocoIcons.Pencil)) { pick("Rename…") },
-        MenuItem("Archive", icon = MenuIcon.Symbol(RobocoIcons.Archivebox), destructive = true) { pick("Archive") },
+        MenuItem("Rename…", icon = MenuIcon.Symbol(ZeronIcons.Pencil)) { pick("Rename…") },
+        MenuItem("Archive", icon = MenuIcon.Symbol(ZeronIcons.Archivebox), destructive = true) { pick("Archive") },
     ),
 )
 
@@ -351,26 +351,26 @@ private fun checkoutMenu(branch: MenuElement.Deferred): Menu = Menu(
 
 private fun groupByProjectMenu(): Menu = Menu(
     children = listOf(
-        MenuItem("New Section…", icon = MenuIcon.Symbol(RobocoIcons.FolderBadgePlus)) {},
-        MenuItem("Collapse All", icon = MenuIcon.Symbol(RobocoIcons.RectangleCompressVertical)) {},
+        MenuItem("New Section…", icon = MenuIcon.Symbol(ZeronIcons.FolderBadgePlus)) {},
+        MenuItem("Collapse All", icon = MenuIcon.Symbol(ZeronIcons.RectangleCompressVertical)) {},
         MenuElement.Deferred(cached = false) {
-            listOf(MenuItem("Group by Project", checked = true, icon = MenuIcon.Symbol(RobocoIcons.SquareStack3dUp)) {})
+            listOf(MenuItem("Group by Project", checked = true, icon = MenuIcon.Symbol(ZeronIcons.SquareStack3dUp)) {})
         },
-        MenuItem("Archived", icon = MenuIcon.Symbol(RobocoIcons.Archivebox)) {},
+        MenuItem("Archived", icon = MenuIcon.Symbol(ZeronIcons.Archivebox)) {},
     ),
 )
 
 private fun longPrMenu(pick: (String) -> Unit): Menu = Menu(
     title = "Fix queue panel layout while the agent steers mid-turn (#12488)",
     children = listOf(
-        MenuItem("Open Pull Request", icon = MenuIcon.Symbol(RobocoIcons.Safari)) { pick("Open Pull Request") },
-        MenuItem("Copy Link", icon = MenuIcon.Symbol(RobocoIcons.Link)) { pick("Copy Link") },
+        MenuItem("Open Pull Request", icon = MenuIcon.Symbol(ZeronIcons.Safari)) { pick("Open Pull Request") },
+        MenuItem("Copy Link", icon = MenuIcon.Symbol(ZeronIcons.Link)) { pick("Copy Link") },
     ),
 )
 
 private fun fortyRowsMenu(pick: (String) -> Unit): Menu = Menu(
     children = (1..40).map { index ->
-        MenuItem("Row $index", icon = MenuIcon.Symbol(RobocoIcons.Folder)) { pick("Row $index") }
+        MenuItem("Row $index", icon = MenuIcon.Symbol(ZeronIcons.Folder)) { pick("Row $index") }
     },
 )
 
@@ -404,11 +404,11 @@ private fun GlassMenuPanelCDarkPreview() {
 
 @Composable
 private fun PanelPreview(appearance: Appearance, lines: List<MenuLine>) {
-    RobocoTheme(appearance) {
+    ZeronTheme(appearance) {
         Box(
             Modifier
                 .size(360.dp, 360.dp)
-                .background(RobocoTheme.palette.background),
+                .background(ZeronTheme.palette.background),
         ) {
             GlassMenuPanel(
                 lines = lines,

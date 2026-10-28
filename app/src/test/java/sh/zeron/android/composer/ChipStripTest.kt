@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
@@ -53,15 +53,15 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.EdgeFade
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.session.ContextReading
-import sh.roboco.android.session.contextChip
-import sh.roboco.android.session.contextUsageCard
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.EdgeFade
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.session.ContextReading
+import sh.zeron.android.session.contextChip
+import sh.zeron.android.session.contextUsageCard
 import java.util.Locale
 import kotlin.math.abs
 
@@ -111,7 +111,7 @@ class ChipStripTest {
         appearance: Appearance = Appearance.Light,
         backdrop: Color = Color.White,
     ) {
-        RobocoTheme(appearance) {
+        ZeronTheme(appearance) {
             GlassMenuHost(hazeState = rememberHazeState()) {
                 Box(Modifier.fillMaxSize().background(backdrop)) {
                     ChipStrip(
@@ -135,7 +135,7 @@ class ChipStripTest {
         canWrite: Boolean,
         onTap: (String) -> Unit,
     ) {
-        RobocoTheme(Appearance.Light) {
+        ZeronTheme(Appearance.Light) {
             GlassMenuHost(hazeState = rememberHazeState()) {
                 Box(
                     Modifier
@@ -627,7 +627,7 @@ class ChipStripTest {
         focusCount = 0
         val state = ScrollState(0)
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 GlassMenuHost(hazeState = rememberHazeState()) {
                     Box(
                         Modifier
@@ -692,7 +692,7 @@ class ChipStripTest {
     fun withoutAGlassMenuHostTheStripThrows() {
         try {
             compose.setContent {
-                RobocoTheme(Appearance.Light) {
+                ZeronTheme(Appearance.Light) {
                     Box(Modifier.fillMaxSize()) {
                         ChipStrip(chipFixtureSession(), emptyMap(), canWrite = true, onChipTap = {})
                     }

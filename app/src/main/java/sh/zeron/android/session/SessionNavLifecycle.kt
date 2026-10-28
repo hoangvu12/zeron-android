@@ -1,7 +1,7 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
-import sh.roboco.android.shell.AppRouter
-import sh.roboco.android.transcript.TranscriptState
+import sh.zeron.android.shell.AppRouter
+import sh.zeron.android.transcript.TranscriptState
 
 /**
  * Ticket 83's "endEdit(commit = null)" (`ios:Session/
@@ -41,7 +41,7 @@ fun interface DraftSaver {
  *   ([onWillAppear] with `hasAppeared`, iOS `viewWillAppear` `:178`) and
  *   `sessionDidAppear` on every appearance.
  *
- * A plain class, retained per [sh.roboco.android.shell.NavEntry] (ticket
+ * A plain class, retained per [sh.zeron.android.shell.NavEntry] (ticket
  * 24's `retain`), so it survives a tab host's disposal and
  * configuration changes. Every method is **main thread only** and
  * idempotent; after [release] every method is a no-op. No Compose.

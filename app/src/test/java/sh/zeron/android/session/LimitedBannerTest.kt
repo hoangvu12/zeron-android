@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -10,12 +10,12 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import uniffi.roboco_core.AgentAccount
-import uniffi.roboco_core.AgentUsageWindow
-import uniffi.roboco_core.ResumeCandidates
-import uniffi.roboco_core.ResumeSwitchOutcome
-import uniffi.roboco_core.SessionLimit
-import uniffi.roboco_core.CoreException
+import uniffi.zeron_core.AgentAccount
+import uniffi.zeron_core.AgentUsageWindow
+import uniffi.zeron_core.ResumeCandidates
+import uniffi.zeron_core.ResumeSwitchOutcome
+import uniffi.zeron_core.SessionLimit
+import uniffi.zeron_core.CoreException
 
 /**
  * The Limited banner (the failover port) on the plain JVM: the pure

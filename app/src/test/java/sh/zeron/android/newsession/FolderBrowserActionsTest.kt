@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import kotlinx.coroutines.CompletableDeferred
@@ -14,13 +14,13 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import sh.roboco.android.design.AlertButtonRole
-import sh.roboco.android.design.Alerts
-import sh.roboco.android.design.RobocoAlert
-import uniffi.roboco_core.CoreException
-import uniffi.roboco_core.FolderEntry
-import uniffi.roboco_core.FolderListing
-import uniffi.roboco_core.PreparedPath
+import sh.zeron.android.design.AlertButtonRole
+import sh.zeron.android.design.Alerts
+import sh.zeron.android.design.ZeronAlert
+import uniffi.zeron_core.CoreException
+import uniffi.zeron_core.FolderEntry
+import uniffi.zeron_core.FolderListing
+import uniffi.zeron_core.PreparedPath
 
 /**
  * [FolderBrowserActions] (android-ui-parity #111): every acceptance row
@@ -84,12 +84,12 @@ class FolderBrowserActionsTest {
 
     /** The alerts the flow shows, captured. */
     private class RecordingAlerts : Alerts {
-        val shown = mutableListOf<RobocoAlert>()
-        override fun show(alert: RobocoAlert) {
+        val shown = mutableListOf<ZeronAlert>()
+        override fun show(alert: ZeronAlert) {
             shown += alert
         }
 
-        override fun updateCurrent(alert: RobocoAlert) {}
+        override fun updateCurrent(alert: ZeronAlert) {}
 
         override fun dismissAll() {}
     }
@@ -145,7 +145,7 @@ class FolderBrowserActionsTest {
     }
 
     /** Drives the alert's Create button with the typed text. */
-    private fun RobocoAlert.createWith(text: String) {
+    private fun ZeronAlert.createWith(text: String) {
         buttons.last().onClick(text)
     }
 
@@ -244,11 +244,11 @@ class FolderBrowserActionsTest {
         runCurrent()
 
         // Descended from a repo row (110's hint) → true.
-        h.controller.load("/srv/roboco", isRepoHint = true)
+        h.controller.load("/srv/zeron", isRepoHint = true)
         runCurrent()
         h.actions.createProject()
         runCurrent()
-        assertEquals("createProject dev-htz /srv/roboco git=true", h.api.calls[1])
+        assertEquals("createProject dev-htz /srv/zeron git=true", h.api.calls[1])
         h.api.answer(1, "space-2")
         runCurrent()
 
@@ -445,7 +445,7 @@ class FolderBrowserActionsTest {
     fun folderErrorMapsEveryEngineErrorFamily() = runTest {
         val h = harness()
         assertEquals(
-            "Couldn't create the folder. Roboco is disconnected.",
+            "Couldn't create the folder. Zeron is disconnected.",
             h.actions.folderError(CoreException.Closed()),
         )
         assertEquals(
@@ -458,8 +458,8 @@ class FolderBrowserActionsTest {
         )
         // CoreProjectWriteApi's no-client throw maps through the platform message.
         assertEquals(
-            "Couldn't create the folder. Roboco is disconnected.",
-            h.actions.folderError(IllegalStateException("Roboco is disconnected.")),
+            "Couldn't create the folder. Zeron is disconnected.",
+            h.actions.folderError(IllegalStateException("Zeron is disconnected.")),
         )
     }
 

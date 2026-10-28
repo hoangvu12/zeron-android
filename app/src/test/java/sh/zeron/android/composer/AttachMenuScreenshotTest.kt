@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,13 +17,13 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.GalleryBackdrop
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.glass.GlassMenuPanel
-import sh.roboco.android.design.glass.Menu
-import sh.roboco.android.design.glass.flattenLevel
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.GalleryBackdrop
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.GlassMenuPanel
+import sh.zeron.android.design.glass.Menu
+import sh.zeron.android.design.glass.flattenLevel
 
 /**
  * The attach menu's goldens (android-ui-parity #87), recorded by
@@ -62,7 +62,7 @@ class AttachMenuScreenshotTest {
 
     private fun shot(appearance: Appearance, menu: Menu, file: String) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 Box(Modifier.fillMaxSize()) {
                     GalleryBackdrop(Modifier.fillMaxSize())
                     GlassMenuPanel(

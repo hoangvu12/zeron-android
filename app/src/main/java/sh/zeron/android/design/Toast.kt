@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.content.res.Configuration
 import android.os.Handler
@@ -68,10 +68,10 @@ import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.glass.GlassSurface
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.glass.ProvideHazeState
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.glass.GlassSurface
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.glass.ProvideHazeState
 import kotlin.math.min
 
 /**
@@ -96,7 +96,7 @@ import kotlin.math.min
  *  - **Copy is the caller's:** `show(text, action?, onAction?)` renders
  *    both strings verbatim; the toast never builds or localizes strings.
  *
- * Roboco adaptations (see the ticket): the anchor follows the *live* chrome
+ * Zeron adaptations (see the ticket): the anchor follows the *live* chrome
  * top with the rise spring (iOS freezes the constraint constant at show
  * time); the keyboard counts as a bottom edge; the hold uses Android's
  * recommended a11y timeout (4000 ms unless "Time to take action" is set);
@@ -319,7 +319,7 @@ private class HoldJobHolder {
  *    ([Motion.toastOut]) in a **new** coroutine (the hold job's own
  *    cancellation must not take the removal down with it); when the tween
  *    finishes the toast is removed by id.
- *  - anchor follow (Roboco adaptation): the rest anchor animates to the
+ *  - anchor follow (Zeron adaptation): the rest anchor animates to the
  *    live chrome top with the rise spring. The first composition starts at
  *    the right value, so the initial placement is not animated.
  */
@@ -374,7 +374,7 @@ private fun ToastCapsule(
                     visible = !dismissing,
                     materializeOnEnter = true,
                     actionClick = {
-                        // Roboco adaptation: once-only. Two taps can be
+                        // Zeron adaptation: once-only. Two taps can be
                         // delivered before the recomposition that flips
                         // `visible`, which would run the handler twice.
                         if (!actionFired) {
@@ -425,7 +425,7 @@ private fun ToastCapsuleBody(
     modifier: Modifier = Modifier,
 ) {
     val typeScale = LocalTypeScale.current
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val labelStyle = uiStyle(Face.SansMedium, typeScale.fixed(15f), palette.text)
     val actionStyle = uiStyle(Face.SansSemibold, typeScale.fixed(14f), palette.background)
     GlassSurface(
@@ -533,7 +533,7 @@ internal fun ToastChromeFixture(
     modifier: Modifier = Modifier,
     chromeVisible: Boolean = true,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val chromeTop = LocalBottomChromeTop.current
     val density = LocalDensity.current
     Box(modifier) {
@@ -599,9 +599,9 @@ private fun ToastDarkPreview() {
 
 @Composable
 private fun ToastPreview(appearance: Appearance) {
-    RobocoTheme(appearance) {
+    ZeronTheme(appearance) {
         ProvideHazeState {
-            Box(Modifier.size(393.dp, 852.dp).background(RobocoTheme.palette.background)) {
+            Box(Modifier.size(393.dp, 852.dp).background(ZeronTheme.palette.background)) {
                 Box(Modifier.fillMaxSize().hazeSource(LocalHazeState.current!!)) {
                     ToastChromeFixture(Modifier.fillMaxSize())
                 }

@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -31,15 +31,15 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.FadingHorizontalScroll
-import sh.roboco.android.design.GlassStage
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.hairlineBorder
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.FadingHorizontalScroll
+import sh.zeron.android.design.GlassStage
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.hairlineBorder
+import sh.zeron.android.design.uiStyle
 
 /**
  * The "Tab bar" page of the debug design gallery (android-ui-parity #26):
@@ -60,7 +60,7 @@ import sh.roboco.android.design.uiStyle
  */
 @Composable
 internal fun TabBarGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     var selected by remember { mutableStateOf(TabId.Sessions) }
     var hold by remember { mutableStateOf(false) }
@@ -192,7 +192,7 @@ internal fun TabBarGallerySection() {
 /** One width frame: the backdrop with the bar, and a caption. */
 @Composable
 private fun WidthFrame(width: Dp, selected: TabId) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         val haze = rememberHazeState()
@@ -215,7 +215,7 @@ private fun WidthFrame(width: Dp, selected: TabId) {
 /** A plain text chip; a `clickable` BasicText, no Material controls. */
 @Composable
 private fun GalleryChip(text: String, active: Boolean, onClick: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     BasicText(
         text,
@@ -240,11 +240,11 @@ private fun GalleryLabel(text: String, style: TextStyle, modifier: Modifier = Mo
 @Preview(name = "tab bar gallery light", widthDp = 434, heightDp = 2100)
 @Composable
 private fun TabBarGalleryLightPreview() {
-    RobocoTheme { TabBarGallerySection() }
+    ZeronTheme { TabBarGallerySection() }
 }
 
 @Preview(name = "tab bar gallery dark", widthDp = 434, heightDp = 2100, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun TabBarGalleryDarkPreview() {
-    RobocoTheme { TabBarGallerySection() }
+    ZeronTheme { TabBarGallerySection() }
 }

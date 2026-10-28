@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -46,18 +46,18 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.glass.GlassProgressKey
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.glass.ProvideHazeState
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.session.SessionChrome
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.glass.GlassProgressKey
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.glass.ProvideHazeState
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.session.SessionChrome
 import kotlin.math.abs
 
 /**
@@ -140,7 +140,7 @@ class QueuePanelTest {
     /**
      * Renders the panel in a 378 dp slot at the window's top-start over a
      * white page, inside the host wiring the ticket names
-     * (`RobocoTheme { ProvideHazeState { GlassMenuHost { … } } }`). The
+     * (`ZeronTheme { ProvideHazeState { GlassMenuHost { … } } }`). The
      * first call mounts; later calls swap the inputs. The frozen-clock
      * recipe (write → notifications → one frame) runs after every call.
      */
@@ -155,7 +155,7 @@ class QueuePanelTest {
         if (!mounted) {
             compose.setContent {
                 val p = placement ?: return@setContent
-                RobocoTheme(Appearance.Light) {
+                ZeronTheme(Appearance.Light) {
                     ProvideHazeState {
                         GlassMenuHost(hazeState = LocalHazeState.current!!) {
                             Box(Modifier.fillMaxSize().background(Color.White)) {
@@ -187,7 +187,7 @@ class QueuePanelTest {
     @Composable
     private fun LongTextProbe(widthDp: (Float) -> Unit) {
         val measurer = rememberTextMeasurer()
-        val style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(15f), RobocoTheme.palette.text)
+        val style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(15f), ZeronTheme.palette.text)
         val localDensity = LocalDensity.current
         SideEffect {
             val layout = measurer.measure(

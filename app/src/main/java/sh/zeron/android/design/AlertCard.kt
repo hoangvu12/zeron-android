@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -48,9 +48,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.HazeState
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.glass.GlassSurface
-import sh.roboco.android.design.glass.LocalHazeState
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.glass.GlassSurface
+import sh.zeron.android.design.glass.LocalHazeState
 
 /**
  * The stateless iOS 26 alert card (ticket 18) — the visual twin of
@@ -101,8 +101,8 @@ internal object AlertTokens {
  * source); `null` draws the fallback fill (previews, screenshots, ticket 43).
  */
 @Composable
-fun RobocoAlertCard(
-    alert: RobocoAlert,
+fun ZeronAlertCard(
+    alert: ZeronAlert,
     fieldValue: TextFieldValue,
     onFieldValueChange: (TextFieldValue) -> Unit,
     onButton: (index: Int) -> Unit,
@@ -111,7 +111,7 @@ fun RobocoAlertCard(
     modifier: Modifier = Modifier,
     fieldFocusRequester: FocusRequester = remember { FocusRequester() },
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     CompositionLocalProvider(LocalHazeState provides hazeState) {
         GlassSurface(
@@ -224,7 +224,7 @@ private fun AlertTextField(
     focusRequester: FocusRequester,
     modifier: Modifier = Modifier,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     BasicTextField(
         value = value,
@@ -277,7 +277,7 @@ private fun AlertProgressSection(
     progress: AlertProgress,
     modifier: Modifier = Modifier,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Column(modifier) {
         val fraction = progress.fraction.coerceIn(0f, 1f)
@@ -322,7 +322,7 @@ private fun AlertProgressSection(
  */
 @Composable
 private fun AlertButtons(
-    alert: RobocoAlert,
+    alert: ZeronAlert,
     fieldValue: TextFieldValue,
     onButton: (Int) -> Unit,
     modifier: Modifier = Modifier,
@@ -392,7 +392,7 @@ private fun AlertButtons(
 /**
  * One button capsule: 48 dp min height, [AlertTokens.controlFill] fill, the
  * pressed overlay `palette.controlFill` over it, no ripple
- * (`indication = null` — `RobocoTheme` already provides `NoIndication`,
+ * (`indication = null` — `ZeronTheme` already provides `NoIndication`,
  * this keeps it explicit). The title is Geist Regular 17, centred, one line
  * with an ellipsis: `text` for Cancel/Default (identical ink — the capture
  * shows no accent and no bold), `danger` for Destructive, `tertiary` while
@@ -411,7 +411,7 @@ private fun AlertButtonCell(
     onButton: (Int) -> Unit,
     tag: String,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val interactionSource = remember { MutableInteractionSource() }
     val pressed by interactionSource.collectIsPressedAsState()
@@ -473,7 +473,7 @@ private fun darken(accent: Color): Color = accent.copy(alpha = 0.88f)
  */
 @Composable
 internal fun AlertStripes(modifier: Modifier = Modifier) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     Column(modifier.fillMaxWidth()) {
         for (i in 0 until 16) {
             Box(
@@ -499,7 +499,7 @@ private fun alertStripe(palette: Palette, i: Int): Color = when (i % 3) {
 
 @Composable
 private fun AlertCardPreviewContent() {
-    val alert = RobocoAlert(
+    val alert = ZeronAlert(
         title = "New Folder",
         message = "Couldn't create the folder. Enter a folder name without path separators.",
         field = AlertField(
@@ -520,7 +520,7 @@ private fun AlertCardPreviewContent() {
             Modifier.fillMaxSize().padding(16.dp),
             contentAlignment = Alignment.Center,
         ) {
-            RobocoAlertCard(
+            ZeronAlertCard(
                 alert = alert,
                 fieldValue = TextFieldValue("../outside"),
                 onFieldValueChange = {},
@@ -535,11 +535,11 @@ private fun AlertCardPreviewContent() {
 @Preview(name = "Alert light", widthDp = 393, heightDp = 852)
 @Composable
 private fun AlertLightPreview() {
-    RobocoTheme(Appearance.Light) { AlertCardPreviewContent() }
+    ZeronTheme(Appearance.Light) { AlertCardPreviewContent() }
 }
 
 @Preview(name = "Alert dark", widthDp = 393, heightDp = 852, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun AlertDarkPreview() {
-    RobocoTheme(Appearance.Dark) { AlertCardPreviewContent() }
+    ZeronTheme(Appearance.Dark) { AlertCardPreviewContent() }
 }

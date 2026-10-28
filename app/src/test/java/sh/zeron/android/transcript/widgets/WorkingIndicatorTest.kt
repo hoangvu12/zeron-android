@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -46,27 +46,27 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LinearFontScaleDensity
-import sh.roboco.android.design.LocalReduceMotion
-import sh.roboco.android.design.Motion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.transcript.ManualPoster
-import sh.roboco.android.transcript.RealizedRow
-import sh.roboco.android.transcript.RowContext
-import sh.roboco.android.transcript.RowModel
-import sh.roboco.android.transcript.TranscriptActions
-import sh.roboco.android.transcript.TranscriptState
-import sh.roboco.android.transcript.WidgetBox
-import uniffi.roboco_core.LayoutFrame
-import uniffi.roboco_core.NoHandle
-import uniffi.roboco_core.RowDisplay
-import uniffi.roboco_core.RowKind
-import uniffi.roboco_core.RowPlacement
-import uniffi.roboco_core.TextSystem
-import uniffi.roboco_core.TranscriptView
-import uniffi.roboco_core.Widget
-import uniffi.roboco_core.WidgetKind
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LinearFontScaleDensity
+import sh.zeron.android.design.LocalReduceMotion
+import sh.zeron.android.design.Motion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.transcript.ManualPoster
+import sh.zeron.android.transcript.RealizedRow
+import sh.zeron.android.transcript.RowContext
+import sh.zeron.android.transcript.RowModel
+import sh.zeron.android.transcript.TranscriptActions
+import sh.zeron.android.transcript.TranscriptState
+import sh.zeron.android.transcript.WidgetBox
+import uniffi.zeron_core.LayoutFrame
+import uniffi.zeron_core.NoHandle
+import uniffi.zeron_core.RowDisplay
+import uniffi.zeron_core.RowKind
+import uniffi.zeron_core.RowPlacement
+import uniffi.zeron_core.TextSystem
+import uniffi.zeron_core.TranscriptView
+import uniffi.zeron_core.Widget
+import uniffi.zeron_core.WidgetKind
 
 /**
  * The Working trailer's geometry, ticking, lifecycle and semantics
@@ -146,8 +146,8 @@ class WorkingIndicatorTest {
     ) {
         compose.setContent {
             CompositionLocalProvider(LocalLifecycleOwner provides owner) {
-                RobocoTheme(Appearance.Light) {
-                    Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+                ZeronTheme(Appearance.Light) {
+                    Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                         Box(Modifier.size(354.dp, boxH)) {
                             WorkingIndicator(sinceMs = sinceMs, streaming = streaming, clock = { nowMs })
                         }
@@ -235,15 +235,15 @@ class WorkingIndicatorTest {
         // (active at ≥ 1.03), which yields bodyFactor ≈ 1.46 — the ticket's
         // table (label 20.25 px, row 54) assumes the exact 1.5, so the test
         // uses ticket 22's linear override (as TypeGalleryDensityTest does)
-        // and provides it OUTSIDE RobocoTheme so the theme's
+        // and provides it OUTSIDE ZeronTheme so the theme's
         // remember(density) { TypeScale.from(density) } sees it.
         compose.setContent {
             CompositionLocalProvider(
                 LocalLifecycleOwner provides owner,
                 LocalDensity provides LinearFontScaleDensity(1f, 1.5f),
             ) {
-                RobocoTheme(Appearance.Light) {
-                    Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+                ZeronTheme(Appearance.Light) {
+                    Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                         Box(Modifier.size(354.dp, 54.dp)) {
                             WorkingIndicator(sinceMs = nowMs - 75_000L, streaming = false, clock = { nowMs })
                         }
@@ -267,8 +267,8 @@ class WorkingIndicatorTest {
     @Test
     fun theDoneToolStatusIconIsA12dpBoxCentredInThe15_75Rect() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
-                Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+            ZeronTheme(Appearance.Light) {
+                Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                     Box(Modifier.testTag("tool-box").size(15.75.dp)) {
                         ToolStatusWidget(running = false, failed = false)
                     }
@@ -288,8 +288,8 @@ class WorkingIndicatorTest {
     @Test
     fun runningToolStatusBeatsFailedAndBothSpinnersFillTheRect() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
-                Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+            ZeronTheme(Appearance.Light) {
+                Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                     Row(horizontalArrangement = Arrangement.spacedBy(32.dp)) {
                         Box(Modifier.testTag("tool-box").size(15.75.dp)) {
                             ToolStatusWidget(running = true, failed = true)
@@ -358,8 +358,8 @@ class WorkingIndicatorTest {
         var shown by mutableStateOf(true)
         compose.setContent {
             CompositionLocalProvider(LocalLifecycleOwner provides owner) {
-                RobocoTheme(Appearance.Light) {
-                    Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+                ZeronTheme(Appearance.Light) {
+                    Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                         if (shown) {
                             Box(Modifier.size(354.dp, 36.dp)) {
                                 WorkingIndicator(sinceMs = nowMs - 74_500L, streaming = false, clock = { nowMs })
@@ -402,8 +402,8 @@ class WorkingIndicatorTest {
         var streaming by mutableStateOf(false)
         compose.setContent {
             CompositionLocalProvider(LocalLifecycleOwner provides owner) {
-                RobocoTheme(Appearance.Light) {
-                    Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+                ZeronTheme(Appearance.Light) {
+                    Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                         Box(Modifier.size(354.dp, 36.dp)) {
                             WorkingIndicator(sinceMs = nowMs - 74_500L, streaming = streaming, clock = { nowMs })
                         }
@@ -438,8 +438,8 @@ class WorkingIndicatorTest {
     @Test
     fun theDecorativeWidgetsExposeNoActionsOrDescriptions() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
-                Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+            ZeronTheme(Appearance.Light) {
+                Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                     Row(horizontalArrangement = Arrangement.spacedBy(32.dp)) {
                         Box(Modifier.testTag("tool-box").size(15.75.dp)) {
                             ToolStatusWidget(running = false, failed = true)
@@ -478,7 +478,7 @@ class WorkingIndicatorTest {
         val workingSince = System.currentTimeMillis() - 60_000L
         compose.setContent {
             CompositionLocalProvider(LocalLifecycleOwner provides owner) {
-                RobocoTheme(Appearance.Light) {
+                ZeronTheme(Appearance.Light) {
                     Box(Modifier.size(390.dp, 76.dp)) {
                         val widgets = listOf(
                             Widget(1u, WidgetKind.ToolStatus(running = false, failed = true), 18f, 0f, 15.75f, 15.75f, null, null),
@@ -545,11 +545,11 @@ class WorkingIndicatorTest {
         val taps = intArrayOf(0)
         compose.setContent {
             CompositionLocalProvider(LocalLifecycleOwner provides owner) {
-                RobocoTheme(Appearance.Light) {
+                ZeronTheme(Appearance.Light) {
                     Box(
                         Modifier
                             .fillMaxSize()
-                            .background(RobocoTheme.palette.background)
+                            .background(ZeronTheme.palette.background)
                             .clickable(interactionSource = null, indication = null) { taps[0]++ },
                     ) {
                         Box(Modifier.size(354.dp, 36.dp)) {
@@ -576,9 +576,9 @@ class WorkingIndicatorTest {
         // the elapsed label keeps advancing under reduced motion.
         compose.setContent {
             CompositionLocalProvider(LocalLifecycleOwner provides owner) {
-                RobocoTheme(Appearance.Light) {
+                ZeronTheme(Appearance.Light) {
                     CompositionLocalProvider(LocalReduceMotion provides true) {
-                        Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+                        Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                             Box(Modifier.size(354.dp, 36.dp)) {
                                 WorkingIndicator(sinceMs = nowMs - 74_500L, streaming = false, clock = { nowMs })
                             }

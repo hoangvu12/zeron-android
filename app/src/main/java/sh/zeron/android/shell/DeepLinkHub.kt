@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import android.util.Log
 
@@ -17,13 +17,13 @@ internal var deepLinksLog: (String) -> Unit = { message -> Log.i("DeepLinks", me
  * generalised from notifications to every inbound link.
  *
  * Main thread only (Compose callbacks, `onCreate`/`onNewIntent` already
- * run there). Process-wide — it lives on `RobocoApplication`, so a link
+ * run there). Process-wide — it lives on `ZeronApplication`, so a link
  * held at cold start survives activity recreation:
  *
  * - [submit] routes a [DeepLink.Pair] straight to the registered pairing
  *   handler (held in a one-slot `pendingPair` until 139 registers) and
  *   **honours it on every root** — the pairing root is where
- *   `roboco://pair` matters most. Any other link is dropped while the
+ *   `zeron://pair` matters most. Any other link is dropped while the
  *   pairing root is on screen (iOS ignores `-route` on the SignIn root),
  *   dispatched at once when a router is attached, otherwise held in the
  *   one `pending` slot — the **latest submit wins**.
@@ -40,7 +40,7 @@ internal var deepLinksLog: (String) -> Unit = { message -> Log.i("DeepLinks", me
  * - [registerPairingHandler] delivers a held pair link on registration
  *   and returns the unregister lambda ticket 139 calls in `onDispose`.
  *
- * [knownChatIds] must return an in-memory list (`RobocoApplication`'s
+ * [knownChatIds] must return an in-memory list (`ZeronApplication`'s
  * `workspaceFeed.snapshot`), never a blocking FFI call on the main
  * thread — and it is only ever read for an `OpenChat` with a raw id.
  */
@@ -99,7 +99,7 @@ class DeepLinkHub(
     }
 
     /**
-     * Ticket 139's handler for `roboco://pair…` links (unregister in
+     * Ticket 139's handler for `zeron://pair…` links (unregister in
      * `onDispose`). A held pair link is delivered right here — including
      * while the pairing root is on screen.
      */

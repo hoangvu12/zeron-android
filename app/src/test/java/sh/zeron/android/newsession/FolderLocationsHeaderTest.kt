@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -42,8 +42,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The locations rail and the search/typed-path field's geometry, taps,
@@ -91,8 +91,8 @@ class FolderLocationsHeaderTest {
         background: Color? = null,
     ) {
         compose.setContent {
-            RobocoTheme(appearance) {
-                Box(Modifier.fillMaxSize().background(background ?: RobocoTheme.palette.background)) {
+            ZeronTheme(appearance) {
+                Box(Modifier.fillMaxSize().background(background ?: ZeronTheme.palette.background)) {
                     Column(Modifier.testTag("header-host")) {
                         if (interactive) {
                             var text by remember { mutableStateOf(spec.query) }

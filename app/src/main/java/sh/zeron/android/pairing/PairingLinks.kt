@@ -1,17 +1,17 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import java.util.Locale
-import sh.roboco.android.shell.percentDecode
+import sh.zeron.android.shell.percentDecode
 
 /**
  * The inbound pairing-link grammar (android-ui-parity #139): the
- * `roboco://pair#url=` deep link (ticket 36 hands the whole string here
+ * `zeron://pair#url=` deep link (ticket 36 hands the whole string here
  * via `DeepLink.Pair`) and the `text/plain` share candidates.
  *
  * Pure Kotlin, **no `android.*`** — the grammar is plain-JVM-testable
  * (one Robolectric test pins the `encodedFragment` equivalence with
  * `android.net.Uri`). Ticket 138's QR decoding calls
- * [urlFromDeepLink] on its unwrapped `roboco://pair#url=` payload too;
+ * [urlFromDeepLink] on its unwrapped `zeron://pair#url=` payload too;
  * whichever of 138/139 landed first created this object, the other
  * extended it.
  *
@@ -24,11 +24,11 @@ import sh.roboco.android.shell.percentDecode
  */
 object PairingLinks {
 
-    /** `roboco://pair#url=` — what [deepLinkFor] writes. */
-    const val DEEP_LINK_PREFIX = "roboco://pair#url="
+    /** `zeron://pair#url=` — what [deepLinkFor] writes. */
+    const val DEEP_LINK_PREFIX = "zeron://pair#url="
 
     /**
-     * The share-candidate cap (a Roboco guard, not a source value): it
+     * The share-candidate cap (a Zeron guard, not a source value): it
      * bounds the forwarded extra and the FFI parse calls for a
      * pathological share. Real shares carry one link.
      */
@@ -49,7 +49,7 @@ object PairingLinks {
     }
 
     /**
-     * `roboco://pair#url=<percent-encoded pairing URL>` → the pairing
+     * `zeron://pair#url=<percent-encoded pairing URL>` → the pairing
      * URL, or null. Decoded **exactly once** (the web `/pair` landing
      * decodes twice — `URLSearchParams` + `decodeURIComponent` — and a
      * second pass here would corrupt a literal `%25…`), `+` kept
@@ -116,7 +116,7 @@ object PairingLinks {
         shareCandidates(text).firstOrNull(accepts)
 
     /**
-     * `roboco://pair#url=` + strict percent-encoding of [url]: each
+     * `zeron://pair#url=` + strict percent-encoding of [url]: each
      * UTF-8 byte outside the unreserved set `A–Z a–z 0–9 - . _ ~`
      * becomes `%XX` with uppercase hex, so
      * `urlFromDeepLink(deepLinkFor(u)) == u` for every clean `u`.

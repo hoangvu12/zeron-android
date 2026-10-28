@@ -1,6 +1,6 @@
-package sh.roboco.android.core
+package sh.zeron.android.core
 
-import uniffi.roboco_core.WallpaperEffect
+import uniffi.zeron_core.WallpaperEffect
 
 /**
  * The wallpaper effect catalogue, verbatim from

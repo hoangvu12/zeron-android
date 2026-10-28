@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -15,9 +15,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.AndroidMeasurer
-import sh.roboco.android.core.Face
-import sh.roboco.android.core.FontChain
+import sh.zeron.android.core.AndroidMeasurer
+import sh.zeron.android.core.Face
+import sh.zeron.android.core.FontChain
 
 /**
  * The text-engine specimen (debug gallery, ticket 60): the shared
@@ -37,7 +37,7 @@ fun TextEngineSpecimen(
     cjkSource: String? = FontChain.cjkSource,
     measurerCalls: Long = AndroidMeasurer.Stats.calls.get(),
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
 
     Box(Modifier.fillMaxSize().background(palette.background)) {
@@ -77,11 +77,11 @@ fun TextEngineSpecimen(
 @Preview(name = "Text engine light")
 @Composable
 private fun TextEngineSpecimenLightPreview() {
-    RobocoTheme(Appearance.Light) { TextEngineSpecimen(cjkSource = "fixture", measurerCalls = 0) }
+    ZeronTheme(Appearance.Light) { TextEngineSpecimen(cjkSource = "fixture", measurerCalls = 0) }
 }
 
 @Preview(name = "Text engine dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun TextEngineSpecimenDarkPreview() {
-    RobocoTheme(Appearance.Dark) { TextEngineSpecimen(cjkSource = "fixture", measurerCalls = 0) }
+    ZeronTheme(Appearance.Dark) { TextEngineSpecimen(cjkSource = "fixture", measurerCalls = 0) }
 }

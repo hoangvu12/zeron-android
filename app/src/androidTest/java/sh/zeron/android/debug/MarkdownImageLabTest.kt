@@ -1,4 +1,4 @@
-package sh.roboco.android.debug
+package sh.zeron.android.debug
 
 import android.app.Activity
 import android.app.Instrumentation
@@ -20,7 +20,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import sh.roboco.android.transcript.widgets.ImageTileReferenceKey
+import sh.zeron.android.transcript.widgets.ImageTileReferenceKey
 
 /**
  * The markdown-image lab flows (ticket 137; the ports of pr817's

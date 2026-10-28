@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
@@ -9,8 +9,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The Wallpaper rows goldens (android-ui-parity #97): the gallery fixtures
@@ -27,7 +27,7 @@ import sh.roboco.android.design.RobocoTheme
  * "Shown behind new chats and the sessions list" subtitle, chevron.
  *
  * Record with
- * `./gradlew :app:recordRoborazziDebug --tests sh.roboco.android.settings.WallpaperRowsScreenshotTest`,
+ * `./gradlew :app:recordRoborazziDebug --tests sh.zeron.android.settings.WallpaperRowsScreenshotTest`,
  * verify with `./gradlew :app:verifyRoborazziDebug --tests …`. Paths are
  * relative to the `roborazzi { outputDir }` (`src/test/screenshots`),
  * landing under `settings/`.
@@ -42,7 +42,7 @@ class WallpaperRowsScreenshotTest {
 
     private fun shot(appearance: Appearance, file: String) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 WallpaperRowsGallerySection(showLive = false)
             }
         }

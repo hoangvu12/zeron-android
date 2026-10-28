@@ -1,4 +1,4 @@
-package sh.roboco.android.accounts
+package sh.zeron.android.accounts
 
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.runtime.Composable
@@ -20,24 +20,24 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import sh.roboco.android.RobocoApplication
-import sh.roboco.android.design.GroupedAccessory
-import sh.roboco.android.design.GroupedPosition
-import sh.roboco.android.design.GroupedRow
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.groupedSection
-import sh.roboco.android.design.settingsTag
-import sh.roboco.android.shell.LocalNavEntry
-import sh.roboco.android.shell.LocalNavStack
-import uniffi.roboco_core.AgentAccountsSnapshot
-import uniffi.roboco_core.AgentUsageWindow
-import uniffi.roboco_core.DeviceView
-import uniffi.roboco_core.WorkspaceSnapshot
+import sh.zeron.android.ZeronApplication
+import sh.zeron.android.design.GroupedAccessory
+import sh.zeron.android.design.GroupedPosition
+import sh.zeron.android.design.GroupedRow
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.groupedSection
+import sh.zeron.android.design.settingsTag
+import sh.zeron.android.shell.LocalNavEntry
+import sh.zeron.android.shell.LocalNavStack
+import uniffi.zeron_core.AgentAccountsSnapshot
+import uniffi.zeron_core.AgentUsageWindow
+import uniffi.zeron_core.DeviceView
+import uniffi.zeron_core.WorkspaceSnapshot
 
 /**
  * The Settings "Agent Accounts" section (android-next#05) — the port of
  * PR #578's Provider Accounts summary, placed where #578 put it: ahead of
- * the computers (Roboco's Devices) section. One row per harness showing
+ * the computers (Zeron's Devices) section. One row per harness showing
  * the login in use and its fullest window as a small meter; the row opens
  * the Accounts & Usage page on the section's computer.
  *
@@ -47,7 +47,7 @@ import uniffi.roboco_core.WorkspaceSnapshot
  * an offline engine keeps the section with its clear offline state row.
  */
 object AgentAccountsSectionCopy {
-    /** The section header (iOS's "Provider Accounts", Roboco's wording). */
+    /** The section header (iOS's "Provider Accounts", Zeron's wording). */
     const val Header = AccountsCopy.SectionHeader
 
     /** No paired engine. */
@@ -55,7 +55,7 @@ object AgentAccountsSectionCopy {
 
     /** No paired engine's message. */
     const val NoComputerMessage =
-        "Open Roboco on a computer to run sessions and see its accounts here."
+        "Open Zeron on a computer to run sessions and see its accounts here."
 
     /** The pending row. */
     const val Loading = "Loading accounts\u2026"
@@ -67,7 +67,7 @@ object AgentAccountsSectionCopy {
     const val Empty = "No agent accounts"
 
     /** The empty state's message. */
-    fun emptyMessage(deviceName: String) = "Sign in to an agent from Roboco on $deviceName."
+    fun emptyMessage(deviceName: String) = "Sign in to an agent from Zeron on $deviceName."
 }
 
 /** The row ids — the tags are [settingsTag] of these. */
@@ -201,7 +201,7 @@ class AgentAccountsSectionState internal constructor(
 
     /** The newest probe's wording, for the section's footer. */
     val updatedText: String?
-        get() = snapshot?.let { sh.roboco.android.accounts.updatedText(it, nowMs()) }
+        get() = snapshot?.let { sh.zeron.android.accounts.updatedText(it, nowMs()) }
 
     /** The section's device id (the click's subject). */
     internal val deviceId: String? get() = device()?.id
@@ -293,7 +293,7 @@ fun rememberAgentAccountsSectionState(
     nowMs: () -> Long = System::currentTimeMillis,
     onOpen: ((deviceId: String) -> Unit)? = null,
 ): AgentAccountsSectionState {
-    val app = LocalContext.current.applicationContext as? RobocoApplication
+    val app = LocalContext.current.applicationContext as? ZeronApplication
     val snapshotState = (workspace ?: app?.workspaceFeed?.snapshot)?.collectAsState()
         ?: remember { androidx.compose.runtime.mutableStateOf<WorkspaceSnapshot?>(null) }
     val effectiveCore = core ?: remember(app) {
@@ -327,26 +327,26 @@ fun rememberAgentAccountsSectionState(
 /** The no-core fallback: loads fail as unavailable, nothing is cached. */
 private object NoAccountsCore : AccountsCore {
     override suspend fun list(deviceId: String, forceUsage: Boolean): AgentAccountsSnapshot =
-        throw uniffi.roboco_core.CoreException.HostUnavailable("No core")
+        throw uniffi.zeron_core.CoreException.HostUnavailable("No core")
 
     override suspend fun activate(
         deviceId: String,
         harness: String,
         accountId: String,
-    ): AgentAccountsSnapshot = throw uniffi.roboco_core.CoreException.HostUnavailable("No core")
+    ): AgentAccountsSnapshot = throw uniffi.zeron_core.CoreException.HostUnavailable("No core")
 
     override suspend fun forget(
         deviceId: String,
         harness: String,
         accountId: String,
-    ): AgentAccountsSnapshot = throw uniffi.roboco_core.CoreException.HostUnavailable("No core")
+    ): AgentAccountsSnapshot = throw uniffi.zeron_core.CoreException.HostUnavailable("No core")
 
     override fun cached(deviceId: String): AgentAccountsSnapshot? = null
 }
 
 /**
  * The default row handler: push [AgentAccountsRoute] (animated) on the
- * enclosing [sh.roboco.android.shell.NavStack], with the same
+ * enclosing [sh.zeron.android.shell.NavStack], with the same
  * mid-transition guard as the Devices section's.
  */
 @Composable
@@ -393,7 +393,7 @@ fun AgentAccountsRow(
             position = position,
             modifier = modifier,
             subtitle = AgentAccountsSectionCopy.NoComputerMessage,
-            icon = RobocoIcons.Desktopcomputer,
+            icon = ZeronIcons.Desktopcomputer,
             accessories = emptyList(),
             testTag = settingsTag(spec.id),
         )
@@ -401,7 +401,7 @@ fun AgentAccountsRow(
             title = AgentAccountsSectionCopy.Loading,
             position = position,
             modifier = modifier,
-            icon = RobocoIcons.Gauge,
+            icon = ZeronIcons.Gauge,
             accessories = emptyList(),
             testTag = settingsTag(spec.id),
         )
@@ -410,7 +410,7 @@ fun AgentAccountsRow(
             position = position,
             modifier = modifier,
             subtitle = spec.message,
-            icon = RobocoIcons.ExclamationmarkTriangle,
+            icon = ZeronIcons.ExclamationmarkTriangle,
             accessories = emptyList(),
             testTag = settingsTag(spec.id),
         )

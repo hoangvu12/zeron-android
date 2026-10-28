@@ -1,8 +1,8 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import sh.roboco.android.shell.NavKind
+import sh.zeron.android.shell.NavKind
 
 /**
  * The pure functions of the push/pop choreography (android-ui-parity

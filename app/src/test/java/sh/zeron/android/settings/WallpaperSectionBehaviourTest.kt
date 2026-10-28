@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import android.net.Uri
 import androidx.activity.compose.LocalActivityResultRegistryOwner
@@ -46,11 +46,11 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.core.WallpaperStore
-import sh.roboco.android.design.ActionSheetHost
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
-import uniffi.roboco_core.WallpaperEffect
+import sh.zeron.android.core.WallpaperStore
+import sh.zeron.android.design.ActionSheetHost
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
+import uniffi.zeron_core.WallpaperEffect
 
 /**
  * The Wallpaper section's behaviour (android-ui-parity #97) through the
@@ -143,14 +143,14 @@ class WallpaperSectionBehaviourTest {
         compose.setContent {
             val current = this.appearance
             key(current) {
-                RobocoTheme(current) {
+                ZeronTheme(current) {
                     CompositionLocalProvider(LocalActivityResultRegistryOwner provides owner) {
                         ActionSheetHost {
                             val section = rememberWallpaperSectionState(fake)
                             LazyColumn(
                                 Modifier
                                     .fillMaxSize()
-                                    .background(RobocoTheme.palette.background),
+                                    .background(ZeronTheme.palette.background),
                             ) {
                                 wallpaperSection(section)
                             }

@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.background
@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.sp
  */
 @Composable
 fun HapticsGallerySection(hardware: HapticHardware, hasView: Boolean) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val feedback = LocalFeedback.current
     val caps = hardware.caps(hasView)
 
@@ -110,7 +110,7 @@ private fun Hairline(color: Color) {
 @Composable
 private fun HapticsGallerySectionLight() {
     ProvideFeedback {
-        RobocoTheme(Appearance.System) {
+        ZeronTheme(Appearance.System) {
             HapticsGallerySection(HapticHardware(34, ALL_PRIMITIVES.toSet(), hasVibrator = true), hasView = true)
         }
     }
@@ -120,7 +120,7 @@ private fun HapticsGallerySectionLight() {
 @Composable
 private fun HapticsGallerySectionDark() {
     ProvideFeedback {
-        RobocoTheme(Appearance.System) {
+        ZeronTheme(Appearance.System) {
             HapticsGallerySection(HapticHardware(34, ALL_PRIMITIVES.toSet(), hasVibrator = true), hasView = true)
         }
     }

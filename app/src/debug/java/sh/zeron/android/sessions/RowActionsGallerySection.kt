@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import android.content.res.Configuration
 import androidx.compose.foundation.clickable
@@ -17,14 +17,14 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.MutableSharedFlow
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalToaster
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.ToastHost
-import sh.roboco.android.design.uiStyle
-import uniffi.roboco_core.CoreException
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalToaster
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.ToastHost
+import sh.zeron.android.design.uiStyle
+import uniffi.zeron_core.CoreException
 
 /**
  * The fake's scripted failure mode — each maps to one row of the ticket's
@@ -95,7 +95,7 @@ private class FakeSessionWrites(var mode: WriteMode = WriteMode.Ok) : SessionWri
  */
 @Composable
 fun RowActionsGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val toaster = LocalToaster.current
     val scope = rememberCoroutineScope()
@@ -165,11 +165,11 @@ private fun GalleryLabel(text: String, style: TextStyle, modifier: Modifier = Mo
 @Preview(name = "Row actions gallery light")
 @Composable
 private fun RowActionsGalleryLightPreview() {
-    RobocoTheme(Appearance.Light) { ToastHost { RowActionsGallerySection() } }
+    ZeronTheme(Appearance.Light) { ToastHost { RowActionsGallerySection() } }
 }
 
 @Preview(name = "Row actions gallery dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun RowActionsGalleryDarkPreview() {
-    RobocoTheme(Appearance.Dark) { ToastHost { RowActionsGallerySection() } }
+    ZeronTheme(Appearance.Dark) { ToastHost { RowActionsGallerySection() } }
 }

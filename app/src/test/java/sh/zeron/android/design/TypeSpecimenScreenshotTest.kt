@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
@@ -30,7 +30,7 @@ class TypeSpecimenScreenshotTest {
 
     private fun specimenShot(appearance: Appearance, file: String) {
         compose.setContent {
-            RobocoTheme(appearance) { TypeSpecimen() }
+            ZeronTheme(appearance) { TypeSpecimen() }
         }
         compose.onRoot().captureRoboImage(file)
     }
@@ -61,7 +61,7 @@ class TypeSpecimenScreenshotTest {
     @Config(sdk = [36], qualifiers = "w411dp-h891dp-xxhdpi")
     fun fontsMissingLight() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 FontsMissingScreen(listOf("fonts/Geist.ttf", "fonts/GeistMono.ttf"))
             }
         }
@@ -72,7 +72,7 @@ class TypeSpecimenScreenshotTest {
     @Config(sdk = [36], qualifiers = "w411dp-h891dp-xxhdpi")
     fun fontsMissingDark() {
         compose.setContent {
-            RobocoTheme(Appearance.Dark) {
+            ZeronTheme(Appearance.Dark) {
                 FontsMissingScreen(listOf("fonts/Geist.ttf", "fonts/GeistMono.ttf"))
             }
         }

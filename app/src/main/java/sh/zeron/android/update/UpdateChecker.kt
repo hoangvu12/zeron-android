@@ -1,4 +1,4 @@
-package sh.roboco.android.update
+package sh.zeron.android.update
 
 import java.io.IOException
 
@@ -66,7 +66,7 @@ sealed interface UpdateCheckResult {
 /**
  * The engine-version nudge (the ticket's behaviour 7): one paired engine
  * reporting a version **older than the new release** adds the "Update
- * Roboco on your computer too." line. Engines without a version never
+ * Zeron on your computer too." line. Engines without a version never
  * nudge, and neither does a release the engines already run.
  */
 fun engineNeedsNudge(engineVersions: List<String?>, release: String): Boolean {

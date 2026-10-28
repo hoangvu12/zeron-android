@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -18,8 +18,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * Ticket 35's goldens: the app root with the fake roots on the ticket's
@@ -60,8 +60,8 @@ class AppRootScreenshotTest {
 
     @Composable
     private fun Root(appearance: Appearance) {
-        RobocoTheme(appearance) {
-            val palette = RobocoTheme.palette
+        ZeronTheme(appearance) {
+            val palette = ZeronTheme.palette
             AppRoot(
                 input = input.value,
                 state = remember { AppRootState() },
@@ -150,7 +150,7 @@ class AppRootScreenshotTest {
 
     @Test
     fun coreFailedLight() {
-        input.value = RootInput.CoreFailed("libroboco_core.so not found")
+        input.value = RootInput.CoreFailed("libzeron_core.so not found")
         shot("app_root_core_failed_light.png", Appearance.Light)
     }
 }

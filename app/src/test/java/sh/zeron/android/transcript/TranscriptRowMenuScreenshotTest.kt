@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.content.Context
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,17 +20,17 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.core.Fonts
-import sh.roboco.android.core.TextEngine
-import sh.roboco.android.core.UniffiSandbox
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.ContextMenuHost
-import sh.roboco.android.design.LocalFeedback
-import sh.roboco.android.design.NoFeedback
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.ToastHost
-import sh.roboco.android.design.glass.Glass
+import sh.zeron.android.core.Fonts
+import sh.zeron.android.core.TextEngine
+import sh.zeron.android.core.UniffiSandbox
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ContextMenuHost
+import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.design.NoFeedback
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.ToastHost
+import sh.zeron.android.design.glass.Glass
 
 /**
  * The row-menu goldens (android-ui-parity #128), recorded by
@@ -96,7 +96,7 @@ class TranscriptRowMenuScreenshotTest {
         val state = fedRowMenuState()
         try {
             compose.setContent {
-                RobocoTheme(appearance) {
+                ZeronTheme(appearance) {
                     // Frozen glyph clock: the Working row's trailer would
                     // otherwise run the theme's endless withFrameNanos loop,
                     // so the auto-advancing clock never idles (and the golden

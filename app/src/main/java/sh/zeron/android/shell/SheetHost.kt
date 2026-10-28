@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import android.os.Looper
 import android.util.Log
@@ -36,10 +36,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import sh.roboco.android.design.LocalReduceMotion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.SmoothRoundedShape
-import sh.roboco.android.design.sheet.GlassSheetDefaults
+import sh.zeron.android.design.LocalReduceMotion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.SmoothRoundedShape
+import sh.zeron.android.design.sheet.GlassSheetDefaults
 
 /**
  * How [SheetHost] presents a sheet (android-ui-parity #31): the port of
@@ -388,7 +388,7 @@ fun SheetHost(state: SheetHostState = remember { SheetHostState() }, content: @C
     val reduceMotion = LocalReduceMotion.current
     val density = LocalDensity.current
     val tabletPx = with(density) { PageSheetDefaults.TabletBreakpoint.toPx() }
-    val scrimMax = if (RobocoTheme.isDark) PageSheetDefaults.ScrimAlphaDark else PageSheetDefaults.ScrimAlphaLight
+    val scrimMax = if (ZeronTheme.isDark) PageSheetDefaults.ScrimAlphaDark else PageSheetDefaults.ScrimAlphaLight
 
     // The host's scope is where every animated dismissal (and the
     // spring-back) runs, so they follow the composition's

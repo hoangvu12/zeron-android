@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -25,7 +25,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
-import sh.roboco.android.core.Face
+import sh.zeron.android.core.Face
 
 // ---------------------------------------------------------------------------
 // Debug design-gallery sections (registered by ticket 22; this file only
@@ -107,7 +107,7 @@ private val statusToneNames = listOf("working", "input", "failed", "done", "idle
  */
 @Composable
 fun PaletteGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val light = Palette.Light
     val dark = Palette.Dark
     Column {
@@ -174,7 +174,7 @@ private fun Palette.statusToneByName(name: String): Color = when (name) {
  */
 @Composable
 fun ShapesGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     // 0.6 alpha through rgba, per the palette rule (never Color.copy).
     val dangerSoft = if (palette.isDark) rgba(0xF87171, 0.6) else rgba(0xDC2626, 0.6)
     Column {
@@ -204,13 +204,13 @@ fun ShapesGallerySection() {
 }
 
 // ---------------------------------------------------------------------------
-// Previews (both sections in one RobocoTheme; dark follows the uiMode).
+// Previews (both sections in one ZeronTheme; dark follows the uiMode).
 // ---------------------------------------------------------------------------
 
 @Preview(name = "Theme - Light")
 @Composable
 private fun ThemeSectionsLightPreview() {
-    RobocoTheme(Appearance.System) {
+    ZeronTheme(Appearance.System) {
         Column {
             PaletteGallerySection()
             ShapesGallerySection()
@@ -221,7 +221,7 @@ private fun ThemeSectionsLightPreview() {
 @Preview(name = "Theme - Dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun ThemeSectionsDarkPreview() {
-    RobocoTheme(Appearance.System) {
+    ZeronTheme(Appearance.System) {
         Column {
             PaletteGallerySection()
             ShapesGallerySection()

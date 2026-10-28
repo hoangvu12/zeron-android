@@ -1,4 +1,4 @@
-package sh.roboco.android.core
+package sh.zeron.android.core
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.okio.OkioStorage

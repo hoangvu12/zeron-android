@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.Easing
@@ -418,9 +418,9 @@ object Motion {
     val TranscriptBounce = IosSpring("transcriptBounce", 0.46167, 1f)
 
     // ------------------------------------------------ connection line (50)
-    // The Sessions front page's multi-engine connection line (the Roboco
+    // The Sessions front page's multi-engine connection line (the Zeron
     // stand-in for the never-shipped offline banner). This is the one
-    // entrance iOS has no counterpart for, so the numbers are the Roboco
+    // entrance iOS has no counterpart for, so the numbers are the Zeron
     // desktop's `motion::fade_in` (`crates/ui/src/motion.rs:442-450`) over
     // its `FADE_IN` (`crates/proto/src/motion.rs:215,289`) — the same 500 ms
     // ease-out-expo entrance the web's `rb-fade-in` uses
@@ -529,7 +529,7 @@ object Motion {
     }
 
     // ------------------------------------------------------- session list (41)
-    // The shared session list's two Roboco-chosen timings. iOS has no
+    // The shared session list's two Zeron-chosen timings. iOS has no
     // source numbers for either (UIKit's diffable animation is
     // unmeasured and `deselectItem(at:animated: true)`'s fade is
     // unstated), so both are approximations to tune side by side with an

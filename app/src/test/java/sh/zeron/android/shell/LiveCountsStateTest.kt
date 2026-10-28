@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -9,15 +9,15 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import sh.roboco.android.sessions.SessionsScreenFixtures
-import uniffi.roboco_core.ChatIndicator
-import uniffi.roboco_core.FrontPage
-import uniffi.roboco_core.PullRequestGroups
-import uniffi.roboco_core.WorkspaceSnapshot
+import sh.zeron.android.sessions.SessionsScreenFixtures
+import uniffi.zeron_core.ChatIndicator
+import uniffi.zeron_core.FrontPage
+import uniffi.zeron_core.PullRequestGroups
+import uniffi.zeron_core.WorkspaceSnapshot
 
 /**
  * /code-review F3 (ticket 27 step 4): the shell owner's live counts follow
- * the workspace feed. `RobocoAppContent` collects
+ * the workspace feed. `ZeronAppContent` collects
  * `rememberLiveCounts(app.workspaceFeed.snapshot)` and passes it to
  * `MainTabShell(counts = …)`; before this the production shell never got
  * counts and the accessory's summary stayed empty. The derivation rules

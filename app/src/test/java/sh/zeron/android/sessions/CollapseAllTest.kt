@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -9,9 +9,9 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
-import sh.roboco.android.design.Haptic
-import sh.roboco.android.design.NoFeedback
-import uniffi.roboco_core.FrontPage
+import sh.zeron.android.design.Haptic
+import sh.zeron.android.design.NoFeedback
+import uniffi.zeron_core.FrontPage
 
 /**
  * Collapse All (android-ui-parity #40) — the port of

@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import android.content.Context
 import java.io.File
@@ -8,7 +8,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import sh.roboco.android.shell.LaunchOptions
+import sh.zeron.android.shell.LaunchOptions
 
 /**
  * The open-latency probe (android-ui-parity #75) — the port of
@@ -17,7 +17,7 @@ import sh.roboco.android.shell.LaunchOptions
  * `OPEN {"openMs":…,"rows":…,"layoutPassMs":…}` to logcat (tag
  * [TAG]), and, with the debug launch extra `measureopen`, writes the same
  * JSON to `open.json` in the external files dir, atomically, off main.
- * Pull path: `adb pull /sdcard/Android/data/sh.roboco.android/files/open.json`.
+ * Pull path: `adb pull /sdcard/Android/data/sh.zeron.android/files/open.json`.
  *
  * This object keeps no `android.util.Log` **import** on the pure path: the
  * default [log] lambda refers to it fully qualified, and the plain-JVM
@@ -27,7 +27,7 @@ import sh.roboco.android.shell.LaunchOptions
 object OpenProbe {
 
     /** The logcat tag (a fixed string; not a translation). */
-    const val TAG = "RobocoOpen"
+    const val TAG = "ZeronOpen"
 
     /** `Log.INFO`, spelled locally so the pure path stays import-free. */
     internal const val INFO = 4

@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import android.graphics.Bitmap
 import androidx.compose.foundation.ScrollState
@@ -69,11 +69,11 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.NoFeedback
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.NoFeedback
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The staged-thumbnail strip's acceptance criteria (android-ui-parity #88):
@@ -146,14 +146,14 @@ class StagedThumbnailStripTest {
         rtl: Boolean = false,
         appearance: Appearance = Appearance.Light,
     ) {
-        RobocoTheme(appearance) {
+        ZeronTheme(appearance) {
             val direction = if (rtl) LayoutDirection.Rtl else LayoutDirection.Ltr
             CompositionLocalProvider(LocalLayoutDirection provides direction) {
                 // Pinned top-LEFT in both directions: a TopStart Box would
                 // mirror the 342 dp strip to x = 48 in the 390 dp RTL window,
                 // and the RTL test's coordinates are the strip's own (0…342).
                 Box(
-                    Modifier.fillMaxSize().background(RobocoTheme.palette.background),
+                    Modifier.fillMaxSize().background(ZeronTheme.palette.background),
                     contentAlignment = AbsoluteAlignment.TopLeft,
                 ) {
                     StagedThumbnailStrip(
@@ -309,7 +309,7 @@ class StagedThumbnailStripTest {
 
     private fun mountSurface(withStrip: Boolean) {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.fillMaxSize().background(Palette.Light.background)) {
                     ComposerSurface(
                         progress = { 1f },
@@ -605,7 +605,7 @@ class StagedThumbnailStripTest {
     /** 56's fixture: a glass box with tap-to-focus, one real field, the strip. */
     private fun mountFocusFixture() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 val state = rememberComposerMorphState(
                     alwaysCard = false,
                     hasImages = { images.isNotEmpty() },
@@ -776,7 +776,7 @@ class StagedThumbnailStripTest {
     fun eightImagesFadeTheTrailingEdgeAtRestAndSwapAfterScrolling() {
         val holder = arrayOfNulls<ScrollState>(1)
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.fillMaxSize().background(Color.White)) {
                     val state = rememberScrollState()
                     SideEffect { holder[0] = state }

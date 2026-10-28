@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.activity.BackEventCompat
 import androidx.activity.ComponentActivity
@@ -34,8 +34,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * Ticket 24's host behaviour (Robolectric, `createAndroidComposeRule`): the
@@ -100,7 +100,7 @@ class NavStackHostTest {
 
     private fun setContent(stack: NavStack, active: Boolean = true) {
         compose.setContent {
-            RobocoTheme {
+            ZeronTheme {
                 NavStackHost(stack, active = active) { entry -> ProbeScreen(entry) }
             }
         }
@@ -522,7 +522,7 @@ class NavStackHostTest {
         val stack = NavStack(TestRoute("root"))
         var active by mutableStateOf(true)
         compose.setContent {
-            RobocoTheme {
+            ZeronTheme {
                 NavStackHost(stack, active = active) { entry -> ProbeScreen(entry) }
             }
         }
@@ -560,7 +560,7 @@ class NavStackHostTest {
         val stack = NavStack(TestRoute("root"))
         var showHost by mutableStateOf(true)
         compose.setContent {
-            RobocoTheme {
+            ZeronTheme {
                 if (showHost) {
                     NavStackHost(stack, active = true) { entry -> ProbeScreen(entry) }
                 }

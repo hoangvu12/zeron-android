@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -16,15 +16,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
-import sh.roboco.android.design.LocalToaster
-import sh.roboco.android.design.RobocoIcon
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.Toaster
-import sh.roboco.android.design.glass.Menu
-import sh.roboco.android.design.glass.MenuIcon
-import sh.roboco.android.design.glass.MenuItem
-import uniffi.roboco_core.RowDisplay
-import uniffi.roboco_core.WidgetKind
+import sh.zeron.android.design.LocalToaster
+import sh.zeron.android.design.ZeronIcon
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.Toaster
+import sh.zeron.android.design.glass.Menu
+import sh.zeron.android.design.glass.MenuIcon
+import sh.zeron.android.design.glass.MenuItem
+import uniffi.zeron_core.RowDisplay
+import uniffi.zeron_core.WidgetKind
 import kotlin.math.max
 
 /**
@@ -43,16 +43,16 @@ import kotlin.math.max
  * Nothing here draws chrome, and nothing here fires a haptic (choosing an
  * item is silent on iOS).
  */
-enum class RowMenuKind(val title: String, val icon: RobocoIcon, val testTag: String) {
+enum class RowMenuKind(val title: String, val icon: ZeronIcon, val testTag: String) {
 
     /** `doc.on.doc` → drawable `copy` (`TranscriptListView.swift:614`). Copies the row's own text. */
-    Copy("Copy", RobocoIcons.DocOnDoc, "row-menu-copy"),
+    Copy("Copy", ZeronIcons.DocOnDoc, "row-menu-copy"),
 
     /** `doc.on.clipboard` → drawable `clipboard` (`:619`). Copies the whole message. */
-    CopyMessage("Copy Message", RobocoIcons.DocOnClipboard, "row-menu-copy-message"),
+    CopyMessage("Copy Message", ZeronIcons.DocOnClipboard, "row-menu-copy-message"),
 
     /** `character.cursor.ibeam` → drawable `text-cursor` (`:625`). Opens the Select Text sheet. */
-    SelectText("Select Text", RobocoIcons.CharacterCursorIbeam, "row-menu-select-text"),
+    SelectText("Select Text", ZeronIcons.CharacterCursorIbeam, "row-menu-select-text"),
 }
 
 /**
@@ -131,7 +131,7 @@ fun List<RowMenuAction>.toMenu(perform: (RowMenuAction) -> Unit): Menu? =
 /**
  * Runs the chosen item (15 calls the action on the frame after the close
  * starts, so the sheet rises while the menu fades):
- *  - Copy / Copy Message → `ClipData.newPlainText("Roboco", text)` on the
+ *  - Copy / Copy Message → `ClipData.newPlainText("Zeron", text)` on the
  *    platform [ClipboardManager], main thread — never compose-ui's
  *    deprecated `LocalClipboardManager`, which hides the `ClipData` label
  *    and the failure path. No haptic, no toast on API 33+ (the system
@@ -153,10 +153,10 @@ class RowMenuPerformer(
     private fun copy(text: String) {
         val cm = context.getSystemService(ClipboardManager::class.java) ?: return
         try {
-            cm.setPrimaryClip(ClipData.newPlainText("Roboco", text))
+            cm.setPrimaryClip(ClipData.newPlainText("Zeron", text))
         } catch (e: RuntimeException) {
             // e.g. a message over the Binder transaction limit: no crash.
-            Log.w("Roboco", "row copy failed: $e")
+            Log.w("Zeron", "row copy failed: $e")
             toaster.show("Could not copy the text.")
             return
         }
@@ -197,7 +197,7 @@ internal fun WidgetKind.isControl(): Boolean =
 
 /**
  * True when a touch-down at row-local `(xDp, yDp)` lands on a control
- * widget — the row then opens **no** menu (the Roboco "away from controls"
+ * widget — the row then opens **no** menu (the Zeron "away from controls"
  * rule; see the ticket's Comments for why this differs from iOS). Pure,
  * row-local dp, no slop, edges left/top-inclusive and right/bottom-
  * exclusive.

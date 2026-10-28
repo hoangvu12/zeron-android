@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -48,21 +48,21 @@ import dev.chrisbanes.haze.hazeSource
 import kotlin.math.max
 import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.CapsuleShape
-import sh.roboco.android.design.Icon
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.Motion
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.SymbolWeight
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.glass.GlassSurface
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.glass.ProvideHazeState
-import sh.roboco.android.design.uiStyle
-import uniffi.roboco_core.FileMatch
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.CapsuleShape
+import sh.zeron.android.design.Icon
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.Motion
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.SymbolWeight
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.GlassSurface
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.glass.ProvideHazeState
+import sh.zeron.android.design.uiStyle
+import uniffi.zeron_core.FileMatch
 
 /**
  * The mention-suggestion card and its screen-level host
@@ -260,7 +260,7 @@ fun MentionSuggestionsCard(
  */
 @Composable
 private fun MentionSuggestionRow(file: FileMatch, index: Int, enabled: Boolean, onClick: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
     val src = remember { MutableInteractionSource() }
     val pressed by src.collectIsPressedAsState()
@@ -285,7 +285,7 @@ private fun MentionSuggestionRow(file: FileMatch, index: Int, enabled: Boolean, 
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
-            if (file.isDir) RobocoIcons.Folder else RobocoIcons.DocText,
+            if (file.isDir) ZeronIcons.Folder else ZeronIcons.DocText,
             tint = palette.text,
             sizePt = 13f,
             weight = SymbolWeight.Medium,
@@ -337,11 +337,11 @@ internal object MentionFixture {
 /** The preview body: the 376 dp card at the bottom of a padded page. */
 @Composable
 private fun MentionSuggestionsPreviewBody() {
-    RobocoTheme {
+    ZeronTheme {
         Box(
             Modifier
                 .fillMaxSize()
-                .background(RobocoTheme.palette.background)
+                .background(ZeronTheme.palette.background)
                 .padding(12.dp),
         ) {
             MentionSuggestionsCard(
@@ -386,7 +386,7 @@ private fun MentionSuggestionsDarkPreview() {
  */
 @Composable
 fun MentionSuggestionsGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     var offline by remember { mutableStateOf(false) }
     var focused by remember { mutableStateOf(false) }
@@ -475,11 +475,11 @@ fun MentionSuggestionsGallerySection() {
 @Preview(name = "Mention suggestions gallery light")
 @Composable
 private fun MentionSuggestionsGalleryLightPreview() {
-    RobocoTheme(Appearance.Light) { MentionSuggestionsGallerySection() }
+    ZeronTheme(Appearance.Light) { MentionSuggestionsGallerySection() }
 }
 
 @Preview(name = "Mention suggestions gallery dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun MentionSuggestionsGalleryDarkPreview() {
-    RobocoTheme(Appearance.Dark) { MentionSuggestionsGallerySection() }
+    ZeronTheme(Appearance.Dark) { MentionSuggestionsGallerySection() }
 }

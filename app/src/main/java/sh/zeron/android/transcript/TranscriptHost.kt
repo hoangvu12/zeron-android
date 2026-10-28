@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.content.ComponentCallbacks2
 import android.content.res.Configuration
@@ -29,8 +29,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Constraints
-import sh.roboco.android.design.LocalIsDark
-import sh.roboco.android.design.TranscriptPalette
+import sh.zeron.android.design.LocalIsDark
+import sh.zeron.android.design.TranscriptPalette
 import kotlin.math.max
 import kotlin.math.roundToInt
 import kotlinx.coroutines.flow.collectLatest

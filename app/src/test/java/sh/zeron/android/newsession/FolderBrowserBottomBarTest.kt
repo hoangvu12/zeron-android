@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.clickable
@@ -38,13 +38,13 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.AlertHost
-import sh.roboco.android.design.AlertHostState
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.BusySpinnerTag
-import sh.roboco.android.design.glass.Glass
+import sh.zeron.android.design.AlertHost
+import sh.zeron.android.design.AlertHostState
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.BusySpinnerTag
+import sh.zeron.android.design.glass.Glass
 
 /**
  * The folder browser bottom bar's goldens and geometry
@@ -92,7 +92,7 @@ class FolderBrowserBottomBarTest {
 
     private fun present(spec: FolderBottomBarSpec, appearance: Appearance) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 FolderBottomBarStage(spec, Modifier.fillMaxSize())
             }
         }
@@ -108,7 +108,7 @@ class FolderBrowserBottomBarTest {
     private fun presentRetryAlert(appearance: Appearance) {
         val state = AlertHostState()
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 AlertHost(state = state) {
                     FolderBottomBarStage(specs()[0], Modifier.fillMaxSize())
                 }
@@ -286,7 +286,7 @@ class FolderBrowserBottomBarTest {
     fun theBusyCreateShowsTheSpinnerAndIgnoresUseClicks() {
         var useTaps = 0
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.fillMaxSize()) {
                     FolderBrowserBottomBar(
                         status = "/srv",
@@ -316,7 +316,7 @@ class FolderBrowserBottomBarTest {
     fun tapsBetweenTheButtonsReachTheContentBelow() {
         var behindTaps = 0
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.fillMaxSize().clickable { behindTaps++ }) {
                     FolderBottomBarStage(specs()[0], Modifier.fillMaxSize())
                 }

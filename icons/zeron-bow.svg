@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#000">
-  <!-- The Roboco mark (android-next #03, variant A): a silhouette of the
-       launcher artwork's ribbon bow with open loops, drawn for Roboco. It
-       is the notification small icon (zi_roboco_bow) and, inset into the
+  <!-- The Zeron mark (android-next #03, variant A): a silhouette of the
+       launcher artwork's ribbon bow with open loops, drawn for Zeron. It
+       is the notification small icon (zi_zeron_bow) and, inset into the
        adaptive icon's safe zone, the themed launcher icon's monochrome
        layer. The two loops are even-odd fills (android:fillType). -->
   <path fill-rule="evenodd" d="M10.5 9.6C8.2 6.6 3.6 5.4 2.6 7.9C1.7 10.3 3.6 13 10.5 11.6Z M9 10.1C7.1 8.4 4.8 7.9 4.4 9C4.1 10.1 5.4 11.2 9 10.8Z"/>

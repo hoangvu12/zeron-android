@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -25,16 +25,16 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.GalleryBackdrop
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.glass.GlassMenuPanel
-import sh.roboco.android.design.glass.MenuLine
-import sh.roboco.android.design.glass.reservesLeadingSlot
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.GalleryBackdrop
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.GlassMenuPanel
+import sh.zeron.android.design.glass.MenuLine
+import sh.zeron.android.design.glass.reservesLeadingSlot
+import sh.zeron.android.design.uiStyle
 
 /**
  * The New-session menus' goldens (android-ui-parity #114), recorded by
@@ -92,8 +92,8 @@ class CheckoutModelEffortMenusScreenshotTest {
 
     private fun goldenShot(appearance: Appearance, file: String) {
         compose.setContent {
-            RobocoTheme(appearance) {
-                Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+            ZeronTheme(appearance) {
+                Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                     GalleryBackdrop(Modifier.fillMaxSize())
                     Box(Modifier.padding(16.dp)) { GoldenPanels() }
                 }
@@ -130,7 +130,7 @@ class CheckoutModelEffortMenusScreenshotTest {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             BasicText(
                 caption,
-                style = uiStyle(Face.SansMedium, LocalTypeScale.current.fixed(12f), RobocoTheme.palette.secondary),
+                style = uiStyle(Face.SansMedium, LocalTypeScale.current.fixed(12f), ZeronTheme.palette.secondary),
             )
             GlassMenuPanel(
                 lines = lines,

@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -22,7 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
+import sh.zeron.android.core.Face
 
 /**
  * The "Action sheet" page of the debug design gallery (android-ui-parity
@@ -52,7 +52,7 @@ import sh.roboco.android.core.Face
 @Composable
 fun ActionSheetGallerySection() {
     val sheets = remember { ActionSheetHostState() }
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val hintStyle = uiStyle(Face.Sans, typeScale.scaled(13f), palette.secondary)
     var result by remember { mutableStateOf("—") }
@@ -166,7 +166,7 @@ fun ActionSheetGallerySection() {
 /** One demo row: a full-width tappable label (the gallery's flat-button look). */
 @Composable
 private fun SheetDemoRow(label: String, onClick: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     BasicText(
         label,

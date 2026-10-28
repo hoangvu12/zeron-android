@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -61,15 +61,15 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalFonts
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.NoFeedback
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalFonts
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.NoFeedback
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
 
 /**
  * [ComposerTextField] — android-ui-parity #57's acceptance criteria:
@@ -81,7 +81,7 @@ import sh.roboco.android.design.uiStyle
  *
  * - the field in a `Box(Modifier.requiredWidth(slotWidth))` (268 dp
  *   capsule / 338 dp card — the slots of a 370 dp composer), on
- *   `Palette.Light.background`, inside `RobocoTheme`;
+ *   `Palette.Light.background`, inside `ZeronTheme`;
  * - `isCard`, the slot width and `textHidden` are test-held state, so a
  *   test flips them with `runOnUiThread` exactly as 55/56 would;
  * - a **probe** `BasicText` below, same text, same style, same width —
@@ -164,7 +164,7 @@ class ComposerTextFieldTest {
             compose.setContent {
                 val m = h.value
                 key(m.generation) {
-                    RobocoTheme(Appearance.Light) { Harness(m.text, m.wire, m.onTextRect) }
+                    ZeronTheme(Appearance.Light) { Harness(m.text, m.wire, m.onTextRect) }
                 }
             }
         } else {
@@ -231,7 +231,7 @@ class ComposerTextFieldTest {
         wire: (ComposerController.() -> Unit)?,
         onTextRect: ((Rect) -> Unit)?,
     ) {
-        val palette = RobocoTheme.palette
+        val palette = ZeronTheme.palette
         val scope = rememberCoroutineScope()
         val ctrl = remember { ComposerController(scope, NoFeedback, text).also { wire?.invoke(it) } }
         controller = ctrl
@@ -268,7 +268,7 @@ class ComposerTextFieldTest {
     private fun BlurButton(onBlur: () -> Unit) {
         BasicText(
             "Blur",
-            style = uiStyle(Face.SansMedium, LocalTypeScale.current.fixed(14f), RobocoTheme.palette.accent),
+            style = uiStyle(Face.SansMedium, LocalTypeScale.current.fixed(14f), ZeronTheme.palette.accent),
             modifier = Modifier
                 .testTag("blur")
                 .clickable(
@@ -413,13 +413,13 @@ class ComposerTextFieldTest {
     /** The port harness: `isCard = focused`, the width follows the mode. */
     private fun mountFocusFollowingDraftHarness() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 val scope = rememberCoroutineScope()
                 val ctrl = remember { ComposerController(scope, NoFeedback, "") }
                 controller = ctrl
                 val focusManager = LocalFocusManager.current
                 var focused by remember { mutableStateOf(false) }
-                Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+                Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                     Column {
                         Box(Modifier.requiredWidth(if (focused) 338.dp else 268.dp)) {
                             ComposerTextField(

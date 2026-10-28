@@ -1,11 +1,11 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import org.junit.Assert.assertArrayEquals
 import org.junit.Test
-import sh.roboco.android.transcript.RowFixtures
-import sh.roboco.android.transcript.RowModel
-import uniffi.roboco_core.Scroller
-import uniffi.roboco_core.TextRun
+import sh.zeron.android.transcript.RowFixtures
+import sh.zeron.android.transcript.RowModel
+import uniffi.zeron_core.Scroller
+import uniffi.zeron_core.TextRun
 
 /**
  * The shimmer's run filter (ticket 122) — iOS `drawRuns`

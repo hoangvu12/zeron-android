@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -13,8 +13,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The image-tile goldens (ticket 66; recorded by `:app:recordRoborazziDebug`,
@@ -73,8 +73,8 @@ class ImageTileScreenshotTest {
     @Config(sdk = [36], qualifiers = "w393dp-h852dp-xxhdpi")
     fun imageTileOverlayClipLight() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
-                Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+            ZeronTheme(Appearance.Light) {
+                Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                     ImageTileOverlayFixture()
                 }
             }
@@ -88,8 +88,8 @@ class ImageTileScreenshotTest {
         // Frozen, the spinner sits at step 0 (as ImageTileStatesScreenshotTest).
         if (!loaded) compose.mainClock.autoAdvance = false
         compose.setContent {
-            RobocoTheme(appearance) {
-                Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+            ZeronTheme(appearance) {
+                Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                     ImageTileFixture(loaded = loaded)
                 }
             }

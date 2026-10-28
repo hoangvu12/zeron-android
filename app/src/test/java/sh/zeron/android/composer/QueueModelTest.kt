@@ -1,17 +1,17 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.glass.MenuIcon
-import sh.roboco.android.design.glass.MenuItem
-import sh.roboco.android.session.ChromeInput
-import sh.roboco.android.session.SessionChrome
-import sh.roboco.android.session.composerState
-import uniffi.roboco_core.QueueGate
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.glass.MenuIcon
+import sh.zeron.android.design.glass.MenuItem
+import sh.zeron.android.session.ChromeInput
+import sh.zeron.android.session.SessionChrome
+import sh.zeron.android.session.composerState
+import uniffi.zeron_core.QueueGate
 
 /**
  * [QueueModel] — android-ui-parity #82's pure model, pinned on the plain
@@ -128,10 +128,10 @@ class QueueModelTest {
     @Test
     fun rowMenuIconsAndDestructiveRules() {
         val rows = rowsOf(1, 4)
-        assertEquals(MenuIcon.Symbol(RobocoIcons.Pencil), rows[0].icon)
-        assertEquals(MenuIcon.Symbol(RobocoIcons.ArrowUp), rows[1].icon)
-        assertEquals(MenuIcon.Symbol(RobocoIcons.ArrowDown), rows[2].icon)
-        assertEquals(MenuIcon.Symbol(RobocoIcons.Trash), rows[3].icon)
+        assertEquals(MenuIcon.Symbol(ZeronIcons.Pencil), rows[0].icon)
+        assertEquals(MenuIcon.Symbol(ZeronIcons.ArrowUp), rows[1].icon)
+        assertEquals(MenuIcon.Symbol(ZeronIcons.ArrowDown), rows[2].icon)
+        assertEquals(MenuIcon.Symbol(ZeronIcons.Trash), rows[3].icon)
         assertFalse(rows[0].destructive)
         assertFalse(rows[1].destructive)
         assertFalse(rows[2].destructive)
@@ -159,14 +159,14 @@ class QueueModelTest {
 
     // ------------------------------------------------------ the filler
 
-    /** A [uniffi.roboco_core.QueueItem] with only the mapped fields apart. */
+    /** A [uniffi.zeron_core.QueueItem] with only the mapped fields apart. */
     private fun queueItem(
         id: String,
         text: String,
         visibleText: String = text,
         gate: QueueGate? = null,
         actionPending: Boolean = false,
-    ) = uniffi.roboco_core.QueueItem(
+    ) = uniffi.zeron_core.QueueItem(
         id = id,
         text = text,
         visibleText = visibleText,

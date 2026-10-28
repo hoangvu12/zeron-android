@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -17,17 +17,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import kotlinx.coroutines.flow.StateFlow
-import sh.roboco.android.RobocoApplication
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.GroupedAccessory
-import sh.roboco.android.design.GroupedHeader
-import sh.roboco.android.design.GroupedPosition
-import sh.roboco.android.design.GroupedRow
-import sh.roboco.android.design.RobocoIcon
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.groupedSection
-import sh.roboco.android.design.settingsTag
+import sh.zeron.android.ZeronApplication
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.GroupedAccessory
+import sh.zeron.android.design.GroupedHeader
+import sh.zeron.android.design.GroupedPosition
+import sh.zeron.android.design.GroupedRow
+import sh.zeron.android.design.ZeronIcon
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.groupedSection
+import sh.zeron.android.design.settingsTag
 
 /**
  * The "Appearance" section of the Settings screen (android-ui-parity #96):
@@ -36,10 +36,10 @@ import sh.roboco.android.design.settingsTag
  * its SF symbol — and a checkmark on the row whose **stored** value is
  * current (with System stored on a dark phone, "System" is checked, not
  * "Dark"). A tap writes the phone-local `appearance` preference (ticket
- * 40's [sh.roboco.android.core.Prefs]); the checkmark moves on the next
+ * 40's [sh.zeron.android.core.Prefs]); the checkmark moves on the next
  * frame, with no animation (`dataSource.apply(…, animatingDifferences:
  * false)`), and the whole app re-themes in the same frame through the one
- * root `RobocoTheme(appearance)` (the port of
+ * root `ZeronTheme(appearance)` (the port of
  * `window.overrideUserInterfaceStyle`, `SceneDelegate.swift:12-16`).
  *
  * Every visual — the header, the card, the row, the checkmark, the
@@ -59,7 +59,7 @@ data class AppearanceRow(
     val appearance: Appearance,
     val id: String,
     val title: String,
-    val icon: RobocoIcon,
+    val icon: ZeronIcon,
 )
 
 /** The section's rows and copy, verbatim from the iOS reference. */
@@ -69,9 +69,9 @@ object AppearanceRows {
     const val HEADER = "Appearance"
 
     val all: List<AppearanceRow> = listOf(
-        AppearanceRow(Appearance.System, "appearance:0", "System", RobocoIcons.CircleLeftHalfFilled),
-        AppearanceRow(Appearance.Light, "appearance:1", "Light", RobocoIcons.SunMax),
-        AppearanceRow(Appearance.Dark, "appearance:2", "Dark", RobocoIcons.Moon),
+        AppearanceRow(Appearance.System, "appearance:0", "System", ZeronIcons.CircleLeftHalfFilled),
+        AppearanceRow(Appearance.Light, "appearance:1", "Light", ZeronIcons.SunMax),
+        AppearanceRow(Appearance.Dark, "appearance:2", "Dark", ZeronIcons.Moon),
     )
 }
 
@@ -99,9 +99,9 @@ class AppearanceSectionState internal constructor(
 @Composable
 fun rememberAppearanceSectionState(
     appearance: StateFlow<Appearance> =
-        (LocalContext.current.applicationContext as RobocoApplication).appearance,
+        (LocalContext.current.applicationContext as ZeronApplication).appearance,
     onPick: (Appearance) -> Unit =
-        (LocalContext.current.applicationContext as RobocoApplication)::setAppearance,
+        (LocalContext.current.applicationContext as ZeronApplication)::setAppearance,
 ): AppearanceSectionState {
     val current = appearance.collectAsState()
     // rememberUpdatedState: a later recomposition with a new onPick keeps
@@ -162,7 +162,7 @@ private fun AppearanceRowItem(
         icon = row.icon,
         accessories = listOf(GroupedAccessory.Check(row.appearance == current)),
         testTag = settingsTag(row.id),
-        // The stored value, not RobocoTheme.isDark, drives the checkmark.
+        // The stored value, not ZeronTheme.isDark, drives the checkmark.
         // Tapping the already-checked row runs the same handler (iOS
         // rewrites the same value); Prefs.setAppearance no-ops on it.
         onClick = { onPick(row.appearance) },
@@ -195,8 +195,8 @@ fun AppearanceRowsColumn(current: Appearance, onPick: (Appearance) -> Unit, modi
 @Preview(name = "Appearance – light")
 @Composable
 private fun AppearanceSectionLightPreview() {
-    RobocoTheme(Appearance.Light) {
-        Box(Modifier.background(RobocoTheme.palette.background)) {
+    ZeronTheme(Appearance.Light) {
+        Box(Modifier.background(ZeronTheme.palette.background)) {
             AppearanceRowsColumn(Appearance.System, {})
         }
     }
@@ -205,8 +205,8 @@ private fun AppearanceSectionLightPreview() {
 @Preview(name = "Appearance – dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun AppearanceSectionDarkPreview() {
-    RobocoTheme(Appearance.Dark) {
-        Box(Modifier.background(RobocoTheme.palette.background)) {
+    ZeronTheme(Appearance.Dark) {
+        Box(Modifier.background(ZeronTheme.palette.background)) {
             AppearanceRowsColumn(Appearance.Dark, {})
         }
     }

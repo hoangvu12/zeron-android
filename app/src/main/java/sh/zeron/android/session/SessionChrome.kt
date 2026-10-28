@@ -1,8 +1,8 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
-import sh.roboco.android.composer.ComposerChip
-import uniffi.roboco_core.ComposerState
-import uniffi.roboco_core.SessionRow
+import sh.zeron.android.composer.ComposerChip
+import uniffi.zeron_core.ComposerState
+import uniffi.zeron_core.SessionRow
 
 /**
  * Composer-facing state of one open session (android-ui-parity #51) —
@@ -35,7 +35,7 @@ data class SessionChrome(
     val running: Boolean = false,
     /** `composer.host.capabilities.midTurnSteering ?: false`. */
     val canSteer: Boolean = false,
-    /** Roboco ADD (79): `false` while the owning engine is offline — read-only mode. `true` until 79 lands. */
+    /** Zeron ADD (79): `false` while the owning engine is offline — read-only mode. `true` until 79 lands. */
     val canWrite: Boolean = true,
     /** `"Message <harness label>"` (`CoreSessionSource.swift:49`). */
     val placeholder: String = "Message",
@@ -57,7 +57,7 @@ data class SessionChrome(
     val limited: LimitedChrome? = null,
 ) {
     /**
-     * Roboco's banner set (android-app#22 §Status pill) instead of iOS's
+     * Zeron's banner set (android-app#22 §Status pill) instead of iOS's
      * `offline` / `reconnecting(in:)`. Ticket 73 owns precedence, copy
      * and taps and may refine the payloads — nothing in this ticket
      * depends on the variants beyond value equality.

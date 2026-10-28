@@ -1,4 +1,4 @@
-package sh.roboco.android.sidechats
+package sh.zeron.android.sidechats
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
@@ -14,13 +14,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import sh.roboco.android.session.SessionEventHub
-import sh.roboco.android.sessions.SessionRowVM
-import sh.roboco.android.update.SemVer
-import uniffi.roboco_core.CoreClient
-import uniffi.roboco_core.SessionHandle
-import uniffi.roboco_core.SubagentInfo
-import uniffi.roboco_core.SubagentState
+import sh.zeron.android.session.SessionEventHub
+import sh.zeron.android.sessions.SessionRowVM
+import sh.zeron.android.update.SemVer
+import uniffi.zeron_core.CoreClient
+import uniffi.zeron_core.SessionHandle
+import uniffi.zeron_core.SubagentInfo
+import uniffi.zeron_core.SubagentState
 
 /** Where a subagent stands — its spawn chip's lifecycle, never `resolved` alone. */
 enum class AgentState { Running, Done, Failed }
@@ -215,7 +215,7 @@ class SideChatsModel(
 
 /**
  * Whether an engine serves side chats (`ForkSideChat`, `createChat` with
- * `parentChatId`), from its reported version: they shipped in Roboco
+ * `parentChatId`), from its reported version: they shipped in Zeron
  * 0.5.0. An unknown or unparsable version reads as supported (a fork on
  * an engine without the RPC then fails with the engine's own reason).
  * Pure.

@@ -1,9 +1,9 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import android.os.SystemClock
 import androidx.annotation.MainThread
 import androidx.annotation.VisibleForTesting
-import sh.roboco.android.design.Motion
+import sh.zeron.android.design.Motion
 
 /**
  * What one tool-group rail draws when (ticket 121): the row the draw-in

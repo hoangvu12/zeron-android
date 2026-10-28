@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -15,34 +15,34 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import sh.roboco.android.BuildConfig
-import sh.roboco.android.RobocoApplication
-import sh.roboco.android.core.CoreStatus
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Feedback
-import sh.roboco.android.design.GroupedAccessory
-import sh.roboco.android.design.GroupedRow
-import sh.roboco.android.design.Haptic
-import sh.roboco.android.design.LocalFeedback
-import sh.roboco.android.design.LocalToaster
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoIcon
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.Toaster
-import sh.roboco.android.design.groupedSection
-import sh.roboco.android.design.settingsTag
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.shell.LocalNavStack
-import sh.roboco.android.update.UpdateCenter
-import sh.roboco.android.update.UpdateUiState
-import sh.roboco.android.update.updateAboutRow
-import sh.roboco.android.update.updateRowStrings
+import sh.zeron.android.BuildConfig
+import sh.zeron.android.ZeronApplication
+import sh.zeron.android.core.CoreStatus
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Feedback
+import sh.zeron.android.design.GroupedAccessory
+import sh.zeron.android.design.GroupedRow
+import sh.zeron.android.design.Haptic
+import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.design.LocalToaster
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronIcon
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.Toaster
+import sh.zeron.android.design.groupedSection
+import sh.zeron.android.design.settingsTag
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.shell.LocalNavStack
+import sh.zeron.android.update.UpdateCenter
+import sh.zeron.android.update.UpdateUiState
+import sh.zeron.android.update.updateAboutRow
+import sh.zeron.android.update.updateRowStrings
 
 /**
  * The Settings "About" section (android-ui-parity #101): the last section
  * of Settings, in iOS's Sign-Out slot (`MoreViewController.swift:217-218`
- * — Roboco has no account, ADR 0004, so the row itself is dropped). Two
+ * — Zeron has no account, ADR 0004, so the row itself is dropped). Two
  * informational rows: **Version** (app version, version code, core
  * version; long-press copies the line) and **Licenses** (pushes the
  * Licenses screen).
@@ -85,11 +85,11 @@ const val ThirdPartyNotices = "Third-party notices"
 
 /**
  * One About row, pure data: the [GroupedRow] inputs the section renders.
- * The icons are `SF info.circle`/`doc.text` → `RobocoIcons.InfoCircle` /
- * [RobocoIcons.DocText]; the Version row shows no accessory, the
+ * The icons are `SF info.circle`/`doc.text` → `ZeronIcons.InfoCircle` /
+ * [ZeronIcons.DocText]; the Version row shows no accessory, the
  * Licenses row the disclosure chevron (the iOS `Row` default).
  * [accent] (android-next#04) draws the title and icon in `Palette.accent`
- * — the "Update to Roboco <ver>" row (panel D) and its GitHub twin (F);
+ * — the "Update to Zeron <ver>" row (panel D) and its GitHub twin (F);
  * the renderer maps it, the spec stays pure.
  */
 @Immutable
@@ -97,20 +97,20 @@ data class AboutRowSpec(
     val id: String,
     val title: String,
     val subtitle: String?,
-    val icon: RobocoIcon,
+    val icon: ZeronIcon,
     val accessories: List<GroupedAccessory>,
     val accent: Boolean = false,
 )
 
 /**
- * `"Roboco 0.9.2 (9002) · core 0.9.2"` — the Version row's subtitle,
+ * `"Zeron 0.9.2 (9002) · core 0.9.2"` — the Version row's subtitle,
  * exactly. The separator is space, U+00B7 MIDDLE DOT, space. `core` is
  * the cached [CoreStatus.Loaded] version, or the literal `unavailable`
  * when the status is [CoreStatus.Failed] (never a second FFI call: #609
  * called `coreVersion()` in composition, which is both an FFI hop on the
  * main thread and not our copy to make). [buildMarker] (android-next#04,
  * panel F) slots the build type in for non-release builds —
- * `"Roboco 0.9.2 (9002) debug · core 0.9.2"`.
+ * `"Zeron 0.9.2 (9002) debug · core 0.9.2"`.
  */
 fun versionSubtitle(
     versionName: String,
@@ -123,7 +123,7 @@ fun versionSubtitle(
         is CoreStatus.Failed -> CoreUnavailable
     }
     val own = buildString {
-        append("Roboco ").append(versionName).append(" (").append(versionCode).append(")")
+        append("Zeron ").append(versionName).append(" (").append(versionCode).append(")")
         if (buildMarker != null) append(' ').append(buildMarker)
     }
     return "$own · core $coreVersion"
@@ -141,7 +141,7 @@ fun aboutRows(subtitle: String, updateRow: AboutRowSpec? = null): List<AboutRowS
                 id = AboutRowIds.Version,
                 title = "Version",
                 subtitle = subtitle,
-                icon = RobocoIcons.InfoCircle,
+                icon = ZeronIcons.InfoCircle,
                 accessories = emptyList(),
             ),
         )
@@ -151,7 +151,7 @@ fun aboutRows(subtitle: String, updateRow: AboutRowSpec? = null): List<AboutRowS
                 id = AboutRowIds.Licenses,
                 title = "Licenses",
                 subtitle = ThirdPartyNotices,
-                icon = RobocoIcons.DocText,
+                icon = ZeronIcons.DocText,
                 accessories = listOf(GroupedAccessory.Disclosure),
             ),
         )
@@ -191,7 +191,7 @@ class AboutSectionState internal constructor(
 
 /**
  * Copies [text] to the clipboard with the ticket's feedback rules: the
- * [Haptic.LongPress] haptic fires once (ticket 05 — Roboco-only, iOS has
+ * [Haptic.LongPress] haptic fires once (ticket 05 — Zeron-only, iOS has
  * no such row), `setPrimaryClip` runs on the calling (main) thread and is
  * not marked sensitive, the "Copied" toast shows **only on API 31–32**
  * (the system's own clipboard confirmation covers 33+; ticket 80's rule),
@@ -215,7 +215,7 @@ internal fun copyToClipboard(
         if (sdkInt <= Build.VERSION_CODES.S_V2) toaster.show(CopiedToast)
         true
     } catch (e: RuntimeException) {
-        Log.w("Roboco", "copy version failed: $e")
+        Log.w("Zeron", "copy version failed: $e")
         false
     }
 }
@@ -225,12 +225,12 @@ internal fun copyToClipboard(
  * 103), never inside a `LazyColumn` item.
  *
  * Defaults come from the build (`BuildConfig.VERSION_NAME` /
- * `VERSION_CODE`) and the app's cached [RobocoApplication.core] — both
+ * `VERSION_CODE`) and the app's cached [ZeronApplication.core] — both
  * equal `PackageInfo` / `coreVersion()` without a binder or FFI call.
  * Previews and tests pass [core] (and, when needed, `sdkInt`) explicitly.
  *
  * android-next#04: the middle row comes from the app's
- * [RobocoApplication.updates] [UpdateCenter.state] — the update row when
+ * [ZeronApplication.updates] [UpdateCenter.state] — the update row when
  * an update is known, the Check row otherwise — with its clicks wired to
  * [UpdateCenter.beginUpdate] / [UpdateCenter.checkNow]. Pass [updates]
  * (or a null [updateState] with own callbacks) to inject fakes; a
@@ -241,7 +241,7 @@ internal fun copyToClipboard(
 fun rememberAboutSectionState(
     versionName: String = BuildConfig.VERSION_NAME,
     versionCode: Long = BuildConfig.VERSION_CODE.toLong(),
-    core: CoreStatus = (LocalContext.current.applicationContext as RobocoApplication).core,
+    core: CoreStatus = (LocalContext.current.applicationContext as ZeronApplication).core,
     sdkInt: Int = Build.VERSION.SDK_INT,
     updateState: StateFlow<UpdateUiState>? = null,
     onUpdate: (() -> Unit)? = null,
@@ -252,7 +252,7 @@ fun rememberAboutSectionState(
     val toaster = LocalToaster.current
     val feedback = LocalFeedback.current
     val context = LocalContext.current
-    val app = context.applicationContext as? RobocoApplication
+    val app = context.applicationContext as? ZeronApplication
     val center = app?.updates
     val state: StateFlow<UpdateUiState> = updateState ?: center?.state ?: remember {
         MutableStateFlow(UpdateUiState.Idle)
@@ -314,7 +314,7 @@ fun LazyListScope.aboutSection(state: AboutSectionState) {
         items = state.rows,
         itemKey = { it.id },
     ) { row, position ->
-        val accent = if (row.accent) RobocoTheme.palette.accent else RobocoTheme.palette.secondary
+        val accent = if (row.accent) ZeronTheme.palette.accent else ZeronTheme.palette.secondary
         GroupedRow(
             title = row.title,
             position = position,
@@ -322,7 +322,7 @@ fun LazyListScope.aboutSection(state: AboutSectionState) {
             icon = row.icon,
             iconTint = accent,
             titleStyle = if (row.accent) {
-                uiStyle(Face.SansMedium, LocalTypeScale.current.fixed(16f), RobocoTheme.palette.accent)
+                uiStyle(Face.SansMedium, LocalTypeScale.current.fixed(16f), ZeronTheme.palette.accent)
             } else {
                 null
             },

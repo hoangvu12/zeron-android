@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -55,19 +55,19 @@ import dev.chrisbanes.haze.hazeSource
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.CapsuleShape
-import sh.roboco.android.design.EdgeFadeOverlay
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.glass.GlassCircleButton
-import sh.roboco.android.design.glass.GlassSurface
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.glass.ProvideHazeState
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.CapsuleShape
+import sh.zeron.android.design.EdgeFadeOverlay
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.GlassCircleButton
+import sh.zeron.android.design.glass.GlassSurface
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.glass.ProvideHazeState
+import sh.zeron.android.design.uiStyle
 
 /**
  * The bottom stack's test tags (Android-only hooks, ticket 22's rule: the
@@ -549,7 +549,7 @@ private class SlotClipShape(private val visibleHeightPx: Float) : Shape {
  */
 @Composable
 private fun StripeTranscript() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     Box(
         Modifier
             .fillMaxSize()
@@ -592,7 +592,7 @@ private fun QueuePanelStandIn(rows: Int, glassVisible: Boolean, animateGlass: Bo
                 Box(Modifier.fillMaxWidth().height(40.dp), contentAlignment = Alignment.CenterStart) {
                     BasicText(
                         "Queued message ${index + 1}",
-                        style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(15f), RobocoTheme.palette.text),
+                        style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(15f), ZeronTheme.palette.text),
                         maxLines = 1,
                     )
                 }
@@ -604,7 +604,7 @@ private fun QueuePanelStandIn(rows: Int, glassVisible: Boolean, animateGlass: Bo
 /** The questions stand-in: a 26 dp glass card, 220 dp tall. */
 @Composable
 private fun QuestionsPanelStandIn(glassVisible: Boolean, animateGlass: Boolean) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     GlassSurface(
         modifier = Modifier.fillMaxWidth().height(220.dp),
@@ -626,7 +626,7 @@ private fun QuestionsPanelStandIn(glassVisible: Boolean, animateGlass: Boolean) 
 /** The composer stand-in: a 50 dp glass capsule (120 dp when tall). */
 @Composable
 private fun ComposerStandIn(tall: Boolean) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     GlassSurface(
         modifier = Modifier.fillMaxWidth().height(if (tall) 120.dp else 50.dp),
@@ -668,12 +668,12 @@ internal fun BottomStackStandIn(
 @Composable
 private fun JumpStandIn() {
     GlassCircleButton(
-        icon = RobocoIcons.ArrowDown,
+        icon = ZeronIcons.ArrowDown,
         contentDescription = "Jump to latest",
         onClick = {},
         size = 40.dp,
         iconPt = 15f,
-        ink = RobocoTheme.palette.text,
+        ink = ZeronTheme.palette.text,
     )
 }
 
@@ -781,7 +781,7 @@ fun BottomStackGallerySection() {
 /** One gallery toggle row: label left, current value in accent right. */
 @Composable
 private fun StackToggleRow(label: String, value: String, onClick: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Row(
         Modifier
@@ -803,13 +803,13 @@ private fun StackToggleRow(label: String, value: String, onClick: () -> Unit) {
 @Preview(name = "Bottom stack light")
 @Composable
 private fun BottomStackLightPreview() {
-    RobocoTheme(Appearance.Light) { BottomStackStandIn() }
+    ZeronTheme(Appearance.Light) { BottomStackStandIn() }
 }
 
 @Preview(name = "Bottom stack dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun BottomStackDarkPreview() {
-    RobocoTheme(Appearance.Dark) { BottomStackStandIn() }
+    ZeronTheme(Appearance.Dark) { BottomStackStandIn() }
 }
 
 /**

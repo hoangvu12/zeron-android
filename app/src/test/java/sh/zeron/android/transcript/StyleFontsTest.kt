@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.content.Context
 import android.graphics.Paint
@@ -18,10 +18,10 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import org.robolectric.shadows.ShadowLog
-import sh.roboco.android.core.FontChain
-import sh.roboco.android.core.Fonts
-import uniffi.roboco_core.FaceRole
-import uniffi.roboco_core.StyleDesc
+import sh.zeron.android.core.FontChain
+import sh.zeron.android.core.Fonts
+import uniffi.zeron_core.FaceRole
+import uniffi.zeron_core.StyleDesc
 
 /**
  * The paint side of [StyleFonts] (ticket 62) over the real font chain —
@@ -141,7 +141,7 @@ class StyleFontsTest {
         assertNull(fonts[99u])
         assertNull(fonts[99u])
 
-        val logged = ShadowLog.getLogs().filter { it.tag == "RobocoTranscript" }
+        val logged = ShadowLog.getLogs().filter { it.tag == "ZeronTranscript" }
         assertEquals(1, logged.size)
         assertEquals("no style 99 (count=2)", logged.single().msg)
     }

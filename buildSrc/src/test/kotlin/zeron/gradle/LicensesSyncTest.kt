@@ -1,4 +1,4 @@
-package roboco.gradle
+package zeron.gradle
 
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Assert.assertArrayEquals
@@ -11,7 +11,7 @@ import java.io.File
  * `LICENSE` and `THIRD_PARTY_NOTICES.md` are copied byte-identical into
  * `assets/licenses/` — a sideloaded APK is the whole distribution, so its
  * licenses ship inside it. Settings → About (ticket 26) displays them from
- * there, beside the font licenses `syncRobocoFonts` stages; #101 adds the
+ * there, beside the font licenses `syncZeronFonts` stages; #101 adds the
  * committed SPDX fallback texts under `assets/licenses/spdx/`.
  */
 class LicensesSyncTest {

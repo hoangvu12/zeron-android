@@ -1,4 +1,4 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
@@ -17,9 +17,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import uniffi.roboco_core.CoreClient
-import uniffi.roboco_core.NoHandle
-import uniffi.roboco_core.PairedEngine
+import uniffi.zeron_core.CoreClient
+import uniffi.zeron_core.NoHandle
+import uniffi.zeron_core.PairedEngine
 
 /**
  * The debug `pair` launch extra's redemption (android-app#30): the
@@ -143,7 +143,7 @@ class LaunchPairRedeemerTest {
 
 /** A throwaway DataStore for the store (71's test pattern, pairing-only file). */
 private fun testEngineStore(): androidx.datastore.core.DataStore<androidx.datastore.preferences.core.Preferences> =
-    sh.roboco.android.core.testPrefsStore(
+    sh.zeron.android.core.testPrefsStore(
         CoroutineScope(UnconfinedTestDispatcher() + Job()),
         File.createTempFile("launch-pair", ".preferences_pb"),
     )

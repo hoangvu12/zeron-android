@@ -1,4 +1,4 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import android.content.Context
 import android.util.Log
@@ -25,13 +25,13 @@ import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
-import uniffi.roboco_core.EngineTransport
-import uniffi.roboco_core.PairedEngine
-import uniffi.roboco_core.RoomMemberRecord
-import uniffi.roboco_core.RoomRecord
+import uniffi.zeron_core.EngineTransport
+import uniffi.zeron_core.PairedEngine
+import uniffi.zeron_core.RoomMemberRecord
+import uniffi.zeron_core.RoomRecord
 
 /**
- * Persistent storage for the phone's paired engines (ticket 71) — Roboco's
+ * Persistent storage for the phone's paired engines (ticket 71) — Zeron's
  * port of the iOS Keychain block, spread over N engines.
  *
  * Layout: readable metadata as one JSON array under `engines` (pairing
@@ -446,21 +446,21 @@ class PairedEngineStore(
 
     /** Must stay equal to `KeystoreSecretCipher.ALIAS` (the ticket reuses the alias here). */
     private fun aad(engineId: String): ByteArray =
-        "roboco.engine-credentials.v1:$engineId".toByteArray(Charsets.UTF_8)
+        "zeron.engine-credentials.v1:$engineId".toByteArray(Charsets.UTF_8)
 
     /** Distinct from [aad]: a `cred:` blob never decrypts as a `tc:` one. */
     private fun tailcatAad(engineId: String): ByteArray =
-        "roboco.engine-credentials.v1:tailcat:$engineId".toByteArray(Charsets.UTF_8)
+        "zeron.engine-credentials.v1:tailcat:$engineId".toByteArray(Charsets.UTF_8)
 
     /** Distinct again: a room blob never decrypts as a credential or route. */
     private fun roomAad(roomId: String): ByteArray =
-        "roboco.engine-credentials.v1:room:$roomId".toByteArray(Charsets.UTF_8)
+        "zeron.engine-credentials.v1:room:$roomId".toByteArray(Charsets.UTF_8)
 
     companion object {
         /** Required by `PreferenceDataStoreFactory`. */
         const val FILE_NAME = "paired_engines.preferences_pb"
 
-        private const val TAG = "Roboco"
+        private const val TAG = "Zeron"
         private const val CRED_PREFIX = "cred:"
         private const val TAILCAT_PREFIX = "tc:"
         private const val ROOM_PREFIX = "room:"
@@ -468,7 +468,7 @@ class PairedEngineStore(
 
         /**
          * The process's single DataStore for [FILE_NAME] (a second instance
-         * on the same file throws). Create once in `RobocoApplication`.
+         * on the same file throws). Create once in `ZeronApplication`.
          */
         fun createDataStore(context: Context, scope: CoroutineScope): DataStore<Preferences> =
             PreferenceDataStoreFactory.create(

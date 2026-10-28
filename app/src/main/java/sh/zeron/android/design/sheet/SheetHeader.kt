@@ -1,4 +1,4 @@
-package sh.roboco.android.design.sheet
+package sh.zeron.android.design.sheet
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -16,12 +16,12 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.GlassCircleButton
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.GlassCircleButton
+import sh.zeron.android.design.uiStyle
 
 /**
  * What sits in the leading (start) slot of a [SheetHeaderRow]
@@ -83,7 +83,7 @@ fun SheetHeaderRow(
     onTrailing: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     BoxWithConstraints(modifier.fillMaxWidth().height(GlassSheetDefaults.HeaderHeight)) {
         BasicText(
@@ -100,7 +100,7 @@ fun SheetHeaderRow(
         when (leading) {
             SheetLeading.None -> {}
             SheetLeading.Close -> GlassCircleButton(
-                icon = RobocoIcons.Xmark,
+                icon = ZeronIcons.Xmark,
                 contentDescription = "Close",
                 onClick = onLeading,
                 modifier = Modifier
@@ -112,7 +112,7 @@ fun SheetHeaderRow(
         when (trailing) {
             SheetTrailing.None -> {}
             SheetTrailing.Done -> GlassCircleButton(
-                icon = RobocoIcons.Checkmark,
+                icon = ZeronIcons.Checkmark,
                 contentDescription = "Done",
                 onClick = onTrailing,
                 filled = palette.accent,

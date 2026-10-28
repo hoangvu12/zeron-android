@@ -1,12 +1,12 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.StatusGlyphKind
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.StatusGlyphKind
 
 /**
  * The corner precedence and its colours/glyphs (android-ui-parity #37):

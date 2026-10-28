@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -15,21 +15,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.GroupedHeader
-import sh.roboco.android.design.GroupedPosition
-import sh.roboco.android.design.LocalToaster
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.GroupedHeader
+import sh.zeron.android.design.GroupedPosition
+import sh.zeron.android.design.LocalToaster
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
 
 /**
  * The "Settings · Sessions" page of the debug design gallery
  * (android-ui-parity #100): the section's ticket-step-7 fixtures. The
  * **live** block renders the real [SessionsSettingsRowContent] pair over a
  * gallery-local `mutableStateOf(true)` — the switch toggles for real
- * (through ticket 98's `RobocoSwitch` tap path, haptic included, via
+ * (through ticket 98's `ZeronSwitch` tap path, haptic included, via
  * `onGroupByProjectChange`), and tapping "Archived Sessions" shows
  * ticket 14's "Archived" toast through the gallery's `ToastHost`
  * (`LocalToaster` is `Toaster.Noop` outside one, so previews stay silent).
@@ -100,7 +100,7 @@ fun SessionsSettingsGallerySection() {
 @Composable
 private fun SessionsSettingsGalleryCaption(text: String) {
     val typeScale = LocalTypeScale.current
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     BasicText(
         text,
         style = uiStyle(Face.Sans, typeScale.fixed(12f), palette.secondary),
@@ -111,8 +111,8 @@ private fun SessionsSettingsGalleryCaption(text: String) {
 @Preview(name = "light")
 @Composable
 private fun SessionsSettingsGalleryLightPreview() {
-    RobocoTheme(Appearance.Light) {
-        Box(Modifier.background(RobocoTheme.palette.background)) {
+    ZeronTheme(Appearance.Light) {
+        Box(Modifier.background(ZeronTheme.palette.background)) {
             SessionsSettingsGallerySection()
         }
     }
@@ -121,8 +121,8 @@ private fun SessionsSettingsGalleryLightPreview() {
 @Preview(name = "dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun SessionsSettingsGalleryDarkPreview() {
-    RobocoTheme(Appearance.Dark) {
-        Box(Modifier.background(RobocoTheme.palette.background)) {
+    ZeronTheme(Appearance.Dark) {
+        Box(Modifier.background(ZeronTheme.palette.background)) {
             SessionsSettingsGallerySection()
         }
     }

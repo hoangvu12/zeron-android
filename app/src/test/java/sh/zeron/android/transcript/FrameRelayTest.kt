@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.view.Choreographer
 import java.util.concurrent.atomic.AtomicInteger

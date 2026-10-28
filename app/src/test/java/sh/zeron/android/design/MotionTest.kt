@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.InfiniteRepeatableSpec

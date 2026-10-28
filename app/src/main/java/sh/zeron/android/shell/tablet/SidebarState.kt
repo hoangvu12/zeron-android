@@ -1,4 +1,4 @@
-package sh.roboco.android.shell.tablet
+package sh.zeron.android.shell.tablet
 
 import androidx.annotation.MainThread
 import androidx.compose.foundation.layout.WindowInsets
@@ -14,9 +14,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.design.BottomChromeInsets
-import sh.roboco.android.shell.NavRoute
-import sh.roboco.android.shell.NavStack
+import sh.zeron.android.design.BottomChromeInsets
+import sh.zeron.android.shell.NavRoute
+import sh.zeron.android.shell.NavStack
 
 /**
  * Root of the sidebar stack (android-ui-parity #105): the front page —
@@ -60,7 +60,7 @@ object SidebarChromeMetrics {
  * [rememberSidebarState] serves the gallery, previews and tests.
  *
  * `query` is the **raw** field text (`searchBar.text ?? ""`): trimming
- * happens once, in 49's `searchTrim`, read by [sh.roboco.android.sessions.sidebarListContent]
+ * happens once, in 49's `searchTrim`, read by [sh.zeron.android.sessions.sidebarListContent]
  * and the search model. `currentChatId` is deliberately **not** here —
  * 33's `TabletShellState.currentChatId` is the single source and the
  * sidebar just reads it.
@@ -131,7 +131,7 @@ fun rememberSidebarState(): SidebarState = remember { SidebarState() }
  * IME never counts (107's pitfall); screens that need IME clearance add
  * their own, like 49 does.
  *
- * Provided as [sh.roboco.android.design.LocalBottomChrome] around the
+ * Provided as [sh.zeron.android.design.LocalBottomChrome] around the
  * whole sidebar stack host in [Sidebar], so the root **and** 45's pushed
  * folder pages pad their lists past the toolbar area.
  */

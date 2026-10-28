@@ -1,6 +1,6 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
-import sh.roboco.android.shell.NavRoute
+import sh.zeron.android.shell.NavRoute
 
 /**
  * The route the Settings → Devices engine row pushes (android-ui-parity

@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -12,12 +12,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.SymbolWeight
-import sh.roboco.android.design.glass.GlassCircleButton
-import sh.roboco.android.design.glass.GlassTier
-import sh.roboco.android.design.glass.LocalGlassTier
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.SymbolWeight
+import sh.zeron.android.design.glass.GlassCircleButton
+import sh.zeron.android.design.glass.GlassTier
+import sh.zeron.android.design.glass.LocalGlassTier
 
 /**
  * The phone's one-row bottom bar (wave-10 37, upstream #967 + #971's
@@ -66,7 +66,7 @@ fun SessionsBottomBar(
     modifier: Modifier = Modifier,
     onFrontPage: Boolean = true,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     BoxWithConstraints(modifier.fillMaxWidth().height(SessionsBottomBarMetrics.Height.dp)) {
         val circle = SessionsBottomBarMetrics.Height
         val gap = SessionsBottomBarMetrics.Gap
@@ -77,7 +77,7 @@ fun SessionsBottomBar(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             GlassCircleButton(
-                icon = RobocoIcons.Gearshape,
+                icon = ZeronIcons.Gearshape,
                 contentDescription = "Settings",
                 onClick = onSettings,
                 modifier = Modifier.testTag("bottom-settings"),
@@ -105,7 +105,7 @@ fun SessionsBottomBar(
                 )
             }
             GlassCircleButton(
-                icon = RobocoIcons.Plus,
+                icon = ZeronIcons.Plus,
                 contentDescription = "New session",
                 onClick = onNewSession,
                 modifier = Modifier.testTag("new-session"),

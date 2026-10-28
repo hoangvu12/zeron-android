@@ -1,4 +1,4 @@
-package roboco.gradle
+package zeron.gradle
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
@@ -16,7 +16,7 @@ import java.io.File
  * → `res/raw/chime_*.wav`, byte-identical — the channel sounds must be the
  * exact bytes the desktop plays (the ticket's SHA-256 pins). `appshot.wav`
  * is deliberately NOT copied; #699 committed mastered `fx_chime_*` copies,
- * Roboco does not re-master.
+ * Zeron does not re-master.
  *
  * A dedicated task (rather than a bare `Sync`) so AGP's
  * `addGeneratedSourceDirectory` wiring sees a plain `@OutputDirectory`

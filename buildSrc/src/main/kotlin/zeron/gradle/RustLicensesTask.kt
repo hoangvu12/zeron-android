@@ -1,4 +1,4 @@
-package roboco.gradle
+package zeron.gradle
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
@@ -18,7 +18,7 @@ import javax.inject.Inject
  * One invocation of `cargo xtask android-licenses` (android-ui-parity
  * #101): writes the Rust core's licence data
  * (`assets/licenses/rust-crates.json`) — every external crate linked into
- * `libroboco_mobile.so`, with its licence expression and bundled licence
+ * `libzeron_mobile.so`, with its licence expression and bundled licence
  * texts.
  *
  * Like [AndroidCoreBuild], the xtask is the single entry point on Windows

@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -19,16 +19,16 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.AlertButton
-import sh.roboco.android.design.AlertButtonRole
-import sh.roboco.android.design.AlertField
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalAlerts
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoAlert
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.AlertButton
+import sh.zeron.android.design.AlertButtonRole
+import sh.zeron.android.design.AlertField
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalAlerts
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronAlert
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
 
 /**
  * The "Folder bottom bar" section of the debug design gallery
@@ -37,7 +37,7 @@ import sh.roboco.android.design.uiStyle
  * four fixtures (a)–(d), each in a fixed-height page whose rows run
  * underneath the background-less stack, plus the New Folder alert in
  * its retry-error state (through [LocalAlerts] — the gallery's own
- * `AlertHost` from [sh.roboco.android.design.GalleryProviders]).
+ * `AlertHost` from [sh.zeron.android.design.GalleryProviders]).
  *
  * The fixtures and the stage are shared verbatim with the screenshot
  * test `FolderBrowserBottomBarTest` (the debug source set is visible to
@@ -96,7 +96,7 @@ fun folderBottomBarFixtures(): List<Pair<String, FolderBottomBarSpec>> = listOf(
 )
 
 /** The alert the retry flow re-shows: the invalid-name error, the name kept. */
-fun newFolderRetryAlert(): RobocoAlert = RobocoAlert(
+fun newFolderRetryAlert(): ZeronAlert = ZeronAlert(
     title = "New Folder",
     message = "Couldn't create the folder. Enter a folder name without path separators.",
     field = AlertField(
@@ -148,9 +148,9 @@ internal fun FolderBottomBarStage(spec: FolderBottomBarSpec, modifier: Modifier 
  */
 @Composable
 private fun FolderFixtureRows(modifier: Modifier = Modifier) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
-    val names = listOf("Desktop", "Documents", "Downloads", "Projects", "roboco", "zeron")
+    val names = listOf("Desktop", "Documents", "Downloads", "Projects", "zeron", "zeron")
     Column(modifier.background(palette.background)) {
         repeat(17) { index ->
             Box(Modifier.fillMaxWidth().height(52.dp).padding(horizontal = 16.dp)) {
@@ -179,7 +179,7 @@ fun FolderBottomBarGallerySection() {
         BasicText(
             "Open the New Folder alert in its retry-error state",
             Modifier.clickable(role = Role.Button) { alerts.show(newFolderRetryAlert()) },
-            style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(15f), RobocoTheme.palette.accent),
+            style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(15f), ZeronTheme.palette.accent),
         )
     }
 }
@@ -187,7 +187,7 @@ fun FolderBottomBarGallerySection() {
 /** One fixture: the label, then the 180 dp stage with rows under the bar. */
 @Composable
 private fun FixtureCard(label: String, spec: FolderBottomBarSpec) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         BasicText(label, style = uiStyle(Face.Sans, ts.fixed(13f), palette.secondary))
@@ -202,7 +202,7 @@ private fun FixtureCard(label: String, spec: FolderBottomBarSpec) {
 /** The preview stage: one fixture on a full page, light or dark. */
 @Composable
 private fun FolderBottomBarPreviewStage(appearance: Appearance, spec: FolderBottomBarSpec) {
-    RobocoTheme(appearance) {
+    ZeronTheme(appearance) {
         FolderBottomBarStage(spec, Modifier.fillMaxSize())
     }
 }

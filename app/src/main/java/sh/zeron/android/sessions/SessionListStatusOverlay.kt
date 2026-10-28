@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,12 +17,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.StatusGlyph
-import sh.roboco.android.design.StatusGlyphKind
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.StatusGlyph
+import sh.zeron.android.design.StatusGlyphKind
+import sh.zeron.android.design.uiStyle
 
 /**
  * The overlay's vertical anchor, in px: `(safeTop + (height − safeBottom))
@@ -44,11 +44,11 @@ private val AnchorLift = 40.dp
 /** The empty copy's side margins: 24 dp each (48 total). */
 private val EmptySideInset = 24.dp
 
-/** The 4 dp gap between the two empty lines (Roboco addition). */
+/** The 4 dp gap between the two empty lines (Zeron addition). */
 private val EmptyLineGap = 4.dp
 
 /**
- * The merged empty / loading overlay (Roboco addition — iOS shows a blank
+ * The merged empty / loading overlay (Zeron addition — iOS shows a blank
  * list), painted for every status but [SessionListStatus.Content] and
  * [SessionListStatus.Blank]:
  *
@@ -81,7 +81,7 @@ fun SessionListStatusOverlay(
     safePadding: PaddingValues,
     modifier: Modifier = Modifier,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
     when (status) {
         SessionListStatus.Content, SessionListStatus.Blank -> Unit

@@ -1,4 +1,4 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
@@ -36,16 +36,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.R
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.rememberSmoothRoundedShape
-import sh.roboco.android.design.glass.ProminentGlassButton
-import sh.roboco.android.design.glass.ProminentGlassButtonDefaults
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.R
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.rememberSmoothRoundedShape
+import sh.zeron.android.design.glass.ProminentGlassButton
+import sh.zeron.android.design.glass.ProminentGlassButtonDefaults
+import sh.zeron.android.design.uiStyle
 
 /**
  * What the pairing root's status line shows. Hoisted: the caller (ticket 35,
@@ -105,7 +105,7 @@ internal fun pairingRootStatusLine(
  * - a top stack centred on the **whole window** (not the safe area) and
  *   lifted 80 dp above the window centre (`:83-84`): the launcher
  *   artwork in a 64 dp rounded tile (android-next #03), the title
- *   "Roboco" and the tagline, 12 dp apart (`:71-74`);
+ *   "Zeron" and the tagline, 12 dp apart (`:71-74`);
  * - a bottom stack pinned 24 dp above the safe area's bottom edge and 24 dp
  *   inside its side edges (`:85-87`), 12 dp between the status line and the
  *   full-width "Pair an engine" capsule (ticket 08's
@@ -134,7 +134,7 @@ fun PairingRoot(
     modifier: Modifier = Modifier,
     safeInsets: WindowInsets = WindowInsets.systemBars.union(WindowInsets.displayCutout),
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val redeeming = stringResource(R.string.pairing_root_redeeming)
     Box(
@@ -294,7 +294,7 @@ private fun PairingRootErrorDarkPreview() {
 
 @Composable
 private fun PairingRootPreviewBody(appearance: Appearance, status: PairingRootStatus) {
-    RobocoTheme(appearance) {
+    ZeronTheme(appearance) {
         PairingRoot(status = status, onPair = {}, safeInsets = PreviewSafeInsets)
     }
 }

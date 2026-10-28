@@ -1,10 +1,10 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import java.util.concurrent.CopyOnWriteArrayList
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import uniffi.roboco_core.ClientEvent
+import uniffi.zeron_core.ClientEvent
 
 /**
  * [SessionEventHub] (android-ui-parity #51): the routing table (which

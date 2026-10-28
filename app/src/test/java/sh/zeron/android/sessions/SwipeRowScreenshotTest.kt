@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -15,9 +15,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The swipe-row goldens (android-ui-parity #44): the static block —
@@ -31,7 +31,7 @@ import sh.roboco.android.design.RobocoTheme
  * are relative to `roborazzi { outputDir }` (`src/test/screenshots`), so
  * the goldens land at `src/test/screenshots/sessions/`. Recorded by
  * `./gradlew :app:recordRoborazziDebug --tests
- * sh.roboco.android.sessions.SwipeRowScreenshotTest`, verified by
+ * sh.zeron.android.sessions.SwipeRowScreenshotTest`, verified by
  * `:app:verifyRoborazziDebug --tests …`.
  */
 @RunWith(RobolectricTestRunner::class)
@@ -47,9 +47,9 @@ class SwipeRowScreenshotTest {
         val density = Density(3f)
         compose.setContent {
             CompositionLocalProvider(LocalDensity provides density) {
-                RobocoTheme(appearance) {
+                ZeronTheme(appearance) {
                     ProvideGlyphClock(frozenAtNanos = 0L) {
-                        Box(Modifier.background(RobocoTheme.palette.background)) {
+                        Box(Modifier.background(ZeronTheme.palette.background)) {
                             SwipeRowStaticBlock()
                         }
                     }

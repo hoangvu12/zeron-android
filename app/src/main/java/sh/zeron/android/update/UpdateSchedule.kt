@@ -1,4 +1,4 @@
-package sh.roboco.android.update
+package sh.zeron.android.update
 
 /**
  * The check cadence (android-next#04), mirroring `crates/update/src/lib.rs:50-61`:

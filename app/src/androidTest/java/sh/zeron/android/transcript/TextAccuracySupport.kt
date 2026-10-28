@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.os.SystemClock
 import android.util.Log
@@ -6,18 +6,18 @@ import androidx.test.platform.app.InstrumentationRegistry
 import java.util.Locale
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.fail
-import sh.roboco.android.core.TextEngine
-import uniffi.roboco_core.LayoutFrame
-import uniffi.roboco_core.LayoutListener
-import uniffi.roboco_core.TextSystem
-import uniffi.roboco_core.TranscriptView
+import sh.zeron.android.core.TextEngine
+import uniffi.zeron_core.LayoutFrame
+import uniffi.zeron_core.LayoutListener
+import uniffi.zeron_core.TextSystem
+import uniffi.zeron_core.TranscriptView
 
 /**
  * Shared plumbing for the two text-accuracy instrumented tests (ticket 115):
  * the drift corpus (`LineBreakAccuracyTests.swift:9-27`, the 10 literals
  * plus every qualifying fixture paragraph), the shared [TextSystem], and
- * one logging channel — `Log.i` under the `RobocoTextAccuracy` tag plus
- * `println`, so `adb logcat -s RobocoTextAccuracy` and the instrumentation
+ * one logging channel — `Log.i` under the `ZeronTextAccuracy` tag plus
+ * `println`, so `adb logcat -s ZeronTextAccuracy` and the instrumentation
  * output both carry every line. Logcat truncates near 4 000 characters,
  * so callers log one line at a time, never a joined report.
  *
@@ -29,14 +29,14 @@ import uniffi.roboco_core.TranscriptView
  */
 internal object TextAccuracy {
 
-    private const val TAG: String = "RobocoTextAccuracy"
+    private const val TAG: String = "ZeronTextAccuracy"
 
     /**
      * The 10 corpus literals, verbatim from
      * `upstream/main:apps/ios/ZeronTests/LineBreakAccuracyTests.swift:10-21`
      * (UTF-16 lengths 116, 120, 121, 111, 115, 58, 96, 120, 121, 112).
-     * The only Roboco change is string 4: `zeron-text` → `roboco-text`
-     * (rename mapping; the crate is `roboco-text`). String 6's invisible
+     * The only Zeron change is string 4: `zeron-text` → `zeron-text`
+     * (rename mapping; the crate is `zeron-text`). String 6's invisible
      * joiners are written as explicit escapes so no copy-paste can drop
      * them: U+200D (ZWJ, twice), U+FE0F (VS-16) and U+20E3 (combining
      * keycap); the visible emoji stay raw. Nothing else is escaped (no
@@ -47,7 +47,7 @@ internal object TextAccuracy {
         "Inline code spans get chips, links are tappable, and old ideas are struck through when they no longer apply to the plan.",
         "Nested bullet with a very/long/path/that/must/wrap/somewhere/in/the/middle/because/it/is/too/wide.rs and then more words.",
         "See https://example.com/a/very/long/url/that/keeps/going/and/going?query=parameters&more=stuff for the details.",
-        "Run cargo test -p roboco-text --release -- --nocapture, then compare the numbers against the previous baseline run.",
+        "Run cargo test -p zeron-text --release -- --nocapture, then compare the numbers against the previous baseline run.",
         "CJK: 日本語のテキストも正しく折り返されます。中文也可以正确换行，不需要空格。한국어 문장도 줄바꿈이 됩니다.",
         "Emoji sequences 👩\u200D💻 🧑🏽\u200D🚀 🇯🇵 1\uFE0F\u20E3 never split, even when a line is tight 🚀✨🔥 around them.",
         "Numbers like 3,100 and 1.5×, dates like 2026-09-26, and times like 12:48 stay intact; so do e.g. and i.e. abbreviations.",
@@ -73,7 +73,7 @@ internal object TextAccuracy {
                 .map { it.replace("\n", " ") }
 
     /**
-     * The process-wide engine (ticket 60). `RobocoApplication.onCreate`
+     * The process-wide engine (ticket 60). `ZeronApplication.onCreate`
      * has already run `FontGate.check` + `TextEngine.init` + `prewarm`;
      * the idempotent [TextEngine.init] call only guards a runner that
      * somehow started without the application, and [TextEngine.await]

@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.annotation.MainThread
 import androidx.compose.runtime.Composable
@@ -7,12 +7,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.staticCompositionLocalOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import sh.roboco.android.shell.LocalAppRouter
-import sh.roboco.android.shell.LocalNavStack
-import sh.roboco.android.shell.LocalRouterHooks
-import sh.roboco.android.shell.NavRoute
-import sh.roboco.android.shell.SessionRoute
-import sh.roboco.android.shell.openSessionRoute
+import sh.zeron.android.shell.LocalAppRouter
+import sh.zeron.android.shell.LocalNavStack
+import sh.zeron.android.shell.LocalRouterHooks
+import sh.zeron.android.shell.NavRoute
+import sh.zeron.android.shell.SessionRoute
+import sh.zeron.android.shell.openSessionRoute
 
 /**
  * The tap-to-open override — the Android shape of iOS's

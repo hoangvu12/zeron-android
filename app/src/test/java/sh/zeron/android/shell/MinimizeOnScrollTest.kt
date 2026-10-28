@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -40,13 +40,13 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.design.glass.GlassMenuHost
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.design.glass.GlassMenuHost
 import kotlin.math.abs
 
 /**
@@ -125,12 +125,12 @@ class MinimizeOnScrollTest {
         listState = LazyListState()
         list = listState
         compose.setContent {
-            RobocoTheme {
+            ZeronTheme {
                 // A frozen glyph clock: the real accessory's "2 working"
                 // spinner otherwise runs a withFrameNanos loop forever and
                 // Compose never idles (AppNotIdleException).
                 ProvideGlyphClock(frozenAtNanos = 0L) {
-                    val palette = RobocoTheme.palette
+                    val palette = ZeronTheme.palette
                     val typeScale = LocalTypeScale.current
                     val minimize = rememberTabBarMinimizeState()
                     state = minimize
@@ -225,7 +225,7 @@ class MinimizeOnScrollTest {
     /** The real shell over the placeholder roots. */
     private fun placeShell(shellState: MainTabState) {
         compose.setContent {
-            RobocoTheme {
+            ZeronTheme {
                 // Ticket 46: the Sessions root is the real screen now — its
                 // ⋯ needs a GlassMenuHost and its loading spinner a frozen
                 // glyph clock.

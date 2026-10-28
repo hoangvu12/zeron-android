@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -51,11 +51,11 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LinearFontScaleDensity
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LinearFontScaleDensity
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The list's behaviour (android-ui-parity #41) on the ticket's worked
@@ -113,7 +113,7 @@ class SessionListBehaviourTest {
             // The density is built in composition from the provider, so a
             // flipped factor re-provides it (one setContent per test).
             CompositionLocalProvider(LocalDensity provides LinearFontScaleDensity(3f, fontScale())) {
-                RobocoTheme(Appearance.Light) { ProvideGlyphClock(frozenAtNanos = 0L) {
+                ZeronTheme(Appearance.Light) { ProvideGlyphClock(frozenAtNanos = 0L) {
                     val model = rememberSessionListModel(
                         sections = sections(),
                         collapsible = collapsible(),
@@ -279,7 +279,7 @@ class SessionListBehaviourTest {
         var h: State<Float>? = null
         compose.mainClock.autoAdvance = false
         compose.setContent {
-            RobocoTheme(Appearance.Light) { h = rememberRowHighlight(src, fadeOnRelease = true) }
+            ZeronTheme(Appearance.Light) { h = rememberRowHighlight(src, fadeOnRelease = true) }
         }
         compose.mainClock.advanceTimeBy(100)
         val press = PressInteraction.Press(Offset.Zero)
@@ -299,7 +299,7 @@ class SessionListBehaviourTest {
         var h: State<Float>? = null
         compose.mainClock.autoAdvance = false
         compose.setContent {
-            RobocoTheme(Appearance.Light) { h = rememberRowHighlight(src, fadeOnRelease = false) }
+            ZeronTheme(Appearance.Light) { h = rememberRowHighlight(src, fadeOnRelease = false) }
         }
         compose.mainClock.advanceTimeBy(100)
         val press = PressInteraction.Press(Offset.Zero)
@@ -317,7 +317,7 @@ class SessionListBehaviourTest {
         var h: State<Float>? = null
         compose.mainClock.autoAdvance = false
         compose.setContent {
-            RobocoTheme(Appearance.Light) { h = rememberRowHighlight(src, fadeOnRelease = true) }
+            ZeronTheme(Appearance.Light) { h = rememberRowHighlight(src, fadeOnRelease = true) }
         }
         compose.mainClock.advanceTimeBy(100)
         val press = PressInteraction.Press(Offset.Zero)
@@ -362,7 +362,7 @@ class SessionListBehaviourTest {
         var onScreen by mutableStateOf(false)
         val produced = CopyOnWriteArrayList<SessionListModel>()
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 val m = rememberSessionListModel(SessionListFixtures.sections(), collapsible = true, onScreen = onScreen)
                 SideEffect { produced += m }
             }
@@ -382,7 +382,7 @@ class SessionListBehaviourTest {
         val produced = CopyOnWriteArrayList<SessionListModel>()
         compose.setContent {
             CompositionLocalProvider(LocalDensity provides LinearFontScaleDensity(3f, factor)) {
-                RobocoTheme(Appearance.Light) {
+                ZeronTheme(Appearance.Light) {
                     val m = rememberSessionListModel(SessionListFixtures.sections(), collapsible = true)
                     SideEffect { produced += m }
                 }
@@ -402,7 +402,7 @@ class SessionListBehaviourTest {
         val density = { LinearFontScaleDensity(3f, factor) }
         compose.setContent {
             CompositionLocalProvider(LocalDensity provides density()) {
-                RobocoTheme(Appearance.Light) {
+                ZeronTheme(Appearance.Light) {
                     SessionList(
                         model = rememberSessionListModel(SessionListFixtures.sections(), collapsible = true),
                         onOpenSession = {},

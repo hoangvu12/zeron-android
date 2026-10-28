@@ -1,4 +1,4 @@
-package sh.roboco.android.design.glass
+package sh.zeron.android.design.glass
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.runtime.Composable
@@ -6,8 +6,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.ui.semantics.SemanticsPropertyKey
-import sh.roboco.android.design.LocalReduceMotion
-import sh.roboco.android.design.Motion
+import sh.zeron.android.design.LocalReduceMotion
+import sh.zeron.android.design.Motion
 
 /**
  * Test-only: the surface's materialization progress `p` (0 = dematerialized,

@@ -1,8 +1,8 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import java.util.Locale
-import uniffi.roboco_core.FrontPage
-import uniffi.roboco_core.SessionRow
+import uniffi.zeron_core.FrontPage
+import uniffi.zeron_core.SessionRow
 
 /**
  * The front page's section list (ticket 40) — the port of
@@ -144,7 +144,7 @@ object FrontPageSections {
     private class Candidate(val id: String, val title: String, val engineId: String)
 
     /**
-     * The multi-engine name-collision suffix (the Roboco adaptation — new
+     * The multi-engine name-collision suffix (the Zeron adaptation — new
      * copy, needed only with ≥2 paired engines): user-section and group
      * headers whose titles match after `trim().lowercase(Locale.ROOT)`
      * while sitting on **different** engines become

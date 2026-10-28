@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -50,18 +50,18 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.transcript.AttachmentReader
-import sh.roboco.android.transcript.DecodedImage
-import sh.roboco.android.transcript.ImageDecode
-import sh.roboco.android.transcript.ImageKey
-import sh.roboco.android.transcript.MaxAutoImageRetries
-import sh.roboco.android.transcript.TranscriptActions
-import sh.roboco.android.transcript.TranscriptImageBinding
-import sh.roboco.android.transcript.TranscriptImageLoader
-import sh.roboco.android.transcript.imageRetryDelayMs
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.transcript.AttachmentReader
+import sh.zeron.android.transcript.DecodedImage
+import sh.zeron.android.transcript.ImageDecode
+import sh.zeron.android.transcript.ImageKey
+import sh.zeron.android.transcript.MaxAutoImageRetries
+import sh.zeron.android.transcript.TranscriptActions
+import sh.zeron.android.transcript.TranscriptImageBinding
+import sh.zeron.android.transcript.TranscriptImageLoader
+import sh.zeron.android.transcript.imageRetryDelayMs
 
 /**
  * The tile's state machine (ticket 137, at `w393dp-h852dp-xxhdpi` → d = 3,
@@ -163,8 +163,8 @@ class ImageTileStatesTest {
 
     @Composable
     private fun Host(content: @Composable () -> Unit) {
-        RobocoTheme(Appearance.Light) {
-            Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) { content() }
+        ZeronTheme(Appearance.Light) {
+            Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) { content() }
         }
     }
 
@@ -403,7 +403,7 @@ class ImageTileStatesTest {
         val reader = FakeReader()
         val binding = TranscriptImageBinding(newLoader(), { "e1" }, reader)
         val actions = TranscriptActions(cachedImage = binding::cached, loadImage = binding::load)
-        val refs = listOf("assets/shot.png", "file:///tmp/a.png", "roboco-file:a.png", "")
+        val refs = listOf("assets/shot.png", "file:///tmp/a.png", "zeron-file:a.png", "")
 
         compose.setContent {
             Host {

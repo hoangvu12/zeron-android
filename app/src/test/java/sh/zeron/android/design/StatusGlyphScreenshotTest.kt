@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -19,7 +19,7 @@ import org.robolectric.annotation.GraphicsMode
  * (`src/test/screenshots`).
  *
  * Every capture pins the environment the ticket prescribes:
- * `RobocoTheme(Appearance) { LocalReduceMotion provides false (or true) {
+ * `ZeronTheme(Appearance) { LocalReduceMotion provides false (or true) {
  * ProvideGlyphClock(frozenAtNanos) { … } } }` — reduce motion pinned so the
  * system animator setting under Robolectric cannot change the result, and a
  * frozen clock so no frame ever re-draws. The fixture is a 16-dp-padded row
@@ -44,7 +44,7 @@ class StatusGlyphScreenshotTest {
 
     private fun shot(appearance: Appearance, frozenAtNanos: Long, reduce: Boolean, file: String) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 CompositionLocalProvider(LocalReduceMotion provides reduce) {
                     ProvideGlyphClock(frozenAtNanos = frozenAtNanos) {
                         StatusGlyphSampleRow()

@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import android.content.ClipboardManager
 import androidx.compose.foundation.background
@@ -19,11 +19,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.hairlineBorder
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.hairlineBorder
+import sh.zeron.android.design.uiStyle
 
 /**
  * The "Copy code" section of the debug design gallery (ticket 119): the
@@ -67,7 +67,7 @@ fun CopyCodeGallerySection() {
  */
 @Composable
 fun CopyCodeFixture(copied: Boolean?) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     // Circular corners (drawRoundRect circular arcs, ticket 64) — not the
     // transcript's SmoothRoundedShape.
     val shape = RoundedCornerShape(12.dp)
@@ -110,6 +110,6 @@ private fun ClipboardLine() {
     }
     BasicText(
         "Clipboard: " + (text?.take(40) ?: "tap the live card above"),
-        style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(13f), RobocoTheme.palette.secondary),
+        style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(13f), ZeronTheme.palette.secondary),
     )
 }

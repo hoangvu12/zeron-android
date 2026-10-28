@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -20,14 +20,14 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.AlertButton
-import sh.roboco.android.design.AlertButtonRole
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoAlert
-import sh.roboco.android.design.RobocoAlertCard
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.notify.NotificationPrefs
-import sh.roboco.android.notify.NotificationStatus
+import sh.zeron.android.design.AlertButton
+import sh.zeron.android.design.AlertButtonRole
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronAlert
+import sh.zeron.android.design.ZeronAlertCard
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.notify.NotificationPrefs
+import sh.zeron.android.notify.NotificationStatus
 
 /**
  * The Notifications rows goldens (android-ui-parity #99): the ticket's
@@ -56,7 +56,7 @@ import sh.roboco.android.notify.NotificationStatus
  * rows", light and dark).
  *
  * Record with
- * `./gradlew :app:recordRoborazziDebug --tests sh.roboco.android.settings.NotificationRowsScreenshotTest`,
+ * `./gradlew :app:recordRoborazziDebug --tests sh.zeron.android.settings.NotificationRowsScreenshotTest`,
  * verify with `./gradlew :app:verifyRoborazziDebug --tests …`. Paths are
  * relative to the `roborazzi { outputDir }` (`src/test/screenshots`),
  * landing under `settings/`.
@@ -73,7 +73,7 @@ class NotificationRowsScreenshotTest {
     private val onFixture = NotificationPrefs.Snapshot(enabled = true, done = true, input = false, failed = true)
 
     /** The denied alert, exactly as the section's state machine shows it. */
-    private val deniedAlert = RobocoAlert(
+    private val deniedAlert = ZeronAlert(
         title = NotificationCopy.AlertTitle,
         message = NotificationCopy.AlertMessage,
         buttons = listOf(
@@ -90,7 +90,7 @@ class NotificationRowsScreenshotTest {
         file: String,
     ) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 SectionBackdrop(snapshot, status)
             }
         }
@@ -103,7 +103,7 @@ class NotificationRowsScreenshotTest {
         LazyColumn(
             Modifier
                 .fillMaxSize()
-                .background(RobocoTheme.palette.background),
+                .background(ZeronTheme.palette.background),
         ) {
             notificationRowsSection(
                 rows = notificationRows(snapshot, status, pendingOn = false),
@@ -141,8 +141,8 @@ class NotificationRowsScreenshotTest {
     @Test
     fun deniedAlertLight() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
-                Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+            ZeronTheme(Appearance.Light) {
+                Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                     SectionBackdrop(allOn, NotificationStatus.Denied)
                     Box(Modifier.fillMaxSize().background(Color(0x33000000)))
                     Box(
@@ -151,7 +151,7 @@ class NotificationRowsScreenshotTest {
                             .padding(16.dp),
                         contentAlignment = Alignment.Center,
                     ) {
-                        RobocoAlertCard(
+                        ZeronAlertCard(
                             alert = deniedAlert,
                             fieldValue = TextFieldValue(""),
                             onFieldValueChange = {},

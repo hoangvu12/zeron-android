@@ -1,4 +1,4 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import android.content.Context
 import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
@@ -15,8 +15,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
-import uniffi.roboco_core.EngineTransport
-import uniffi.roboco_core.PairedEngine
+import uniffi.zeron_core.EngineTransport
+import uniffi.zeron_core.PairedEngine
 import java.io.File
 import java.util.UUID
 

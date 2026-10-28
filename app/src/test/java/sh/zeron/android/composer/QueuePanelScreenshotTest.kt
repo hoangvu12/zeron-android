@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.Modifier
@@ -17,15 +17,15 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.GlassStage
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.glass.ProvideHazeState
-import sh.roboco.android.session.SessionChrome
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.GlassStage
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.glass.ProvideHazeState
+import sh.zeron.android.session.SessionChrome
 
 /**
  * The queue panel goldens (android-ui-parity #82), recorded by
@@ -76,7 +76,7 @@ class QueuePanelScreenshotTest {
     private fun mount(appearance: Appearance, key: String) {
         val items = fixtureItems(key)
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 ProvideHazeState {
                     GlassMenuHost(hazeState = LocalHazeState.current!!) {
                         GlassStage(

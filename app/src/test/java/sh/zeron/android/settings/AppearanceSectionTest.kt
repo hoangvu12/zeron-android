@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,9 +35,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.settingsTag
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.settingsTag
 
 /**
  * The Appearance section (android-ui-parity #96) through the real
@@ -51,7 +51,7 @@ import sh.roboco.android.design.settingsTag
  *  - the iOS copy, verbatim, and the tags `settings-appearance:0/1/2`;
  *  - the checkmark: `Selected` semantics on exactly the row whose stored
  *    value is current — from the section's `current`, never
- *    `RobocoTheme.isDark` — and the accent-pixel probe (±16 per channel
+ *    `ZeronTheme.isDark` — and the accent-pixel probe (±16 per channel
  *    of `#5B43E8`, the bounding-box centre at 341.5 dp in row
  *    coordinates) finding it in the checked row only;
  *  - the tap: `onPick` fires once, the checkmark moves on the very next
@@ -79,13 +79,13 @@ class AppearanceSectionTest {
         onPick: (Appearance) -> Unit = {},
     ) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 AppearanceRowsColumn(
                     current = current,
                     onPick = onPick,
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(RobocoTheme.palette.background),
+                        .background(ZeronTheme.palette.background),
                 )
             }
         }
@@ -328,13 +328,13 @@ class AppearanceSectionTest {
         val picks = mutableListOf<Appearance>()
         val current = mutableStateOf(Appearance.System)
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 AppearanceRowsColumn(
                     current = current.value,
                     onPick = { a -> picks += a; current.value = a },
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(RobocoTheme.palette.background),
+                        .background(ZeronTheme.palette.background),
                 )
             }
         }
@@ -363,13 +363,13 @@ class AppearanceSectionTest {
         val picks = mutableListOf<Appearance>()
         val current = mutableStateOf(Appearance.System)
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 AppearanceRowsColumn(
                     current = current.value,
                     onPick = { a -> picks += a; current.value = a },
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(RobocoTheme.palette.background),
+                        .background(ZeronTheme.palette.background),
                 )
             }
         }
@@ -393,12 +393,12 @@ class AppearanceSectionTest {
         val flow = MutableStateFlow(Appearance.System)
         val calls = mutableListOf<Appearance>()
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 val state = rememberAppearanceSectionState(appearance = flow, onPick = { calls += it })
                 LazyColumn(
                     Modifier
                         .fillMaxSize()
-                        .background(RobocoTheme.palette.background),
+                        .background(ZeronTheme.palette.background),
                 ) {
                     appearanceSection(state)
                 }

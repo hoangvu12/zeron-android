@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -14,17 +14,17 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import sh.roboco.android.design.ActionSheetModel
-import sh.roboco.android.design.ActionSheetPresenter
-import sh.roboco.android.design.ActionSheetStyle
-import sh.roboco.android.design.AlertButtonRole
-import sh.roboco.android.design.Alerts
-import sh.roboco.android.design.RobocoAlert
-import sh.roboco.android.design.Toaster
-import sh.roboco.android.pairing.CredentialStoreException
-import uniffi.roboco_core.CoreException
-import uniffi.roboco_core.EngineState
-import uniffi.roboco_core.ParkReason
+import sh.zeron.android.design.ActionSheetModel
+import sh.zeron.android.design.ActionSheetPresenter
+import sh.zeron.android.design.ActionSheetStyle
+import sh.zeron.android.design.AlertButtonRole
+import sh.zeron.android.design.Alerts
+import sh.zeron.android.design.ZeronAlert
+import sh.zeron.android.design.Toaster
+import sh.zeron.android.pairing.CredentialStoreException
+import uniffi.zeron_core.CoreException
+import uniffi.zeron_core.EngineState
+import uniffi.zeron_core.ParkReason
 import java.io.IOException
 
 /**
@@ -85,12 +85,12 @@ class EngineDetailStateTest {
     }
 
     private class FakeAlerts : Alerts {
-        val shown = mutableListOf<RobocoAlert>()
-        override fun show(alert: RobocoAlert) {
+        val shown = mutableListOf<ZeronAlert>()
+        override fun show(alert: ZeronAlert) {
             shown += alert
         }
 
-        override fun updateCurrent(alert: RobocoAlert) {}
+        override fun updateCurrent(alert: ZeronAlert) {}
 
         override fun dismissAll() {}
     }

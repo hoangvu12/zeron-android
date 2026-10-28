@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import android.Manifest
 import android.app.Application
@@ -57,20 +57,20 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.AlertButtonRole
-import sh.roboco.android.design.AlertHost
-import sh.roboco.android.design.AlertHostState
-import sh.roboco.android.design.Alerts
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoAlert
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.settingsTag
-import sh.roboco.android.design.toggleTag
-import sh.roboco.android.notify.NotificationKind
-import sh.roboco.android.notify.NotificationPermission
-import sh.roboco.android.notify.NotificationPrefs
-import sh.roboco.android.notify.NotificationStatus
+import sh.zeron.android.design.AlertButtonRole
+import sh.zeron.android.design.AlertHost
+import sh.zeron.android.design.AlertHostState
+import sh.zeron.android.design.Alerts
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronAlert
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.settingsTag
+import sh.zeron.android.design.toggleTag
+import sh.zeron.android.notify.NotificationKind
+import sh.zeron.android.notify.NotificationPermission
+import sh.zeron.android.notify.NotificationPrefs
+import sh.zeron.android.notify.NotificationStatus
 
 /**
  * The Notifications section (android-ui-parity #99) through the real
@@ -160,14 +160,14 @@ class NotificationSettingsTest {
 
     /** The state-machine tests' alert fake: records every shown alert. */
     private class RecordingAlerts : Alerts {
-        val shown = mutableListOf<RobocoAlert>()
+        val shown = mutableListOf<ZeronAlert>()
         var dismissAlls = 0
 
-        override fun show(alert: RobocoAlert) {
+        override fun show(alert: ZeronAlert) {
             shown += alert
         }
 
-        override fun updateCurrent(alert: RobocoAlert) {}
+        override fun updateCurrent(alert: ZeronAlert) {}
 
         override fun dismissAll() {
             dismissAlls++
@@ -191,7 +191,7 @@ class NotificationSettingsTest {
         openSettings: (() -> Unit)? = null,
     ) {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(LocalActivityResultRegistryOwner provides owner) {
                     AlertHost(alerts) {
                         val state = rememberNotificationSectionState(
@@ -201,7 +201,7 @@ class NotificationSettingsTest {
                         LazyColumn(
                             Modifier
                                 .fillMaxSize()
-                                .background(RobocoTheme.palette.background),
+                                .background(ZeronTheme.palette.background),
                         ) {
                             notificationSection(state)
                         }
@@ -245,7 +245,7 @@ class NotificationSettingsTest {
         assertEquals("notify:enabled", master.id)
         assertEquals("Notifications", master.title)
         assertEquals("When a session finishes, needs you or fails", master.subtitle)
-        assertEquals(RobocoIcons.Bell, master.icon)
+        assertEquals(ZeronIcons.Bell, master.icon)
         assertFalse("the master shows enabled && Granted, never enabled alone", master.checked)
         assertEquals(null, master.kind)
     }
@@ -280,7 +280,7 @@ class NotificationSettingsTest {
         assertEquals(listOf(null, null, null), rows.drop(1).map { it.subtitle })
         assertEquals(listOf(true, false, true), rows.drop(1).map { it.checked })
         assertEquals(
-            listOf(RobocoIcons.CheckmarkCircle, RobocoIcons.QuestionmarkBubble, RobocoIcons.ExclamationmarkTriangle),
+            listOf(ZeronIcons.CheckmarkCircle, ZeronIcons.QuestionmarkBubble, ZeronIcons.ExclamationmarkTriangle),
             rows.drop(1).map { it.icon },
         )
         assertEquals(NotificationKind.entries, rows.drop(1).map { it.kind })
@@ -350,7 +350,7 @@ class NotificationSettingsTest {
         assertEquals("exactly one alert", 1, h.alerts.shown.size)
         val alert = h.alerts.shown.single()
         assertEquals("Notifications are off", alert.title)
-        assertEquals("Allow notifications for Roboco in Android settings.", alert.message)
+        assertEquals("Allow notifications for Zeron in Android settings.", alert.message)
         assertEquals(null, alert.field)
         val (notNow, openSettings) = alert.buttons
         assertEquals("Not Now", notNow.title)
@@ -707,7 +707,7 @@ class NotificationSettingsTest {
 
         compose.onNodeWithTag("alert").assertExists()
         compose.onNodeWithText("Notifications are off").assertExists()
-        compose.onNodeWithText("Allow notifications for Roboco in Android settings.").assertExists()
+        compose.onNodeWithText("Allow notifications for Zeron in Android settings.").assertExists()
         // Stacked (decision, round 31: the stacking rule mirrors iOS): on the
         // 320 dp card "Open Settings" is wider than the 108 dp side-by-side
         // label limit (AlertRules.sideBySideLabelMaxDp), so the buttons stack
@@ -770,7 +770,7 @@ class NotificationSettingsTest {
 
         val started: Intent? = shadowOf(compose.activity).nextStartedActivity
         assertEquals(Settings.ACTION_APP_NOTIFICATION_SETTINGS, started?.action)
-        assertEquals("sh.roboco.android", started?.getStringExtra(Settings.EXTRA_APP_PACKAGE))
+        assertEquals("sh.zeron.android", started?.getStringExtra(Settings.EXTRA_APP_PACKAGE))
         assertEquals(context.packageName, started?.getStringExtra(Settings.EXTRA_APP_PACKAGE))
         compose.onNodeWithTag("alert").assertDoesNotExist()
         switchNode(NotificationCopy.MasterId).assertIsOff()
@@ -822,7 +822,7 @@ class NotificationSettingsTest {
         var probes = 0
         fakeStatus = NotificationStatus.NotDetermined
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(LocalActivityResultRegistryOwner provides owner) {
                     AlertHost(alerts) {
                         val state = rememberNotificationSectionState(
@@ -838,7 +838,7 @@ class NotificationSettingsTest {
                         LazyColumn(
                             Modifier
                                 .fillMaxSize()
-                                .background(RobocoTheme.palette.background),
+                                .background(ZeronTheme.palette.background),
                         ) {
                             notificationSection(state)
                         }

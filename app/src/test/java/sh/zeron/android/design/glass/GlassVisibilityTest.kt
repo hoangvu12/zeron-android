@@ -1,4 +1,4 @@
-package sh.roboco.android.design.glass
+package sh.zeron.android.design.glass
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -29,9 +29,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The materialize/dematerialize animation, the hidden-state hit-testing
@@ -130,7 +130,7 @@ class GlassVisibilityTest {
         interactionSource: MutableInteractionSource? = null,
         onClick: (() -> Unit)? = null,
     ) {
-        RobocoTheme(Appearance.Light) {
+        ZeronTheme(Appearance.Light) {
             Box(Modifier.fillMaxSize()) {
                 GlassSurface(
                     modifier = Modifier.size(160.dp, 44.dp),

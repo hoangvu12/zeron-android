@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
@@ -19,7 +19,7 @@ import org.robolectric.annotation.GraphicsMode
  * are all at their reference size.
  *
  * Record with
- * `./gradlew :app:recordRoborazziDebug --tests sh.roboco.android.design.GroupedListScreenshotTest`,
+ * `./gradlew :app:recordRoborazziDebug --tests sh.zeron.android.design.GroupedListScreenshotTest`,
  * verify with `:app:verifyRoborazziDebug --tests …`. Paths are relative to
  * the `roborazzi { outputDir }` (`src/test/screenshots`), landing under
  * `design/`. The section's only animation-free state is the pressed row,
@@ -36,7 +36,7 @@ class GroupedListScreenshotTest {
 
     private fun shot(appearance: Appearance, file: String) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 GroupedListGallerySection()
             }
         }

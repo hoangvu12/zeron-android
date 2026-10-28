@@ -1,11 +1,11 @@
-package sh.roboco.android.accounts
+package sh.zeron.android.accounts
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
-import uniffi.roboco_core.AgentAccount
-import uniffi.roboco_core.AgentAccountsSnapshot
-import uniffi.roboco_core.AgentUsageWindow
+import uniffi.zeron_core.AgentAccount
+import uniffi.zeron_core.AgentAccountsSnapshot
+import uniffi.zeron_core.AgentUsageWindow
 
 /**
  * The Settings "Agent Accounts" section's pure derivation
@@ -83,7 +83,7 @@ class AgentAccountsSectionTest {
     fun noAccountsIsEmptyWithTheSignInSectionCopy() {
         val rows = rows(snapshot = AgentAccountsSnapshot(accounts = emptyList(), warnings = emptyList()))!!
         assertEquals(
-            listOf(AgentAccountsRowSpec.Empty("Sign in to an agent from Roboco on Studio.")),
+            listOf(AgentAccountsRowSpec.Empty("Sign in to an agent from Zeron on Studio.")),
             rows,
         )
     }

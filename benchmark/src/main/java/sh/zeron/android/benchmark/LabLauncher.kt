@@ -1,4 +1,4 @@
-package sh.roboco.android.benchmark
+package sh.zeron.android.benchmark
 
 import android.content.Intent
 import androidx.benchmark.macro.MacrobenchmarkScope
@@ -12,11 +12,11 @@ import androidx.test.uiautomator.Until
  * `turns`/flag extras, and the wait for the transcript host.
  */
 
-/** The measured app's package (`sh.roboco.android`). */
-const val TARGET = "sh.roboco.android"
+/** The measured app's package (`sh.zeron.android`). */
+const val TARGET = "sh.zeron.android"
 
 /** 135's debug-only lab activity (exported, so `am start`/Macrobenchmark reach it). */
-const val LAB = "sh.roboco.android.debug.TranscriptLabActivity"
+const val LAB = "sh.zeron.android.debug.TranscriptLabActivity"
 
 /** One lab launch: `-lab -turns <turns>` plus boolean flag extras. */
 fun labIntent(turns: Int = 300, vararg flags: String): Intent =

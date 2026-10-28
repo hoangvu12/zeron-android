@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.content.res.Configuration
 import androidx.compose.foundation.ScrollState
@@ -22,14 +22,14 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
-import sh.roboco.android.core.Fonts
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.TranscriptPalette
-import uniffi.roboco_core.BoxStyle
-import uniffi.roboco_core.ColorRole
-import uniffi.roboco_core.FaceRole
-import uniffi.roboco_core.Scroller
+import sh.zeron.android.core.Fonts
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.TranscriptPalette
+import uniffi.zeron_core.BoxStyle
+import uniffi.zeron_core.ColorRole
+import uniffi.zeron_core.FaceRole
+import uniffi.zeron_core.Scroller
 
 /**
  * The transcript-scroller specimen (debug gallery, ticket 116): the real
@@ -51,8 +51,8 @@ fun ScrollerFixturePage() {
     val context = LocalContext.current
     val density = LocalDensity.current.density
     // Read before the draw pass: an appearance flip only swaps the palette.
-    val dark = RobocoTheme.isDark
-    val background = RobocoTheme.palette.background
+    val dark = ZeronTheme.isDark
+    val background = ZeronTheme.palette.background
     val fonts = remember(context) {
         // StyleFonts' default constructor resolves typefaces through the
         // shared chain, so make sure it is built first (memoised).
@@ -221,11 +221,11 @@ private fun buildScrollerRows(fonts: StyleFonts, d: Float): List<ScrollerItem> {
 @Preview(name = "Scrollers light", widthDp = 390, heightDp = 760)
 @Composable
 private fun ScrollerLightPreview() {
-    RobocoTheme(Appearance.Light) { ScrollerFixturePage() }
+    ZeronTheme(Appearance.Light) { ScrollerFixturePage() }
 }
 
 @Preview(name = "Scrollers dark", widthDp = 390, heightDp = 760, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun ScrollerDarkPreview() {
-    RobocoTheme(Appearance.Dark) { ScrollerFixturePage() }
+    ZeronTheme(Appearance.Dark) { ScrollerFixturePage() }
 }

@@ -1,4 +1,4 @@
-package sh.roboco.android.design.glass
+package sh.zeron.android.design.glass
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,13 +17,13 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.GalleryBackdrop
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.fixtureALines
-import sh.roboco.android.design.fixtureBLines
-import sh.roboco.android.design.fixtureCLines
-import sh.roboco.android.design.fixtureDLines
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.GalleryBackdrop
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.fixtureALines
+import sh.zeron.android.design.fixtureBLines
+import sh.zeron.android.design.fixtureCLines
+import sh.zeron.android.design.fixtureDLines
 
 /**
  * The menu goldens (android-ui-parity #15), recorded by
@@ -57,7 +57,7 @@ class GlassMenuScreenshotTest {
 
     private fun shot(appearance: Appearance, lines: List<MenuLine>, file: String) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 Box(Modifier.fillMaxSize()) {
                     GalleryBackdrop(Modifier.fillMaxSize())
                     GlassMenuPanel(

@@ -1,4 +1,4 @@
-package sh.roboco.android
+package sh.zeron.android
 
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
@@ -8,17 +8,17 @@ import org.junit.Test
 import java.io.File
 
 /**
- * The generated asset/res trees, from the `roboco.*` system properties the
+ * The generated asset/res trees, from the `zeron.*` system properties the
  * Gradle build sets (android-app#13). Plain JVM: reads PNG IHDR bytes, no
  * Android APIs, so the merge check can run it cheaply.
  */
 class GeneratedAssetsTest {
 
-    private val repoRoot = File(System.getProperty("roboco.repoRoot"))
-    private val generatedAssets = File(System.getProperty("roboco.generatedAssets"))
-    private val generatedRes = File(System.getProperty("roboco.generatedRes"))
-    private val generatedFonts = File(System.getProperty("roboco.generatedFonts"))
-    private val generatedLicenses = File(System.getProperty("roboco.generatedLicenses"))
+    private val repoRoot = File(System.getProperty("zeron.repoRoot"))
+    private val generatedAssets = File(System.getProperty("zeron.generatedAssets"))
+    private val generatedRes = File(System.getProperty("zeron.generatedRes"))
+    private val generatedFonts = File(System.getProperty("zeron.generatedFonts"))
+    private val generatedLicenses = File(System.getProperty("zeron.generatedLicenses"))
 
     @Test
     fun licenseAndThirdPartyNoticesAreBundledByteIdentical() {
@@ -46,7 +46,7 @@ class GeneratedAssetsTest {
     fun allTwelveFontsExistAndAreByteIdenticalToTheSource() {
         // The app's own list is the source of truth here: this test then
         // verifies the Gradle sync produced exactly those faces.
-        for (file in sh.roboco.android.core.FontAssets.FILES) {
+        for (file in sh.zeron.android.core.FontAssets.FILES) {
             val source = repoRoot.resolve("crates/ui/assets/fonts").resolve(file)
             val generated = generatedFonts.resolve("fonts").resolve(file)
             assertTrue("$file missing from the generated fonts", generated.isFile)
@@ -77,7 +77,7 @@ class GeneratedAssetsTest {
 
     @Test
     fun vectorDrawablesExist() {
-        for (name in listOf("zi_tab_chat.xml", "zi_tab_settings.xml", "zi_plus.xml", "zi_roboco_bow.xml")) {
+        for (name in listOf("zi_tab_chat.xml", "zi_tab_settings.xml", "zi_plus.xml", "zi_zeron_bow.xml")) {
             val xml = generatedRes.resolve("drawable").resolve(name)
             assertTrue("$name missing from the generated res", xml.isFile)
             val text = xml.readText()
@@ -94,7 +94,7 @@ class GeneratedAssetsTest {
         for (name in outputs) {
             // `file-markdown`/`julia-markdown` are file icons, not brand marks.
             assertFalse("$name must not exist", name.endsWith("-mark.xml") || name.endsWith("-mark.png"))
-            assertFalse("$name must not exist", name.startsWith("roboco_logo") || name.startsWith("zi_roboco_logo"))
+            assertFalse("$name must not exist", name.startsWith("zeron_logo") || name.startsWith("zi_zeron_logo"))
         }
     }
 

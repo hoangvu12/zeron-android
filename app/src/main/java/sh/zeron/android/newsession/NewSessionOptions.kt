@@ -1,6 +1,6 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
-import uniffi.roboco_core.WorkspaceSnapshot
+import uniffi.zeron_core.WorkspaceSnapshot
 
 /**
  * The New Session / New Project option records (android-ui-parity #92,

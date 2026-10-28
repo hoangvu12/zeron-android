@@ -1,4 +1,4 @@
-package roboco.gradle
+package zeron.gradle
 
 /**
  * The 12 bundled Geist faces the app ships (android-app#13): the same
@@ -6,7 +6,7 @@ package roboco.gradle
  * `core/FontAssets.kt` mirrors this list for runtime checks — keep the two
  * in lockstep when a face is ever added.
  */
-object RobocoFonts {
+object ZeronFonts {
     val FILES: List<String> = listOf(
         "Geist.ttf",
         "Geist-Medium.ttf",

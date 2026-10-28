@@ -1,11 +1,11 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.runtime.Immutable
-import sh.roboco.android.design.PrState
-import sh.roboco.android.design.prBadgeA11yLabel
-import uniffi.roboco_core.ChatIndicator
-import uniffi.roboco_core.SendState
-import uniffi.roboco_core.SessionRow
+import sh.zeron.android.design.PrState
+import sh.zeron.android.design.prBadgeA11yLabel
+import uniffi.zeron_core.ChatIndicator
+import uniffi.zeron_core.SendState
+import uniffi.zeron_core.SessionRow
 
 /**
  * One session row's view model — the port of `SessionRowVM`
@@ -20,7 +20,7 @@ import uniffi.roboco_core.SessionRow
  * tickets that need the owning engine (42 row actions, 50 offline
  * indication) look the FFI row up by id. A later ticket that must add a
  * field appends it with a default so this ticket's fixtures keep compiling.
- * The composable that draws it is [sh.roboco.android.sessions.SessionRow].
+ * The composable that draws it is [sh.zeron.android.sessions.SessionRow].
  */
 @Immutable
 data class SessionRowVM(
@@ -103,7 +103,7 @@ fun statusOf(i: ChatIndicator): SessionRowVM.Status = when (i) {
  * native core; never read from a plain-JVM test (pass `6` instead).
  */
 object HomeColorIndex {
-    val value: Int by lazy { uniffi.roboco_core.projectColorIndex("home").toInt() }
+    val value: Int by lazy { uniffi.zeron_core.projectColorIndex("home").toInt() }
 }
 
 /**

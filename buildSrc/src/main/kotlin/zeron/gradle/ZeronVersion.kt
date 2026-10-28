@@ -1,4 +1,4 @@
-package roboco.gradle
+package zeron.gradle
 
 import java.io.File
 
@@ -6,12 +6,12 @@ import java.io.File
  * Version derivation from the workspace `Cargo.toml` (android-app#13).
  *
  * `versionName` is the `[workspace.package]` version (overridable with
- * `-ProbocoVersionName`); `versionCode` is
+ * `-PzeronVersionName`); `versionCode` is
  * `major × 1_000_000 + minor × 1_000 + patch` (overridable with
- * `-ProbocoVersionCode`), ignoring any `-suffix`. Ticket 31 (release
+ * `-PzeronVersionCode`), ignoring any `-suffix`. Ticket 31 (release
  * packaging) relies on `tag == versionName` matching this derivation.
  */
-object RobocoVersion {
+object ZeronVersion {
 
     private val VERSION_LINE = Regex("""^\s*version\s*=\s*"([^"]+)"""")
 
@@ -45,11 +45,11 @@ object RobocoVersion {
         return major * 1_000_000 + minor * 1_000 + patch
     }
 
-    /** `versionName` with the `-ProbocoVersionName` override applied. */
+    /** `versionName` with the `-PzeronVersionName` override applied. */
     fun versionName(cargoToml: File, override: String?): String =
         override ?: versionName(cargoToml)
 
-    /** `versionCode` with the `-ProbocoVersionCode` override applied. */
+    /** `versionCode` with the `-PzeronVersionCode` override applied. */
     fun versionCode(versionName: String, override: Int?): Int =
         override ?: versionCode(versionName)
 }

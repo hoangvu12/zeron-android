@@ -1,4 +1,4 @@
-package sh.roboco.android.background
+package sh.zeron.android.background
 
 import android.app.ForegroundServiceStartNotAllowedException
 import android.content.Context
@@ -12,8 +12,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import sh.roboco.android.notify.Notifier
-import sh.roboco.android.notify.WorkingRun
+import sh.zeron.android.notify.Notifier
+import sh.zeron.android.notify.WorkingRun
 
 /**
  * The state the service renders: the working set (already projected to
@@ -44,7 +44,7 @@ data class RunWatchState(
 
 /**
  * The foreground-service lifecycle owner (android-app#28), a process
- * singleton created in `RobocoApplication.onCreate`. It never owns
+ * singleton created in `ZeronApplication.onCreate`. It never owns
  * sockets — the core client (also a process singleton) does; the service
  * only keeps the process out of the cached/frozen set so the engine
  * connections and their notifications live.
@@ -320,7 +320,7 @@ class RunWatchController(
     }
 
     companion object {
-        private const val TAG = "RobocoRunWatch"
+        private const val TAG = "ZeronRunWatch"
 
         /**
          * How long the service outlives the last Working run (ADR 0010):

@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,9 +23,9 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import kotlin.math.max
 import kotlin.math.roundToInt
-import sh.roboco.android.BuildConfig
-import sh.roboco.android.design.glass.GlassSurface
-import sh.roboco.android.design.rememberSmoothRoundedShape
+import sh.zeron.android.BuildConfig
+import sh.zeron.android.design.glass.GlassSurface
+import sh.zeron.android.design.rememberSmoothRoundedShape
 
 /**
  * The alpha at which the chips count as gone (UIKit skips views with model

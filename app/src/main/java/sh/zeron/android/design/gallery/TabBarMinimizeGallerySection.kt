@@ -1,4 +1,4 @@
-package sh.roboco.android.design.gallery
+package sh.zeron.android.design.gallery
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -34,23 +34,23 @@ import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.launch
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.CapsuleShape
-import sh.roboco.android.design.GlassStage
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.hairlineBorder
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.shell.GlassSearchButton
-import sh.roboco.android.shell.GlassTabPill
-import sh.roboco.android.shell.LiveCounts
-import sh.roboco.android.shell.NewSessionAccessory
-import sh.roboco.android.shell.TabChromeLayout
-import sh.roboco.android.shell.TabId
-import sh.roboco.android.shell.minimizeOnScroll
-import sh.roboco.android.shell.rememberTabBarMinimizeState
-import sh.roboco.android.shell.tabPillExpandedWidth
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.CapsuleShape
+import sh.zeron.android.design.GlassStage
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.hairlineBorder
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.shell.GlassSearchButton
+import sh.zeron.android.shell.GlassTabPill
+import sh.zeron.android.shell.LiveCounts
+import sh.zeron.android.shell.NewSessionAccessory
+import sh.zeron.android.shell.TabChromeLayout
+import sh.zeron.android.shell.TabId
+import sh.zeron.android.shell.minimizeOnScroll
+import sh.zeron.android.shell.rememberTabBarMinimizeState
+import sh.zeron.android.shell.tabPillExpandedWidth
 
 /**
  * The "Tab bar minimize" page of the debug design gallery
@@ -73,7 +73,7 @@ import sh.roboco.android.shell.tabPillExpandedWidth
  */
 @Composable
 internal fun TabBarMinimizeGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val state = rememberTabBarMinimizeState()
     val scope = rememberCoroutineScope()
@@ -197,7 +197,7 @@ internal fun TabBarMinimizeGallerySection() {
 /** A plain text chip; a `clickable` BasicText, no Material controls. */
 @Composable
 private fun GalleryChip(text: String, active: Boolean, onClick: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     BasicText(
         text,

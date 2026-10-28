@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
@@ -15,11 +15,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import sh.roboco.android.design.Feedback
-import sh.roboco.android.design.Haptic
-import sh.roboco.android.design.LocalFeedback
-import sh.roboco.android.design.glass.Menu
-import uniffi.roboco_core.FileMatch
+import sh.zeron.android.design.Feedback
+import sh.zeron.android.design.Haptic
+import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.design.glass.Menu
+import uniffi.zeron_core.FileMatch
 
 /**
  * The composer's non-visual state holder (android-ui-parity #54): the
@@ -42,7 +42,7 @@ import uniffi.roboco_core.FileMatch
  * `ImageBitmap` value types and the [rememberComposerController] factory.
  * Main thread only.
  *
- * Roboco adaptations on top of the iOS rules (see the ticket):
+ * Zeron adaptations on top of the iOS rules (see the ticket):
  * - [onSend] is `suspend` (the FFI send is async), launched
  *   [CoroutineStart.UNDISPATCHED] so a non-suspending handler completes
  *   inside the [send] call exactly like iOS; while a send is in flight a
@@ -105,10 +105,10 @@ class ComposerController(
     /** Stay in the card state even when idle — iOS `chipsAlwaysVisible` (`:76-77`); 56 reads it as `wantsCard`. */
     var alwaysCard by mutableStateOf(false)
 
-    /** Roboco: `false` while the owning engine is offline (79 derives it). Text and chips stay editable. */
+    /** Zeron: `false` while the owning engine is offline (79 derives it). Text and chips stay editable. */
     var canWrite by mutableStateOf(true)
 
-    /** Roboco: `false` while a queued edit is open (83); 55/87 grey out `+`. */
+    /** Zeron: `false` while a queued edit is open (83); 55/87 grey out `+`. */
     var attachEnabled by mutableStateOf(true)
 
     /** Mention-suggestion card visibility (86 renders it; [send] hides it). */
@@ -137,7 +137,7 @@ class ComposerController(
     val hasContent: Boolean
         get() = value.text.isNotBlank() || images.isNotEmpty()
 
-    /** The action button's derived state — a pure function of the state above (`:579-581`), with Roboco's `canWrite`. */
+    /** The action button's derived state — a pure function of the state above (`:579-581`), with Zeron's `canWrite`. */
     val actionState: ActionState
         get() = deriveAction(running, hasContent, canWrite, canSteer, preferredDelivery)
 
@@ -256,7 +256,7 @@ class ComposerController(
 
         /**
          * The action derivation, `ios:Composer/ComposerBar.swift:579-581`
-         * plus Roboco's `canWrite`:
+         * plus Zeron's `canWrite`:
          * - action: `running ? (hasContent ? queue : stop) : send`;
          * - enabled: Stop is always enabled, everything else needs content,
          *   and `canWrite` gates all of it;

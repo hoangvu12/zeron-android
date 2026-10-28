@@ -1,4 +1,4 @@
-package sh.roboco.android.update
+package sh.zeron.android.update
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,17 +23,17 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.R
-import sh.roboco.android.design.AlertButton
-import sh.roboco.android.design.AlertButtonRole
-import sh.roboco.android.design.AlertHost
-import sh.roboco.android.design.AlertHostState
-import sh.roboco.android.design.AlertProgress
-import sh.roboco.android.design.AlertProgressKey
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.RobocoAlert
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.R
+import sh.zeron.android.design.AlertButton
+import sh.zeron.android.design.AlertButtonRole
+import sh.zeron.android.design.AlertHost
+import sh.zeron.android.design.AlertHostState
+import sh.zeron.android.design.AlertProgress
+import sh.zeron.android.design.AlertProgressKey
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.ZeronAlert
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The update alerts' rendering (android-next#04, panels A/B/C): the launch
@@ -56,7 +56,7 @@ class UpdateAlertsUiTest {
     private val alerts = AlertHostState()
 
     /** The exact launch prompt the center builds (panel A). */
-    private fun launchAlert(): RobocoAlert = RobocoAlert(
+    private fun launchAlert(): ZeronAlert = ZeronAlert(
         title = context.getString(R.string.update_alert_title),
         message = context.getString(R.string.update_alert_message, "0.10.0", "0.9.2"),
         buttons = listOf(
@@ -76,7 +76,7 @@ class UpdateAlertsUiTest {
     )
 
     /** The exact download state the center builds (panel B). */
-    private fun downloadingAlert(fraction: Float): RobocoAlert = RobocoAlert(
+    private fun downloadingAlert(fraction: Float): ZeronAlert = ZeronAlert(
         title = context.getString(R.string.update_downloading_title),
         message = context.getString(R.string.update_downloading_message, "0.10.0"),
         progress = AlertProgress(
@@ -89,7 +89,7 @@ class UpdateAlertsUiTest {
     )
 
     /** The exact permission ask the center builds (panel C). */
-    private fun permissionAlert(): RobocoAlert = RobocoAlert(
+    private fun permissionAlert(): ZeronAlert = ZeronAlert(
         title = context.getString(R.string.update_permission_title),
         message = context.getString(R.string.update_permission_message),
         buttons = listOf(
@@ -100,7 +100,7 @@ class UpdateAlertsUiTest {
 
     private fun mount() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 AlertHost(alerts) {
                     Box(Modifier.fillMaxSize()) { BasicText("the app behind the alert") }
                 }
@@ -110,7 +110,7 @@ class UpdateAlertsUiTest {
         compose.waitForIdle()
     }
 
-    private fun show(alert: RobocoAlert) {
+    private fun show(alert: ZeronAlert) {
         compose.runOnUiThread { alerts.show(alert) }
         compose.waitForIdle()
         // Let the present animation settle (the fade-in runs 200 ms).
@@ -126,7 +126,7 @@ class UpdateAlertsUiTest {
         show(launchAlert())
 
         compose.onNodeWithText("Update Available").assertExists()
-        compose.onNodeWithText("Roboco 0.10.0 is available. You have 0.9.2.").assertExists()
+        compose.onNodeWithText("Zeron 0.10.0 is available. You have 0.9.2.").assertExists()
         compose.onNodeWithTag("alert-primary").assertExists()
         compose.onNodeWithText("Update").assertExists()
         compose.onNodeWithTag("alert-cancel").assertExists()
@@ -183,7 +183,7 @@ class UpdateAlertsUiTest {
 
         // One card, the same presentation — never a second alert.
         assertEquals(1, compose.onAllNodesWithTag("alert").fetchSemanticsNodes().size)
-        compose.onNodeWithText("Updating Roboco").assertExists()
+        compose.onNodeWithText("Updating Zeron").assertExists()
         compose.onNodeWithText("Downloading 0.10.0…").assertExists()
         compose.onNodeWithText("Cancel").assertExists()
         // The progress bar's fraction and its label.
@@ -200,8 +200,8 @@ class UpdateAlertsUiTest {
         mount()
         show(permissionAlert())
 
-        compose.onNodeWithText("Allow Roboco to Install Updates").assertExists()
-        compose.onNodeWithText("Android asks once. Turn on \"Allow from this source\" for Roboco, then come back.")
+        compose.onNodeWithText("Allow Zeron to Install Updates").assertExists()
+        compose.onNodeWithText("Android asks once. Turn on \"Allow from this source\" for Zeron, then come back.")
             .assertExists()
         compose.onNodeWithText("Open Settings").assertExists()
         compose.onNodeWithText("Not Now").assertExists()

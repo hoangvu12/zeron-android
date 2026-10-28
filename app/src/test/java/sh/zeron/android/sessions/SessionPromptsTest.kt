@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Box
@@ -33,17 +33,17 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.ActionSheetHost
-import sh.roboco.android.design.ActionSheetHostState
-import sh.roboco.android.design.AlertHost
-import sh.roboco.android.design.AlertHostState
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalFeedback
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.ToastAnnouncer
-import sh.roboco.android.design.ToasterState
-import sh.roboco.android.design.ToastHost
-import uniffi.roboco_core.SectionView
+import sh.zeron.android.design.ActionSheetHost
+import sh.zeron.android.design.ActionSheetHostState
+import sh.zeron.android.design.AlertHost
+import sh.zeron.android.design.AlertHostState
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.ToastAnnouncer
+import sh.zeron.android.design.ToasterState
+import sh.zeron.android.design.ToastHost
+import uniffi.zeron_core.SectionView
 
 /**
  * Ticket 43's launcher behaviour (Robolectric, `createAndroidComposeRule`):
@@ -170,7 +170,7 @@ class SessionPromptsTest {
     @Before
     fun mount() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 AlertHost(state = alerts) {
                     ToastHost(state = toaster, announcer = ToastAnnouncer { }) {
                         ActionSheetHost(state = sheets) {

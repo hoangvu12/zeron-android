@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,14 +23,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.CapsuleShape
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.gallery.ScrollEdgeEngagedMode
-import sh.roboco.android.design.gallery.engaged
-import sh.roboco.android.design.gallery.next
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.CapsuleShape
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.gallery.ScrollEdgeEngagedMode
+import sh.zeron.android.design.gallery.engaged
+import sh.zeron.android.design.gallery.next
+import sh.zeron.android.design.uiStyle
 
 /** The gallery's Title toggle states (the ticket's three titles). */
 private enum class GalleryTitleKind(val label: String, val text: String) {
@@ -44,7 +44,7 @@ private enum class GalleryTitleKind(val label: String, val text: String) {
 
 /** The gallery's Subtitle toggle states (engine / "No project" / empty). */
 private enum class GallerySubtitleKind(val label: String, val text: String) {
-    Engine("engine", "roboco @ MacBook Pro"),
+    Engine("engine", "zeron @ MacBook Pro"),
     NoProject("no project", "No project"),
     Empty("empty", ""),
 }
@@ -68,7 +68,7 @@ private inline fun <reified E : Enum<E>> E.next(): E {
  * empty), Back (on/off), Engaged (auto from the fixture list scroll /
  * always / never) and Width (full / 360 / 320, a centred fixed-width frame
  * that shrinks the title cap). It follows the gallery's Light/Dark and
- * Force-reduce-motion toggles through [RobocoTheme].
+ * Force-reduce-motion toggles through [ZeronTheme].
  *
  * The toggles are siblings **after** the fixture (never inside its haze
  * source), so they stay crisp and tappable over the transcript. Tapping ⋯
@@ -80,7 +80,7 @@ private inline fun <reified E : Enum<E>> E.next(): E {
  */
 @Composable
 fun SessionHeaderGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     var titleKind by remember { mutableStateOf(GalleryTitleKind.Reference) }
     var subtitleKind by remember { mutableStateOf(GallerySubtitleKind.Engine) }
     var back by remember { mutableStateOf(true) }
@@ -155,7 +155,7 @@ private fun GalleryToggle(text: String, onClick: () -> Unit) {
         style = uiStyle(
             Face.SansMedium,
             LocalTypeScale.current.fixed(14f),
-            RobocoTheme.palette.accent,
+            ZeronTheme.palette.accent,
         ),
         modifier = Modifier
             .clickable(onClick = onClick)

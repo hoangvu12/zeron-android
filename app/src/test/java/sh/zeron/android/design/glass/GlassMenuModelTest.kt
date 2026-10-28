@@ -1,10 +1,10 @@
-package sh.roboco.android.design.glass
+package sh.zeron.android.design.glass
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import sh.roboco.android.design.RobocoIcon
+import sh.zeron.android.design.ZeronIcon
 
 /**
  * The menu model's flattening rules (android-ui-parity #15, `GlassMenuModel.kt`):
@@ -33,7 +33,7 @@ class GlassMenuModelTest {
         action = {},
     )
 
-    private fun symbol() = MenuIcon.Symbol(RobocoIcon.Vector(1))
+    private fun symbol() = MenuIcon.Symbol(ZeronIcon.Vector(1))
 
     private fun inline(title: String? = null, vararg children: MenuElement) =
         MenuSection(title = title, inline = true, children = children.toList())

@@ -1,8 +1,8 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.ImageBitmap
-import sh.roboco.android.design.glass.Menu
+import sh.zeron.android.design.glass.Menu
 
 /**
  * How a message sent during a running turn is delivered
@@ -57,7 +57,7 @@ enum class ComposerAction { Send, Queue, Stop }
  * `ComposerControllerTest`.
  *
  * [action] and [steering] pick the glyph and label; [enabled] gates taps
- * (Stop is always enabled on iOS — only Roboco's `canWrite` can disable
+ * (Stop is always enabled on iOS — only Zeron's `canWrite` can disable
  * it); [deliveryMenu] says whether the long-press "While the agent works"
  * menu (58) is offered.
  */
@@ -128,7 +128,7 @@ sealed interface ChipIcon {
  * [ComposerController.chipMenus].
  *
  * [symbol] is the **SF Symbol name** (e.g. `gauge.with.dots.needle.67percent`),
- * resolved by 59 via ticket 06's `RobocoIcons.forSfName`; [icon] wins over
+ * resolved by 59 via ticket 06's `ZeronIcons.forSfName`; [icon] wins over
  * it when both are set.
  */
 @Immutable

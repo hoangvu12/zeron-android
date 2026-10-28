@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Canvas
@@ -14,17 +14,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.FontChain
-import sh.roboco.android.core.Fonts
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.TranscriptPalette
-import uniffi.roboco_core.ColorRole
-import uniffi.roboco_core.Decoration
-import uniffi.roboco_core.FaceRole
-import uniffi.roboco_core.RowDisplay
-import uniffi.roboco_core.StyleDesc
-import uniffi.roboco_core.TextRun
+import sh.zeron.android.core.FontChain
+import sh.zeron.android.core.Fonts
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.TranscriptPalette
+import uniffi.zeron_core.ColorRole
+import uniffi.zeron_core.Decoration
+import uniffi.zeron_core.FaceRole
+import uniffi.zeron_core.RowDisplay
+import uniffi.zeron_core.StyleDesc
+import uniffi.zeron_core.TextRun
 
 /**
  * The text-run specimen (debug gallery, ticket 63): every run-painting
@@ -66,7 +66,7 @@ fun TextRunsSpecimen(dark: Boolean) {
     Box(
         Modifier
             .size(360.dp, 200.dp)
-            .background(RobocoTheme.palette.background), // ticket 01: #F3F3F5 / #060606
+            .background(ZeronTheme.palette.background), // ticket 01: #F3F3F5 / #060606
     ) {
         Canvas(Modifier.matchParentSize()) {
             drawIntoCanvas { canvas ->
@@ -200,11 +200,11 @@ private fun spanWidth(fonts: StyleFonts, style: UShort, start: Int, end: Int, d:
 @Preview(name = "Text runs · light")
 @Composable
 private fun TextRunsSpecimenLightPreview() {
-    RobocoTheme(Appearance.Light) { TextRunsSpecimen(dark = false) }
+    ZeronTheme(Appearance.Light) { TextRunsSpecimen(dark = false) }
 }
 
 @Preview(name = "Text runs · dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun TextRunsSpecimenDarkPreview() {
-    RobocoTheme(Appearance.Dark) { TextRunsSpecimen(dark = true) }
+    ZeronTheme(Appearance.Dark) { TextRunsSpecimen(dark = true) }
 }

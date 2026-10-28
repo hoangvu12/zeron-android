@@ -1,4 +1,4 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
@@ -19,7 +19,7 @@ import javax.crypto.AEADBadTagException
 class FakeSecretCipherTest {
 
     private val engineId = "11111111-1111-4111-8111-111111111111"
-    private val aad = "roboco.engine-credentials.v1:$engineId".toByteArray(Charsets.UTF_8)
+    private val aad = "zeron.engine-credentials.v1:$engineId".toByteArray(Charsets.UTF_8)
 
     @Test
     fun roundTripsUtf8ThroughTheBlobFormat() {
@@ -48,7 +48,7 @@ class FakeSecretCipherTest {
     @Test
     fun aBlobForOneEngineFailsAnotherEnginesAad() {
         val cipher = FakeSecretCipher()
-        val otherAad = "roboco.engine-credentials.v1:22222222-2222-4222-8222-222222222222"
+        val otherAad = "zeron.engine-credentials.v1:22222222-2222-4222-8222-222222222222"
             .toByteArray(Charsets.UTF_8)
         val blob = cipher.encrypt("cred-swapped".toByteArray(Charsets.UTF_8), aad)
 

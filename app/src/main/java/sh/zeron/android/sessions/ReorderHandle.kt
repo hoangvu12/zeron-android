@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import android.content.res.Configuration
 import androidx.compose.animation.core.AnimationSpec
@@ -44,18 +44,18 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import sh.calvin.reorderable.DragGestureDetector
 import sh.calvin.reorderable.ReorderableCollectionItemScope
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.Icon
-import sh.roboco.android.design.LocalReduceMotion
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.Motion
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.SmoothRoundedShape
-import sh.roboco.android.design.SymbolWeight
-import sh.roboco.android.design.hairlineDp
-import sh.roboco.android.design.rememberSmoothRoundedShape
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.Icon
+import sh.zeron.android.design.LocalReduceMotion
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.Motion
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.SmoothRoundedShape
+import sh.zeron.android.design.SymbolWeight
+import sh.zeron.android.design.hairlineDp
+import sh.zeron.android.design.rememberSmoothRoundedShape
 
 // ---------------------------------------------------------------------------
 // The drag handle slot (47)
@@ -96,7 +96,7 @@ internal fun ReorderHandleSlot(
     onDragStopped: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val reduce = LocalReduceMotion.current
     val widthSpec: AnimationSpec<Dp> =
         if (reduce) snap() else tween(EditMetrics.EditToggleMs, easing = Motion.EaseInOut)
@@ -165,7 +165,7 @@ internal fun ReorderHandleSlot(
                 ),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(RobocoIcons.Line3Horizontal, palette.tertiary, EditMetrics.GlyphPt, SymbolWeight.Regular)
+            Icon(ZeronIcons.Line3Horizontal, palette.tertiary, EditMetrics.GlyphPt, SymbolWeight.Regular)
         }
         Spacer(Modifier.width(EditMetrics.SlotEndPadding))
     }
@@ -189,7 +189,7 @@ internal fun ReorderHandleSlot(
  */
 @Composable
 internal fun Modifier.liftedRow(progress: () -> Float): Modifier {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val fillShape = rememberSmoothRoundedShape(EditMetrics.LiftFillRadius)
     val layerShape = remember {
         LiftedInsetShape(EditMetrics.LiftFillRadius, EditMetrics.LiftInsetHorizontal, EditMetrics.LiftInsetVertical)
@@ -294,9 +294,9 @@ private object NoDragItemScope : ReorderableCollectionItemScope {
 
 @Composable
 private fun LiftedRowPreviewBody(appearance: Appearance, vm: SessionRowVM) {
-    RobocoTheme(appearance) {
+    ZeronTheme(appearance) {
         ProvideGlyphClock(frozenAtNanos = 0L) {
-            Column(Modifier.background(RobocoTheme.palette.background)) {
+            Column(Modifier.background(ZeronTheme.palette.background)) {
                 LiftedRowSample(vm)
             }
         }

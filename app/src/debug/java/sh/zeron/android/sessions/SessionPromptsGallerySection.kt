@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import android.content.res.Configuration
 import androidx.compose.foundation.clickable
@@ -25,21 +25,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.ActionSheetHost
-import sh.roboco.android.design.ActionSheetHostState
-import sh.roboco.android.design.AlertHost
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.GalleryBackdrop
-import sh.roboco.android.design.LocalToaster
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.Toaster
-import sh.roboco.android.design.ToastHost
-import sh.roboco.android.design.uiStyle
-import uniffi.roboco_core.ChatIndicator
-import uniffi.roboco_core.SectionView
-import uniffi.roboco_core.SessionRow
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.ActionSheetHost
+import sh.zeron.android.design.ActionSheetHostState
+import sh.zeron.android.design.AlertHost
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.GalleryBackdrop
+import sh.zeron.android.design.LocalToaster
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.Toaster
+import sh.zeron.android.design.ToastHost
+import sh.zeron.android.design.uiStyle
+import uniffi.zeron_core.ChatIndicator
+import uniffi.zeron_core.SectionView
+import uniffi.zeron_core.SessionRow
 
 /**
  * The fake [SessionPromptBackend] for the gallery: the three engines of
@@ -220,7 +220,7 @@ private fun galleryRow(id: String, engineId: String, title: String): SessionRow 
  */
 @Composable
 fun SessionPromptsGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val toaster = LocalToaster.current
     val sheets = remember { ActionSheetHostState() }
@@ -357,7 +357,7 @@ private fun PromptLabel(text: String, style: TextStyle, modifier: Modifier = Mod
 @Preview(name = "Session prompts gallery light")
 @Composable
 private fun SessionPromptsGalleryLightPreview() {
-    RobocoTheme(Appearance.Light) {
+    ZeronTheme(Appearance.Light) {
         AlertHost { ToastHost { SessionPromptsGallerySection() } }
     }
 }
@@ -365,7 +365,7 @@ private fun SessionPromptsGalleryLightPreview() {
 @Preview(name = "Session prompts gallery dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun SessionPromptsGalleryDarkPreview() {
-    RobocoTheme(Appearance.Dark) {
+    ZeronTheme(Appearance.Dark) {
         AlertHost { ToastHost { SessionPromptsGallerySection() } }
     }
 }

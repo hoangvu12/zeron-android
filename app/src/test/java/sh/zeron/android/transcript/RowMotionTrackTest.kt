@@ -1,11 +1,11 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import uniffi.roboco_core.RowKind
+import uniffi.zeron_core.RowKind
 
 /**
  * The additive segment tracks (ticket 132, plain JVM with explicit `tick`

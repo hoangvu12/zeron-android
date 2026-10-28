@@ -1,6 +1,6 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
-import uniffi.roboco_core.LayoutFrame
+import uniffi.zeron_core.LayoutFrame
 
 /**
  * The set of row keys ever laid out (ticket 65): the first non-empty frame

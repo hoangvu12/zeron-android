@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -49,7 +49,7 @@ import androidx.compose.ui.tooling.preview.Preview
  */
 @Composable
 fun EdgeFadeGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -82,7 +82,7 @@ fun EdgeFadeGallerySection() {
         )
         val metaLine = buildAnnotatedString {
             appendInlineContent("tile", "[]")
-            append("  roboco   main branch with a long name")
+            append("  zeron   main branch with a long name")
         }
         FadingText(metaLine, text, Modifier.width(120.dp), inlineContent = inlineContent)
 
@@ -187,11 +187,11 @@ private fun StripedBlock(modifier: Modifier = Modifier, palette: Palette) {
 @Preview(name = "Edge fades - Light")
 @Composable
 private fun EdgeFadeGallerySectionLightPreview() {
-    RobocoTheme(Appearance.Light) { EdgeFadeGallerySection() }
+    ZeronTheme(Appearance.Light) { EdgeFadeGallerySection() }
 }
 
 @Preview(name = "Edge fades - Dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun EdgeFadeGallerySectionDarkPreview() {
-    RobocoTheme(Appearance.Dark) { EdgeFadeGallerySection() }
+    ZeronTheme(Appearance.Dark) { EdgeFadeGallerySection() }
 }

@@ -1,4 +1,4 @@
-package roboco.gradle
+package zeron.gradle
 
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -16,7 +16,7 @@ class HostCoreTest {
         assertTrue(
             HostCore.needed(listOf(":app:assembleDebug", ":app:testDebugUnitTest", ":buildSrc:test")),
         )
-        assertTrue(HostCore.needed(listOf(":app:testDebugUnitTest", "--tests", "sh.roboco.Foo")))
+        assertTrue(HostCore.needed(listOf(":app:testDebugUnitTest", "--tests", "sh.zeron.Foo")))
         assertTrue(HostCore.needed(listOf("verifyRoborazziDebug")))
         assertTrue(HostCore.needed(listOf("check")))
         assertTrue(HostCore.needed(listOf("build")))

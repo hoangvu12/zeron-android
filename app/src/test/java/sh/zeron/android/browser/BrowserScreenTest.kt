@@ -1,4 +1,4 @@
-package sh.roboco.android.browser
+package sh.zeron.android.browser
 
 import android.content.Context
 import android.webkit.WebView
@@ -17,13 +17,13 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.shell.LocalNavEntry
-import sh.roboco.android.shell.LocalNavStack
-import sh.roboco.android.shell.NavRoute
-import sh.roboco.android.shell.NavStack
-import sh.roboco.android.shell.NavStackHost
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.shell.LocalNavEntry
+import sh.zeron.android.shell.LocalNavStack
+import sh.zeron.android.shell.NavRoute
+import sh.zeron.android.shell.NavStack
+import sh.zeron.android.shell.NavStackHost
 
 /**
  * The in-app browser entry (agent-previews ticket 05) on the JVM: the
@@ -112,7 +112,7 @@ class BrowserScreenTest {
         stack.push(route, animated = false)
         val pushed = stack.entries.last()
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(
                     LocalNavStack provides stack,
                     LocalNavEntry provides pushed,

@@ -1,6 +1,6 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
-import uniffi.roboco_core.CoreClient
+import uniffi.zeron_core.CoreClient
 
 /**
  * The core open, behind a seam (android-ui-parity #76): the generated
@@ -28,7 +28,7 @@ fun interface SessionOpener {
 
 /**
  * The live [SessionOpener]. [client] is ticket 71's holder —
- * `RobocoApplication.clientOrNull()`, which delegates to
+ * `ZeronApplication.clientOrNull()`, which delegates to
  * `CoreStartup.clientOrNull()`: null before `CoreStartState.Ready` or
  * after a failed start, so an open in that window fails exactly like
  * iOS's `guard let client else { return nil }`. Anything the open

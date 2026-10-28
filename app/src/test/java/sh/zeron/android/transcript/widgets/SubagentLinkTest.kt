@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Box
@@ -21,12 +21,12 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.transcript.TranscriptActions
-import sh.roboco.android.transcript.isControl
-import sh.roboco.android.transcript.isTranscriptControl
-import uniffi.roboco_core.WidgetKind
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.transcript.TranscriptActions
+import sh.zeron.android.transcript.isControl
+import sh.zeron.android.transcript.isTranscriptControl
+import uniffi.zeron_core.WidgetKind
 
 /**
  * The subagent spawn card's tap target (android-next #06, upstream #899's
@@ -54,7 +54,7 @@ class SubagentLinkTest {
     fun aTapOpensTheSubagentOnceAndSpeaksAsAButton() {
         val opened = mutableListOf<String>()
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.fillMaxSize()) {
                     // The Rust rect of a 30 pt card in its 38 pt row (T = 1.125).
                     Box(Modifier.absoluteOffset(18.dp, 4.dp).size(324.dp, 33.75.dp)) {

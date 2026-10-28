@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import android.content.ContentResolver
 import android.graphics.Bitmap
@@ -38,7 +38,7 @@ data class PickedImage(val uri: Uri, val baseName: String? = null)
  * a fresh lowercased UUID id and an `image-<8 hex>.jpg` (or
  * `<baseName>.jpg`) file name.
  *
- * Roboco adaptations (see the ticket): decoding goes through
+ * Zeron adaptations (see the ticket): decoding goes through
  * [ImageDecoder] (EXIF orientation applied by the decoder itself, and
  * `info.size` is the **upright** size, exactly what `UIImage.size` gives
  * iOS), the long-side bound is applied **at decode time** via

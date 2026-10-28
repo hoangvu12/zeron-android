@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -46,31 +46,31 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.Cue
-import sh.roboco.android.design.Feedback
-import sh.roboco.android.design.Haptic
-import sh.roboco.android.design.LocalFeedback
-import sh.roboco.android.design.LocalReduceMotion
-import sh.roboco.android.design.NoFeedback
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.transcript.ManualPoster
-import sh.roboco.android.transcript.RealizedRow
-import sh.roboco.android.transcript.RowContext
-import sh.roboco.android.transcript.RowModel
-import sh.roboco.android.transcript.TranscriptActions
-import sh.roboco.android.transcript.TranscriptState
-import sh.roboco.android.transcript.WidgetBox
-import uniffi.roboco_core.LayoutFrame
-import uniffi.roboco_core.NoHandle
-import uniffi.roboco_core.RowDisplay
-import uniffi.roboco_core.RowKind
-import uniffi.roboco_core.RowPlacement
-import uniffi.roboco_core.TextSystem
-import uniffi.roboco_core.TranscriptView
-import uniffi.roboco_core.Widget
-import uniffi.roboco_core.WidgetKind
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.Cue
+import sh.zeron.android.design.Feedback
+import sh.zeron.android.design.Haptic
+import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.design.LocalReduceMotion
+import sh.zeron.android.design.NoFeedback
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.transcript.ManualPoster
+import sh.zeron.android.transcript.RealizedRow
+import sh.zeron.android.transcript.RowContext
+import sh.zeron.android.transcript.RowModel
+import sh.zeron.android.transcript.TranscriptActions
+import sh.zeron.android.transcript.TranscriptState
+import sh.zeron.android.transcript.WidgetBox
+import uniffi.zeron_core.LayoutFrame
+import uniffi.zeron_core.NoHandle
+import uniffi.zeron_core.RowDisplay
+import uniffi.zeron_core.RowKind
+import uniffi.zeron_core.RowPlacement
+import uniffi.zeron_core.TextSystem
+import uniffi.zeron_core.TranscriptView
+import uniffi.zeron_core.Widget
+import uniffi.zeron_core.WidgetKind
 
 /**
  * The three disclosure widgets' behaviour (ticket 120, Compose test rule at
@@ -126,7 +126,7 @@ class DisclosureWidgetsTest {
     // ------------------------------------------------------------- fixtures
 
     /**
-     * The test host: `RobocoTheme` on the `background` role box, the
+     * The test host: `ZeronTheme` on the `background` role box, the
      * feedback recorder in `LocalFeedback`, `LocalReduceMotion` provided
      * explicitly per the ticket.
      */
@@ -137,9 +137,9 @@ class DisclosureWidgetsTest {
         content: @Composable () -> Unit,
     ) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 CompositionLocalProvider(LocalFeedback provides feedback, LocalReduceMotion provides reduce) {
-                    Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) { content() }
+                    Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) { content() }
                 }
             }
         }
@@ -398,12 +398,12 @@ class DisclosureWidgetsTest {
         val reduce = mutableStateOf(true)
         val expanded = mutableStateOf(false)
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(
                     LocalFeedback provides NoFeedback,
                     LocalReduceMotion provides reduce.value,
                 ) {
-                    Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+                    Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                         ChevronSlot(expanded = { expanded.value })
                     }
                 }
@@ -474,7 +474,7 @@ class DisclosureWidgetsTest {
                 Modifier
                     .testTag("host")
                     .size(373.dp, 45.25.dp)
-                    .background(RobocoTheme.palette.background)
+                    .background(ZeronTheme.palette.background)
                     .padding(8.dp),
             ) {
                 DisclosureTarget(false, {}, Modifier.size(145.dp, 29.25.dp))

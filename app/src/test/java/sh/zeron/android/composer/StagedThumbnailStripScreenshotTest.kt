@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -27,21 +27,21 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.CapsuleShape
-import sh.roboco.android.design.GlassStage
-import sh.roboco.android.design.Icon
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.SymbolWeight
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.glass.ProvideHazeState
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.CapsuleShape
+import sh.zeron.android.design.GlassStage
+import sh.zeron.android.design.Icon
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.SymbolWeight
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.glass.ProvideHazeState
 
 /**
  * The staged-thumbnail goldens (android-ui-parity #88), recorded by
- * `:app:recordRoborazziDebug --tests sh.roboco.android.composer.StagedThumbnailStripScreenshotTest`
+ * `:app:recordRoborazziDebug --tests sh.zeron.android.composer.StagedThumbnailStripScreenshotTest`
  * and verified by `verifyRoborazziDebug`:
  *
  *  - `composer_thumbs_3` — ticket 55's [ComposerSurface] at `p = 1`, the
@@ -66,7 +66,7 @@ import sh.roboco.android.design.glass.ProvideHazeState
  * landing under `composer/`. The gallery section's own goldens
  * (`design/gallery/gallery_composer_thumbnails_{light,dark}.png`) are
  * captured automatically by ticket 22's parameterized
- * [sh.roboco.android.design.GalleryScreenshotTest] through the registry
+ * [sh.zeron.android.design.GalleryScreenshotTest] through the registry
  * line this ticket adds.
  */
 @RunWith(RobolectricTestRunner::class)
@@ -114,11 +114,11 @@ class StagedThumbnailStripScreenshotTest {
                     Modifier
                         .size(34.dp)
                         .clip(CapsuleShape)
-                        .background(RobocoTheme.palette.accent)
+                        .background(ZeronTheme.palette.accent)
                         .composerControl(morph),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Icon(RobocoIcons.ArrowUp, tint = Color.White, sizePt = 15f, weight = SymbolWeight.Bold)
+                    Icon(ZeronIcons.ArrowUp, tint = Color.White, sizePt = 15f, weight = SymbolWeight.Bold)
                 }
             },
         )
@@ -126,7 +126,7 @@ class StagedThumbnailStripScreenshotTest {
 
     private fun shot(appearance: Appearance, count: Int) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 ProvideHazeState {
                     GlassStage(
                         modifier = Modifier.size(390.dp, 220.dp),

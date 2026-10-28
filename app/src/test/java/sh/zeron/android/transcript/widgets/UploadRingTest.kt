@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -32,26 +32,26 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalReduceMotion
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.transcript.ManualPoster
-import sh.roboco.android.transcript.RealizedRow
-import sh.roboco.android.transcript.RowContext
-import sh.roboco.android.transcript.RowModel
-import sh.roboco.android.transcript.RowWidget
-import sh.roboco.android.transcript.TranscriptActions
-import sh.roboco.android.transcript.TranscriptState
-import uniffi.roboco_core.LayoutFrame
-import uniffi.roboco_core.NoHandle
-import uniffi.roboco_core.RowDisplay
-import uniffi.roboco_core.RowKind
-import uniffi.roboco_core.RowPlacement
-import uniffi.roboco_core.TextSystem
-import uniffi.roboco_core.TranscriptView
-import uniffi.roboco_core.Widget
-import uniffi.roboco_core.WidgetKind
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalReduceMotion
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.transcript.ManualPoster
+import sh.zeron.android.transcript.RealizedRow
+import sh.zeron.android.transcript.RowContext
+import sh.zeron.android.transcript.RowModel
+import sh.zeron.android.transcript.RowWidget
+import sh.zeron.android.transcript.TranscriptActions
+import sh.zeron.android.transcript.TranscriptState
+import uniffi.zeron_core.LayoutFrame
+import uniffi.zeron_core.NoHandle
+import uniffi.zeron_core.RowDisplay
+import uniffi.zeron_core.RowKind
+import uniffi.zeron_core.RowPlacement
+import uniffi.zeron_core.TextSystem
+import uniffi.zeron_core.TranscriptView
+import uniffi.zeron_core.Widget
+import uniffi.zeron_core.WidgetKind
 
 /**
  * The ring's behaviour (ticket 67, Compose test rule at 393 dp × xxhdpi →
@@ -116,8 +116,8 @@ class UploadRingTest {
 
     @Composable
     private fun Host(content: @Composable () -> Unit) {
-        RobocoTheme(Appearance.Light) {
-            Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) { content() }
+        ZeronTheme(Appearance.Light) {
+            Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) { content() }
         }
     }
 

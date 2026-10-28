@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import android.util.Log
 import androidx.compose.runtime.Immutable
@@ -18,10 +18,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
-import uniffi.roboco_core.CoreClient
-import uniffi.roboco_core.SearchHit
-import uniffi.roboco_core.SessionRow
-import uniffi.roboco_core.WorkspaceSnapshot
+import uniffi.zeron_core.CoreClient
+import uniffi.zeron_core.SearchHit
+import uniffi.zeron_core.SessionRow
+import uniffi.zeron_core.WorkspaceSnapshot
 
 /** The core's result cap (`AppModel.swift:491`, `limit: 60`). */
 const val SEARCH_LIMIT: UInt = 60u
@@ -181,7 +181,7 @@ class SearchModel(
     }
 }
 
-private const val TAG = "RobocoSearch"
+private const val TAG = "ZeronSearch"
 
 /**
  * [WorkspaceSnapshot] → [SearchSource]: the revision plus `front.recent`.

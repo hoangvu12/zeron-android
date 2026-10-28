@@ -22,7 +22,7 @@ if ($Libraries) {
         $abi = $apk.BaseName -replace '^app-(.+)-debug$', '$1'
         $zip = [System.IO.Compression.ZipFile]::OpenRead($apk.FullName)
         try {
-            foreach ($lib in "libroboco_mobile.so", "libroboco_tailcat.so") {
+            foreach ($lib in "libzeron_mobile.so", "libzeron_tailcat.so") {
                 $entry = $zip.GetEntry("lib/$abi/$lib")
                 if ($entry) {
                     $stored = [math]::Round($entry.CompressedLength / 1KB)

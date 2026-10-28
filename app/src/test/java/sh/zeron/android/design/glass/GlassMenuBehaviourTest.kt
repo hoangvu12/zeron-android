@@ -1,4 +1,4 @@
-package sh.roboco.android.design.glass
+package sh.zeron.android.design.glass
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -45,14 +45,14 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.Feedback
-import sh.roboco.android.design.Haptic
-import sh.roboco.android.design.LocalFeedback
-import sh.roboco.android.design.NoFeedback
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.Feedback
+import sh.zeron.android.design.Haptic
+import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.design.NoFeedback
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The menu's behaviour (android-ui-parity #15) through a real
@@ -99,7 +99,7 @@ class GlassMenuBehaviourTest {
             haptics += haptic
         }
 
-        override fun cue(cue: sh.roboco.android.design.Cue) = Unit
+        override fun cue(cue: sh.zeron.android.design.Cue) = Unit
     }
 
     /** Test-side handle on the remembered [GlassMenuState]. */
@@ -116,7 +116,7 @@ class GlassMenuBehaviourTest {
         content: @Composable () -> Unit = {},
     ) {
         density = LocalDensity.current
-        RobocoTheme(Appearance.Light) {
+        ZeronTheme(Appearance.Light) {
             CompositionLocalProvider(LocalFeedback provides feedback) {
                 GlassMenuHost {
                     if (stateRef != null) {
@@ -862,8 +862,8 @@ class GlassMenuBehaviourTest {
         val ref = StateRef()
         val menu = Menu(
             children = listOf(
-                MenuItem("Edit", icon = MenuIcon.Symbol(RobocoIcons.Pencil)) {},
-                MenuItem("Move Up", icon = MenuIcon.Symbol(RobocoIcons.ArrowUp)) {},
+                MenuItem("Edit", icon = MenuIcon.Symbol(ZeronIcons.Pencil)) {},
+                MenuItem("Move Up", icon = MenuIcon.Symbol(ZeronIcons.ArrowUp)) {},
                 MenuItem(
                     "Custom",
                     // A tagged box as a stand-in glyph: measures the slot itself.
@@ -904,8 +904,8 @@ class GlassMenuBehaviourTest {
         val ref = StateRef()
         val menu = Menu(
             children = listOf(
-                MenuItem("Edit", icon = MenuIcon.Symbol(RobocoIcons.Pencil)) {},
-                MenuItem("Move Up", icon = MenuIcon.Symbol(RobocoIcons.ArrowUp)) {},
+                MenuItem("Edit", icon = MenuIcon.Symbol(ZeronIcons.Pencil)) {},
+                MenuItem("Move Up", icon = MenuIcon.Symbol(ZeronIcons.ArrowUp)) {},
             ),
         )
         compose.setContent {

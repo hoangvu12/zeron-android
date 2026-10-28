@@ -1,16 +1,16 @@
-package sh.roboco.android.debug
+package sh.zeron.android.debug
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import uniffi.roboco_core.DebugEntry
+import uniffi.zeron_core.DebugEntry
 import kotlin.random.Random
 
 /**
  * The pure constants and fixture recipe of the Transcript Lab
  * (android-ui-parity #135) — the values the iOS view controller carries
  * as literals (`TranscriptLabViewController.swift:57-77, 182-186`), kept
- * verbatim so the Roboco lab streams exactly like the iOS one.
+ * verbatim so the Zeron lab streams exactly like the iOS one.
  */
 object LabScript {
 

@@ -1,4 +1,4 @@
-package sh.roboco.android.debug
+package sh.zeron.android.debug
 
 import android.content.Context
 import android.content.Intent
@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.design.glass.GlassTextCapsule
+import sh.zeron.android.design.glass.GlassTextCapsule
 
 /**
  * The "Transcript Lab" section of the debug design gallery

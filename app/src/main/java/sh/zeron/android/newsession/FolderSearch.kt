@@ -1,12 +1,12 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import androidx.compose.runtime.Immutable
 import java.util.Locale
 import kotlinx.coroutines.CancellationException
-import sh.roboco.android.composer.ChipColors
-import sh.roboco.android.design.Palette
-import uniffi.roboco_core.CoreException
-import uniffi.roboco_core.FolderEntry
+import sh.zeron.android.composer.ChipColors
+import sh.zeron.android.design.Palette
+import uniffi.zeron_core.CoreException
+import uniffi.zeron_core.FolderEntry
 
 /**
  * The folder browser's pure helpers (android-ui-parity #112): line-for-line

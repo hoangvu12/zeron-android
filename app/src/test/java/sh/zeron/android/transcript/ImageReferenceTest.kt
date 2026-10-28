@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList
@@ -16,7 +16,7 @@ import org.junit.Test
  * order), the phone-side `data:` decoder, the retry backoff and reconnect
  * signal, and the per-engine cache-key separation (66's `imageCacheKey`).
  * Plain JVM — all pure functions. Path resolution (relative, `~`,
- * `file://`, `roboco-file:`) is the engine's `ReadImageChunk`, pinned by
+ * `file://`, `zeron-file:`) is the engine's `ReadImageChunk`, pinned by
  * `crates/engine/src/image_refs.rs`'s tests.
  */
 class ImageReferenceTest {
@@ -52,7 +52,7 @@ class ImageReferenceTest {
             "\\\\server\\share\\a.png",
             "file:///tmp/a.png",
             "file:///C:/Users/me/a%20b.png",
-            "roboco-file:shots/a%20b.png",
+            "zeron-file:shots/a%20b.png",
             "assets/shot.png",
             "./shot.png",
             "../shot.png",

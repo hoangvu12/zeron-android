@@ -1,9 +1,9 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
-import uniffi.roboco_core.RowKind
+import uniffi.zeron_core.RowKind
 
 /**
  * The S1–S4 selection (ticket 132, plain JVM over `RowLookup` fakes built

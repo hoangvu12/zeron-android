@@ -1,4 +1,4 @@
-package sh.roboco.android.update
+package sh.zeron.android.update
 
 import android.app.PendingIntent
 import android.content.Context
@@ -89,7 +89,7 @@ class PackageInstallerApkInstaller(
 
     private companion object {
         /** The staged file's name inside the session. */
-        const val SESSION_NAME = "roboco-update.apk"
+        const val SESSION_NAME = "zeron-update.apk"
     }
 }
 

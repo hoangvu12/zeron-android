@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.lazy.LazyListState
@@ -21,19 +21,19 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.ContextMenuHost
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.WallpaperArtwork
-import sh.roboco.android.design.WallpaperHero
-import sh.roboco.android.design.WallpaperRender
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.wallpaperFixture
-import sh.roboco.android.shell.NavStack
-import sh.roboco.android.shell.NavStackHost
-import sh.roboco.android.shell.TabId
-import sh.roboco.android.shell.TabRootRoute
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ContextMenuHost
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.WallpaperArtwork
+import sh.zeron.android.design.WallpaperHero
+import sh.zeron.android.design.WallpaperRender
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.wallpaperFixture
+import sh.zeron.android.shell.NavStack
+import sh.zeron.android.shell.NavStackHost
+import sh.zeron.android.shell.TabId
+import sh.zeron.android.shell.TabRootRoute
 
 /**
  * The Sessions tab root's goldens (android-ui-parity #46): the ticket's
@@ -53,7 +53,7 @@ import sh.roboco.android.shell.TabRootRoute
  * take the mean-size estimate). Roborazzi paths are relative to
  * `src/test/screenshots`, so the goldens land at
  * `src/test/screenshots/sessions/`. Recorded by
- * `./gradlew :app:recordRoborazziDebug --tests sh.roboco.android.sessions.SessionsScreenScreenshotTest`,
+ * `./gradlew :app:recordRoborazziDebug --tests sh.zeron.android.sessions.SessionsScreenScreenshotTest`,
  * verified by `:app:verifyRoborazziDebug --tests …`, then reviewed side
  * by side with `pr-assets/group-by-project/{1-off,3-on}.png`.
  */
@@ -110,7 +110,7 @@ class SessionsScreenScreenshotTest {
             hero ?: { m, f -> WallpaperHero(modifier = m, scrollFade = f) }
         val stack = NavStack(TabRootRoute(TabId.Sessions))
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 ProvideGlyphClock(frozenAtNanos = 0L) {
                     ContextMenuHost {
                         GlassMenuHost(hazeState = rememberHazeState()) {

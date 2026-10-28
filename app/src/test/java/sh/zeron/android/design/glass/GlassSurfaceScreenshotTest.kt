@@ -1,4 +1,4 @@
-package sh.roboco.android.design.glass
+package sh.zeron.android.design.glass
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -15,8 +15,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The glass material goldens (ticket 07, the step 9 fixture shared with the
@@ -50,7 +50,7 @@ class GlassSurfaceScreenshotTest {
 
     private fun shot(appearance: Appearance, file: String) {
         compose.setContent {
-            RobocoTheme(appearance) { GlassSurfaceFixture() }
+            ZeronTheme(appearance) { GlassSurfaceFixture() }
         }
         compose.onRoot().captureRoboImage(file)
     }
@@ -86,7 +86,7 @@ class GlassSurfaceScreenshotTest {
         var materialize by mutableStateOf(false)
         compose.mainClock.autoAdvance = false
         compose.setContent {
-            RobocoTheme(Appearance.Light) { GlassSurfaceFixture(materialize) }
+            ZeronTheme(Appearance.Light) { GlassSurfaceFixture(materialize) }
         }
         compose.waitForIdle()
 

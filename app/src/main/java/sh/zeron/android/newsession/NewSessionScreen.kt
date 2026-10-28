@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
@@ -19,19 +19,19 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import kotlinx.coroutines.CancellationException
 import java.util.concurrent.atomic.AtomicBoolean
-import sh.roboco.android.RobocoApplication
-import sh.roboco.android.composer.ComposerBar
-import sh.roboco.android.composer.ComposerController
-import sh.roboco.android.composer.SendResult
-import sh.roboco.android.composer.StagedImage
-import sh.roboco.android.composer.rememberComposerController
-import sh.roboco.android.composer.rememberComposerMorphState
-import sh.roboco.android.design.LocalAlerts
-import sh.roboco.android.notify.NotificationPermission
-import sh.roboco.android.notify.findActivity
-import sh.roboco.android.shell.DraftHandoff
-import sh.roboco.android.shell.LocalPageSheetScope
-import uniffi.roboco_core.FileMatch
+import sh.zeron.android.ZeronApplication
+import sh.zeron.android.composer.ComposerBar
+import sh.zeron.android.composer.ComposerController
+import sh.zeron.android.composer.SendResult
+import sh.zeron.android.composer.StagedImage
+import sh.zeron.android.composer.rememberComposerController
+import sh.zeron.android.composer.rememberComposerMorphState
+import sh.zeron.android.design.LocalAlerts
+import sh.zeron.android.notify.NotificationPermission
+import sh.zeron.android.notify.findActivity
+import sh.zeron.android.shell.DraftHandoff
+import sh.zeron.android.shell.LocalPageSheetScope
+import uniffi.zeron_core.FileMatch
 
 /**
  * The New Session page (android-ui-parity #93) — the port of
@@ -110,7 +110,7 @@ internal fun NewSessionScreenBody(
     // one-time notification ask (android-app#28) and the capture.
     val alerts = LocalAlerts.current
     val context = LocalContext.current
-    val app = context.applicationContext as RobocoApplication
+    val app = context.applicationContext as ZeronApplication
     // Unwrap the ContextWrapper chain to the activity (the ask needs a
     // ComponentActivity; a preview context unwraps to null and the ask
     // is skipped).

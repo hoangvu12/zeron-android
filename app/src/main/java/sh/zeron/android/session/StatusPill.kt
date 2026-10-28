@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -32,18 +32,18 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.CapsuleShape
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.Motion
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.StatusGlyph
-import sh.roboco.android.design.StatusGlyphKind
-import sh.roboco.android.design.formatElapsed
-import sh.roboco.android.design.glass.GlassSurface
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.CapsuleShape
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.Motion
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.StatusGlyph
+import sh.zeron.android.design.StatusGlyphKind
+import sh.zeron.android.design.formatElapsed
+import sh.zeron.android.design.glass.GlassSurface
+import sh.zeron.android.design.uiStyle
 
 /**
  * The pill's tunables (android-ui-parity #73) — the UIKit constraints of
@@ -177,7 +177,7 @@ fun StatusPill(
     }
 
     val content = pillContent(display, now)
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val glyph = when (content.glyph) {
         PillGlyph.Trailer -> StatusGlyphKind.Trailer
         PillGlyph.DotDanger -> StatusGlyphKind.Dot(palette.danger)
@@ -280,7 +280,7 @@ val SessionChrome.Banner.showsPill: Boolean
  */
 @Composable
 internal fun StatusPillFixtureColumn(nowMs: () -> Long = { 1_000_000L }) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     Column(
         Modifier
             .width(390.dp)
@@ -356,7 +356,7 @@ fun StatusPillGallerySection(liveTicker: Boolean = true) {
 @Preview(name = "StatusPill light")
 @Composable
 private fun StatusPillLightPreview() {
-    RobocoTheme(Appearance.Light) {
+    ZeronTheme(Appearance.Light) {
         ProvideGlyphClock(frozenAtNanos = 0L) { StatusPillFixtureColumn() }
     }
 }
@@ -364,7 +364,7 @@ private fun StatusPillLightPreview() {
 @Preview(name = "StatusPill dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun StatusPillDarkPreview() {
-    RobocoTheme(Appearance.Dark) {
+    ZeronTheme(Appearance.Dark) {
         ProvideGlyphClock(frozenAtNanos = 0L) { StatusPillFixtureColumn() }
     }
 }

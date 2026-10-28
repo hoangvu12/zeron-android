@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -16,15 +16,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
-import sh.roboco.android.core.Face
-import sh.roboco.android.core.WallpaperStore
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.GroupedHeader
-import sh.roboco.android.design.GroupedPosition
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
-import uniffi.roboco_core.WallpaperEffect
+import sh.zeron.android.core.Face
+import sh.zeron.android.core.WallpaperStore
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.GroupedHeader
+import sh.zeron.android.design.GroupedPosition
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
+import uniffi.zeron_core.WallpaperEffect
 
 /**
  * The "Wallpaper rows" page of the debug design gallery (android-ui-parity
@@ -62,7 +62,7 @@ import uniffi.roboco_core.WallpaperEffect
  */
 @Composable
 fun WallpaperRowsGallerySection(showLive: Boolean = true) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     Column(
         Modifier
             .widthIn(max = 402.dp)
@@ -107,7 +107,7 @@ private fun WallpaperRowsFixture(caption: String, state: WallpaperStore.State) {
 @Composable
 private fun WallpaperRowsCaption(text: String) {
     val typeScale = LocalTypeScale.current
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     BasicText(
         text,
         style = uiStyle(Face.Sans, typeScale.fixed(12f), palette.secondary),
@@ -157,11 +157,11 @@ private fun WallpaperRowsLiveBlock() {
 @Preview(name = "light")
 @Composable
 private fun WallpaperRowsGalleryLightPreview() {
-    RobocoTheme(Appearance.Light) { WallpaperRowsGallerySection(showLive = false) }
+    ZeronTheme(Appearance.Light) { WallpaperRowsGallerySection(showLive = false) }
 }
 
 @Preview(name = "dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun WallpaperRowsGalleryDarkPreview() {
-    RobocoTheme(Appearance.Dark) { WallpaperRowsGallerySection(showLive = false) }
+    ZeronTheme(Appearance.Dark) { WallpaperRowsGallerySection(showLive = false) }
 }

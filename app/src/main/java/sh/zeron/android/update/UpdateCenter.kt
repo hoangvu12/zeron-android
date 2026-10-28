@@ -1,4 +1,4 @@
-package sh.roboco.android.update
+package sh.zeron.android.update
 
 import android.content.Context
 import android.content.Intent
@@ -17,14 +17,14 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import sh.roboco.android.BuildConfig
-import sh.roboco.android.R
-import sh.roboco.android.composer.openInCustomTab
-import sh.roboco.android.design.AlertButton
-import sh.roboco.android.design.AlertButtonRole
-import sh.roboco.android.design.AlertProgress
-import sh.roboco.android.design.Alerts
-import sh.roboco.android.design.RobocoAlert
+import sh.zeron.android.BuildConfig
+import sh.zeron.android.R
+import sh.zeron.android.composer.openInCustomTab
+import sh.zeron.android.design.AlertButton
+import sh.zeron.android.design.AlertButtonRole
+import sh.zeron.android.design.AlertProgress
+import sh.zeron.android.design.Alerts
+import sh.zeron.android.design.ZeronAlert
 
 /**
  * The app-wide update service (android-next#04): the scheduled checks
@@ -34,7 +34,7 @@ import sh.roboco.android.design.RobocoAlert
  * approved alert panels A–C, and the Settings → About row's state.
  *
  * Everything the user sees goes through the app's own [Alerts] host and
- * the About rows ([sh.roboco.android.settings.rememberAboutSectionState]
+ * the About rows ([sh.zeron.android.settings.rememberAboutSectionState]
  * reads [state]); this class never composes. All state writes happen on
  * the caller's [scope] (the app's Main.immediate lane); the network,
  * file and PackageManager work hops to [io]. Nothing is logged — the
@@ -118,7 +118,7 @@ class UpdateCenter(
      * Arms the loop: the launch check after [initialDelayMs], then hourly
      * after successes and the desktop's backoff after failures, paused
      * while the process is backgrounded. Idempotent; called once from
-     * `RobocoApplication.onCreate`.
+     * `ZeronApplication.onCreate`.
      */
     fun start() {
         if (started) return
@@ -224,7 +224,7 @@ class UpdateCenter(
         ) + (if (nudge) "\n" + context.getString(R.string.update_alert_engine_nudge) else "")
         morphOwned = true
         alerts.show(
-            RobocoAlert(
+            ZeronAlert(
                 title = context.getString(R.string.update_alert_title),
                 message = message,
                 buttons = listOf(
@@ -427,7 +427,7 @@ class UpdateCenter(
      * (presentation, animations) alive: the approved panels' A→B→C
      * transitions are one alert changing in place, never a second one.
      */
-    private fun morphOrShow(alert: RobocoAlert) {
+    private fun morphOrShow(alert: ZeronAlert) {
         if (morphOwned && alerts.isShowing) {
             alerts.updateCurrent(alert)
         } else {
@@ -439,7 +439,7 @@ class UpdateCenter(
     /** The failure alert (morphs in place; "Try Again" restarts the flow). */
     private fun showFailure(message: String) {
         morphOrShow(
-            RobocoAlert(
+            ZeronAlert(
                 title = context.getString(R.string.update_failed_title),
                 message = message,
                 buttons = listOf(
@@ -461,7 +461,7 @@ class UpdateCenter(
         version: String,
         fraction: Float,
         label: String?,
-    ): RobocoAlert = RobocoAlert(
+    ): ZeronAlert = ZeronAlert(
         title = context.getString(R.string.update_downloading_title),
         message = context.getString(R.string.update_downloading_message, version),
         progress = AlertProgress(fraction, label),
@@ -476,7 +476,7 @@ class UpdateCenter(
         ),
     )
 
-    private fun permissionAlert(): RobocoAlert = RobocoAlert(
+    private fun permissionAlert(): ZeronAlert = ZeronAlert(
         title = context.getString(R.string.update_permission_title),
         message = context.getString(R.string.update_permission_message),
         buttons = listOf(

@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import android.os.Looper
 import android.util.Log
@@ -21,11 +21,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import uniffi.roboco_core.CoreClient
-import uniffi.roboco_core.FolderListing
-import uniffi.roboco_core.hostPathJoin
-import uniffi.roboco_core.hostPathName
-import uniffi.roboco_core.hostPathParent
+import uniffi.zeron_core.CoreClient
+import uniffi.zeron_core.FolderListing
+import uniffi.zeron_core.hostPathJoin
+import uniffi.zeron_core.hostPathName
+import uniffi.zeron_core.hostPathParent
 
 /**
  * The folder browser's browsing brain (android-ui-parity #110): the load
@@ -169,7 +169,7 @@ class FolderBrowserController(
     /** Non-null → engines/engine are set synchronously in init (no load — no coroutine may launch during composition). */
     initialHosts: List<HostOption>? = null,
 ) {
-    /** The live host list (iOS reads `hostOptions` once; Roboco's list is live — see the ticket's Adaptation). */
+    /** The live host list (iOS reads `hostOptions` once; Zeron's list is live — see the ticket's Adaptation). */
     var engines: List<HostOption> by mutableStateOf(emptyList())
         private set
 
@@ -400,7 +400,7 @@ class FolderBrowserController(
  * The sheet-body wiring (ticket 92 step 10's pattern, mirrored exactly):
  * the app's single workspace feed snapshot mapped through
  * `WorkspaceSnapshot.toNewSessionOptions()` into the hosts flow, the
- * [CoreFolderBrowserSource] over `RobocoApplication.clientOrNull()`, and
+ * [CoreFolderBrowserSource] over `ZeronApplication.clientOrNull()`, and
  * the controller over both. The StateFlow replays its current value, so
  * the first `collect` performs the first-call branch (default pick +
  * `load(null)`) right after the first frame; the initial value is the

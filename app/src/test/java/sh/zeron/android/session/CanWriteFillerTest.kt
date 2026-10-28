@@ -1,13 +1,13 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import sh.roboco.android.composer.ComposerChip
-import uniffi.roboco_core.EngineState
-import uniffi.roboco_core.EngineView
-import uniffi.roboco_core.ParkReason
+import sh.zeron.android.composer.ComposerChip
+import uniffi.zeron_core.EngineState
+import uniffi.zeron_core.EngineView
+import uniffi.zeron_core.ParkReason
 
 /**
  * [CanWriteFiller] (android-ui-parity #79): the derivation table —
@@ -45,7 +45,7 @@ class CanWriteFillerTest {
     fun fillChangesOnlyCanWrite() {
         val chrome = SessionChrome(
             title = "Wrangler deploy hygiene",
-            subtitle = "roboco @ Vu-PC",
+            subtitle = "zeron @ Vu-PC",
             running = true,
             canSteer = true,
             canWrite = true,

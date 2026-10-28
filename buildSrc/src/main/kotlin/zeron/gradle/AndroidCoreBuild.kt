@@ -1,4 +1,4 @@
-package roboco.gradle
+package zeron.gradle
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
@@ -25,7 +25,7 @@ import javax.inject.Inject
  * re-implements its steps (bindgen, NDK lookup, the 16 KB ELF check), never
  * shells out through bash, and never hard-codes `.exe`.
  *
- * `-ProbocoSkipCore` skips the build **only while every requested ABI plus
+ * `-PzeronSkipCore` skips the build **only while every requested ABI plus
  * the bindings and the host library exist** (upstream #609 skipped on arm64
  * alone, review bug 11: JNA then dies with `UnsatisfiedLinkError`).
  *
@@ -55,14 +55,14 @@ abstract class AndroidCoreBuild : DefaultTask() {
     abstract val ndkHome: Property<String>
 
     /**
-     * Whether `libroboco_tailcat.so` (the Go Tailcat transport, android-next#02)
+     * Whether `libzeron_tailcat.so` (the Go Tailcat transport, android-next#02)
      * is built into every ABI. Off: `--skip-tailcat`, and the core reports
      * Tailcat as unavailable at pair time.
      */
     @get:Input
     abstract val tailcat: Property<Boolean>
 
-    /** `-ProbocoSkipCore`: skip while all outputs exist (never when missing). */
+    /** `-PzeronSkipCore`: skip while all outputs exist (never when missing). */
     @get:Input
     abstract val skipIfOutputsExist: Property<Boolean>
 
@@ -82,11 +82,11 @@ abstract class AndroidCoreBuild : DefaultTask() {
     @get:PathSensitive(PathSensitivity.NAME_ONLY)
     abstract val sources: ConfigurableFileCollection
 
-    /** Generated UniFFI Kotlin (package `uniffi.roboco_core`). */
+    /** Generated UniFFI Kotlin (package `uniffi.zeron_core`). */
     @get:OutputDirectory
     abstract val kotlinDir: DirectoryProperty
 
-    /** `jniLibs/<abi>/libroboco_mobile.so` (and `libroboco_tailcat.so`) for the APK. */
+    /** `jniLibs/<abi>/libzeron_mobile.so` (and `libzeron_tailcat.so`) for the APK. */
     @get:OutputDirectory
     abstract val jniLibsDir: DirectoryProperty
 
@@ -102,15 +102,15 @@ abstract class AndroidCoreBuild : DefaultTask() {
 
     private fun outputsComplete(): Boolean {
         val out = hostDir.get().asFile.parentFile
-        if (!out.resolve("kotlin/uniffi/roboco_core/roboco_core.kt").isFile) return false
+        if (!out.resolve("kotlin/uniffi/zeron_core/zeron_core.kt").isFile) return false
         val host = hostDir.get().asFile
-        val hostLibrary = host.resolve("roboco_mobile.dll").isFile ||
-            host.resolve("libroboco_mobile.so").isFile
+        val hostLibrary = host.resolve("zeron_mobile.dll").isFile ||
+            host.resolve("libzeron_mobile.so").isFile
         if (buildHost.get() && !hostLibrary) return false
         val jniLibs = jniLibsDir.get().asFile
         return abis.get().all { abi ->
-            jniLibs.resolve("$abi/libroboco_mobile.so").isFile &&
-                (!tailcat.get() || jniLibs.resolve("$abi/libroboco_tailcat.so").isFile)
+            jniLibs.resolve("$abi/libzeron_mobile.so").isFile &&
+                (!tailcat.get() || jniLibs.resolve("$abi/libzeron_tailcat.so").isFile)
         }
     }
 

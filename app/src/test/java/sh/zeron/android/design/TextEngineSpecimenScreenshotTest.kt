@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
@@ -31,7 +31,7 @@ class TextEngineSpecimenScreenshotTest {
 
     private fun specimenShot(appearance: Appearance, file: String) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 TextEngineSpecimen(cjkSource = "fixture", measurerCalls = 0)
             }
         }

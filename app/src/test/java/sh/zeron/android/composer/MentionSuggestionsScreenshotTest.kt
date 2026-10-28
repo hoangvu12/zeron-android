@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -17,9 +17,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
 
 /**
  * The mention-card goldens (android-ui-parity #86): [MentionFixture.files]
@@ -33,7 +33,7 @@ import sh.roboco.android.design.glass.Glass
  * `Glass.forceFallback` is set for the captures (ticket 07: Robolectric
  * blur is not byte-stable), so the card draws the fallback fill
  * `#FFFFFF`@0.94 / `#111113`@0.94 over the plain page. Record with
- * `./gradlew :app:recordRoborazziDebug --tests sh.roboco.android.composer.MentionSuggestionsScreenshotTest`,
+ * `./gradlew :app:recordRoborazziDebug --tests sh.zeron.android.composer.MentionSuggestionsScreenshotTest`,
  * verify with `:app:verifyRoborazziDebug --tests …`; paths land under
  * `src/test/screenshots/composer/`.
  */
@@ -55,14 +55,14 @@ class MentionSuggestionsScreenshotTest {
     @Test
     fun mentionSuggestionsLight() {
         captureRoboImage("composer/mention_suggestions_light.png") {
-            RobocoTheme(Appearance.Light) { CardFixture() }
+            ZeronTheme(Appearance.Light) { CardFixture() }
         }
     }
 
     @Test
     fun mentionSuggestionsDark() {
         captureRoboImage("composer/mention_suggestions_dark.png") {
-            RobocoTheme(Appearance.Dark) { CardFixture() }
+            ZeronTheme(Appearance.Dark) { CardFixture() }
         }
     }
 
@@ -72,7 +72,7 @@ class MentionSuggestionsScreenshotTest {
         Box(
             Modifier
                 .fillMaxSize()
-                .background(RobocoTheme.palette.background)
+                .background(ZeronTheme.palette.background)
                 .padding(12.dp),
         ) {
             MentionSuggestionsCard(

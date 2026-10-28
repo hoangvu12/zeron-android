@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -8,8 +8,8 @@ import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import uniffi.roboco_core.ChatIndicator
-import uniffi.roboco_core.SessionRow
+import uniffi.zeron_core.ChatIndicator
+import uniffi.zeron_core.SessionRow
 
 /**
  * The item model (android-ui-parity #41) — the pure port of

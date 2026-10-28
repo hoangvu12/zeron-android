@@ -1,4 +1,4 @@
-package sh.roboco.android
+package sh.zeron.android
 
 import java.io.File
 import java.security.MessageDigest
@@ -11,13 +11,13 @@ import org.junit.Test
  * The packaged chimes (android-app#28): the three raw resources the
  * syncChimes Gradle task stages are byte-identical to the desktop chimes
  * under crates/ui/assets/sounds (done, request, attention) — the channels
- * play exactly the bytes the desktop plays. Plain JVM over the roboco.*
+ * play exactly the bytes the desktop plays. Plain JVM over the zeron.*
  * system properties the build sets (the GeneratedAssetsTest pattern).
  */
 class ChimeBytesTest {
 
-    private val repoRoot = File(System.getProperty("roboco.repoRoot"))
-    private val generatedChimes = File(System.getProperty("roboco.generatedChimes"))
+    private val repoRoot = File(System.getProperty("zeron.repoRoot"))
+    private val generatedChimes = File(System.getProperty("zeron.generatedChimes"))
 
     /** The ticket's SHA-256 pins (byte-for-byte from the desktop). */
     private val expectedSha256 = mapOf(
@@ -48,7 +48,7 @@ class ChimeBytesTest {
 
     @Test
     fun appshotNeverRidesAlong() {
-        // #699 committed mastered copies; Roboco does not re-master, and
+        // #699 committed mastered copies; Zeron does not re-master, and
         // the appshot cue is not a session chime.
         val raw = generatedChimes.resolve("raw")
         assertTrue(raw.isDirectory)

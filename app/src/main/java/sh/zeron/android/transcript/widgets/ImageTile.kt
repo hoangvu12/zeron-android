@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -39,13 +39,13 @@ import kotlin.math.ceil
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withTimeoutOrNull
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.rememberSmoothRoundedShape
-import sh.roboco.android.image.imageViewerSource
-import sh.roboco.android.transcript.MaxAutoImageRetries
-import sh.roboco.android.transcript.TranscriptActions
-import sh.roboco.android.transcript.imageRetryDelayMs
-import sh.roboco.android.transcript.isFetchableImageReference
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.rememberSmoothRoundedShape
+import sh.zeron.android.image.imageViewerSource
+import sh.zeron.android.transcript.MaxAutoImageRetries
+import sh.zeron.android.transcript.TranscriptActions
+import sh.zeron.android.transcript.imageRetryDelayMs
+import sh.zeron.android.transcript.isFetchableImageReference
 
 /**
  * The tile's corner radius (ticket 66; iOS `RowView.swift:218`): 14 dp when
@@ -193,7 +193,7 @@ fun ImageTile(
     }
 
     var coords by remember { mutableStateOf<LayoutCoordinates?>(null) }
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val compact = imageTileCompact(widthDp, heightDp)
     val bmp = st.bitmap
     val status = st.status

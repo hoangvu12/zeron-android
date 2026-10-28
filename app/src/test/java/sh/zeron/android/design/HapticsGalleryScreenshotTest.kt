@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -15,7 +15,7 @@ import org.robolectric.annotation.GraphicsMode
  * The Haptics gallery section (android-ui-parity #05): 11 rows plus the
  * capability line for the fixture SDK 34 / ALL primitives / a view. Row 1
  * reads `Select` / `selection · ComposerBar.swift:371` / `View SEGMENT_TICK`.
- * Wrapped in `RobocoTheme` since ticket 22: the section reads the palette,
+ * Wrapped in `ZeronTheme` since ticket 22: the section reads the palette,
  * so the appearance is explicit here. Goldens live under
  * `src/test/screenshots/design/` (the `roborazzi { outputDir }`); the batch
  * run records them.
@@ -30,7 +30,7 @@ class HapticsGalleryScreenshotTest {
 
     @Composable
     private fun content(appearance: Appearance) {
-        RobocoTheme(appearance) {
+        ZeronTheme(appearance) {
             HapticsGallerySection(HapticHardware(34, ALL_PRIMITIVES.toSet(), hasVibrator = true), hasView = true)
         }
     }

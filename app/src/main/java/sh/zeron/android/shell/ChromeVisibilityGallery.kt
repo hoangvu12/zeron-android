@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import android.content.res.Configuration
 import androidx.compose.foundation.clickable
@@ -23,13 +23,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.LocalToaster
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.hairlineBorder
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.LocalToaster
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.hairlineBorder
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.uiStyle
 
 /**
  * The "Chrome visibility" page of the debug design gallery
@@ -57,7 +57,7 @@ import sh.roboco.android.design.uiStyle
  */
 @Composable
 internal fun ChromeVisibilityGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val scope = rememberCoroutineScope()
     val state = remember { MainTabState(TabId.Sessions) }
@@ -139,7 +139,7 @@ private fun chromeReadout(c: ChromeVisibilityController): String {
 /** A 44 dp hit row with an accent label (26's demo rows). */
 @Composable
 private fun GalleryChromeRow(text: String, onClick: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Box(
         Modifier
@@ -171,13 +171,13 @@ private fun GalleryChromeLabel(text: String, style: TextStyle) {
 @Preview(name = "chrome visibility light", widthDp = 434, heightDp = 1300)
 @Composable
 private fun ChromeVisibilityGalleryLightPreview() {
-    RobocoTheme { ChromeVisibilityGallerySection() }
+    ZeronTheme { ChromeVisibilityGallerySection() }
 }
 
 @Preview(name = "chrome visibility dark", widthDp = 434, heightDp = 1300, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun ChromeVisibilityGalleryDarkPreview() {
-    RobocoTheme { ChromeVisibilityGallerySection() }
+    ZeronTheme { ChromeVisibilityGallerySection() }
 }
 
 /** The shell frozen mid-pop from a session at 0.5: the reveal. */
@@ -201,11 +201,11 @@ private fun ChromePopHalfContent() {
 @Preview(name = "chrome pop 0.5 light", widthDp = 402, heightDp = 874)
 @Composable
 private fun ChromePopHalfLightPreview() {
-    RobocoTheme { ChromePopHalfContent() }
+    ZeronTheme { ChromePopHalfContent() }
 }
 
 @Preview(name = "chrome pop 0.5 dark", widthDp = 402, heightDp = 874, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun ChromePopHalfDarkPreview() {
-    RobocoTheme { ChromePopHalfContent() }
+    ZeronTheme { ChromePopHalfContent() }
 }

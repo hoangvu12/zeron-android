@@ -1,4 +1,4 @@
-package sh.roboco.android.browser
+package sh.zeron.android.browser
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
@@ -9,11 +9,11 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import uniffi.roboco_core.CoreException
-import uniffi.roboco_core.PreviewPanelListener
-import uniffi.roboco_core.PreviewPanelPhase
-import uniffi.roboco_core.PreviewPanelState
-import uniffi.roboco_core.PreviewServiceRow
+import uniffi.zeron_core.CoreException
+import uniffi.zeron_core.PreviewPanelListener
+import uniffi.zeron_core.PreviewPanelPhase
+import uniffi.zeron_core.PreviewPanelState
+import uniffi.zeron_core.PreviewServiceRow
 
 /**
  * The preview panel's behaviour (agent-previews ticket 05) on the plain
@@ -57,7 +57,7 @@ class PreviewPanelModelTest {
         }
 
         override suspend fun proxyStatus() =
-            uniffi.roboco_core.PreviewProxyStatus(port = null, error = null)
+            uniffi.zeron_core.PreviewProxyStatus(port = null, error = null)
 
         override fun setProxyWatching(engineId: String, watching: Boolean) {
             proxyWatching += engineId to watching

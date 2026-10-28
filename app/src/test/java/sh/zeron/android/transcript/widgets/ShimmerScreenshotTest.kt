@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import android.content.Context
 import androidx.compose.runtime.getValue
@@ -22,10 +22,10 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.core.Fonts
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.core.Fonts
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The shimmer goldens (recorded by `:app:recordRoborazziDebug`, verified by
@@ -70,7 +70,7 @@ class ShimmerScreenshotTest {
 
     private fun shot(dark: Boolean, phase: Float?, file: String) {
         captureRoboImage("transcript/$file") {
-            RobocoTheme(if (dark) Appearance.Dark else Appearance.Light) {
+            ZeronTheme(if (dark) Appearance.Dark else Appearance.Light) {
                 ShimmerSpecimen(dark, phase)
             }
         }
@@ -127,7 +127,7 @@ class ShimmerScreenshotTest {
     fun atT0TheGoldenIsPixelIdenticalToReduceMotion() {
         var phase by mutableStateOf<Float?>(0f)
         compose.setContent {
-            RobocoTheme(Appearance.Light) { ShimmerSpecimen(dark = false, phase = phase) }
+            ZeronTheme(Appearance.Light) { ShimmerSpecimen(dark = false, phase = phase) }
         }
         val atT0 = compose.onRoot().captureToImage().toPixelMap()
         compose.runOnUiThread { phase = null }
@@ -152,7 +152,7 @@ class ShimmerScreenshotTest {
     fun theBackgroundIsUnchangedAtEveryPhase() {
         var phase by mutableStateOf(0f)
         compose.setContent {
-            RobocoTheme(Appearance.Light) { ShimmerSpecimen(dark = false, phase = phase) }
+            ZeronTheme(Appearance.Light) { ShimmerSpecimen(dark = false, phase = phase) }
         }
         for (t in listOf(0f, 0.25f, 1f / 3f, 0.4167f, 0.8333f)) {
             compose.runOnUiThread { phase = t }

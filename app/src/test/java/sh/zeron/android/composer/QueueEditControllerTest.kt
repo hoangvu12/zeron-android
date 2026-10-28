@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.ui.graphics.ImageBitmap
 import kotlinx.coroutines.CompletableDeferred
@@ -20,23 +20,23 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import sh.roboco.android.design.AlertButtonRole
-import sh.roboco.android.design.Alerts
-import sh.roboco.android.design.NoFeedback
-import sh.roboco.android.design.RobocoAlert
-import sh.roboco.android.session.ChromeInput
-import sh.roboco.android.session.SessionChrome
-import sh.roboco.android.session.StatusBanner
-import sh.roboco.android.session.composerState
-import sh.roboco.android.session.shownBanner
-import uniffi.roboco_core.ComposerState
-import uniffi.roboco_core.NoHandle
-import uniffi.roboco_core.QueueEditAction
-import uniffi.roboco_core.QueueEditFinish
-import uniffi.roboco_core.QueueEditLease
-import uniffi.roboco_core.QueueEditStart
-import uniffi.roboco_core.QueueItem
-import uniffi.roboco_core.SessionHandle
+import sh.zeron.android.design.AlertButtonRole
+import sh.zeron.android.design.Alerts
+import sh.zeron.android.design.NoFeedback
+import sh.zeron.android.design.ZeronAlert
+import sh.zeron.android.session.ChromeInput
+import sh.zeron.android.session.SessionChrome
+import sh.zeron.android.session.StatusBanner
+import sh.zeron.android.session.composerState
+import sh.zeron.android.session.shownBanner
+import uniffi.zeron_core.ComposerState
+import uniffi.zeron_core.NoHandle
+import uniffi.zeron_core.QueueEditAction
+import uniffi.zeron_core.QueueEditFinish
+import uniffi.zeron_core.QueueEditLease
+import uniffi.zeron_core.QueueEditStart
+import uniffi.zeron_core.QueueItem
+import uniffi.zeron_core.SessionHandle
 
 /**
  * [QueueEditController] (android-ui-parity #83) — the whole state
@@ -53,7 +53,7 @@ import uniffi.roboco_core.SessionHandle
  * beginEdit returns" checks require.
  *
  * Also covered: [ComposerEditHost] (the alert through ticket 18's
- * `RobocoAlert`, the failure slot through 73's real [StatusBanner]) and
+ * `ZeronAlert`, the failure slot through 73's real [StatusBanner]) and
  * [CoreQueueEditPort]'s FFI mapping over a recording handle (COMMIT /
  * CANCEL, `attachments = null`, the outcome folding).
  *
@@ -730,11 +730,11 @@ class QueueEditControllerTest {
 
     /** Records every alert; the host's alert path is ticket 18's. */
     private class RecordingAlerts : Alerts {
-        val shown = mutableListOf<RobocoAlert>()
-        override fun show(alert: RobocoAlert) {
+        val shown = mutableListOf<ZeronAlert>()
+        override fun show(alert: ZeronAlert) {
             shown += alert
         }
-        override fun updateCurrent(alert: RobocoAlert) {}
+        override fun updateCurrent(alert: ZeronAlert) {}
         override fun dismissAll() {}
     }
 

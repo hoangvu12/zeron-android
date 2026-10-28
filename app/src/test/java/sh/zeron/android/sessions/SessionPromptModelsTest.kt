@@ -1,12 +1,12 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import sh.roboco.android.design.ActionSheetStyle
-import sh.roboco.android.design.AlertButtonRole
+import sh.zeron.android.design.ActionSheetStyle
+import sh.zeron.android.design.AlertButtonRole
 
 /**
  * The pure builders of android-ui-parity #43 (plain JUnit, no Robolectric:

@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.os.SystemClock
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -14,10 +14,10 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import sh.roboco.android.core.TextEngine
-import uniffi.roboco_core.DebugEntry
-import uniffi.roboco_core.LayoutFrame
-import uniffi.roboco_core.layoutFixtureMarkdown
+import sh.zeron.android.core.TextEngine
+import uniffi.zeron_core.DebugEntry
+import uniffi.zeron_core.LayoutFrame
+import uniffi.zeron_core.layoutFixtureMarkdown
 
 /**
  * Scroll anchoring (ticket 130) against the real core and the lab fixture

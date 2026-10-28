@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -10,8 +10,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The large-title scaffold's goldens (android-ui-parity #25): the ticket's
@@ -44,7 +44,7 @@ class LargeTitleScaffoldScreenshotTest {
 
     private fun shot(appearance: Appearance, file: String, content: @Composable () -> Unit) {
         compose.setContent {
-            RobocoTheme(appearance) { content() }
+            ZeronTheme(appearance) { content() }
         }
         compose.waitForIdle()
         compose.onRoot().captureRoboImage(file)

@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -53,8 +53,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The split shell's frame (android-ui-parity #33) at 1280 × 800 dp × 2.0
@@ -166,7 +166,7 @@ class SplitRootTest {
         router: AppRouter = AppRouter.Noop,
     ) {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 SplitRoot(shell = state, sidebar = sidebar, detail = detail, router = router)
             }
         }
@@ -564,7 +564,7 @@ class SplitRootTest {
         val restoration = StateRestorationTester(compose)
         var current: TabletShellState? = null
         restoration.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 SplitRoot(
                     shell = rememberTabletShellState().also { current = it },
                     sidebar = { FieldSidebar() },

@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.content.Context
 import android.content.pm.ApplicationInfo
@@ -21,7 +21,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.lifecycle.compose.LifecycleStartEffect
 import java.lang.ref.WeakReference
 
-private const val TAG = "RobocoFeedback"
+private const val TAG = "ZeronFeedback"
 
 /**
  * What this device can render, probed once per process (the `Vibrator`
@@ -114,7 +114,7 @@ class SystemHapticOutput(private val vibrator: Vibrator?) : HapticOutput {
  * Haptics for the whole app. See [FeedbackGate] for when a moment plays and
  * [HapticPlanner] for how it is felt on this hardware.
  *
- * Debug builds log one line per event to the `RobocoFeedback` tag: what
+ * Debug builds log one line per event to the `ZeronFeedback` tag: what
  * played (and as what) or why it did not.
  */
 class AndroidFeedback(

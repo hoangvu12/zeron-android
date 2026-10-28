@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.ui.graphics.toArgb
 import org.junit.Assert.assertEquals
@@ -6,7 +6,7 @@ import org.junit.Assert.assertNotSame
 import org.junit.Assert.assertSame
 import org.junit.Assert.fail
 import org.junit.Test
-import uniffi.roboco_core.ColorRole
+import uniffi.zeron_core.ColorRole
 
 /**
  * Every ARGB value of the transcript palette table

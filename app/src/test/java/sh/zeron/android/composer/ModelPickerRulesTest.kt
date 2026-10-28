@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

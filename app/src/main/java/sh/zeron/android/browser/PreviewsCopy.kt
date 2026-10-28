@@ -1,4 +1,4 @@
-package sh.roboco.android.browser
+package sh.zeron.android.browser
 
 /**
  * The preview surfaces' copy (agent-previews ticket 05) — the desktop
@@ -39,7 +39,7 @@ object PreviewsCopy {
 
     /** The engine-too-old note (the `unsupported` phase). */
     const val Unsupported =
-        "This Roboco is too old to show previews. Update it on the device running this session."
+        "This Zeron is too old to show previews. Update it on the device running this session."
 
     /** The browser entry's main-frame failure note. */
     const val LoadFailed = "This preview could not be loaded."

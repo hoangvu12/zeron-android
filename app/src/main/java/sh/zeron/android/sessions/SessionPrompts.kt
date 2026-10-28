@@ -1,17 +1,17 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
-import sh.roboco.android.design.ActionSheetPresenter
-import sh.roboco.android.design.Alerts
-import sh.roboco.android.design.LocalActionSheet
-import sh.roboco.android.design.LocalAlerts
-import sh.roboco.android.design.LocalToaster
-import sh.roboco.android.design.Toaster
-import uniffi.roboco_core.CoreClient
-import uniffi.roboco_core.EngineState
-import uniffi.roboco_core.SessionRow
+import sh.zeron.android.design.ActionSheetPresenter
+import sh.zeron.android.design.Alerts
+import sh.zeron.android.design.LocalActionSheet
+import sh.zeron.android.design.LocalAlerts
+import sh.zeron.android.design.LocalToaster
+import sh.zeron.android.design.Toaster
+import uniffi.zeron_core.CoreClient
+import uniffi.zeron_core.EngineState
+import uniffi.zeron_core.SessionRow
 
 /**
  * The launcher layer over the five prompt builders (android-ui-parity
@@ -22,7 +22,7 @@ import uniffi.roboco_core.SessionRow
  * up except the engine list.
  *
  * All writes go through ticket 42's [RowActions]; this class never calls a
- * [CoreClient] write and never catches a [uniffi.roboco_core.CoreException]
+ * [CoreClient] write and never catches a [uniffi.zeron_core.CoreException]
  * — 42 owns the dispatch, the IO lane and every error toast. Follow-ups
  * key off 42's [ActionOutcome]: the folder title only on [ActionOutcome.Ok],
  * the pop after delete on [ActionOutcome.Ok] or [ActionOutcome.Gone].
@@ -44,7 +44,7 @@ interface SessionPromptBackend {
 
 /**
  * The [SessionPromptBackend] over the live [CoreClient] —
- * `engines()` maps the [uniffi.roboco_core.EngineView] records to
+ * `engines()` maps the [uniffi.zeron_core.EngineView] records to
  * [EngineChoice]s, resolved at call time like 42's `writes` seam so a
  * re-created client (re-pair, forget) is picked up.
  */

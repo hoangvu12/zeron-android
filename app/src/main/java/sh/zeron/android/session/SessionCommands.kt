@@ -1,13 +1,13 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
-import sh.roboco.android.composer.DeliveryMode
-import sh.roboco.android.composer.StagedImage
-import uniffi.roboco_core.BusyPolicy
-import uniffi.roboco_core.CoreClient
-import uniffi.roboco_core.FileMatch
-import uniffi.roboco_core.OutgoingAttachment
-import uniffi.roboco_core.SendRequest
-import uniffi.roboco_core.SessionHandle
+import sh.zeron.android.composer.DeliveryMode
+import sh.zeron.android.composer.StagedImage
+import uniffi.zeron_core.BusyPolicy
+import uniffi.zeron_core.CoreClient
+import uniffi.zeron_core.FileMatch
+import uniffi.zeron_core.OutgoingAttachment
+import uniffi.zeron_core.SendRequest
+import uniffi.zeron_core.SessionHandle
 
 /**
  * The FFI the composer needs (android-ui-parity #78): send, interrupt
@@ -15,7 +15,7 @@ import uniffi.roboco_core.SessionHandle
  * 247-249`. All suspend, all called **off main** by
  * [SessionComposerBinding], and fakeable in tests and the gallery.
  *
- * iOS's `send` is synchronous and returns `Bool`; Roboco's is an engine
+ * iOS's `send` is synchronous and returns `Bool`; Zeron's is an engine
  * round trip, so it is `suspend` and reports failures by throwing (the
  * binding turns that into the send-failure pill and a kept draft).
  */
@@ -36,7 +36,7 @@ interface SessionCommands {
 /**
  * The delivery mode → `BusyPolicy` table (android-app#08 §Send rule 6).
  * **Never interrupt-then-send**: "Stop and send" is one send with
- * [BusyPolicy.INTERRUPT] — Roboco's `interrupt` pauses the queue and
+ * [BusyPolicy.INTERRUPT] — Zeron's `interrupt` pauses the queue and
  * cancels held sends, so the iOS order would strand the message
  * (upstream #609/#621's trap).
  */

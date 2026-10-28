@@ -1,4 +1,4 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
@@ -9,8 +9,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * Ticket 138's goldens: [QrScannerContent] over [FakeCameraPreview] on
@@ -23,12 +23,12 @@ import sh.roboco.android.design.RobocoTheme
  *   Open Settings capsule (`#E8E8EA` fill, `#060606` title);
  * - `qr_scanner_unavailable` — the unavailable caption, no stroke.
  *
- * Both modes wrap in `RobocoTheme(Appearance.Dark)` — the stage is always
+ * Both modes wrap in `ZeronTheme(Appearance.Dark)` — the stage is always
  * dark (SHELL-D2) — so light and dark goldens must be **pixel-identical**;
  * the night qualifier only proves the values-night resources change
  * nothing. The clock is frozen and exactly one frame runs before each
  * capture (PairPageScreenshotTest's convention). Recorded by
- * `./gradlew :app:recordRoborazziDebug --tests sh.roboco.android.pairing.QrScannerScreenshotTest`,
+ * `./gradlew :app:recordRoborazziDebug --tests sh.zeron.android.pairing.QrScannerScreenshotTest`,
  * verified with `:app:verifyRoborazziDebug`; the files land under
  * `src/test/screenshots/pairing/`. Colour checks (caption `#FFFFFF`,
  * reticle stroke `#E6FFFFFF`, ✕ glyph `#E8E8EA` on the `#111113` @0.94
@@ -46,7 +46,7 @@ class QrScannerScreenshotTest {
     private fun shot(file: String, phase: ScannerPhase, foreign: Boolean) {
         compose.mainClock.autoAdvance = false
         compose.setContent {
-            RobocoTheme(Appearance.Dark) {
+            ZeronTheme(Appearance.Dark) {
                 QrScannerContent(
                     state = QrScannerUiState(phase, foreign),
                     onClose = {},

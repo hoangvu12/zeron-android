@@ -1,15 +1,15 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import uniffi.roboco_core.EngineState
+import uniffi.zeron_core.EngineState
 
 /**
  * The status derivations (android-ui-parity #41): the
  * [sessionListStatus] first-match-wins table, the [sessionsLoading]
- * matrix over the FFI [uniffi.roboco_core.EngineView] record, and the
+ * matrix over the FFI [uniffi.zeron_core.EngineView] record, and the
  * [statusAnchorY] worked example from the ticket (393 × 852, safe top
  * 155, bottom 110, lift 40 → **408.5**).
  *
@@ -57,7 +57,7 @@ class SessionListStatusTest {
         assertFalse(sessionsLoading(listOf(eng(EngineState.Reconnecting, false))))
         assertFalse(sessionsLoading(listOf(eng(EngineState.Connected, true))))
         assertFalse(sessionsLoading(listOf(eng(EngineState.Offline, true))))
-        assertFalse(sessionsLoading(listOf(eng(EngineState.Parked(uniffi.roboco_core.ParkReason.REVOKED), true))))
+        assertFalse(sessionsLoading(listOf(eng(EngineState.Parked(uniffi.zeron_core.ParkReason.REVOKED), true))))
         // A from-cache reconnecter makes the list loading; others never do.
         assertTrue(
             sessionsLoading(

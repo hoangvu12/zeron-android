@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.ui.graphics.toArgb
 import androidx.test.core.app.ApplicationProvider
@@ -7,7 +7,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import sh.roboco.android.R
+import sh.zeron.android.R
 
 /**
  * The launch background written by android-app#13 to

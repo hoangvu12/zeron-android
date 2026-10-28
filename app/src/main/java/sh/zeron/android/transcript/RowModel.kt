@@ -1,11 +1,11 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.graphics.Canvas
 import android.util.Log
-import sh.roboco.android.core.FontChain
-import sh.roboco.android.design.color
-import uniffi.roboco_core.FadeEdge
-import uniffi.roboco_core.RowDisplay
+import sh.zeron.android.core.FontChain
+import sh.zeron.android.design.color
+import uniffi.zeron_core.FadeEdge
+import uniffi.zeron_core.RowDisplay
 
 /**
  * One row's display list plus everything cheap to derive from it: the
@@ -255,7 +255,7 @@ class RowModel(val display: RowDisplay) {
     }
 
     private companion object {
-        const val TAG = "RobocoTranscript"
+        const val TAG = "ZeronTranscript"
 
         /** Half-extent of a Range split: ±100 000 px spans any row (iOS uses ±10 000 pt). */
         const val CLIP_EXTENT = 100_000f

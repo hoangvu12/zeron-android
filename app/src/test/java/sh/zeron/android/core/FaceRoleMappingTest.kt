@@ -1,8 +1,8 @@
-package sh.roboco.android.core
+package sh.zeron.android.core
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import uniffi.roboco_core.FaceRole
+import uniffi.zeron_core.FaceRole
 
 /**
  * `Face` ↔ `FaceRole` mapping (plain JVM, for the merge check): the Kotlin

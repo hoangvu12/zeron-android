@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import android.content.res.Configuration
 import androidx.annotation.VisibleForTesting
@@ -34,19 +34,19 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.R
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.Haptic
-import sh.roboco.android.design.IconInBox
-import sh.roboco.android.design.LocalFeedback
-import sh.roboco.android.design.LocalReduceMotion
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.Motion
-import sh.roboco.android.design.RobocoIcon
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.SymbolWeight
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.R
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.Haptic
+import sh.zeron.android.design.IconInBox
+import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.design.LocalReduceMotion
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.Motion
+import sh.zeron.android.design.ZeronIcon
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.SymbolWeight
+import sh.zeron.android.design.uiStyle
 
 /**
  * `WidgetKind.Disclosure`'s view (ticket 120; iOS `DisclosureControl`,
@@ -110,7 +110,7 @@ fun ToolToggleTarget(open: Boolean, onToggle: () -> Unit, modifier: Modifier = M
     val feedback = LocalFeedback.current
     val interactions = remember { MutableInteractionSource() }
     val pressed = interactions.collectIsPressedAsState()
-    val fill = RobocoTheme.palette.controlFill
+    val fill = ZeronTheme.palette.controlFill
     Box(
         modifier
             .fillMaxSize()
@@ -134,7 +134,7 @@ fun ToolToggleTarget(open: Boolean, onToggle: () -> Unit, modifier: Modifier = M
  */
 @Composable
 internal fun ToolToggleSurface(pressed: Boolean, modifier: Modifier = Modifier) {
-    val fill = RobocoTheme.palette.controlFill
+    val fill = ZeronTheme.palette.controlFill
     Box(
         modifier
             .fillMaxSize()
@@ -148,13 +148,13 @@ internal fun ToolToggleSurface(pressed: Boolean, modifier: Modifier = Modifier) 
 
 /**
  * The chevron glyph: iOS `tool-alt-arrow-down` (24-unit viewBox, one "v"
- * path, stroke 1.5, round caps and joins), the same asset Roboco compiles
+ * path, stroke 1.5, round caps and joins), the same asset Zeron compiles
  * as `zi_alt_arrow_down`. `opticalScale = 1` — unlike
- * `RobocoIcons.ChevronDown` (1.1, tuned for SF `chevron.down`), the glyph
+ * `ZeronIcons.ChevronDown` (1.1, tuned for SF `chevron.down`), the glyph
  * aspect-fits the whole 15.75 dp widget rect exactly (stroke 1.5 / 24 of
  * the rect, ≈ 0.98 dp at text scale 1) and may not overhang it.
  */
-private val ToolChevronIcon = RobocoIcon.Vector(R.drawable.zi_alt_arrow_down)
+private val ToolChevronIcon = ZeronIcon.Vector(R.drawable.zi_alt_arrow_down)
 
 /** Down (expanded, 0°) or right (collapsed, −90°). */
 internal fun chevronAngle(expanded: Boolean): Float = if (expanded) 0f else -90f
@@ -211,7 +211,7 @@ internal val ChevronAngleKey = SemanticsPropertyKey<Float>("ChevronAngle")
 @Composable
 fun ToolChevron(rowKey: ULong, expanded: Boolean, modifier: Modifier = Modifier) {
     val reduce = LocalReduceMotion.current
-    val tint = RobocoTheme.palette.secondary
+    val tint = ZeronTheme.palette.secondary
     // Keyed on the row only, never on `expanded`: a flip starts from the
     // angle currently shown, and an interrupted flip restarts there toward
     // its new target. Under reduce motion the first value is already the
@@ -259,8 +259,8 @@ fun ToolChevron(rowKey: ULong, expanded: Boolean, modifier: Modifier = Modifier)
 @Preview(name = "Disclosure light")
 @Composable
 private fun DisclosureLightPreview() {
-    RobocoTheme(Appearance.System) {
-        Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+    ZeronTheme(Appearance.System) {
+        Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
             DisclosurePreviewRows()
         }
     }
@@ -269,8 +269,8 @@ private fun DisclosureLightPreview() {
 @Preview(name = "Disclosure dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun DisclosureDarkPreview() {
-    RobocoTheme(Appearance.System) {
-        Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+    ZeronTheme(Appearance.System) {
+        Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
             DisclosurePreviewRows()
         }
     }
@@ -321,7 +321,7 @@ private fun PreviewLabel(text: String, x: Dp) {
         BasicText(
             text,
             Modifier.align(Alignment.CenterStart),
-            style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(13.5f), RobocoTheme.palette.secondary),
+            style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(13.5f), ZeronTheme.palette.secondary),
         )
     }
 }

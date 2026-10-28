@@ -1,4 +1,4 @@
-package sh.roboco.android.debug
+package sh.zeron.android.debug
 
 import android.content.Context
 import android.content.Intent
@@ -53,28 +53,28 @@ import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.CapsuleShape
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.Motion
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.SymbolWeight
-import sh.roboco.android.design.glass.GlassCircleButton
-import sh.roboco.android.design.glass.ProvideHazeState
-import sh.roboco.android.design.glass.ScrollEdgeEffect
-import sh.roboco.android.design.glass.ScrollEdgeEffectDefaults
-import sh.roboco.android.design.hairlineBorder
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.image.ImageViewerHost
-import sh.roboco.android.image.ImageViewerRequest
-import sh.roboco.android.image.LocalImageViewer
-import sh.roboco.android.image.rememberImageViewerState
-import sh.roboco.android.transcript.TranscriptActions
-import sh.roboco.android.transcript.TranscriptHost
-import sh.roboco.android.transcript.TranscriptImageBinding
-import sh.roboco.android.transcript.TranscriptImageLoader
-import sh.roboco.android.transcript.TranscriptViewport
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.CapsuleShape
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.Motion
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.SymbolWeight
+import sh.zeron.android.design.glass.GlassCircleButton
+import sh.zeron.android.design.glass.ProvideHazeState
+import sh.zeron.android.design.glass.ScrollEdgeEffect
+import sh.zeron.android.design.glass.ScrollEdgeEffectDefaults
+import sh.zeron.android.design.hairlineBorder
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.image.ImageViewerHost
+import sh.zeron.android.image.ImageViewerRequest
+import sh.zeron.android.image.LocalImageViewer
+import sh.zeron.android.image.rememberImageViewerState
+import sh.zeron.android.transcript.TranscriptActions
+import sh.zeron.android.transcript.TranscriptHost
+import sh.zeron.android.transcript.TranscriptImageBinding
+import sh.zeron.android.transcript.TranscriptImageLoader
+import sh.zeron.android.transcript.TranscriptViewport
 
 /**
  * The Transcript Lab screen (android-ui-parity #135): the full-window
@@ -168,7 +168,7 @@ private fun LabScreenBody(
     actions: TranscriptActions,
     overlay: @Composable BoxScope.(contentTop: Dp) -> Unit,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val viewport = controller.state.viewport
     val hazeState = rememberHazeState()
     // The insets are captured in composition (they are @Composable
@@ -296,7 +296,7 @@ private enum class LabSlot { Input, Transcript, Header, Overlay }
  */
 @Composable
 private fun LabHeader(engaged: Boolean) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Box(Modifier.fillMaxWidth()) {
         ScrollEdgeEffect(height = ScrollEdgeEffectDefaults.height(), engaged = engaged)
@@ -331,7 +331,7 @@ private fun LabHeader(engaged: Boolean) {
  */
 @Composable
 private fun LabInputRow(controller: TranscriptLabController) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     var text by rememberSaveable { mutableStateOf("") }
     Row(
@@ -374,7 +374,7 @@ private fun LabInputRow(controller: TranscriptLabController) {
         val running = controller.stream.running
         val stop = running && !hasContent
         GlassCircleButton(
-            icon = if (stop) RobocoIcons.StopFill else RobocoIcons.ArrowUp,
+            icon = if (stop) ZeronIcons.StopFill else ZeronIcons.ArrowUp,
             contentDescription = when {
                 stop -> "Stop response"
                 running -> "Queue message"

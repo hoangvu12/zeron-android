@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,27 +20,27 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.rememberHazeState
-import sh.roboco.android.composer.ComposerBar
-import sh.roboco.android.composer.ComposerController
-import sh.roboco.android.composer.ComposerEditHost
-import sh.roboco.android.composer.EditFinish
-import sh.roboco.android.composer.EditRow
-import sh.roboco.android.composer.FixtureQueueEditPort
-import sh.roboco.android.composer.QueueAction
-import sh.roboco.android.composer.QueueEditController
-import sh.roboco.android.composer.QueuePanel
-import sh.roboco.android.composer.SendResult
-import sh.roboco.android.composer.rememberComposerMorphState
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.glass.ProvideHazeState
-import sh.roboco.android.session.BottomStackModel
-import sh.roboco.android.session.SessionBottomStack
-import sh.roboco.android.session.SessionChrome
-import sh.roboco.android.session.StatusBanner
-import sh.roboco.android.session.StatusPillRow
-import sh.roboco.android.session.rememberBottomStackState
-import sh.roboco.android.session.shownBanner
+import sh.zeron.android.composer.ComposerBar
+import sh.zeron.android.composer.ComposerController
+import sh.zeron.android.composer.ComposerEditHost
+import sh.zeron.android.composer.EditFinish
+import sh.zeron.android.composer.EditRow
+import sh.zeron.android.composer.FixtureQueueEditPort
+import sh.zeron.android.composer.QueueAction
+import sh.zeron.android.composer.QueueEditController
+import sh.zeron.android.composer.QueuePanel
+import sh.zeron.android.composer.SendResult
+import sh.zeron.android.composer.rememberComposerMorphState
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.glass.ProvideHazeState
+import sh.zeron.android.session.BottomStackModel
+import sh.zeron.android.session.SessionBottomStack
+import sh.zeron.android.session.SessionChrome
+import sh.zeron.android.session.StatusBanner
+import sh.zeron.android.session.StatusPillRow
+import sh.zeron.android.session.rememberBottomStackState
+import sh.zeron.android.session.shownBanner
 
 /**
  * The "Queue edit" page of the debug design gallery (android-ui-parity
@@ -77,7 +77,7 @@ import sh.roboco.android.session.shownBanner
  */
 @Composable
 fun QueueEditGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val scope = rememberCoroutineScope()
     val alerts = LocalAlerts.current
@@ -206,7 +206,7 @@ fun QueueEditGallerySection() {
 /** The transcript stand-in behind the stack, so the glass and the fade have content to sample. */
 @Composable
 private fun GalleryQueueEditTranscript() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Column(
         Modifier
@@ -227,7 +227,7 @@ private fun GalleryQueueEditTranscript() {
 /** One gallery chip: a clickable BasicText in accent, tagged for the golden test. No Material controls. */
 @Composable
 private fun QueueEditChip(tag: String, text: String, onClick: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     BasicText(
         text,

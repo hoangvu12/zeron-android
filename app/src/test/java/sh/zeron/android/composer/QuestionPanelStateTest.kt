@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
@@ -11,11 +11,11 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import sh.roboco.android.design.Cue
-import sh.roboco.android.design.Feedback
-import sh.roboco.android.design.Haptic
-import sh.roboco.android.design.Motion
-import sh.roboco.android.session.SessionChrome
+import sh.zeron.android.design.Cue
+import sh.zeron.android.design.Feedback
+import sh.zeron.android.design.Haptic
+import sh.zeron.android.design.Motion
+import sh.zeron.android.session.SessionChrome
 
 /**
  * [QuestionPanelState] — android-ui-parity #91's behaviour, pinned on the

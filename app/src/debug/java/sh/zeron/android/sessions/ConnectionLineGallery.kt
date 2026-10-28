@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -16,14 +16,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.MutableStateFlow
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
-import uniffi.roboco_core.Connectivity
-import uniffi.roboco_core.EngineDiagnostics
-import uniffi.roboco_core.EngineState
-import uniffi.roboco_core.EngineView
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
+import uniffi.zeron_core.Connectivity
+import uniffi.zeron_core.EngineDiagnostics
+import uniffi.zeron_core.EngineState
+import uniffi.zeron_core.EngineView
 
 /**
  * The "Connection line" fixtures (android-ui-parity #50) — every row of
@@ -62,7 +62,7 @@ internal object ConnectionLineFixtures {
         listOf(
             ConnectionLineEntry(
                 ConnectionGlyph.DangerDot,
-                "MacBook Pro needs a newer Roboco app. Update the app to connect.",
+                "MacBook Pro needs a newer Zeron app. Update the app to connect.",
             ),
         ),
     )
@@ -155,7 +155,7 @@ private fun fakeEngine(
  */
 @Composable
 fun ConnectionLineGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
     val captionStyle = uiStyle(Face.Mono, ts.fixed(11f), palette.tertiary)
     Column(Modifier.background(palette.background)) {

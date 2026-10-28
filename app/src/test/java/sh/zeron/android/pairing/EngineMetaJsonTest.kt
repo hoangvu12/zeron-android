@@ -1,4 +1,4 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import org.json.JSONArray
 import org.json.JSONObject
@@ -10,7 +10,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.shadows.ShadowLog
-import uniffi.roboco_core.EngineTransport
+import uniffi.zeron_core.EngineTransport
 
 /**
  * The `engines` preference's JSON codec (ticket 71): round-trip of all
@@ -203,7 +203,7 @@ class EngineMetaJsonTest {
 
         EngineMetaJson.decode(JSONArray().put(missingLabel).toString())
 
-        // Round 53: ShadowLog is process-global and shares the "Roboco" tag
+        // Round 53: ShadowLog is process-global and shares the "Zeron" tag
         // with other components (CI 9307a945 caught a background
         // "setNetworkOnline(false)" between clear() and here), so the exact
         // match is scoped to this codec's own lines...

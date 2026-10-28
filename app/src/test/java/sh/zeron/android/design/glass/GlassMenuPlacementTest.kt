@@ -1,4 +1,4 @@
-package sh.roboco.android.design.glass
+package sh.zeron.android.design.glass
 
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.unit.IntRect
@@ -140,7 +140,7 @@ class GlassMenuPlacementTest {
         // RTL only mirrors the content inside the panel; the placement is
         // physical. The JVM signature (mangled for the IntSize value class)
         // must not carry a direction parameter.
-        val methods = Class.forName("sh.roboco.android.design.glass.GlassMenuPlacementKt")
+        val methods = Class.forName("sh.zeron.android.design.glass.GlassMenuPlacementKt")
             .methods
             .filter { it.name.substringBefore('-') == "placeGlassMenu" }
         assertTrue("placeGlassMenu not found", methods.isNotEmpty())

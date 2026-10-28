@@ -1,4 +1,4 @@
-package sh.roboco.android.design.sheet
+package sh.zeron.android.design.sheet
 
 import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.ui.unit.Density

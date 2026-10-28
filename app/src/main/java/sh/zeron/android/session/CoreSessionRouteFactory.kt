@@ -1,18 +1,18 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import sh.roboco.android.composer.CoreQueuePort
-import sh.roboco.android.composer.QueueActions
-import sh.roboco.android.core.TextEngine
-import sh.roboco.android.shell.RouterHooks
-import sh.roboco.android.shell.SessionRouteFactory
-import sh.roboco.android.sidechats.CoreSideChatsSource
-import sh.roboco.android.sidechats.SideChatsModel
-import sh.roboco.android.transcript.TranscriptState
-import uniffi.roboco_core.TextSystem
+import sh.zeron.android.composer.CoreQueuePort
+import sh.zeron.android.composer.QueueActions
+import sh.zeron.android.core.TextEngine
+import sh.zeron.android.shell.RouterHooks
+import sh.zeron.android.shell.SessionRouteFactory
+import sh.zeron.android.sidechats.CoreSideChatsSource
+import sh.zeron.android.sidechats.SideChatsModel
+import sh.zeron.android.transcript.TranscriptState
+import uniffi.zeron_core.TextSystem
 
 /**
  * The real [SessionRouteFactory] (android-ui-parity #76) — the port of
@@ -35,9 +35,9 @@ class CoreSessionRouteFactory(
     private val hub: SessionEventHub,
     private val fillers: ChromeFillerRegistry,
     private val isMainThread: () -> Boolean = ::defaultIsMainThread,
-    /** Production logs `Log.w("RobocoSession", ...)`; plain-JVM tests swap this (the stub `android.util.Log` throws). */
+    /** Production logs `Log.w("ZeronSession", ...)`; plain-JVM tests swap this (the stub `android.util.Log` throws). */
     private val logW: (String, Throwable?) -> Unit = { message, error ->
-        android.util.Log.w("RobocoSession", message, error)
+        android.util.Log.w("ZeronSession", message, error)
     },
     /** A fresh serial IO lane per controller (ticket 51's default); tests inject a `StandardTestDispatcher`. */
     private val newIo: () -> CoroutineDispatcher = { Dispatchers.IO.limitedParallelism(1) },
@@ -123,7 +123,7 @@ class CoreSessionRouteFactory(
 }
 
 /**
- * Called once from `RobocoApplication.onCreate`: swaps ticket 32's
+ * Called once from `ZeronApplication.onCreate`: swaps ticket 32's
  * `SessionRouteFactory.Unavailable` for the real one. After this, every
  * failed open is the core refusing (or the client being absent) — never
  * a missing registration.

@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.runtime.Composable
 import java.util.concurrent.CopyOnWriteArrayList

@@ -1,4 +1,4 @@
-package sh.roboco.android
+package sh.zeron.android
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -12,12 +12,12 @@ import java.util.regex.Pattern
  * `major × 1_000_000 + minor × 1_000 + patch`.
  *
  * The buildSrc formula itself is pinned by buildSrc's own
- * `RobocoVersionTest` (run via `:buildSrc:test`); this test pins the
+ * `ZeronVersionTest` (run via `:buildSrc:test`); this test pins the
  * derivation wiring with worked literals.
  */
 class VersionTest {
 
-    private val repoRoot = File(System.getProperty("roboco.repoRoot"))
+    private val repoRoot = File(System.getProperty("zeron.repoRoot"))
 
     @Test
     fun versionNameComesFromTheWorkspaceCargoToml() {

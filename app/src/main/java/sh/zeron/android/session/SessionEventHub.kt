@@ -1,9 +1,9 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import androidx.annotation.MainThread
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArraySet
-import uniffi.roboco_core.ClientEvent
+import uniffi.zeron_core.ClientEvent
 
 /** What a registered controller asks for: one coalesced refresh. */
 fun interface SessionEventListener {

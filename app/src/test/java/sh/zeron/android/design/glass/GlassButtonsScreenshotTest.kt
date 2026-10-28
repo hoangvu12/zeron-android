@@ -1,4 +1,4 @@
-package sh.roboco.android.design.glass
+package sh.zeron.android.design.glass
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -23,10 +23,10 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.GlassStage
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.GlassStage
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The glass-button goldens (ticket 08), recorded by `recordRoborazziDebug`
@@ -65,7 +65,7 @@ class GlassButtonsScreenshotTest {
 
     private fun shot(appearance: Appearance, file: String, content: @Composable BoxScope.() -> Unit) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 ProvideHazeState {
                     GlassStage(
                         modifier = Modifier.fillMaxSize(),
@@ -124,7 +124,7 @@ class GlassButtonsScreenshotTest {
         val capsule = MutableInteractionSource()
         val prominent = MutableInteractionSource()
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 ProvideHazeState {
                     GlassStage(
                         modifier = Modifier.fillMaxSize(),
@@ -136,12 +136,12 @@ class GlassButtonsScreenshotTest {
                             verticalArrangement = Arrangement.spacedBy(24.dp),
                         ) {
                             GlassCircleButton(
-                                RobocoIcons.Ellipsis, "More", {},
+                                ZeronIcons.Ellipsis, "More", {},
                                 interactionSource = glassCircle,
                             )
                             GlassCircleButton(
-                                RobocoIcons.Plus, "New session", {},
-                                filled = RobocoTheme.palette.accent,
+                                ZeronIcons.Plus, "New session", {},
+                                filled = ZeronTheme.palette.accent,
                                 interactionSource = filledCircle,
                             )
                             GlassTextCapsule(

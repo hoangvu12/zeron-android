@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
@@ -38,9 +38,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
-import uniffi.roboco_core.Scroller
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
+import uniffi.zeron_core.Scroller
 
 /**
  * The pure viewport (ticket 116) at `w320dp-h480dp-mdpi`, so 1 dp = 1 px
@@ -81,7 +81,7 @@ class ScrollerViewportTest {
         content: @Composable BoxScope.() -> Unit = {},
     ) {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 val dir = if (rtl) LayoutDirection.Rtl else LayoutDirection.Ltr
                 CompositionLocalProvider(LocalLayoutDirection provides dir) {
                     Box(Modifier.fillMaxSize().background(Color.White)) {
@@ -190,7 +190,7 @@ class ScrollerViewportTest {
         var s by mutableStateOf(Scroller(0f, 0f, 200f, 40f, 600f))
         var composed: ScrollState? = null
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.fillMaxSize().background(Color.White)) {
                     key(0) {
                         val state = rememberScrollerState(s)

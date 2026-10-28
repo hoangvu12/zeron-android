@@ -1,4 +1,4 @@
-package sh.roboco.android.design.sheet
+package sh.zeron.android.design.sheet
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -28,10 +28,10 @@ import androidx.graphics.shapes.CornerRounding
 import androidx.graphics.shapes.RoundedPolygon
 import androidx.graphics.shapes.rectangle
 import kotlin.math.min
-import sh.roboco.android.design.DEFAULT_SMOOTHING
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.polygonPath
-import sh.roboco.android.design.rgba
+import sh.zeron.android.design.DEFAULT_SMOOTHING
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.polygonPath
+import sh.zeron.android.design.rgba
 
 /**
  * iOS continuous ("squircle") **top** corners with square bottom corners —
@@ -110,7 +110,7 @@ fun SheetGrabber(
     // Palette.tertiary @0.5 (light #97979F, dark #6B6B72): UIKit's own
     // system grey stand-in, starred in the ticket. Alpha goes through
     // rgba, not Color.copy, per Palette.kt's quantisation note.
-    val ink = rgba(if (RobocoTheme.isDark) 0x6B6B72 else 0x97979F, 0.5)
+    val ink = rgba(if (ZeronTheme.isDark) 0x6B6B72 else 0x97979F, 0.5)
     Box(
         modifier
             .size(GlassSheetDefaults.GrabberTouchTarget)

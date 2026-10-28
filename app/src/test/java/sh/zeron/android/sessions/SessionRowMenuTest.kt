@@ -1,18 +1,18 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import sh.roboco.android.R
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.glass.MenuIcon
-import sh.roboco.android.design.glass.MenuItem
-import sh.roboco.android.design.glass.MenuSection
-import uniffi.roboco_core.ChatIndicator
-import uniffi.roboco_core.SessionRow
-import uniffi.roboco_core.SectionView
+import sh.zeron.android.R
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.glass.MenuIcon
+import sh.zeron.android.design.glass.MenuItem
+import sh.zeron.android.design.glass.MenuSection
+import uniffi.zeron_core.ChatIndicator
+import uniffi.zeron_core.SessionRow
+import uniffi.zeron_core.SectionView
 
 /**
  * [sessionRowMenu] and the [SessionRowCommands] adapter (android-ui-parity
@@ -227,30 +227,30 @@ class SessionRowMenuTest {
 
         val pin = children[0] as MenuItem
         assertEquals("Pin", pin.title)
-        assertEquals(MenuIcon.Symbol(RobocoIcons.Pin), pin.icon)
+        assertEquals(MenuIcon.Symbol(ZeronIcons.Pin), pin.icon)
         assertFalse(pin.destructive)
         assertEquals("row-menu-pin", pin.testTag)
 
         val move = children[1] as MenuSection
         assertEquals("Move to Section", move.title)
-        assertEquals(MenuIcon.Symbol(RobocoIcons.Folder), move.icon)
+        assertEquals(MenuIcon.Symbol(ZeronIcons.Folder), move.icon)
         assertFalse(move.inline)
 
         val rename = children[2] as MenuItem
         assertEquals("Rename…", rename.title)
-        assertEquals(MenuIcon.Symbol(RobocoIcons.Pencil), rename.icon)
+        assertEquals(MenuIcon.Symbol(ZeronIcons.Pencil), rename.icon)
         assertFalse(rename.destructive)
         assertEquals("row-menu-rename", rename.testTag)
 
         val archive = children[3] as MenuItem
         assertEquals("Archive", archive.title)
-        assertEquals(MenuIcon.Symbol(RobocoIcons.Archivebox), archive.icon)
+        assertEquals(MenuIcon.Symbol(ZeronIcons.Archivebox), archive.icon)
         assertFalse("upstream #967: Archive is no longer destructive", archive.destructive)
         assertEquals("row-menu-archive", archive.testTag)
 
         val delete = children[4] as MenuItem
         assertEquals("Delete", delete.title)
-        assertEquals(MenuIcon.Symbol(RobocoIcons.Trash), delete.icon)
+        assertEquals(MenuIcon.Symbol(ZeronIcons.Trash), delete.icon)
         assertTrue(delete.destructive)
         assertEquals("row-menu-delete", delete.testTag)
     }
@@ -260,7 +260,7 @@ class SessionRowMenuTest {
         val menu = menu(row("c1", pinned = true), RecordingCommands())
         val pin = menu.children[0] as MenuItem
         assertEquals("Unpin", pin.title)
-        assertEquals(MenuIcon.Symbol(RobocoIcons.PinSlash), pin.icon)
+        assertEquals(MenuIcon.Symbol(ZeronIcons.PinSlash), pin.icon)
         assertEquals("row-menu-unpin", pin.testTag)
     }
 
@@ -273,7 +273,7 @@ class SessionRowMenuTest {
         assertEquals(4, move.children.size)
         val s1 = move.children[0] as MenuItem
         assertEquals("Work", s1.title)
-        assertEquals(MenuIcon.Symbol(RobocoIcons.Folder), s1.icon)
+        assertEquals(MenuIcon.Symbol(ZeronIcons.Folder), s1.icon)
         assertEquals("row-menu-section-s1", s1.testTag)
         assertFalse(s1.checked)
         val s2 = move.children[1] as MenuItem
@@ -281,11 +281,11 @@ class SessionRowMenuTest {
         assertEquals("row-menu-section-s2", s2.testTag)
         val none = move.children[2] as MenuItem
         assertEquals("No Section", none.title)
-        assertEquals(MenuIcon.Symbol(RobocoIcons.Tray), none.icon)
+        assertEquals(MenuIcon.Symbol(ZeronIcons.Tray), none.icon)
         assertEquals("row-menu-no-section", none.testTag)
         val newSection = move.children[3] as MenuItem
         assertEquals("New Section…", newSection.title)
-        assertEquals(MenuIcon.Symbol(RobocoIcons.FolderBadgePlus), newSection.icon)
+        assertEquals(MenuIcon.Symbol(ZeronIcons.FolderBadgePlus), newSection.icon)
         assertEquals("row-menu-new-section", newSection.testTag)
     }
 
@@ -295,7 +295,7 @@ class SessionRowMenuTest {
         assertEquals(3, menu.children.size)
         val unarchive = menu.children[0] as MenuItem
         assertEquals("Unarchive", unarchive.title)
-        assertEquals(MenuIcon.Symbol(RobocoIcons.TrayAndArrowUp), unarchive.icon)
+        assertEquals(MenuIcon.Symbol(ZeronIcons.TrayAndArrowUp), unarchive.icon)
         assertEquals("row-menu-unarchive", unarchive.testTag)
         assertFalse(unarchive.destructive)
         val rename = menu.children[1] as MenuItem

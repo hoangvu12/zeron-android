@@ -1,4 +1,4 @@
-package sh.roboco.android.design.glass
+package sh.zeron.android.design.glass
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -37,19 +37,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.hazeSource
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.CapsuleShape
-import sh.roboco.android.design.GlassStage
-import sh.roboco.android.design.Icon
-import sh.roboco.android.design.LocalIsDark
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoIcon
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.SymbolWeight
-import sh.roboco.android.design.rgb
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.CapsuleShape
+import sh.zeron.android.design.GlassStage
+import sh.zeron.android.design.Icon
+import sh.zeron.android.design.LocalIsDark
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronIcon
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.SymbolWeight
+import sh.zeron.android.design.rgb
+import sh.zeron.android.design.uiStyle
 
 /**
  * The `testTag` of [ProminentGlassButton]'s busy spinner
@@ -68,7 +68,7 @@ object GlassButtonDefaults {
      * has no such system step, so this is the default ink of every glass
      * bar item (nav bars, sheet headers, the tablet toolbar). The
      * `Glass.circleButton` ports (jump to latest, image viewer, scanner ✕)
-     * pass `ink = RobocoTheme.palette.text`, which the Swift sets itself.
+     * pass `ink = ZeronTheme.palette.text`, which the Swift sets itself.
      *
      * Reads [LocalIsDark] (the resolved appearance), not
      * `isSystemInDarkTheme()`.
@@ -120,7 +120,7 @@ object GlassButtonDefaults {
  *   `+` passes `palette.accent`, the sheets' ✓ too)
  * @param ink the glyph colour; the default is the measured iOS 26 glass
  *   bar-item ink ([GlassButtonDefaults.barGlyphInk], SESSIONS-D1), the
- *   `Glass.circleButton` ports pass `RobocoTheme.palette.text`, filled
+ *   `Glass.circleButton` ports pass `ZeronTheme.palette.text`, filled
  *   circles pass white
  * @param interactive `false` = no pointer input at all: no `clickable`, no
  *   press, nothing forwarded to the inner [GlassSurface]'s press tracker
@@ -128,7 +128,7 @@ object GlassButtonDefaults {
  */
 @Composable
 fun GlassCircleButton(
-    icon: RobocoIcon,
+    icon: ZeronIcon,
     contentDescription: String?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -142,7 +142,7 @@ fun GlassCircleButton(
     interactive: Boolean = true,
 ) {
     val source = interactionSource ?: remember { MutableInteractionSource() }
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val glyphInk = if (enabled) ink else palette.tertiary
     Box(
         modifier
@@ -262,7 +262,7 @@ fun ProminentGlassButton(
     interactionSource: MutableInteractionSource? = null,
 ) {
     val source = interactionSource ?: remember { MutableInteractionSource() }
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     // Busy buttons ignore clicks but are not otherwise "off" (UIKit keeps
     // the title visible; the activity indicator replaces the image slot).
@@ -345,7 +345,7 @@ fun GlassTextCapsule(
     interactionSource: MutableInteractionSource? = null,
 ) {
     val source = interactionSource ?: remember { MutableInteractionSource() }
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     GlassSurface(
         modifier
@@ -397,39 +397,39 @@ fun GlassTextCapsule(
  */
 @Composable
 internal fun GlassCircleVariants(press: MutableInteractionSource? = null) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            GlassCircleButton(RobocoIcons.Ellipsis, "More", {}, interactionSource = press)
-            GlassCircleButton(RobocoIcons.Xmark, "Close", {}, interactionSource = press)
+            GlassCircleButton(ZeronIcons.Ellipsis, "More", {}, interactionSource = press)
+            GlassCircleButton(ZeronIcons.Xmark, "Close", {}, interactionSource = press)
             GlassCircleButton(
-                RobocoIcons.ChevronBackward, "Back", {},
+                ZeronIcons.ChevronBackward, "Back", {},
                 weight = SymbolWeight.Semibold,
                 interactionSource = press,
             )
             GlassCircleButton(
-                RobocoIcons.ArrowDown, "Jump to latest", {},
+                ZeronIcons.ArrowDown, "Jump to latest", {},
                 size = 40.dp, iconPt = 15f,
                 interactionSource = press,
             )
         }
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             GlassCircleButton(
-                RobocoIcons.SquareAndArrowUp, "Share image", {},
+                ZeronIcons.SquareAndArrowUp, "Share image", {},
                 iconPt = 15f,
                 interactionSource = press,
             )
             GlassCircleButton(
-                RobocoIcons.Plus, "New session", {},
+                ZeronIcons.Plus, "New session", {},
                 filled = palette.accent,
                 interactionSource = press,
             )
             GlassCircleButton(
-                RobocoIcons.Checkmark, "Done", {},
+                ZeronIcons.Checkmark, "Done", {},
                 filled = palette.accent,
                 interactionSource = press,
             )
-            GlassCircleButton(RobocoIcons.Ellipsis, "More", {}, enabled = false, interactionSource = press)
+            GlassCircleButton(ZeronIcons.Ellipsis, "More", {}, enabled = false, interactionSource = press)
         }
     }
 }
@@ -457,8 +457,8 @@ internal fun GlassTextCapsuleVariants(press: MutableInteractionSource? = null) {
 
 /**
  * Every prominent variant (ticket 08 step 7): the compact "Next", the
- * disabled "Submit", the full-width `Use “roboco”` (default padding), the
- * busy `Use “roboco”` at intrinsic width (the spinner grows it by 28 dp,
+ * disabled "Submit", the full-width `Use “zeron”` (default padding), the
+ * busy `Use “zeron”` at intrinsic width (the spinner grows it by 28 dp,
  * like UIKit's image slot), and the full-width pairing "Pair an engine"
  * (pairing padding).
  */
@@ -471,8 +471,8 @@ internal fun GlassProminentVariants(press: MutableInteractionSource? = null) {
             interactionSource = press,
         )
         ProminentGlassButton("Submit", {}, enabled = false, interactionSource = press)
-        ProminentGlassButton("Use “roboco”", {}, modifier = Modifier.fillMaxWidth(), interactionSource = press)
-        ProminentGlassButton("Use “roboco”", {}, busy = true, interactionSource = press)
+        ProminentGlassButton("Use “zeron”", {}, modifier = Modifier.fillMaxWidth(), interactionSource = press)
+        ProminentGlassButton("Use “zeron”", {}, busy = true, interactionSource = press)
         ProminentGlassButton(
             "Pair an engine", {},
             contentPadding = ProminentGlassButtonDefaults.PairingPadding,
@@ -511,11 +511,11 @@ private fun GlassButtonsStage() {
 @Preview(name = "Glass buttons light")
 @Composable
 private fun GlassButtonsLightPreview() {
-    RobocoTheme(Appearance.Light) { GlassButtonsStage() }
+    ZeronTheme(Appearance.Light) { GlassButtonsStage() }
 }
 
 @Preview(name = "Glass buttons dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun GlassButtonsDarkPreview() {
-    RobocoTheme(Appearance.Dark) { GlassButtonsStage() }
+    ZeronTheme(Appearance.Dark) { GlassButtonsStage() }
 }

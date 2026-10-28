@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.content.Context
 import android.os.Looper
@@ -27,12 +27,12 @@ import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import org.robolectric.shadows.ShadowChoreographer
-import sh.roboco.android.core.TextEngine
-import sh.roboco.android.core.UniffiSandbox
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
-import uniffi.roboco_core.RowKind
+import sh.zeron.android.core.TextEngine
+import sh.zeron.android.core.UniffiSandbox
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
+import uniffi.zeron_core.RowKind
 
 /**
  * The row motion against the real core (ticket 132; the same JNA setup as
@@ -101,8 +101,8 @@ class RowMotionHostTest {
 
     private fun host(state: TranscriptState) {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
-                Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+            ZeronTheme(Appearance.Light) {
+                Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                     TranscriptHost(state, TranscriptActions(), Modifier.fillMaxSize())
                 }
             }

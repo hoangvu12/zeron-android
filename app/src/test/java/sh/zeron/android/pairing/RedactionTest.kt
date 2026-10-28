@@ -1,4 +1,4 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -10,7 +10,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 /**
- * The only debug-safe rendering of a [uniffi.roboco_core.PairedEngine]:
+ * The only debug-safe rendering of a [uniffi.zeron_core.PairedEngine]:
  * the generated `toString()` prints the credential, so every print must
  * go through [redacted] (ticket 71's redacted-logging rule).
  */

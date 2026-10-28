@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
@@ -15,8 +15,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * Ticket 24's goldens: the push at 0.5 (light, dark, RTL), the pop at 0.25
@@ -52,7 +52,7 @@ class NavStackScreenshotTest {
 
     private fun capture(stack: NavStack, fileName: String, rtl: Boolean = false) {
         compose.setContent {
-            RobocoTheme {
+            ZeronTheme {
                 // RTL is driven through LocalLayoutDirection (the geometry
                 // reads it), deterministic regardless of Robolectric's
                 // qualifier parsing.

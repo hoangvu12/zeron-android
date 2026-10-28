@@ -1,4 +1,4 @@
-package sh.roboco.android.core
+package sh.zeron.android.core
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -32,8 +32,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import sh.roboco.android.design.Palette
-import uniffi.roboco_core.WallpaperEffect
+import sh.zeron.android.design.Palette
+import uniffi.zeron_core.WallpaperEffect
 
 /**
  * Seam over the two mobile-core wallpaper calls so tests can count and
@@ -71,7 +71,7 @@ interface WallpaperCore {
             height: Int,
             effect: WallpaperEffect,
             light: Boolean,
-        ): ByteArray = uniffi.roboco_core.wallpaperRender(
+        ): ByteArray = uniffi.zeron_core.wallpaperRender(
             rgba, width.toUInt(), height.toUInt(), effect, light,
         )
 
@@ -84,7 +84,7 @@ interface WallpaperCore {
             region: Float,
             minContrast: Float,
             maxOpacity: Float,
-        ): Float = uniffi.roboco_core.wallpaperSafeOpacity(
+        ): Float = uniffi.zeron_core.wallpaperSafeOpacity(
             rgba, width.toUInt(), height.toUInt(),
             textRgb.toUInt(), backgroundRgb.toUInt(),
             region, minContrast, maxOpacity,

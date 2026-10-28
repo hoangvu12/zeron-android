@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -20,10 +20,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
 
 /**
  * The "Transcript disclosure" section of the debug design gallery (ticket
@@ -104,7 +104,7 @@ private fun StandInText(text: String, x: Dp) {
         BasicText(
             text,
             Modifier.align(Alignment.CenterStart),
-            style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(13.5f), RobocoTheme.palette.secondary),
+            style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(13.5f), ZeronTheme.palette.secondary),
         )
     }
 }
@@ -150,7 +150,7 @@ private fun LiveToolRow(label: String) {
         }
         if (open) {
             // The detail body's stand-in (Rust paints it in the app).
-            Box(Modifier.width(357.dp).height(40.dp).background(RobocoTheme.palette.controlFill))
+            Box(Modifier.width(357.dp).height(40.dp).background(ZeronTheme.palette.controlFill))
         }
     }
 }

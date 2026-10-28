@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
@@ -13,11 +13,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import uniffi.roboco_core.ChatConfig
-import uniffi.roboco_core.ComposerState
-import uniffi.roboco_core.EngineView
-import uniffi.roboco_core.SessionRow
-import uniffi.roboco_core.TranscriptView
+import uniffi.zeron_core.ChatConfig
+import uniffi.zeron_core.ComposerState
+import uniffi.zeron_core.EngineView
+import uniffi.zeron_core.SessionRow
+import uniffi.zeron_core.TranscriptView
 
 /**
  * What fillers read (android-ui-parity #51): fetched once per refresh
@@ -63,14 +63,14 @@ interface ChromeFiller {
 
 /**
  * The failure sink for refresh and lifecycle FFI errors: production
- * logs `Log.w("RobocoSession", …)`. Plain-JVM tests swap this — the
+ * logs `Log.w("ZeronSession", …)`. Plain-JVM tests swap this — the
  * stub `android.util.Log` throws "not mocked" outside Robolectric.
  */
 internal var sessionLogW: (String, Throwable?) -> Unit = { message, error ->
     if (error == null) {
-        android.util.Log.w("RobocoSession", message)
+        android.util.Log.w("ZeronSession", message)
     } else {
-        android.util.Log.w("RobocoSession", message, error)
+        android.util.Log.w("ZeronSession", message, error)
     }
 }
 

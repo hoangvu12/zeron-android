@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import android.util.Log
 import androidx.activity.compose.PredictiveBackHandler
@@ -54,12 +54,12 @@ import kotlin.math.roundToInt
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.glass.ProvideHazeState
-import sh.roboco.android.design.sheet.GlassSheetDefaults
-import sh.roboco.android.design.sheet.SheetGrabber
-import sh.roboco.android.design.sheet.SmoothTopRoundedShape
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.glass.ProvideHazeState
+import sh.zeron.android.design.sheet.GlassSheetDefaults
+import sh.zeron.android.design.sheet.SheetGrabber
+import sh.zeron.android.design.sheet.SmoothTopRoundedShape
 
 /**
  * What the content of a [SheetHost] entry is composed in: its [key], the
@@ -227,7 +227,7 @@ internal fun PageSheet(
     modifier: Modifier = Modifier,
 ) {
     val density = LocalDensity.current
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val grabber = (entry.style as? SheetStyle.Page)?.grabber == true
     val topShape = remember { SmoothTopRoundedShape(PageSheetDefaults.CornerRadius) }
     val animScope = rememberCoroutineScope()

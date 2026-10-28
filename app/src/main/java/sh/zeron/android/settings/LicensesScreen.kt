@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import android.util.Log
 import androidx.compose.foundation.layout.Column
@@ -32,40 +32,40 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.GroupedAccessory
-import sh.roboco.android.design.GroupedRow
-import sh.roboco.android.design.LocalBottomChrome
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.groupedSection
-import sh.roboco.android.design.rgba
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.design.sheet.SheetHeaderRow
-import sh.roboco.android.design.sheet.SheetTrailing
-import sh.roboco.android.shell.LargeTitleScaffold
-import sh.roboco.android.shell.LocalNavEntry
-import sh.roboco.android.shell.LocalPageSheetScope
-import sh.roboco.android.shell.LocalSheetHost
-import sh.roboco.android.shell.NavRoute
-import sh.roboco.android.shell.PageSheetScope
-import sh.roboco.android.shell.SheetStyle
-import sh.roboco.android.shell.TitleMode
-import sh.roboco.android.shell.largeTitleDefaultTopInset
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.GroupedAccessory
+import sh.zeron.android.design.GroupedRow
+import sh.zeron.android.design.LocalBottomChrome
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.groupedSection
+import sh.zeron.android.design.rgba
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.design.sheet.SheetHeaderRow
+import sh.zeron.android.design.sheet.SheetTrailing
+import sh.zeron.android.shell.LargeTitleScaffold
+import sh.zeron.android.shell.LocalNavEntry
+import sh.zeron.android.shell.LocalPageSheetScope
+import sh.zeron.android.shell.LocalSheetHost
+import sh.zeron.android.shell.NavRoute
+import sh.zeron.android.shell.PageSheetScope
+import sh.zeron.android.shell.SheetStyle
+import sh.zeron.android.shell.TitleMode
+import sh.zeron.android.shell.largeTitleDefaultTopInset
 
 /**
  * The Licenses screen (android-ui-parity #101): a large-title,
- * inset-grouped list with four sections — "Roboco", "Fonts and assets",
+ * inset-grouped list with four sections — "Zeron", "Fonts and assets",
  * "Android libraries", "Rust core". Tapping an entry presents the
  * full-height licence-text page sheet (the look of iOS's
  * `SelectTextViewController`, `TranscriptListView.swift:641-691`: large
  * detent, no grabber, centred title, trailing Done).
  *
  * The data is parsed off the main thread and retained by the Licenses
- * [sh.roboco.android.shell.NavEntry] (`retain("licenses")`), so the ≈1–3 MB
+ * [sh.zeron.android.shell.NavEntry] (`retain("licenses")`), so the ≈1–3 MB
  * of strings are freed on pop — never a process-wide singleton. The route
  * is rendered by ticket 26's
- * [sh.roboco.android.shell.ShellRouteContent].
+ * [sh.zeron.android.shell.ShellRouteContent].
  */
 
 /** The route the Settings "Licenses" row pushes. */
@@ -94,7 +94,7 @@ class LicensesModel(repository: LicensesRepository, scope: CoroutineScope) {
 
 /**
  * The Licenses screen, as rendered inside a
- * [sh.roboco.android.shell.NavStackHost]: the model is retained by the
+ * [sh.zeron.android.shell.NavStackHost]: the model is retained by the
  * current entry and the licence sheet is presented through 31's host.
  */
 @Composable
@@ -182,7 +182,7 @@ fun rememberLicencePresenter(): (LicenceEntry) -> Unit {
             }
             val shown = parent?.present(key, SheetStyle.Page(grabber = false), null, content)
                 ?: host?.present(key, SheetStyle.Page(grabber = false), null, content)
-            if (shown != true) Log.w("Roboco", "licence sheet not presented: $key")
+            if (shown != true) Log.w("Zeron", "licence sheet not presented: $key")
         }
     }
 }
@@ -203,7 +203,7 @@ fun rememberLicencePresenter(): (LicenceEntry) -> Unit {
  */
 @Composable
 fun LicenceTextSheet(title: String, text: String, onDone: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val selectionColors = rememberLicenceSelectionColors()
     Column(Modifier.fillMaxSize().testTag("licence-sheet")) {
@@ -239,8 +239,8 @@ fun LicenceTextSheet(title: String, text: String, onDone: () -> Unit) {
  */
 @Composable
 private fun rememberLicenceSelectionColors(): TextSelectionColors {
-    val accent = RobocoTheme.palette.accent
-    val dark = RobocoTheme.isDark
+    val accent = ZeronTheme.palette.accent
+    val dark = ZeronTheme.isDark
     return remember(accent, dark) {
         TextSelectionColors(
             handleColor = accent,

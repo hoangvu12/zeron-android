@@ -1,11 +1,11 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import android.graphics.drawable.ColorDrawable
 import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.toArgb
-import sh.roboco.android.design.Palette
+import sh.zeron.android.design.Palette
 
 /**
  * The two launch-window backgrounds, one per effective appearance. Built
@@ -19,7 +19,7 @@ private val LaunchBackgroundDarkDrawable = ColorDrawable(Palette.LaunchBackgroun
 /**
  * Keeps the window (DecorView) background on the **launch** colour of the
  * effective appearance (ticket 96): light `#EDEDED`, dark `#000000` — the
- * same colours `Theme.Roboco`'s `windowBackground`/splash resolve per
+ * same colours `Theme.Zeron`'s `windowBackground`/splash resolve per
  * configuration, so what shows through during a whole-tree redraw equals
  * what a cold start in that mode would show.
  *

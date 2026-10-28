@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.layout.Box
@@ -29,7 +29,7 @@ import kotlin.math.abs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import sh.roboco.android.design.Motion
+import sh.zeron.android.design.Motion
 
 /**
  * The whole bottom chrome group's frame for one instant (android-ui-parity
@@ -178,7 +178,7 @@ class ChromeVisibilityController internal constructor(
         get() = tabs.stack(tabs.selected)
 
     /**
-     * The value for ticket 14's [sh.roboco.android.design.BottomChromeTopState.top],
+     * The value for ticket 14's [sh.zeron.android.design.BottomChromeTopState.top],
      * in dp; `NaN` = no chrome on screen ("[Dp.Unspecified]"). While Search
      * is selected with the IME up, 29's row rides the keyboard through
      * `Modifier.offset`, which 28's `onRects` cannot see — so the lift past

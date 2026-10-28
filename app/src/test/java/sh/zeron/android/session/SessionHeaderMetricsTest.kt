@@ -1,9 +1,9 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import androidx.compose.ui.unit.dp
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import sh.roboco.android.design.glass.ScrollEdgeEffectDefaults
+import sh.zeron.android.design.glass.ScrollEdgeEffectDefaults
 
 /**
  * [SessionHeaderMetrics]' pure math (android-ui-parity #52), as a **plain

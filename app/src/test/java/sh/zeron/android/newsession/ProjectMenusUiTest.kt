@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
@@ -46,20 +46,20 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.composer.ChipStrip
-import sh.roboco.android.composer.ComposerController
-import sh.roboco.android.composer.Drafts
-import sh.roboco.android.composer.FakePrefsStore
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.GalleryBackdrop
-import sh.roboco.android.design.NoFeedback
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.shell.SheetEntry
-import sh.roboco.android.shell.SheetHost
-import sh.roboco.android.shell.SheetHostState
-import sh.roboco.android.shell.SheetStyle
+import sh.zeron.android.composer.ChipStrip
+import sh.zeron.android.composer.ComposerController
+import sh.zeron.android.composer.Drafts
+import sh.zeron.android.composer.FakePrefsStore
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.GalleryBackdrop
+import sh.zeron.android.design.NoFeedback
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.shell.SheetEntry
+import sh.zeron.android.shell.SheetHost
+import sh.zeron.android.shell.SheetHostState
+import sh.zeron.android.shell.SheetStyle
 
 /**
  * The Project / Run on menus' end-to-end behaviour (android-ui-parity
@@ -112,7 +112,7 @@ class ProjectMenusUiTest {
         val model = newFixturePage()
         val composer = ComposerController(CoroutineScope(Dispatchers.Unconfined), NoFeedback)
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 GlassMenuHost(hazeState = rememberHazeState()) {
                     ProjectMenusHarness(model, composer, NewProjectPresenter { })
                 }
@@ -124,14 +124,14 @@ class ProjectMenusUiTest {
         compose.onNodeWithTag("composer-chip-project").performClick()
         compose.waitUntil(5_000) { nodesOf("project-menu-group").isNotEmpty() }
         // One entry for both clones (iOS: `label BEGINSWITH 'zeron'`,
-        // case-sensitive — "Roboco Mobile" is a different group).
-        val roboco = compose.onAllNodes(hasTestTag("project-menu-group") and hasText("roboco", substring = false))
-        assertEquals("one entry for both clones", 1, roboco.fetchSemanticsNodes().size)
-        roboco[0].performClick()
+        // case-sensitive — "Zeron Mobile" is a different group).
+        val zeron = compose.onAllNodes(hasTestTag("project-menu-group") and hasText("zeron", substring = false))
+        assertEquals("one entry for both clones", 1, zeron.fetchSemanticsNodes().size)
+        zeron[0].performClick()
         compose.waitUntil(5_000) { nodesOf("glass-menu").isEmpty() }
-        waitChipContains("composer-chip-project", "roboco")
+        waitChipContains("composer-chip-project", "zeron")
 
-        // The host chip: exactly the engines holding a roboco checkout.
+        // The host chip: exactly the engines holding a zeron checkout.
         compose.onNodeWithTag("composer-chip-host").performClick()
         compose.waitUntil(5_000) { nodesOf("run-on-row").size == 2 }
         assertEquals(
@@ -155,8 +155,8 @@ class ProjectMenusUiTest {
         compose.onAllNodes(hasTestTag("run-on-row") and hasText("hetzner-01", substring = false))[0].performClick()
         compose.waitUntil(5_000) { nodesOf("glass-menu").isEmpty() }
         waitChipContains("composer-chip-host", "hetzner-01")
-        compose.onNodeWithTag("composer-chip-project").assertTextContains("roboco")
-        assertEquals("e2:space-roboco-vps", model.draft.projectId)
+        compose.onNodeWithTag("composer-chip-project").assertTextContains("zeron")
+        assertEquals("e2:space-zeron-vps", model.draft.projectId)
         assertNull(model.draft.hostId)
     }
 
@@ -165,7 +165,7 @@ class ProjectMenusUiTest {
         val model = newFixturePage(MutableStateFlow(NewSessionOptions(emptyList(), emptyList())))
         val composer = ComposerController(CoroutineScope(Dispatchers.Unconfined), NoFeedback)
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 GlassMenuHost(hazeState = rememberHazeState()) {
                     ProjectMenusHarness(model, composer, NewProjectPresenter { })
                 }
@@ -195,7 +195,7 @@ class ProjectMenusUiTest {
             }
         }
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 GlassMenuHost(hazeState = rememberHazeState()) {
                     SheetHost(state) { GalleryBackdrop(Modifier.fillMaxSize()) }
                 }
@@ -228,7 +228,7 @@ class ProjectMenusUiTest {
         // Inside SheetHost's root content there is no sheet scope (106's
         // embedded column): the presenter must go through LocalSheetHost.
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 GlassMenuHost(hazeState = rememberHazeState()) {
                     SheetHost(state) {
                         ProjectMenusHarness(model, composer, rememberNewProjectPresenter(), focusProbe = true)
@@ -261,7 +261,7 @@ class ProjectMenusUiTest {
         var showPage by mutableStateOf(true)
 
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 GlassMenuHost(hazeState = rememberHazeState()) {
                     if (showPage) ProjectMenusHarness(model, composer, presenter)
                 }

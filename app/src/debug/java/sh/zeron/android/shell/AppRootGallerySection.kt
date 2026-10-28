@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,10 +25,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
 
 /**
  * The "App root" page of the debug design gallery (android-ui-parity
@@ -71,7 +71,7 @@ fun AppRootGallerySection() {
         }
         BasicText(
             "Toggling Paired with the sheet up removes it instantly, then cross-fades.",
-            style = uiStyle(Face.Mono, typeScale.fixed(11f), RobocoTheme.palette.secondary),
+            style = uiStyle(Face.Mono, typeScale.fixed(11f), ZeronTheme.palette.secondary),
             modifier = Modifier.padding(vertical = 8.dp),
         )
         BoxWithConstraints(Modifier.fillMaxSize()) {
@@ -105,7 +105,7 @@ private fun FramedAppRoot(
     presentations: RootPresentations,
     onSheetDismiss: () -> Unit,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     Box(
         Modifier
             .requiredWidth(frameWidth)
@@ -141,7 +141,7 @@ private fun FramedAppRoot(
 /** One toggle: SemiBold `text` when selected, Regular `secondary` when not. */
 @Composable
 private fun Toggle(label: String, selected: Boolean, onSelect: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     BasicText(
         label,

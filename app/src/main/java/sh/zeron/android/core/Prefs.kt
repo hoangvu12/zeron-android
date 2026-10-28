@@ -1,4 +1,4 @@
-package sh.roboco.android.core
+package sh.zeron.android.core
 
 import android.content.Context
 import androidx.datastore.core.DataStore
@@ -21,16 +21,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import sh.roboco.android.design.Appearance
+import sh.zeron.android.design.Appearance
 
 /**
- * The keys of the phone-local `roboco_prefs` store (ticket 40). The names
+ * The keys of the phone-local `zeron_prefs` store (ticket 40). The names
  * are the iOS `UserDefaults` keys, so a user switching platforms finds the
  * same semantics: `"groupByProject"` is the Sessions-tab grouping flag
  * (`ios:App/AppModel.swift:18-31`), `"collapsedSections"` the phone-local
  * folds of Pinned/Recent/groups (`ios:Threads/SessionListController.swift:34-37`),
  * and `"sectionFoldOverrides"` the offline overrides of engine-synced user
- * sections (Roboco's addition). Tickets 96 and 100 extend this object
+ * sections (Zeron's addition). Tickets 96 and 100 extend this object
  * rather than adding a second file.
  */
 object PrefKeys {
@@ -46,7 +46,7 @@ object PrefKeys {
     /** Phone-local fold set: Pinned, Recent and `project:*`/`home:*` groups. */
     val COLLAPSED_SECTIONS = stringSetPreferencesKey("collapsedSections")
 
-    /** `"<1|0>|<engineId>|<sectionId>"` offline overrides (see [sh.roboco.android.sessions.FoldState]). */
+    /** `"<1|0>|<engineId>|<sectionId>"` offline overrides (see [sh.zeron.android.sessions.FoldState]). */
     val SECTION_FOLD_OVERRIDES = stringSetPreferencesKey("sectionFoldOverrides")
 
     /**
@@ -59,12 +59,12 @@ object PrefKeys {
 }
 
 /**
- * The one `roboco_prefs` [DataStore] per process (a second instance on the
+ * The one `zeron_prefs` [DataStore] per process (a second instance on the
  * same file throws). Every phone-local preference of the parity set reads
  * and writes through this single delegate.
  */
-val Context.robocoPrefsStore: DataStore<Preferences> by preferencesDataStore(
-    name = "roboco_prefs",
+val Context.zeronPrefsStore: DataStore<Preferences> by preferencesDataStore(
+    name = "zeron_prefs",
     corruptionHandler = ReplaceFileCorruptionHandler { emptyPreferences() },
 )
 

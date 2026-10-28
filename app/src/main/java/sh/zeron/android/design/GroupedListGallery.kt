@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -19,14 +19,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
+import sh.zeron.android.core.Face
 
 /**
  * The "Grouped list" page of the debug design gallery (ticket 70): the
  * inset-grouped list fixture, `2-settings.png` sections 1–6 plus the
  * pressed-highlight demo. Sections 1–4 and "Remove Wallpaper" are iOS copy
  * verbatim (`MoreViewController.swift:132,200-202,205,209,214-215`); the
- * Devices rows and "Version" are Roboco fixture copy (tickets 102 / 101),
+ * Devices rows and "Version" are Zeron fixture copy (tickets 102 / 101),
  * not iOS strings.
  *
  * Registered by ticket 22's registry as
@@ -38,7 +38,7 @@ import sh.roboco.android.core.Face
  */
 @Composable
 fun GroupedListGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Column(
         Modifier
@@ -49,18 +49,18 @@ fun GroupedListGallerySection() {
             .background(palette.background)
             .verticalScroll(rememberScrollState()),
     ) {
-        // 1. "Notifications" — iOS copy verbatim; ticket 98's RobocoSwitch,
+        // 1. "Notifications" — iOS copy verbatim; ticket 98's ZeronSwitch,
         // off by default.
         var notificationsOn by remember { mutableStateOf(false) }
         GroupedHeader("Notifications")
         GroupedRow(
             title = "Notifications",
             subtitle = "When a session finishes, needs you or fails",
-            icon = RobocoIcons.Bell,
+            icon = ZeronIcons.Bell,
             position = GroupedPosition.Single,
             accessories = listOf(
                 GroupedAccessory.Custom {
-                    RobocoSwitch(notificationsOn, { notificationsOn = it }, testTag = toggleTag("notify:enabled"))
+                    ZeronSwitch(notificationsOn, { notificationsOn = it }, testTag = toggleTag("notify:enabled"))
                 },
             ),
             onClick = null,
@@ -71,21 +71,21 @@ fun GroupedListGallerySection() {
         GroupedHeader("Appearance")
         GroupedRow(
             title = "System",
-            icon = RobocoIcons.CircleLeftHalfFilled,
+            icon = ZeronIcons.CircleLeftHalfFilled,
             position = GroupedPosition.First,
             accessories = listOf(GroupedAccessory.Check(on = true)),
             onClick = null,
         )
         GroupedRow(
             title = "Light",
-            icon = RobocoIcons.SunMax,
+            icon = ZeronIcons.SunMax,
             position = GroupedPosition.Middle,
             accessories = listOf(GroupedAccessory.Check(on = false)),
             onClick = null,
         )
         GroupedRow(
             title = "Dark",
-            icon = RobocoIcons.Moon,
+            icon = ZeronIcons.Moon,
             position = GroupedPosition.Last,
             accessories = listOf(GroupedAccessory.Check(on = false)),
             onClick = null,
@@ -96,7 +96,7 @@ fun GroupedListGallerySection() {
         GroupedRow(
             title = "Choose Wallpaper…",
             subtitle = "Shown behind new chats and the sessions list",
-            icon = RobocoIcons.Photo,
+            icon = ZeronIcons.Photo,
             position = GroupedPosition.Single,
         )
 
@@ -107,28 +107,28 @@ fun GroupedListGallerySection() {
         GroupedRow(
             title = "Group by Project",
             subtitle = "Sessions outside your sections, under their project",
-            icon = RobocoIcons.SquareStack3dUp,
+            icon = ZeronIcons.SquareStack3dUp,
             position = GroupedPosition.First,
             accessories = listOf(
                 GroupedAccessory.Custom {
-                    RobocoSwitch(groupByProject, { groupByProject = it }, testTag = toggleTag("groupByProject"))
+                    ZeronSwitch(groupByProject, { groupByProject = it }, testTag = toggleTag("groupByProject"))
                 },
             ),
             onClick = null,
         )
         GroupedRow(
             title = "Archived Sessions",
-            icon = RobocoIcons.Archivebox,
+            icon = ZeronIcons.Archivebox,
             position = GroupedPosition.Last,
         )
 
-        // 5. "Devices" — Roboco fixture copy (ticket 102): a dot +
+        // 5. "Devices" — Zeron fixture copy (ticket 102): a dot +
         // disclosure pair and a plain disclosure row.
         GroupedHeader("Devices")
         GroupedRow(
             title = "MacBook Pro",
             subtitle = "Connected",
-            icon = RobocoIcons.Desktopcomputer,
+            icon = ZeronIcons.Desktopcomputer,
             position = GroupedPosition.First,
             accessories = listOf(
                 GroupedAccessory.Dot(online = true),
@@ -137,12 +137,12 @@ fun GroupedListGallerySection() {
         )
         GroupedRow(
             title = "Pair an engine",
-            icon = RobocoIcons.Plus,
+            icon = ZeronIcons.Plus,
             position = GroupedPosition.Last,
         )
 
         // 6. The blank-title section (" "): header height, no text. The
-        // Version row is the value cell (Roboco copy, ticket 101), not
+        // Version row is the value cell (Zeron copy, ticket 101), not
         // clickable; "Remove Wallpaper" is the destructive row with no
         // accessories at all.
         GroupedHeader(" ")
@@ -154,7 +154,7 @@ fun GroupedListGallerySection() {
         )
         GroupedRow(
             title = "Remove Wallpaper",
-            icon = RobocoIcons.Trash,
+            icon = ZeronIcons.Trash,
             destructive = true,
             accessories = emptyList(),
             position = GroupedPosition.Last,
@@ -172,7 +172,7 @@ fun GroupedListGallerySection() {
         )
         GroupedRow(
             title = "Archived Sessions",
-            icon = RobocoIcons.Archivebox,
+            icon = ZeronIcons.Archivebox,
             position = GroupedPosition.Single,
             previewPressed = true,
         )
@@ -182,11 +182,11 @@ fun GroupedListGallerySection() {
 @Preview(name = "light")
 @Composable
 private fun GroupedListGalleryLightPreview() {
-    RobocoTheme(Appearance.Light) { GroupedListGallerySection() }
+    ZeronTheme(Appearance.Light) { GroupedListGallerySection() }
 }
 
 @Preview(name = "dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun GroupedListGalleryDarkPreview() {
-    RobocoTheme(Appearance.Dark) { GroupedListGallerySection() }
+    ZeronTheme(Appearance.Dark) { GroupedListGallerySection() }
 }

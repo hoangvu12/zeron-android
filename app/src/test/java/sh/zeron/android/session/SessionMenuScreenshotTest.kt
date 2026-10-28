@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,18 +20,18 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.GalleryBackdrop
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.ToastHost
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.glass.rememberGlassMenuState
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.GalleryBackdrop
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.ToastHost
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.glass.rememberGlassMenuState
 
 /**
  * The ⋯ menu's goldens (android-ui-parity #80), recorded by
  * `recordRoborazziDebug` and verified by `verifyRoborazziDebug`: the real
- * [SessionHeader] (52) — "Fix the deploy script" / "roboco @ studio",
+ * [SessionHeader] (52) — "Fix the deploy script" / "zeron @ studio",
  * a fixed 24 dp status bar — over ticket 22's striped [GalleryBackdrop],
  * inside a real [GlassMenuHost] (15) and [ToastHost] (14), on the
  * `w412dp-h900dp-xxhdpi` device with no system insets. Tapping
@@ -95,7 +95,7 @@ class SessionMenuScreenshotTest {
      */
     private fun shot(appearance: Appearance, pinned: Boolean, canWrite: Boolean, file: String, headed: Boolean = false) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 ToastHost {
                     GlassMenuHost {
                         shotDensity = LocalDensity.current
@@ -104,7 +104,7 @@ class SessionMenuScreenshotTest {
                             val menuState = rememberGlassMenuState()
                             SessionHeader(
                                 title = "Fix the deploy script",
-                                subtitle = "roboco @ studio",
+                                subtitle = "zeron @ studio",
                                 edgeEngaged = true,
                                 onMore = { anchor ->
                                     menuState.open(
@@ -119,7 +119,7 @@ class SessionMenuScreenshotTest {
                                             onArchive = {},
                                             onDelete = if (headed) ({}) else null,
                                             title = if (headed) "Fix the deploy script" else "",
-                                            subtitle = if (headed) "roboco @ studio" else "",
+                                            subtitle = if (headed) "zeron @ studio" else "",
                                         ),
                                     )
                                 },

@@ -1,4 +1,4 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -22,10 +22,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
 
 /**
  * The "Pairing root" page of the debug design gallery (android-ui-parity
@@ -47,7 +47,7 @@ import sh.roboco.android.design.uiStyle
  */
 @Composable
 fun PairingRootGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     var status by remember { mutableStateOf<PairingRootStatus>(PairingRootStatus.None) }
     var pairs by remember { mutableIntStateOf(0) }
@@ -94,7 +94,7 @@ fun PairingRootGallerySection() {
 /** One status toggle: SemiBold `text` when selected, Regular `secondary` when not. */
 @Composable
 private fun StatusToggle(label: String, selected: Boolean, onSelect: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     BasicText(
         label,

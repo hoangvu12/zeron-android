@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -13,14 +13,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.rememberHazeState
-import sh.roboco.android.composer.ChipStrip
-import sh.roboco.android.composer.ComposerChip
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.composer.ChipStrip
+import sh.zeron.android.composer.ComposerChip
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.uiStyle
 
 /**
  * The "New-session chips" page of the debug design gallery
@@ -54,14 +54,14 @@ private val CodexXHigh = listOf("low", "medium", "high", "xhigh")
 /** Fixture A's project (the ticket's row 1 fixture; B–C derive from it). */
 private val GalleryProject = ProjectOption(
     id = "p1",
-    name = "roboco",
-    path = "/srv/roboco",
+    name = "zeron",
+    path = "/srv/zeron",
     device = "d1",
     deviceName = "Workstation",
     online = true,
     git = true,
     groupKey = "repo:r",
-    groupName = "roboco",
+    groupName = "zeron",
     colorIndex = 2,
 )
 
@@ -156,7 +156,7 @@ fun NewSessionChipsGallerySection() {
 /** One fixture: a caption above the 400 dp strip on the elevated card. */
 @Composable
 private fun NewSessionChipsGalleryFixture(caption: String, chips: List<ComposerChip>) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         BasicText(caption, style = uiStyle(Face.SansMedium, typeScale.fixed(12f), palette.secondary))
@@ -180,13 +180,13 @@ private fun NewSessionChipsGalleryFixture(caption: String, chips: List<ComposerC
 @Preview(name = "New-session chips light")
 @Composable
 private fun NewSessionChipsLightPreview() {
-    RobocoTheme(Appearance.Light) { NewSessionChipsPreviewBody() }
+    ZeronTheme(Appearance.Light) { NewSessionChipsPreviewBody() }
 }
 
 @Preview(name = "New-session chips dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun NewSessionChipsDarkPreview() {
-    RobocoTheme(Appearance.Dark) { NewSessionChipsPreviewBody() }
+    ZeronTheme(Appearance.Dark) { NewSessionChipsPreviewBody() }
 }
 
 @Composable

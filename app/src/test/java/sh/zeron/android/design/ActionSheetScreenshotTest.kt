@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -47,7 +47,7 @@ class ActionSheetScreenshotTest {
 
     private fun shot(appearance: Appearance, file: String, model: ActionSheetModel) {
         compose.setContent {
-            RobocoTheme(appearance) { ActionSheetGoldenFixture(model) }
+            ZeronTheme(appearance) { ActionSheetGoldenFixture(model) }
         }
         compose.waitForIdle()
         compose.onRoot().captureRoboImage("design/$file")
@@ -56,7 +56,7 @@ class ActionSheetScreenshotTest {
     /** The panel as the overlay places it at rest: backdrop + scrim + bottom stack. */
     @Composable
     private fun ActionSheetGoldenFixture(model: ActionSheetModel) {
-        Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+        Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
             GalleryBackdrop(Modifier.matchParentSize())
             Box(Modifier.fillMaxSize().background(rgba(0x000000, 0.2)))
             BoxWithConstraints(Modifier.fillMaxSize()) {

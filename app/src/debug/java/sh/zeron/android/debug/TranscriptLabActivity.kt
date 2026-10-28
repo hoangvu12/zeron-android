@@ -1,4 +1,4 @@
-package sh.roboco.android.debug
+package sh.zeron.android.debug
 
 import android.app.Activity
 import android.os.Bundle
@@ -17,12 +17,12 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
-import sh.roboco.android.RobocoApplication
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.shell.toExtrasMap
-import sh.roboco.android.transcript.TranscriptState
-import uniffi.roboco_core.DebugEntry
+import sh.zeron.android.ZeronApplication
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.shell.toExtrasMap
+import sh.zeron.android.transcript.TranscriptState
+import uniffi.zeron_core.DebugEntry
 
 /**
  * The debug-only Transcript Lab activity (android-ui-parity #135) — the
@@ -34,7 +34,7 @@ import uniffi.roboco_core.DebugEntry
  * class lives in `src/debug`, so release builds never contain it.
  *
  * Reached by
- * `adb shell am start -n sh.roboco.android/.debug.TranscriptLabActivity`
+ * `adb shell am start -n sh.zeron.android/.debug.TranscriptLabActivity`
  * (or the gallery's "Transcript Lab" section). The persisted appearance
  * (ticket 96) themes it, `--es appearance dark` overrides it, and the
  * preference is never written from here.
@@ -77,8 +77,8 @@ class TranscriptLabActivity : ComponentActivity() {
         // survive; the scripts only run on a fresh launch.
         val runScripts = savedInstanceState == null
         setContent {
-            RobocoTheme(options.appearance ?: appDefaultAppearance()) {
-                val dark = RobocoTheme.isDark
+            ZeronTheme(options.appearance ?: appDefaultAppearance()) {
+                val dark = ZeronTheme.isDark
                 val view = LocalView.current
                 SideEffect {
                     val window = (view.context as? Activity)?.window ?: return@SideEffect
@@ -114,11 +114,11 @@ class TranscriptLabActivity : ComponentActivity() {
  * `System` until the disk read lands) — the lab's theme when the
  * `appearance` extra is absent, exactly what iOS's window style override
  * does (`SceneDelegate.swift:14`). Never writes the preference; a
- * non-Roboco host (tests) reads `System`.
+ * non-Zeron host (tests) reads `System`.
  */
 @Composable
 private fun appDefaultAppearance(): Appearance {
-    val app = LocalContext.current.applicationContext as? RobocoApplication
+    val app = LocalContext.current.applicationContext as? ZeronApplication
         ?: return Appearance.System
     return app.prefs.appearance.collectAsState().value
 }

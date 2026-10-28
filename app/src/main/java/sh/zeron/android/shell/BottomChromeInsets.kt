@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.exclude
@@ -10,13 +10,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.design.BottomChromeInsets
+import sh.zeron.android.design.BottomChromeInsets
 
 /**
  * The list bottom padding under the whole chrome group
  * (android-ui-parity #30): `barBottom + 62 (pill) + 8 (gap) + 48
  * (accessory) + 8` — the constants are 28's [TabChromeMetrics], never
- * retyped. The trailing `+ 8` is the Roboco edge-to-edge choice
+ * retyped. The trailing `+ 8` is the Zeron edge-to-edge choice
  * (android-app#19): the last row clears the accessory by 8 dp, as the
  * iOS reference shows rows scrolling under the chrome (`3-on.png`).
  *

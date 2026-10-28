@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,11 +14,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.LocalGalleryCapture
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.LocalGalleryCapture
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
 
 /**
  * The "Status widgets" section of the debug design gallery (ticket 123,
@@ -57,7 +57,7 @@ fun StatusWidgetsGallerySection() {
         // Foundation `clickable` on a BasicText — no Material controls.
         BasicText(
             "Toggle streaming",
-            style = uiStyle(Face.SansMedium, LocalTypeScale.current.fixed(14f), RobocoTheme.palette.accent),
+            style = uiStyle(Face.SansMedium, LocalTypeScale.current.fixed(14f), ZeronTheme.palette.accent),
             modifier = Modifier
                 .clickable(interactionSource = null, indication = null) { streaming = !streaming }
                 .padding(horizontal = 12.dp, vertical = 6.dp),

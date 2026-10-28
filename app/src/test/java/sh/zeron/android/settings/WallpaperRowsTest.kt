@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -6,18 +6,18 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import sh.roboco.android.core.WallpaperEffects
-import sh.roboco.android.core.WallpaperStore
-import sh.roboco.android.design.ActionSheetStyle
-import sh.roboco.android.design.GroupedAccessory
-import sh.roboco.android.design.RobocoIcons
-import uniffi.roboco_core.WallpaperEffect
+import sh.zeron.android.core.WallpaperEffects
+import sh.zeron.android.core.WallpaperStore
+import sh.zeron.android.design.ActionSheetStyle
+import sh.zeron.android.design.GroupedAccessory
+import sh.zeron.android.design.ZeronIcons
+import uniffi.zeron_core.WallpaperEffect
 
 /**
  * The pure model of the Wallpaper section (android-ui-parity #97), plain
  * JVM — no Robolectric: [wallpaperRows] and [wallpaperEffectSheet] are pure
  * functions over [WallpaperStore.State] / [WallpaperEffect], and
- * `R.drawable` fields are compile-time ints (the `RobocoIconsTest` method).
+ * `R.drawable` fields are compile-time ints (the `ZeronIconsTest` method).
  *
  * The copy checks pin the ticket's table exactly: the U+2026 ellipsis in
  * the choose titles, the U+2014 em dash with single spaces in the effect
@@ -38,7 +38,7 @@ class WallpaperRowsTest {
         assertEquals(WallpaperRowIds.Choose, choose.id)
         assertEquals("Choose Wallpaper\u2026", choose.title)
         assertEquals("Shown behind new chats and the sessions list", choose.subtitle)
-        assertSame(RobocoIcons.Photo, choose.icon)
+        assertSame(ZeronIcons.Photo, choose.icon)
         assertEquals(listOf<GroupedAccessory>(GroupedAccessory.Disclosure), choose.accessories)
         assertFalse(choose.destructive)
     }
@@ -51,21 +51,21 @@ class WallpaperRowsTest {
         val choose = rows[0]
         assertEquals("Change Wallpaper\u2026", choose.title)
         assertEquals("IMG_0412", choose.subtitle)
-        assertSame(RobocoIcons.Photo, choose.icon)
+        assertSame(ZeronIcons.Photo, choose.icon)
         assertEquals(listOf<GroupedAccessory>(GroupedAccessory.Disclosure), choose.accessories)
         assertFalse(choose.destructive)
 
         val effect = rows[1]
         assertEquals("Effect", effect.title)
         assertEquals("Halftone \u2014 Recreates the artwork with colored print dots.", effect.subtitle)
-        assertSame(RobocoIcons.WandAndStars, effect.icon)
+        assertSame(ZeronIcons.WandAndStars, effect.icon)
         assertEquals(listOf<GroupedAccessory>(GroupedAccessory.Disclosure), effect.accessories)
         assertFalse(effect.destructive)
 
         val remove = rows[2]
         assertEquals("Remove Wallpaper", remove.title)
         assertNull(remove.subtitle)
-        assertSame(RobocoIcons.Trash, remove.icon)
+        assertSame(ZeronIcons.Trash, remove.icon)
         assertEquals(emptyList<GroupedAccessory>(), remove.accessories)
         assertTrue(remove.destructive)
     }

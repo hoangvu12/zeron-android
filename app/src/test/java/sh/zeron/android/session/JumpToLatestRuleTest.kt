@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import androidx.compose.animation.core.TargetBasedAnimation
 import androidx.compose.animation.core.VectorConverter
@@ -12,8 +12,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import sh.roboco.android.design.Motion
-import sh.roboco.android.transcript.TranscriptViewport
+import sh.zeron.android.design.Motion
+import sh.zeron.android.transcript.TranscriptViewport
 
 /**
  * The jump button's pure rules (android-ui-parity #131), plain JUnit — no

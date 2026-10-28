@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
@@ -38,13 +38,13 @@ import androidx.compose.ui.unit.dp
 import kotlin.math.max
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalAlerts
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.GlassTextCapsule
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalAlerts
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.GlassTextCapsule
+import sh.zeron.android.design.uiStyle
 
 /**
  * The "New session: handoff capture" page of the debug design gallery
@@ -75,7 +75,7 @@ import sh.roboco.android.design.uiStyle
  */
 @Composable
 fun HandoffCaptureGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
     val alerts = LocalAlerts.current
     val scope = rememberCoroutineScope()
@@ -159,7 +159,7 @@ private const val HandoffCaptureGalleryText = "Add a dark mode toggle to setting
  */
 @Composable
 private fun HandoffCaptureFakePage(capture: HandoffCaptureState) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
     Box(
         Modifier
@@ -196,7 +196,7 @@ private fun HandoffCaptureFakePage(capture: HandoffCaptureState) {
                     .background(palette.controlFill),
             ) {
                 BasicText(
-                    "roboco",
+                    "zeron",
                     Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
                     style = uiStyle(Face.Sans, ts.fixed(13f), palette.text),
                 )
@@ -212,7 +212,7 @@ private fun HandoffCaptureFakePage(capture: HandoffCaptureState) {
  */
 @Composable
 private fun CaptureGalleryTextSlot(capture: HandoffCaptureState) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
     val density = LocalDensity.current
     Box(
@@ -250,7 +250,7 @@ private fun CaptureGalleryTextSlot(capture: HandoffCaptureState) {
  */
 @Composable
 private fun CaptureGalleryTile(label: String, bitmap: ImageBitmap, outline: Rect?) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
     val density = LocalDensity.current
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -295,7 +295,7 @@ private fun CaptureGalleryTile(label: String, bitmap: ImageBitmap, outline: Rect
 /** The preview stage: the section exactly as the gallery shows it. */
 @Composable
 private fun HandoffCapturePreviewStage(appearance: Appearance) {
-    RobocoTheme(appearance) { HandoffCaptureGallerySection() }
+    ZeronTheme(appearance) { HandoffCaptureGallerySection() }
 }
 
 @Preview(name = "New session handoff capture light", widthDp = 411, heightDp = 891)

@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
@@ -50,8 +50,8 @@ class SessionChromeTest {
             return chrome.subtitle to chrome.placeholder
         }
 
-        assertEquals("roboco @ Vu-PC" to "Message Claude Code", row("roboco", "Claude Code", "Vu-PC"))
-        assertEquals("roboco" to "Message Codex", row("roboco", "Codex", null))
+        assertEquals("zeron @ Vu-PC" to "Message Claude Code", row("zeron", "Claude Code", "Vu-PC"))
+        assertEquals("zeron" to "Message Codex", row("zeron", "Codex", null))
         assertEquals("No project @ Vu-PC" to "Message Claude Code", row(null, "Claude Code", "Vu-PC"))
 
         // The fourth row: no row at all (dangling chat, iOS `app.row` miss).
@@ -66,16 +66,16 @@ class SessionChromeTest {
         // null-checked, never blank-checked.
         val chrome = baseChrome(
             composerState(hostName = ""),
-            sessionRow(projectName = "roboco", harnessLabel = "Claude Code"),
+            sessionRow(projectName = "zeron", harnessLabel = "Claude Code"),
         )
-        assertEquals("roboco @ ", chrome.subtitle)
+        assertEquals("zeron @ ", chrome.subtitle)
     }
 
     @Test
     fun baseChromeMapsTheComposerFields() {
         fun chrome(steering: Boolean?) = baseChrome(
             composerState(midTurnSteering = steering),
-            sessionRow(projectName = "roboco", harnessLabel = "Claude Code"),
+            sessionRow(projectName = "zeron", harnessLabel = "Claude Code"),
         )
 
         // midTurnSteering: null / false / true -> false / false / true.
@@ -152,7 +152,7 @@ class SessionChromeTest {
 
     @Test
     fun uploadProgressTakesPartInEquality() {
-        // Roboco ADAPT: iOS's hand-written `==` omits uploadProgress, so a
+        // Zeron ADAPT: iOS's hand-written `==` omits uploadProgress, so a
         // progress-only change never re-rendered and the ring (67) froze.
         assertNotEquals(SessionChrome(uploadProgress = 0.4), SessionChrome(uploadProgress = 0.5))
         assertNotEquals(SessionChrome(uploadProgress = 0.4), SessionChrome(uploadProgress = null))

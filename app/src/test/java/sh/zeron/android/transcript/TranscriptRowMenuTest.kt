@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.content.ClipboardManager
 import android.content.Context
@@ -26,26 +26,26 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.core.TextEngine
-import sh.roboco.android.core.UniffiSandbox
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.ContextMenuHost
-import sh.roboco.android.design.Cue
-import sh.roboco.android.design.Feedback
-import sh.roboco.android.design.Haptic
-import sh.roboco.android.design.LocalFeedback
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.ToasterState
-import sh.roboco.android.design.ToastHost
-import uniffi.roboco_core.RowKind
-import uniffi.roboco_core.WidgetKind
+import sh.zeron.android.core.TextEngine
+import sh.zeron.android.core.UniffiSandbox
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ContextMenuHost
+import sh.zeron.android.design.Cue
+import sh.zeron.android.design.Feedback
+import sh.zeron.android.design.Haptic
+import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.ToasterState
+import sh.zeron.android.design.ToastHost
+import uniffi.zeron_core.RowKind
+import uniffi.zeron_core.WidgetKind
 
 /**
  * The row long-press menu against the real core (android-ui-parity #128;
  * the same JNA setup as `TranscriptHostTest`, `w411dp-h891dp-xhdpi` so
  * d = 2): the item set per row kind, the order, the clipboard writes (the
- * `ClipData` label `Roboco`), the API 31–32 `Copied` toast against the
+ * `ClipData` label `Zeron`), the API 31–32 `Copied` toast against the
  * API 33+ silence, the Select Text hand-off, the "no menu for a Working
  * row or a control" rule, and that a lift's release never fires `onTap`.
  *
@@ -96,7 +96,7 @@ class TranscriptRowMenuTest {
     /** The ticket's host: `ToastHost { ContextMenuHost { TranscriptHost } }`. */
     private fun host(state: TranscriptState, actions: TranscriptActions) {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 // Frozen glyph clock: the fixture's Working row subscribes the
                 // trailer glyph to the theme's endless withFrameNanos loop, and
                 // an auto-advancing test clock never sees Compose idle.
@@ -183,7 +183,7 @@ class TranscriptRowMenuTest {
 
     @Test
     @Config(sdk = [36], qualifiers = "w411dp-h891dp-xhdpi")
-    fun copyPutsTheRowsOwnTextOnTheClipboardWithTheRobocoLabelAndNoToastOnApi33Plus() {
+    fun copyPutsTheRowsOwnTextOnTheClipboardWithTheZeronLabelAndNoToastOnApi33Plus() {
         val state = fedState()
         try {
             host(state, actions())
@@ -191,7 +191,7 @@ class TranscriptRowMenuTest {
             settle()
             pick("row-menu-copy")
             assertEquals("Ship it.", clipText())
-            assertEquals("Roboco", clipLabel())
+            assertEquals("Zeron", clipLabel())
             assertEquals("choosing an item added no haptic", listOf(Haptic.LongPress), feedback.haptics)
             assertNull("no app toast on API 33+ (the system's own overlay)", toaster.current)
             compose.onNodeWithTag("context-menu-overlay").assertDoesNotExist()
@@ -235,7 +235,7 @@ class TranscriptRowMenuTest {
 
             pick("row-menu-copy-message")
             assertEquals("First paragraph.\n\nSecond paragraph.", clipText())
-            assertEquals("Roboco", clipLabel())
+            assertEquals("Zeron", clipLabel())
         } finally {
             state.close()
         }

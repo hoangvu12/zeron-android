@@ -1,4 +1,4 @@
-package sh.roboco.android.core
+package sh.zeron.android.core
 
 import android.content.Context
 import androidx.test.core.app.ActivityScenario
@@ -15,10 +15,10 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.MainActivity
-import uniffi.roboco_core.FaceRole
-import uniffi.roboco_core.TextSystem
-import uniffi.roboco_core.debugLineStarts
+import sh.zeron.android.MainActivity
+import uniffi.zeron_core.FaceRole
+import uniffi.zeron_core.TextSystem
+import uniffi.zeron_core.debugLineStarts
 
 /**
  * The shared text engine (Robolectric + the real host core through JNA,
@@ -74,7 +74,7 @@ class TextEngineTest {
             FaceRole.SANS,
             16.5f,
             200f,
-            uniffi.roboco_core.layoutFixtureMarkdown(),
+            uniffi.zeron_core.layoutFixtureMarkdown(),
         )
         assertTrue("expected at least 2 line starts, got ${starts.size}", starts.size >= 2)
         assertEquals(0, starts.first().toInt())
@@ -98,7 +98,7 @@ class TextEngineTest {
 
     @Test
     fun builtOffTheMainThreadAfterANormalAppStart() {
-        // RobocoApplication.onCreate ran prewarm; await() runs on
+        // ZeronApplication.onCreate ran prewarm; await() runs on
         // Dispatchers.Default. Neither builds on the main looper.
         val scenario = ActivityScenario.launch(MainActivity::class.java)
         try {

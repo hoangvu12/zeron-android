@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Box
@@ -38,25 +38,25 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.map
-import sh.roboco.android.RobocoApplication
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.BottomChromeInsets
-import sh.roboco.android.design.IconInBox
-import sh.roboco.android.design.LocalBottomChrome
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.shell.LargeTitleDefaults
-import sh.roboco.android.shell.LargeTitleScaffold
-import sh.roboco.android.shell.LocalNavEntry
-import sh.roboco.android.shell.LocalSearchTabState
-import sh.roboco.android.shell.RegisterScrollToTop
-import sh.roboco.android.shell.SearchMorphGeometry
-import sh.roboco.android.shell.TabChromeMetrics
-import sh.roboco.android.shell.TitleMode
+import sh.zeron.android.ZeronApplication
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.BottomChromeInsets
+import sh.zeron.android.design.IconInBox
+import sh.zeron.android.design.LocalBottomChrome
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.shell.LargeTitleDefaults
+import sh.zeron.android.shell.LargeTitleScaffold
+import sh.zeron.android.shell.LocalNavEntry
+import sh.zeron.android.shell.LocalSearchTabState
+import sh.zeron.android.shell.RegisterScrollToTop
+import sh.zeron.android.shell.SearchMorphGeometry
+import sh.zeron.android.shell.TabChromeMetrics
+import sh.zeron.android.shell.TitleMode
 
 /**
  * The Search tab's root screen (android-ui-parity #49) — the port of
@@ -86,7 +86,7 @@ import sh.roboco.android.shell.TitleMode
  *
  * - the [SearchModel], retained under `"search-model"`, reading 29's raw
  *   field text through `queryFlow()` and the app's single workspace feed
- *   (`RobocoApplication.workspaceFeed` — the same source tickets 40/42
+ *   (`ZeronApplication.workspaceFeed` — the same source tickets 40/42
  *   read, never a second listener), with the search FFI on
  *   `Dispatchers.Default` through [coreSessionSearch];
  * - the [LazyListState], retained under `"search-list"`, so the scroll
@@ -104,7 +104,7 @@ import sh.roboco.android.shell.TitleMode
 fun SearchScreen(modifier: Modifier = Modifier) {
     val entry = LocalNavEntry.current
     val tabState = LocalSearchTabState.current
-    val app = LocalContext.current.applicationContext as RobocoApplication
+    val app = LocalContext.current.applicationContext as ZeronApplication
     val model = entry.retain("search-model") {
         SearchModel(
             query = tabState.queryFlow(),
@@ -333,7 +333,7 @@ private const val NoResultsTitlePt = 22f
 private const val NoResultsBodyPt = 15f
 
 /**
- * The no-results view (Roboco ADAPT of iOS's system
+ * The no-results view (Zeron ADAPT of iOS's system
  * `UIContentUnavailableConfiguration.search()` — the iOS app itself shows
  * a blank list): a magnifier glyph in `secondary` (48 dp box ★,
  * decorative), **"No Results"** (Geist SemiBold, scaled 22 ★, `text`, one
@@ -349,7 +349,7 @@ private const val NoResultsBodyPt = 15f
  */
 @Composable
 fun SearchNoResults(modifier: Modifier = Modifier) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
     Box(modifier, contentAlignment = Alignment.Center) {
         Column(
@@ -361,7 +361,7 @@ fun SearchNoResults(modifier: Modifier = Modifier) {
         ) {
             // Decorative: no content description, no semantics node.
             IconInBox(
-                icon = RobocoIcons.Magnifyingglass,
+                icon = ZeronIcons.Magnifyingglass,
                 tint = palette.secondary,
                 box = NoResultsGlyphBox,
             )
@@ -390,7 +390,7 @@ fun SearchNoResults(modifier: Modifier = Modifier) {
 
 @Composable
 private fun SearchPreviewBody(appearance: Appearance, results: SearchResults) {
-    RobocoTheme(appearance) {
+    ZeronTheme(appearance) {
         CompositionLocalProvider(LocalBottomChrome provides BottomChromeInsets(24.dp, 150.dp)) {
             // Frozen at 0 ns: the Loading fixture's spinner renders its
             // cycle-0 pattern and the preview never starts a frame loop.

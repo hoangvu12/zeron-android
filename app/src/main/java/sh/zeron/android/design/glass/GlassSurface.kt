@@ -1,4 +1,4 @@
-package sh.roboco.android.design.glass
+package sh.zeron.android.design.glass
 
 import android.content.res.Configuration
 import androidx.compose.animation.core.Animatable
@@ -63,13 +63,13 @@ import dev.chrisbanes.haze.hazeSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.CapsuleShape
-import sh.roboco.android.design.LocalIsDark
-import sh.roboco.android.design.LocalReduceMotion
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.rgba
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.CapsuleShape
+import sh.zeron.android.design.LocalIsDark
+import sh.zeron.android.design.LocalReduceMotion
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.rgba
 
 /**
  * The one Android glass material (ticket 07): the port of iOS
@@ -438,7 +438,7 @@ private fun GlassTestSemantics(progress: State<Float>, press: GlassPressState?) 
  */
 @Composable
 internal fun GlassSurfaceFixture(materializeVisible: Boolean = false) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     ProvideHazeState {
         Box(Modifier.size(400.dp, 300.dp).background(palette.background)) {
             Column(
@@ -494,11 +494,11 @@ private fun fixtureStripe(palette: Palette, i: Int): Color = when (i % 2) {
 @Preview(name = "Glass light")
 @Composable
 private fun GlassSurfaceLightPreview() {
-    RobocoTheme(Appearance.Light) { GlassSurfaceFixture() }
+    ZeronTheme(Appearance.Light) { GlassSurfaceFixture() }
 }
 
 @Preview(name = "Glass dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun GlassSurfaceDarkPreview() {
-    RobocoTheme(Appearance.Dark) { GlassSurfaceFixture() }
+    ZeronTheme(Appearance.Dark) { GlassSurfaceFixture() }
 }

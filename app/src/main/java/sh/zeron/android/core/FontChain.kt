@@ -1,4 +1,4 @@
-package sh.roboco.android.core
+package sh.zeron.android.core
 
 import android.graphics.Paint
 import android.graphics.Typeface
@@ -13,7 +13,7 @@ import java.nio.ByteBuffer
 import java.util.EnumMap
 import java.util.HashMap
 import java.util.Locale
-import uniffi.roboco_core.FaceRole
+import uniffi.zeron_core.FaceRole
 import androidx.compose.ui.text.font.FontStyle as ComposeFontStyle
 import android.graphics.fonts.FontStyle as PlatformFontStyle
 
@@ -26,12 +26,12 @@ val FaceRole.face: Face
     get() = Face.entries[ordinal]
 
 /**
- * One font fallback chain for everything Roboco draws: the bundled Geist
+ * One font fallback chain for everything Zeron draws: the bundled Geist
  * (or GeistMono) face first, then Noto Sans CJK at the role's weight (the
  * variant picked by device locale, [CjkFallback]), then the platform's own
  * `sans-serif` fallback. The transcript measurer ([AndroidMeasurer]), the
  * transcript painter (ticket 62) and the Compose UI (ticket 03's
- * `RobocoFonts`) all resolve through these same [Typeface]s, so wrapping,
+ * `ZeronFonts`) all resolve through these same [Typeface]s, so wrapping,
  * heights and drawing agree.
  *
  * [build] is the only writer of [typeface]'s backing state; [Fonts.load]
@@ -42,7 +42,7 @@ val FaceRole.face: Face
  */
 object FontChain {
 
-    private const val TAG = "Roboco"
+    private const val TAG = "Zeron"
 
     /**
      * The shared text-[Paint] recipe (measurer **and** ticket 62's

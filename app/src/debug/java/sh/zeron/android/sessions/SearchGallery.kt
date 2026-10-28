@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -25,13 +25,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.BottomChromeInsets
-import sh.roboco.android.design.LocalBottomChrome
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.BottomChromeInsets
+import sh.zeron.android.design.LocalBottomChrome
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
 
 /** The gallery's state picker: each value is one [SearchResults] fixture. */
 private enum class SearchDemo(val label: String) {
@@ -66,7 +66,7 @@ private enum class SearchDemo(val label: String) {
  */
 @Composable
 fun SearchGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
 
     var demo by remember { mutableStateOf(SearchDemo.Recent) }
     val results = when (demo) {
@@ -111,7 +111,7 @@ fun SearchGallerySection() {
 /** One segmented-control button: SemiBold `accent` when on, `secondary` when off. */
 @Composable
 private fun DemoToggle(label: String, selected: Boolean, onSelect: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     BasicText(
         label,
@@ -134,7 +134,7 @@ private fun DemoToggle(label: String, selected: Boolean, onSelect: () -> Unit) {
 @Preview(name = "search gallery light")
 @Composable
 private fun SearchGalleryLightPreview() {
-    RobocoTheme(Appearance.Light) {
+    ZeronTheme(Appearance.Light) {
         SearchGallerySection()
     }
 }
@@ -142,7 +142,7 @@ private fun SearchGalleryLightPreview() {
 @Preview(name = "search gallery dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun SearchGalleryDarkPreview() {
-    RobocoTheme(Appearance.Dark) {
+    ZeronTheme(Appearance.Dark) {
         SearchGallerySection()
     }
 }

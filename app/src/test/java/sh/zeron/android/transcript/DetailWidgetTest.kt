@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -49,13 +49,13 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
-import uniffi.roboco_core.Widget
-import uniffi.roboco_core.WidgetKind
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
+import uniffi.zeron_core.Widget
+import uniffi.zeron_core.WidgetKind
 
 /**
  * [DetailWidget]'s behaviour (ticket 127) — Robolectric + compose-ui-test
@@ -104,9 +104,9 @@ class DetailWidgetTest {
      */
     private fun mountWidget(payload: String?) {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 val typeScale = LocalTypeScale.current
-                val palette = RobocoTheme.palette
+                val palette = ZeronTheme.palette
                 val scroll = rememberScrollState()
                 scrollState = scroll
                 val w = remember { widget(payload) }
@@ -266,8 +266,8 @@ class DetailWidgetTest {
         stripeMounted = true
         stripeWidget = withWidget
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
-                val palette = RobocoTheme.palette
+            ZeronTheme(Appearance.Light) {
+                val palette = ZeronTheme.palette
                 Box(Modifier.fillMaxSize()) {
                     Box(
                         Modifier
@@ -303,6 +303,6 @@ class DetailWidgetTest {
     }
 
     private companion object {
-        const val Payload = "\$ roboco engine start\nlistening on ws://0.0.0.0:8675"
+        const val Payload = "\$ zeron engine start\nlistening on ws://0.0.0.0:8675"
     }
 }

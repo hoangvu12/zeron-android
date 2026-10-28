@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -32,12 +32,12 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalFeedback
-import sh.roboco.android.design.LocalReduceMotion
-import sh.roboco.android.design.NoFeedback
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.design.LocalReduceMotion
+import sh.zeron.android.design.NoFeedback
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The tool rail's composition behaviour (ticket 121; the Compose rule at
@@ -99,12 +99,12 @@ class ToolRailTest {
     private fun composeStage(stage: RailStage) {
         compose.mainClock.autoAdvance = false
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(
                     LocalFeedback provides NoFeedback,
                     LocalReduceMotion provides stage.reduce,
                 ) {
-                    Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+                    Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                         Box(Modifier.absoluteOffset(x = 18.dp, y = 0.dp).size(63.dp, 240.dp)) {
                             ToolRail(
                                 groupKey = stage.key,
@@ -215,8 +215,8 @@ class ToolRailTest {
     fun theCoversHideTheRowContentUntilItsBranchDraws() {
         compose.mainClock.autoAdvance = false
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
-                Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+            ZeronTheme(Appearance.Light) {
+                Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                     Box(Modifier.testTag("rail-host")) {
                         ToolRailFixture(railDemoSpec(2), live = true, key = 507uL, token = Any())
                     }
@@ -243,9 +243,9 @@ class ToolRailTest {
     fun aTapInsideTheRailReachesTheToolToggleUnderneath() {
         var toggles = 0
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(LocalFeedback provides NoFeedback) {
-                    Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+                    Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                         // 120's toggle over a 36 dp tool row, then the rail
                         // composed after it — painted on top of it. The
                         // toggle's centre sits inside the rail's 63 dp box.

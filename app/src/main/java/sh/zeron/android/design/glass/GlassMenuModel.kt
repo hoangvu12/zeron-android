@@ -1,19 +1,19 @@
-package sh.roboco.android.design.glass
+package sh.zeron.android.design.glass
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
-import sh.roboco.android.design.RobocoIcon
+import sh.zeron.android.design.ZeronIcon
 
 /**
  * The pull-down / context menu **model** (android-ui-parity #15): the
  * Android port of what upstream's Swift *builds* — `UIMenu`, `UIAction`,
  * `UIDeferredMenuElement` — never what it *draws* (UIKit draws `UIMenu`
- * itself; the Roboco panel is [GlassMenuPanel] in `GlassMenu.kt`).
+ * itself; the Zeron panel is [GlassMenuPanel] in `GlassMenu.kt`).
  *
  * Consumers (44, 45, 46, 58, 80, 82, 87, 89, 110, 113, 114) build their
  * menu content with this model and hand it to [GlassMenuHost] /
- * [sh.roboco.android.design.glass.GlassMenuHost]-presented surfaces
+ * [sh.zeron.android.design.glass.GlassMenuHost]-presented surfaces
  * (`Modifier.glassMenu`, `rememberGlassMenuState`).
  */
 @Immutable
@@ -90,7 +90,7 @@ data class MenuItem(
  *   neighbours by a hairline.
  * - `inline = false`: a **drill-in row** with a trailing chevron; tapping it
  *   replaces the panel's content with the section's children plus a back
- *   row (never a side flyout — the Roboco mobile rule).
+ *   row (never a side flyout — the Zeron mobile rule).
  */
 @Immutable
 data class MenuSection(
@@ -111,7 +111,7 @@ data class MenuSection(
  *   ink and decides itself (the tile ignores it). Never tinted by the menu.
  */
 sealed interface MenuIcon {
-    data class Symbol(val icon: RobocoIcon) : MenuIcon
+    data class Symbol(val icon: ZeronIcon) : MenuIcon
     data class Brand(val harness: String) : MenuIcon
     class Custom(val content: @Composable (ink: Color) -> Unit) : MenuIcon
 }

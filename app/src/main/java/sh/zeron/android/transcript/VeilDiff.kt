@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 /**
  * Where `new` is `old` with exactly one run of `new.length - old.length`

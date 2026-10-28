@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import android.Manifest
 import android.app.Application
@@ -49,33 +49,33 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.core.CoreStatus
-import sh.roboco.android.core.WallpaperStore
-import sh.roboco.android.design.ActionSheetHost
-import sh.roboco.android.design.AlertHost
-import sh.roboco.android.design.AlertHostState
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.BottomChromeInsets
-import sh.roboco.android.design.LocalBottomChrome
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.settingsTag
-import sh.roboco.android.design.toggleTag
-import sh.roboco.android.notify.NotificationKind
-import sh.roboco.android.notify.NotificationPrefs
-import sh.roboco.android.notify.NotificationStatus
-import sh.roboco.android.sessions.FolderRoute
-import sh.roboco.android.shell.MainTabShell
-import sh.roboco.android.shell.MainTabState
-import sh.roboco.android.shell.NavRoute
-import sh.roboco.android.shell.NavStack
-import sh.roboco.android.shell.NavStackHost
-import sh.roboco.android.shell.ShellRouteContent
-import sh.roboco.android.shell.TabId
-import uniffi.roboco_core.EngineState
-import uniffi.roboco_core.EngineView
-import uniffi.roboco_core.WallpaperEffect
+import sh.zeron.android.core.CoreStatus
+import sh.zeron.android.core.WallpaperStore
+import sh.zeron.android.design.ActionSheetHost
+import sh.zeron.android.design.AlertHost
+import sh.zeron.android.design.AlertHostState
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.BottomChromeInsets
+import sh.zeron.android.design.LocalBottomChrome
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.settingsTag
+import sh.zeron.android.design.toggleTag
+import sh.zeron.android.notify.NotificationKind
+import sh.zeron.android.notify.NotificationPrefs
+import sh.zeron.android.notify.NotificationStatus
+import sh.zeron.android.sessions.FolderRoute
+import sh.zeron.android.shell.MainTabShell
+import sh.zeron.android.shell.MainTabState
+import sh.zeron.android.shell.NavRoute
+import sh.zeron.android.shell.NavStack
+import sh.zeron.android.shell.NavStackHost
+import sh.zeron.android.shell.ShellRouteContent
+import sh.zeron.android.shell.TabId
+import uniffi.zeron_core.EngineState
+import uniffi.zeron_core.EngineView
+import uniffi.zeron_core.WallpaperEffect
 
 /**
  * The Settings screen's assembly (android-ui-parity #103, Robolectric +
@@ -237,7 +237,7 @@ class SettingsScreenTest {
         val openEngine: ((String) -> Unit)? = if (defaultDeviceRouting) null else ({ engineOpens += it })
         val pair: (() -> Unit)? = if (defaultDeviceRouting) null else ({ pairCalls++ })
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(LocalActivityResultRegistryOwner provides owner) {
                     AlertHost(alerts) {
                         ActionSheetHost {
@@ -743,7 +743,7 @@ class SettingsScreenTest {
     fun theLastRowStops166AboveTheWindowBottomUnderTheChrome() {
         val listState = LazyListState()
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(
                     LocalActivityResultRegistryOwner provides owner,
                     LocalBottomChrome provides BottomChromeInsets(24.dp, 150.dp),
@@ -762,7 +762,7 @@ class SettingsScreenTest {
     fun theLastRowStops16AboveTheWindowBottomWithoutChrome() {
         val listState = LazyListState()
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(LocalActivityResultRegistryOwner provides owner) {
                     ActionSheetHost { SettingsScreenGallerySection(listState = listState) }
                 }
@@ -791,7 +791,7 @@ class SettingsScreenTest {
         NotificationPrefs.get(context).enabled = true
         val shellState = MainTabState(TabId.Sessions)
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(LocalActivityResultRegistryOwner provides owner) {
                     ProvideGlyphClock(frozenAtNanos = 0L) {
                         GlassMenuHost { MainTabShell(state = shellState) }

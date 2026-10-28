@@ -1,4 +1,4 @@
-package sh.roboco.android.flows
+package sh.zeron.android.flows
 
 import android.content.ClipboardManager
 import android.graphics.Point
@@ -56,16 +56,16 @@ import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import sh.roboco.android.MainActivity
-import sh.roboco.android.RobocoApplication
+import sh.zeron.android.MainActivity
+import sh.zeron.android.ZeronApplication
 
 /**
  * The flow suite's SessionFlowTests port (android-app#30 §6): one Android
  * test per iOS test of `uit:SessionFlowTests.swift` with the same name
  * minus `test`, run against the **fixture engines** ([FixtureRule]) — a
- * real `roboco-engine` on the mock harness, paired exactly as a user
+ * real `zeron-engine` on the mock harness, paired exactly as a user
  * pairs — instead of upstream's in-app `-demo` host (D4: no demo
- * workspace in Roboco).
+ * workspace in Zeron).
  *
  * Rows whose owning tickets have not landed yet stay in this class
  * `@Ignore`d with the ticket named, so the port table is visible in one
@@ -108,9 +108,9 @@ class SessionFlowTest {
     private val device: UiDevice
         get() = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
 
-    private val app: RobocoApplication
+    private val app: ZeronApplication
         get() = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext
-            as RobocoApplication
+            as ZeronApplication
 
     @Before
     fun requirePairedFixtureEngine() {
@@ -925,7 +925,7 @@ class SessionFlowTest {
         FlowSemantics.saveScreenshot("runway.png")
     }
 
-    // ── the offline read-only flow (Roboco ADD, 79) ──────────────────
+    // ── the offline read-only flow (Zeron ADD, 79) ──────────────────
 
     /**
      * An engine dropping mid-session makes the chat read-only — writes
@@ -1024,7 +1024,7 @@ class SessionFlowTest {
         failedOpenReturnsToSessions("unknown-chat-returned-to-sessions.png")
     }
 
-    /** A well-formed scoped id whose engine key is not paired (the Roboco ADD of #76). */
+    /** A well-formed scoped id whose engine key is not paired (the Zeron ADD of #76). */
     @Test
     @PhoneOnly("suspected tablet bug, ci-speed ticket 25: after the failed open the split still showed a transcript (run 40725884775)")
     fun forgottenEngineChatRouteReturnsToSessions() {

@@ -1,6 +1,6 @@
-package sh.roboco.android.accounts
+package sh.zeron.android.accounts
 
-import sh.roboco.android.shell.NavRoute
+import sh.zeron.android.shell.NavRoute
 
 /**
  * The route the Settings → Agent Accounts row, the composer usage chip's

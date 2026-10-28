@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -32,17 +32,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.hazeSource
 import java.util.Locale
-import sh.roboco.android.composer.ComposerAttachButton
-import sh.roboco.android.composer.ComposerMorphState
-import sh.roboco.android.composer.ComposerSurface
-import sh.roboco.android.composer.composerControl
-import sh.roboco.android.composer.composerInput
-import sh.roboco.android.composer.composerMorphHost
-import sh.roboco.android.composer.previewMorphState
-import sh.roboco.android.composer.rememberComposerMorphState
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.glass.ProvideHazeState
+import sh.zeron.android.composer.ComposerAttachButton
+import sh.zeron.android.composer.ComposerMorphState
+import sh.zeron.android.composer.ComposerSurface
+import sh.zeron.android.composer.composerControl
+import sh.zeron.android.composer.composerInput
+import sh.zeron.android.composer.composerMorphHost
+import sh.zeron.android.composer.previewMorphState
+import sh.zeron.android.composer.rememberComposerMorphState
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.glass.ProvideHazeState
 
 /**
  * The "Composer morph" page of the debug design gallery
@@ -118,7 +118,7 @@ private fun MorphReadout(morph: ComposerMorphState) {
     }
     BasicText(
         readout,
-        style = uiStyle(Face.Mono, LocalTypeScale.current.fixed(12f), RobocoTheme.palette.secondary),
+        style = uiStyle(Face.Mono, LocalTypeScale.current.fixed(12f), ZeronTheme.palette.secondary),
     )
 }
 
@@ -130,7 +130,7 @@ private fun MorphReadout(morph: ComposerMorphState) {
  */
 @Composable
 private fun BoxScope.MorphStageComposer(morph: ComposerMorphState, withThumbnails: Boolean) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val field = remember { TextFieldState("Half-written thought") }
     ComposerSurface(
@@ -172,7 +172,7 @@ private fun BoxScope.MorphStageComposer(morph: ComposerMorphState, withThumbnail
 private fun MorphPlaceholder() {
     BasicText(
         "Message",
-        style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(16.5f), RobocoTheme.palette.tertiary),
+        style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(16.5f), ZeronTheme.palette.tertiary),
         maxLines = 1,
     )
 }
@@ -180,7 +180,7 @@ private fun MorphPlaceholder() {
 /** The chip strip: two `controlFill` capsules with the `composerControl` marker. */
 @Composable
 private fun MorphChips(morph: ComposerMorphState) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Row(
         horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -203,7 +203,7 @@ private fun MorphChips(morph: ComposerMorphState) {
 /** The action button: a 34 dp accent circle with the send glyph (58 owns the real one). */
 @Composable
 private fun MorphAction(morph: ComposerMorphState) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     Box(
         Modifier
             .size(34.dp)
@@ -212,14 +212,14 @@ private fun MorphAction(morph: ComposerMorphState) {
             .composerControl(morph),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(RobocoIcons.ArrowUp, tint = Color.White, sizePt = 15f, weight = SymbolWeight.Bold)
+        Icon(ZeronIcons.ArrowUp, tint = Color.White, sizePt = 15f, weight = SymbolWeight.Bold)
     }
 }
 
 /** The thumbnail strip: two 56 dp rounded boxes, 8 dp apart, 68 dp tall (88 owns the real one). */
 @Composable
 private fun MorphThumbs() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     Row(
         modifier = Modifier.padding(top = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -238,7 +238,7 @@ private fun MorphThumbs() {
 /** A plain text chip; a `clickable` BasicText, no Material controls. */
 @Composable
 private fun MorphChip(text: String, active: Boolean, onClick: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     BasicText(
         text,
@@ -260,7 +260,7 @@ private fun MorphChip(text: String, active: Boolean, onClick: () -> Unit) {
  */
 @Composable
 private fun ComposerMorphPreviewBody(appearance: Appearance) {
-    RobocoTheme(appearance) {
+    ZeronTheme(appearance) {
         ProvideHazeState {
             GlassStage(
                 height = 200.dp,

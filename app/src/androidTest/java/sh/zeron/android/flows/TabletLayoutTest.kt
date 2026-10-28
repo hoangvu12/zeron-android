@@ -1,4 +1,4 @@
-package sh.roboco.android.flows
+package sh.zeron.android.flows
 
 import android.content.res.Configuration
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
@@ -13,7 +13,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import sh.roboco.android.MainActivity
+import sh.zeron.android.MainActivity
 
 /**
  * The tablet split shell's flows (android-app#30, the port of
@@ -24,7 +24,7 @@ import sh.roboco.android.MainActivity
  *
  * The "Sign Out" popover step becomes the effect action-sheet anchor
  * (the ticket's adaptation: iPad action sheets need an anchor —
- * Roboco's action sheets always have one), but that row needs the
+ * Zeron's action sheets always have one), but that row needs the
  * Settings screen's sign-out row, which lands with the parity Settings
  * tickets; the two landed tests stop at the sidebar/session/search
  * round trips.

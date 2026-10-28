@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -17,21 +17,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.CoreStatus
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.GroupedHeader
-import sh.roboco.android.design.GroupedPosition
-import sh.roboco.android.design.GroupedRow
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.shell.NavRoute
-import sh.roboco.android.shell.NavStack
-import sh.roboco.android.shell.NavStackHost
-import sh.roboco.android.shell.SheetHost
-import sh.roboco.android.shell.SheetStyle
-import sh.roboco.android.shell.rememberSheetHostState
+import sh.zeron.android.core.CoreStatus
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.GroupedHeader
+import sh.zeron.android.design.GroupedPosition
+import sh.zeron.android.design.GroupedRow
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.shell.NavRoute
+import sh.zeron.android.shell.NavStack
+import sh.zeron.android.shell.NavStackHost
+import sh.zeron.android.shell.SheetHost
+import sh.zeron.android.shell.SheetStyle
+import sh.zeron.android.shell.rememberSheetHostState
 
 /**
  * The "About & Licenses" page of the debug design gallery
@@ -94,7 +94,7 @@ fun AboutGallerySection() {
 @Composable
 fun AboutGalleryCard() {
     val rows = remember { aboutRows(versionSubtitle("0.9.2", 9002L, CoreStatus.Loaded("0.9.2"))) }
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Column(Modifier.fillMaxWidth()) {
         GroupedHeader(AboutSectionTitle)
@@ -146,7 +146,7 @@ private data object AboutGalleryRoot : NavRoute {
 
 @Composable
 private fun GalleryRootPage() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Box(Modifier.fillMaxSize().background(palette.background)) {
         BasicText(
@@ -160,7 +160,7 @@ private fun GalleryRootPage() {
 /** The gallery button row, like the debug gallery's `GalleryButton`s. */
 @Composable
 private fun GalleryButton(text: String, onClick: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     BasicText(
         text,
@@ -182,12 +182,12 @@ private fun GalleryButton(text: String, onClick: () -> Unit) {
  */
 val AboutGallerySections: List<LicenceSection> = listOf(
     LicenceSection(
-        key = "roboco",
-        title = "Roboco",
+        key = "zeron",
+        title = "Zeron",
         entries = listOf(
             LicenceEntry(
-                id = "roboco",
-                title = "Roboco",
+                id = "zeron",
+                title = "Zeron",
                 subtitle = "MIT License",
                 header = null,
                 texts = listOf(AboutGalleryMitFixture),
@@ -197,7 +197,7 @@ val AboutGallerySections: List<LicenceSection> = listOf(
                 title = ThirdPartyNotices,
                 subtitle = null,
                 header = null,
-                texts = listOf("Roboco's third-party notices (fixture)."),
+                texts = listOf("Zeron's third-party notices (fixture)."),
             ),
         ),
     ),
@@ -312,31 +312,31 @@ internal const val AboutGallerySymbolsFixture = "The Symbols icon set is MIT lic
 @Preview(name = "light")
 @Composable
 private fun AboutGalleryCardLightPreview() {
-    RobocoTheme(Appearance.Light) { AboutGalleryCard() }
+    ZeronTheme(Appearance.Light) { AboutGalleryCard() }
 }
 
 @Preview(name = "dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun AboutGalleryCardDarkPreview() {
-    RobocoTheme(Appearance.Dark) { AboutGalleryCard() }
+    ZeronTheme(Appearance.Dark) { AboutGalleryCard() }
 }
 
 @Preview(name = "light")
 @Composable
 private fun AboutGalleryLicensesLightPreview() {
-    RobocoTheme(Appearance.Light) { LicensesListPreviewHost() }
+    ZeronTheme(Appearance.Light) { LicensesListPreviewHost() }
 }
 
 @Preview(name = "dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun AboutGalleryLicensesDarkPreview() {
-    RobocoTheme(Appearance.Dark) { LicensesListPreviewHost() }
+    ZeronTheme(Appearance.Dark) { LicensesListPreviewHost() }
 }
 
 @Preview(name = "light")
 @Composable
 private fun AboutGallerySheetLightPreview() {
-    RobocoTheme(Appearance.Light) {
+    ZeronTheme(Appearance.Light) {
         LicenceTextSheet("Geist and Geist Mono", AboutGalleryOflFixture, onDone = {})
     }
 }
@@ -344,7 +344,7 @@ private fun AboutGallerySheetLightPreview() {
 @Preview(name = "dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun AboutGallerySheetDarkPreview() {
-    RobocoTheme(Appearance.Dark) {
+    ZeronTheme(Appearance.Dark) {
         LicenceTextSheet("Geist and Geist Mono", AboutGalleryOflFixture, onDone = {})
     }
 }

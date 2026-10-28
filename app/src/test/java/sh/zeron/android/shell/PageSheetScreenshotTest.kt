@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -16,13 +16,13 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.GalleryBackdrop
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.sheet.SheetHeaderRow
-import sh.roboco.android.design.sheet.SheetLeading
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.GalleryBackdrop
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.sheet.SheetHeaderRow
+import sh.zeron.android.design.sheet.SheetLeading
 
 /**
  * The page-sheet goldens (android-ui-parity #31), recorded by
@@ -80,7 +80,7 @@ class PageSheetScreenshotTest {
             }
         }
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 SheetHost(state) { GalleryBackdrop(Modifier.fillMaxSize()) }
             }
         }
@@ -135,7 +135,7 @@ class PageSheetTabletScreenshotTest {
             }
         }
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 SheetHost(state) { GalleryBackdrop(Modifier.fillMaxSize()) }
             }
         }

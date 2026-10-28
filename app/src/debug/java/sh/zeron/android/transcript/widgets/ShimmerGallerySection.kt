@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -16,16 +16,16 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.core.Fonts
-import sh.roboco.android.design.LocalGalleryCapture
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.TranscriptPalette
-import sh.roboco.android.design.color
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.transcript.StyleFonts
-import uniffi.roboco_core.ColorRole
+import sh.zeron.android.core.Face
+import sh.zeron.android.core.Fonts
+import sh.zeron.android.design.LocalGalleryCapture
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.TranscriptPalette
+import sh.zeron.android.design.color
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.transcript.StyleFonts
+import uniffi.zeron_core.ColorRole
 
 /**
  * The "Shimmer" section of the debug design gallery (ticket 122): the
@@ -62,7 +62,7 @@ fun ShimmerGallerySection() {
 @Composable
 private fun FrozenShimmer(caption: String, phase: Float) {
     ShimmerCaption(caption)
-    ShimmerSpecimen(dark = RobocoTheme.isDark, phase = phase)
+    ShimmerSpecimen(dark = ZeronTheme.isDark, phase = phase)
 }
 
 /**
@@ -73,7 +73,7 @@ private fun FrozenShimmer(caption: String, phase: Float) {
  */
 @Composable
 private fun ShimmerLiveSpecimen() {
-    val dark = RobocoTheme.isDark
+    val dark = ZeronTheme.isDark
     val capture = LocalGalleryCapture.current
     val context = LocalContext.current
     val d = LocalDensity.current.density
@@ -84,7 +84,7 @@ private fun ShimmerLiveSpecimen() {
     val model = remember(fonts, d) { ShimmerSpecimen.model(fonts, d) }
     val palette = TranscriptPalette(dark)
     val widget = model.display.widgets[0]
-    Box(Modifier.size(402.dp, 29.25.dp).background(RobocoTheme.palette.background)) {
+    Box(Modifier.size(402.dp, 29.25.dp).background(ZeronTheme.palette.background)) {
         Canvas(Modifier.matchParentSize()) {
             drawIntoCanvas { c -> model.draw(0, c.nativeCanvas, d, palette, fonts) }
         }
@@ -124,6 +124,6 @@ private fun ShimmerLiveSpecimen() {
 private fun ShimmerCaption(text: String) {
     BasicText(
         text,
-        style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(13.5f), RobocoTheme.palette.secondary),
+        style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(13.5f), ZeronTheme.palette.secondary),
     )
 }

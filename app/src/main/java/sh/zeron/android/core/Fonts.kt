@@ -1,12 +1,12 @@
-package sh.roboco.android.core
+package sh.zeron.android.core
 
 import android.content.Context
 import android.graphics.Typeface
 import androidx.annotation.VisibleForTesting
 import java.io.IOException
 import java.io.InputStream
-import uniffi.roboco_core.FaceData
-import uniffi.roboco_core.FaceRole
+import uniffi.zeron_core.FaceData
+import uniffi.zeron_core.FaceRole
 
 /**
  * A bundled face that could not be read or parsed. Subclass of

@@ -1,11 +1,11 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import java.awt.Font
 import java.io.File
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import sh.roboco.android.core.FontChain
+import sh.zeron.android.core.FontChain
 
 /**
  * The font-side half of the mono 2-cell rule (ticket 63): inside
@@ -23,16 +23,16 @@ import sh.roboco.android.core.FontChain
  * position.
  *
  * Plain JVM, like the repo's other pin tests: `java.awt.Font` needs no
- * display, and the TTFs are read from `roboco.repoRoot` (the Gradle test
+ * display, and the TTFs are read from `zeron.repoRoot` (the Gradle test
  * task sets it) — the APK copies are generated assets
- * (`build/generated/roboco-fonts`), not files under `src/main/assets`.
+ * (`build/generated/zeron-fonts`), not files under `src/main/assets`.
  */
 class MonoCoverageTest {
 
     @Test
     fun geistMonoCoversExactlyTheTwoExcludedWideCodePoints() {
-        val root = System.getProperty("roboco.repoRoot")
-            ?: throw AssertionError("roboco.repoRoot is not set; run from the Gradle test task")
+        val root = System.getProperty("zeron.repoRoot")
+            ?: throw AssertionError("zeron.repoRoot is not set; run from the Gradle test task")
         for (name in MONO_FACES) {
             val file = File(root, "crates/ui/assets/fonts/$name")
             assertTrue("missing font: ${file.path}", file.isFile)
@@ -52,7 +52,7 @@ class MonoCoverageTest {
     }
 
     private companion object {
-        /** The four mono roles the app ships (buildSrc `RobocoFonts.FILES`). */
+        /** The four mono roles the app ships (buildSrc `ZeronFonts.FILES`). */
         val MONO_FACES = listOf(
             "GeistMono.ttf",
             "GeistMono-Medium.ttf",

@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.util.Log
 import androidx.compose.animation.core.LinearEasing
@@ -33,14 +33,14 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toIntSize
 import kotlinx.coroutines.withTimeoutOrNull
-import sh.roboco.android.design.glass.Menu
-import sh.roboco.android.design.glass.hasContent
+import sh.zeron.android.design.glass.Menu
+import sh.zeron.android.design.glass.hasContent
 
 /**
- * `Modifier.contextMenu` (android-ui-parity #16): Roboco's port of the iOS
+ * `Modifier.contextMenu` (android-ui-parity #16): Zeron's port of the iOS
  * long-press context menu (`UIContextMenuInteraction`): the pressed row
  * "lifts" as a rounded preview over a dimmed, blurred backdrop, and a
- * [sh.roboco.android.design.glass.GlassMenuContent] opens attached to it.
+ * [sh.zeron.android.design.glass.GlassMenuContent] opens attached to it.
  * The gesture, haptic, lift, backdrop, placement and dismissal live here
  * and in `ContextMenuHost.kt`; the menu **items** belong to the callers
  * (tickets 44, 46, 128).

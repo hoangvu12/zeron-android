@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -38,31 +38,31 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
-import sh.roboco.android.RobocoApplication
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.FadingText
-import sh.roboco.android.design.GroupedAccessory
-import sh.roboco.android.design.GroupedFooter
-import sh.roboco.android.design.GroupedHeader
-import sh.roboco.android.design.GroupedListTokens
-import sh.roboco.android.design.GroupedPosition
-import sh.roboco.android.design.GroupedRow
-import sh.roboco.android.design.Haptic
-import sh.roboco.android.design.LocalActionSheet
-import sh.roboco.android.design.LocalAlerts
-import sh.roboco.android.design.LocalBottomChrome
-import sh.roboco.android.design.LocalFeedback
-import sh.roboco.android.design.LocalToaster
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.pairing.LocalPairPage
-import sh.roboco.android.shell.LargeTitleScaffold
-import sh.roboco.android.shell.LocalEnclosingSheet
-import sh.roboco.android.shell.LocalNavEntry
-import sh.roboco.android.shell.LocalNavStack
-import uniffi.roboco_core.EngineView
+import sh.zeron.android.ZeronApplication
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.FadingText
+import sh.zeron.android.design.GroupedAccessory
+import sh.zeron.android.design.GroupedFooter
+import sh.zeron.android.design.GroupedHeader
+import sh.zeron.android.design.GroupedListTokens
+import sh.zeron.android.design.GroupedPosition
+import sh.zeron.android.design.GroupedRow
+import sh.zeron.android.design.Haptic
+import sh.zeron.android.design.LocalActionSheet
+import sh.zeron.android.design.LocalAlerts
+import sh.zeron.android.design.LocalBottomChrome
+import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.design.LocalToaster
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.pairing.LocalPairPage
+import sh.zeron.android.shell.LargeTitleScaffold
+import sh.zeron.android.shell.LocalEnclosingSheet
+import sh.zeron.android.shell.LocalNavEntry
+import sh.zeron.android.shell.LocalNavStack
+import uniffi.zeron_core.EngineView
 
 /**
  * The Engine detail page (android-ui-parity #140): the pushed page the
@@ -92,7 +92,7 @@ import uniffi.roboco_core.EngineView
 fun EngineDetailScreen(
     engineId: String,
     engines: StateFlow<List<EngineView>?> =
-        (LocalContext.current.applicationContext as RobocoApplication).coreStartup.engines,
+        (LocalContext.current.applicationContext as ZeronApplication).coreStartup.engines,
     backend: EngineDetailBackend? = null,
     forgetDrafts: ForgetDrafts? = null,
     forgetContext: (() -> ForgetDraftsContext)? = null,
@@ -101,7 +101,7 @@ fun EngineDetailScreen(
     io: CoroutineDispatcher = Dispatchers.IO,
     modifier: Modifier = Modifier,
 ) {
-    val app = LocalContext.current.applicationContext as RobocoApplication
+    val app = LocalContext.current.applicationContext as ZeronApplication
     val list by engines.collectAsState()
     val view = list?.firstOrNull { it.engineId == engineId }
 
@@ -217,7 +217,7 @@ fun EngineDetailScreen(
         if (launcher != null) {
             launcher.openPairPage(prefill = null, replaceEngineId = engineId, over = enclosingSheet)
         } else {
-            Log.w("Roboco", "no PairPageLauncher")
+            Log.w("Zeron", "no PairPageLauncher")
         }
     }
     val onForget: () -> Unit = { shown?.let(state::onForget) }
@@ -294,7 +294,7 @@ fun EngineDetailCards(
     onForget: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     BoxWithConstraints(modifier.fillMaxWidth()) {
         val valueMax = (maxWidth - GroupedListTokens.CardInset * 2) * 0.5f
@@ -328,7 +328,7 @@ fun EngineDetailCards(
             GroupedRow(
                 title = EngineDetailCopy.Rename,
                 position = if (pairAgainShown) GroupedPosition.First else GroupedPosition.Single,
-                icon = RobocoIcons.Pencil,
+                icon = ZeronIcons.Pencil,
                 // The VoiceViewController disabled-row look while the
                 // engine is not connected: title and icon in tertiary,
                 // still tappable (the toast explains why).
@@ -341,7 +341,7 @@ fun EngineDetailCards(
                 GroupedRow(
                     title = EngineDetailCopy.PairAgain,
                     position = GroupedPosition.Last,
-                    icon = RobocoIcons.Link,
+                    icon = ZeronIcons.Link,
                     testTag = "engine-detail-pair-again",
                     onClick = onPairAgain,
                 )
@@ -353,7 +353,7 @@ fun EngineDetailCards(
             GroupedRow(
                 title = EngineDetailCopy.Forget,
                 position = GroupedPosition.Single,
-                icon = RobocoIcons.Trash,
+                icon = ZeronIcons.Trash,
                 destructive = true,
                 accessories = emptyList(),
                 // Forgetting: no highlight, taps ignored (the sheet already
@@ -380,7 +380,7 @@ private fun EngineStatusCardRow(
     onCopyId: () -> Unit,
     position: GroupedPosition,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     when (row) {
         EngineStatusRow.Status -> GroupedRow(

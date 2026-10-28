@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.ImageBitmap
@@ -96,7 +96,7 @@ class LinkRouterTest {
             launcher,
             loadFull = { reference -> loads += reference; bitmap },
             showImage = { reference, source, bmp -> shown += Triple(reference, source, bmp) },
-        ).open(tap("roboco-preview://image?ref=assets/shot.png"))
+        ).open(tap("zeron-preview://image?ref=assets/shot.png"))
         advanceUntilIdle()
         assertEquals(listOf("assets/shot.png"), loads)
         assertEquals(1, shown.size)
@@ -112,12 +112,12 @@ class LinkRouterTest {
         }
 
         router(RecordingLauncher(), loadFull = { null }, showImage = showImage)
-            .open(tap("roboco-preview://image?ref=gone.png"))
+            .open(tap("zeron-preview://image?ref=gone.png"))
         advanceUntilIdle()
         assertTrue("a null load must not show anything", shown.isEmpty())
 
         router(RecordingLauncher(), loadFull = { throw IllegalStateException("boom") }, showImage = showImage)
-            .open(tap("roboco-preview://image?ref=boom.png"))
+            .open(tap("zeron-preview://image?ref=boom.png"))
         advanceUntilIdle()
         assertTrue("a throwing load must not show anything (and must not crash the scope)", shown.isEmpty())
     }
@@ -132,8 +132,8 @@ class LinkRouterTest {
             loadFull = { reference -> loads += reference; delay(100); bitmap },
             showImage = { reference, _, _ -> shown += reference },
         ).apply {
-            open(LinkTap("roboco-preview://image?ref=first.png", rowBounds, rowBounds))
-            open(LinkTap("roboco-preview://image?ref=second.png", rowBounds, rowBounds))
+            open(LinkTap("zeron-preview://image?ref=first.png", rowBounds, rowBounds))
+            open(LinkTap("zeron-preview://image?ref=second.png", rowBounds, rowBounds))
         }
         advanceUntilIdle()
         // The first load never ran (the dispatcher queues it) and the
@@ -154,7 +154,7 @@ class LinkRouterTest {
             loadFull = { reference -> loads += reference; null },
             showImage = { reference, _, _ -> shown += reference },
         )
-        for (url in listOf("assets/notes.md", "roboco-file:src/lib.rs", "file:///x.txt", "C:\\x.log")) {
+        for (url in listOf("assets/notes.md", "zeron-file:src/lib.rs", "file:///x.txt", "C:\\x.log")) {
             r.open(tap(url))
         }
         advanceUntilIdle()
@@ -167,7 +167,7 @@ class LinkRouterTest {
     @Test
     fun fileShapedImageLinksOpenTheViewer() = runTest {
         val bitmap = ImageBitmap(4, 4)
-        for (url in listOf("assets/logo.png", "roboco-file:shots/a%20b.png", "file:///x.png", "C:\\x.png")) {
+        for (url in listOf("assets/logo.png", "zeron-file:shots/a%20b.png", "file:///x.png", "C:\\x.png")) {
             val launcher = RecordingLauncher()
             val loads = mutableListOf<String>()
             val shown = mutableListOf<String>()
@@ -197,7 +197,7 @@ class LinkRouterTest {
         advanceUntilIdle()
         assertEquals(listOf("mailto:dev@example.com"), launcher.views)
 
-        r.open(tap("roboco-invoke:7b7d"))
+        r.open(tap("zeron-invoke:7b7d"))
         r.open(tap("#install"))
         advanceUntilIdle()
         assertEquals("no further launcher calls", 1, launcher.views.size)

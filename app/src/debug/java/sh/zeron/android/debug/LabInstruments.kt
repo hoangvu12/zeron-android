@@ -1,4 +1,4 @@
-package sh.roboco.android.debug
+package sh.zeron.android.debug
 
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity

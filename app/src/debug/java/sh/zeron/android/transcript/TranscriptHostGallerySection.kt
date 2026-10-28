@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,9 +22,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import sh.roboco.android.design.LocalGalleryCapture
-import sh.roboco.android.design.RobocoTheme
-import uniffi.roboco_core.DebugEntry
+import sh.zeron.android.design.LocalGalleryCapture
+import sh.zeron.android.design.ZeronTheme
+import uniffi.zeron_core.DebugEntry
 import kotlin.random.Random
 
 /**
@@ -56,7 +56,7 @@ import kotlin.random.Random
 @Composable
 fun TranscriptHostGallerySection() {
     val capture = LocalGalleryCapture.current
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val state = remember { TranscriptState() }
     DisposableEffect(state) { onDispose { state.close() } }
     val scope = rememberCoroutineScope()

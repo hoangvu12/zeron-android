@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -14,7 +14,7 @@ enum class RootKind { Pairing, Phone, Split }
 
 /**
  * What the app root needs from the app model (ticket 35, derived in
- * `RobocoApplication` from #13's [sh.roboco.android.core.CoreStatus] and
+ * `ZeronApplication` from #13's [sh.zeron.android.core.CoreStatus] and
  * 71's `CoreStartup`):
  *
  * - [Loading] — nothing is drawn, the platform splash is held

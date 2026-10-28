@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import android.app.Activity
 import android.content.ClipboardManager
@@ -41,25 +41,25 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.session.ChromeInput
-import sh.roboco.android.session.SessionChipsFiller
-import sh.roboco.android.session.SessionController
-import sh.roboco.android.session.SessionEventHub
-import sh.roboco.android.session.SessionChrome
-import sh.roboco.android.session.SessionCore
-import sh.roboco.android.session.StatusBanner
-import sh.roboco.android.session.engineView
-import uniffi.roboco_core.ChatConfig
-import uniffi.roboco_core.ClientEvent
-import uniffi.roboco_core.ComposerState
-import uniffi.roboco_core.EngineView
-import uniffi.roboco_core.ModelInfo
-import uniffi.roboco_core.SessionRow
-import uniffi.roboco_core.TranscriptView
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.session.ChromeInput
+import sh.zeron.android.session.SessionChipsFiller
+import sh.zeron.android.session.SessionController
+import sh.zeron.android.session.SessionEventHub
+import sh.zeron.android.session.SessionChrome
+import sh.zeron.android.session.SessionCore
+import sh.zeron.android.session.StatusBanner
+import sh.zeron.android.session.engineView
+import uniffi.zeron_core.ChatConfig
+import uniffi.zeron_core.ClientEvent
+import uniffi.zeron_core.ComposerState
+import uniffi.zeron_core.EngineView
+import uniffi.zeron_core.ModelInfo
+import uniffi.zeron_core.SessionRow
+import uniffi.zeron_core.TranscriptView
 
 /**
  * The chip menus' end-to-end behaviour (android-ui-parity #89) — Robolectric
@@ -215,7 +215,7 @@ class SessionChipMenusUiTest {
         platform: ChipMenuPlatform,
         canWrite: Boolean = true,
     ) {
-        RobocoTheme(Appearance.Light) {
+        ZeronTheme(Appearance.Light) {
             GlassMenuHost(hazeState = rememberHazeState()) {
                 Box(Modifier.fillMaxSize().background(Color.White)) {
                     ChipStrip(
@@ -232,7 +232,7 @@ class SessionChipMenusUiTest {
     /** The controller-driven harness: the real chip derivation + the menus. */
     @Composable
     private fun ControllerHarness(controller: SessionController, menus: SessionChipMenus, platform: ChipMenuPlatform) {
-        RobocoTheme(Appearance.Light) {
+        ZeronTheme(Appearance.Light) {
             GlassMenuHost(hazeState = rememberHazeState()) {
                 Box(Modifier.fillMaxSize().background(Color.White)) {
                     val chrome by controller.chrome.collectAsState()
@@ -502,7 +502,7 @@ class SessionChipMenusUiTest {
             },
         )
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 GlassMenuHost(hazeState = rememberHazeState()) {
                     Box(Modifier.fillMaxSize().background(Color.White)) {
                         ChipStrip(

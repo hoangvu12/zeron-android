@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -35,12 +35,12 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.composer.ChipStrip
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.HarnessMark
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.glass.GlassMenuHost
+import sh.zeron.android.composer.ChipStrip
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.HarnessMark
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.GlassMenuHost
 
 /**
  * The checkout / model / effort menus' end-to-end behaviour
@@ -120,7 +120,7 @@ class CheckoutModelEffortMenusUiTest {
      */
     @Composable
     private fun Harness(page: NewSessionMenusDemoPage) {
-        val palette = RobocoTheme.palette
+        val palette = ZeronTheme.palette
         GlassMenuHost(hazeState = rememberHazeState()) {
             Column(Modifier.fillMaxSize().background(Color.White).padding(16.dp)) {
                 Box(Modifier.testTag("new-session-hero-${page.draft.harness}")) {
@@ -144,7 +144,7 @@ class CheckoutModelEffortMenusUiTest {
 
     private fun launch(page: NewSessionMenusDemoPage) {
         compose.setContent {
-            RobocoTheme(Appearance.Light) { Harness(page) }
+            ZeronTheme(Appearance.Light) { Harness(page) }
         }
         compose.waitForIdle()
     }

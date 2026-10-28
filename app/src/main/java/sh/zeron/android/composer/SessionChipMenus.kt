@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import java.util.Locale
 import java.util.concurrent.atomic.AtomicBoolean
@@ -11,26 +11,26 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.glass.Menu
-import sh.roboco.android.design.glass.MenuElement
-import sh.roboco.android.design.glass.MenuIcon
-import sh.roboco.android.design.glass.MenuItem
-import sh.roboco.android.session.ChromeFiller
-import sh.roboco.android.session.ChromeInput
-import sh.roboco.android.session.ContextReading
-import sh.roboco.android.session.CoreSessionCore
-import sh.roboco.android.session.SessionChrome
-import sh.roboco.android.session.SessionChipIds
-import sh.roboco.android.session.SessionCore
-import sh.roboco.android.session.contextReading
-import sh.roboco.android.session.contextUsageCard
-import uniffi.roboco_core.ChatConfig
-import uniffi.roboco_core.HarnessInfo
-import uniffi.roboco_core.ModelInfo
-import uniffi.roboco_core.SandboxLevel
-import uniffi.roboco_core.SendState
-import uniffi.roboco_core.SessionRow
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.glass.Menu
+import sh.zeron.android.design.glass.MenuElement
+import sh.zeron.android.design.glass.MenuIcon
+import sh.zeron.android.design.glass.MenuItem
+import sh.zeron.android.session.ChromeFiller
+import sh.zeron.android.session.ChromeInput
+import sh.zeron.android.session.ContextReading
+import sh.zeron.android.session.CoreSessionCore
+import sh.zeron.android.session.SessionChrome
+import sh.zeron.android.session.SessionChipIds
+import sh.zeron.android.session.SessionCore
+import sh.zeron.android.session.contextReading
+import sh.zeron.android.session.contextUsageCard
+import uniffi.zeron_core.ChatConfig
+import uniffi.zeron_core.HarnessInfo
+import uniffi.zeron_core.ModelInfo
+import uniffi.zeron_core.SandboxLevel
+import uniffi.zeron_core.SendState
+import uniffi.zeron_core.SessionRow
 
 /**
  * The FFI seam of the chip menus (android-ui-parity #89) — the five core
@@ -76,7 +76,7 @@ interface ChipMenuCore {
  * registry hands the filler the same `SessionCore` instance).
  */
 class CoreChipMenuCore(
-    private val client: uniffi.roboco_core.CoreClient,
+    private val client: uniffi.zeron_core.CoreClient,
     private val chatId: String,
 ) : ChipMenuCore {
     override fun sessionRow(): SessionRow? = client.sessionRow(chatId)
@@ -90,9 +90,9 @@ class CoreChipMenuCore(
         client.listHarnesses(deviceId)
 
     override fun fallbackModels(harness: String): List<ModelInfo> =
-        uniffi.roboco_core.fallbackModels(harness)
+        uniffi.zeron_core.fallbackModels(harness)
 
-    override fun reasoningLabel(level: String): String = uniffi.roboco_core.reasoningLabel(level)
+    override fun reasoningLabel(level: String): String = uniffi.zeron_core.reasoningLabel(level)
 
     override suspend fun setSessionConfig(config: ChatConfig) {
         client.setSessionConfig(chatId, config)
@@ -379,12 +379,12 @@ class SessionChipMenus(
                     children = listOf(
                         MenuItem(
                             title = PR_OPEN_ROW,
-                            icon = MenuIcon.Symbol(RobocoIcons.Safari),
+                            icon = MenuIcon.Symbol(ZeronIcons.Safari),
                             testTag = "chip-menu-pr-open",
                         ) { platform.openUrl(url) },
                         MenuItem(
                             title = PR_COPY_ROW,
-                            icon = MenuIcon.Symbol(RobocoIcons.Link),
+                            icon = MenuIcon.Symbol(ZeronIcons.Link),
                             testTag = "chip-menu-pr-copy",
                         ) { platform.copyLink(url) },
                     ),
@@ -591,7 +591,7 @@ fun providerSwitchNote(canSwitch: Boolean, running: Boolean, hostSwitches: Boole
     canSwitch -> null
     running -> "You can switch provider when this turn ends."
     hostSwitches -> null
-    else -> "This computer needs a newer Roboco to switch provider."
+    else -> "This computer needs a newer Zeron to switch provider."
 }
 
 /**

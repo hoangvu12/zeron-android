@@ -1,12 +1,12 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import uniffi.roboco_core.SessionRow
-import uniffi.roboco_core.WorkspaceSnapshot
+import uniffi.zeron_core.SessionRow
+import uniffi.zeron_core.WorkspaceSnapshot
 
 /**
  * `FolderRoute` / [folderKind] / [folderRows] (android-ui-parity #45), the

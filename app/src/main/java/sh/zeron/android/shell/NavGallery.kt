@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -25,16 +25,16 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.hairlineBorder
-import sh.roboco.android.design.hairlineWidth
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.hairlineBorder
+import sh.zeron.android.design.hairlineWidth
 
 /**
  * The navigation gallery (ticket 24): demo routes, the demo screen, the fake
  * bottom chrome, and the "Navigation" section of the debug design gallery.
  *
  * Ticket 22 owns the registration line in
- * `apps/android/app/src/debug/java/sh/roboco/android/design/Gallery.kt`:
+ * `apps/android/app/src/debug/java/sh/zeron/android/design/Gallery.kt`:
  * `GallerySection("Navigation", GalleryLayout.Scroll, screenshotHeightDp = 891) { NavGallerySection() }`
  * — that file does not exist yet (ticket 22 is not merged), same as ticket
  * 05's `HapticsGallerySection`.
@@ -74,7 +74,7 @@ private fun demoMonoStyle(color: Color) =
 @Composable
 internal fun NavDemoScreen(entry: NavEntry, showControls: Boolean = false) {
     val stack = LocalNavStack.current
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val depth = stack.entries.indexOf(entry) + 1
     Box(
         Modifier
@@ -123,7 +123,7 @@ private fun DemoRow(text: String, onClick: () -> Unit) {
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        BasicText(text, style = demoButtonStyle(RobocoTheme.palette.accent))
+        BasicText(text, style = demoButtonStyle(ZeronTheme.palette.accent))
     }
 }
 
@@ -144,7 +144,7 @@ internal fun NavFakeChrome() {
         Box(
             Modifier
                 .size(width = 200.dp, height = 64.dp)
-                .background(RobocoTheme.palette.tertiary, RoundedCornerShape(50)),
+                .background(ZeronTheme.palette.tertiary, RoundedCornerShape(50)),
         )
     }
 }
@@ -168,7 +168,7 @@ internal fun NavFakeChrome() {
 @Composable
 internal fun NavGallerySection() {
     val stack = remember { NavStack(DemoRoute("Root")) }
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     Column {
         Box(
             Modifier
@@ -202,11 +202,11 @@ internal fun NavGallerySection() {
 @Preview(name = "navigation gallery light", widthDp = 400, heightDp = 760)
 @Composable
 private fun NavGallerySectionPreview() {
-    RobocoTheme { NavGallerySection() }
+    ZeronTheme { NavGallerySection() }
 }
 
 @Preview(name = "navigation gallery dark", widthDp = 400, heightDp = 760, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun NavGallerySectionDarkPreview() {
-    RobocoTheme { NavGallerySection() }
+    ZeronTheme { NavGallerySection() }
 }

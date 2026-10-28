@@ -1,9 +1,9 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
-import sh.roboco.android.design.Palette
+import sh.zeron.android.design.Palette
 
 /**
  * The pairing root's status → copy/colour mapping (android-ui-parity #34),

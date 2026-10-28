@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -52,16 +52,16 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.GlassStage
-import sh.roboco.android.design.LocalReduceMotion
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.TypeScale
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.glass.GlassPressScaleKey
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.GlassStage
+import sh.zeron.android.design.LocalReduceMotion
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.TypeScale
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.GlassPressScaleKey
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.uiStyle
 
 /**
  * Ticket 26's bar geometry and semantics (Robolectric, 402 × 874 dp at
@@ -105,7 +105,7 @@ class GlassTabBarTest {
     ) {
         if (freezeClock) compose.mainClock.autoAdvance = false
         compose.setContent {
-            RobocoTheme {
+            ZeronTheme {
                 CompositionLocalProvider(
                     LocalLayoutDirection provides if (rtl) LayoutDirection.Rtl else LayoutDirection.Ltr,
                     LocalReduceMotion provides reduce,
@@ -360,7 +360,7 @@ class GlassTabBarTest {
     @Test
     fun tabLabelRendersAtTheSameSizeAtFontScale16() {
         compose.setContent {
-            RobocoTheme {
+            ZeronTheme {
                 Column {
                     LabelAtDensity("label-1x", Density(3f, fontScale = 1f))
                     LabelAtDensity("label-16x", Density(3f, fontScale = 1.6f))
@@ -383,7 +383,7 @@ class GlassTabBarTest {
             val style: TextStyle = uiStyle(
                 Face.SansSemibold,
                 typeScale.fixed(GlassTabBarDefaults.LabelPt),
-                RobocoTheme.palette.text,
+                ZeronTheme.palette.text,
             )
             Box(Modifier.testTag(tag)) {
                 BasicText(TabId.Sessions.label, style = style, maxLines = 1, softWrap = false)

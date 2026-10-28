@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -29,7 +29,7 @@ enum class ImageSource {
 
     /**
      * The engine's `ReadImageChunk`: any path (absolute, `~`, relative to
-     * the chat's cwd), `file:`/`roboco-file:`/`pending://` references,
+     * the chat's cwd), `file:`/`zeron-file:`/`pending://` references,
      * URLs only the PC can reach, and SVG rasterized to PNG.
      */
     Engine,
@@ -122,14 +122,14 @@ internal const val MaxImageBytes = 32 * 1024 * 1024
 /**
  * Platform HTTP (`HttpURLConnection`, no Play or Google dependency):
  * follows up to ten redirects — including http↔https hops, which
- * `HttpURLConnection` refuses on its own — with a Roboco user agent,
+ * `HttpURLConnection` refuses on its own — with a Zeron user agent,
  * bounded connect/read timeouts and the [MaxImageBytes] cap.
  */
 object PlatformWebImageFetcher : WebImageFetcher {
     private const val ConnectTimeoutMs = 8_000
     private const val ReadTimeoutMs = 15_000
     private const val MaxRedirects = 10
-    private const val UserAgent = "Mozilla/5.0 (Linux; Android) Roboco (+https://github.com/hoangvu12/roboco)"
+    private const val UserAgent = "Mozilla/5.0 (Linux; Android) Zeron (+https://github.com/hoangvu12/zeron-android)"
     private const val Accept = "image/avif,image/webp,image/apng,image/png,image/svg+xml,image/*;q=0.8,*/*;q=0.5"
 
     override suspend fun fetch(url: String): ByteArray = withContext(Dispatchers.IO) {

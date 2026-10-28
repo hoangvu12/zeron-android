@@ -1,7 +1,7 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.runtime.Immutable
-import uniffi.roboco_core.SessionRow
+import uniffi.zeron_core.SessionRow
 
 /**
  * One folder row of the side rail — the port of `FolderRowVM`

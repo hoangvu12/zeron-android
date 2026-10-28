@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.ui.graphics.toArgb
 import org.json.JSONObject
@@ -32,7 +32,7 @@ class ThemeArtifactPinTest {
         val families = JSONObject(path.readText()).getJSONArray("families")
         for (i in 0 until families.length()) {
             val family = families.getJSONObject(i)
-            if (family.getString("id") != "roboco") continue
+            if (family.getString("id") != "zeron") continue
             val variants = family.getJSONArray("variants")
             for (j in 0 until variants.length()) {
                 val variant = variants.getJSONObject(j)
@@ -95,11 +95,11 @@ class ThemeArtifactPinTest {
 
     @Test
     fun lightVariantMatchesTheSharedSubset() {
-        assertSharedSubset("roboco-light", Palette.Light, isDark = false)
+        assertSharedSubset("zeron-light", Palette.Light, isDark = false)
     }
 
     @Test
     fun darkVariantMatchesTheSharedSubset() {
-        assertSharedSubset("roboco-dark", Palette.Dark, isDark = true)
+        assertSharedSubset("zeron-dark", Palette.Dark, isDark = true)
     }
 }

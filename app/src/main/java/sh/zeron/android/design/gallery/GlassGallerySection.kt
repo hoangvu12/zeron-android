@@ -1,4 +1,4 @@
-package sh.roboco.android.design.gallery
+package sh.zeron.android.design.gallery
 
 import android.os.Build
 import androidx.compose.foundation.background
@@ -30,16 +30,16 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.chrisbanes.haze.hazeSource
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.rgba
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.glass.GlassCrashGuard
-import sh.roboco.android.design.glass.GlassSurface
-import sh.roboco.android.design.glass.LocalGlassTier
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.glass.ProvideHazeState
-import sh.roboco.android.design.glass.rememberGlassProgress
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.rgba
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.GlassCrashGuard
+import sh.zeron.android.design.glass.GlassSurface
+import sh.zeron.android.design.glass.LocalGlassTier
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.glass.ProvideHazeState
+import sh.zeron.android.design.glass.rememberGlassProgress
 
 /**
  * The "Glass surface" page of the debug design gallery (ticket 07): the
@@ -56,7 +56,7 @@ import sh.roboco.android.design.glass.rememberGlassProgress
  */
 @Composable
 fun GlassGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val context = LocalContext.current
     val guard = remember { GlassCrashGuard.get(context) }
     ProvideHazeState {

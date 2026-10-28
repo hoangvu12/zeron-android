@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.displayCutout
@@ -67,7 +67,7 @@ data class BottomChromeInsets(val barBottom: Dp, val contentPadding: Dp) {
     }
 }
 
-/** The shell's [BottomChromeInsets]; `BottomChromeInsets.None` outside [MainTabShell][sh.roboco.android.shell.MainTabShell]. */
+/** The shell's [BottomChromeInsets]; `BottomChromeInsets.None` outside [MainTabShell][sh.zeron.android.shell.MainTabShell]. */
 val LocalBottomChrome = staticCompositionLocalOf { BottomChromeInsets.None }
 
 /**
@@ -76,7 +76,7 @@ val LocalBottomChrome = staticCompositionLocalOf { BottomChromeInsets.None }
  *
  * iOS uses `window.safeAreaInsets.bottom` only, but its own comment says
  * "keep clear of the keyboard / home indicator either way" (`Toast.swift:42-43`),
- * and Roboco routes engine notices to the toast while the composer may be
+ * and Zeron routes engine notices to the toast while the composer may be
  * focused (ticket 42) — so the IME inset counts. Do **not** use
  * `WindowInsets.safeDrawing.exclude(ime)`: it subtracts and collapses to 0
  * when the IME is up; the union-then-max here never does.

@@ -1,9 +1,9 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import uniffi.roboco_core.ChatIndicator
-import uniffi.roboco_core.SessionRow
+import uniffi.zeron_core.ChatIndicator
+import uniffi.zeron_core.SessionRow
 
 /**
  * The sidebar's query → content rule (android-ui-parity #105) — plain

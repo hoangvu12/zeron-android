@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.os.Looper
 import androidx.compose.foundation.clickable
@@ -37,7 +37,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.glass.GlassProgressKey
+import sh.zeron.android.design.glass.GlassProgressKey
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -106,7 +106,7 @@ class ToastHostTest {
         onUnderClick: (() -> Unit)? = null,
     ) {
         density = LocalDensity.current
-        RobocoTheme(Appearance.Light) {
+        ZeronTheme(Appearance.Light) {
             ToastHost(state, announcer) {
                 val chrome = LocalBottomChromeTop.current
                 chromeState = chrome
@@ -395,7 +395,7 @@ class ToastHostTest {
 
     @Test
     fun twoTapsBeforeTheRecompositionFireTheHandlerOnce() {
-        // The Roboco adaptation: two taps can be delivered before the
+        // The Zeron adaptation: two taps can be delivered before the
         // recomposition that flips `visible`; only the first may run the
         // handler (unarchive twice would be wrong).
         var fired = 0

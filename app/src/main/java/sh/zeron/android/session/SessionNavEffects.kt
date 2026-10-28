@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import android.app.Activity
 import android.content.Context
@@ -8,9 +8,9 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
-import sh.roboco.android.shell.LocalAppRouter
-import sh.roboco.android.shell.NavEntry
-import sh.roboco.android.shell.NavEntryEffect
+import sh.zeron.android.shell.LocalAppRouter
+import sh.zeron.android.shell.NavEntry
+import sh.zeron.android.shell.NavEntryEffect
 
 /**
  * Wires one Session screen's [SessionNavLifecycle] into ticket 24's

@@ -1,4 +1,4 @@
-package sh.roboco.android.design.glass
+package sh.zeron.android.design.glass
 
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.runtime.Composable
@@ -12,10 +12,10 @@ import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.Immutable
-import sh.roboco.android.design.CapsuleShape
-import sh.roboco.android.design.Motion
-import sh.roboco.android.design.SmoothRoundedShape
-import sh.roboco.android.design.rgb
+import sh.zeron.android.design.CapsuleShape
+import sh.zeron.android.design.Motion
+import sh.zeron.android.design.SmoothRoundedShape
+import sh.zeron.android.design.rgb
 
 /**
  * The glass material, per appearance (ticket 07). Every value is the

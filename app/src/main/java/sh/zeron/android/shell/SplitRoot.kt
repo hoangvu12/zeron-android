@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
@@ -35,8 +35,8 @@ import androidx.compose.ui.unit.LayoutDirection
 import kotlin.math.min
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop
-import sh.roboco.android.design.Motion
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Motion
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The tablet split shell (android-ui-parity #33): the port of
@@ -91,7 +91,7 @@ fun SplitRoot(
     modifier: Modifier = Modifier,
     router: AppRouter = LocalAppRouter.current,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val focusManager = LocalFocusManager.current
 
     // The sidebar position follows `sidebarVisible`: snap on (re)composition
@@ -203,7 +203,7 @@ fun SplitRoot(
     }
 
     // The sidebar toolbar's bottom gap — the insets 105's placement uses.
-    val toolbarBarBottom = sh.roboco.android.shell.tablet.rememberSidebarBottomInsets().barBottom
+    val toolbarBarBottom = sh.zeron.android.shell.tablet.rememberSidebarBottomInsets().barBottom
     Layout(
         modifier = modifier
             .testTag("split-root")
@@ -232,8 +232,8 @@ fun SplitRoot(
                     LocalPrefersLargeTitles provides false,
                     // Wave-10 42 (#1014): the resting composer sits level
                     // with the sidebar toolbar while the sidebar shows.
-                    sh.roboco.android.session.LocalSidebarToolbarMid provides if (shell.sidebarVisible) {
-                        toolbarBarBottom + sh.roboco.android.shell.tablet.SidebarChromeMetrics.ToolbarHeight / 2
+                    sh.zeron.android.session.LocalSidebarToolbarMid provides if (shell.sidebarVisible) {
+                        toolbarBarBottom + sh.zeron.android.shell.tablet.SidebarChromeMetrics.ToolbarHeight / 2
                     } else {
                         null
                     },

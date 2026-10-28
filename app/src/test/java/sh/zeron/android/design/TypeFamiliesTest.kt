@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.content.Context
 import android.graphics.Typeface
@@ -30,17 +30,17 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.core.Face
-import sh.roboco.android.core.FontGate
-import sh.roboco.android.core.FontLoadException
-import sh.roboco.android.core.FontStatus
-import sh.roboco.android.core.Fonts
+import sh.zeron.android.core.Face
+import sh.zeron.android.core.FontGate
+import sh.zeron.android.core.FontLoadException
+import sh.zeron.android.core.FontStatus
+import sh.zeron.android.core.Fonts
 
 /**
  * The type system end to end under Robolectric (native graphics, so real
  * TTFs load): the families resolve the 12 shipped faces through ticket
  * 60's `ChainFont`s (the shared `FontChain` typefaces), `uiStyle` renders
- * the italic faces #609 omitted, `RobocoTheme` provides the locals and
+ * the italic faces #609 omitted, `ZeronTheme` provides the locals and
  * rebuilds the type scale on a font-scale change, and GeistMono's glyph
  * advances prove the text is Geist, not a system fallback.
  */
@@ -56,7 +56,7 @@ class TypeFamiliesTest {
 
     @Test
     fun familiesResolveEightSansAndFourMonoFaces() {
-        val families = RobocoFonts.families(appContext())
+        val families = ZeronFonts.families(appContext())
         val geist = families.geist as FontListFontFamily
         val mono = families.geistMono as FontListFontFamily
         assertEquals(8, geist.size)
@@ -89,7 +89,7 @@ class TypeFamiliesTest {
         var sansStyle: TextStyle? = null
         var monoStyle: TextStyle? = null
         compose.setContent {
-            RobocoTheme {
+            ZeronTheme {
                 val typeScale = LocalTypeScale.current
                 BasicText("sans semibold italic 123", style = uiStyle(Face.SansSemiboldItalic, typeScale.fixed(17f)))
                 BasicText("mono italic 123", style = uiStyle(Face.MonoItalic, typeScale.fixed(13f)))
@@ -100,7 +100,7 @@ class TypeFamiliesTest {
         compose.onNodeWithText("sans semibold italic 123").assertExists()
         compose.onNodeWithText("mono italic 123").assertExists()
 
-        val families = RobocoFonts.families(appContext())
+        val families = ZeronFonts.families(appContext())
         assertEquals(families.geist, sansStyle?.fontFamily)
         assertEquals(FontWeight.SemiBold, sansStyle?.fontWeight)
         assertEquals(FontStyle.Italic, sansStyle?.fontStyle)
@@ -113,23 +113,23 @@ class TypeFamiliesTest {
 
     @Test
     fun themeProvidesTheFontsAndTheTypeScale() {
-        var fonts: RobocoFontFamilies? = null
+        var fonts: ZeronFontFamilies? = null
         var factor = Float.NaN
         compose.setContent {
-            RobocoTheme {
+            ZeronTheme {
                 fonts = LocalFonts.current
                 factor = LocalTypeScale.current.factor
             }
         }
         compose.waitForIdle()
         assertEquals(1f, factor)
-        assertEquals(RobocoFonts.families(appContext()), fonts)
+        assertEquals(ZeronFonts.families(appContext()), fonts)
     }
 
     @Test
     fun fontScaleChangeRebuildsTheTypeScale() {
         var factor = Float.NaN
-        compose.setContent { RobocoTheme { factor = LocalTypeScale.current.factor } }
+        compose.setContent { ZeronTheme { factor = LocalTypeScale.current.factor } }
         compose.waitForIdle()
         assertEquals(1f, factor)
 
@@ -138,7 +138,7 @@ class TypeFamiliesTest {
         // rebuilds the scale — 2.0 clamps to the 1.6 ceiling.
         RuntimeEnvironment.setFontScale(2f)
         compose.activityRule.scenario.recreate()
-        compose.setContent { RobocoTheme { factor = LocalTypeScale.current.factor } }
+        compose.setContent { ZeronTheme { factor = LocalTypeScale.current.factor } }
         compose.waitForIdle()
         assertEquals(1.6f, factor)
     }
@@ -162,10 +162,10 @@ class TypeFamiliesTest {
         // Ticket 60's swap: the italic faces #609 omitted now resolve
         // through ChainLoader, which the load counter proves (and the
         // composition does not throw).
-        RobocoFonts.resetForTest()
+        ZeronFonts.resetForTest()
         try {
             compose.setContent {
-                RobocoTheme {
+                ZeronTheme {
                     val typeScale = LocalTypeScale.current
                     BasicText(
                         "sans semibold italic chain",
@@ -181,11 +181,11 @@ class TypeFamiliesTest {
             compose.onNodeWithText("mono italic chain").assertExists()
             compose.waitForIdle()
             assertTrue(
-                "ChainLoader resolved ${RobocoFonts.chainLoads.get()} typefaces, expected at least 1",
-                RobocoFonts.chainLoads.get() > 0,
+                "ChainLoader resolved ${ZeronFonts.chainLoads.get()} typefaces, expected at least 1",
+                ZeronFonts.chainLoads.get() > 0,
             )
         } finally {
-            RobocoFonts.resetForTest()
+            ZeronFonts.resetForTest()
         }
     }
 
@@ -230,7 +230,7 @@ class TypeFamiliesTest {
         var monoWidthDp = 0f
         var systemWidthDp = 0f
         compose.setContent {
-            RobocoTheme {
+            ZeronTheme {
                 val typeScale = LocalTypeScale.current
                 val density = LocalDensity.current
                 val measurer = rememberTextMeasurer()
@@ -240,7 +240,7 @@ class TypeFamiliesTest {
                 ).size.width / density.density
                 systemWidthDp = measurer.measure(
                     "iiii0000",
-                    RobocoTextDefaults.Base.copy(
+                    ZeronTextDefaults.Base.copy(
                         fontFamily = FontFamily.Default,
                         fontSize = typeScale.fixed(10f),
                     ),

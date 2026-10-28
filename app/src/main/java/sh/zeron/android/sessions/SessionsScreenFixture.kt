@@ -1,10 +1,10 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
-import uniffi.roboco_core.ChatIndicator
-import uniffi.roboco_core.ProjectRef
-import uniffi.roboco_core.PullRequest
-import uniffi.roboco_core.PullRequestState
-import uniffi.roboco_core.SessionRow
+import uniffi.zeron_core.ChatIndicator
+import uniffi.zeron_core.ProjectRef
+import uniffi.zeron_core.PullRequest
+import uniffi.zeron_core.PullRequestState
+import uniffi.zeron_core.SessionRow
 
 /**
  * The Sessions tab root's fixture (android-ui-parity #46) — the ticket's

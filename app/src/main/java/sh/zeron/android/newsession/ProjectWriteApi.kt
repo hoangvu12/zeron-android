@@ -1,10 +1,10 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import uniffi.roboco_core.CoreClient
-import uniffi.roboco_core.PreparedPath
+import uniffi.zeron_core.CoreClient
+import uniffi.zeron_core.PreparedPath
 
 /**
  * The New Project write seam (android-ui-parity #111): the two FFI calls
@@ -35,7 +35,7 @@ interface ProjectWriteApi {
 /**
  * The live [ProjectWriteApi] over the app's [CoreClient] — the same
  * provider 110's [CoreFolderBrowserSource] uses (`app.clientOrNull()`).
- * With no client it throws `IllegalStateException("Roboco is disconnected.")`
+ * With no client it throws `IllegalStateException("Zeron is disconnected.")`
  * (the alert's message maps that the same way iOS maps `CoreError.Closed`).
  *
  * The FFI calls run on [io] (never main, never `runBlocking` — the #609
@@ -48,7 +48,7 @@ class CoreProjectWriteApi(
 ) : ProjectWriteApi {
 
     override suspend fun createProject(deviceId: String, path: String, gitDetected: Boolean): String {
-        val c = client() ?: throw IllegalStateException("Roboco is disconnected.")
+        val c = client() ?: throw IllegalStateException("Zeron is disconnected.")
         return withContext(io) { c.createProject(deviceId, path, gitDetected) }
     }
 
@@ -57,7 +57,7 @@ class CoreProjectWriteApi(
         path: String,
         createIfMissing: Boolean,
     ): PreparedPath {
-        val c = client() ?: throw IllegalStateException("Roboco is disconnected.")
+        val c = client() ?: throw IllegalStateException("Zeron is disconnected.")
         return withContext(io) { c.prepareSpacePath(deviceId, path, createIfMissing) }
     }
 }

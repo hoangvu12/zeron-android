@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -21,14 +21,14 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import java.util.Collections
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LinearFontScaleDensity
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.TypeScale
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LinearFontScaleDensity
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.TypeScale
+import sh.zeron.android.design.uiStyle
 
 /** The gallery's status selector — each value is one overlay state. */
 private enum class StatusDemo(val label: String) {
@@ -59,7 +59,7 @@ private enum class StatusDemo(val label: String) {
  */
 @Composable
 fun SessionListGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
 
     var collapsible by remember { mutableStateOf(true) }
@@ -148,7 +148,7 @@ fun SessionListGallerySection() {
 /** A toggle row: the label in `accent` when on, `secondary` when off. */
 @Composable
 private fun ControlRow(text: String, checked: Boolean, onClick: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     BasicText(
         text,
@@ -177,7 +177,7 @@ private fun SessionListPreviewBody(
     loading: Boolean = false,
     empty: SessionListEmpty = SessionListEmpty.None,
 ) {
-    RobocoTheme(appearance) {
+    ZeronTheme(appearance) {
         // Frozen at 0 ns: the spinner renders the cycle-0 pattern and the
         // preview never starts a frame loop.
         ProvideGlyphClock(frozenAtNanos = 0L) {

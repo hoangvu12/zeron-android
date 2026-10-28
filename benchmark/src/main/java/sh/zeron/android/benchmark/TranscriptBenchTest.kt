@@ -1,4 +1,4 @@
-package sh.roboco.android.benchmark
+package sh.zeron.android.benchmark
 
 import android.app.UiAutomation
 import android.os.Build

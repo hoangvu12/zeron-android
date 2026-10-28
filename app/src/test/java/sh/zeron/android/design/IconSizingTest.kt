@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.content.Context
 import android.graphics.Paint
@@ -24,8 +24,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.core.Face
-import sh.roboco.android.core.assetPath
+import sh.zeron.android.core.Face
+import sh.zeron.android.core.assetPath
 
 /**
  * The icon sizing and weight tests (android-ui-parity #06), Robolectric at
@@ -57,11 +57,11 @@ class IconSizingTest {
     @Config(sdk = [36], qualifiers = "w400dp-h400dp-mdpi")
     fun iconReservesABoxOfOnePointTwoDpPerSizePt() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Column {
-                    Icon(RobocoIcons.Plus, Color.Black, 15f, modifier = Modifier.testTag("pt15"))
-                    Icon(RobocoIcons.Plus, Color.Black, 11f, modifier = Modifier.testTag("pt11"))
-                    Icon(RobocoIcons.Plus, Color.Black, 17f, modifier = Modifier.testTag("pt17"))
+                    Icon(ZeronIcons.Plus, Color.Black, 15f, modifier = Modifier.testTag("pt15"))
+                    Icon(ZeronIcons.Plus, Color.Black, 11f, modifier = Modifier.testTag("pt11"))
+                    Icon(ZeronIcons.Plus, Color.Black, 17f, modifier = Modifier.testTag("pt17"))
                 }
             }
         }
@@ -77,8 +77,8 @@ class IconSizingTest {
     @Config(sdk = [36], qualifiers = "w400dp-h400dp-mdpi")
     fun iconInBoxUsesItsExplicitBox() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
-                IconInBox(RobocoIcons.TabChat, Color.Black, 24.dp, modifier = Modifier.testTag("box"))
+            ZeronTheme(Appearance.Light) {
+                IconInBox(ZeronIcons.TabChat, Color.Black, 24.dp, modifier = Modifier.testTag("box"))
             }
         }
         compose.onNodeWithTag("box").assertWidthIsEqualTo(24.dp).assertHeightIsEqualTo(24.dp)
@@ -88,7 +88,7 @@ class IconSizingTest {
     @Config(sdk = [36], qualifiers = "w400dp-h400dp-mdpi")
     fun numberCircleMeasuresLikeIcon() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 NumberCircle(7, Color.Black, 17f, modifier = Modifier.testTag("n7"))
             }
         }
@@ -99,8 +99,8 @@ class IconSizingTest {
     @Config(sdk = [36], qualifiers = "w400dp-h400dp-mdpi")
     fun iconDelegatesNumberIconsToNumberCircle() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
-                Icon(RobocoIcon.Number(3), Color.Black, 17f, modifier = Modifier.testTag("n3"))
+            ZeronTheme(Appearance.Light) {
+                Icon(ZeronIcon.Number(3), Color.Black, 17f, modifier = Modifier.testTag("n3"))
             }
         }
         compose.onNodeWithTag("n3").assertWidthIsEqualTo(20.4.dp).assertHeightIsEqualTo(20.4.dp)
@@ -113,8 +113,8 @@ class IconSizingTest {
     @Test
     fun semiboldScalesEveryPlusStrokeByOnePointTwoSeven() {
         val resources = context().resources
-        val regular = weightedIconVector(resources, RobocoIcons.Plus, SymbolWeight.Regular)
-        val semibold = weightedIconVector(resources, RobocoIcons.Plus, SymbolWeight.Semibold)
+        val regular = weightedIconVector(resources, ZeronIcons.Plus, SymbolWeight.Regular)
+        val semibold = weightedIconVector(resources, ZeronIcons.Plus, SymbolWeight.Semibold)
 
         val paths = regular.vectorPaths()
         assertTrue("zi_plus must have at least one path", paths.isNotEmpty())
@@ -134,8 +134,8 @@ class IconSizingTest {
     @Test
     fun fillOnlyGlyphsAreUnchangedByWeight() {
         val resources = context().resources
-        val regular = weightedIconVector(resources, RobocoIcons.Moon, SymbolWeight.Regular)
-        val bold = weightedIconVector(resources, RobocoIcons.Moon, SymbolWeight.Bold)
+        val regular = weightedIconVector(resources, ZeronIcons.Moon, SymbolWeight.Regular)
+        val bold = weightedIconVector(resources, ZeronIcons.Moon, SymbolWeight.Bold)
 
         assertTrue("zi_moon is fill-only", regular.vectorPaths().all { it.stroke == null })
         // Every property of every node is copied verbatim — only stroked
@@ -147,12 +147,12 @@ class IconSizingTest {
     @Test
     fun theWeightedVectorCacheReturnsStableInstances() {
         val resources = context().resources
-        val bold = weightedIconVector(resources, RobocoIcons.Moon, SymbolWeight.Bold)
-        assertSame(bold, weightedIconVector(resources, RobocoIcons.Moon, SymbolWeight.Bold))
-        val light = weightedIconVector(resources, RobocoIcons.Moon, SymbolWeight.Light)
+        val bold = weightedIconVector(resources, ZeronIcons.Moon, SymbolWeight.Bold)
+        assertSame(bold, weightedIconVector(resources, ZeronIcons.Moon, SymbolWeight.Bold))
+        val light = weightedIconVector(resources, ZeronIcons.Moon, SymbolWeight.Light)
         assertNotSame(bold, light)
-        val regular = weightedIconVector(resources, RobocoIcons.Moon, SymbolWeight.Regular)
-        assertSame(regular, weightedIconVector(resources, RobocoIcons.Moon, SymbolWeight.Regular))
+        val regular = weightedIconVector(resources, ZeronIcons.Moon, SymbolWeight.Regular)
+        assertSame(regular, weightedIconVector(resources, ZeronIcons.Moon, SymbolWeight.Regular))
     }
 
     // -----------------------------------------------------------------
@@ -162,8 +162,8 @@ class IconSizingTest {
     @Test
     fun everyRegistryVectorResolvesToAZiDrawable() {
         val resources = context().resources
-        for (entry in RobocoIcons.entries) {
-            val icon = entry.icon as? RobocoIcon.Vector ?: continue
+        for (entry in ZeronIcons.entries) {
+            val icon = entry.icon as? ZeronIcon.Vector ?: continue
             // Throws NotFoundException if the drawable does not exist.
             val name = resources.getResourceEntryName(icon.res)
             assertTrue("${entry.name} resolves to \"$name\"", name.startsWith("zi_"))

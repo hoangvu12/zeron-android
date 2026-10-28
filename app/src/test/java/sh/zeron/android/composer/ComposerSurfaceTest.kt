@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -63,10 +63,10 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * [ComposerSurface] and [ComposerAttachButton] — android-ui-parity #55's
@@ -162,7 +162,7 @@ class ComposerSurfaceTest {
         spanBandChips: Boolean = false,
     ) {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.fillMaxSize().background(Palette.Light.background)) {
                     ComposerSurface(
                         progress = { p },
@@ -373,7 +373,7 @@ class ComposerSurfaceTest {
         var p by mutableFloatStateOf(0f)
         val maxWidths = mutableListOf<Int>()
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.fillMaxSize().background(Palette.Light.background)) {
                     ComposerSurface(
                         progress = { p },
@@ -470,7 +470,7 @@ class ComposerSurfaceTest {
         var isCard by mutableStateOf(true)
         val field = TextFieldState("draft")
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.fillMaxSize().background(Palette.Light.background)) {
                     ComposerSurface(
                         progress = { p },
@@ -510,7 +510,7 @@ class ComposerSurfaceTest {
         var p by mutableFloatStateOf(0f)
         var textCompositions = 0
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.fillMaxSize().background(Palette.Light.background)) {
                     ComposerSurface(
                         progress = { p },
@@ -544,7 +544,7 @@ class ComposerSurfaceTest {
     @Test
     fun rtlMirrorsTheControls() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                     Box(Modifier.fillMaxSize().background(Palette.Light.background)) {
                         ComposerSurface(
@@ -582,7 +582,7 @@ class ComposerSurfaceTest {
     @Test
     fun theAttachButtonIsA34dpCircleOfControlFill() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.fillMaxSize().background(Palette.Light.background)) {
                     ComposerAttachButton(onClick = {}, modifier = Modifier.testTag("attach"))
                 }
@@ -605,7 +605,7 @@ class ComposerSurfaceTest {
     fun theAttachButtonCarriesItsSemanticsTagAndClick() {
         var clicks = 0
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.fillMaxSize().background(Palette.Light.background)) {
                     ComposerAttachButton(onClick = { clicks++ })
                 }
@@ -623,7 +623,7 @@ class ComposerSurfaceTest {
     fun theDisabledAttachButtonDrawsTertiaryInkAndIgnoresTaps() {
         var clicks = 0
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.fillMaxSize().background(Palette.Light.background)) {
                     ComposerAttachButton(onClick = { clicks++ }, enabled = false, modifier = Modifier.testTag("attach"))
                 }
@@ -650,7 +650,7 @@ class ComposerSurfaceTest {
     @Test
     fun theEnabledAttachButtonInkIsText() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.fillMaxSize().background(Palette.Light.background)) {
                     ComposerAttachButton(onClick = {})
                 }

@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -9,7 +9,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import sh.roboco.android.session.QueuedEditGate
+import sh.zeron.android.session.QueuedEditGate
 
 /**
  * The queued-message edit lease state machine (android-ui-parity #83) —

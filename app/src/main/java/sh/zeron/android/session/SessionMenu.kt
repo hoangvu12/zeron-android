@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -25,29 +25,29 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import sh.roboco.android.composer.ACCOUNT_USAGE_ROW
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalToaster
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.Toaster
-import sh.roboco.android.design.glass.GlassCircleButton
-import sh.roboco.android.design.glass.GlassMenuPanel
-import sh.roboco.android.design.glass.Menu
-import sh.roboco.android.design.glass.MenuIcon
-import sh.roboco.android.design.glass.MenuItem
-import sh.roboco.android.design.glass.MenuSection
-import sh.roboco.android.design.glass.flattenLevel
-import sh.roboco.android.design.glass.rememberGlassMenuState
-import sh.roboco.android.sessions.ActionOutcome
-import sh.roboco.android.sessions.LocalRowActions
-import sh.roboco.android.sessions.rememberSessionPrompts
-import sh.roboco.android.shell.AppRouter
-import sh.roboco.android.shell.LocalAppRouter
-import sh.roboco.android.shell.LocalNavEntry
-import sh.roboco.android.shell.LocalNavStack
-import sh.roboco.android.transcript.TranscriptState
-import uniffi.roboco_core.LayoutFrame
+import sh.zeron.android.composer.ACCOUNT_USAGE_ROW
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalToaster
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.Toaster
+import sh.zeron.android.design.glass.GlassCircleButton
+import sh.zeron.android.design.glass.GlassMenuPanel
+import sh.zeron.android.design.glass.Menu
+import sh.zeron.android.design.glass.MenuIcon
+import sh.zeron.android.design.glass.MenuItem
+import sh.zeron.android.design.glass.MenuSection
+import sh.zeron.android.design.glass.flattenLevel
+import sh.zeron.android.design.glass.rememberGlassMenuState
+import sh.zeron.android.sessions.ActionOutcome
+import sh.zeron.android.sessions.LocalRowActions
+import sh.zeron.android.sessions.rememberSessionPrompts
+import sh.zeron.android.shell.AppRouter
+import sh.zeron.android.shell.LocalAppRouter
+import sh.zeron.android.shell.LocalNavEntry
+import sh.zeron.android.shell.LocalNavStack
+import sh.zeron.android.transcript.TranscriptState
+import uniffi.zeron_core.LayoutFrame
 
 /**
  * The header's ⋯ pull-down (android-ui-parity #80) — the port of
@@ -62,7 +62,7 @@ import uniffi.roboco_core.LayoutFrame
  * [Menu] inside the click lambda, so the pin title and the disabled flags
  * are always current, never cached in composition.
  *
- * Roboco adaptations (79/42/22): Pin/Unpin and Archive are disabled while
+ * Zeron adaptations (79/42/22): Pin/Unpin and Archive are disabled while
  * `canWrite == false` (Copy Transcript stays live — it reads only local
  * state); the leave after Archive happens only on `Ok`/`Gone` outcomes;
  * Copy Transcript builds the string off main and handles Binder's
@@ -93,7 +93,7 @@ import uniffi.roboco_core.LayoutFrame
  *
  * Upstream #967 also heads the menu with the session's title over
  * "project @ device" ([title]/[subtitle], one wrapped `Menu.title`; blank
- * = no title line). Roboco keeps the header bar's two-line title as well.
+ * = no title line). Zeron keeps the header bar's two-line title as well.
  *
  * Keep it pure: no `@Composable`, no state reads. [rememberSessionMenu]
  * calls this once per open, from the click lambda.
@@ -115,33 +115,33 @@ fun sessionMenu(
     children = listOfNotNull(
         MenuItem(
             title = if (pinned) "Unpin" else "Pin",
-            icon = MenuIcon.Symbol(if (pinned) RobocoIcons.PinSlash else RobocoIcons.Pin),
+            icon = MenuIcon.Symbol(if (pinned) ZeronIcons.PinSlash else ZeronIcons.Pin),
             disabled = !canWrite,
             testTag = "session-menu-pin",
             action = { onSetPinned(!pinned) },
         ),
         MenuItem(
             title = "Copy Transcript",
-            icon = MenuIcon.Symbol(RobocoIcons.DocOnDoc),
+            icon = MenuIcon.Symbol(ZeronIcons.DocOnDoc),
             testTag = "session-menu-copy",
             action = onCopyTranscript,
         ),
         sideChats?.let { sideChatSection(it, canWrite) },
         MenuItem(
-            title = sh.roboco.android.browser.PreviewsCopy.SessionMenuRow,
-            icon = MenuIcon.Symbol(RobocoIcons.Safari),
+            title = sh.zeron.android.browser.PreviewsCopy.SessionMenuRow,
+            icon = MenuIcon.Symbol(ZeronIcons.Safari),
             testTag = "session-menu-previews",
             action = onShowPreviews,
         ),
         MenuItem(
             title = ACCOUNT_USAGE_ROW,
-            icon = MenuIcon.Symbol(RobocoIcons.Gauge),
+            icon = MenuIcon.Symbol(ZeronIcons.Gauge),
             testTag = "session-menu-accounts",
             action = onShowAccounts,
         ),
         MenuItem(
             title = "Archive",
-            icon = MenuIcon.Symbol(RobocoIcons.Archivebox),
+            icon = MenuIcon.Symbol(ZeronIcons.Archivebox),
             disabled = !canWrite,
             testTag = "session-menu-archive",
             action = onArchive,
@@ -149,7 +149,7 @@ fun sessionMenu(
         onDelete?.let {
             MenuItem(
                 title = "Delete",
-                icon = MenuIcon.Symbol(RobocoIcons.Trash),
+                icon = MenuIcon.Symbol(ZeronIcons.Trash),
                 destructive = true,
                 disabled = !canWrite,
                 testTag = "session-menu-delete",
@@ -190,14 +190,14 @@ private fun sideChatSection(rows: SideChatMenuRows, canWrite: Boolean): MenuSect
     children = listOf(
         MenuItem(
             title = "New Side Chat",
-            icon = MenuIcon.Symbol(RobocoIcons.QuestionmarkBubble),
+            icon = MenuIcon.Symbol(ZeronIcons.QuestionmarkBubble),
             disabled = !canWrite,
             testTag = "session-menu-new-side-chat",
             action = rows.onNew,
         ),
         MenuItem(
             title = "Fork into Side Chat",
-            icon = MenuIcon.Symbol(RobocoIcons.ArrowTriangleBranch),
+            icon = MenuIcon.Symbol(ZeronIcons.ArrowTriangleBranch),
             disabled = !canWrite || rows.forking,
             testTag = "session-menu-fork-side-chat",
             action = rows.onFork,
@@ -222,8 +222,8 @@ private fun sideChatSection(rows: SideChatMenuRows, canWrite: Boolean): MenuSect
  * #05's "Account & Usage" pushes the Accounts & Usage page scoped to
  * this session's harness and computer (PR #578's `showAccounts`).
  *
- * Requires [sh.roboco.android.shell.LocalNavStack] /
- * [sh.roboco.android.shell.LocalNavEntry] (any screen inside a
+ * Requires [sh.zeron.android.shell.LocalNavStack] /
+ * [sh.zeron.android.shell.LocalNavEntry] (any screen inside a
  * `NavStackHost`) and a mounted `GlassMenuHost` (the app root, 35).
  */
 @Composable
@@ -265,7 +265,7 @@ fun rememberSessionMenu(
             val showAccounts = {
                 if (nav.top.id == entry.id) {
                     nav.push(
-                        sh.roboco.android.accounts.AgentAccountsRoute(
+                        sh.zeron.android.accounts.AgentAccountsRoute(
                             deviceId = controller.hostDeviceId.ifEmpty { null },
                             focusHarness = controller.harness,
                         ),
@@ -280,7 +280,7 @@ fun rememberSessionMenu(
             val showPreviews = {
                 if (nav.top.id == entry.id) {
                     nav.push(
-                        sh.roboco.android.browser.PreviewPanelRoute(
+                        sh.zeron.android.browser.PreviewPanelRoute(
                             chatId = chatId,
                             chatTitle = controller.chrome.value.title,
                         ),
@@ -330,7 +330,7 @@ fun rememberSessionMenu(
  * 3. back on main: the platform `ClipboardManager` write.
  *
  * Feedback (android-app#22): API 33+ shows the system's own copy overlay
- * — nothing here; API 31–32 shows Roboco's "Copied" toast. A
+ * — nothing here; API 31–32 shows Zeron's "Copied" toast. A
  * `TransactionTooLargeException`-style `RuntimeException` from Binder
  * logs and toasts "Could not copy the transcript." (iOS's pasteboard has
  * no such limit; Android's must not crash the app). An empty transcript
@@ -353,7 +353,7 @@ internal suspend fun copyTranscript(
             // finally, so a throwing plainText() never leaks it. (A bare
             // `use` does not resolve here: kotlin.io's applies to
             // java.io.Closeable, the bindings' own to `Disposable` in
-            // uniffi.roboco_core.)
+            // uniffi.zeron_core.)
             fresh != null -> try {
                 fresh.plainText()
             } finally {
@@ -369,7 +369,7 @@ internal suspend fun copyTranscript(
         // shows its overlay and a second toast would duplicate it.
         if (sdkInt <= Build.VERSION_CODES.S_V2) toaster.show("Copied")
     } catch (e: RuntimeException) {
-        Log.w("Roboco", "copy transcript failed: $e")
+        Log.w("Zeron", "copy transcript failed: $e")
         toaster.show("Could not copy the transcript.")
     }
 }
@@ -406,9 +406,9 @@ internal fun leaveAfterArchive(
 /** The previews' shared fixture: the ⋯ circle with the menu open below it. */
 @Composable
 private fun SessionMenuOpenPreview(pinned: Boolean, canWrite: Boolean) {
-    Box(Modifier.fillMaxWidth().height(220.dp).background(RobocoTheme.palette.background)) {
+    Box(Modifier.fillMaxWidth().height(220.dp).background(ZeronTheme.palette.background)) {
         GlassCircleButton(
-            icon = RobocoIcons.Ellipsis,
+            icon = ZeronIcons.Ellipsis,
             contentDescription = "More",
             onClick = {},
             modifier = Modifier.align(Alignment.TopEnd).padding(top = 24.dp, end = 16.dp),
@@ -441,17 +441,17 @@ private fun SessionMenuOpenPreview(pinned: Boolean, canWrite: Boolean) {
 @Preview(name = "light")
 @Composable
 private fun SessionMenuUnpinnedLightPreview() {
-    RobocoTheme(Appearance.Light) { SessionMenuOpenPreview(pinned = false, canWrite = true) }
+    ZeronTheme(Appearance.Light) { SessionMenuOpenPreview(pinned = false, canWrite = true) }
 }
 
 @Preview(name = "dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun SessionMenuPinnedDarkPreview() {
-    RobocoTheme(Appearance.Dark) { SessionMenuOpenPreview(pinned = true, canWrite = true) }
+    ZeronTheme(Appearance.Dark) { SessionMenuOpenPreview(pinned = true, canWrite = true) }
 }
 
 @Preview(name = "read-only light")
 @Composable
 private fun SessionMenuReadOnlyLightPreview() {
-    RobocoTheme(Appearance.Light) { SessionMenuOpenPreview(pinned = false, canWrite = false) }
+    ZeronTheme(Appearance.Light) { SessionMenuOpenPreview(pinned = false, canWrite = false) }
 }

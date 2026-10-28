@@ -1,9 +1,9 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.ui.geometry.Rect
-import sh.roboco.android.session.SessionScreenRoute
-import sh.roboco.android.shell.SessionRoute
+import sh.zeron.android.session.SessionScreenRoute
+import sh.zeron.android.shell.SessionRoute
 
 /**
  * What the handoff animator needs from the arriving session

@@ -1,4 +1,4 @@
-package sh.roboco.android.shell.tablet
+package sh.zeron.android.shell.tablet
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -52,15 +52,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.first
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.CapsuleShape
-import sh.roboco.android.design.Icon
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.GlassSurface
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.CapsuleShape
+import sh.zeron.android.design.Icon
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.GlassSurface
+import sh.zeron.android.design.uiStyle
 
 /**
  * The stacked search bar's geometry (105 §Geometry, dp). UIKit draws the
@@ -143,7 +143,7 @@ fun SidebarSearchField(
     state: SidebarState,
     modifier: Modifier = Modifier,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val keyboard = LocalSoftwareKeyboardController.current
     val focus = LocalFocusManager.current
@@ -228,7 +228,7 @@ fun SidebarSearchField(
             // a wrapped content box.
             Box(Modifier.fillMaxSize()) {
                 Icon(
-                    RobocoIcons.Magnifyingglass,
+                    ZeronIcons.Magnifyingglass,
                     tint = palette.secondary,
                     sizePt = SidebarSearchMetrics.IconPt,
                     modifier = Modifier
@@ -313,7 +313,7 @@ fun SidebarSearchField(
                         contentAlignment = Alignment.Center,
                     ) {
                         Icon(
-                            RobocoIcons.XmarkCircleFill,
+                            ZeronIcons.XmarkCircleFill,
                             tint = palette.tertiary,
                             sizePt = SidebarSearchMetrics.IconPt,
                         )
@@ -332,7 +332,7 @@ fun SidebarSearchField(
 
 @Composable
 private fun SidebarSearchFieldPreviewBody(appearance: Appearance, text: String) {
-    RobocoTheme(appearance) {
+    ZeronTheme(appearance) {
         // The field's state carries the preview's text from the start —
         // never edited during composition.
         val state = remember(text) { SidebarState(search = TextFieldState(text)) }
@@ -340,7 +340,7 @@ private fun SidebarSearchFieldPreviewBody(appearance: Appearance, text: String) 
             Modifier
                 .fillMaxWidth()
                 .height(SidebarSearchMetrics.BandHeight)
-                .background(RobocoTheme.palette.background),
+                .background(ZeronTheme.palette.background),
         ) {
             SidebarSearchField(state, Modifier.fillMaxWidth().height(SidebarSearchMetrics.BandHeight))
         }

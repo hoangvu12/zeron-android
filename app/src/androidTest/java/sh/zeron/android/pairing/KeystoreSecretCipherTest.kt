@@ -1,4 +1,4 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import android.content.Context
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -31,7 +31,7 @@ class KeystoreSecretCipherTest {
         get() = InstrumentationRegistry.getInstrumentation().targetContext
 
     private val aad: ByteArray
-        get() = "roboco.engine-credentials.v1:11111111-1111-4111-8111-111111111111"
+        get() = "zeron.engine-credentials.v1:11111111-1111-4111-8111-111111111111"
             .toByteArray(Charsets.UTF_8)
 
     private lateinit var cipher: KeystoreSecretCipher
@@ -69,7 +69,7 @@ class KeystoreSecretCipherTest {
     @Test
     fun aBlobBoundToOneEngineFailsAnotherEnginesAad() {
         val blob = cipher.encrypt("cred-x".toByteArray(Charsets.UTF_8), aad)
-        val otherAad = "roboco.engine-credentials.v1:22222222-2222-4222-8222-222222222222"
+        val otherAad = "zeron.engine-credentials.v1:22222222-2222-4222-8222-222222222222"
             .toByteArray(Charsets.UTF_8)
 
         assertThrows(AEADBadTagException::class.java) { cipher.decrypt(blob, otherAad) }

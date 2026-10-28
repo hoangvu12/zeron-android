@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,9 +10,9 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Test
-import uniffi.roboco_core.Connectivity
-import uniffi.roboco_core.ConnectivityState
-import uniffi.roboco_core.EngineState
+import uniffi.zeron_core.Connectivity
+import uniffi.zeron_core.ConnectivityState
+import uniffi.zeron_core.EngineState
 
 /**
  * [EngineHealthModel] (android-ui-parity #50) — the re-check loop:

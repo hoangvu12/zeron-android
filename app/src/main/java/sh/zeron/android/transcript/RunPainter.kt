@@ -1,7 +1,7 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.graphics.Canvas
-import sh.roboco.android.design.color
+import sh.zeron.android.design.color
 
 /**
  * The model-level facade over ticket 63's run painting, for the callers

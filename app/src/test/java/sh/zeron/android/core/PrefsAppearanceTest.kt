@@ -1,4 +1,4 @@
-package sh.roboco.android.core
+package sh.zeron.android.core
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -20,7 +20,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
-import sh.roboco.android.design.Appearance
+import sh.zeron.android.design.Appearance
 
 /**
  * `Prefs.appearance` (android-ui-parity #96) — the port of the

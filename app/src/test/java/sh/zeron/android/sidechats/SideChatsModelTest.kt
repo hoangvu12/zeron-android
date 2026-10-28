@@ -1,4 +1,4 @@
-package sh.roboco.android.sidechats
+package sh.zeron.android.sidechats
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -11,11 +11,11 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import sh.roboco.android.session.SessionEventHub
-import sh.roboco.android.sessions.SessionRowVM
-import uniffi.roboco_core.ClientEvent
-import uniffi.roboco_core.SubagentInfo
-import uniffi.roboco_core.SubagentState
+import sh.zeron.android.session.SessionEventHub
+import sh.zeron.android.sessions.SessionRowVM
+import uniffi.zeron_core.ClientEvent
+import uniffi.zeron_core.SubagentInfo
+import uniffi.zeron_core.SubagentState
 
 /**
  * The side chats state holder (android-next #06): the sections a pull
@@ -37,7 +37,7 @@ class SideChatsModelTest {
     private fun chat(id: String) = SessionRowVM(
         id = id,
         title = "Side $id",
-        projectName = "roboco",
+        projectName = "zeron",
         hasProject = true,
         colorIndex = 6,
         harness = "claude-code",

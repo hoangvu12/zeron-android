@@ -1,4 +1,4 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import android.util.Log
 import androidx.compose.runtime.Composable
@@ -13,9 +13,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import sh.roboco.android.RobocoApplication
-import sh.roboco.android.shell.DeepLinkHub
-import sh.roboco.android.shell.LocalRootPresentations
+import sh.zeron.android.ZeronApplication
+import sh.zeron.android.shell.DeepLinkHub
+import sh.zeron.android.shell.LocalRootPresentations
 
 /**
  * What [InboundPairing] needs from ticket 72's [PairPageLauncher] and
@@ -46,7 +46,7 @@ interface PairPageControl {
 
 /**
  * The hub's pairing handler (android-ui-parity #139): a
- * `roboco://pair…` link (tapped, or re-wrapped from a share) decodes,
+ * `zeron://pair…` link (tapped, or re-wrapped from a share) decodes,
  * is validated by the core's `parse_pairing_url` **off the main
  * thread**, and then only **pre-fills** ticket 72's Pair page — never
  * auto-redeems (android-app#18: an installed app receives links from
@@ -128,7 +128,7 @@ class InboundPairing(
  * missing core). **Never call on the main thread.**
  */
 fun ffiAcceptsPairingUrl(url: String): Boolean =
-    runCatching { uniffi.roboco_core.parsePairingUrl(url) }.isSuccess
+    runCatching { uniffi.zeron_core.parsePairingUrl(url) }.isSuccess
 
 /**
  * Composed once at the app root, inside 72's `ProvidePairPage`:
@@ -146,7 +146,7 @@ fun ffiAcceptsPairingUrl(url: String): Boolean =
 fun InboundPairingLinks(ready: Boolean) {
     val launcher = LocalPairPage.current ?: return
     val presentations = LocalRootPresentations.current
-    val hub = (LocalContext.current.applicationContext as RobocoApplication).deepLinks
+    val hub = (LocalContext.current.applicationContext as ZeronApplication).deepLinks
     val scope = rememberCoroutineScope()
     val inbound = remember(launcher, presentations, scope) {
         InboundPairing(

@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import android.content.ClipboardManager
 import android.content.Context
@@ -39,40 +39,40 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.ActionSheetModel
-import sh.roboco.android.design.ActionSheetPresenter
-import sh.roboco.android.design.ActionSheetStyle
-import sh.roboco.android.design.AlertButtonRole
-import sh.roboco.android.design.Alerts
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.Cue
-import sh.roboco.android.design.Feedback
-import sh.roboco.android.design.Haptic
-import sh.roboco.android.design.LocalActionSheet
-import sh.roboco.android.design.LocalAlerts
-import sh.roboco.android.design.LocalFeedback
-import sh.roboco.android.design.LocalToaster
-import sh.roboco.android.design.RobocoAlert
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.Toaster
-import sh.roboco.android.pairing.LocalPairPage
-import sh.roboco.android.pairing.PairClipboard
-import sh.roboco.android.pairing.PairPageLauncher
-import sh.roboco.android.pairing.PairingBackend
-import sh.roboco.android.pairing.PairedEngineSink
-import sh.roboco.android.shell.LocalNavEntry
-import sh.roboco.android.shell.LocalNavStack
-import sh.roboco.android.shell.NavRoute
-import sh.roboco.android.shell.NavStack
-import sh.roboco.android.shell.SheetHostState
-import uniffi.roboco_core.EngineState
-import uniffi.roboco_core.EngineView
-import uniffi.roboco_core.ParkReason
-import uniffi.roboco_core.PairedEngine
-import uniffi.roboco_core.RoomInviteTarget
-import uniffi.roboco_core.RoomJoinResult
-import uniffi.roboco_core.RoomRecord
-import uniffi.roboco_core.PairingTarget
+import sh.zeron.android.design.ActionSheetModel
+import sh.zeron.android.design.ActionSheetPresenter
+import sh.zeron.android.design.ActionSheetStyle
+import sh.zeron.android.design.AlertButtonRole
+import sh.zeron.android.design.Alerts
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.Cue
+import sh.zeron.android.design.Feedback
+import sh.zeron.android.design.Haptic
+import sh.zeron.android.design.LocalActionSheet
+import sh.zeron.android.design.LocalAlerts
+import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.design.LocalToaster
+import sh.zeron.android.design.ZeronAlert
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.Toaster
+import sh.zeron.android.pairing.LocalPairPage
+import sh.zeron.android.pairing.PairClipboard
+import sh.zeron.android.pairing.PairPageLauncher
+import sh.zeron.android.pairing.PairingBackend
+import sh.zeron.android.pairing.PairedEngineSink
+import sh.zeron.android.shell.LocalNavEntry
+import sh.zeron.android.shell.LocalNavStack
+import sh.zeron.android.shell.NavRoute
+import sh.zeron.android.shell.NavStack
+import sh.zeron.android.shell.SheetHostState
+import uniffi.zeron_core.EngineState
+import uniffi.zeron_core.EngineView
+import uniffi.zeron_core.ParkReason
+import uniffi.zeron_core.PairedEngine
+import uniffi.zeron_core.RoomInviteTarget
+import uniffi.zeron_core.RoomJoinResult
+import uniffi.zeron_core.RoomRecord
+import uniffi.zeron_core.PairingTarget
 
 /**
  * The Engine detail page's screen wiring (android-ui-parity #140,
@@ -110,12 +110,12 @@ class EngineDetailScreenTest {
     }
 
     private class FakeAlerts : Alerts {
-        val shown = mutableListOf<RobocoAlert>()
-        override fun show(alert: RobocoAlert) {
+        val shown = mutableListOf<ZeronAlert>()
+        override fun show(alert: ZeronAlert) {
             shown += alert
         }
 
-        override fun updateCurrent(alert: RobocoAlert) {}
+        override fun updateCurrent(alert: ZeronAlert) {}
 
         override fun dismissAll() {}
     }
@@ -245,7 +245,7 @@ class EngineDetailScreenTest {
      * [NavStack] with the detail route pushed, and the screen over the
      * fixture flow with the fake backend and the fixed clock.
      *
-     * @param pairPage when non-null, also provided as [sh.roboco.android.pairing.LocalPairPage]
+     * @param pairPage when non-null, also provided as [sh.zeron.android.pairing.LocalPairPage]
      */
     private fun mount(
         appearance: Appearance = Appearance.Light,
@@ -257,7 +257,7 @@ class EngineDetailScreenTest {
         stack.push(EngineDetailRoute("e1"), animated = false)
         val pushed = stack.entries.last()
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 CompositionLocalProvider(
                     LocalNavStack provides stack,
                     LocalNavEntry provides pushed,
@@ -496,7 +496,7 @@ class EngineDetailScreenTest {
                     id = "e1",
                     name = "Build box",
                     state = EngineState.Parked(ParkReason.INCOMPATIBLE),
-                    lastError = "Build box runs an older Roboco (0.8.0). Update Roboco on that device to connect.",
+                    lastError = "Build box runs an older Zeron (0.8.0). Update Zeron on that device to connect.",
                     host = "10.0.0.7:27655",
                     baseUrl = "http://10.0.0.7:27655",
                     deviceId = deviceId,
@@ -510,7 +510,7 @@ class EngineDetailScreenTest {
         compose.onNodeWithText("3d ago", useUnmergedTree = true).assertExists()
         row("engine-detail-pair-again").assertDoesNotExist()
         compose.onNodeWithText(
-            "Build box runs an older Roboco (0.8.0). Update Roboco on that device to connect.",
+            "Build box runs an older Zeron (0.8.0). Update Zeron on that device to connect.",
             useUnmergedTree = true,
         ).assertExists()
     }
@@ -528,7 +528,7 @@ class EngineDetailScreenTest {
                     deviceId = deviceId,
                     platform = "macos",
                     version = "0.10.0",
-                    notice = "MacBook Pro runs Roboco 0.10.0, newer than this app (0.9.2). " +
+                    notice = "MacBook Pro runs Zeron 0.10.0, newer than this app (0.9.2). " +
                         "Everything should keep working; if something looks wrong, update the app.",
                 ),
             ),

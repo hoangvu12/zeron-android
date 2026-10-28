@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import android.util.Log
 import kotlinx.coroutines.CancellationException
@@ -12,11 +12,11 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import sh.roboco.android.design.Toaster
-import uniffi.roboco_core.ClientEvent
-import uniffi.roboco_core.CoreClient
-import uniffi.roboco_core.CoreException
-import uniffi.roboco_core.SectionView
+import sh.zeron.android.design.Toaster
+import uniffi.zeron_core.ClientEvent
+import uniffi.zeron_core.CoreClient
+import uniffi.zeron_core.CoreException
+import uniffi.zeron_core.SectionView
 
 /**
  * The narrow FFI surface [CoreRowActions] needs (`mob:client_ffi/
@@ -170,7 +170,7 @@ class CoreRowActions(
     private val scope: CoroutineScope,
     private val io: CoroutineDispatcher = Dispatchers.IO.limitedParallelism(1),
     private val main: CoroutineDispatcher = Dispatchers.Main.immediate,
-    private val log: (String) -> Unit = { Log.w("Roboco", it) },
+    private val log: (String) -> Unit = { Log.w("Zeron", it) },
 ) : RowActions {
 
     private var noticeJob: Job? = null
@@ -202,7 +202,7 @@ class CoreRowActions(
     override fun archive(chatId: String, onResult: (ActionOutcome) -> Unit) {
         dispatch("archive", OpKind.Chat, onResult, onOk = {
             // Gated on Ok: iOS shows this even when the call threw
-            // (AppModel.swift:506-508), but Roboco writes fail fast when
+            // (AppModel.swift:506-508), but Zeron writes fail fast when
             // the engine is offline and the row stays — a stale Undo
             // would promise a restore that never happened.
             toaster.show(ARCHIVED_TOAST, ARCHIVED_TOAST_ACTION) { unarchive(chatId) }

@@ -1,9 +1,9 @@
-package sh.roboco.android.accounts
+package sh.zeron.android.accounts
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import uniffi.roboco_core.AgentAccountsSnapshot
-import uniffi.roboco_core.CoreClient
+import uniffi.zeron_core.AgentAccountsSnapshot
+import uniffi.zeron_core.CoreClient
 
 /**
  * The FFI seam of the agent-account surfaces (android-next#05) — the four
@@ -73,5 +73,5 @@ class CoreAccountsCore(
         client()?.cachedAgentAccounts(deviceId)
 
     /** The live client, or a `Closed` error when the core is not ready. */
-    private fun live(): CoreClient = client() ?: throw uniffi.roboco_core.CoreException.Closed()
+    private fun live(): CoreClient = client() ?: throw uniffi.zeron_core.CoreException.Closed()
 }

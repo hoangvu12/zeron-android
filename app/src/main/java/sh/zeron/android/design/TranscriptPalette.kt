@@ -1,6 +1,6 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
-import uniffi.roboco_core.ColorRole
+import uniffi.zeron_core.ColorRole
 
 /**
  * Transcript paint roles → ARGB for one appearance (iOS `Palette.color(_:)`,

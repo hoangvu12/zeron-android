@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.withContext
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The transcript's vertical scroll indicator (ticket 134, decision
@@ -97,7 +97,7 @@ internal fun Modifier.transcriptScrollIndicator(
     viewport: TranscriptViewport,
     state: TranscriptScrollIndicatorState = rememberTranscriptScrollIndicatorState(viewport),
 ): Modifier {
-    val thumbColor = (if (RobocoTheme.isDark) Color.White else Color.Black)
+    val thumbColor = (if (ZeronTheme.isDark) Color.White else Color.Black)
         .copy(alpha = INDICATOR_ALPHA)
     return drawWithContent {
         drawContent()

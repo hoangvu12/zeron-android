@@ -1,10 +1,10 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import kotlin.math.exp
-import sh.roboco.android.design.Motion
-import sh.roboco.android.design.UIScrollViewRubberBandC
-import sh.roboco.android.design.rubberBandOffset
-import sh.roboco.android.design.rubberBandTravel
+import sh.zeron.android.design.Motion
+import sh.zeron.android.design.UIScrollViewRubberBandC
+import sh.zeron.android.design.rubberBandOffset
+import sh.zeron.android.design.rubberBandTravel
 
 /**
  * The transcript's scroll physics constants and pure maths (ticket 134):

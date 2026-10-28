@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.content.res.Configuration
 import androidx.compose.animation.core.Animatable
@@ -32,11 +32,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.hazeSource
-import sh.roboco.android.composer.ComposerAttachButton
-import sh.roboco.android.composer.ComposerSurface
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.glass.ProvideHazeState
+import sh.zeron.android.composer.ComposerAttachButton
+import sh.zeron.android.composer.ComposerSurface
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.glass.ProvideHazeState
 
 /**
  * The "Composer surface" page of the debug design gallery
@@ -115,7 +115,7 @@ private fun ComposerSurfaceStage(
 /** The live stage: the caption toggle and the animating composer. */
 @Composable
 private fun ComposerSurfaceLiveStage() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val capture = LocalGalleryCapture.current
     val reduce = LocalReduceMotion.current
@@ -178,7 +178,7 @@ private fun TextStandIn(p: Float) {
 /** The placeholder: "Message" in tertiary, one line, tail-truncated. */
 @Composable
 private fun PlaceholderStandIn() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     BasicText(
         "Message",
@@ -191,7 +191,7 @@ private fun PlaceholderStandIn() {
 /** The chip strip: three `controlFill` capsules, 6 dp apart, 34 dp high. */
 @Composable
 private fun ChipsStandIn() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Row(
         horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -213,19 +213,19 @@ private fun ChipsStandIn() {
 /** The action button: a 34 dp accent circle with the send glyph (58 owns the real one). */
 @Composable
 private fun ActionStandIn() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     Box(
         Modifier.size(34.dp).clip(CapsuleShape).background(palette.accent),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(RobocoIcons.ArrowUp, tint = Color.White, sizePt = 15f, weight = SymbolWeight.Bold)
+        Icon(ZeronIcons.ArrowUp, tint = Color.White, sizePt = 15f, weight = SymbolWeight.Bold)
     }
 }
 
 /** The thumbnail strip: two 56 dp rounded boxes, 8 dp apart, 68 dp tall (88 owns the real one). */
 @Composable
 private fun ThumbsStandIn() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     Row(
         modifier = Modifier.padding(top = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -248,11 +248,11 @@ private fun ThumbsStandIn() {
 @Preview(name = "light")
 @Composable
 private fun ComposerSurfaceGalleryLightPreview() {
-    RobocoTheme(Appearance.Light) { ComposerSurfaceGallerySection() }
+    ZeronTheme(Appearance.Light) { ComposerSurfaceGallerySection() }
 }
 
 @Preview(name = "dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun ComposerSurfaceGalleryDarkPreview() {
-    RobocoTheme(Appearance.Dark) { ComposerSurfaceGallerySection() }
+    ZeronTheme(Appearance.Dark) { ComposerSurfaceGallerySection() }
 }

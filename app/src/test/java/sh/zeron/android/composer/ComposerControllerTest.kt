@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.text.TextRange
@@ -15,10 +15,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import sh.roboco.android.design.Cue
-import sh.roboco.android.design.Feedback
-import sh.roboco.android.design.Haptic
-import uniffi.roboco_core.FileMatch
+import sh.zeron.android.design.Cue
+import sh.zeron.android.design.Feedback
+import sh.zeron.android.design.Haptic
+import uniffi.zeron_core.FileMatch
 
 /**
  * [ComposerController] (android-ui-parity #54): every acceptance row of the
@@ -28,7 +28,7 @@ import uniffi.roboco_core.FileMatch
  * [SendResult]s (including the throw and the in-flight adaptations), the
  * haptic ordering and the `canWrite` gate.
  *
- * Robolectric (android-app#13): the suite constructs `uniffi.roboco_core.FileMatch`
+ * Robolectric (android-app#13): the suite constructs `uniffi.zeron_core.FileMatch`
  * records and `ImageBitmap(1, 1)`s. Nothing calls into the native core — the
  * mention index is built with the ticket's fake `link` (the real
  * `fileMentionLink` output is 53's `MentionLinkFfiTest`), so the tests need
@@ -58,7 +58,7 @@ class ComposerControllerTest {
             scope = this,
             feedback = feedback,
             initialText = initialText,
-            mentions = MentionIndex(link = { p, _ -> "[${p.substringAfterLast('/')}](roboco-file:$p)" }),
+            mentions = MentionIndex(link = { p, _ -> "[${p.substringAfterLast('/')}](zeron-file:$p)" }),
         )
         controller.onSend = onSend
         return controller
@@ -259,7 +259,7 @@ class ComposerControllerTest {
         assertEquals("@a.kt", c.mentions.token(FileMatch("src/a.kt", false)))
         c.text = "  see @a.kt \n"
         c.send(DeliveryMode.Queue)
-        assertEquals("see [a.kt](roboco-file:src/a.kt)", body)
+        assertEquals("see [a.kt](zeron-file:src/a.kt)", body)
     }
 
     @Test

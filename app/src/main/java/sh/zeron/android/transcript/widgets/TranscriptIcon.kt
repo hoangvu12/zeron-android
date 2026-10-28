@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import android.content.Context
 import android.graphics.BitmapFactory
@@ -22,16 +22,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import java.io.IOException
 import java.io.InputStream
-import sh.roboco.android.BuildConfig
-import sh.roboco.android.R
-import sh.roboco.android.design.Icon
-import sh.roboco.android.design.LocalIsDark
-import sh.roboco.android.design.RobocoIcon
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.SymbolWeight
-import sh.roboco.android.design.TranscriptPalette
-import sh.roboco.android.design.color
-import uniffi.roboco_core.ColorRole
+import sh.zeron.android.BuildConfig
+import sh.zeron.android.R
+import sh.zeron.android.design.Icon
+import sh.zeron.android.design.LocalIsDark
+import sh.zeron.android.design.ZeronIcon
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.SymbolWeight
+import sh.zeron.android.design.TranscriptPalette
+import sh.zeron.android.design.color
+import uniffi.zeron_core.ColorRole
 
 /**
  * How one icon-widget name is drawn (android-ui-parity #124; the three
@@ -39,7 +39,7 @@ import uniffi.roboco_core.ColorRole
  * Symbol, plus the "nothing" case):
  *
  * 1. [Tool] — a `tool-*` template VectorDrawable from #13's pipeline
- *    (Roboco's own line SVGs, identical geometry to the iOS catalog),
+ *    (Zeron's own line SVGs, identical geometry to the iOS catalog),
  *    tinted with the widget's color and aspect-fit into the rect;
  * 2. [FileIcon] — a full-colour `fileicon-*` PNG (96 px, with a
  *    `-dark` variant picked by the appearance), **never** tinted;
@@ -58,8 +58,8 @@ internal sealed interface TranscriptIconSource {
      */
     data class FileIcon(val name: String) : TranscriptIconSource
 
-    /** An SF Symbol name resolved through [RobocoIcons.forSfName]. */
-    data class Symbol(val icon: RobocoIcon) : TranscriptIconSource
+    /** An SF Symbol name resolved through [ZeronIcons.forSfName]. */
+    data class Symbol(val icon: ZeronIcon) : TranscriptIconSource
 
     /** Neither an asset nor a known symbol: draw nothing. */
     data object Unknown : TranscriptIconSource
@@ -80,7 +80,7 @@ internal object TranscriptIcons {
 
     /**
      * The 15 `tool-*` stems the iOS ToolIcons catalog carries → the #13
-     * VectorDrawables (Roboco's `crates/ui/assets/icons` line SVGs, the
+     * VectorDrawables (Zeron's `crates/ui/assets/icons` line SVGs, the
      * same geometry; the four stems the core never emits are kept for
      * catalog parity). A literal table, never `Resources.getIdentifier`
      * (reflection, slow, breaks resource shrinking).
@@ -162,13 +162,13 @@ internal object TranscriptIcons {
 
     /**
      * The uncached rule table: asset prefixes first, then the SF registry
-     * (which also handles SF `N.circle` names through [RobocoIcons]).
+     * (which also handles SF `N.circle` names through [ZeronIcons]).
      */
     private fun resolve(name: String): TranscriptIconSource {
         val resolved = when {
             name.startsWith("tool-") -> toolDrawables[name]?.let { TranscriptIconSource.Tool(it) }
             name.startsWith("fileicon-") -> TranscriptIconSource.FileIcon(name)
-            else -> RobocoIcons.forSfName(name)?.let { TranscriptIconSource.Symbol(it) }
+            else -> ZeronIcons.forSfName(name)?.let { TranscriptIconSource.Symbol(it) }
         }
         return resolved ?: TranscriptIconSource.Unknown.also { logOnce(name) }
     }
@@ -218,9 +218,9 @@ private fun openAssetFromApk(context: Context, path: String): InputStream? =
         null
     }
 
-/** The default [TranscriptIcons.log]: one warning, `RobocoTranscript`. */
+/** The default [TranscriptIcons.log]: one warning, `ZeronTranscript`. */
 private fun logWarning(message: String) {
-    Log.w("RobocoTranscript", message)
+    Log.w("ZeronTranscript", message)
 }
 
 /**

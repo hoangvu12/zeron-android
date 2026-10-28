@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -28,15 +28,15 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
-import uniffi.roboco_core.ChatIndicator
-import uniffi.roboco_core.SessionRow as CoreSessionRow
-import uniffi.roboco_core.SectionView
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
+import uniffi.zeron_core.ChatIndicator
+import uniffi.zeron_core.SessionRow as CoreSessionRow
+import uniffi.zeron_core.SectionView
 
 /**
  * The "Swipe rows" page of the debug design gallery (android-ui-parity
@@ -92,7 +92,7 @@ fun SwipeRowGallerySection() {
  */
 @Composable
 internal fun SwipeRowStaticBlock(modifier: Modifier = Modifier) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val cmd = remember { SwipeGalleryCommands(onLog = { }) }
     Column(
         modifier
@@ -140,7 +140,7 @@ private fun LiveRow(ctx: SessionRowContext, wrapper: SessionRowWrapper, onOpen: 
 /** One static row: [SwipeRow] with `previewOffset`, plain content. */
 @Composable
 private fun StaticRow(row: CoreSessionRow, offset: Dp?, cmd: SwipeGalleryCommands, archived: Boolean = false) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val height = LocalTypeScale.current.scaledDp(62f)
     val vm = remember(row) { SessionRowVM.from(row, homeColorIndex = 6) }
     val res = LocalContext.current.resources
@@ -164,7 +164,7 @@ private fun StaticRow(row: CoreSessionRow, offset: Dp?, cmd: SwipeGalleryCommand
 private fun Caption(text: String) {
     BasicText(
         text,
-        style = uiStyle(Face.Mono, LocalTypeScale.current.fixed(11f), RobocoTheme.palette.tertiary),
+        style = uiStyle(Face.Mono, LocalTypeScale.current.fixed(11f), ZeronTheme.palette.tertiary),
     )
 }
 
@@ -303,7 +303,7 @@ private fun ffRow(
 @Preview(name = "Swipe rows – Light", widthDp = 360)
 @Composable
 private fun SwipeRowStaticLightPreview() {
-    RobocoTheme(Appearance.Light) {
+    ZeronTheme(Appearance.Light) {
         ProvideGlyphClock(frozenAtNanos = 0L) {
             SwipeRowStaticBlock()
         }
@@ -313,7 +313,7 @@ private fun SwipeRowStaticLightPreview() {
 @Preview(name = "Swipe rows – Dark", widthDp = 360, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun SwipeRowStaticDarkPreview() {
-    RobocoTheme(Appearance.Dark) {
+    ZeronTheme(Appearance.Dark) {
         ProvideGlyphClock(frozenAtNanos = 0L) {
             SwipeRowStaticBlock()
         }

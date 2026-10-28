@@ -1,4 +1,4 @@
-package sh.roboco.android.core
+package sh.zeron.android.core
 
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -7,7 +7,7 @@ import org.junit.Test
 
 /**
  * The `Face` table (plain JVM, for the merge check): exactly 12 entries in
- * `uniffi.roboco_core.FaceRole` order (`mob:layout/style.rs:11-24`), with the
+ * `uniffi.zeron_core.FaceRole` order (`mob:layout/style.rs:11-24`), with the
  * file, weight, style and family of each, and the fontTools metrics the
  * centring consumers (tickets 37/39) read from [GeistMetrics].
  */
@@ -97,7 +97,7 @@ class FontFacesTest {
     @Test
     fun fontAssetsFilesDeriveFromTheFaceTable() {
         // android-app#13's generated-assets test iterates this list; it must
-        // stay in lockstep with `Face` (and buildSrc's RobocoFonts).
+        // stay in lockstep with `Face` (and buildSrc's ZeronFonts).
         assertEquals(
             listOf(
                 "Geist.ttf", "Geist-Medium.ttf", "Geist-SemiBold.ttf", "Geist-Bold.ttf",

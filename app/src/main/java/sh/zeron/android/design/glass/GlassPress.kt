@@ -1,4 +1,4 @@
-package sh.roboco.android.design.glass
+package sh.zeron.android.design.glass
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -18,7 +18,7 @@ import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.semantics.semantics
 import kotlinx.coroutines.launch
-import sh.roboco.android.design.LocalReduceMotion
+import sh.zeron.android.design.LocalReduceMotion
 
 /**
  * Test-only: the graphics-layer scale applied by [Modifier.glassPress]

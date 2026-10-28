@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.os.Looper
 import androidx.activity.ComponentActivity
@@ -43,7 +43,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.core.Face
+import sh.zeron.android.core.Face
 
 /**
  * Ticket 18's host behaviour (Robolectric, `createAndroidComposeRule`): the
@@ -75,7 +75,7 @@ class AlertHostTest {
     /** The app under the alert: a tappable box, so blocked taps are visible. */
     @Composable
     private fun DemoContent() {
-        val palette = RobocoTheme.palette
+        val palette = ZeronTheme.palette
         val typeScale = LocalTypeScale.current
         Box(
             Modifier
@@ -90,7 +90,7 @@ class AlertHostTest {
     private fun host(content: @Composable () -> Unit = { DemoContent() }): AlertHostState {
         val state = AlertHostState()
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 AlertHost(state = state) { content() }
             }
         }
@@ -104,22 +104,22 @@ class AlertHostTest {
 
     private fun bounds(tag: String): Rect = compose.onNodeWithTag(tag).pxBounds()
 
-    private val okAlert = RobocoAlert(
+    private val okAlert = ZeronAlert(
         title = "Couldn't start the session",
         message = "Choose a project or a host that can run it.",
         buttons = listOf(AlertButton("OK") { handlers += "ok" }),
     )
 
-    private val notNowAlert = RobocoAlert(
+    private val notNowAlert = ZeronAlert(
         title = "Notifications are off",
-        message = "Allow notifications for Roboco in Android settings.",
+        message = "Allow notifications for Zeron in Android settings.",
         buttons = listOf(
             AlertButton("Not Now", role = AlertButtonRole.Cancel) { handlers += "not-now" },
             AlertButton("Open Settings") { handlers += "settings" },
         ),
     )
 
-    private val renameAlert = RobocoAlert(
+    private val renameAlert = ZeronAlert(
         title = "Rename Session",
         field = AlertField(text = "Fix flaky test"),
         buttons = listOf(
@@ -128,7 +128,7 @@ class AlertHostTest {
         ),
     )
 
-    private val newFolderAlert = RobocoAlert(
+    private val newFolderAlert = ZeronAlert(
         title = "New Folder",
         message = "Create a folder in /Users/me/code on Studio.",
         field = AlertField(
@@ -142,7 +142,7 @@ class AlertHostTest {
         ),
     )
 
-    private fun retryAlert(name: String) = RobocoAlert(
+    private fun retryAlert(name: String) = ZeronAlert(
         title = "New Folder",
         message = "Couldn't create the folder. Enter a folder name without path separators.",
         field = AlertField(
@@ -157,7 +157,7 @@ class AlertHostTest {
         ),
     )
 
-    private val twoDefaultsAlert = RobocoAlert(
+    private val twoDefaultsAlert = ZeronAlert(
         title = "Version conflict",
         buttons = listOf(
             AlertButton("Keep Both Versions") { handlers += "keep" },
@@ -165,7 +165,7 @@ class AlertHostTest {
         ),
     )
 
-    private val threeButtonsAlert = RobocoAlert(
+    private val threeButtonsAlert = ZeronAlert(
         title = "Version conflict",
         message = "A session with this name already exists.",
         buttons = listOf(
@@ -238,7 +238,7 @@ class AlertHostTest {
         compose.mainClock.advanceTimeBy(100)
         compose.runOnUiThread {
             state.show(
-                RobocoAlert(
+                ZeronAlert(
                     title = "Rename Session",
                     buttons = listOf(
                         AlertButton("Rename") { handlers += "rename" },
@@ -554,8 +554,8 @@ class AlertHostTest {
         val state = host()
         compose.mainClock.advanceTimeBy(100)
         compose.runOnUiThread {
-            state.show(RobocoAlert("First", buttons = listOf(AlertButton("Dismiss First") { handlers += "first" })))
-            state.show(RobocoAlert("Second", buttons = listOf(AlertButton("Dismiss Second") { handlers += "second" })))
+            state.show(ZeronAlert("First", buttons = listOf(AlertButton("Dismiss First") { handlers += "first" })))
+            state.show(ZeronAlert("Second", buttons = listOf(AlertButton("Dismiss Second") { handlers += "second" })))
         }
         Snapshot.sendApplyNotifications() // frozen clock: hand the write to the Recomposer
         compose.mainClock.advanceTimeBy(400)
@@ -584,7 +584,7 @@ class AlertHostTest {
         compose.waitForIdle()
         compose.runOnUiThread {
             state.show(
-                RobocoAlert(
+                ZeronAlert(
                     title = "New Folder",
                     message = "Create a folder in /Users/me/code on Studio.",
                     field = AlertField(

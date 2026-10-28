@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 /**
  * Dragging a session between the front page's sections (wave-10 41,

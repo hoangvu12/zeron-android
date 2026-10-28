@@ -1,4 +1,4 @@
-package sh.roboco.android.image
+package sh.zeron.android.image
 
 import android.content.Context
 import android.content.res.Configuration
@@ -97,17 +97,17 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.IosSpring
-import sh.roboco.android.design.LocalReduceMotion
-import sh.roboco.android.design.Motion
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.smoothRoundedPath
-import sh.roboco.android.design.glass.GlassCircleButton
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.glass.ProvideHazeState
-import sh.roboco.android.shell.RegisterRootPresentation
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.IosSpring
+import sh.zeron.android.design.LocalReduceMotion
+import sh.zeron.android.design.Motion
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.smoothRoundedPath
+import sh.zeron.android.design.glass.GlassCircleButton
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.glass.ProvideHazeState
+import sh.zeron.android.shell.RegisterRootPresentation
 
 /**
  * The viewer's open/close transition spring (ticket Comments: UIKit's
@@ -1232,24 +1232,24 @@ private fun ViewerPage(state: ImageViewerState) {
                     .graphicsLayer { alpha = state.currentBackgroundAlpha() },
             ) {
                 GlassCircleButton(
-                    icon = RobocoIcons.Xmark,
+                    icon = ZeronIcons.Xmark,
                     contentDescription = CloseImagePreviewLabel,
                     onClick = { state.close() },
                     size = 44.dp,
                     iconPt = 15f,
-                    ink = RobocoTheme.palette.text,
+                    ink = ZeronTheme.palette.text,
                     modifier = Modifier
                         .align(Alignment.TopStart)
                         .padding(start = 16.dp, top = 8.dp)
                         .testTag(ImageViewerCloseTag),
                 )
                 GlassCircleButton(
-                    icon = RobocoIcons.SquareAndArrowUp,
+                    icon = ZeronIcons.SquareAndArrowUp,
                     contentDescription = ShareImageLabel,
                     onClick = { state.share(context) },
                     size = 44.dp,
                     iconPt = 15f,
-                    ink = RobocoTheme.palette.text,
+                    ink = ZeronTheme.palette.text,
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(end = 16.dp, top = 8.dp)
@@ -1389,7 +1389,7 @@ fun Modifier.imageViewerSource(reference: String): Modifier = composed {
 @Preview(name = "Image viewer light", widthDp = 393, heightDp = 852)
 @Composable
 private fun ImageViewerLightPreview() {
-    RobocoTheme(Appearance.Light) {
+    ZeronTheme(Appearance.Light) {
         val bitmap = remember { previewFixture() }
         val state = remember { ImageViewerState() }
         LaunchedEffect(state) { state.showForPreview(bitmap) }
@@ -1400,7 +1400,7 @@ private fun ImageViewerLightPreview() {
 @Preview(name = "Image viewer dark", widthDp = 393, heightDp = 852, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun ImageViewerDarkPreview() {
-    RobocoTheme(Appearance.Dark) {
+    ZeronTheme(Appearance.Dark) {
         val bitmap = remember { previewFixture() }
         val state = remember { ImageViewerState() }
         LaunchedEffect(state) { state.showForPreview(bitmap) }
@@ -1415,7 +1415,7 @@ private fun ImageViewerDarkPreview() {
  */
 @Composable
 private fun FakeTranscriptForPreview() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     Box(Modifier.fillMaxSize().background(palette.background)) {
         Box(
             Modifier

@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.content.res.Configuration
 import android.os.SystemClock
@@ -23,8 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
-import sh.roboco.android.core.Face
-import sh.roboco.android.shell.LargeTitleScaffold
+import sh.zeron.android.core.Face
+import sh.zeron.android.shell.LargeTitleScaffold
 
 /** The gallery's fake refresh durations (the ticket's three toggles). */
 private val GalleryRefreshDurations = listOf(100L, 2000L, 5000L)
@@ -54,7 +54,7 @@ private fun durationLabel(ms: Long): String = when (ms) {
  */
 @Composable
 fun PullToRefreshGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
 
     var durationMs by remember { mutableStateOf(GalleryRefreshDurations.first()) }
@@ -112,7 +112,7 @@ fun PullToRefreshGallerySection() {
 /** A toggle label: `accent` when selected, `secondary` when not. */
 @Composable
 private fun ToggleText(text: String, checked: Boolean, onClick: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     BasicText(
         text,
@@ -135,7 +135,7 @@ private fun ToggleText(text: String, checked: Boolean, onClick: () -> Unit) {
 @Preview(name = "Pull to refresh – light", widthDp = 393, heightDp = 852)
 @Composable
 private fun PullToRefreshGalleryLightPreview() {
-    RobocoTheme(Appearance.Light) {
+    ZeronTheme(Appearance.Light) {
         ProvideGlyphClock(frozenAtNanos = 0L) {
             PullToRefreshGallerySection()
         }
@@ -145,7 +145,7 @@ private fun PullToRefreshGalleryLightPreview() {
 @Preview(name = "Pull to refresh – dark", widthDp = 393, heightDp = 852, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun PullToRefreshGalleryDarkPreview() {
-    RobocoTheme(Appearance.Dark) {
+    ZeronTheme(Appearance.Dark) {
         ProvideGlyphClock(frozenAtNanos = 0L) {
             PullToRefreshGallerySection()
         }

@@ -1,4 +1,4 @@
-package sh.roboco.android
+package sh.zeron.android
 
 import android.content.ComponentName
 import android.content.Context
@@ -15,7 +15,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import sh.roboco.android.core.AppLifecycleHooks
+import sh.zeron.android.core.AppLifecycleHooks
 
 /**
  * The window setup (android-ui-parity #35, Robolectric + ActivityScenario):
@@ -23,7 +23,7 @@ import sh.roboco.android.core.AppLifecycleHooks
  * declaration that keeps the activity alive across rotation/fold/resize
  * and appearance changes, and — the #609/#621 regression — recreating the
  * activity never adds a second `ProcessLifecycleOwner` observer, because
- * the hooks are installed once in `RobocoApplication.onCreate`.
+ * the hooks are installed once in `ZeronApplication.onCreate`.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [36])

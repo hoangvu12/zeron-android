@@ -1,4 +1,4 @@
-package sh.roboco.android.update
+package sh.zeron.android.update
 
 import androidx.compose.runtime.Immutable
 import kotlin.math.roundToLong
@@ -9,7 +9,7 @@ import kotlin.math.roundToLong
  *
  * ```json
  * {"version": "0.10.0", "date": "2026-10-20T13:37:00Z",
- *  "files": {"roboco-0.10.0-android-arm64-v8a.apk": {"sha256": "…", "size": 24530000}}}
+ *  "files": {"zeron-0.10.0-android-arm64-v8a.apk": {"sha256": "…", "size": 24530000}}}
  * ```
  *
  * `date` and `size` are this ticket's additions to the workflow (the
@@ -56,11 +56,11 @@ data class ApkAsset(
 )
 
 /**
- * `roboco-<ver>-android-<abi>.apk` — the release workflow's staging name
+ * `zeron-<ver>-android-<abi>.apk` — the release workflow's staging name
  * (`release.yml` "Verify and stage APKs" → "updater manifest"), with the
  * manifest's own version string (the tag without `v`).
  */
-fun apkAssetName(version: String, abi: String): String = "roboco-$version-android-$abi.apk"
+fun apkAssetName(version: String, abi: String): String = "zeron-$version-android-$abi.apk"
 
 /**
  * Maps the device's primary ABI (`Build.SUPPORTED_ABIS[0]`) to the ABI of

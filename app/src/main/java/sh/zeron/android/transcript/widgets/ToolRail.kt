@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -26,14 +26,14 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlin.math.max
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalIsDark
-import sh.roboco.android.design.LocalReduceMotion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.TranscriptPalette
-import sh.roboco.android.design.color
-import uniffi.roboco_core.ColorRole
-import uniffi.roboco_core.WidgetKind
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalIsDark
+import sh.zeron.android.design.LocalReduceMotion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.TranscriptPalette
+import sh.zeron.android.design.color
+import uniffi.zeron_core.ColorRole
+import uniffi.zeron_core.WidgetKind
 
 /**
  * A plain mirror of `WidgetKind.ToolRail` (dp, widget-local — x from the
@@ -240,7 +240,7 @@ fun ToolRail(
     // while a running draw-in continues.
     val dark = LocalIsDark.current
     val stroke = Color(TranscriptPalette(dark).color(ColorRole.TOOL_RAIL))
-    val coverColor = RobocoTheme.palette.background
+    val coverColor = ZeronTheme.palette.background
     val uiDensity = LocalDensity.current
     val density = uiDensity.density
     val paths = remember(spec, density) { RailPaths(spec, density) }
@@ -297,8 +297,8 @@ fun ToolRail(
 @Preview(name = "Tool rail light")
 @Composable
 private fun ToolRailLightPreview() {
-    RobocoTheme(Appearance.System) {
-        Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+    ZeronTheme(Appearance.System) {
+        Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
             ToolRailPreviewFixture()
         }
     }
@@ -307,8 +307,8 @@ private fun ToolRailLightPreview() {
 @Preview(name = "Tool rail dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun ToolRailDarkPreview() {
-    RobocoTheme(Appearance.System) {
-        Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+    ZeronTheme(Appearance.System) {
+        Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
             ToolRailPreviewFixture()
         }
     }
@@ -322,7 +322,7 @@ private fun ToolRailDarkPreview() {
  */
 @Composable
 private fun ToolRailPreviewFixture() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val spec = remember {
         RailSpec(14.0625f, 6.75f, 31.5f, 18f, floatArrayOf(31.5f, 67.5f, 163.5f), floatArrayOf(36f, 96f, 36f))
     }

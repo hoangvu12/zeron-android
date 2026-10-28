@@ -1,4 +1,4 @@
-package sh.roboco.android.update
+package sh.zeron.android.update
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -22,13 +22,13 @@ class ReleaseManifestTest {
           "version": "0.10.0",
           "date": "2026-10-20T13:37:00Z",
           "files": {
-            "roboco-0.10.0-android-arm64-v8a.apk": {
+            "zeron-0.10.0-android-arm64-v8a.apk": {
               "sha256": "aabb", "size": 25700000
             },
-            "roboco-0.10.0-android-x86_64.apk": {
+            "zeron-0.10.0-android-x86_64.apk": {
               "sha256": "ccdd", "size": 24100000
             },
-            "roboco-0.10.0-linux-x86_64.tar.gz": { "sha256": "eeff" }
+            "zeron-0.10.0-linux-x86_64.tar.gz": { "sha256": "eeff" }
           }
         }
     """.trimIndent()
@@ -39,10 +39,10 @@ class ReleaseManifestTest {
         assertEquals("0.10.0", m.version)
         assertEquals("2026-10-20T13:37:00Z", m.date)
         assertEquals(3, m.files.size)
-        val arm = m.files["roboco-0.10.0-android-arm64-v8a.apk"]!!
+        val arm = m.files["zeron-0.10.0-android-arm64-v8a.apk"]!!
         assertEquals("aabb", arm.sha256)
         assertEquals(25700000L, arm.sizeBytes)
-        val tar = m.files["roboco-0.10.0-linux-x86_64.tar.gz"]!!
+        val tar = m.files["zeron-0.10.0-linux-x86_64.tar.gz"]!!
         assertEquals("eeff", tar.sha256)
         assertNull(tar.sizeBytes)
     }
@@ -112,14 +112,14 @@ class ReleaseManifestTest {
 
     @Test
     fun apkAssetNamesMatchTheReleaseWorkflow() {
-        // release.yml: dist/roboco-$ver-android-$abi.apk, with $ver the
+        // release.yml: dist/zeron-$ver-android-$abi.apk, with $ver the
         // manifest's own version string (no `v`).
         assertEquals(
-            "roboco-0.10.0-android-arm64-v8a.apk",
+            "zeron-0.10.0-android-arm64-v8a.apk",
             apkAssetName("0.10.0", "arm64-v8a"),
         )
         assertEquals(
-            "roboco-0.10.0-android-x86_64.apk",
+            "zeron-0.10.0-android-x86_64.apk",
             apkAssetName("0.10.0", "x86_64"),
         )
     }

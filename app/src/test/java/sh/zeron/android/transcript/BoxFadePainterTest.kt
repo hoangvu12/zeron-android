@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -15,13 +15,13 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.core.Fonts
-import sh.roboco.android.design.TranscriptPalette
-import uniffi.roboco_core.BoxPrim
-import uniffi.roboco_core.BoxStyle
-import uniffi.roboco_core.ColorRole
-import uniffi.roboco_core.Fade
-import uniffi.roboco_core.FadeEdge
+import sh.zeron.android.core.Fonts
+import sh.zeron.android.design.TranscriptPalette
+import uniffi.zeron_core.BoxPrim
+import uniffi.zeron_core.BoxStyle
+import uniffi.zeron_core.ColorRole
+import uniffi.zeron_core.Fade
+import uniffi.zeron_core.FadeEdge
 
 /**
  * Ticket 64's pixel tests for [BoxPainter] and [FadePainter] (native

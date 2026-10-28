@@ -1,10 +1,10 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.ui.platform.SoftwareKeyboardController
-import sh.roboco.android.design.AlertButton
-import sh.roboco.android.design.Alerts
-import sh.roboco.android.design.RobocoAlert
-import sh.roboco.android.session.StatusBanner
+import sh.zeron.android.design.AlertButton
+import sh.zeron.android.design.Alerts
+import sh.zeron.android.design.ZeronAlert
+import sh.zeron.android.session.StatusBanner
 
 /**
  * The UI seam of the queued-message edit (android-ui-parity #83): the
@@ -133,7 +133,7 @@ class ComposerEditHost(
     /** The `Can't edit right now` alert through ticket 18's host (never a Material dialog). */
     override fun showCantEditAlert() {
         alerts().show(
-            RobocoAlert(
+            ZeronAlert(
                 title = QueueEditCopy.AlertTitle,
                 message = QueueEditCopy.AlertMessage,
                 buttons = listOf(AlertButton(QueueEditCopy.AlertOk)),

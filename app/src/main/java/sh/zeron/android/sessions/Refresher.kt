@@ -1,12 +1,12 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import sh.roboco.android.design.PullToRefreshState
-import sh.roboco.android.design.rememberPullToRefreshState
-import uniffi.roboco_core.CoreClient
+import sh.zeron.android.design.PullToRefreshState
+import sh.zeron.android.design.rememberPullToRefreshState
+import uniffi.zeron_core.CoreClient
 
 /**
  * What a pull-to-refresh does (android-ui-parity #48): the Android
@@ -15,7 +15,7 @@ import uniffi.roboco_core.CoreClient
  * `CoreClient.refresh()` — it reconnects non-parked engines that are down
  * and probes every connected feed, resolving on fresh data or failure
  * with the core's own 3 s cap. The 0.6 s floor and the UI-side 3 s
- * backstop live in `design/PullToRefresh.kt`'s [holdRefresh][sh.roboco.android.design.holdRefresh],
+ * backstop live in `design/PullToRefresh.kt`'s [holdRefresh][sh.zeron.android.design.holdRefresh],
  * which wraps this — never call it directly from a screen.
  */
 fun interface Refresher {
@@ -33,7 +33,7 @@ val LocalRefresher = staticCompositionLocalOf<Refresher> { Refresher { } }
 /**
  * Production: android-app#06/#10's `CoreClient.refresh()`. A null client
  * (not paired yet / torn down) returns at once, so the spinner holds only
- * the 0.6 s floor — iOS spins for the full 3 s there; Roboco's shorter
+ * the 0.6 s floor — iOS spins for the full 3 s there; Zeron's shorter
  * hold is harmless. The call runs off main on [Dispatchers.IO] (ticket
  * 42's FFI threading rule: no `CoreClient` call on the main thread — JNA
  * entry and android-app#06's re-entrant listener callbacks stay off it),
@@ -46,7 +46,7 @@ fun coreRefresher(client: () -> CoreClient?): Refresher =
 /**
  * One [PullToRefreshState] for a session-list screen (tickets 45, 46, 49;
  * 105 reuses 46), wired to the ambient [Refresher]. Pass it to
- * [LargeTitleScaffold][sh.roboco.android.shell.LargeTitleScaffold]'s
+ * [LargeTitleScaffold][sh.zeron.android.shell.LargeTitleScaffold]'s
  * `pullToRefresh` slot.
  */
 @Composable

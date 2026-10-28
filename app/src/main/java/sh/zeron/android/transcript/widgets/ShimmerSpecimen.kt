@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -14,20 +14,20 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import kotlin.math.min
-import sh.roboco.android.core.Fonts
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.TranscriptPalette
-import sh.roboco.android.design.color
-import sh.roboco.android.transcript.RowModel
-import sh.roboco.android.transcript.StyleFonts
-import uniffi.roboco_core.ColorRole
-import uniffi.roboco_core.Decoration
-import uniffi.roboco_core.FaceRole
-import uniffi.roboco_core.RowDisplay
-import uniffi.roboco_core.StyleDesc
-import uniffi.roboco_core.TextRun
-import uniffi.roboco_core.Widget
-import uniffi.roboco_core.WidgetKind
+import sh.zeron.android.core.Fonts
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.TranscriptPalette
+import sh.zeron.android.design.color
+import sh.zeron.android.transcript.RowModel
+import sh.zeron.android.transcript.StyleFonts
+import uniffi.zeron_core.ColorRole
+import uniffi.zeron_core.Decoration
+import uniffi.zeron_core.FaceRole
+import uniffi.zeron_core.RowDisplay
+import uniffi.zeron_core.StyleDesc
+import uniffi.zeron_core.TextRun
+import uniffi.zeron_core.Widget
+import uniffi.zeron_core.WidgetKind
 
 /**
  * The shimmer specimen (ticket 122): a hand-built tool-group **header**
@@ -146,7 +146,7 @@ internal fun ShimmerSpecimen(dark: Boolean, phase: Float?) {
     val model = remember(fonts, d) { ShimmerSpecimen.model(fonts, d) }
     val palette = TranscriptPalette(dark)
     val widget = model.display.widgets[0]
-    Box(Modifier.size(402.dp, 29.25.dp).background(RobocoTheme.palette.background)) {
+    Box(Modifier.size(402.dp, 29.25.dp).background(ZeronTheme.palette.background)) {
         Canvas(Modifier.matchParentSize()) {
             drawIntoCanvas { c -> model.draw(0, c.nativeCanvas, d, palette, fonts) }
         }

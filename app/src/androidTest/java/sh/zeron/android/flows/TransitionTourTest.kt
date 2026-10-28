@@ -1,4 +1,4 @@
-package sh.roboco.android.flows
+package sh.zeron.android.flows
 
 import android.os.ParcelFileDescriptor
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -7,7 +7,7 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Configurator
 import androidx.test.uiautomator.UiDevice
 import java.util.regex.Pattern
-import sh.roboco.android.shell.ScopedIds
+import sh.zeron.android.shell.ScopedIds
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -24,7 +24,7 @@ import org.junit.runner.RunWith
  * 180 s, the `--time-limit` cap; `executeShellCommand` is already
  * asynchronous); the tour stops it at the end with `pkill -INT
  * screenrecord` so the mp4 finalizes. Recordings land in
- * `/sdcard/roboco-tour-<name>.mp4`, where `flow-tests.sh`'s artefact
+ * `/sdcard/zeron-tour-<name>.mp4`, where `flow-tests.sh`'s artefact
  * step picks them up.
  */
 @Tour
@@ -136,7 +136,7 @@ class TransitionTourTest {
 
     /**
      * Runs [body] while `screenrecord` captures the screen into
-     * `/sdcard/roboco-tour-<name>.mp4`.
+     * `/sdcard/zeron-tour-<name>.mp4`.
      */
     private fun record(name: String, body: () -> Unit) {
         // UiDevice first, then the UiAutomation with UiDevice's own flags,
@@ -148,7 +148,7 @@ class TransitionTourTest {
         val automation = InstrumentationRegistry.getInstrumentation()
             .getUiAutomation(Configurator.getInstance().uiAutomationFlags)
         // Asynchronous: returns at once; the fd reaches EOF when screenrecord exits.
-        val recording = automation.executeShellCommand("screenrecord --time-limit 180 /sdcard/roboco-tour-$name.mp4")
+        val recording = automation.executeShellCommand("screenrecord --time-limit 180 /sdcard/zeron-tour-$name.mp4")
         try {
             body()
         } finally {

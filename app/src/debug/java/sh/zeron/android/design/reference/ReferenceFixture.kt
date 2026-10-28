@@ -1,11 +1,11 @@
-package sh.roboco.android.design.reference
+package sh.zeron.android.design.reference
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpRect
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.GeistMetrics
-import sh.roboco.android.design.PrState
-import sh.roboco.android.design.roundHalfAway
+import sh.zeron.android.core.GeistMetrics
+import sh.zeron.android.design.PrState
+import sh.zeron.android.design.roundHalfAway
 
 /**
  * The fixed iOS geometry of the reference board (android-ui-parity #23):

@@ -1,20 +1,20 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import android.util.Log
 import androidx.compose.runtime.Immutable
-import uniffi.roboco_core.EngineState
-import uniffi.roboco_core.EngineView
-import uniffi.roboco_core.SessionRow
+import uniffi.zeron_core.EngineState
+import uniffi.zeron_core.EngineView
+import uniffi.zeron_core.SessionRow
 
 /**
  * The warning sink for the duplicate-section-id skip in
- * [buildSessionListItems]: production logs `Log.w("RobocoSessionList", …)`.
+ * [buildSessionListItems]: production logs `Log.w("ZeronSessionList", …)`.
  * Plain-JVM tests swap this — the stub `android.util.Log` throws "not
  * mocked" outside Robolectric (the same seam as `foldLogW`).
  */
 internal var sessionListLogW: (String) -> Unit = { Log.w(TAG, it) }
 
-private const val TAG = "RobocoSessionList"
+private const val TAG = "ZeronSessionList"
 
 /**
  * iOS `reload()`'s live derivation (`SessionListController.swift:134`):
@@ -171,7 +171,7 @@ fun buildSessionListItems(
 }
 
 /**
- * Which empty-state copy a list with no items shows (Roboco addition — iOS
+ * Which empty-state copy a list with no items shows (Zeron addition — iOS
  * shows a blank list). `Sessions` is the front page, `Archived` the
  * archived folder page; `None` (Pinned, user sections, Search) is blank.
  */

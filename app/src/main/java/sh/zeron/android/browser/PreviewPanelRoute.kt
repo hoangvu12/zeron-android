@@ -1,6 +1,6 @@
-package sh.roboco.android.browser
+package sh.zeron.android.browser
 
-import sh.roboco.android.shell.NavRoute
+import sh.zeron.android.shell.NavRoute
 
 /**
  * The preview panel's route (agent-previews ticket 05) — the phone's half

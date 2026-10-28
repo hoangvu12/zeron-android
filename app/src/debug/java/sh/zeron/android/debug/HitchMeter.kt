@@ -1,4 +1,4 @@
-package sh.roboco.android.debug
+package sh.zeron.android.debug
 
 import android.view.Choreographer
 import androidx.compose.foundation.background
@@ -22,10 +22,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.transcript.TranscriptState
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.transcript.TranscriptState
 import java.util.Locale
 
 /**
@@ -120,7 +120,7 @@ internal fun HitchMeter(state: TranscriptState, budget: FrameBudget, rate: Refre
 @Composable
 fun HitchMeterLabel(text: String, modifier: Modifier = Modifier) {
     if (text.isEmpty()) return
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     BasicText(
         text,
@@ -160,8 +160,8 @@ private fun HitchMeterDarkPreview() {
 
 @Composable
 private fun HitchMeterPreviewBody(appearance: Appearance) {
-    RobocoTheme(appearance) {
-        Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+    ZeronTheme(appearance) {
+        Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
             HitchMeterLabel(" 3 hitches · layout 1.4ms ", Modifier.align(Alignment.Center))
         }
     }

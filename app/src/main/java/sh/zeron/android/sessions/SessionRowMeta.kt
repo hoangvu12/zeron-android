@@ -1,9 +1,9 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.text.font.FontWeight
-import sh.roboco.android.core.GeistMetrics
-import sh.roboco.android.design.roundHalfAway
+import sh.zeron.android.core.GeistMetrics
+import sh.zeron.android.design.roundHalfAway
 import kotlin.math.max
 
 /**
@@ -43,7 +43,7 @@ fun showsBadge(vm: SessionRowVM): Boolean = vm.pr != null && vm.prNumber != null
  * The meta line's scale-dependent geometry — `SessionCell.swift:112-131,
  * 157-190` as pure dp math, the unit-test oracle for the composable's px
  * placement. All lengths are dp (Float); `k` is
- * [sh.roboco.android.design.LocalTypeScale]'s `factor`.
+ * [sh.zeron.android.design.LocalTypeScale]'s `factor`.
  *
  * Rounding is [roundHalfAway] (Swift `.rounded()`), so the half-point
  * sizes always round up at `k = 1` (`size(13.5) = 14`, `size(12.5) = 13`)

@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import android.Manifest
 import android.content.ClipData
@@ -70,18 +70,18 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.CapsuleShape
-import sh.roboco.android.design.Icon
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.NoFeedback
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.SymbolWeight
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.CapsuleShape
+import sh.zeron.android.design.Icon
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.NoFeedback
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.SymbolWeight
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.uiStyle
 
 /**
  * The attach menu's behaviour (android-ui-parity #87) through the real
@@ -250,7 +250,7 @@ class AttachMenuBehaviourTest {
     @Composable
     private fun Fixture(controller: ComposerController, attach: (ComposerMorphState) -> Unit) {
         CompositionLocalProvider(LocalActivityResultRegistryOwner provides registryOwner) {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 GlassMenuHost {
                     Box(Modifier.fillMaxSize()) {
                         val m = rememberComposerMorphState(
@@ -267,7 +267,7 @@ class AttachMenuBehaviourTest {
                                 .width(366.dp)
                                 .composerMorphHost(m),
                             text = {
-                                val palette = RobocoTheme.palette
+                                val palette = ZeronTheme.palette
                                 val typeScale = LocalTypeScale.current
                                 BasicTextField(
                                     value = controller.value,
@@ -285,7 +285,7 @@ class AttachMenuBehaviourTest {
                                     style = uiStyle(
                                         Face.Sans,
                                         LocalTypeScale.current.fixed(16.5f),
-                                        RobocoTheme.palette.tertiary,
+                                        ZeronTheme.palette.tertiary,
                                     ),
                                     maxLines = 1,
                                 )
@@ -304,7 +304,7 @@ class AttachMenuBehaviourTest {
     /** 58's action stand-in: a 34 dp accent circle carrying the marker. */
     @Composable
     private fun AttachAction(morph: ComposerMorphState) {
-        val palette = RobocoTheme.palette
+        val palette = ZeronTheme.palette
         Box(
             Modifier
                 .size(34.dp)
@@ -314,7 +314,7 @@ class AttachMenuBehaviourTest {
             contentAlignment = Alignment.Center,
         ) {
             Icon(
-                RobocoIcons.ArrowUp,
+                ZeronIcons.ArrowUp,
                 tint = Color.White,
                 sizePt = 15f,
                 weight = SymbolWeight.Bold,
@@ -467,7 +467,7 @@ class AttachMenuBehaviourTest {
 
         // A clip whose description carries an image mime appears on the
         // next open — only the description was read, never the data.
-        val uri = Uri.parse("content://sh.roboco.test.clipboard/img")
+        val uri = Uri.parse("content://sh.zeron.test.clipboard/img")
         clipboard.setPrimaryClip(ClipData(ClipDescription("img", arrayOf("image/png")), ClipData.Item(uri)))
         openMenu()
         compose.onNodeWithTag("attach-paste").assertExists()
@@ -527,7 +527,7 @@ class AttachMenuBehaviourTest {
     fun aPhotoBatchIsStagedOnceAndDeliveredWholeInOrder() {
         mount(initialImages = 5)
         val uris = listOf("one", "two", "three", "four").map {
-            Uri.parse("content://sh.roboco.test.photos/$it")
+            Uri.parse("content://sh.zeron.test.photos/$it")
         }
         registry.nextResult = { _, _ -> uris }
         stagerResult = listOf(stubImage("new-0"), stubImage("new-1"), stubImage("new-2"))
@@ -602,8 +602,8 @@ class AttachMenuBehaviourTest {
     @Test
     fun pasteStagesEveryUriItemInOrderAndSkipsTextItems() {
         mount()
-        val uri1 = Uri.parse("content://sh.roboco.test.clip/a")
-        val uri2 = Uri.parse("content://sh.roboco.test.clip/b")
+        val uri1 = Uri.parse("content://sh.zeron.test.clip/a")
+        val uri2 = Uri.parse("content://sh.zeron.test.clip/b")
         val clip = ClipData(ClipDescription("imgs", arrayOf("image/png")), ClipData.Item(uri1)).apply {
             addItem(ClipData.Item(uri2))
             addItem(ClipData.Item("plain text"))
@@ -628,7 +628,7 @@ class AttachMenuBehaviourTest {
         val gate = CompletableDeferred<Unit>()
         stagerGate = gate
         stagerResult = listOf(stubImage("late-0"))
-        val uris = listOf(Uri.parse("content://sh.roboco.test.photos/late"))
+        val uris = listOf(Uri.parse("content://sh.zeron.test.photos/late"))
         registry.nextResult = { _, _ -> uris }
 
         openMenu()
@@ -692,7 +692,7 @@ class AttachMenuBehaviourTest {
     // ---------------------------------------------------------------- fakes
 
     private companion object {
-        const val FILES_AUTHORITY = "sh.roboco.test.files"
+        const val FILES_AUTHORITY = "sh.zeron.test.files"
     }
 }
 

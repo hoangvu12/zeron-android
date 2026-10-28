@@ -1,8 +1,8 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
-import sh.roboco.android.shell.NavRoute
-import uniffi.roboco_core.SessionRow
-import uniffi.roboco_core.WorkspaceSnapshot
+import sh.zeron.android.shell.NavRoute
+import uniffi.zeron_core.SessionRow
+import uniffi.zeron_core.WorkspaceSnapshot
 
 /**
  * Which of the three folder kinds a [FolderRoute] shows — decided by the

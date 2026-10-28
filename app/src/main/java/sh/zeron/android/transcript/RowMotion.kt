@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import androidx.compose.animation.core.Easing
 import androidx.compose.runtime.Stable
@@ -6,9 +6,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.setValue
-import sh.roboco.android.design.Motion
-import uniffi.roboco_core.LayoutFrame
-import uniffi.roboco_core.RowKind
+import sh.zeron.android.design.Motion
+import uniffi.zeron_core.LayoutFrame
+import uniffi.zeron_core.RowKind
 
 /**
  * The two row-motion kinds (ticket 132; iOS `rowAnimation(old:new:)`,

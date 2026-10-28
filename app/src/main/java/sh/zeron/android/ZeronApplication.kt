@@ -1,4 +1,4 @@
-package sh.roboco.android
+package sh.zeron.android
 
 import android.app.Application
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -17,69 +17,69 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
-import sh.roboco.android.background.RunWatchController
-import sh.roboco.android.composer.CoreChipMenuCore
-import sh.roboco.android.accounts.CoreAccountsCore
-import sh.roboco.android.accounts.SessionAccountUsage
-import sh.roboco.android.composer.Drafts
-import sh.roboco.android.composer.QueueChromeFiller
-import sh.roboco.android.composer.SessionChipMenus
-import sh.roboco.android.core.AppLifecycleHooks
-import sh.roboco.android.core.AppearanceController
-import sh.roboco.android.core.CoreClientWorkspace
-import sh.roboco.android.core.CoreLoader
-import sh.roboco.android.core.CoreLifecycleSink
-import sh.roboco.android.core.CoreStartState
-import sh.roboco.android.core.CoreStartup
-import sh.roboco.android.core.CoreStatus
-import sh.roboco.android.core.FontGate
-import sh.roboco.android.core.Prefs
-import sh.roboco.android.core.TextEngine
-import sh.roboco.android.core.UiModeNightModeSink
-import sh.roboco.android.core.WorkspaceCore
-import sh.roboco.android.core.WorkspaceFeed
-import sh.roboco.android.core.robocoPrefsStore
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.AlertHostState
-import sh.roboco.android.design.ToasterState
-import sh.roboco.android.update.RELEASES_PAGE
-import sh.roboco.android.notify.NotificationCenter
-import sh.roboco.android.notify.NotificationPermission
-import sh.roboco.android.notify.NotificationPolicy
-import sh.roboco.android.notify.NotificationPrefs
-import sh.roboco.android.notify.Notifier
-import sh.roboco.android.newsession.NewSessionDraftStore
-import sh.roboco.android.pairing.KeystoreSecretCipher
-import sh.roboco.android.pairing.LaunchPairRedeemer
-import sh.roboco.android.pairing.PairedEngineStore
-import sh.roboco.android.session.CanWriteFiller
-import sh.roboco.android.session.ChromeFillerRegistry
-import sh.roboco.android.session.CoreLimitedCore
-import sh.roboco.android.session.CoreSessionCore
-import sh.roboco.android.session.CoreSessionOpener
-import sh.roboco.android.session.LimitedBanner
-import sh.roboco.android.session.QuestionsChromeFiller
-import sh.roboco.android.session.SessionChipsFiller
-import sh.roboco.android.session.StatusBanner
-import sh.roboco.android.session.installSessionRoutes
-import sh.roboco.android.sessions.CoreRowActions
-import sh.roboco.android.sessions.EngineHealthModel
-import sh.roboco.android.sessions.FoldState
-import sh.roboco.android.sessions.FrontPageModel
-import sh.roboco.android.sessions.asSessionWrites
-import sh.roboco.android.sessions.notices
-import sh.roboco.android.shell.DeepLinkHub
-import sh.roboco.android.shell.RootInput
-import sh.roboco.android.shell.RouterHooks
-import sh.roboco.android.shell.SearchTabState
-import sh.roboco.android.update.UpdateCenter
-import sh.roboco.android.composer.openInCustomTab
-import uniffi.roboco_core.ClientEvent
-import uniffi.roboco_core.CoreClient
-import uniffi.roboco_core.WorkspaceSnapshot
+import sh.zeron.android.background.RunWatchController
+import sh.zeron.android.composer.CoreChipMenuCore
+import sh.zeron.android.accounts.CoreAccountsCore
+import sh.zeron.android.accounts.SessionAccountUsage
+import sh.zeron.android.composer.Drafts
+import sh.zeron.android.composer.QueueChromeFiller
+import sh.zeron.android.composer.SessionChipMenus
+import sh.zeron.android.core.AppLifecycleHooks
+import sh.zeron.android.core.AppearanceController
+import sh.zeron.android.core.CoreClientWorkspace
+import sh.zeron.android.core.CoreLoader
+import sh.zeron.android.core.CoreLifecycleSink
+import sh.zeron.android.core.CoreStartState
+import sh.zeron.android.core.CoreStartup
+import sh.zeron.android.core.CoreStatus
+import sh.zeron.android.core.FontGate
+import sh.zeron.android.core.Prefs
+import sh.zeron.android.core.TextEngine
+import sh.zeron.android.core.UiModeNightModeSink
+import sh.zeron.android.core.WorkspaceCore
+import sh.zeron.android.core.WorkspaceFeed
+import sh.zeron.android.core.zeronPrefsStore
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.AlertHostState
+import sh.zeron.android.design.ToasterState
+import sh.zeron.android.update.RELEASES_PAGE
+import sh.zeron.android.notify.NotificationCenter
+import sh.zeron.android.notify.NotificationPermission
+import sh.zeron.android.notify.NotificationPolicy
+import sh.zeron.android.notify.NotificationPrefs
+import sh.zeron.android.notify.Notifier
+import sh.zeron.android.newsession.NewSessionDraftStore
+import sh.zeron.android.pairing.KeystoreSecretCipher
+import sh.zeron.android.pairing.LaunchPairRedeemer
+import sh.zeron.android.pairing.PairedEngineStore
+import sh.zeron.android.session.CanWriteFiller
+import sh.zeron.android.session.ChromeFillerRegistry
+import sh.zeron.android.session.CoreLimitedCore
+import sh.zeron.android.session.CoreSessionCore
+import sh.zeron.android.session.CoreSessionOpener
+import sh.zeron.android.session.LimitedBanner
+import sh.zeron.android.session.QuestionsChromeFiller
+import sh.zeron.android.session.SessionChipsFiller
+import sh.zeron.android.session.StatusBanner
+import sh.zeron.android.session.installSessionRoutes
+import sh.zeron.android.sessions.CoreRowActions
+import sh.zeron.android.sessions.EngineHealthModel
+import sh.zeron.android.sessions.FoldState
+import sh.zeron.android.sessions.FrontPageModel
+import sh.zeron.android.sessions.asSessionWrites
+import sh.zeron.android.sessions.notices
+import sh.zeron.android.shell.DeepLinkHub
+import sh.zeron.android.shell.RootInput
+import sh.zeron.android.shell.RouterHooks
+import sh.zeron.android.shell.SearchTabState
+import sh.zeron.android.update.UpdateCenter
+import sh.zeron.android.composer.openInCustomTab
+import uniffi.zeron_core.ClientEvent
+import uniffi.zeron_core.CoreClient
+import uniffi.zeron_core.WorkspaceSnapshot
 
 /**
- * The Roboco app shell: verifies the bundled fonts, loads the Rust mobile
+ * The Zeron app shell: verifies the bundled fonts, loads the Rust mobile
  * core, then starts the client pipeline (ticket 71) — the stored paired
  * engines load on IO, the single `CoreClient` is built from them, and the
  * splash (ticket 35) holds on `CoreStartState.Loading` until the engine
@@ -91,7 +91,7 @@ import uniffi.roboco_core.WorkspaceSnapshot
  * `deepLinks` (#36, landed), `drafts` (#84), `newSessionDrafts` (#92) —
  * do not reuse them for something else.
  */
-class RobocoApplication : Application() {
+class ZeronApplication : Application() {
 
     lateinit var core: CoreStatus
         private set
@@ -141,10 +141,10 @@ class RobocoApplication : Application() {
     val chromeFillers = ChromeFillerRegistry()
 
     /**
-     * The process-wide deep-link hub (ticket 36): holds `roboco://` links
+     * The process-wide deep-link hub (ticket 36): holds `zeron://` links
      * and `route` extras until a shell can take them (dispatched after the
      * shell's first frame), drops everything but `pair` while the pairing
-     * root is on screen, and hands `roboco://pair…` to the handler ticket
+     * root is on screen, and hands `zeron://pair…` to the handler ticket
      * 139 registers. App-lifetime on purpose: a link held while the
      * splash is up survives activity recreation.
      *
@@ -159,7 +159,7 @@ class RobocoApplication : Application() {
     /**
      * The appearance preference (ticket 96): the DataStore-backed
      * [Prefs.appearance] StateFlow — `System` until the first disk read —
-     * fed into the one root `RobocoTheme(appearance)`, the port of
+     * fed into the one root `ZeronTheme(appearance)`, the port of
      * `window.overrideUserInterfaceStyle` (`SceneDelegate.swift:14`).
      */
     val appearance: StateFlow<Appearance>
@@ -324,7 +324,7 @@ class RobocoApplication : Application() {
      * offline fold overrides — engine-local data (ADR 0004), never sent
      * to an engine.
      */
-    val prefs: Prefs by lazy { Prefs(robocoPrefsStore, applicationScope) }
+    val prefs: Prefs by lazy { Prefs(zeronPrefsStore, applicationScope) }
 
     /**
      * The workspace FFI seam, resolved at call time: whatever client
@@ -359,7 +359,7 @@ class RobocoApplication : Application() {
      * pushed on reconnect. One instance per process — the tablet sidebar
      * (105) shares it.
      */
-    val foldState: FoldState by lazy { FoldState(robocoPrefsStore, liveCore, applicationScope) }
+    val foldState: FoldState by lazy { FoldState(zeronPrefsStore, liveCore, applicationScope) }
 
     /**
      * The multi-engine health model (ticket 50): the 4 s show-slow /
@@ -402,7 +402,7 @@ class RobocoApplication : Application() {
      * precedent): the update center — an app-lifetime service, not a
      * screen — shows its alerts through it, so a prompt raised while no
      * activity is composed (or after a rotation) still lands in the live
-     * root host. `RobocoAppContent` passes it to `RootHosts` (the alert
+     * root host. `ZeronAppContent` passes it to `RootHosts` (the alert
      * host is the root's own; this is only the shared state behind it).
      */
     val appAlerts: AlertHostState by lazy { AlertHostState() }
@@ -440,7 +440,7 @@ class RobocoApplication : Application() {
 
     /**
      * The one object every session/section write goes through (ticket
-     * 42) — the [sh.roboco.android.sessions.RowActions] instance ticket
+     * 42) — the [sh.zeron.android.sessions.RowActions] instance ticket
      * 35 provides as `LocalRowActions` inside the root `ToastHost`.
      * Writes run on the serial IO lane, errors toast, a successful
      * archive shows "Archived · Undo", and the `ClientEvent.Notice`
@@ -506,12 +506,12 @@ class RobocoApplication : Application() {
 
     /**
      * Wave-10 43 (#626): the system is short of memory — shrink the core's
-     * warm sessions ([sh.roboco.android.background.trimIsCritical]). Off
+     * warm sessions ([sh.zeron.android.background.trimIsCritical]). Off
      * main: an eviction sizes transcripts.
      */
     override fun onTrimMemory(level: Int) {
         super.onTrimMemory(level)
-        val critical = sh.roboco.android.background.trimIsCritical(level) ?: return
+        val critical = sh.zeron.android.background.trimIsCritical(level) ?: return
         val client = clientOrNull() ?: return
         appScope.launch(Dispatchers.IO) { client.trimMemory(critical) }
     }

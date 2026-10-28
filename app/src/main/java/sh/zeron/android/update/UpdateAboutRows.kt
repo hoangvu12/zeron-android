@@ -1,19 +1,19 @@
-package sh.roboco.android.update
+package sh.zeron.android.update
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
 import java.util.Locale
-import sh.roboco.android.R
-import sh.roboco.android.design.GroupedAccessory
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.settings.AboutRowIds
-import sh.roboco.android.settings.AboutRowSpec
+import sh.zeron.android.R
+import sh.zeron.android.design.GroupedAccessory
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.settings.AboutRowIds
+import sh.zeron.android.settings.AboutRowSpec
 
 /**
  * The Settings → About update row (android-next#04, panels D/E/F): the
- * row spec per [UpdateUiState] — the accent "Update to Roboco <ver>" row
+ * row spec per [UpdateUiState] — the accent "Update to Zeron <ver>" row
  * (disclosure, size/date subtitle) while an update is known, the GitHub
  * row for non-release builds, and the "Check for Updates" row with its
  * four subtitle states. Pure over injected strings ([UpdateRowStrings])
@@ -33,7 +33,7 @@ fun updateAboutRow(
                 id = AboutRowIds.Update,
                 title = strings.updateTitle(state.manifest.version),
                 subtitle = updateSubtitle(state.manifest, strings, deviceAbi),
-                icon = RobocoIcons.ArrowDown,
+                icon = ZeronIcons.ArrowDown,
                 accent = true,
                 accessories = listOf(GroupedAccessory.Disclosure),
             )
@@ -44,7 +44,7 @@ fun updateAboutRow(
                 id = AboutRowIds.Update,
                 title = strings.githubTitle(state.manifest.version),
                 subtitle = strings.githubSubtitle,
-                icon = RobocoIcons.ArrowUpRight,
+                icon = ZeronIcons.ArrowUpRight,
                 accent = true,
                 accessories = listOf(GroupedAccessory.Disclosure),
             )
@@ -90,7 +90,7 @@ private fun checkRow(strings: UpdateRowStrings, subtitle: String?): AboutRowSpec
     id = AboutRowIds.Check,
     title = strings.checkTitle,
     subtitle = subtitle,
-    icon = RobocoIcons.Refresh,
+    icon = ZeronIcons.Refresh,
     accent = false,
     accessories = emptyList(),
 )

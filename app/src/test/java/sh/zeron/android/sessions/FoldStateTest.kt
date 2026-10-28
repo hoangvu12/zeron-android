@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -24,11 +24,11 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
-import sh.roboco.android.core.testPrefsStore
-import sh.roboco.android.design.Haptic
-import sh.roboco.android.design.NoFeedback
-import uniffi.roboco_core.CoreException
-import uniffi.roboco_core.EngineState
+import sh.zeron.android.core.testPrefsStore
+import sh.zeron.android.design.Haptic
+import sh.zeron.android.design.NoFeedback
+import uniffi.zeron_core.CoreException
+import uniffi.zeron_core.EngineState
 
 /**
  * `FoldState` (android-ui-parity #40): the phone-local folds, the

@@ -1,4 +1,4 @@
-package sh.roboco.android.design.gallery
+package sh.zeron.android.design.gallery
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -18,14 +18,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.hazeSource
-import sh.roboco.android.composer.QuestionCard
-import sh.roboco.android.composer.QuestionPageActions
-import sh.roboco.android.composer.QuestionPageModel
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.GlassStage
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.glass.ProvideHazeState
+import sh.zeron.android.composer.QuestionCard
+import sh.zeron.android.composer.QuestionPageActions
+import sh.zeron.android.composer.QuestionPageModel
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.GlassStage
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.glass.ProvideHazeState
 
 /**
  * The "Question card" page of the debug design gallery (android-ui-parity
@@ -52,7 +52,7 @@ import sh.roboco.android.design.glass.ProvideHazeState
  *  - **A** (synthetic): the geometry fixture — "Pick a tone", three
  *    one-line options, nothing picked, Next disabled, no Back. Card
  *    height 342.85 dp at 388 dp width.
- *  - **B1** (Roboco's `ROBOCO_MOCK_QUESTION` page 1, single pick): one
+ *  - **B1** (Zeron's `ZERON_MOCK_QUESTION` page 1, single pick): one
  *    option picked, the two long options wrap.
  *  - **B2** (mock page 2, multi): page 2 of 2 — Back shown, Submit, two
  *    of three picked (check squares).
@@ -290,7 +290,7 @@ private fun QuestionInteractiveCard() {
 /** The preview body: fixtures A and B2, each in a 420 dp stage at 388 dp. */
 @Composable
 private fun QuestionCardPreviewBody() {
-    Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+    Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             QuestionCardStage(QuestionCardFixtures.A, 420.dp)
             QuestionCardStage(QuestionCardFixtures.B2, 420.dp)
@@ -301,11 +301,11 @@ private fun QuestionCardPreviewBody() {
 @Preview(name = "Question card – light")
 @Composable
 private fun QuestionCardLightPreview() {
-    RobocoTheme(Appearance.Light) { QuestionCardPreviewBody() }
+    ZeronTheme(Appearance.Light) { QuestionCardPreviewBody() }
 }
 
 @Preview(name = "Question card – dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun QuestionCardDarkPreview() {
-    RobocoTheme(Appearance.Dark) { QuestionCardPreviewBody() }
+    ZeronTheme(Appearance.Dark) { QuestionCardPreviewBody() }
 }

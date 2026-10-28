@@ -1,11 +1,11 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 /**
  * The New Folder name check (android-ui-parity #111) — the client half of
  * upstream's server rules (`pr685:crates/engine/src/repos.rs:1363-1400`),
- * ported to Kotlin because Roboco has no `CreateFolder` RPC:
+ * ported to Kotlin because Zeron has no `CreateFolder` RPC:
  * `PrepareSpacePath` would otherwise accept `../x` as a path (the ticket's
- * ADAPT). The messages are the Roboco engine's, verbatim.
+ * ADAPT). The messages are the Zeron engine's, verbatim.
  *
  * Pure and plain-JVM: no Compose state, no uniffi types.
  */

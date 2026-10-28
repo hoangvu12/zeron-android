@@ -1,8 +1,8 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.ui.graphics.Color
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.StatusGlyphKind
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.StatusGlyphKind
 
 /**
  * What the title line's right corner shows — the discriminant of

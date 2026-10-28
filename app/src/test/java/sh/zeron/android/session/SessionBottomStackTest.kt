@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -44,10 +44,10 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
 
 /**
  * [SessionBottomStack]'s layout, reflow and touch routing
@@ -101,7 +101,7 @@ class SessionBottomStackTest {
     /** Composes the content and settles the first two frames (the glass flag flip included). */
     private fun host(content: @Composable () -> Unit) {
         compose.setContent {
-            RobocoTheme(Appearance.Light) { content() }
+            ZeronTheme(Appearance.Light) { content() }
         }
         compose.waitForIdle()
         compose.mainClock.advanceTimeByFrame()
@@ -146,7 +146,7 @@ class SessionBottomStackTest {
         // Written in composition, read in measure: a change invalidates
         // the measure and lands in the same frame's layout.
         state.imeOverride = ime
-        val palette = RobocoTheme.palette
+        val palette = ZeronTheme.palette
         SessionBottomStack(
             state = state,
             model = model,

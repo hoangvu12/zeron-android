@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
@@ -6,8 +6,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.input.TextFieldValue
-import uniffi.roboco_core.FileMatch
-import uniffi.roboco_core.fileMentionLink
+import uniffi.zeron_core.FileMatch
+import uniffi.zeron_core.fileMentionLink
 
 /**
  * The `@query` being typed: `[start, end)` covers `@` + query, with [end]
@@ -21,7 +21,7 @@ data class MentionQuery(val start: Int, val end: Int, val query: String)
 
 /**
  * `@file` mentions: the composer shows `@name` tokens; on send they become
- * the canonical `[name](roboco-file:path)` links the engine resolves.
+ * the canonical `[name](zeron-file:path)` links the engine resolves.
  * Port of `ios:Composer/Mentions.swift:5-48`.
  *
  * - Offsets are UTF-16 code units on both platforms (`NSString` ↔ Kotlin

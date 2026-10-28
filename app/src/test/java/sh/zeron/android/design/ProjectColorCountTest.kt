@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import org.junit.Assert.assertEquals
 import org.junit.Ignore
@@ -17,7 +17,7 @@ import org.robolectric.annotation.Config
  * android-app#07 is not merged yet, so the export is absent from the
  * generated bindings; the call is made reflectively to keep this file
  * compiling until then. When 07 merges: drop the @Ignore, call
- * `uniffi.roboco_core.projectColorCount()` directly and delete this comment.
+ * `uniffi.zeron_core.projectColorCount()` directly and delete this comment.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [36])
@@ -26,7 +26,7 @@ class ProjectColorCountTest {
     @Test
     @Ignore("needs android-app#07 project_color_count")
     fun projectColorCountMatchesThePalette() {
-        val bindings = Class.forName("uniffi.roboco_core.Roboco_coreKt")
+        val bindings = Class.forName("uniffi.zeron_core.Zeron_coreKt")
         val count = bindings.getMethod("projectColorCount").invoke(null) as UInt
         assertEquals(Palette.PROJECT_TONE_COUNT.toUInt(), count)
     }

@@ -1,11 +1,11 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 /**
  * The ordered [ChromeFiller] factories (android-ui-parity #76 — ticket
  * 51's "a list composed by ticket 76"). Register at app start, before
  * the first session can open: the filler tickets (73 banner, 78 chips,
  * 79 canWrite, 82 queue, 89 chip menus, 91 questions) call [register]
- * from `RobocoApplication.onCreate`.
+ * from `ZeronApplication.onCreate`.
  *
  * [create] runs once per opened route, so each filler is a fresh
  * instance per session — per-session filler state (73's sticky send

@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 /**
  * One dp rect in **row-local** coordinates (android-ui-parity #29): `x`

@@ -1,4 +1,4 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import android.content.Context
 import android.content.pm.PackageManager
@@ -19,7 +19,7 @@ import javax.crypto.spec.GCMParameterSpec
 
 /**
  * [SecretCipher] over a non-exportable Android Keystore AES-256-GCM key —
- * Roboco's Keychain equivalent (iOS `AppModel.swift`'s `enum Keychain`).
+ * Zeron's Keychain equivalent (iOS `AppModel.swift`'s `enum Keychain`).
  *
  * The key is created lazily on the first **encrypt**, never on decrypt:
  * a missing key on decrypt is a decrypt failure, so a lost key degrades
@@ -35,8 +35,8 @@ class KeystoreSecretCipher(private val context: Context) : SecretCipher {
 
     companion object {
         /** Also the AAD prefix — one constant, no new naming surface. */
-        const val ALIAS = "roboco.engine-credentials.v1"
-        private const val TAG = "Roboco"
+        const val ALIAS = "zeron.engine-credentials.v1"
+        private const val TAG = "Zeron"
         private const val PROVIDER = "AndroidKeyStore"
         private const val TRANSFORMATION = "AES/GCM/NoPadding"
         private const val IV_BYTES = 12

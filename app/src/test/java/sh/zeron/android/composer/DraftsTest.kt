@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -30,7 +30,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
-import sh.roboco.android.core.testPrefsStore
+import sh.zeron.android.core.testPrefsStore
 
 /**
  * [Drafts] (android-ui-parity #84) — the store's whole contract on the

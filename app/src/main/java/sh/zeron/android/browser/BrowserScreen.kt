@@ -1,4 +1,4 @@
-package sh.roboco.android.browser
+package sh.zeron.android.browser
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -34,15 +34,15 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.SymbolWeight
-import sh.roboco.android.design.glass.ActivitySpinner
-import sh.roboco.android.design.glass.GlassCircleButton
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.shell.LocalNavStack
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.SymbolWeight
+import sh.zeron.android.design.glass.ActivitySpinner
+import sh.zeron.android.design.glass.GlassCircleButton
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.shell.LocalNavStack
 
 /**
  * The in-app browser entry's test tags (ticket 22's rule).
@@ -80,7 +80,7 @@ fun BrowserScreen(
     webViewFactory: (Context) -> WebView = ::WebView,
 ) {
     val context = LocalContext.current
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val page = remember(route.url) { BrowserPage(route.title) }
     val webView = remember(route.url) {
         webViewFactory(context).apply {
@@ -115,7 +115,7 @@ fun BrowserScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             GlassCircleButton(
-                icon = RobocoIcons.ChevronBackward,
+                icon = ZeronIcons.ChevronBackward,
                 contentDescription = PreviewsCopy.Back,
                 onClick = { stack.pop() },
                 modifier = Modifier.testTag(BrowserTags.Back),
@@ -132,7 +132,7 @@ fun BrowserScreen(
                 overflow = TextOverflow.Ellipsis,
             )
             GlassCircleButton(
-                icon = RobocoIcons.ArrowUp,
+                icon = ZeronIcons.ArrowUp,
                 contentDescription = PreviewsCopy.Reload,
                 onClick = { webView.reload() },
                 modifier = Modifier.testTag(BrowserTags.Reload),

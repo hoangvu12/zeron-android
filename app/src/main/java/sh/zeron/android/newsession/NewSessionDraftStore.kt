@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import android.content.Context
 import android.util.Log
@@ -18,12 +18,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import sh.roboco.android.composer.DEFAULT_HARNESS
-import sh.roboco.android.composer.DraftKey
-import sh.roboco.android.composer.Drafts
-import sh.roboco.android.composer.StagedImage
-import sh.roboco.android.shell.LaunchOptions
-import uniffi.roboco_core.WorkspaceSnapshot
+import sh.zeron.android.composer.DEFAULT_HARNESS
+import sh.zeron.android.composer.DraftKey
+import sh.zeron.android.composer.Drafts
+import sh.zeron.android.composer.StagedImage
+import sh.zeron.android.shell.LaunchOptions
+import uniffi.zeron_core.WorkspaceSnapshot
 
 /**
  * The New Session page's sticky state, app-wide (android-ui-parity #92) —
@@ -33,7 +33,7 @@ import uniffi.roboco_core.WorkspaceSnapshot
  *
  * - **[lastDraft]** — the options record, persisted as JSON under the
  *   DataStore key `newSessionDraft` (the iOS `UserDefaults` key) on
- *   **every assignment** (the Roboco adaptation of `didSet`: every draft
+ *   **every assignment** (the Zeron adaptation of `didSet`: every draft
  *   change is persisted, not only the close paths — same stored state at
  *   every observable moment, and it survives an abnormal process death
  *   while the page is open).
@@ -46,7 +46,7 @@ import uniffi.roboco_core.WorkspaceSnapshot
  * Threading (ticket 84's write mechanics, identical shape): the mirror is
  * updated synchronously on the main thread (a read right after an
  * assignment sees the new value), and the disk write runs on [scope]
- * (which must outlive every page — `RobocoApplication.appScope`) +
+ * (which must outlive every page — `ZeronApplication.appScope`) +
  * [io], writing the mirror's **current** JSON, so writes are
  * order-insensitive and the last state wins.
  *
@@ -64,7 +64,7 @@ class NewSessionDraftStore(
     private val store: DataStore<Preferences>,
     /** Ticket 84's store: the typed text lives under its `"new-session"` key. */
     private val drafts: Drafts,
-    /** The process-lifetime scope (`RobocoApplication.appScope`) — outlives every page. */
+    /** The process-lifetime scope (`ZeronApplication.appScope`) — outlives every page. */
     private val scope: CoroutineScope,
     private val io: CoroutineDispatcher = Dispatchers.IO,
     /** Ticket 36's debug-only harness extra; a seam so tests can pin it. */
@@ -107,7 +107,7 @@ class NewSessionDraftStore(
 
     /**
      * Starts the first disk read (idempotent; called once from
-     * `RobocoApplication.onCreate`, which precedes every activity's
+     * `ZeronApplication.onCreate`, which precedes every activity's
      * `setContent`). A read failure is logged content-free and treated as
      * absent; the store is marked loaded either way.
      */
@@ -122,7 +122,7 @@ class NewSessionDraftStore(
                 // IOException and anything else the first read can throw
                 // (the corruption handler already reset the file): absent,
                 // marked loaded — never a crash from the app's scope.
-                Log.w("Roboco", "new-session load failed")
+                Log.w("Zeron", "new-session load failed")
                 null
             }
             synchronized(lock) {
@@ -250,7 +250,7 @@ class NewSessionDraftStore(
             } catch (t: Throwable) {
                 // IOException from DataStore and anything else a write can
                 // throw — content-free on purpose: never the JSON or ids.
-                Log.w("Roboco", "new-session write failed")
+                Log.w("Zeron", "new-session write failed")
             }
         }
     }
@@ -265,13 +265,13 @@ class NewSessionDraftStore(
         /**
          * The process's single DataStore for [FILE_NAME] (a second active
          * instance on the same file throws). Create once, in
-         * `RobocoApplication` — the same shape as ticket 84's
+         * `ZeronApplication` — the same shape as ticket 84's
          * `drafts.preferences_pb`.
          */
         fun createDataStore(context: Context, scope: CoroutineScope): DataStore<Preferences> =
             PreferenceDataStoreFactory.create(
                 corruptionHandler = ReplaceFileCorruptionHandler {
-                    Log.w("Roboco", "new-session store corrupt; reset")
+                    Log.w("Zeron", "new-session store corrupt; reset")
                     emptyPreferences()
                 },
                 scope = scope,

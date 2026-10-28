@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import java.util.Locale
-import sh.roboco.android.core.Face
+import sh.zeron.android.core.Face
 
 /**
  * The type specimen: one line per [Face] in `fixed(17)`, the fixed /
@@ -31,7 +31,7 @@ import sh.roboco.android.core.Face
  */
 @Composable
 fun TypeSpecimen(modifier: Modifier = Modifier) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
 
     Box(modifier.fillMaxSize().background(palette.background)) {
@@ -76,19 +76,19 @@ fun TypeSpecimen(modifier: Modifier = Modifier) {
 @Preview(name = "Type light")
 @Composable
 private fun TypeSpecimenLightPreview() {
-    RobocoTheme(Appearance.Light) { TypeSpecimen() }
+    ZeronTheme(Appearance.Light) { TypeSpecimen() }
 }
 
 @Preview(name = "Type dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun TypeSpecimenDarkPreview() {
-    RobocoTheme(Appearance.Dark) { TypeSpecimen() }
+    ZeronTheme(Appearance.Dark) { TypeSpecimen() }
 }
 
 @Preview(name = "Type 1.3x", fontScale = 1.3f)
 @Composable
 private fun TypeSpecimenFontScalePreview() {
-    RobocoTheme(Appearance.Light) { TypeSpecimen() }
+    ZeronTheme(Appearance.Light) { TypeSpecimen() }
 }
 
 private val missingFontSample = listOf("fonts/Geist.ttf", "fonts/GeistMono.ttf")
@@ -96,11 +96,11 @@ private val missingFontSample = listOf("fonts/Geist.ttf", "fonts/GeistMono.ttf")
 @Preview(name = "Fonts missing - light")
 @Composable
 private fun FontsMissingLightPreview() {
-    RobocoTheme(Appearance.Light) { FontsMissingScreen(missingFontSample) }
+    ZeronTheme(Appearance.Light) { FontsMissingScreen(missingFontSample) }
 }
 
 @Preview(name = "Fonts missing - dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun FontsMissingDarkPreview() {
-    RobocoTheme(Appearance.Dark) { FontsMissingScreen(missingFontSample) }
+    ZeronTheme(Appearance.Dark) { FontsMissingScreen(missingFontSample) }
 }

@@ -1,16 +1,16 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
-import uniffi.roboco_core.BoxPrim
-import uniffi.roboco_core.BoxStyle
-import uniffi.roboco_core.ColorRole
-import uniffi.roboco_core.Decoration
-import uniffi.roboco_core.Fade
-import uniffi.roboco_core.FadeEdge
-import uniffi.roboco_core.FaceRole
-import uniffi.roboco_core.RowDisplay
-import uniffi.roboco_core.Scroller
-import uniffi.roboco_core.StyleDesc
-import uniffi.roboco_core.TextRun
+import uniffi.zeron_core.BoxPrim
+import uniffi.zeron_core.BoxStyle
+import uniffi.zeron_core.ColorRole
+import uniffi.zeron_core.Decoration
+import uniffi.zeron_core.Fade
+import uniffi.zeron_core.FadeEdge
+import uniffi.zeron_core.FaceRole
+import uniffi.zeron_core.RowDisplay
+import uniffi.zeron_core.Scroller
+import uniffi.zeron_core.StyleDesc
+import uniffi.zeron_core.TextRun
 
 /**
  * Synthetic [RowDisplay]s and [StyleDesc]s for ticket 62's tests

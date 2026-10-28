@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.core.Animatable
@@ -36,9 +36,9 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalWindowInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import sh.roboco.android.design.LocalReduceMotion
-import sh.roboco.android.design.Motion
-import sh.roboco.android.transcript.InteractiveImeDismiss
+import sh.zeron.android.design.LocalReduceMotion
+import sh.zeron.android.design.Motion
+import sh.zeron.android.transcript.InteractiveImeDismiss
 
 /**
  * iOS `ComposerBar.wantsCard` (`ios:Composer/ComposerBar.swift:308-310`):
@@ -52,7 +52,7 @@ fun wantsCard(alwaysCard: Boolean, focused: Boolean, hasImages: Boolean): Boolea
 
 /**
  * One step of the Android-only "a closed IME blurs the field" rule (the
- * Roboco adaptation of `textViewDidEndEditing`, which on iOS is the same
+ * Zeron adaptation of `textViewDidEndEditing`, which on iOS is the same
  * event as "keyboard went away"). Returns `(newImeSeen, shouldBlur)`:
  *
  *  - not focused → the watch resets, nothing blurs;

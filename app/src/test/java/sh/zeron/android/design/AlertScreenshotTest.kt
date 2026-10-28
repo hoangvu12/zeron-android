@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -46,9 +46,9 @@ class AlertScreenshotTest {
         ReduceMotion.resetForTest()
     }
 
-    private fun shot(appearance: Appearance, file: String, alert: RobocoAlert, fieldText: String = "") {
+    private fun shot(appearance: Appearance, file: String, alert: ZeronAlert, fieldText: String = "") {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 AlertGoldenFixture(alert, TextFieldValue(fieldText))
             }
         }
@@ -58,8 +58,8 @@ class AlertScreenshotTest {
 
     /** The card, centred over the stripes and the 0.2 scrim, no host (static). */
     @Composable
-    private fun AlertGoldenFixture(alert: RobocoAlert, fieldValue: TextFieldValue) {
-        val palette = RobocoTheme.palette
+    private fun AlertGoldenFixture(alert: ZeronAlert, fieldValue: TextFieldValue) {
+        val palette = ZeronTheme.palette
         Box(Modifier.fillMaxSize().background(palette.background)) {
             AlertStripes()
             Box(Modifier.fillMaxSize().background(rgba(0x000000, 0.2)))
@@ -67,7 +67,7 @@ class AlertScreenshotTest {
                 Modifier.fillMaxSize().padding(16.dp),
                 contentAlignment = Alignment.Center,
             ) {
-                RobocoAlertCard(
+                ZeronAlertCard(
                     alert = alert,
                     fieldValue = fieldValue,
                     onFieldValueChange = {},
@@ -79,22 +79,22 @@ class AlertScreenshotTest {
         }
     }
 
-    private val okAlert = RobocoAlert(
+    private val okAlert = ZeronAlert(
         title = "Couldn't start the session",
         message = "Choose a project or a host that can run it.",
         buttons = listOf(AlertButton("OK")),
     )
 
-    private val twoButtonsAlert = RobocoAlert(
+    private val twoButtonsAlert = ZeronAlert(
         title = "Notifications are off",
-        message = "Allow notifications for Roboco in Android settings.",
+        message = "Allow notifications for Zeron in Android settings.",
         buttons = listOf(
             AlertButton("Not Now", role = AlertButtonRole.Cancel),
             AlertButton("Open Settings"),
         ),
     )
 
-    private val fieldAlert = RobocoAlert(
+    private val fieldAlert = ZeronAlert(
         title = "Rename Session",
         field = AlertField(text = "Fix flaky test"),
         buttons = listOf(
@@ -103,7 +103,7 @@ class AlertScreenshotTest {
         ),
     )
 
-    private val newFolderAlert = RobocoAlert(
+    private val newFolderAlert = ZeronAlert(
         title = "New Folder",
         message = "Create a folder in /Users/me/code on Studio.",
         field = AlertField(
@@ -117,7 +117,7 @@ class AlertScreenshotTest {
         ),
     )
 
-    private val stackedAlert = RobocoAlert(
+    private val stackedAlert = ZeronAlert(
         title = "Version conflict",
         message = "A session with this name already exists.",
         buttons = listOf(
@@ -127,7 +127,7 @@ class AlertScreenshotTest {
         ),
     )
 
-    private val destructiveAlert = RobocoAlert(
+    private val destructiveAlert = ZeronAlert(
         title = "Remove wallpaper?",
         buttons = listOf(
             AlertButton("Cancel", role = AlertButtonRole.Cancel),
@@ -135,7 +135,7 @@ class AlertScreenshotTest {
         ),
     )
 
-    private val retryAlert = RobocoAlert(
+    private val retryAlert = ZeronAlert(
         title = "New Folder",
         message = "Couldn't create the folder. Enter a folder name without path separators.",
         field = AlertField(

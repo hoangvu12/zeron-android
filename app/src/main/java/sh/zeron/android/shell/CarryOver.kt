@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 /**
  * The collapse / expand carry-over across the 840 dp breakpoint
@@ -17,7 +17,7 @@ package sh.roboco.android.shell
  *   captured chat on the phone Sessions tab — through the fence, so the
  *   outgoing copy detaches before the incoming one attaches.
  * - **Widening** (Phone → Split) pops the phone Sessions stack (and the
- *   Search stack, the Roboco adaptation) and brings the last open session
+ *   Search stack, the Zeron adaptation) and brings the last open session
  *   into the detail column, or shows the draft when none was open and the
  *   column is empty.
  *
@@ -102,7 +102,7 @@ sealed interface CarryOverStep {
     /** iOS `:176`: `tabs.popToFrontPage()`. */
     data object PopTabsToFrontPage : CarryOverStep
 
-    /** The Roboco adaptation: pop a session off the hidden Search stack too. */
+    /** The Zeron adaptation: pop a session off the hidden Search stack too. */
     data object PopSearchSessions : CarryOverStep
 
     /** iOS `:178-183`: the detail open (no dismissal, no animation). */

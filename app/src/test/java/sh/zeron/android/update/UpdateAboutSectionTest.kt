@@ -1,4 +1,4 @@
-package sh.roboco.android.update
+package sh.zeron.android.update
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,15 +16,15 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.core.CoreStatus
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.settingsTag
-import sh.roboco.android.settings.AboutRowIds
-import sh.roboco.android.settings.AboutSectionState
-import sh.roboco.android.settings.aboutRows
-import sh.roboco.android.settings.aboutSection
-import sh.roboco.android.settings.versionSubtitle
+import sh.zeron.android.core.CoreStatus
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.settingsTag
+import sh.zeron.android.settings.AboutRowIds
+import sh.zeron.android.settings.AboutSectionState
+import sh.zeron.android.settings.aboutRows
+import sh.zeron.android.settings.aboutSection
+import sh.zeron.android.settings.versionSubtitle
 
 /**
  * The Settings → About update rows (android-next#04, panels D/E/F),
@@ -44,7 +44,7 @@ class UpdateAboutSectionTest {
     private val manifest = ReleaseManifest.parse(
         """
         {"version": "0.10.0", "date": "2026-10-20T13:37:00Z",
-         "files": {"roboco-0.10.0-android-arm64-v8a.apk": {"sha256": "aa", "size": 24530000}}}
+         "files": {"zeron-0.10.0-android-arm64-v8a.apk": {"sha256": "aa", "size": 24530000}}}
         """,
     )!!
 
@@ -56,7 +56,7 @@ class UpdateAboutSectionTest {
         buildMarker: String? = null,
     ) {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 val strings = updateRowStrings()
                 val section = AboutSectionState(
                     rows = aboutRows(
@@ -71,7 +71,7 @@ class UpdateAboutSectionTest {
                 LazyColumn(
                     Modifier
                         .fillMaxSize()
-                        .background(RobocoTheme.palette.background),
+                        .background(ZeronTheme.palette.background),
                 ) {
                     aboutSection(section)
                 }
@@ -86,7 +86,7 @@ class UpdateAboutSectionTest {
     fun anUpdateShowsTheUpdateRowBetweenVersionAndLicenses() {
         mount(UpdateUiState.Available(manifest, checkedAtMs = 999_000L))
 
-        compose.onNodeWithText("Update to Roboco 0.10.0").assertExists()
+        compose.onNodeWithText("Update to Zeron 0.10.0").assertExists()
         compose.onNodeWithText("24.5 MB · Released Oct 20").assertExists()
         compose.onNodeWithTag(settingsTag(AboutRowIds.Update)).assertHasClickAction()
         // The standard About card geometry: Version first, update middle,
@@ -112,10 +112,10 @@ class UpdateAboutSectionTest {
             onUpdate = { opens++ },
             buildMarker = "debug",
         )
-        compose.onNodeWithText("Roboco 0.10.0 on GitHub").assertExists()
+        compose.onNodeWithText("Zeron 0.10.0 on GitHub").assertExists()
         compose.onNodeWithText("Debug build: install the release APK manually").assertExists()
         // The Version row carries the build marker (panel F).
-        compose.onNodeWithText("Roboco 0.9.2 (9002) debug · core 0.9.2").assertExists()
+        compose.onNodeWithText("Zeron 0.9.2 (9002) debug · core 0.9.2").assertExists()
 
         compose.onNodeWithTag(settingsTag(AboutRowIds.Update)).performClick()
         assertEquals(1, opens)
@@ -129,7 +129,7 @@ class UpdateAboutSectionTest {
         compose.onNodeWithText("Check for Updates").assertExists()
         // No subtitle: no "Checking…" or verdict text anywhere.
         compose.onNodeWithText("Checking…").assertDoesNotExist()
-        compose.onNodeWithText("Roboco is up to date").assertDoesNotExist()
+        compose.onNodeWithText("Zeron is up to date").assertDoesNotExist()
     }
 
     @Test
@@ -142,7 +142,7 @@ class UpdateAboutSectionTest {
     @Test
     fun upToDateCarriesTheCheckedRelativeAge() {
         mount(UpdateUiState.UpToDate(checkedAtMs = 1_000_000L - 2 * 60_000))
-        compose.onNodeWithText("Roboco is up to date · checked 2 min ago").assertExists()
+        compose.onNodeWithText("Zeron is up to date · checked 2 min ago").assertExists()
     }
 
     @Test

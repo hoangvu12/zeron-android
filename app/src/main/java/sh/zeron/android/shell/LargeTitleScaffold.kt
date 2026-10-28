@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.animateScrollBy
@@ -68,20 +68,20 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.Motion
-import sh.roboco.android.design.PullToRefreshIndicator
-import sh.roboco.android.design.PullToRefreshState
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.SymbolWeight
-import sh.roboco.android.design.glass.GlassCircleButton
-import sh.roboco.android.design.glass.ProvideHazeState
-import sh.roboco.android.design.glass.ScrollEdgeEffect
-import sh.roboco.android.design.glass.ScrollEdgeEffectDefaults
-import sh.roboco.android.design.glass.contentUnderTopEdge
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.Motion
+import sh.zeron.android.design.PullToRefreshIndicator
+import sh.zeron.android.design.PullToRefreshState
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.SymbolWeight
+import sh.zeron.android.design.glass.GlassCircleButton
+import sh.zeron.android.design.glass.ProvideHazeState
+import sh.zeron.android.design.glass.ScrollEdgeEffect
+import sh.zeron.android.design.glass.ScrollEdgeEffectDefaults
+import sh.zeron.android.design.glass.contentUnderTopEdge
+import sh.zeron.android.design.uiStyle
 
 /**
  * How a screen's title is shown (android-ui-parity #25), the port of UIKit's
@@ -290,7 +290,7 @@ fun LargeTitleScaffold(
     content: LazyListScope.() -> Unit,
 ) {
     LargeTitleRecompositionProbe.count++
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val density = LocalDensity.current
     val layoutDirection = LocalLayoutDirection.current
@@ -608,7 +608,7 @@ fun LargeTitleScaffold(
                                     // in RTL (06's autoMirror) — nothing to
                                     // do here.
                                     GlassCircleButton(
-                                        icon = RobocoIcons.ChevronBackward,
+                                        icon = ZeronIcons.ChevronBackward,
                                         contentDescription = "Back",
                                         onClick = onBack,
                                         modifier = Modifier.testTag("nav-back"),
@@ -687,7 +687,7 @@ private fun LargeTitleRow(
     cutoutStart: Dp,
     cutoutEnd: Dp,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Box(
         Modifier

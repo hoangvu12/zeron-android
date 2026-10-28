@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -15,10 +15,10 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.design.Haptic
-import sh.roboco.android.design.LocalFeedback
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.rememberSmoothRoundedShape
+import sh.zeron.android.design.Haptic
+import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.rememberSmoothRoundedShape
 
 /**
  * `WidgetKind.SubagentLink`'s view (android-next #06; upstream #899's
@@ -38,7 +38,7 @@ fun SubagentLinkTarget(title: String, onOpen: () -> Unit, modifier: Modifier = M
     val feedback = LocalFeedback.current
     val interactions = remember { MutableInteractionSource() }
     val pressed = interactions.collectIsPressedAsState()
-    val fill = RobocoTheme.palette.controlFill
+    val fill = ZeronTheme.palette.controlFill
     val shape = rememberSmoothRoundedShape(10.dp)
     Box(
         modifier

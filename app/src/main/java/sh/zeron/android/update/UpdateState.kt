@@ -1,4 +1,4 @@
-package sh.roboco.android.update
+package sh.zeron.android.update
 
 import androidx.compose.runtime.Immutable
 import java.io.File

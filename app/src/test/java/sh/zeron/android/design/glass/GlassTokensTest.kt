@@ -1,4 +1,4 @@
-package sh.roboco.android.design.glass
+package sh.zeron.android.design.glass
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -6,9 +6,9 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import sh.roboco.android.design.CapsuleShape
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.SmoothRoundedShape
+import sh.zeron.android.design.CapsuleShape
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.SmoothRoundedShape
 
 /**
  * The glass material tokens (ticket 07): every value pinned against the

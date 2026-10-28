@@ -1,25 +1,25 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
-import uniffi.roboco_core.ChatIndicator
-import uniffi.roboco_core.ChatConfig
-import uniffi.roboco_core.ComposerState
-import uniffi.roboco_core.Connectivity
-import uniffi.roboco_core.ConnectivityState
-import uniffi.roboco_core.ContextUsage
-import uniffi.roboco_core.EngineDiagnostics
-import uniffi.roboco_core.EngineState
-import uniffi.roboco_core.EngineView
-import uniffi.roboco_core.HostCapabilities
-import uniffi.roboco_core.HostInfo
-import uniffi.roboco_core.LiveStatus
-import uniffi.roboco_core.ProjectRef
-import uniffi.roboco_core.PullRequest
-import uniffi.roboco_core.PullRequestState
-import uniffi.roboco_core.RoomState
-import uniffi.roboco_core.SessionRow
-import uniffi.roboco_core.SessionLimit
-import uniffi.roboco_core.TranscriptView
-import uniffi.roboco_core.NoHandle
+import uniffi.zeron_core.ChatIndicator
+import uniffi.zeron_core.ChatConfig
+import uniffi.zeron_core.ComposerState
+import uniffi.zeron_core.Connectivity
+import uniffi.zeron_core.ConnectivityState
+import uniffi.zeron_core.ContextUsage
+import uniffi.zeron_core.EngineDiagnostics
+import uniffi.zeron_core.EngineState
+import uniffi.zeron_core.EngineView
+import uniffi.zeron_core.HostCapabilities
+import uniffi.zeron_core.HostInfo
+import uniffi.zeron_core.LiveStatus
+import uniffi.zeron_core.ProjectRef
+import uniffi.zeron_core.PullRequest
+import uniffi.zeron_core.PullRequestState
+import uniffi.zeron_core.RoomState
+import uniffi.zeron_core.SessionRow
+import uniffi.zeron_core.SessionLimit
+import uniffi.zeron_core.TranscriptView
+import uniffi.zeron_core.NoHandle
 
 /**
  * Fixture builders for the session tests (android-ui-parity #51):
@@ -134,7 +134,7 @@ internal fun pullRequest(
     provider = "github",
     number = number.toULong(),
     title = "Fixture PR",
-    url = "https://github.com/roboco/roboco/pull/$number",
+    url = "https://github.com/zeron/zeron/pull/$number",
     state = state,
     baseRef = "main",
     headRef = "feature",

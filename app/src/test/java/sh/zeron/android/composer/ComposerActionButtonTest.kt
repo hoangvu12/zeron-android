@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -58,16 +58,16 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.Cue
-import sh.roboco.android.design.Feedback
-import sh.roboco.android.design.Haptic
-import sh.roboco.android.design.LocalFeedback
-import sh.roboco.android.design.NoFeedback
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.Cue
+import sh.zeron.android.design.Feedback
+import sh.zeron.android.design.Haptic
+import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.design.NoFeedback
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.GlassMenuHost
 
 /**
  * [ComposerActionButton] (android-ui-parity #58) — Robolectric +
@@ -159,10 +159,10 @@ class ComposerActionButtonTest {
         stateVar: MutableState<ActionState>? = null,
     ) {
         val body: @Composable () -> Unit = {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 CompositionLocalProvider(LocalFeedback provides feedback) {
                     GlassMenuHost(hazeState = rememberHazeState()) {
-                        Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+                        Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                             Box(Modifier.align(Alignment.Center)) {
                                 ComposerActionButton(
                                     state = stateVar?.value ?: state,
@@ -538,10 +538,10 @@ class ComposerActionButtonTest {
         var mode: DeliveryMode? = null
         var body: String? = null
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(LocalFeedback provides feedback) {
                     GlassMenuHost(hazeState = rememberHazeState()) {
-                        Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+                        Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                             Box(Modifier.align(Alignment.Center)) {
                                 val controller = rememberComposerController()
                                 controller.onSend = { text, _, m ->
@@ -753,14 +753,14 @@ class ComposerActionButtonTest {
         val field = TextFieldState("draft")
         var primary = 0
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 GlassMenuHost(hazeState = rememberHazeState()) {
-                    Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+                    Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                         Column(Modifier.align(Alignment.Center)) {
                             BasicTextField(
                                 state = field,
                                 modifier = Modifier.testTag("field").width(200.dp),
-                                textStyle = TextStyle(color = RobocoTheme.palette.text),
+                                textStyle = TextStyle(color = ZeronTheme.palette.text),
                             )
                             Spacer(Modifier.height(40.dp))
                             ComposerActionButton(sendEnabled, onPrimary = { primary++ }, onSend = {})

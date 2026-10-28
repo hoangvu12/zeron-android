@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import android.content.res.Configuration
 import android.view.Choreographer
@@ -32,42 +32,42 @@ import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.GlassCircleButton
-import sh.roboco.android.design.glass.GlassSurface
-import sh.roboco.android.design.glass.ProvideHazeState
-import sh.roboco.android.design.hairlineBorder
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.shell.AppRouter
-import sh.roboco.android.shell.DemoRoute
-import sh.roboco.android.shell.DraftHandoff
-import sh.roboco.android.shell.LocalAppRouter
-import sh.roboco.android.shell.LocalNavEntry
-import sh.roboco.android.shell.LocalNavStack
-import sh.roboco.android.shell.NavDemoScreen
-import sh.roboco.android.shell.NavEntry
-import sh.roboco.android.shell.NavRoute
-import sh.roboco.android.shell.NavStack
-import sh.roboco.android.shell.NavStackHost
-import sh.roboco.android.transcript.FramePoster
-import sh.roboco.android.transcript.ModelPipeline
-import sh.roboco.android.transcript.TranscriptState
-import uniffi.roboco_core.ChatConfig
-import uniffi.roboco_core.ChatIndicator
-import uniffi.roboco_core.ComposerState
-import uniffi.roboco_core.EngineView
-import uniffi.roboco_core.HostCapabilities
-import uniffi.roboco_core.HostInfo
-import uniffi.roboco_core.LayoutFrame
-import uniffi.roboco_core.LiveStatus
-import uniffi.roboco_core.NoHandle
-import uniffi.roboco_core.RoomState
-import uniffi.roboco_core.SessionRow
-import uniffi.roboco_core.TextSystem
-import uniffi.roboco_core.TranscriptView
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.GlassCircleButton
+import sh.zeron.android.design.glass.GlassSurface
+import sh.zeron.android.design.glass.ProvideHazeState
+import sh.zeron.android.design.hairlineBorder
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.shell.AppRouter
+import sh.zeron.android.shell.DemoRoute
+import sh.zeron.android.shell.DraftHandoff
+import sh.zeron.android.shell.LocalAppRouter
+import sh.zeron.android.shell.LocalNavEntry
+import sh.zeron.android.shell.LocalNavStack
+import sh.zeron.android.shell.NavDemoScreen
+import sh.zeron.android.shell.NavEntry
+import sh.zeron.android.shell.NavRoute
+import sh.zeron.android.shell.NavStack
+import sh.zeron.android.shell.NavStackHost
+import sh.zeron.android.transcript.FramePoster
+import sh.zeron.android.transcript.ModelPipeline
+import sh.zeron.android.transcript.TranscriptState
+import uniffi.zeron_core.ChatConfig
+import uniffi.zeron_core.ChatIndicator
+import uniffi.zeron_core.ComposerState
+import uniffi.zeron_core.EngineView
+import uniffi.zeron_core.HostCapabilities
+import uniffi.zeron_core.HostInfo
+import uniffi.zeron_core.LayoutFrame
+import uniffi.zeron_core.LiveStatus
+import uniffi.zeron_core.NoHandle
+import uniffi.zeron_core.RoomState
+import uniffi.zeron_core.SessionRow
+import uniffi.zeron_core.TextSystem
+import uniffi.zeron_core.TranscriptView
 
 /**
  * The "Session push/pop" gallery page (android-ui-parity #85) — the
@@ -120,7 +120,7 @@ internal fun SessionNavGalleryFrame(
     Box(
         Modifier
             .size(402.dp, 874.dp)
-            .hairlineBorder(RobocoTheme.palette.hairline, RectangleShape),
+            .hairlineBorder(ZeronTheme.palette.hairline, RectangleShape),
     ) {
         NavStackHost(stack, active = true) { entry ->
             if (entry.route is GallerySessionRoute) session(entry) else NavDemoScreen(entry)
@@ -155,7 +155,7 @@ internal fun SessionNavFixtureScreen() {
  */
 @Composable
 internal fun SessionNavFakeChromePage(nav: SessionNavAlpha, modifier: Modifier = Modifier) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     Box(modifier.fillMaxSize().background(palette.background)) {
         // The fake bottom stack, 74's own `bottom-stack` tag.
         Box(
@@ -173,7 +173,7 @@ internal fun SessionNavFakeChromePage(nav: SessionNavAlpha, modifier: Modifier =
         // trailing edge — 131's own visibility is forced to full here; the
         // nav multiplier is the only fade.
         GlassCircleButton(
-            icon = RobocoIcons.ArrowDown,
+            icon = ZeronIcons.ArrowDown,
             contentDescription = "Jump to latest",
             onClick = {},
             modifier = Modifier
@@ -219,7 +219,7 @@ private fun SessionNavDemoSession(
 /** The gallery's section entry point (registered in `Gallery.kt`). */
 @Composable
 fun SessionNavGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val stack = remember { NavStack(DemoRoute("Sessions")) }
     val logLines = remember { mutableStateListOf<String>() }
@@ -283,7 +283,7 @@ fun SessionNavGallerySection() {
 /** One 44 dp hit row with an accent-coloured label (24's `DemoRow` look). */
 @Composable
 private fun SessionNavRow(text: String, onClick: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Box(
         Modifier
@@ -434,7 +434,7 @@ private fun galleryNavLifecycle(onLog: (String) -> Unit): SessionNavLifecycle {
 
 @Composable
 private fun SessionNavPreviewContent() {
-    RobocoTheme {
+    ZeronTheme {
         val stack = remember {
             NavStack(DemoRoute("Sessions")).apply {
                 holdHostlessOps()

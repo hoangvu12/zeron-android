@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import android.content.res.Configuration
 import androidx.compose.animation.core.Animatable
@@ -52,20 +52,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.CapsuleShape
-import sh.roboco.android.design.GlassStage
-import sh.roboco.android.design.Icon
-import sh.roboco.android.design.IconInBox
-import sh.roboco.android.design.LocalReduceMotion
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.Motion
-import sh.roboco.android.design.RobocoIcon
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.GlassSurface
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.CapsuleShape
+import sh.zeron.android.design.GlassStage
+import sh.zeron.android.design.Icon
+import sh.zeron.android.design.IconInBox
+import sh.zeron.android.design.LocalReduceMotion
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.Motion
+import sh.zeron.android.design.ZeronIcon
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.GlassSurface
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.uiStyle
 import kotlin.math.roundToInt
 
 /**
@@ -234,7 +234,7 @@ fun GlassTabPill(
     modifier: Modifier = Modifier,
     pillInteractionSource: MutableInteractionSource = remember { MutableInteractionSource() },
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val reduce = LocalReduceMotion.current
 
     // The pill's own selection: while Search is selected the pill slot is
@@ -303,7 +303,7 @@ fun GlassTabPill(
                 }
                 // ---- layer 1: the selected tab's travelling icon ----
                 IconInBox(
-                    icon = if (pillSelection == TabId.Settings) RobocoIcons.TabSettings else RobocoIcons.TabChat,
+                    icon = if (pillSelection == TabId.Settings) ZeronIcons.TabSettings else ZeronIcons.TabChat,
                     tint = palette.text,
                     box = GlassTabBarDefaults.IconBox,
                 )
@@ -381,7 +381,7 @@ fun GlassSearchButton(
     onTabTap: (TabId) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val searchSource = remember { MutableInteractionSource() }
 
     GlassSurface(
@@ -401,7 +401,7 @@ fun GlassSearchButton(
         contentAlignment = Alignment.Center,
     ) {
         Icon(
-            RobocoIcons.Magnifyingglass,
+            ZeronIcons.Magnifyingglass,
             tint = palette.text,
             sizePt = GlassTabBarDefaults.SearchIconPt,
         )
@@ -433,7 +433,7 @@ internal fun TabPillCellsAndPlatter(
     cellWidth: Dp,
     modifier: Modifier = Modifier,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     Box(modifier) {
         // The selection platter first (under the cells), inset 4 dp on all
         // sides. Modifier.offset mirrors in RTL, and the state read lives
@@ -457,7 +457,7 @@ internal fun TabPillCellsAndPlatter(
         ) {
             TabCell(
                 tab = TabId.Sessions,
-                icon = RobocoIcons.TabChat,
+                icon = ZeronIcons.TabChat,
                 selected = selectedCell == TabId.Sessions,
                 onTabTap = onTabTap,
                 pillSource = pillSource,
@@ -466,7 +466,7 @@ internal fun TabPillCellsAndPlatter(
             )
             TabCell(
                 tab = TabId.Settings,
-                icon = RobocoIcons.TabSettings,
+                icon = ZeronIcons.TabSettings,
                 selected = selectedCell == TabId.Settings,
                 onTabTap = onTabTap,
                 pillSource = pillSource,
@@ -493,14 +493,14 @@ internal fun TabPillCellsAndPlatter(
 @Composable
 private fun TabCell(
     tab: TabId,
-    icon: RobocoIcon,
+    icon: ZeronIcon,
     selected: Boolean,
     onTabTap: (TabId) -> Unit,
     pillSource: MutableInteractionSource,
     hideIcon: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     // Baseline 49 dp below the cell top = paddingFromBaseline(13) under the
     // 24 dp icon that starts 12 dp below the cell top (12 + 24 + 13 = 49).
     val labelFromBaseline = GlassTabBarDefaults.LabelBaseline -
@@ -543,7 +543,7 @@ private fun TabCell(
  * side and bottom margins, the 62 dp pill and circle, the 4 dp platter
  * inset, the 24 dp icon box 12 dp below the cell top, the label baseline
  * at 49 dp, and the 398 dp row-width cap (the widest iPhone — not an iOS
- * value, a Roboco choice for landscape phones and unfolded foldables).
+ * value, a Zeron choice for landscape phones and unfolded foldables).
  * The minimized morph's numbers live in ticket 28's [TabChromeMetrics],
  * which a test pins against these.
  */
@@ -620,7 +620,7 @@ fun tabBarRowWidth(availableWidth: Dp): Dp =
 
 @Composable
 private fun TabBarPreviewContent() {
-    RobocoTheme {
+    ZeronTheme {
         val haze = rememberHazeState()
         CompositionLocalProvider(LocalHazeState provides haze) {
             GlassStage(

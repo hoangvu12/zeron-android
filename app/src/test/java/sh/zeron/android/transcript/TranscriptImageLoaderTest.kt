@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.content.ComponentCallbacks2
 import android.content.Context
@@ -408,7 +408,7 @@ class TranscriptImageLoaderTest {
     fun everyOtherReferenceIsReadThroughTheEngineAsWritten() = runTest {
         val seen = mutableListOf<String>()
         val reader = AttachmentReader { _, reference -> seen += reference; byteArrayOf(1) }
-        val refs = listOf("shots/a.png", "~/x.png", "file:///C:/a%20b.png", "roboco-file:docs/x.svg", "/tmp/x.png")
+        val refs = listOf("shots/a.png", "~/x.png", "file:///C:/a%20b.png", "zeron-file:docs/x.svg", "/tmp/x.png")
         val loader = newLoader(ScriptedDecode(refs.map { bmp(10, 10, full = true) }))
         val binding = TranscriptImageBinding(loader, { "e1" }, reader, chatId = "chat-1")
 

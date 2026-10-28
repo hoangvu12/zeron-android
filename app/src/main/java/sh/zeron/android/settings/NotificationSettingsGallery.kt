@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import android.content.res.Configuration
 import android.util.Log
@@ -18,19 +18,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.AlertButton
-import sh.roboco.android.design.AlertButtonRole
-import sh.roboco.android.design.Alerts
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalAlerts
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoAlert
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.notify.NotificationKind
-import sh.roboco.android.notify.NotificationPrefs
-import sh.roboco.android.notify.NotificationStatus
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.AlertButton
+import sh.zeron.android.design.AlertButtonRole
+import sh.zeron.android.design.Alerts
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalAlerts
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronAlert
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.notify.NotificationKind
+import sh.zeron.android.notify.NotificationPrefs
+import sh.zeron.android.notify.NotificationStatus
 
 /**
  * The "Notification rows" page of the debug design gallery
@@ -74,7 +74,7 @@ import sh.roboco.android.notify.NotificationStatus
 @Composable
 fun NotificationRowsGallerySection() {
     val alerts = LocalAlerts.current
-    val background = RobocoTheme.palette.background
+    val background = ZeronTheme.palette.background
     val off = rememberFixture(
         initial = NotificationPrefs.Snapshot(enabled = true, done = true, input = true, failed = true),
         status = NotificationStatus.NotDetermined,
@@ -151,7 +151,7 @@ private class NotificationGalleryFixture(
 }
 
 /** The denied fixture's alert: the section's copy, handlers that only log. */
-private fun deniedGalleryAlert() = RobocoAlert(
+private fun deniedGalleryAlert() = ZeronAlert(
     title = NotificationCopy.AlertTitle,
     message = NotificationCopy.AlertMessage,
     buttons = listOf(
@@ -196,7 +196,7 @@ private fun LazyListScope.notificationGalleryFixture(
 @Composable
 private fun NotificationRowsCaption(text: String) {
     val typeScale = LocalTypeScale.current
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     BasicText(
         text,
         style = uiStyle(Face.Sans, typeScale.fixed(12f), palette.secondary),
@@ -211,8 +211,8 @@ private fun NotificationRowsCaption(text: String) {
 @Preview(name = "light")
 @Composable
 private fun NotificationRowsGalleryLightPreview() {
-    RobocoTheme(Appearance.Light) {
-        Box(Modifier.background(RobocoTheme.palette.background)) {
+    ZeronTheme(Appearance.Light) {
+        Box(Modifier.background(ZeronTheme.palette.background)) {
             NotificationRowsGallerySection()
         }
     }
@@ -221,8 +221,8 @@ private fun NotificationRowsGalleryLightPreview() {
 @Preview(name = "dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun NotificationRowsGalleryDarkPreview() {
-    RobocoTheme(Appearance.Dark) {
-        Box(Modifier.background(RobocoTheme.palette.background)) {
+    ZeronTheme(Appearance.Dark) {
+        Box(Modifier.background(ZeronTheme.palette.background)) {
             NotificationRowsGallerySection()
         }
     }

@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -13,11 +13,11 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.ActionSheetPresenter
-import sh.roboco.android.design.Alerts
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.Toaster
-import sh.roboco.android.shell.tablet.SidebarState
+import sh.zeron.android.design.ActionSheetPresenter
+import sh.zeron.android.design.Alerts
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.Toaster
+import sh.zeron.android.shell.tablet.SidebarState
 
 /**
  * The detail column's lifecycle through a real host (android-ui-parity
@@ -86,7 +86,7 @@ class TabletDetailHostTest {
     @Test
     fun replacingSessions_deliversLifecycleAndClosesTheOldRoot() {
         compose.setContent {
-            RobocoTheme {
+            ZeronTheme {
                 TabletDetailHost(adapter.detailStack)
             }
         }
@@ -122,7 +122,7 @@ class TabletDetailHostTest {
     @Test
     fun setDetailDraftAndEmpty_recordRootsAndRoutes() {
         // Hostless on purpose: 93's embedded NewSessionScreen needs the app
-        // graph (a RobocoApplication), which this rule has no instance of —
+        // graph (a ZeronApplication), which this rule has no instance of —
         // and with no host attached, setRoutes completes synchronously (24),
         // so the draft page never composes at all.
         adapter.setDetailDraft(null, false) { _, _ -> }

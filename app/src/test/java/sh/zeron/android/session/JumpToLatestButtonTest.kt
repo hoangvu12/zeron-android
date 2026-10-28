@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -46,12 +46,12 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.Motion
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.transcript.TranscriptViewport
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.Motion
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.transcript.TranscriptViewport
 
 /**
  * The jump button's Compose contract (android-ui-parity #131):
@@ -96,7 +96,7 @@ class JumpToLatestButtonTest {
     /** Composes the content and settles the first two frames (the glass flag flip included). */
     private fun host(content: @Composable () -> Unit) {
         compose.setContent {
-            RobocoTheme(Appearance.Light) { content() }
+            ZeronTheme(Appearance.Light) { content() }
         }
         compose.waitForIdle()
         compose.mainClock.advanceTimeByFrame()
@@ -146,7 +146,7 @@ class JumpToLatestButtonTest {
         navAlpha: () -> Float = { 1f },
         motion: JumpToLatestMotion = remember { JumpToLatestMotion(visible) },
     ) {
-        Box(Modifier.size(200.dp, 200.dp).background(RobocoTheme.palette.background)) {
+        Box(Modifier.size(200.dp, 200.dp).background(ZeronTheme.palette.background)) {
             Box(Modifier.matchParentSize().clickable(onClick = underTaps))
             JumpToLatestButton(
                 visible = visible,
@@ -305,7 +305,7 @@ class JumpToLatestButtonTest {
         viewport.setOffset(viewport.maxOffset - 400f)
         var under = 0
         host {
-            Box(Modifier.size(200.dp, 200.dp).background(RobocoTheme.palette.background)) {
+            Box(Modifier.size(200.dp, 200.dp).background(ZeronTheme.palette.background)) {
                 Box(Modifier.matchParentSize().clickable(onClick = { under++ }))
                 JumpToLatestButton(
                     viewport = viewport,
@@ -368,7 +368,7 @@ class JumpToLatestButtonTest {
         val full = JumpToLatestMotion(true)
         val faded = JumpToLatestMotion(true)
         host {
-            Box(Modifier.size(400.dp, 200.dp).background(RobocoTheme.palette.background)) {
+            Box(Modifier.size(400.dp, 200.dp).background(ZeronTheme.palette.background)) {
                 JumpToLatestButton(
                     visible = true, onClick = {},
                     modifier = Modifier.offset(60.dp, 80.dp), motion = full,
@@ -440,7 +440,7 @@ class JumpToLatestButtonTest {
             SessionBottomStack(
                 state = state,
                 model = BottomStackModel(),
-                transcript = { _ -> Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) },
+                transcript = { _ -> Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) },
                 pill = {},
                 queue = {},
                 questions = {},

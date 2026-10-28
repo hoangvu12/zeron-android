@@ -7,7 +7,7 @@ def ds(name):
 head = ("// GENERATED from crates/ui/assets/icons/<name>-mark.svg by\n"
         "// apps/android/scripts/gen_brand_mark_paths.py. Do not hand-edit:\n"
         "// BrandMarkSvgParityTest fails if this drifts from the desktop assets.\n"
-        "package sh.roboco.android.design\n\n")
+        "package sh.zeron.android.design\n\n")
 body = head
 for name in ["claude", "openai", "cursor", "devin", "grok", "pi", "opencode", "antigravity"]:
     d = ds(name)[0]  # opencode: frame path only (first <path>)

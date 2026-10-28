@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.content.Context
 import android.content.res.Resources
@@ -36,9 +36,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.BuildConfig
-import sh.roboco.android.core.Face
-import sh.roboco.android.core.assetPath
+import sh.zeron.android.BuildConfig
+import sh.zeron.android.core.Face
+import sh.zeron.android.core.assetPath
 
 /**
  * One SF Symbol point → the layout box it reserves: `p × 1.2` dp. Fixed —
@@ -67,21 +67,21 @@ internal fun iconBoxDp(sizePt: Float): Dp = (sizePt * BOX_PER_PT).dp
  * `box × opticalScale` square, allowed to overhang the box, never clipped)
  * and scales every stroked path by [weight]'s stroke scale.
  *
- * A [RobocoIcon.Number] delegates to [NumberCircle].
+ * A [ZeronIcon.Number] delegates to [NumberCircle].
  *
  * This is Compose-foundation only — no Material `Icon`, no
  * `LocalContentColor`, no intrinsic-size letterboxing.
  *
  * @param tint the glyph colour, `Palette.<role>` at the call site
  * @param sizePt the iOS point size, verbatim (never fudged to compensate
- *   for glyph proportions — [RobocoIcon.Vector.opticalScale] does that)
+ *   for glyph proportions — [ZeronIcon.Vector.opticalScale] does that)
  * @param weight the SF weight, as a stroke scale
  * @param contentDescription `null` for a decorative glyph (no semantics
  *   node); buttons that wrap an icon set the label on the button instead
  */
 @Composable
 fun Icon(
-    icon: RobocoIcon,
+    icon: ZeronIcon,
     tint: Color,
     sizePt: Float,
     weight: SymbolWeight = SymbolWeight.Regular,
@@ -89,8 +89,8 @@ fun Icon(
     contentDescription: String? = null,
 ) {
     when (icon) {
-        is RobocoIcon.Number -> NumberCircle(icon.n, tint, sizePt, weight, modifier)
-        is RobocoIcon.Vector ->
+        is ZeronIcon.Number -> NumberCircle(icon.n, tint, sizePt, weight, modifier)
+        is ZeronIcon.Vector ->
             IconInBox(icon, tint, iconBoxDp(sizePt), weight, modifier, contentDescription)
     }
 }
@@ -100,11 +100,11 @@ fun Icon(
  * glyphs (24 dp), swipe actions (22 dp per android-app#20) and the
  * transcript icon widget's core rects. The glyph's drawing rect is
  * `box × opticalScale`, centred — it may overhang without affecting
- * layout. A [RobocoIcon.Number] fills the box via [NumberCircle].
+ * layout. A [ZeronIcon.Number] fills the box via [NumberCircle].
  */
 @Composable
 fun IconInBox(
-    icon: RobocoIcon,
+    icon: ZeronIcon,
     tint: Color,
     box: Dp,
     weight: SymbolWeight = SymbolWeight.Regular,
@@ -112,15 +112,15 @@ fun IconInBox(
     contentDescription: String? = null,
 ) {
     when (icon) {
-        is RobocoIcon.Number -> NumberCircle(icon.n, tint, box.value / BOX_PER_PT, weight, modifier)
-        is RobocoIcon.Vector ->
+        is ZeronIcon.Number -> NumberCircle(icon.n, tint, box.value / BOX_PER_PT, weight, modifier)
+        is ZeronIcon.Vector ->
             VectorIconInBox(icon, tint, box, weight, modifier, contentDescription)
     }
 }
 
 @Composable
 private fun VectorIconInBox(
-    icon: RobocoIcon.Vector,
+    icon: ZeronIcon.Vector,
     tint: Color,
     box: Dp,
     weight: SymbolWeight,
@@ -138,7 +138,7 @@ private fun VectorIconInBox(
     }
     val painter = rememberVectorPainter(vector)
     val tintFilter = remember(tint) { ColorFilter.tint(tint) }
-    // Mirroring lives here and nowhere else (see RobocoIcon.Vector).
+    // Mirroring lives here and nowhere else (see ZeronIcon.Vector).
     val mirror = icon.autoMirror && LocalLayoutDirection.current == LayoutDirection.Rtl
     val description = contentDescription
     val semantics = if (description != null) {
@@ -302,7 +302,7 @@ private val weightedVectorCache = HashMap<Pair<Int, SymbolWeight>, ImageVector>(
  */
 internal fun weightedIconVector(
     resources: Resources,
-    icon: RobocoIcon.Vector,
+    icon: ZeronIcon.Vector,
     weight: SymbolWeight,
 ): ImageVector {
     val key = icon.res to weight

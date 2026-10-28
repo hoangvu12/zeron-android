@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,11 +31,11 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.GlyphClock
-import sh.roboco.android.design.LocalGlyphClock
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.GlyphClock
+import sh.zeron.android.design.LocalGlyphClock
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The accessory's semantics and click behaviour (android-ui-parity #27):
@@ -69,7 +69,7 @@ class NewSessionAccessoryUiTest {
         enabled: Boolean = true,
     ) {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 ProvideGlyphClock(frozenAtNanos = 0L) {
                     Box(Modifier.fillMaxSize()) {
                         NewSessionAccessory(
@@ -179,7 +179,7 @@ class NewSessionAccessoryUiTest {
     fun idleCountsSubscribeNothingToTheGlyphClock() {
         var clock: GlyphClock? = null
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 ProvideGlyphClock {
                     clock = LocalGlyphClock.current
                     NewSessionAccessory(counts = LiveCounts(), onTap = {})
@@ -195,7 +195,7 @@ class NewSessionAccessoryUiTest {
         var counts by mutableStateOf(LiveCounts())
         var clock: GlyphClock? = null
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 // Frozen: the subscription count is the same on a frozen
                 // clock (StatusGlyph's DisposableEffect), but a live clock
                 // runs its withFrameNanos loop forever while the spinner is
@@ -235,7 +235,7 @@ class NewSessionAccessoryUiTest {
         var inline by mutableStateOf(true)
         var labelAlpha by mutableStateOf<(() -> Float)?>(null)
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 ProvideGlyphClock(frozenAtNanos = 0L) {
                     Box(Modifier.fillMaxSize()) {
                         NewSessionAccessory(

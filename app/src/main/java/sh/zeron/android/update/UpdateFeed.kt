@@ -1,4 +1,4 @@
-package sh.roboco.android.update
+package sh.zeron.android.update
 
 import java.io.IOException
 import java.io.InputStream
@@ -14,10 +14,10 @@ import kotlinx.coroutines.withContext
  * base (`manifest.json` and the artifacts live here) and the releases
  * page the app opens when it cannot replace itself.
  */
-const val RELEASES_DOWNLOAD: String = "https://github.com/hoangvu12/roboco/releases/latest/download"
+const val RELEASES_DOWNLOAD: String = "https://github.com/hoangvu12/zeron-android/releases/latest/download"
 
 /** The repository's GitHub Releases page (the advisory destination). */
-const val RELEASES_PAGE: String = "https://github.com/hoangvu12/roboco/releases/latest"
+const val RELEASES_PAGE: String = "https://github.com/hoangvu12/zeron-android/releases/latest"
 
 /** The manifest fetch's budget: short, like the desktop's feed poll. */
 private const val CONNECT_TIMEOUT_MS = 10_000
@@ -117,5 +117,5 @@ private fun openHttps(url: String, connectTimeoutMs: Int, readTimeoutMs: Int): H
         connectTimeout = connectTimeoutMs
         readTimeout = readTimeoutMs
         instanceFollowRedirects = true
-        setRequestProperty("User-Agent", "Roboco-Android")
+        setRequestProperty("User-Agent", "Zeron-Android")
     }

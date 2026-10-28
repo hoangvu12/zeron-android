@@ -1,4 +1,4 @@
-package sh.roboco.android.design.glass
+package sh.zeron.android.design.glass
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
@@ -25,9 +25,9 @@ import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.blur.HazeBlurStyle
 import dev.chrisbanes.haze.blur.hazeBlur
-import sh.roboco.android.design.LocalReduceMotion
-import sh.roboco.android.design.Motion
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.LocalReduceMotion
+import sh.zeron.android.design.Motion
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The scroll-edge effect's tunables (ticket 09): the band geometry, the
@@ -166,7 +166,7 @@ internal fun scrollEdgeLayers(engagedAlpha: Float, blur: Boolean, hasHazeState: 
  * ```
  * val hazeState = rememberHazeState()
  * ProvideHazeState(state = hazeState) {                // ticket 07
- *     Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+ *     Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
  *         // 1. haze SOURCE: everything that scrolls (and the wallpaper hero
  *         //    on the front page — ticket 21)
  *         Box(Modifier.fillMaxSize().hazeSource(hazeState)) {
@@ -204,7 +204,7 @@ fun ScrollEdgeEffect(
     modifier: Modifier = Modifier,
     engaged: Boolean = true,
     hazeState: HazeState? = LocalHazeState.current,
-    color: Color = RobocoTheme.palette.background,
+    color: Color = ZeronTheme.palette.background,
     blur: Boolean = ScrollEdgeEffectDefaults.blurSupported(),
 ) {
     val reduce = LocalReduceMotion.current

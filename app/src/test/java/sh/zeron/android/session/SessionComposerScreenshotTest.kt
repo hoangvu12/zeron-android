@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -23,23 +23,23 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.composer.ChipTint
-import sh.roboco.android.composer.ComposerBar
-import sh.roboco.android.composer.ComposerChip
-import sh.roboco.android.composer.ComposerController
-import sh.roboco.android.composer.MentionSuggestionsHost
-import sh.roboco.android.composer.previewMorphState
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.NoFeedback
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.glass.ProvideHazeState
+import sh.zeron.android.composer.ChipTint
+import sh.zeron.android.composer.ComposerBar
+import sh.zeron.android.composer.ComposerChip
+import sh.zeron.android.composer.ComposerController
+import sh.zeron.android.composer.MentionSuggestionsHost
+import sh.zeron.android.composer.previewMorphState
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.NoFeedback
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.glass.ProvideHazeState
 
 /**
  * The composer goldens (android-ui-parity #78), recorded by
- * `./gradlew :app:recordRoborazziDebug --tests sh.roboco.android.session.SessionComposerScreenshotTest`
+ * `./gradlew :app:recordRoborazziDebug --tests sh.zeron.android.session.SessionComposerScreenshotTest`
  * and verified by `verifyRoborazziDebug`: the ticket's fixture block —
  * three [ComposerBar]s stacked in a 400 × 282 dp window (12 dp padding,
  * 376 dp composers, 8 dp gaps; heights 50 + 96 + 96), on the iOS lab
@@ -89,7 +89,7 @@ class SessionComposerScreenshotTest {
 
     private fun shot(appearance: Appearance, file: String) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 GoldenComposerHost()
             }
         }
@@ -168,7 +168,7 @@ class SessionComposerScreenshotTest {
             ProvideHazeState {
                 MentionSuggestionsHost(Modifier.fillMaxSize()) {
                     Box(Modifier.fillMaxSize()) {
-                        Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background).hazeSource(LocalHazeState.current!!))
+                        Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background).hazeSource(LocalHazeState.current!!))
                         Column(
                             Modifier.padding(12.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp),

@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -28,16 +28,16 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.composer.ChipStrip
-import sh.roboco.android.composer.ComposerChip
-import sh.roboco.android.composer.ComposerController
-import sh.roboco.android.composer.Drafts
-import sh.roboco.android.composer.FakePrefsStore
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.NoFeedback
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.glass.GlassMenuHost
+import sh.zeron.android.composer.ChipStrip
+import sh.zeron.android.composer.ComposerChip
+import sh.zeron.android.composer.ComposerController
+import sh.zeron.android.composer.Drafts
+import sh.zeron.android.composer.FakePrefsStore
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.NoFeedback
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.GlassMenuHost
 
 /**
  * The New Session chip set's goldens and binding (android-ui-parity #109):
@@ -62,7 +62,7 @@ import sh.roboco.android.design.glass.GlassMenuHost
  * Robolectric with NATIVE graphics; [Glass.forceFallback] and the frozen
  * main clock follow the gallery golden convention (tickets 07/22). Record
  * with `./gradlew :app:recordRoborazziDebug --tests
- * sh.roboco.android.newsession.NewSessionChipsScreenshotTest`, verify with
+ * sh.zeron.android.newsession.NewSessionChipsScreenshotTest`, verify with
  * `:app:verifyRoborazziDebug --tests …`.
  */
 @RunWith(RobolectricTestRunner::class)
@@ -99,8 +99,8 @@ class NewSessionChipsScreenshotTest {
 
     private fun goldenShot(appearance: Appearance, file: String) {
         compose.setContent {
-            RobocoTheme(appearance) {
-                Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background).padding(16.dp)) {
+            ZeronTheme(appearance) {
+                Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background).padding(16.dp)) {
                     NewSessionChipsGallerySection()
                 }
             }
@@ -129,7 +129,7 @@ class NewSessionChipsScreenshotTest {
         val firstCompositionChips = mutableListOf<List<ComposerChip>>()
 
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 GlassMenuHost(hazeState = rememberHazeState()) {
                     NewSessionChipsEffect(model, composer, menus, labels = GalleryLabels)
                     remember {
@@ -160,7 +160,7 @@ class NewSessionChipsScreenshotTest {
 
         compose.onNodeWithTag("composer-chip-effort").assertTextContains("Xhigh", substring = true)
         compose.onNodeWithTag("composer-chip-model").assertTextContains("Fable 5.1", substring = true)
-        compose.onNodeWithTag("composer-chip-project").assertTextContains("roboco", substring = true)
+        compose.onNodeWithTag("composer-chip-project").assertTextContains("zeron", substring = true)
 
         // A menu pick (113/114's path) changes only the draft; the chips
         // follow — the draft write, the snapshotFlow collector's dispatch
@@ -185,14 +185,14 @@ class NewSessionChipsScreenshotTest {
     /** The one project the fake options list (the gallery's fixture A). */
     private val BindingProject = ProjectOption(
         id = "p1",
-        name = "roboco",
-        path = "/srv/roboco",
+        name = "zeron",
+        path = "/srv/zeron",
         device = "d1",
         deviceName = "Workstation",
         online = true,
         git = true,
         groupKey = "repo:r",
-        groupName = "roboco",
+        groupName = "zeron",
         colorIndex = 2,
     )
 

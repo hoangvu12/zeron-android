@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -27,20 +27,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.delay
-import sh.roboco.android.composer.ChipStrip
-import sh.roboco.android.composer.ComposerChip
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.GalleryBackdrop
-import sh.roboco.android.design.HarnessMark
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.glass.GlassMenuPanel
-import sh.roboco.android.design.glass.MenuElement
-import sh.roboco.android.design.glass.MenuLine
-import sh.roboco.android.design.glass.flattenLevel
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.composer.ChipStrip
+import sh.zeron.android.composer.ComposerChip
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.GalleryBackdrop
+import sh.zeron.android.design.HarnessMark
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.glass.GlassMenuPanel
+import sh.zeron.android.design.glass.MenuElement
+import sh.zeron.android.design.glass.MenuLine
+import sh.zeron.android.design.glass.flattenLevel
+import sh.zeron.android.design.uiStyle
 
 /**
  * The "New-session menus" page of the debug design gallery
@@ -69,7 +69,7 @@ import sh.roboco.android.design.uiStyle
  */
 
 // ---------------------------------------------------------------------------
-// Fixtures (the ticket's M demo set; Roboco's static catalog values)
+// Fixtures (the ticket's M demo set; Zeron's static catalog values)
 // ---------------------------------------------------------------------------
 
 /** `claude/catalog.rs` FULL_LADDER — 7 levels. */
@@ -106,14 +106,14 @@ internal val NewSessionMenusModels = NewSessionMenusCodexModels + NewSessionMenu
 /** The live demo's project (the ticket's row-1 fixture shape). */
 internal val NewSessionMenusProject = ProjectOption(
     id = "demo:p1",
-    name = "roboco",
-    path = "/home/me/roboco",
+    name = "zeron",
+    path = "/home/me/zeron",
     device = "demo:dev",
     deviceName = "Workstation",
     online = true,
     git = true,
-    groupKey = "roboco",
-    groupName = "roboco",
+    groupKey = "zeron",
+    groupName = "zeron",
     colorIndex = 2,
 )
 
@@ -123,7 +123,7 @@ internal val NewSessionMenusRefs = listOf("main", "feature/android-menus", "fix/
 /**
  * The live demo's in-memory draft — also the UI tests' page: a git
  * project with the Claude pick and nothing else chosen, so the first
- * frame reads `roboco`, `Workstation`, `Current branch`, `Opus 5.5`
+ * frame reads `zeron`, `Workstation`, `Current branch`, `Opus 5.5`
  * and the FULL ladder's middle level `Xhigh`.
  */
 internal val NewSessionMenusDemoDraft = NewSessionDraft(
@@ -223,12 +223,12 @@ fun CheckoutModelEffortMenusGallerySection() {
             ) {
                 SectionLabel(
                     "New-session menus",
-                    style = uiStyle(Face.SansSemibold, LocalTypeScale.current.fixed(17f), RobocoTheme.palette.text),
+                    style = uiStyle(Face.SansSemibold, LocalTypeScale.current.fixed(17f), ZeronTheme.palette.text),
                 )
                 SectionLabel(
                     "Checkout / Model / Reasoning effort — ticket 15 draws, 114 builds the content. " +
                         "The live demo at the bottom drives the real menus.",
-                    style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(13f), RobocoTheme.palette.secondary),
+                    style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(13f), ZeronTheme.palette.secondary),
                 )
                 StaticPanel("K1 · Checkout, loading", checkoutLoadingLines())
                 StaticPanel("K2 · Checkout, loaded, worktree on", checkoutLoadedLines(worktree = true, branch = null))
@@ -256,7 +256,7 @@ fun CheckoutModelEffortMenusGallerySection() {
  */
 @Composable
 private fun LiveDemo() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val page = remember {
         NewSessionMenusDemoPage(refSource = RefSource {
@@ -300,7 +300,7 @@ private fun StaticPanel(caption: String, lines: List<MenuLine>) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         SectionLabel(
             caption,
-            style = uiStyle(Face.SansMedium, LocalTypeScale.current.fixed(12f), RobocoTheme.palette.secondary),
+            style = uiStyle(Face.SansMedium, LocalTypeScale.current.fixed(12f), ZeronTheme.palette.secondary),
         )
         GlassMenuPanel(
             lines = lines,
@@ -325,18 +325,18 @@ private fun SectionLabel(text: String, style: TextStyle) {
 @Preview(name = "New-session menus light")
 @Composable
 private fun NewSessionMenusLightPreview() {
-    RobocoTheme(Appearance.Light) { NewSessionMenusPreviewBody() }
+    ZeronTheme(Appearance.Light) { NewSessionMenusPreviewBody() }
 }
 
 @Preview(name = "New-session menus dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun NewSessionMenusDarkPreview() {
-    RobocoTheme(Appearance.Dark) { NewSessionMenusPreviewBody() }
+    ZeronTheme(Appearance.Dark) { NewSessionMenusPreviewBody() }
 }
 
 @Composable
 private fun NewSessionMenusPreviewBody() {
-    Box(Modifier.background(RobocoTheme.palette.background).padding(16.dp)) {
+    Box(Modifier.background(ZeronTheme.palette.background).padding(16.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
             StaticPanel("K2 · Checkout, worktree on", checkoutLoadedLines(worktree = true, branch = null))
             StaticPanel("M · Model", modelMenuLines())

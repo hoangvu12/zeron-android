@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -17,10 +17,10 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import org.robolectric.shadows.ShadowLog
-import sh.roboco.android.core.Fonts
-import sh.roboco.android.design.TranscriptPalette
-import uniffi.roboco_core.FadeEdge
-import uniffi.roboco_core.Scroller
+import sh.zeron.android.core.Fonts
+import sh.zeron.android.design.TranscriptPalette
+import uniffi.zeron_core.FadeEdge
+import uniffi.zeron_core.Scroller
 
 /**
  * [RowModel.draw]'s orchestration over a recording [Canvas] (native
@@ -158,7 +158,7 @@ class RowModelDrawTest {
         // The missing style logs once per id (StyleFonts.get), not per pass.
         assertEquals(
             1,
-            ShadowLog.getLogs().count { it.tag == "RobocoTranscript" },
+            ShadowLog.getLogs().count { it.tag == "ZeronTranscript" },
         )
     }
 
@@ -186,7 +186,7 @@ class RowModelDrawTest {
         val canvas = newCanvas()
         model.draw(0, canvas, density, TranscriptPalette(false), newFonts())
         assertEquals(listOf("text:0"), canvas.ops.paintEvents())
-        assertEquals("one warning for the whole model", 1, ShadowLog.getLogs().count { it.tag == "RobocoTranscript" })
+        assertEquals("one warning for the whole model", 1, ShadowLog.getLogs().count { it.tag == "ZeronTranscript" })
     }
 
     @Test

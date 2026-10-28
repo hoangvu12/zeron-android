@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -15,17 +15,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
 
 /**
  * The "Settings · Appearance" page of the debug design gallery
  * (android-ui-parity #96): the live section over a gallery-local pick —
  * tapping a row moves the checkmark **locally only**. It never touches
- * [sh.roboco.android.core.Prefs] or the platform night-mode push: the
+ * [sh.zeron.android.core.Prefs] or the platform night-mode push: the
  * gallery's own System/Light/Dark segment (22, its top bar) drives the
  * theme, and writing the real preference from a debug screen would
  * re-theme the user's actual app.
@@ -45,7 +45,7 @@ fun AppearanceGallerySection() {
     Column(
         Modifier
             .widthIn(max = 402.dp)
-            .background(RobocoTheme.palette.background),
+            .background(ZeronTheme.palette.background),
     ) {
         AppearanceGalleryCaption("live · the checkmark moves locally; the theme follows the gallery's own segment")
         AppearanceRowsColumn(current = current, onPick = { pick = it.storedValue })
@@ -56,7 +56,7 @@ fun AppearanceGallerySection() {
 @Composable
 private fun AppearanceGalleryCaption(text: String) {
     val typeScale = LocalTypeScale.current
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     BasicText(
         text,
         style = uiStyle(Face.Sans, typeScale.fixed(12f), palette.secondary),
@@ -67,8 +67,8 @@ private fun AppearanceGalleryCaption(text: String) {
 @Preview(name = "Appearance gallery - light")
 @Composable
 private fun AppearanceGalleryLightPreview() {
-    RobocoTheme(Appearance.Light) {
-        Box(Modifier.background(RobocoTheme.palette.background)) {
+    ZeronTheme(Appearance.Light) {
+        Box(Modifier.background(ZeronTheme.palette.background)) {
             AppearanceGallerySection()
         }
     }
@@ -77,8 +77,8 @@ private fun AppearanceGalleryLightPreview() {
 @Preview(name = "Appearance gallery - dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun AppearanceGalleryDarkPreview() {
-    RobocoTheme(Appearance.Dark) {
-        Box(Modifier.background(RobocoTheme.palette.background)) {
+    ZeronTheme(Appearance.Dark) {
+        Box(Modifier.background(ZeronTheme.palette.background)) {
             AppearanceGallerySection()
         }
     }

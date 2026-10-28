@@ -1,4 +1,4 @@
-package roboco.gradle
+package zeron.gradle
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
@@ -13,7 +13,7 @@ import org.gradle.process.ExecOperations
 import javax.inject.Inject
 
 /**
- * Runs `roboco-android-assets` (android-app#13): the Rust generator that
+ * Runs `zeron-android-assets` (android-app#13): the Rust generator that
  * converts the shared line icons to VectorDrawables and rasterizes the tool
  * and file icons to 96×96 PNGs. It replaces upstream #609's
  * `svg2vd.py`/`gen-icons.sh` so the pipeline is bash-free and works on
@@ -53,7 +53,7 @@ abstract class AndroidAssetsGen : DefaultTask() {
                 "run",
                 "--locked",
                 "-p",
-                "roboco-android-assets",
+                "zeron-android-assets",
                 "--release",
                 "--",
                 "--repo",

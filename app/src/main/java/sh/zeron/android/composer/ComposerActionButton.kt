@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import android.content.res.Configuration
 import androidx.compose.animation.VectorConverter
@@ -42,21 +42,21 @@ import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.rememberHazeState
 import kotlin.math.abs
 import kotlinx.coroutines.launch
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.GlassStage
-import sh.roboco.android.design.Haptic
-import sh.roboco.android.design.Icon
-import sh.roboco.android.design.LocalFeedback
-import sh.roboco.android.design.Motion
-import sh.roboco.android.design.RobocoIcon
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.SymbolWeight
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.glass.Menu
-import sh.roboco.android.design.glass.MenuIcon
-import sh.roboco.android.design.glass.MenuItem
-import sh.roboco.android.design.glass.rememberGlassMenuState
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.GlassStage
+import sh.zeron.android.design.Haptic
+import sh.zeron.android.design.Icon
+import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.design.Motion
+import sh.zeron.android.design.ZeronIcon
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.SymbolWeight
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.glass.Menu
+import sh.zeron.android.design.glass.MenuIcon
+import sh.zeron.android.design.glass.MenuItem
+import sh.zeron.android.design.glass.rememberGlassMenuState
 
 /**
  * The composer's trailing action button (android-ui-parity #58): the
@@ -70,7 +70,7 @@ import sh.roboco.android.design.glass.rememberGlassMenuState
  *   content (the long-press menu is the only extra affordance);
  * - **stop** — `stop.fill` 11 bold, `background` on `text`, while a turn
  *   runs with an empty composer;
- * - **offline** (Roboco) — `canWrite == false` draws the disabled **send**
+ * - **offline** (Zeron) — `canWrite == false` draws the disabled **send**
  *   look for every action, whatever is running.
  *
  * A change of the *visual* action animates the fill and ink with
@@ -123,8 +123,8 @@ enum class ActionInk { White, Tertiary, Background }
 data class ActionButtonLook(
     /** What is drawn: [ComposerAction.Send] whenever `!state.enabled`. */
     val visual: ComposerAction,
-    /** [RobocoIcons.ArrowUp] or [RobocoIcons.StopFill]. */
-    val icon: RobocoIcon,
+    /** [ZeronIcons.ArrowUp] or [ZeronIcons.StopFill]. */
+    val icon: ZeronIcon,
     /** 15 pt (send/queue/offline) or 11 pt (stop). */
     val iconPt: Float,
     val fill: ActionFill,
@@ -151,7 +151,7 @@ fun actionButtonLook(state: ActionState): ActionButtonLook {
     return when (visual) {
         ComposerAction.Send -> ActionButtonLook(
             visual = visual,
-            icon = RobocoIcons.ArrowUp,
+            icon = ZeronIcons.ArrowUp,
             iconPt = ActionButtonTokens.SendIconPt,
             fill = if (state.enabled) ActionFill.Accent else ActionFill.ControlFill,
             ink = if (state.enabled) ActionInk.White else ActionInk.Tertiary,
@@ -163,7 +163,7 @@ fun actionButtonLook(state: ActionState): ActionButtonLook {
         // stop-and-send); only the a11y label says Queue or Steer.
         ComposerAction.Queue -> ActionButtonLook(
             visual = visual,
-            icon = RobocoIcons.ArrowUp,
+            icon = ZeronIcons.ArrowUp,
             iconPt = ActionButtonTokens.SendIconPt,
             fill = ActionFill.Accent,
             ink = ActionInk.White,
@@ -173,7 +173,7 @@ fun actionButtonLook(state: ActionState): ActionButtonLook {
         )
         ComposerAction.Stop -> ActionButtonLook(
             visual = visual,
-            icon = RobocoIcons.StopFill,
+            icon = ZeronIcons.StopFill,
             iconPt = ActionButtonTokens.StopIconPt,
             fill = ActionFill.Text,
             ink = ActionInk.Background,
@@ -196,7 +196,7 @@ fun deliveryMenu(canSteer: Boolean, onSend: (DeliveryMode) -> Unit): Menu = Menu
     children = listOfNotNull(
         MenuItem(
             title = "Queue for next turn",
-            icon = MenuIcon.Symbol(RobocoIcons.QueueForNextTurn),
+            icon = MenuIcon.Symbol(ZeronIcons.QueueForNextTurn),
             testTag = "composer-delivery-queue",
             action = { onSend(DeliveryMode.Queue) },
         ),
@@ -204,7 +204,7 @@ fun deliveryMenu(canSteer: Boolean, onSend: (DeliveryMode) -> Unit): Menu = Menu
             MenuItem(
                 title = "Steer now",
                 subtitle = "Deliver into the running turn",
-                icon = MenuIcon.Symbol(RobocoIcons.ArrowTurnDownRight),
+                icon = MenuIcon.Symbol(ZeronIcons.ArrowTurnDownRight),
                 testTag = "composer-delivery-steer",
                 action = { onSend(DeliveryMode.Steer) },
             )
@@ -213,7 +213,7 @@ fun deliveryMenu(canSteer: Boolean, onSend: (DeliveryMode) -> Unit): Menu = Menu
         },
         MenuItem(
             title = "Stop and send",
-            icon = MenuIcon.Symbol(RobocoIcons.StopCircle),
+            icon = MenuIcon.Symbol(ZeronIcons.StopCircle),
             destructive = true,
             testTag = "composer-delivery-interrupt",
             action = { onSend(DeliveryMode.Interrupt) },
@@ -454,17 +454,17 @@ private fun BounceScaleSemantics(scale: Animatable<Float, AnimationVector1D>) {
 /** [ActionFill] → [Color]: `accent`, `controlFill`, `text` from the palette. */
 @Composable
 private fun ActionFill.color(): Color = when (this) {
-    ActionFill.Accent -> RobocoTheme.palette.accent
-    ActionFill.ControlFill -> RobocoTheme.palette.controlFill
-    ActionFill.Text -> RobocoTheme.palette.text
+    ActionFill.Accent -> ZeronTheme.palette.accent
+    ActionFill.ControlFill -> ZeronTheme.palette.controlFill
+    ActionFill.Text -> ZeronTheme.palette.text
 }
 
 /** [ActionInk] → [Color]: literal white, `tertiary`, `background`. */
 @Composable
 private fun ActionInk.color(): Color = when (this) {
     ActionInk.White -> Color.White
-    ActionInk.Tertiary -> RobocoTheme.palette.tertiary
-    ActionInk.Background -> RobocoTheme.palette.background
+    ActionInk.Tertiary -> ZeronTheme.palette.tertiary
+    ActionInk.Background -> ZeronTheme.palette.background
 }
 
 // ---------------------------------------------------------------------------
@@ -526,7 +526,7 @@ private fun ComposerActionButtonDarkPreview() {
 
 @Composable
 private fun ComposerActionButtonPreviewBody(appearance: Appearance) {
-    RobocoTheme(appearance) {
+    ZeronTheme(appearance) {
         GlassMenuHost(hazeState = rememberHazeState()) {
             GlassStage(height = 160.dp) {
                 ComposerActionButtonFixtureRow()

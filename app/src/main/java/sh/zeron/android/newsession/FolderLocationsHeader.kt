@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
@@ -34,19 +34,19 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.composer.ChipLeading
-import sh.roboco.android.composer.ChipTokens
-import sh.roboco.android.composer.ContextChip
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.fadingHorizontalScroll
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.composer.ChipLeading
+import sh.zeron.android.composer.ChipTokens
+import sh.zeron.android.composer.ContextChip
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.fadingHorizontalScroll
+import sh.zeron.android.design.uiStyle
 
 /**
  * The folder browser's locations rail and search/typed-path field
- * (android-ui-parity #112) — a Roboco-only block (no iOS original) that
+ * (android-ui-parity #112) — a Zeron-only block (no iOS original) that
  * sits fixed between 110's nav bar and 110's list: a horizontally
  * scrolling, edge-faded row of **Home** + drive chips (ticket 59's
  * [ContextChip] with the selected colour override) and the rounded search
@@ -176,11 +176,11 @@ private fun LocationsRail(
                 ContextChip(
                     title = chip.name,
                     leading = ChipLeading.Symbol(
-                        if (chip.path == null) RobocoIcons.Home else RobocoIcons.HardDrive,
+                        if (chip.path == null) ZeronIcons.Home else ZeronIcons.HardDrive,
                     ),
                     onClick = { onPickLocation(chip) },
                     enabled = enabled,
-                    colors = locationChipColors(RobocoTheme.palette, isSelected, enabled),
+                    colors = locationChipColors(ZeronTheme.palette, isSelected, enabled),
                     modifier = Modifier
                         .testTag(if (chip.path == null) "location-home" else "location-drive-${chip.path}")
                         // The chip merges descendants, so the flag lands on
@@ -214,7 +214,7 @@ private fun FolderSearchField(
     onQueryChange: (String) -> Unit,
     onGo: () -> Unit,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val focus = LocalFocusManager.current
     BasicTextField(

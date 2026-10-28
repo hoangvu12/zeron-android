@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import android.content.res.Configuration
 import androidx.compose.animation.core.Animatable
@@ -31,16 +31,16 @@ import dev.chrisbanes.haze.hazeSource
 import kotlin.math.min
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.CapsuleShape
-import sh.roboco.android.design.Motion
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.GlassCircleButton
-import sh.roboco.android.design.glass.GlassSurface
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.glass.ProvideHazeState
-import sh.roboco.android.transcript.TranscriptViewport
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.CapsuleShape
+import sh.zeron.android.design.Motion
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.GlassCircleButton
+import sh.zeron.android.design.glass.GlassSurface
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.glass.ProvideHazeState
+import sh.zeron.android.transcript.TranscriptViewport
 
 /**
  * The jump-to-latest button's constants and pure rules
@@ -218,7 +218,7 @@ internal fun JumpToLatestButton(
     ) {
         if (!idleHidden) {
             GlassCircleButton(
-                icon = RobocoIcons.ArrowDown,
+                icon = ZeronIcons.ArrowDown,
                 contentDescription = JumpToLatest.Label,
                 onClick = onClick,
                 modifier = Modifier.testTag(JumpToLatest.Tag),
@@ -226,7 +226,7 @@ internal fun JumpToLatestButton(
                 iconPt = JumpToLatest.IconPt, // weight: 08's default Medium
                 // Glass.circleButton inks the glyph Palette.text
                 // (SESSIONS-D1): 08's default is the measured bar-item ink.
-                ink = RobocoTheme.palette.text,
+                ink = ZeronTheme.palette.text,
                 interactive = interactive,
             )
         }
@@ -266,7 +266,7 @@ internal fun JumpToLatestStage(
     navAlpha: () -> Float = { 1f },
     motion: JumpToLatestMotion = remember { JumpToLatestMotion(visible) },
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val stackTop = JumpStageHeight - JumpStackBottomGap - JumpStackHeight
     val origin = BottomStackMetrics.jumpOrigin(
         JumpStageWidth.value,
@@ -317,11 +317,11 @@ internal fun JumpToLatestStage(
 @Preview(name = "Jump to latest light")
 @Composable
 private fun JumpToLatestLightPreview() {
-    RobocoTheme(Appearance.Light) { JumpToLatestStage(visible = true) }
+    ZeronTheme(Appearance.Light) { JumpToLatestStage(visible = true) }
 }
 
 @Preview(name = "Jump to latest dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun JumpToLatestDarkPreview() {
-    RobocoTheme(Appearance.Dark) { JumpToLatestStage(visible = true) }
+    ZeronTheme(Appearance.Dark) { JumpToLatestStage(visible = true) }
 }

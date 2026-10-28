@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.runtime.Immutable
 
@@ -28,7 +28,7 @@ data class QuestionPageModel(
     /** Picked option labels for this question (by label, like iOS). */
     val picked: Set<String>,
     val multiSelect: Boolean,
-    /** `true` → the 140 dp editor instead of the Other field. Roboco engines never send it today. */
+    /** `true` → the 140 dp editor instead of the Other field. Zeron engines never send it today. */
     val multiline: Boolean,
     /** `custom[q.id]` (prefill or typed); `""` when none. */
     val customText: String,

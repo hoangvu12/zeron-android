@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,32 +33,32 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.composer.ChipTint
-import sh.roboco.android.composer.ComposerChip
-import sh.roboco.android.composer.ComposerController
-import sh.roboco.android.composer.DeliveryMode
-import sh.roboco.android.composer.SendResult
-import sh.roboco.android.composer.StagedImage
-import sh.roboco.android.composer.previewMorphState
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.NoFeedback
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.shell.NavRoute
-import sh.roboco.android.shell.NavStack
-import sh.roboco.android.shell.NavStackHost
-import sh.roboco.android.transcript.RunwayHooks
-import uniffi.roboco_core.BusyPolicy
-import uniffi.roboco_core.CoreClient
-import uniffi.roboco_core.CoreException
-import uniffi.roboco_core.ContextUsage
-import uniffi.roboco_core.FileMatch
-import uniffi.roboco_core.NoHandle
-import uniffi.roboco_core.PullRequestState
-import uniffi.roboco_core.SendOutcome
-import uniffi.roboco_core.SendRequest
-import uniffi.roboco_core.SessionHandle
+import sh.zeron.android.composer.ChipTint
+import sh.zeron.android.composer.ComposerChip
+import sh.zeron.android.composer.ComposerController
+import sh.zeron.android.composer.DeliveryMode
+import sh.zeron.android.composer.SendResult
+import sh.zeron.android.composer.StagedImage
+import sh.zeron.android.composer.previewMorphState
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.NoFeedback
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.shell.NavRoute
+import sh.zeron.android.shell.NavStack
+import sh.zeron.android.shell.NavStackHost
+import sh.zeron.android.transcript.RunwayHooks
+import uniffi.zeron_core.BusyPolicy
+import uniffi.zeron_core.CoreClient
+import uniffi.zeron_core.CoreException
+import uniffi.zeron_core.ContextUsage
+import uniffi.zeron_core.FileMatch
+import uniffi.zeron_core.NoHandle
+import uniffi.zeron_core.PullRequestState
+import uniffi.zeron_core.SendOutcome
+import uniffi.zeron_core.SendRequest
+import uniffi.zeron_core.SessionHandle
 
 /**
  * The session↔composer binding (android-ui-parity #78):
@@ -260,10 +260,10 @@ class SessionComposerBindingTest {
 
     @Test
     fun theRealFfiLabelsXhighAsXHigh() {
-        assumeTrue("host core library missing", runCatching { uniffi.roboco_core.coreVersion() }.isSuccess)
-        assertEquals("X-High", uniffi.roboco_core.reasoningLabel("xhigh"))
-        assertEquals("", uniffi.roboco_core.reasoningLabel(""))
-        assertEquals("Custom", uniffi.roboco_core.reasoningLabel("custom"))
+        assumeTrue("host core library missing", runCatching { uniffi.zeron_core.coreVersion() }.isSuccess)
+        assertEquals("X-High", uniffi.zeron_core.reasoningLabel("xhigh"))
+        assertEquals("", uniffi.zeron_core.reasoningLabel(""))
+        assertEquals("Custom", uniffi.zeron_core.reasoningLabel("custom"))
     }
 
     // ------------------------------------------------- busyPolicy / core commands
@@ -587,7 +587,7 @@ class SessionComposerBindingTest {
             uploadProgress = 0.42,
         )
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 val b = rememberSessionComposer("chat-a", chrome, FakeCommands(), hooks, RecordingReporter())
                 controller = b.composer
             }
@@ -608,7 +608,7 @@ class SessionComposerBindingTest {
         val hooks = RecordingHooks()
         var chrome by mutableStateOf(SessionChrome(running = false, uploadProgress = 0.42))
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 val b = rememberSessionComposer("chat-a", chrome, FakeCommands(), hooks, RecordingReporter())
                 controller = b.composer
             }
@@ -639,7 +639,7 @@ class SessionComposerBindingTest {
         val hooks = RecordingHooks()
         val reporter = RecordingReporter()
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 val b = rememberSessionComposer("chat-a", chrome, commands, hooks, reporter)
                 bindingOut = b
                 controller = b.composer
@@ -673,7 +673,7 @@ class SessionComposerBindingTest {
         var bindingOut: SessionComposerBinding? = null
         var shown by mutableStateOf(true)
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 val b = rememberSessionComposer("chat-a", SessionChrome(), FakeCommands(), RecordingHooks(), RecordingReporter())
                 bindingOut = b
                 GlassMenuHost {
@@ -717,7 +717,7 @@ class SessionComposerBindingTest {
         var hostOn by mutableStateOf(true)
         val commands = FakeCommands()
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 if (hostOn) {
                     NavStackHost(stack, active = true) { entry ->
                         val route = entry.route

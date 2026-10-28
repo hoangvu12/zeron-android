@@ -1,4 +1,4 @@
-package sh.roboco.android.browser
+package sh.zeron.android.browser
 
 import androidx.compose.runtime.Stable
 import kotlinx.coroutines.CoroutineDispatcher
@@ -8,10 +8,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import uniffi.roboco_core.CoreException
-import uniffi.roboco_core.PreviewPanelListener
-import uniffi.roboco_core.PreviewPanelPhase
-import uniffi.roboco_core.PreviewPanelState
+import uniffi.zeron_core.CoreException
+import uniffi.zeron_core.PreviewPanelListener
+import uniffi.zeron_core.PreviewPanelPhase
+import uniffi.zeron_core.PreviewPanelState
 
 /**
  * The preview panel's behaviour (agent-previews ticket 05) — the Kotlin
@@ -104,5 +104,5 @@ internal fun describePreviewError(error: CoreException): String = when (error) {
     is CoreException.Storage -> error.reason
     is CoreException.NotImplemented -> error.reason
     is CoreException.Internal -> error.reason
-    is CoreException.Closed -> "the Roboco core has not started yet"
+    is CoreException.Closed -> "the Zeron core has not started yet"
 }

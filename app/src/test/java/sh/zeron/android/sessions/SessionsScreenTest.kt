@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.gestures.scrollBy
@@ -48,25 +48,25 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.ContextMenuHost
-import sh.roboco.android.design.Haptic
-import sh.roboco.android.design.LocalFeedback
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.WallpaperArtwork
-import sh.roboco.android.design.WallpaperHero
-import sh.roboco.android.design.WallpaperRender
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.wallpaperFixture
-import sh.roboco.android.shell.NavStack
-import sh.roboco.android.shell.NavStackHost
-import sh.roboco.android.shell.LocalTabId
-import sh.roboco.android.shell.LocalTabScrollToTop
-import sh.roboco.android.shell.ShellRouteContent
-import sh.roboco.android.shell.TabId
-import sh.roboco.android.shell.TabRootRoute
-import sh.roboco.android.shell.TabScrollToTop
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ContextMenuHost
+import sh.zeron.android.design.Haptic
+import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.WallpaperArtwork
+import sh.zeron.android.design.WallpaperHero
+import sh.zeron.android.design.WallpaperRender
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.wallpaperFixture
+import sh.zeron.android.shell.NavStack
+import sh.zeron.android.shell.NavStackHost
+import sh.zeron.android.shell.LocalTabId
+import sh.zeron.android.shell.LocalTabScrollToTop
+import sh.zeron.android.shell.ShellRouteContent
+import sh.zeron.android.shell.TabId
+import sh.zeron.android.shell.TabRootRoute
+import sh.zeron.android.shell.TabScrollToTop
 
 /**
  * The Sessions tab root's behaviour (android-ui-parity #46): the ⋯ flow,
@@ -77,7 +77,7 @@ import sh.roboco.android.shell.TabScrollToTop
  * `topInset` is 0 and the nav row is 0…44).
  *
  * The host mirrors ticket 35's mount order with the menus inside:
- * `RobocoTheme { ContextMenuHost { GlassMenuHost { NavStackHost { … } } } }`
+ * `ZeronTheme { ContextMenuHost { GlassMenuHost { NavStackHost { … } } } }`
  * (16 outermost), over a real `NavStack(TabRootRoute(TabId.Sessions))`:
  * pushes land on this tab's stack and render through
  * [ShellRouteContent] (45's folder pages). The glyph clock is frozen (the
@@ -185,7 +185,7 @@ class SessionsScreenTest {
 
     /**
      * Composes the screen once (a compose rule allows one `setContent` per
-     * test). [hero] null → the production [sh.roboco.android.design.WallpaperHero]
+     * test). [hero] null → the production [sh.zeron.android.design.WallpaperHero]
      * (no wallpaper is set under Robolectric, so no node is emitted).
      */
     private var uiScope: CoroutineScope? = null
@@ -207,7 +207,7 @@ class SessionsScreenTest {
             // A composition scope: it carries the frame clock that
             // animateScrollToItem needs (a bare CoroutineScope has none).
             uiScope = rememberCoroutineScope()
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 ProvideGlyphClock(frozenAtNanos = 0L) {
                     CompositionLocalProvider(LocalFeedback provides feedback) {
                         ContextMenuHost {

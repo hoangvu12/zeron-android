@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -60,19 +60,19 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.core.Prefs
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.Cue
-import sh.roboco.android.design.Feedback
-import sh.roboco.android.design.GroupedPosition
-import sh.roboco.android.design.Haptic
-import sh.roboco.android.design.LocalFeedback
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.settingsTag
-import sh.roboco.android.design.toggleTag
-import sh.roboco.android.sessions.FolderRoute
-import sh.roboco.android.shell.NavRoute
-import sh.roboco.android.shell.NavStack
+import sh.zeron.android.core.Prefs
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.Cue
+import sh.zeron.android.design.Feedback
+import sh.zeron.android.design.GroupedPosition
+import sh.zeron.android.design.Haptic
+import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.settingsTag
+import sh.zeron.android.design.toggleTag
+import sh.zeron.android.sessions.FolderRoute
+import sh.zeron.android.shell.NavRoute
+import sh.zeron.android.shell.NavStack
 
 /**
  * The Sessions Settings section (android-ui-parity #100) through the real
@@ -127,13 +127,13 @@ class SessionsSettingsSectionTest {
         onOpenArchived: () -> Unit = {},
     ) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 CompositionLocalProvider(LocalFeedback provides feedback) {
                     val strings = sessionsSettingsStrings()
                     LazyColumn(
                         Modifier
                             .fillMaxSize()
-                            .background(RobocoTheme.palette.background),
+                            .background(ZeronTheme.palette.background),
                     ) {
                         sessionsSettingsSection(
                             strings = strings,
@@ -516,7 +516,7 @@ class SessionsSettingsSectionTest {
         switchNode().performClick()
         compose.waitForIdle()
         assertEquals(listOf(true), calls)
-        // The switch's own feedback fired (inside RobocoSwitch, before the
+        // The switch's own feedback fired (inside ZeronSwitch, before the
         // callback); nothing else happens — no extra haptic.
         assertEquals(listOf(Haptic.ToggleOn), feedback.haptics)
     }
@@ -538,7 +538,7 @@ class SessionsSettingsSectionTest {
         // 30 dp of travel: Robolectric's 16 dp touch slop is consumed by the
         // slop detector, leaving 14 dp against the 22 dp slide (fraction
         // ~0.64), so the release passes the halfway point and commits ON
-        // (RobocoSwitchTest's precedent).
+        // (ZeronSwitchTest's precedent).
         switchNode().performTouchInput {
             down(center)
             repeat(3) { moveBy(Offset(10.dp.toPx(), 0f)) }
@@ -602,9 +602,9 @@ class SessionsSettingsSectionTest {
         // press by the tap timeout, the GroupedListTest method.
         compose.mainClock.autoAdvance = false
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(LocalFeedback provides feedback) {
-                    Column(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+                    Column(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                         SessionsSettingsRowContent(
                             row = SessionsSettingsRow.Archived,
                             position = GroupedPosition.Single,
@@ -669,14 +669,14 @@ class SessionsSettingsSectionTest {
 
     private fun mountPrefs(prefs: Prefs) {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(LocalFeedback provides feedback) {
                     val group by prefs.groupByProject.collectAsState()
                     val strings = sessionsSettingsStrings()
                     LazyColumn(
                         Modifier
                             .fillMaxSize()
-                            .background(RobocoTheme.palette.background),
+                            .background(ZeronTheme.palette.background),
                     ) {
                         sessionsSettingsSection(
                             strings = strings,

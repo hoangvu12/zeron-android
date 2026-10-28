@@ -1,9 +1,9 @@
-package sh.roboco.android.core
+package sh.zeron.android.core
 
 import android.app.UiModeManager
 import android.content.Context
 import android.util.Log
-import sh.roboco.android.design.Appearance
+import sh.zeron.android.design.Appearance
 
 /**
  * Pushes the user's appearance choice to the platform (ticket 96). Called
@@ -30,12 +30,12 @@ fun platformNightMode(a: Appearance): Int = when (a) {
 
 /**
  * The production [NightModeSink]: `UiModeManager.setApplicationNightMode`.
- * API 31+ (Roboco's minSdk), no permission. The platform persists the
+ * API 31+ (Zeron's minSdk), no permission. The platform persists the
  * per-app mode itself and applies it to the process **and the starting
  * window (splash) of the next cold start** — the Android replacement for
  * `window.overrideUserInterfaceStyle` reaching the launch screen.
  *
- * A binder failure is logged (tag `Roboco`) and swallowed: a coroutine in
+ * A binder failure is logged (tag `Zeron`) and swallowed: a coroutine in
  * the application scope must never throw, and the controller re-applies
  * the value on the next start, so the failure heals itself.
  */
@@ -52,4 +52,4 @@ class UiModeNightModeSink(context: Context) : NightModeSink {
     }
 }
 
-private const val LogTag = "Roboco"
+private const val LogTag = "Zeron"

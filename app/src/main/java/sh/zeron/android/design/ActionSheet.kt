@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.content.res.Configuration
 import android.os.Looper
@@ -77,9 +77,9 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.launch
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.glass.GlassSurface
-import sh.roboco.android.design.glass.LocalHazeState
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.glass.GlassSurface
+import sh.zeron.android.design.glass.LocalHazeState
 
 /**
  * The iOS action sheet (android-ui-parity #19): the twin of
@@ -515,7 +515,7 @@ fun ActionSheetPanel(
     maxCardHeight: Dp = Dp.Infinity,
     enabled: Boolean = true,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val shape = rememberSmoothRoundedShape(ActionSheetMetrics.CardRadiusDp.dp)
     val hasHeader = model.title != null || model.message != null
@@ -623,7 +623,7 @@ fun ActionSheetPanel(
  * checkmark); the Cancel row never has one, so it stays at 16.
  *
  * The checked row draws ticket 06's
- * `Icon(RobocoIcons.Checkmark, accent, 17 pt, Semibold)` in a 20.4 dp box
+ * `Icon(ZeronIcons.Checkmark, accent, 17 pt, Semibold)` in a 20.4 dp box
  * starting 16 dp from the card's start, vertically centred and outside the
  * title's padding; the row's `selected` semantics carries the meaning
  * (TalkBack reads "Selected").
@@ -641,7 +641,7 @@ private fun ActionRow(
     anyChecked: Boolean = false,
     enabled: Boolean = true,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val interactionSource = remember { MutableInteractionSource() }
     val pressed by interactionSource.collectIsPressedAsState()
     val controlFill = palette.controlFill
@@ -684,7 +684,7 @@ private fun ActionRow(
         )
         if (checked) {
             Icon(
-                RobocoIcons.Checkmark,
+                ZeronIcons.Checkmark,
                 tint = palette.accent,
                 sizePt = ActionSheetMetrics.CheckmarkSizePt,
                 weight = SymbolWeight.Semibold,
@@ -761,11 +761,11 @@ private fun ActionSheetPanelPreviewContent() {
 @Preview(name = "ActionSheet light", widthDp = 393, heightDp = 852)
 @Composable
 private fun ActionSheetLightPreview() {
-    RobocoTheme(Appearance.Light) { ActionSheetPanelPreviewContent() }
+    ZeronTheme(Appearance.Light) { ActionSheetPanelPreviewContent() }
 }
 
 @Preview(name = "ActionSheet dark", widthDp = 393, heightDp = 852, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun ActionSheetDarkPreview() {
-    RobocoTheme(Appearance.Dark) { ActionSheetPanelPreviewContent() }
+    ZeronTheme(Appearance.Dark) { ActionSheetPanelPreviewContent() }
 }

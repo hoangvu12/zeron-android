@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import android.util.Log
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,26 +23,26 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import sh.roboco.android.RobocoApplication
-import sh.roboco.android.composer.ComposerBar
-import sh.roboco.android.composer.ComposerChip
-import sh.roboco.android.composer.ComposerController
-import sh.roboco.android.composer.ComposerEditHost
-import sh.roboco.android.composer.ComposerMorphState
-import sh.roboco.android.composer.ChipMenuProvider
-import sh.roboco.android.composer.DeliveryMode
-import sh.roboco.android.composer.QueueEditController
-import sh.roboco.android.composer.QueueEditPort
-import sh.roboco.android.composer.SendResult
-import sh.roboco.android.composer.StagedImage
-import sh.roboco.android.composer.rememberComposerMorphState
-import sh.roboco.android.design.Alerts
-import sh.roboco.android.design.LocalAlerts
-import sh.roboco.android.design.LocalFeedback
-import sh.roboco.android.shell.LocalNavEntryOrNull
-import sh.roboco.android.shell.NavEntry
-import sh.roboco.android.transcript.RunwayHooks
-import uniffi.roboco_core.FileMatch
+import sh.zeron.android.ZeronApplication
+import sh.zeron.android.composer.ComposerBar
+import sh.zeron.android.composer.ComposerChip
+import sh.zeron.android.composer.ComposerController
+import sh.zeron.android.composer.ComposerEditHost
+import sh.zeron.android.composer.ComposerMorphState
+import sh.zeron.android.composer.ChipMenuProvider
+import sh.zeron.android.composer.DeliveryMode
+import sh.zeron.android.composer.QueueEditController
+import sh.zeron.android.composer.QueueEditPort
+import sh.zeron.android.composer.SendResult
+import sh.zeron.android.composer.StagedImage
+import sh.zeron.android.composer.rememberComposerMorphState
+import sh.zeron.android.design.Alerts
+import sh.zeron.android.design.LocalAlerts
+import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.shell.LocalNavEntryOrNull
+import sh.zeron.android.shell.NavEntry
+import sh.zeron.android.transcript.RunwayHooks
+import uniffi.zeron_core.FileMatch
 
 /**
  * Ticket 83's `QueueEditController` as the composer sees it
@@ -117,9 +117,9 @@ class SessionComposerBinding internal constructor(
     /** The nav entry's scope (main, `Main.immediate`); `onStop` launches here. */
     private val scope: CoroutineScope,
     private val io: CoroutineDispatcher = Dispatchers.IO,
-    /** Production logs `Log.w("RobocoSession", …)`; plain tests swap this. */
+    /** Production logs `Log.w("ZeronSession", …)`; plain tests swap this. */
     private val logW: (String, Throwable) -> Unit = { message, error ->
-        Log.w("RobocoSession", message, error)
+        Log.w("ZeronSession", message, error)
     },
 ) {
     /**
@@ -150,7 +150,7 @@ class SessionComposerBinding internal constructor(
      *    → returned as-is (no send, no runway, no IME change);
      * 2. `queued = composer.running && mode == Queue` — read **before**
      *    anything else (iOS `shown.running`);
-     * 3. the runway, **before** the FFI call: on Roboco the core creates
+     * 3. the runway, **before** the FFI call: on Zeron the core creates
      *    the optimistic echo before the RPC completes, so calling
      *    `beginOwnTurn` after the await would snapshot the echo as an old
      *    user row and the prompt would never glide;
@@ -238,7 +238,7 @@ class SessionComposerBinding internal constructor(
 }
 
 /**
- * The chrome → controller mapping (`render:484-491`), with the Roboco
+ * The chrome → controller mapping (`render:484-491`), with the Zeron
  * placeholder adaptation: the queued-edit override (83) wins over the
  * chrome's placeholder — iOS resets "Edit queued message" back to
  * "Message <harness>" on the next chrome change, an upstream wart this
@@ -269,7 +269,7 @@ internal fun applyChrome(
  * Without a `NavStackHost` (previews, Robolectric tests, the gallery) the
  * controller and the binding fall back to `remember { … }` with the
  * composition's own scope — [LocalNavEntryOrNull] instead of a try/catch
- * around the throwing [sh.roboco.android.shell.LocalNavEntry].
+ * around the throwing [sh.zeron.android.shell.LocalNavEntry].
  *
  * @param chatId the session's scoped chat id (the retention key)
  * @param chrome the screen's collected `controller.chrome` value (75)
@@ -432,7 +432,7 @@ internal fun NavEntry.sessionQueueEditGate(chatId: String): QueuedEditGate? =
  *
  * Null (and no edit) when: there is no port (a test fake core, previews,
  * the gallery — those build their own stack), no 73 [StatusBanner] filler
- * for this route, no nav entry, or no [RobocoApplication] behind the
+ * for this route, no nav entry, or no [ZeronApplication] behind the
  * context (the release scope needs the app's outliving job).
  *
  * The screen's own reads — 74's `BottomStackModel.from(chrome, editing)`
@@ -451,7 +451,7 @@ fun rememberSessionQueueEdit(
 ): QueueEditController? {
     if (port == null || banner == null) return null
     val entry = LocalNavEntryOrNull.current ?: return null
-    val app = LocalContext.current.applicationContext as? RobocoApplication ?: return null
+    val app = LocalContext.current.applicationContext as? ZeronApplication ?: return null
     val alerts = LocalAlerts.current
     val keyboard = LocalSoftwareKeyboardController.current
 

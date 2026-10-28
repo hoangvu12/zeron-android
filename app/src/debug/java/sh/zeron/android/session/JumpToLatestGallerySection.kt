@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -18,10 +18,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import java.util.Locale
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
 
 /** The gallery's Nav alpha steps: 1 / 0.5 / 0 (ticket 85's multiplier). */
 private val JumpNavAlphaChoices = floatArrayOf(1f, 0.5f, 0f)
@@ -40,7 +40,7 @@ private val JumpNavAlphaChoices = floatArrayOf(1f, 0.5f, 0f)
  *   formulas.
  *
  * It follows the gallery's Light/Dark and Force-reduce-motion toggles
- * through [RobocoTheme]; the spring is deliberately **not** gated by
+ * through [ZeronTheme]; the spring is deliberately **not** gated by
  * Reduce Motion (iOS keeps it, ticket 04), so it keeps springing under
  * the forced setting.
  *
@@ -48,7 +48,7 @@ private val JumpNavAlphaChoices = floatArrayOf(1f, 0.5f, 0f)
  */
 @Composable
 fun JumpToLatestGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     var visible by remember { mutableStateOf(true) }
     var navStep by remember { mutableIntStateOf(0) }
@@ -89,7 +89,7 @@ private fun jumpReadout(motion: JumpToLatestMotion, nav: Float): String = String
 /** One gallery toggle row: label left, current value in accent right. */
 @Composable
 private fun JumpToggleRow(label: String, value: String, onClick: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Row(
         Modifier

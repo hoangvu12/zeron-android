@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.content.res.Configuration
 import androidx.compose.foundation.clickable
@@ -30,13 +30,13 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.shell.AppRouter
-import sh.roboco.android.shell.DetailRoot
-import sh.roboco.android.shell.DraftHandoff
-import sh.roboco.android.shell.SplitRoot
-import sh.roboco.android.shell.TabletShellState
-import sh.roboco.android.shell.rememberTabletShellState
+import sh.zeron.android.core.Face
+import sh.zeron.android.shell.AppRouter
+import sh.zeron.android.shell.DetailRoot
+import sh.zeron.android.shell.DraftHandoff
+import sh.zeron.android.shell.SplitRoot
+import sh.zeron.android.shell.TabletShellState
+import sh.zeron.android.shell.rememberTabletShellState
 
 /**
  * The "Split layout" page of the debug design gallery (android-ui-parity
@@ -60,7 +60,7 @@ import sh.roboco.android.shell.rememberTabletShellState
  */
 @Composable
 fun SplitGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val shell = rememberTabletShellState()
     val log = remember { mutableStateListOf<String>() }
@@ -130,7 +130,7 @@ fun SplitRootFixture(
 /** The sidebar slot's fixture: 8 flat rows, 44 dp tall, no scroller (22's Scroll-layout rule). */
 @Composable
 private fun SplitSidebarFixtureRows() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Column(Modifier.fillMaxSize()) {
         repeat(8) { index ->
@@ -150,7 +150,7 @@ private fun SplitSidebarFixtureRows() {
 /** The detail slot's fixture: the current root's description, centred, plus a focusable field. */
 @Composable
 private fun SplitDetailFixtureContent(root: DetailRoot) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     var fieldText by remember { mutableStateOf("") }
     Column(
@@ -177,7 +177,7 @@ private fun SplitDetailFixtureContent(root: DetailRoot) {
 /** One plain-text button (no Material controls): Regular `secondary`, 14 dp. */
 @Composable
 private fun GalleryTextButton(label: String, onClick: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     BasicText(
         label,
@@ -232,7 +232,7 @@ private class RecordingRouter(private val log: SnapshotStateList<String>) : AppR
 /** The ticket's preview body: the fixture at full 1280 × 800 dp, sidebar shown. */
 @Composable
 private fun SplitRootFixturePreviewBody(appearance: Appearance) {
-    RobocoTheme(appearance) {
+    ZeronTheme(appearance) {
         SplitRootFixture(rememberTabletShellState())
     }
 }

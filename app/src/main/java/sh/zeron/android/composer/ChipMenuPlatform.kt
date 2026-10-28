@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import android.content.ActivityNotFoundException
 import android.content.ClipData
@@ -14,9 +14,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.notify.findActivity
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.notify.findActivity
 
 /**
  * The production [ChipMenuPlatform] (android-ui-parity #89): a Custom Tab
@@ -26,7 +26,7 @@ import sh.roboco.android.notify.findActivity
  * shows its own confirmation chip, the app shows nothing).
  *
  * [dark] is the **app's** resolved appearance at tap time
- * ([RobocoTheme.isDark]), not the system's — the tab's toolbar matches
+ * ([ZeronTheme.isDark]), not the system's — the tab's toolbar matches
  * the app the user is looking at.
  */
 class AndroidChipMenuPlatform(
@@ -50,7 +50,7 @@ class AndroidChipMenuPlatform(
 @Composable
 fun rememberChipMenuPlatform(): ChipMenuPlatform {
     val context = LocalContext.current
-    val dark = RobocoTheme.isDark
+    val dark = ZeronTheme.isDark
     return remember(context, dark) { AndroidChipMenuPlatform(context, dark) }
 }
 

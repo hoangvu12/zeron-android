@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.runtime.Composable
@@ -11,24 +11,24 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import sh.roboco.android.design.AlertButton
-import sh.roboco.android.design.AlertButtonRole
-import sh.roboco.android.design.Alerts
-import sh.roboco.android.design.GroupedAccessory
-import sh.roboco.android.design.GroupedRow
-import sh.roboco.android.design.LocalAlerts
-import sh.roboco.android.design.RobocoAlert
-import sh.roboco.android.design.RobocoIcon
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoSwitch
-import sh.roboco.android.design.groupedSection
-import sh.roboco.android.design.settingsTag
-import sh.roboco.android.design.toggleTag
-import sh.roboco.android.notify.NotificationKind
-import sh.roboco.android.notify.NotificationPermission
-import sh.roboco.android.notify.NotificationPrefs
-import sh.roboco.android.notify.NotificationStatus
-import sh.roboco.android.notify.rememberNotificationPermissionRequester
+import sh.zeron.android.design.AlertButton
+import sh.zeron.android.design.AlertButtonRole
+import sh.zeron.android.design.Alerts
+import sh.zeron.android.design.GroupedAccessory
+import sh.zeron.android.design.GroupedRow
+import sh.zeron.android.design.LocalAlerts
+import sh.zeron.android.design.ZeronAlert
+import sh.zeron.android.design.ZeronIcon
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronSwitch
+import sh.zeron.android.design.groupedSection
+import sh.zeron.android.design.settingsTag
+import sh.zeron.android.design.toggleTag
+import sh.zeron.android.notify.NotificationKind
+import sh.zeron.android.notify.NotificationPermission
+import sh.zeron.android.notify.NotificationPrefs
+import sh.zeron.android.notify.NotificationStatus
+import sh.zeron.android.notify.rememberNotificationPermissionRequester
 
 /**
  * The "Notifications" section of the Settings screen (android-ui-parity
@@ -36,7 +36,7 @@ import sh.roboco.android.notify.rememberNotificationPermissionRequester
  * rows (`:126-144`) and the toggle handler (`:146-178`) over the shared
  * preference store (android-app#28's [NotificationPrefs]) and the
  * permission reader (this ticket's
- * [NotificationPermission][sh.roboco.android.notify.NotificationPermission]).
+ * [NotificationPermission][sh.zeron.android.notify.NotificationPermission]).
  *
  * One master row ("Notifications", a switch) plus, while notifications are
  * effectively on, three kind rows ("Run finished", "Waiting on your
@@ -60,7 +60,7 @@ import sh.roboco.android.notify.rememberNotificationPermissionRequester
  *    reload (`MoreViewController.swift:177-178`).
  *
  * Every visual — geometry, fonts, colours, separators, the row layout —
- * comes from ticket 70's [GroupedRow] and ticket 98's [RobocoSwitch];
+ * comes from ticket 70's [GroupedRow] and ticket 98's [ZeronSwitch];
  * this file sets no dp, font or colour of its own. The alert is ticket
  * 18's through [LocalAlerts]. Status refresh is the host's job: ticket
  * 103 calls [NotificationSectionState.refreshStatus] on `ON_RESUME`
@@ -87,8 +87,8 @@ object NotificationCopy {
     /** `MoreViewController.swift:150`, adapted (lower-case "settings": Android's app is not called "Settings" in prose). */
     const val AlertTitle = "Notifications are off"
 
-    /** `MoreViewController.swift:150`, adapted (Zeron → Roboco). */
-    const val AlertMessage = "Allow notifications for Roboco in Android settings."
+    /** `MoreViewController.swift:150`, adapted (Zeron → Zeron). */
+    const val AlertMessage = "Allow notifications for Zeron in Android settings."
 
     /** `MoreViewController.swift:152` (the cancel action). */
     const val AlertNotNow = "Not Now"
@@ -114,7 +114,7 @@ data class NotificationRowModel(
     val id: String,
     val title: String,
     val subtitle: String?,
-    val icon: RobocoIcon,
+    val icon: ZeronIcon,
     val checked: Boolean,
     val kind: NotificationKind?,
 )
@@ -142,7 +142,7 @@ fun notificationRows(
         } else {
             NotificationCopy.MasterSubtitle
         },
-        icon = RobocoIcons.Bell,
+        icon = ZeronIcons.Bell,
         checked = on || pendingOn,
         kind = null,
     )
@@ -160,10 +160,10 @@ fun notificationRows(
 }
 
 /** `MoreViewController.swift:135-139`: the kind rows' SF symbols, through ticket 06. */
-private fun kindIcon(kind: NotificationKind): RobocoIcon = when (kind) {
-    NotificationKind.Done -> RobocoIcons.CheckmarkCircle
-    NotificationKind.Input -> RobocoIcons.QuestionmarkBubble
-    NotificationKind.Failed -> RobocoIcons.ExclamationmarkTriangle
+private fun kindIcon(kind: NotificationKind): ZeronIcon = when (kind) {
+    NotificationKind.Done -> ZeronIcons.CheckmarkCircle
+    NotificationKind.Input -> ZeronIcons.QuestionmarkBubble
+    NotificationKind.Failed -> ZeronIcons.ExclamationmarkTriangle
 }
 
 // ---------------------------------------------------------------------------
@@ -304,13 +304,13 @@ class NotificationSectionState(
     }
 
     /**
-     * The denied alert, `MoreViewController.swift:150-155` with Roboco's
+     * The denied alert, `MoreViewController.swift:150-155` with Zeron's
      * copy: "Not Now" (Cancel, leading) slides the switch back; "Open
      * Settings" (Default) fires [openSettings] first. Both buttons
      * re-read the status — ticket 18 also routes back and scrim taps to
      * the Cancel action.
      */
-    private fun deniedAlert() = RobocoAlert(
+    private fun deniedAlert() = ZeronAlert(
         title = NotificationCopy.AlertTitle,
         message = NotificationCopy.AlertMessage,
         buttons = listOf(
@@ -404,7 +404,7 @@ fun LazyListScope.notificationSection(
 /**
  * The stateless emitter: fixed [rows] (the gallery and the screenshot
  * fixtures call it without a live store), each row ticket 70's
- * [GroupedRow] with ticket 98's [RobocoSwitch] in its `Custom` accessory
+ * [GroupedRow] with ticket 98's [ZeronSwitch] in its `Custom` accessory
  * slot. The row body is not clickable (`MoreViewController.swift:222-257`
  * hits `default: break` for `notify:` ids): a row tap neither flips the
  * switch nor flashes the highlight.
@@ -414,7 +414,7 @@ fun LazyListScope.notificationSection(
  * checked value (a value key would recreate the row and cut ticket 98's
  * thumb animation). The tags appear exactly once each: the row's
  * `settings-<id>` through [GroupedRow]'s own `testTag`, the switch's
- * `toggle-<id>` through [RobocoSwitch]'s.
+ * `toggle-<id>` through [ZeronSwitch]'s.
  */
 fun LazyListScope.notificationRowsSection(
     rows: List<NotificationRowModel>,
@@ -434,7 +434,7 @@ fun LazyListScope.notificationRowsSection(
             icon = row.icon,
             accessories = listOf(
                 GroupedAccessory.Custom {
-                    RobocoSwitch(
+                    ZeronSwitch(
                         checked = row.checked,
                         onCheckedChange = { onToggle(row, it) },
                         testTag = toggleTag(row.id),

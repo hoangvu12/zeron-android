@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.app.Application
 import android.content.Context
@@ -32,15 +32,15 @@ import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import org.robolectric.shadows.ShadowChoreographer
-import sh.roboco.android.core.TextEngine
-import sh.roboco.android.core.UniffiSandbox
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
-import uniffi.roboco_core.DebugEntry
-import uniffi.roboco_core.LayoutFrame
-import uniffi.roboco_core.RowKind
-import uniffi.roboco_core.RowPlacement
-import uniffi.roboco_core.TranscriptView
+import sh.zeron.android.core.TextEngine
+import sh.zeron.android.core.UniffiSandbox
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
+import uniffi.zeron_core.DebugEntry
+import uniffi.zeron_core.LayoutFrame
+import uniffi.zeron_core.RowKind
+import uniffi.zeron_core.RowPlacement
+import uniffi.zeron_core.TranscriptView
 
 /**
  * The model pipeline behind the real core and the real host (ticket 117,
@@ -136,7 +136,7 @@ class ModelPipelineHostTest {
 
     private fun host(state: TranscriptState, actions: TranscriptActions = TranscriptActions()) {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 TranscriptHost(state, actions, Modifier.fillMaxSize())
             }
         }
@@ -355,7 +355,7 @@ class ModelPipelineHostTest {
             state.viewport.releaseFollow()
             state.viewport.setOffset(0f)
             compose.setContent {
-                RobocoTheme(Appearance.Light) {
+                ZeronTheme(Appearance.Light) {
                     if (hostVisible) TranscriptHost(state, TranscriptActions(), Modifier.fillMaxSize())
                 }
             }
@@ -443,7 +443,7 @@ class ModelPipelineHostTest {
             0L,
             TimeUnit.MILLISECONDS,
             LinkedBlockingQueue(),
-        ) { r -> Thread(r, "roboco-test-model-pipeline").apply { isDaemon = true } }
+        ) { r -> Thread(r, "zeron-test-model-pipeline").apply { isDaemon = true } }
 
         private val lock = Any()
         private val pending = ArrayDeque<Runnable>()

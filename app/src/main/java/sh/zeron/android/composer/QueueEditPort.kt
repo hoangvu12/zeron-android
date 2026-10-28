@@ -1,14 +1,14 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import uniffi.roboco_core.QueueEditAction
-import uniffi.roboco_core.QueueEditFinish
-import uniffi.roboco_core.QueueEditLease
-import uniffi.roboco_core.QueueEditStart
-import uniffi.roboco_core.SessionHandle
+import uniffi.zeron_core.QueueEditAction
+import uniffi.zeron_core.QueueEditFinish
+import uniffi.zeron_core.QueueEditLease
+import uniffi.zeron_core.QueueEditStart
+import uniffi.zeron_core.SessionHandle
 
 /**
  * Opaque lease handle (android-ui-parity #83): [core] is the uniffi
@@ -79,7 +79,7 @@ interface QueueEditPort {
      * Releases [lease]: `commit = true` sends COMMIT with [text], `false`
      * sends CANCEL with `text = null`. **`attachments` is always null on
      * the wire** — a null attachments list keeps the row's attachments,
-     * an empty list would clear them (Roboco keeps attachments separate
+     * an empty list would clear them (Zeron keeps attachments separate
      * from the text, `docs/reference/message-queue.md:66-70`).
      */
     suspend fun finish(lease: EditLease, commit: Boolean, text: String?): EditFinish

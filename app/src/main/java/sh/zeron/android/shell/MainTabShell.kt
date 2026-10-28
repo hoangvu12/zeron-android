@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -43,12 +43,12 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
-import sh.roboco.android.design.LocalBottomChrome
-import sh.roboco.android.design.LocalBottomChromeTop
-import sh.roboco.android.design.LocalFeedback
-import sh.roboco.android.design.LocalReduceMotion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.LocalHazeState
+import sh.zeron.android.design.LocalBottomChrome
+import sh.zeron.android.design.LocalBottomChromeTop
+import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.design.LocalReduceMotion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.LocalHazeState
 
 /**
  * The phone shell (android-ui-parity #26): the app root on phones, the
@@ -118,7 +118,7 @@ import sh.roboco.android.design.glass.LocalHazeState
  * its measured size, minimize state and press state survive every hide.
  * The shell also provides [LocalBottomChrome] (the list bottom insets,
  * from [rememberBottomChromeInsets]) and
- * [sh.roboco.android.design.LocalBottomChromeTop]'s live chrome top for
+ * [sh.zeron.android.design.LocalBottomChromeTop]'s live chrome top for
  * ticket 14's toast anchor, and wraps each entry with
  * [ProvideTransitionProgress] for ticket 85.
  *
@@ -131,7 +131,7 @@ import sh.roboco.android.design.glass.LocalHazeState
  * and the sheet host is mounted here so the router can present over the
  * whole shell.
  *
- * The app root (35) shows this shell; its owner (`RobocoAppContent`) feeds
+ * The app root (35) shows this shell; its owner (`ZeronAppContent`) feeds
  * [liveCounts] from the workspace feed through [rememberLiveCounts].
  *
  * @param state the tab state; defaults to [rememberMainTabState].
@@ -197,7 +197,7 @@ fun MainTabShell(
     onRouter: (AppRouter) -> Unit = {},
     routeContent: (@Composable (NavEntry) -> Unit)? = null,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val feedback = LocalFeedback.current
     val scope = rememberCoroutineScope()
     val holder = rememberSaveableStateHolder()

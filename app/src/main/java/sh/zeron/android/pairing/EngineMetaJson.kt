@@ -1,12 +1,12 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import android.util.Log
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
-import uniffi.roboco_core.EngineRoomRef
-import uniffi.roboco_core.EngineTransport
-import uniffi.roboco_core.PairedEngine
+import uniffi.zeron_core.EngineRoomRef
+import uniffi.zeron_core.EngineTransport
+import uniffi.zeron_core.PairedEngine
 
 /**
  * How a stored engine is dialed (android-next#02). The metadata says only
@@ -91,7 +91,7 @@ internal fun PairedEngine.meta(): EngineMeta = EngineMeta(
  */
 internal object EngineMetaJson {
 
-    private const val TAG = "Roboco"
+    private const val TAG = "Zeron"
 
     fun encode(metas: List<EngineMeta>): String {
         val array = JSONArray()

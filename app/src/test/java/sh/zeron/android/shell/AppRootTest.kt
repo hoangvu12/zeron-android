@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
@@ -18,8 +18,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The window root's selection and swap rules (android-ui-parity #35):
@@ -46,8 +46,8 @@ class AppRootTest {
 
     private fun start() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
-                val palette = RobocoTheme.palette
+            ZeronTheme(Appearance.Light) {
+                val palette = ZeronTheme.palette
                 Box(Modifier.width(width.value).height(800.dp)) {
                     AppRoot(
                         input = input.value,
@@ -134,12 +134,12 @@ class AppRootTest {
 
     @Test
     fun coreFailedShowsTheDiagnosticScreenAndNeverThePairingRoot() {
-        input.value = RootInput.CoreFailed("libroboco_core.so not found")
+        input.value = RootInput.CoreFailed("libzeron_core.so not found")
         start()
 
         compose.onNodeWithTag("root-core-failed").assertExists()
         compose.onNodeWithTag("root-pairing").assertDoesNotExist()
-        compose.onNodeWithText("Couldn't load the Roboco core: libroboco_core.so not found")
+        compose.onNodeWithText("Couldn't load the Zeron core: libzeron_core.so not found")
             .assertExists()
         assertNull(state.kind)
     }

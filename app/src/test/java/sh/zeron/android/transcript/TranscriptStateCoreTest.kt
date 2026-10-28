@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.content.Context
 import android.os.Looper
@@ -16,15 +16,15 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.core.TextEngine
-import sh.roboco.android.core.UniffiSandbox
-import uniffi.roboco_core.DebugEntry
-import uniffi.roboco_core.layoutFixtureMarkdown
+import sh.zeron.android.core.TextEngine
+import sh.zeron.android.core.UniffiSandbox
+import uniffi.zeron_core.DebugEntry
+import uniffi.zeron_core.layoutFixtureMarkdown
 
 /**
  * [TranscriptState] against the real host core (the same JNA setup as
  * `CoreLoadTest`/`TextEngineTest`): the production constructor on the main
- * looper, debug entries flowing through the `roboco-layout` worker as
+ * looper, debug entries flowing through the `zeron-layout` worker as
  * frames relayed on the vsync, the viewport dedup and the append-only
  * style table, and a safe close that keeps the last frame.
  */

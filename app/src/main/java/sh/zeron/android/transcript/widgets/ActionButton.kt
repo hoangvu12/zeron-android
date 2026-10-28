@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,13 +15,13 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.CapsuleShape
-import sh.roboco.android.design.Haptic
-import sh.roboco.android.design.LocalFeedback
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.CapsuleShape
+import sh.zeron.android.design.Haptic
+import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
 
 /**
  * `WidgetKind.Action`'s view (wave-9 #14's error card; upstream #967's
@@ -50,7 +50,7 @@ fun ActionButton(action: String, label: String, fill: Color, onPerform: () -> Un
     ) {
         BasicText(
             label,
-            style = uiStyle(Face.SansSemibold, typeScale.fixed(14f), RobocoTheme.palette.background),
+            style = uiStyle(Face.SansSemibold, typeScale.fixed(14f), ZeronTheme.palette.background),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )

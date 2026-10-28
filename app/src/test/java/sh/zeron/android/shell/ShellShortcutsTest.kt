@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import android.content.Context
 import android.view.KeyEvent
@@ -212,13 +212,13 @@ class ShellShortcutsTest {
     // ------------------------------------------------------- helper groups
 
     @Test
-    fun helperShowsTheRobocoGroupForTheTabShell() {
+    fun helperShowsTheZeronGroupForTheTabShell() {
         val sink = ShortcutSink()
         sink.handler = { true } // a tab shell mounted
         sink.splitMounted = false
         val groups = ShellShortcuts.helperGroups(context, sink)
         assertEquals(1, groups.size)
-        assertEquals("Roboco", groups[0].label.toString())
+        assertEquals("Zeron", groups[0].label.toString())
         val items = groups[0].items
         assertEquals(2, items.size)
         assertEquals("New Session", items[0].label.toString())
@@ -244,7 +244,7 @@ class ShellShortcutsTest {
 
     @Test
     fun helperShowsNothingWithoutAShell() {
-        // The pairing root: no Roboco group, matching SignInViewController.
+        // The pairing root: no Zeron group, matching SignInViewController.
         val sink = ShortcutSink()
         assertTrue(ShellShortcuts.helperGroups(context, sink).isEmpty())
     }

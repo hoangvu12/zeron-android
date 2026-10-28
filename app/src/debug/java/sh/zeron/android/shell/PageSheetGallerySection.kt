@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,16 +24,16 @@ import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.hazeSource
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.GlassCircleButton
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.glass.ProvideHazeState
-import sh.roboco.android.design.sheet.SheetHeaderRow
-import sh.roboco.android.design.sheet.SheetLeading
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.GlassCircleButton
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.glass.ProvideHazeState
+import sh.zeron.android.design.sheet.SheetHeaderRow
+import sh.zeron.android.design.sheet.SheetLeading
+import sh.zeron.android.design.uiStyle
 
 /**
  * The "Page sheet" page of the debug design gallery (android-ui-parity
@@ -81,7 +81,7 @@ private fun FakePresentingScreen(
     state: SheetHostState,
     onHideForHandoff: () -> Unit,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
 
     fun presentNewSession() {
@@ -121,7 +121,7 @@ private fun FakePresentingScreen(
                 repeat(30) { index -> StripedRow(index) }
             }
             GlassCircleButton(
-                icon = RobocoIcons.Plus,
+                icon = ZeronIcons.Plus,
                 contentDescription = "New Session",
                 onClick = { presentNewSession() },
                 modifier = Modifier
@@ -135,7 +135,7 @@ private fun FakePresentingScreen(
 /** One of the 30 fake session rows, striped over the background. */
 @Composable
 private fun StripedRow(index: Int) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Row(
         Modifier
@@ -184,7 +184,7 @@ private fun NewProjectPage(sheetScope: PageSheetScope) {
 /** One plain-text button row (no Material controls). */
 @Composable
 private fun GalleryButton(text: String, onClick: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     BasicText(
         text,

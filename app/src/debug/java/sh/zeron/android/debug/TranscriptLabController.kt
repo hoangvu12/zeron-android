@@ -1,4 +1,4 @@
-package sh.roboco.android.debug
+package sh.zeron.android.debug
 
 import android.os.SystemClock
 import kotlinx.coroutines.CoroutineScope
@@ -6,9 +6,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import sh.roboco.android.transcript.TranscriptState
-import uniffi.roboco_core.DebugEntry
-import uniffi.roboco_core.layoutFixtureMarkdown
+import sh.zeron.android.transcript.TranscriptState
+import uniffi.zeron_core.DebugEntry
+import uniffi.zeron_core.layoutFixtureMarkdown
 
 /**
  * The Transcript Lab's owner of everything stateful (android-ui-parity

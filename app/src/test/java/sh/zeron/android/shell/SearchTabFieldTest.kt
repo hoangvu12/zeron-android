@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.State
@@ -28,11 +28,11 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.LocalReduceMotion
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.LocalReduceMotion
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.GlassMenuHost
 
 /**
  * Ticket 29's field and return circle (Robolectric, 402 × 220 dp at xxhdpi
@@ -87,7 +87,7 @@ class SearchTabFieldTest {
      */
     private fun place(p: Float = 1f, active: Boolean = true) {
         compose.setContent {
-            RobocoTheme {
+            ZeronTheme {
                 CompositionLocalProvider(LocalReduceMotion provides true) {
                     SearchMorphFixture(
                         state = searchState,
@@ -106,7 +106,7 @@ class SearchTabFieldTest {
     /** The real shell, for the round trip. */
     private fun placeShell(shell: MainTabState) {
         compose.setContent {
-            RobocoTheme {
+            ZeronTheme {
                 // Ticket 46: the real Sessions root needs the menu host and
                 // the frozen glyph clock (the loading spinner).
                 ProvideGlyphClock(frozenAtNanos = 0L) {
@@ -269,7 +269,7 @@ class SearchTabFieldTest {
         var morphState: State<Float>? = null
         compose.mainClock.autoAdvance = false
         compose.setContent {
-            RobocoTheme {
+            ZeronTheme {
                 val morph = rememberSearchMorphProgress(selected)
                 morphState = morph
                 SearchMorphFixture(
@@ -301,7 +301,7 @@ class SearchTabFieldTest {
         ReduceMotion.debugOverride = true
         compose.mainClock.autoAdvance = false
         compose.setContent {
-            RobocoTheme {
+            ZeronTheme {
                 val morph = rememberSearchMorphProgress(selected)
                 morphState = morph
                 SearchMorphFixture(

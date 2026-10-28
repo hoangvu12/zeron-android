@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -10,8 +10,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.GlassMenuHost
 
 /**
  * /code-review F5 (ticket 35 AC: "a presented sheet stays presented across
@@ -37,7 +37,7 @@ class MainTabShellSheetHostTest {
         val root = SheetHostState()
         var seen: SheetHostState? = null
         compose.setContent {
-            RobocoTheme {
+            ZeronTheme {
                 SheetHost(root) {
                     GlassMenuHost {
                         MainTabShell(
@@ -60,7 +60,7 @@ class MainTabShellSheetHostTest {
         val unrelated = SheetHostState()
         var seen: SheetHostState? = null
         compose.setContent {
-            RobocoTheme {
+            ZeronTheme {
                 GlassMenuHost {
                     MainTabShell(
                         state = MainTabState(TabId.Sessions),

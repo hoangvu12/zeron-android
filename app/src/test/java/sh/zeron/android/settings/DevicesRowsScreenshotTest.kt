@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -13,8 +13,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The Devices rows goldens (android-ui-parity #102): the gallery fixtures
@@ -31,7 +31,7 @@ import sh.roboco.android.design.RobocoTheme
  * iOS `numberOfLines = 0`).
  *
  * Record with
- * `./gradlew :app:recordRoborazziDebug --tests sh.roboco.android.settings.DevicesRowsScreenshotTest`,
+ * `./gradlew :app:recordRoborazziDebug --tests sh.zeron.android.settings.DevicesRowsScreenshotTest`,
  * verify with `./gradlew :app:verifyRoborazziDebug --tests …`. Paths are
  * relative to the `roborazzi { outputDir }` (`src/test/screenshots`),
  * landing under `settings/`.
@@ -46,8 +46,8 @@ class DevicesRowsScreenshotTest {
 
     private fun shot(appearance: Appearance, file: String) {
         compose.setContent {
-            RobocoTheme(appearance) {
-                Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+            ZeronTheme(appearance) {
+                Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                     DevicesRowsGallerySection()
                 }
             }

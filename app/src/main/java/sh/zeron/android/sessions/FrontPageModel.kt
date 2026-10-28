@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -15,9 +15,9 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import sh.roboco.android.core.Prefs
-import sh.roboco.android.core.WorkspaceFeed
-import sh.roboco.android.design.Feedback
+import sh.zeron.android.core.Prefs
+import sh.zeron.android.core.WorkspaceFeed
+import sh.zeron.android.design.Feedback
 
 /**
  * What the Sessions tab draws (ticket 40) — the `AppModel.frontPage`

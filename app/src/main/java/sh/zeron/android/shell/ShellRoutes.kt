@@ -1,28 +1,28 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import sh.roboco.android.accounts.AgentAccountsRoute
-import sh.roboco.android.accounts.AgentAccountsScreen
-import sh.roboco.android.browser.BrowserRoute
-import sh.roboco.android.browser.BrowserScreen
-import sh.roboco.android.browser.PreviewPanelRoute
-import sh.roboco.android.browser.PreviewPanelScreen
-import sh.roboco.android.settings.EngineDetailRoute
-import sh.roboco.android.settings.EngineDetailScreen
-import sh.roboco.android.settings.LicensesRoute
-import sh.roboco.android.settings.LicensesScreen
-import sh.roboco.android.session.SessionScreenRoute
-import sh.roboco.android.settings.SettingsScreen
-import sh.roboco.android.sessions.FolderRoute
-import sh.roboco.android.sessions.FolderRouteContent
-import sh.roboco.android.sessions.SearchScreen
-import sh.roboco.android.sessions.SessionsScreen
-import sh.roboco.android.sidechats.SideChatDraftRoute
-import sh.roboco.android.sidechats.SubagentRoute
+import sh.zeron.android.accounts.AgentAccountsRoute
+import sh.zeron.android.accounts.AgentAccountsScreen
+import sh.zeron.android.browser.BrowserRoute
+import sh.zeron.android.browser.BrowserScreen
+import sh.zeron.android.browser.PreviewPanelRoute
+import sh.zeron.android.browser.PreviewPanelScreen
+import sh.zeron.android.settings.EngineDetailRoute
+import sh.zeron.android.settings.EngineDetailScreen
+import sh.zeron.android.settings.LicensesRoute
+import sh.zeron.android.settings.LicensesScreen
+import sh.zeron.android.session.SessionScreenRoute
+import sh.zeron.android.settings.SettingsScreen
+import sh.zeron.android.sessions.FolderRoute
+import sh.zeron.android.sessions.FolderRouteContent
+import sh.zeron.android.sessions.SearchScreen
+import sh.zeron.android.sessions.SessionsScreen
+import sh.zeron.android.sidechats.SideChatDraftRoute
+import sh.zeron.android.sidechats.SubagentRoute
 
 /**
  * A tab's root route (android-ui-parity #26): the first entry of the

@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -18,12 +18,12 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.hazeSource
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.glass.GlassCircleVariants
-import sh.roboco.android.design.glass.GlassProminentVariants
-import sh.roboco.android.design.glass.GlassTextCapsuleVariants
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.glass.ProvideHazeState
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.glass.GlassCircleVariants
+import sh.zeron.android.design.glass.GlassProminentVariants
+import sh.zeron.android.design.glass.GlassTextCapsuleVariants
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.glass.ProvideHazeState
 
 /**
  * The "Glass buttons" page of the debug design gallery (ticket 08): the
@@ -47,7 +47,7 @@ import sh.roboco.android.design.glass.ProvideHazeState
  */
 @Composable
 fun GlassButtonsGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val labelStyle = uiStyle(Face.Sans, typeScale.fixed(13f), palette.secondary)
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -77,7 +77,7 @@ fun GlassButtonsGallerySection() {
  */
 @Composable
 private fun PressStage(height: Dp, content: @Composable (MutableInteractionSource) -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val toggleStyle = uiStyle(Face.SansMedium, typeScale.fixed(14f), palette.accent)
     val source = remember { MutableInteractionSource() }

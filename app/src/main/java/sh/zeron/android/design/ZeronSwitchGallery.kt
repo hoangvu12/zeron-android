@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -19,12 +19,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
+import sh.zeron.android.core.Face
 
 /**
  * The "Switch" page of the debug design gallery (android-ui-parity #98):
  * the `UISwitch` port's fixture. The static card shows every rest and lift
- * state of [RobocoSwitchVisual] (the two Rows exist because five 63 dp
+ * state of [ZeronSwitchVisual] (the two Rows exist because five 63 dp
  * fixtures do not fit a 402 dp card); the two interactive rows below use
  * ticket 70's grouped rows with the iOS copy from
  * `MoreViewController.swift:132,214` — the first a **refusing** caller
@@ -33,11 +33,11 @@ import sh.roboco.android.core.Face
  *
  * Registered by ticket 22's registry as
  * `GallerySection("Switch", screenshotHeightDp = 420)`. The goldens
- * (`design/robocoswitch_{light,dark}.png`, `w402dp-h420dp-xxhdpi`) live in
- * [RobocoSwitchScreenshotTest], which hosts this section directly.
+ * (`design/zeronswitch_{light,dark}.png`, `w402dp-h420dp-xxhdpi`) live in
+ * [ZeronSwitchScreenshotTest], which hosts this section directly.
  */
 @Composable
-fun RobocoSwitchGallerySection() {
+fun ZeronSwitchGallerySection() {
     var groupByProject by remember { mutableStateOf(true) }
 
     // One child, so the gallery frame's 16 dp child spacing never splits
@@ -70,13 +70,13 @@ fun RobocoSwitchGallerySection() {
         GroupedRow(
             title = "Notifications",
             subtitle = "When a session finishes, needs you or fails",
-            icon = RobocoIcons.Bell,
+            icon = ZeronIcons.Bell,
             position = GroupedPosition.First,
             accessories = listOf(
                 GroupedAccessory.Custom {
                     // The refusing caller: the value is never accepted, so a
                     // tap animates nothing and a drag springs back.
-                    RobocoSwitch(checked = false, onCheckedChange = {}, testTag = toggleTag("notify:enabled"))
+                    ZeronSwitch(checked = false, onCheckedChange = {}, testTag = toggleTag("notify:enabled"))
                 },
             ),
             onClick = null,
@@ -84,11 +84,11 @@ fun RobocoSwitchGallerySection() {
         GroupedRow(
             title = "Group by Project",
             subtitle = "Sessions outside your sections, under their project",
-            icon = RobocoIcons.SquareStack3dUp,
+            icon = ZeronIcons.SquareStack3dUp,
             position = GroupedPosition.Last,
             accessories = listOf(
                 GroupedAccessory.Custom {
-                    RobocoSwitch(groupByProject, { groupByProject = it }, testTag = toggleTag("groupByProject"))
+                    ZeronSwitch(groupByProject, { groupByProject = it }, testTag = toggleTag("groupByProject"))
                 },
             ),
             onClick = null,
@@ -96,33 +96,33 @@ fun RobocoSwitchGallerySection() {
     }
 }
 
-/** One captioned [RobocoSwitchVisual] of the state card. */
+/** One captioned [ZeronSwitchVisual] of the state card. */
 @Composable
 private fun SwitchFixture(caption: String, fraction: Float, lift: Float) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        RobocoSwitchVisual(fraction = { fraction }, lift = { lift })
+        ZeronSwitchVisual(fraction = { fraction }, lift = { lift })
         BasicText(caption, style = uiStyle(Face.Sans, typeScale.fixed(13f), palette.secondary))
     }
 }
 
 @Preview(name = "light")
 @Composable
-private fun RobocoSwitchPreviewLight() {
-    RobocoTheme(Appearance.Light) {
-        Box(Modifier.background(RobocoTheme.palette.background)) {
-            RobocoSwitchGallerySection()
+private fun ZeronSwitchPreviewLight() {
+    ZeronTheme(Appearance.Light) {
+        Box(Modifier.background(ZeronTheme.palette.background)) {
+            ZeronSwitchGallerySection()
         }
     }
 }
 
 @Preview(name = "dark")
 @Composable
-private fun RobocoSwitchPreviewDark() {
-    RobocoTheme(Appearance.Dark) {
-        Box(Modifier.background(RobocoTheme.palette.background)) {
-            RobocoSwitchGallerySection()
+private fun ZeronSwitchPreviewDark() {
+    ZeronTheme(Appearance.Dark) {
+        Box(Modifier.background(ZeronTheme.palette.background)) {
+            ZeronSwitchGallerySection()
         }
     }
 }

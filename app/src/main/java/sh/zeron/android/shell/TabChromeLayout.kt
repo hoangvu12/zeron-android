@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
@@ -24,9 +24,9 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
-import sh.roboco.android.design.GlassStage
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.LocalHazeState
+import sh.zeron.android.design.GlassStage
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.LocalHazeState
 
 /**
  * Test-only (android-ui-parity #28): the chrome layout's morph progress
@@ -292,7 +292,7 @@ private fun ChromeMorphFrame(progress: Float, minimized: Boolean) {
 
 @Composable
 private fun TabChromeMorphPreviewContent() {
-    RobocoTheme {
+    ZeronTheme {
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             for (p in listOf(0f, 0.5f, 1f)) {
                 val haze = rememberHazeState()

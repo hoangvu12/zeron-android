@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -15,16 +15,16 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import sh.roboco.android.composer.Drafts
-import sh.roboco.android.composer.FakePrefsStore
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.glass.Menu
-import sh.roboco.android.design.glass.MenuIcon
-import sh.roboco.android.design.glass.MenuItem
-import sh.roboco.android.design.glass.MenuLine
-import sh.roboco.android.design.glass.MenuSection
-import sh.roboco.android.design.glass.flattenLevel
-import sh.roboco.android.design.glass.hasContent
+import sh.zeron.android.composer.Drafts
+import sh.zeron.android.composer.FakePrefsStore
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.glass.Menu
+import sh.zeron.android.design.glass.MenuIcon
+import sh.zeron.android.design.glass.MenuItem
+import sh.zeron.android.design.glass.MenuLine
+import sh.zeron.android.design.glass.MenuSection
+import sh.zeron.android.design.glass.flattenLevel
+import sh.zeron.android.design.glass.hasContent
 
 /**
  * The Project / Run on menu content (android-ui-parity #113) — the pure
@@ -40,7 +40,7 @@ import sh.roboco.android.design.glass.hasContent
  * (panel, checkmark in the leading slot, 18 dp tile) is ticket 15/12's —
  * the Roborazzi goldens in `ProjectMenusScreenshotTest` pin it.
  */
-internal const val ProjectMenusRobocoGroupKey = "repo:github.com/hoangvu12/roboco"
+internal const val ProjectMenusZeronGroupKey = "repo:github.com/hoangvu12/zeron-android"
 
 // ── the fixture (the ticket's demo-data rename; shared with the
 //    Robolectric UI test) ──────────────────────────────────────────
@@ -58,14 +58,14 @@ internal fun projectMenusFixtureProjects(): List<ProjectOption> = listOf(
         groupKey = "e3:space-blog", groupName = "blog", colorIndex = 6,
     ),
     ProjectOption(
-        id = "e1:space-roboco", name = "roboco", path = "/Users/dev/roboco",
+        id = "e1:space-zeron", name = "zeron", path = "/Users/dev/zeron",
         device = "e1:dev-mac", deviceName = "MacBook Pro", online = true, git = true,
-        groupKey = ProjectMenusRobocoGroupKey, groupName = "roboco", colorIndex = 5,
+        groupKey = ProjectMenusZeronGroupKey, groupName = "zeron", colorIndex = 5,
     ),
     ProjectOption(
-        id = "e2:space-roboco-vps", name = "roboco", path = "/srv/src/roboco",
+        id = "e2:space-zeron-vps", name = "zeron", path = "/srv/src/zeron",
         device = "e2:dev-vps", deviceName = "hetzner-01", online = true, git = true,
-        groupKey = ProjectMenusRobocoGroupKey, groupName = "roboco", colorIndex = 5,
+        groupKey = ProjectMenusZeronGroupKey, groupName = "zeron", colorIndex = 5,
     ),
     ProjectOption(
         id = "e2:space-edge", name = "edge", path = "/srv/deploys/edge",
@@ -73,9 +73,9 @@ internal fun projectMenusFixtureProjects(): List<ProjectOption> = listOf(
         groupKey = "e2:space-edge", groupName = "edge", colorIndex = 0,
     ),
     ProjectOption(
-        id = "e1:space-mobile", name = "Roboco Mobile", path = "/Users/dev/roboco-mobile",
+        id = "e1:space-mobile", name = "Zeron Mobile", path = "/Users/dev/zeron-mobile",
         device = "e1:dev-mac", deviceName = "MacBook Pro", online = true, git = true,
-        groupKey = "e1:space-mobile", groupName = "Roboco Mobile", colorIndex = 2,
+        groupKey = "e1:space-mobile", groupName = "Zeron Mobile", colorIndex = 2,
     ),
 )
 
@@ -84,9 +84,9 @@ internal fun projectMenusFixtureOptions(): NewSessionOptions =
 
 /** R2's extra clone: a third checkout of the repository, on the same engine as one. */
 internal fun projectMenusForkOption(): ProjectOption = ProjectOption(
-    id = "e1:space-roboco-fork", name = "roboco-fork", path = "/Users/dev/src/roboco-fork",
+    id = "e1:space-zeron-fork", name = "zeron-fork", path = "/Users/dev/src/zeron-fork",
     device = "e1:dev-mac", deviceName = "MacBook Pro", online = true, git = true,
-    groupKey = ProjectMenusRobocoGroupKey, groupName = "roboco", colorIndex = 5,
+    groupKey = ProjectMenusZeronGroupKey, groupName = "zeron", colorIndex = 5,
 )
 
 /** The fake created space ("New Project…"). */
@@ -105,17 +105,17 @@ class ProjectMenusTest {
     @Test
     fun groupsFixtureByRepositoryInCollatorOrder() {
         val groups = projectGroups(projectMenusFixtureProjects(), us)
-        assertEquals(listOf("blog", "edge", "roboco", "Roboco Mobile"), groups.map { it.name })
-        val roboco = groups.first { it.name == "roboco" }
-        assertEquals(ProjectMenusRobocoGroupKey, roboco.groupKey)
-        assertEquals(5, roboco.colorIndex)
+        assertEquals(listOf("blog", "edge", "zeron", "Zeron Mobile"), groups.map { it.name })
+        val zeron = groups.first { it.name == "zeron" }
+        assertEquals(ProjectMenusZeronGroupKey, zeron.groupKey)
+        assertEquals(5, zeron.colorIndex)
         // members keep options order: the oldest checkout first.
-        assertEquals(listOf("e1:space-roboco", "e2:space-roboco-vps"), roboco.members.map { it.id })
+        assertEquals(listOf("e1:space-zeron", "e2:space-zeron-vps"), zeron.members.map { it.id })
         // the two engines, de-duplicated, collator-sorted, ", "-joined.
-        assertEquals("hetzner-01, MacBook Pro", roboco.hosts)
+        assertEquals("hetzner-01, MacBook Pro", zeron.hosts)
         assertEquals("Mac Studio", groups.first { it.name == "blog" }.hosts)
         assertEquals("hetzner-01", groups.first { it.name == "edge" }.hosts)
-        assertEquals("MacBook Pro", groups.first { it.name == "Roboco Mobile" }.hosts)
+        assertEquals("MacBook Pro", groups.first { it.name == "Zeron Mobile" }.hosts)
     }
 
     @Test
@@ -154,8 +154,8 @@ class ProjectMenusTest {
     @Test
     fun pickProjectTargetFollowsThePreferenceOrder() {
         val projects = projectMenusFixtureProjects()
-        val mac = projects.first { it.id == "e1:space-roboco" }
-        val vps = projects.first { it.id == "e2:space-roboco-vps" }
+        val mac = projects.first { it.id == "e1:space-zeron" }
+        val vps = projects.first { it.id == "e2:space-zeron-vps" }
         val members = listOf(mac, vps)
 
         // 1 — the current checkout belongs to the group (re-pick changes nothing).
@@ -194,8 +194,8 @@ class ProjectMenusTest {
     @Test
     fun withCheckoutNullsHostIdAndClearsBranchOnlyForAnotherCheckout() {
         val projects = projectMenusFixtureProjects()
-        val mac = projects.first { it.id == "e1:space-roboco" }
-        val vps = projects.first { it.id == "e2:space-roboco-vps" }
+        val mac = projects.first { it.id == "e1:space-zeron" }
+        val vps = projects.first { it.id == "e2:space-zeron-vps" }
         val base = NewSessionDraft(projectId = mac.id, branch = "main", worktree = true)
         // same checkout: only hostId is (re-)asserted.
         assertEquals(
@@ -220,7 +220,7 @@ class ProjectMenusTest {
         // no host picked: the first online host, not the first host.
         assertEquals(
             NewSessionDraft(hostId = "e2:dev-vps", branch = "main", worktree = true),
-            NewSessionDraft(projectId = "e1:space-roboco", branch = "main", worktree = true)
+            NewSessionDraft(projectId = "e1:space-zeron", branch = "main", worktree = true)
                 .withNoProject(hosts),
         )
         // all offline: the first host.
@@ -243,7 +243,7 @@ class ProjectMenusTest {
     @Test
     fun withCreatedProjectAndWithHostTouchOnlyTheirFields() {
         val base = NewSessionDraft(
-            projectId = "e1:space-roboco",
+            projectId = "e1:space-zeron",
             hostId = "e1:dev-mac",
             branch = "main",
             worktree = true,
@@ -257,7 +257,7 @@ class ProjectMenusTest {
         assertEquals("high", created.effort)
 
         val host = base.withHost(HostOption("e3:dev-studio", "Mac Studio", online = false))
-        assertEquals("e1:space-roboco", host.projectId)
+        assertEquals("e1:space-zeron", host.projectId)
         assertEquals("e3:dev-studio", host.hostId)
         assertEquals("main", host.branch)
         assertTrue(host.worktree)
@@ -270,7 +270,7 @@ class ProjectMenusTest {
     fun theProjectMenuContentOfP1AndP2() {
         val projects = projectMenusFixtureProjects()
 
-        val p1 = buildProjectMenu(projects, NewSessionDraft(projectId = "e1:space-roboco"), {}, {}, {}, us)
+        val p1 = buildProjectMenu(projects, NewSessionDraft(projectId = "e1:space-zeron"), {}, {}, {}, us)
         assertEquals("Project", p1.title)
         // two untitled inline sections, section 1 first.
         assertEquals(2, p1.children.size)
@@ -284,7 +284,7 @@ class ProjectMenusTest {
 
         val rows = menuRows(p1)
         assertEquals(
-            listOf("blog", "edge", "roboco", "Roboco Mobile", "No Project…", "New Project…"),
+            listOf("blog", "edge", "zeron", "Zeron Mobile", "No Project…", "New Project…"),
             rows.map { it.title },
         )
         assertEquals(
@@ -302,8 +302,8 @@ class ProjectMenusTest {
         // the group rows carry the 18 dp monogram (never tinted — the ink is
         // ignored); the fixed rows carry tray and folder.badge.plus.
         rows.take(4).forEach { assertTrue("a group row draws the tile", it.icon is MenuIcon.Custom) }
-        assertEquals(MenuIcon.Symbol(RobocoIcons.Tray), rows[4].icon)
-        assertEquals(MenuIcon.Symbol(RobocoIcons.FolderBadgePlus), rows[5].icon)
+        assertEquals(MenuIcon.Symbol(ZeronIcons.Tray), rows[4].icon)
+        assertEquals(MenuIcon.Symbol(ZeronIcons.FolderBadgePlus), rows[5].icon)
 
         // P2 — no project: no group checked, "No Project…" checked.
         val p2 = buildProjectMenu(projects, NewSessionDraft(projectId = null, hostId = "e2:dev-vps"), {}, {}, {}, us)
@@ -337,9 +337,9 @@ class ProjectMenusTest {
 
     @Test
     fun theRunOnMenuContentOfR1R2AndR3() {
-        // R1 — the roboco group's two checkouts, one per engine. 92's real
+        // R1 — the zeron group's two checkouts, one per engine. 92's real
         // checkouts computation drives the row order.
-        val r1 = newMenusModel(projectMenusFixtureOptions(), NewSessionDraft(projectId = "e1:space-roboco"))
+        val r1 = newMenusModel(projectMenusFixtureOptions(), NewSessionDraft(projectId = "e1:space-zeron"))
         val r1Menu = buildRunOnMenu(r1.model.checkouts, projectMenusFixtureHosts(), r1.model.draft, {}, {})
         assertEquals("Run on", r1Menu.title)
         val r1Rows = menuRows(r1Menu)
@@ -354,11 +354,11 @@ class ProjectMenusTest {
             projectMenusFixtureProjects() + projectMenusForkOption(),
             projectMenusFixtureHosts(),
         )
-        val r2 = newMenusModel(forkOptions, NewSessionDraft(projectId = "e1:space-roboco"))
+        val r2 = newMenusModel(forkOptions, NewSessionDraft(projectId = "e1:space-zeron"))
         val r2Rows = menuRows(buildRunOnMenu(r2.model.checkouts, projectMenusFixtureHosts(), r2.model.draft, {}, {}))
         assertEquals(listOf("hetzner-01", "MacBook Pro", "MacBook Pro"), r2Rows.map { it.title })
         assertEquals(
-            listOf("Online", "/Users/dev/roboco", "/Users/dev/src/roboco-fork"),
+            listOf("Online", "/Users/dev/zeron", "/Users/dev/src/zeron-fork"),
             r2Rows.map { it.subtitle },
         )
         assertEquals(listOf(false, true, false), r2Rows.map { it.checked })
@@ -415,11 +415,11 @@ class ProjectMenusTest {
         val menus = ProjectRunOnMenus(fixture.model, NewProjectPresenter { }, { true })
         val baseline = fixture.disk.writes.get()
 
-        menuRow(menus.project(), "roboco").action()
+        menuRow(menus.project(), "zeron").action()
 
         // The member on the current device (e1:dev-mac), hostId cleared,
         // through exactly one update — one persist of the changed draft.
-        assertEquals(NewSessionDraft(projectId = "e1:space-roboco"), fixture.model.draft)
+        assertEquals(NewSessionDraft(projectId = "e1:space-zeron"), fixture.model.draft)
         assertEquals("exactly one update for the pick", baseline + 1, fixture.disk.writes.get())
 
         // "No Project…" (the first online host), then Run on → Mac Studio
@@ -473,7 +473,7 @@ class ProjectMenusTest {
 
     private fun assertRunOnRowChrome(rows: List<MenuItem>) {
         rows.forEach { row ->
-            assertEquals(MenuIcon.Symbol(RobocoIcons.Desktopcomputer), row.icon)
+            assertEquals(MenuIcon.Symbol(ZeronIcons.Desktopcomputer), row.icon)
             assertEquals("run-on-row", row.testTag)
             assertFalse("no row is ever disabled", row.disabled)
         }

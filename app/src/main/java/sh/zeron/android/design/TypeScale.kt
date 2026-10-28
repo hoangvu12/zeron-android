@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -107,8 +107,8 @@ fun roundHalfAway(x: Float): Float = sign(x) * floor(abs(x) + 0.5f)
 
 /**
  * The resolved type scale. No default on purpose: a component rendered
- * outside [RobocoTheme] fails at once instead of drawing unscaled text.
+ * outside [ZeronTheme] fails at once instead of drawing unscaled text.
  */
 val LocalTypeScale = staticCompositionLocalOf<TypeScale> {
-    error("LocalTypeScale not provided: wrap content in RobocoTheme")
+    error("LocalTypeScale not provided: wrap content in ZeronTheme")
 }

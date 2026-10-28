@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,13 +25,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.composer.composerInput
-import sh.roboco.android.composer.rememberComposerMorphState
-import sh.roboco.android.core.Face
-import sh.roboco.android.session.dismissComposerOnTap
-import sh.roboco.android.transcript.LocalTranscriptTapGate
-import sh.roboco.android.transcript.TranscriptTapGate
-import sh.roboco.android.transcript.transcriptControl
+import sh.zeron.android.composer.composerInput
+import sh.zeron.android.composer.rememberComposerMorphState
+import sh.zeron.android.core.Face
+import sh.zeron.android.session.dismissComposerOnTap
+import sh.zeron.android.transcript.LocalTranscriptTapGate
+import sh.zeron.android.transcript.TranscriptTapGate
+import sh.zeron.android.transcript.transcriptControl
 
 /**
  * The "Tap to dismiss composer" page of the debug design gallery
@@ -85,7 +85,7 @@ fun TapDismissGallerySection() {
                 ) {
                     BasicText(
                         "A painted link, which opens too",
-                        style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(15f), RobocoTheme.palette.accent),
+                        style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(15f), ZeronTheme.palette.accent),
                         modifier = Modifier
                             .clickable { linkTaps++ }
                             .padding(horizontal = 4.dp, vertical = 10.dp),
@@ -94,7 +94,7 @@ fun TapDismissGallerySection() {
                         Modifier
                             .padding(vertical = 4.dp)
                             .size(44.dp)
-                            .background(RobocoTheme.palette.controlFill)
+                            .background(ZeronTheme.palette.controlFill)
                             // The marker: a tap whose down lands here belongs
                             // to the control, never to the dismiss.
                             .transcriptControl()
@@ -103,12 +103,12 @@ fun TapDismissGallerySection() {
                     ) {
                         BasicText(
                             "ctl",
-                            style = uiStyle(Face.Mono, LocalTypeScale.current.fixed(11f), RobocoTheme.palette.secondary),
+                            style = uiStyle(Face.Mono, LocalTypeScale.current.fixed(11f), ZeronTheme.palette.secondary),
                         )
                     }
                     BasicText(
                         "Half-written thought",
-                        style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(15f), RobocoTheme.palette.text),
+                        style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(15f), ZeronTheme.palette.text),
                         modifier = Modifier.padding(horizontal = 4.dp, vertical = 10.dp),
                     )
                     // Filler: enough of it that the transcript really scrolls
@@ -116,7 +116,7 @@ fun TapDismissGallerySection() {
                     repeat(24) { i ->
                         BasicText(
                             "filler line $i — tap me, scroll me",
-                            style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(15f), RobocoTheme.palette.text),
+                            style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(15f), ZeronTheme.palette.text),
                             modifier = Modifier.padding(horizontal = 4.dp, vertical = 10.dp),
                         )
                     }
@@ -131,12 +131,12 @@ fun TapDismissGallerySection() {
                         .align(Alignment.BottomCenter)
                         .fillMaxWidth()
                         .padding(8.dp)
-                        .background(RobocoTheme.palette.controlFill)
+                        .background(ZeronTheme.palette.controlFill)
                         .pointerInput(Unit) { awaitPointerEventScope { while (true) awaitPointerEvent() } },
                 ) {
                     BasicTextField(
                         state = field,
-                        textStyle = uiStyle(Face.Sans, LocalTypeScale.current.fixed(16.5f), RobocoTheme.palette.text),
+                        textStyle = uiStyle(Face.Sans, LocalTypeScale.current.fixed(16.5f), ZeronTheme.palette.text),
                         lineLimits = TextFieldLineLimits.SingleLine,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -148,7 +148,7 @@ fun TapDismissGallerySection() {
         }
         BasicText(
             "focused=${morph.isFocused} dismissals=$dismissals link=$linkTaps control=$controlTaps",
-            style = uiStyle(Face.Mono, LocalTypeScale.current.fixed(11f), RobocoTheme.palette.secondary),
+            style = uiStyle(Face.Mono, LocalTypeScale.current.fixed(11f), ZeronTheme.palette.secondary),
             modifier = Modifier.padding(top = 8.dp),
         )
     }

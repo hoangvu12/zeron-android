@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
@@ -9,7 +9,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import sh.roboco.android.core.FontChain
+import sh.zeron.android.core.FontChain
 
 /**
  * [MonoWide] — the painter's half of ticket 60's double-width rule

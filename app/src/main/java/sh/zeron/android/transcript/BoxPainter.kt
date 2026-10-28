@@ -1,10 +1,10 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.RectF
-import uniffi.roboco_core.BoxPrim
-import uniffi.roboco_core.BoxStyle
+import uniffi.zeron_core.BoxPrim
+import uniffi.zeron_core.BoxStyle
 
 /**
  * Draws one [BoxPrim] — the iOS box pass (`ios:Transcript/RowModel.swift:148-170`,

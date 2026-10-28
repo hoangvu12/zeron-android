@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -7,9 +7,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import uniffi.roboco_core.ColorRole
-import uniffi.roboco_core.RowKind
-import uniffi.roboco_core.WidgetKind
+import uniffi.zeron_core.ColorRole
+import uniffi.zeron_core.RowKind
+import uniffi.zeron_core.WidgetKind
 
 /**
  * The pure halves of ticket 129's semantics tree, on Robolectric (no
@@ -37,10 +37,10 @@ class TranscriptSemanticsTest {
         assertEquals("host.dev", linkLabel("https://user@host.dev:8080/a?b=1"))
         // Opaque / scheme-less URIs have no host: the whole URL, verbatim.
         assertEquals("mailto:a@b.com", linkLabel("mailto:a@b.com"))
-        assertEquals("roboco-file:src/main.rs", linkLabel("roboco-file:src/main.rs"))
+        assertEquals("zeron-file:src/main.rs", linkLabel("zeron-file:src/main.rs"))
         assertEquals("not a url", linkLabel("not a url"))
         // A user-prompt image chip's preview URL: the host is "image".
-        assertEquals("image", linkLabel("roboco-preview://image?ref=%2Ftmp%2Fx.png"))
+        assertEquals("image", linkLabel("zeron-preview://image?ref=%2Ftmp%2Fx.png"))
     }
 
     @Test

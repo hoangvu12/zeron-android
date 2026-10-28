@@ -1,4 +1,4 @@
-package sh.roboco.android.debug
+package sh.zeron.android.debug
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

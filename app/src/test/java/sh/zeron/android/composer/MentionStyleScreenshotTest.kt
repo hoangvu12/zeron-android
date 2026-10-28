@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.runtime.remember
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -17,12 +17,12 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalFonts
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.RobocoTheme
-import uniffi.roboco_core.FileMatch
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalFonts
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.ZeronTheme
+import uniffi.zeron_core.FileMatch
 
 /**
  * The mention goldens (android-ui-parity #53): [MentionStyleDemo] with the
@@ -36,7 +36,7 @@ import uniffi.roboco_core.FileMatch
  * The captures use roborazzi-compose's top-level [captureRoboImage] (it
  * launches its own headless activity — no compose rule), as 22's
  * `GalleryCapture` does. Record with
- * `./gradlew :app:recordRoborazziDebug --tests sh.roboco.android.composer.MentionStyleScreenshotTest`,
+ * `./gradlew :app:recordRoborazziDebug --tests sh.zeron.android.composer.MentionStyleScreenshotTest`,
  * verify with `:app:verifyRoborazziDebug --tests …`. Paths are relative to
  * the `roborazzi { outputDir }` (`src/test/screenshots`), landing under
  * `composer/`.
@@ -56,14 +56,14 @@ class MentionStyleScreenshotTest {
     @Test
     fun mentionStyleLight() {
         captureRoboImage("composer/mention_style_light.png") {
-            RobocoTheme(Appearance.Light) { MentionStyleDemo(showEncode = false) }
+            ZeronTheme(Appearance.Light) { MentionStyleDemo(showEncode = false) }
         }
     }
 
     @Test
     fun mentionStyleDark() {
         captureRoboImage("composer/mention_style_dark.png") {
-            RobocoTheme(Appearance.Dark) { MentionStyleDemo(showEncode = false) }
+            ZeronTheme(Appearance.Dark) { MentionStyleDemo(showEncode = false) }
         }
     }
 
@@ -73,7 +73,7 @@ class MentionStyleScreenshotTest {
     @Test
     fun rememberTransformationReturnsNoneForAnEmptyIndex() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 val index = remember { MentionIndex() }
                 first = rememberMentionTransformation(index, null)
             }
@@ -85,7 +85,7 @@ class MentionStyleScreenshotTest {
     @Test
     fun rememberTransformationReturnsEqualInstancesForEqualIndexes() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 val a = remember { MentionIndex().apply { token(FileMatch("src/lib.rs", false)) } }
                 val b = remember { MentionIndex().apply { token(FileMatch("src/lib.rs", false)) } }
                 first = rememberMentionTransformation(a, TextRange(4, 8))
@@ -101,7 +101,7 @@ class MentionStyleScreenshotTest {
         var style: SpanStyle? = null
         var mediumFamily: FontFamily? = null
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 style = mentionSpanStyle()
                 mediumFamily = LocalFonts.current.family(Face.SansMedium)
             }

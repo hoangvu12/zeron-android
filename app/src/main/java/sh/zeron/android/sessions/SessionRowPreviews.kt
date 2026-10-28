@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -9,12 +9,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
 
 /**
  * The session-row fixtures (android-ui-parity #37): the ticket's ten
@@ -83,7 +83,7 @@ internal object SessionRowFixtures {
  */
 @Composable
 fun SessionRowGallerySection() {
-    val p = RobocoTheme.palette
+    val p = ZeronTheme.palette
     val ts = LocalTypeScale.current
     val idleSeen = SessionRowFixtures.all.first { it.first == "idle-seen" }.second
     Column(Modifier.background(p.background)) {
@@ -108,7 +108,7 @@ fun SessionRowGallerySection() {
 private fun Caption(text: String) {
     BasicText(
         text,
-        style = uiStyle(Face.Mono, LocalTypeScale.current.fixed(11f), RobocoTheme.palette.tertiary),
+        style = uiStyle(Face.Mono, LocalTypeScale.current.fixed(11f), ZeronTheme.palette.tertiary),
         modifier = Modifier.padding(start = 20.dp),
     )
 }
@@ -120,7 +120,7 @@ private fun Caption(text: String) {
 @Preview(name = "Session row – Light", widthDp = 411)
 @Composable
 private fun SessionRowLightPreview() {
-    RobocoTheme(Appearance.Light) {
+    ZeronTheme(Appearance.Light) {
         ProvideGlyphClock(frozenAtNanos = 0L) {
             SessionRowGallerySection()
         }
@@ -130,7 +130,7 @@ private fun SessionRowLightPreview() {
 @Preview(name = "Session row – Dark", widthDp = 411, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun SessionRowDarkPreview() {
-    RobocoTheme(Appearance.Dark) {
+    ZeronTheme(Appearance.Dark) {
         ProvideGlyphClock(frozenAtNanos = 0L) {
             SessionRowGallerySection()
         }

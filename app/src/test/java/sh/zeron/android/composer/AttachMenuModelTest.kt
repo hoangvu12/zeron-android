@@ -1,13 +1,13 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.glass.MenuIcon
-import sh.roboco.android.design.glass.MenuItem
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.glass.MenuIcon
+import sh.zeron.android.design.glass.MenuItem
 
 /**
  * The attach menu's pure builder (android-ui-parity #87), plain JVM: the
@@ -50,10 +50,10 @@ class AttachMenuModelTest {
         )
         assertEquals(
             listOf(
-                RobocoIcons.PhotoOnRectangle,
-                RobocoIcons.Camera,
-                RobocoIcons.Folder,
-                RobocoIcons.DocOnClipboard,
+                ZeronIcons.PhotoOnRectangle,
+                ZeronIcons.Camera,
+                ZeronIcons.Folder,
+                ZeronIcons.DocOnClipboard,
             ),
             items.map { (icon(it) as MenuIcon.Symbol).icon },
         )
@@ -113,9 +113,9 @@ class AttachMenuModelTest {
         // The rows are plain symbol rows: the icon is the registry glyph
         // itself, and GlassMenuPanel tints it with the row ink.
         val items = rows(hasCamera = true, clipHasImage = true)
-        assertSame(RobocoIcons.PhotoOnRectangle, (icon(items[0]) as MenuIcon.Symbol).icon)
-        assertSame(RobocoIcons.Camera, (icon(items[1]) as MenuIcon.Symbol).icon)
-        assertSame(RobocoIcons.Folder, (icon(items[2]) as MenuIcon.Symbol).icon)
-        assertSame(RobocoIcons.DocOnClipboard, (icon(items[3]) as MenuIcon.Symbol).icon)
+        assertSame(ZeronIcons.PhotoOnRectangle, (icon(items[0]) as MenuIcon.Symbol).icon)
+        assertSame(ZeronIcons.Camera, (icon(items[1]) as MenuIcon.Symbol).icon)
+        assertSame(ZeronIcons.Folder, (icon(items[2]) as MenuIcon.Symbol).icon)
+        assertSame(ZeronIcons.DocOnClipboard, (icon(items[3]) as MenuIcon.Symbol).icon)
     }
 }

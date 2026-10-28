@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
@@ -10,10 +10,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.LayoutCoordinates
-import sh.roboco.android.transcript.widgets.ShimmerClock
-import uniffi.roboco_core.ColorRole
-import uniffi.roboco_core.RowKind
-import uniffi.roboco_core.RowPlacement
+import sh.zeron.android.transcript.widgets.ShimmerClock
+import uniffi.zeron_core.ColorRole
+import uniffi.zeron_core.RowKind
+import uniffi.zeron_core.RowPlacement
 import kotlin.math.max
 import kotlin.math.roundToInt
 
@@ -80,7 +80,7 @@ class RealizedRow internal constructor(
      * 122: the row's shimmer clock — one per row host, so the live group's
      * title sweep restarts only when the row re-enters composition, never
      * on a streaming version bump (iOS rebuilds the `ShimmerView` per
-     * configure; Roboco keeps the phase, like desktop's per-group start
+     * configure; Zeron keeps the phase, like desktop's per-group start
      * instant). Lazily built: only rows that ever host a live tool group
      * read it, and the frame loop runs only while a `Shimmer` widget is
      * composed.

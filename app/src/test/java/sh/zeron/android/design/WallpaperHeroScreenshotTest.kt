@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -41,7 +41,7 @@ import org.robolectric.annotation.GraphicsMode
  * flanking it instead. The 24-px diagonal stripes are 1 px + one bilinear
  * footprint away from every sampled pixel.
  *
- * Record with `:app:recordRoborazziDebug --tests sh.roboco.android.design.WallpaperHeroScreenshotTest`,
+ * Record with `:app:recordRoborazziDebug --tests sh.zeron.android.design.WallpaperHeroScreenshotTest`,
  * verify with `:app:verifyRoborazziDebug --tests …`.
  */
 @RunWith(RobolectricTestRunner::class)
@@ -94,8 +94,8 @@ class WallpaperHeroScreenshotTest {
         this.appearance = appearance
         mounted = true
         compose.setContent {
-            RobocoTheme(this.appearance) {
-                Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+            ZeronTheme(this.appearance) {
+                Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                     WallpaperHeroGallerySection(showLive = false)
                 }
             }

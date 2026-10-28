@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,8 +18,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * Fling continuity across an anchor shift (ticket 130's Robolectric
@@ -49,9 +49,9 @@ class ScrollAnchorFlingTest {
     fun setup() {
         // Ticket 134's scroll indicator sits at the end of the scroll chain
         // and reads the theme for its colour, so the chain (like the host,
-        // 65) now requires a RobocoTheme.
+        // 65) now requires a ZeronTheme.
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.fillMaxSize().then(rememberTranscriptScroll(viewport)))
             }
         }

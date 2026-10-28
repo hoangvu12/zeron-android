@@ -1,4 +1,4 @@
-package sh.roboco.android.design.gallery
+package sh.zeron.android.design.gallery
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.background
@@ -30,17 +30,17 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.CapsuleShape
-import sh.roboco.android.design.LocalReduceMotion
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.shell.SearchMorph
-import sh.roboco.android.shell.SearchMorphFixture
-import sh.roboco.android.shell.SearchTabState
-import sh.roboco.android.shell.TabId
-import sh.roboco.android.shell.rememberTabBarMinimizeState
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.CapsuleShape
+import sh.zeron.android.design.LocalReduceMotion
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.shell.SearchMorph
+import sh.zeron.android.shell.SearchMorphFixture
+import sh.zeron.android.shell.SearchTabState
+import sh.zeron.android.shell.TabId
+import sh.zeron.android.shell.rememberTabBarMinimizeState
 
 /**
  * The "Search tab morph" page of the debug design gallery
@@ -62,7 +62,7 @@ import sh.roboco.android.shell.rememberTabBarMinimizeState
  */
 @Composable
 internal fun SearchTabMorphGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val focusManager = LocalFocusManager.current
     val scope = rememberCoroutineScope()
@@ -208,7 +208,7 @@ private fun accessoryAlphaPercent(liftOverSpan: Float): Int =
 /** A plain text chip; a `clickable` BasicText, no Material controls. */
 @Composable
 private fun GalleryChip(text: String, active: Boolean, onClick: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     BasicText(
         text,

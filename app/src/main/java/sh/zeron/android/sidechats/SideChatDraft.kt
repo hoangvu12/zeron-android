@@ -1,4 +1,4 @@
-package sh.roboco.android.sidechats
+package sh.zeron.android.sidechats
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -6,19 +6,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import kotlinx.coroutines.launch
-import sh.roboco.android.design.LocalToaster
-import sh.roboco.android.newsession.NewSessionScreenBody
-import sh.roboco.android.newsession.SideChatHeadline
-import sh.roboco.android.newsession.SideChatParent
-import sh.roboco.android.newsession.rememberCoreFileSearch
-import sh.roboco.android.newsession.rememberNewSessionModel
-import sh.roboco.android.session.SessionHeader
-import sh.roboco.android.shell.LocalNavEntry
-import sh.roboco.android.shell.LocalNavStack
-import sh.roboco.android.shell.LocalRouterHooks
-import sh.roboco.android.shell.NavRoute
-import sh.roboco.android.shell.OPEN_ERROR_TOAST
-import sh.roboco.android.shell.openSessionRoute
+import sh.zeron.android.design.LocalToaster
+import sh.zeron.android.newsession.NewSessionScreenBody
+import sh.zeron.android.newsession.SideChatHeadline
+import sh.zeron.android.newsession.SideChatParent
+import sh.zeron.android.newsession.rememberCoreFileSearch
+import sh.zeron.android.newsession.rememberNewSessionModel
+import sh.zeron.android.session.SessionHeader
+import sh.zeron.android.shell.LocalNavEntry
+import sh.zeron.android.shell.LocalNavStack
+import sh.zeron.android.shell.LocalRouterHooks
+import sh.zeron.android.shell.NavRoute
+import sh.zeron.android.shell.OPEN_ERROR_TOAST
+import sh.zeron.android.shell.openSessionRoute
 
 /** The draft's bar title and subtitle (upstream #899's `sideOf` title view). */
 object SideChatDraftCopy {

@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import java.io.File
 import org.junit.Assert.assertEquals
@@ -111,7 +111,7 @@ class PullToRefreshMathTest {
      */
     @Test
     fun pullToRefreshHasNoReduceMotionBranch() {
-        val file = File("src/main/java/sh/roboco/android/design/PullToRefresh.kt")
+        val file = File("src/main/java/sh/zeron/android/design/PullToRefresh.kt")
         assertTrue("source not found: ${file.path}", file.isFile)
         val offenders = file.readLines().filter { it.contains("LocalReduceMotion") }
         assertTrue("design/PullToRefresh.kt branches on LocalReduceMotion: $offenders", offenders.isEmpty())
@@ -121,8 +121,8 @@ class PullToRefreshMathTest {
     @Test
     fun noMaterialImportsInTheNewSources() {
         val files = listOf(
-            "src/main/java/sh/roboco/android/design/PullToRefresh.kt",
-            "src/main/java/sh/roboco/android/sessions/Refresher.kt",
+            "src/main/java/sh/zeron/android/design/PullToRefresh.kt",
+            "src/main/java/sh/zeron/android/sessions/Refresher.kt",
         )
         for (path in files) {
             val file = File(path)

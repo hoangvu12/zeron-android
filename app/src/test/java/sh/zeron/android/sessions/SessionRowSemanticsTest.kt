@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -32,9 +32,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.TypeScale
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.TypeScale
 
 /**
  * The row's semantics and its highlight pixels (android-ui-parity #37), on
@@ -87,10 +87,10 @@ class SessionRowSemanticsTest {
         onRecompose: (() -> Unit)? = null,
     ) {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 // Opaque page background behind the row: the fill's rounded
                 // corners are transparent, so probes must read a known page.
-                Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+                Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                     Column {
                         if (onRecompose != null) SideEffect(onRecompose)
                         SessionRow(vm, isCurrent = isCurrent, highlight = highlight)
@@ -132,14 +132,14 @@ class SessionRowSemanticsTest {
 
     @Test
     fun atFontScale1_3TheRowHeightFollowsTheTypeScale() {
-        // LocalDensity is provided OUTSIDE RobocoTheme, so the theme's
+        // LocalDensity is provided OUTSIDE ZeronTheme, so the theme's
         // TypeScale.from(density) sees the font scale.
         val expected = TypeScale.from(Density(3f, 1.3f)).scaledDp(62f)
         compose.setContent {
             CompositionLocalProvider(
                 LocalDensity provides Density(3f, 1.3f),
             ) {
-                RobocoTheme(Appearance.Light) { SessionRow(vm()) }
+                ZeronTheme(Appearance.Light) { SessionRow(vm()) }
             }
         }
         compose.waitForIdle()

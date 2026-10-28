@@ -1,13 +1,13 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.glass.Menu
-import sh.roboco.android.design.glass.MenuIcon
-import sh.roboco.android.design.glass.MenuItem
-import sh.roboco.android.session.ChromeFiller
-import sh.roboco.android.session.ChromeInput
-import sh.roboco.android.session.SessionChrome
-import uniffi.roboco_core.QueueGate
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.glass.Menu
+import sh.zeron.android.design.glass.MenuIcon
+import sh.zeron.android.design.glass.MenuItem
+import sh.zeron.android.session.ChromeFiller
+import sh.zeron.android.session.ChromeInput
+import sh.zeron.android.session.SessionChrome
+import uniffi.zeron_core.QueueGate
 
 /**
  * The queue panel's pure model (android-ui-parity #82): the action set,
@@ -67,24 +67,24 @@ fun queueRowMenu(index: Int, count: Int, onAction: (QueueAction) -> Unit): Menu 
     children = listOf(
         MenuItem(
             title = "Edit",
-            icon = MenuIcon.Symbol(RobocoIcons.Pencil),
+            icon = MenuIcon.Symbol(ZeronIcons.Pencil),
             testTag = "queue-menu-edit",
         ) { onAction(QueueAction.Edit) },
         MenuItem(
             title = "Move Up",
-            icon = MenuIcon.Symbol(RobocoIcons.ArrowUp),
+            icon = MenuIcon.Symbol(ZeronIcons.ArrowUp),
             disabled = index == 0,
             testTag = "queue-menu-move-up",
         ) { onAction(QueueAction.MoveUp) },
         MenuItem(
             title = "Move Down",
-            icon = MenuIcon.Symbol(RobocoIcons.ArrowDown),
+            icon = MenuIcon.Symbol(ZeronIcons.ArrowDown),
             disabled = index == count - 1,
             testTag = "queue-menu-move-down",
         ) { onAction(QueueAction.MoveDown) },
         MenuItem(
             title = "Remove",
-            icon = MenuIcon.Symbol(RobocoIcons.Trash),
+            icon = MenuIcon.Symbol(ZeronIcons.Trash),
             destructive = true,
             testTag = "queue-menu-remove",
         ) { onAction(QueueAction.Remove) },
@@ -110,7 +110,7 @@ fun queueRowMenu(index: Int, count: Int, onAction: (QueueAction) -> Unit): Menu 
  * SessionViewController.swift` maps it into the chrome but never shows
  * it), so there is no error field here.
  *
- * **Registration (76):** `RobocoApplication.onCreate` registers this
+ * **Registration (76):** `ZeronApplication.onCreate` registers this
  * filler in 76's `ChromeFillerRegistry` QUEUE slot (50), before
  * `installSessionRoutes` — `chromeFillers.register(
  * ChromeFillerRegistry.QUEUE) { QueueChromeFiller() }` — so every

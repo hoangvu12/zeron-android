@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -16,17 +16,17 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.GalleryBackdrop
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.shell.NavRoute
-import sh.roboco.android.shell.NavStack
-import sh.roboco.android.shell.NavStackHost
-import sh.roboco.android.shell.SheetHost
-import sh.roboco.android.shell.SheetStyle
-import sh.roboco.android.shell.SheetHostState
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.GalleryBackdrop
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.shell.NavRoute
+import sh.zeron.android.shell.NavStack
+import sh.zeron.android.shell.NavStackHost
+import sh.zeron.android.shell.SheetHost
+import sh.zeron.android.shell.SheetStyle
+import sh.zeron.android.shell.SheetHostState
 
 /**
  * The About & Licenses goldens (android-ui-parity #101), recorded by
@@ -74,7 +74,7 @@ class AboutLicensesScreenshotTest {
 
     private fun shot(appearance: Appearance, file: String, content: @Composable () -> Unit) {
         compose.setContent {
-            RobocoTheme(appearance) { content() }
+            ZeronTheme(appearance) { content() }
         }
         compose.waitForIdle()
         compose.onRoot().captureRoboImage(file)
@@ -127,7 +127,7 @@ class AboutLicensesScreenshotTest {
             }
         }
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 SheetHost(state) { GalleryBackdrop(Modifier.fillMaxSize()) }
             }
         }

@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import android.os.SystemClock
 import androidx.compose.runtime.Immutable
@@ -11,12 +11,12 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
-import sh.roboco.android.core.WorkspaceFeed
-import uniffi.roboco_core.Connectivity
-import uniffi.roboco_core.ConnectivityState
-import uniffi.roboco_core.EngineState
-import uniffi.roboco_core.EngineView
-import uniffi.roboco_core.ParkReason
+import sh.zeron.android.core.WorkspaceFeed
+import uniffi.zeron_core.Connectivity
+import uniffi.zeron_core.ConnectivityState
+import uniffi.zeron_core.EngineState
+import uniffi.zeron_core.EngineView
+import uniffi.zeron_core.ParkReason
 
 /**
  * The 4 s show-slow / hide-fast degradation grace (android-ui-parity #50)
@@ -102,8 +102,8 @@ data class EngineHealthResult(val ui: EngineHealthUi, val nextCheckAtMs: Long?)
 
 /**
  * The multi-engine offline indication's pure model (android-ui-parity #50)
- * — the Roboco stand-in for upstream's never-shipped "offline banner on
- * the session list" (upstream #570), because Roboco pairs N engines and
+ * — the Zeron stand-in for upstream's never-shipped "offline banner on
+ * the session list" (upstream #570), because Zeron pairs N engines and
  * one of them can be down while the others work.
  *
  * The labels are the web's, verbatim

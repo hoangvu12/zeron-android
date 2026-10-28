@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -6,7 +6,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.platform.LocalDensity
-import uniffi.roboco_core.Scroller
+import uniffi.zeron_core.Scroller
 
 /**
  * One horizontal scroller slot, layer `index + 1` (tickets 65 + 116): the

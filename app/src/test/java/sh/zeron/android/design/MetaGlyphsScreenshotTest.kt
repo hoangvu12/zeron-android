@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -66,8 +66,8 @@ class MetaGlyphsScreenshotTest {
     /** The golden host: the section on its palette background (no frame). */
     @Composable
     private fun MetaGlyphsShotHost(appearance: Appearance) {
-        RobocoTheme(appearance) {
-            Box(Modifier.background(RobocoTheme.palette.background)) { MetaGlyphsGallerySection() }
+        ZeronTheme(appearance) {
+            Box(Modifier.background(ZeronTheme.palette.background)) { MetaGlyphsGallerySection() }
         }
     }
 
@@ -85,7 +85,7 @@ class MetaGlyphsScreenshotTest {
 
     @Test
     fun badgeAtElevenMeasuresThirtyEightByEighteenDp() {
-        compose.setContent { RobocoTheme(Appearance.Light) { PrBadge(77u, PrState.Closed) } }
+        compose.setContent { ZeronTheme(Appearance.Light) { PrBadge(77u, PrState.Closed) } }
         compose.onNodeWithContentDescription("Pull request 77, closed")
             .assertWidthIsEqualTo(38.dp)
             .assertHeightIsEqualTo(18.dp)
@@ -93,7 +93,7 @@ class MetaGlyphsScreenshotTest {
 
     @Test
     fun badgeOneOhTwoAtElevenMeasuresFortyFourByEighteenDp() {
-        compose.setContent { RobocoTheme(Appearance.Light) { PrBadge(102u, PrState.Open) } }
+        compose.setContent { ZeronTheme(Appearance.Light) { PrBadge(102u, PrState.Open) } }
         compose.onNodeWithContentDescription("Pull request 102, open")
             .assertWidthIsEqualTo(44.dp)
             .assertHeightIsEqualTo(18.dp)
@@ -101,7 +101,7 @@ class MetaGlyphsScreenshotTest {
 
     @Test
     fun badgeAtFourteenMeasuresFiftyFiveByTwentyThreeDp() {
-        compose.setContent { RobocoTheme(Appearance.Light) { PrBadge(102u, PrState.Open, size = 14f) } }
+        compose.setContent { ZeronTheme(Appearance.Light) { PrBadge(102u, PrState.Open, size = 14f) } }
         compose.onNodeWithContentDescription("Pull request 102, open")
             .assertWidthIsEqualTo(55.dp)
             .assertHeightIsEqualTo(23.dp)
@@ -109,7 +109,7 @@ class MetaGlyphsScreenshotTest {
 
     @Test
     fun badgeIsOneA11yNodeWithNoSeparateTextNode() {
-        compose.setContent { RobocoTheme(Appearance.Light) { PrBadge(102u, PrState.Open) } }
+        compose.setContent { ZeronTheme(Appearance.Light) { PrBadge(102u, PrState.Open) } }
         // The number is not its own semantics node: the badge node speaks
         // the whole label (SessionCell appends prBadge.accessibilityLabel).
         compose.onNodeWithContentDescription("Pull request 102, open").assertExists()
@@ -126,7 +126,7 @@ class MetaGlyphsScreenshotTest {
         var current by mutableStateOf(Appearance.Light)
         compose.setContent {
             val appearance = current
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 val list = listOf(
                     prTone(PrState.Open),
                     prTone(PrState.Merged),
@@ -169,15 +169,15 @@ class MetaGlyphsScreenshotTest {
         // by far more than 1/255.
         var usePainter by mutableStateOf(false)
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 if (usePainter) {
                     Image(
-                        painter = rememberProjectTilePainter("roboco", 2, 14.dp),
+                        painter = rememberProjectTilePainter("zeron", 2, 14.dp),
                         contentDescription = null,
                         modifier = Modifier.testTag("tile").size(14.dp),
                     )
                 } else {
-                    ProjectTile("roboco", 2, Modifier.testTag("tile"), side = 14.dp)
+                    ProjectTile("zeron", 2, Modifier.testTag("tile"), side = 14.dp)
                 }
             }
         }
@@ -210,8 +210,8 @@ class MetaGlyphsScreenshotTest {
     fun tileBitmapSwitchesToTheDarkToneWithTheTheme() {
         var dark by mutableStateOf(false)
         compose.setContent {
-            RobocoTheme(if (dark) Appearance.Dark else Appearance.Light) {
-                ProjectTile("roboco", 2, Modifier.testTag("tile"), side = 14.dp)
+            ZeronTheme(if (dark) Appearance.Dark else Appearance.Light) {
+                ProjectTile("zeron", 2, Modifier.testTag("tile"), side = 14.dp)
             }
         }
         val light = compose.onNodeWithTag("tile").captureToImage().toPixelMap()
@@ -231,10 +231,10 @@ class MetaGlyphsScreenshotTest {
         var colorIndex by mutableStateOf(0)
         var dark by mutableStateOf(false)
         compose.setContent {
-            RobocoTheme(if (dark) Appearance.Dark else Appearance.Light) {
-                val palette = RobocoTheme.palette
+            ZeronTheme(if (dark) Appearance.Dark else Appearance.Light) {
+                val palette = ZeronTheme.palette
                 Box(Modifier.testTag("host").background(palette.background)) {
-                    ProjectTile("roboco", colorIndex, Modifier, side = 14.dp)
+                    ProjectTile("zeron", colorIndex, Modifier, side = 14.dp)
                 }
             }
         }
@@ -259,8 +259,8 @@ class MetaGlyphsScreenshotTest {
         // not be a variable here.
         var index by mutableStateOf(1)
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
-                ProjectTile("roboco", index, Modifier.testTag("tile"), side = 14.dp)
+            ZeronTheme(Appearance.Light) {
+                ProjectTile("zeron", index, Modifier.testTag("tile"), side = 14.dp)
             }
         }
         fun capture(i: Int) = run {
@@ -287,8 +287,8 @@ class MetaGlyphsScreenshotTest {
         var dark by mutableStateOf(false)
         val tones = HashMap<PrState, Color>()
         compose.setContent {
-            RobocoTheme(if (dark) Appearance.Dark else Appearance.Light) {
-                val palette = RobocoTheme.palette
+            ZeronTheme(if (dark) Appearance.Dark else Appearance.Light) {
+                val palette = ZeronTheme.palette
                 val tone = prTone(state)
                 SideEffect { tones[state] = tone }
                 Box(Modifier.testTag("host").background(palette.background)) {

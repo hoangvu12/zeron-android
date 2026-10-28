@@ -1,4 +1,4 @@
-package sh.roboco.android.shell.tablet
+package sh.zeron.android.shell.tablet
 
 import androidx.compose.foundation.text.input.clearText
 import org.junit.Assert.assertEquals
@@ -7,7 +7,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import sh.roboco.android.sessions.FolderRoute
+import sh.zeron.android.sessions.FolderRoute
 
 /**
  * [SidebarState] — the long-lived state holder (android-ui-parity #105),

@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
@@ -18,13 +18,13 @@ import androidx.compose.ui.unit.isSpecified
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import kotlinx.coroutines.flow.StateFlow
-import sh.roboco.android.RobocoApplication
-import sh.roboco.android.accounts.agentAccountsSection
-import sh.roboco.android.design.LocalBottomChrome
-import sh.roboco.android.shell.LargeTitleScaffold
-import sh.roboco.android.shell.LocalNavStack
-import sh.roboco.android.shell.RegisterScrollToTop
-import sh.roboco.android.shell.TitleMode
+import sh.zeron.android.ZeronApplication
+import sh.zeron.android.accounts.agentAccountsSection
+import sh.zeron.android.design.LocalBottomChrome
+import sh.zeron.android.shell.LargeTitleScaffold
+import sh.zeron.android.shell.LocalNavStack
+import sh.zeron.android.shell.RegisterScrollToTop
+import sh.zeron.android.shell.TitleMode
 
 /**
  * The Settings screen (android-ui-parity #103): the Compose port of
@@ -59,7 +59,7 @@ import sh.roboco.android.shell.TitleMode
  * notification status cannot be observed, hence the lifecycle effect.
  *
  * iOS's **Account**, **Voice** and **Sign Out** sections are dropped
- * (`MoreViewController.swift:185-188, 191-194, 217-218`): Roboco has no
+ * (`MoreViewController.swift:185-188, 191-194, 217-218`): Zeron has no
  * account and no voice (ADR 0004), and forgetting an engine (140) is the
  * nearest action to signing out.
  */
@@ -83,7 +83,7 @@ object SettingsScreenTokens {
 /**
  * The sections, in display order = declaration order (iOS
  * `MoreViewController.swift:183-220` minus Account/Voice/Sign-Out, plus
- * Roboco's About in the Sign-Out slot; android-next#05 adds Agent
+ * Zeron's About in the Sign-Out slot; android-next#05 adds Agent
  * Accounts where PR #578 put Provider Accounts — ahead of the
  * computers). The [key]s are the `groupedSection` keys — they must stay
  * unique across the screen (70 prefixes them `grouped:<key>:…`).
@@ -182,21 +182,21 @@ fun SettingsScreen(
     modifier: Modifier = Modifier,
     topInset: Dp = Dp.Unspecified,
     trailing: @Composable RowScope.() -> Unit = {},
-    accounts: sh.roboco.android.accounts.AgentAccountsSectionState =
-        sh.roboco.android.accounts.rememberAgentAccountsSectionState(),
+    accounts: sh.zeron.android.accounts.AgentAccountsSectionState =
+        sh.zeron.android.accounts.rememberAgentAccountsSectionState(),
     devices: DevicesSectionState = rememberDevicesSectionState(),
     notifications: NotificationSectionState = rememberNotificationSectionState(),
     appearance: AppearanceSectionState = rememberAppearanceSectionState(),
     wallpaper: WallpaperSectionState = rememberWallpaperSectionState(),
     groupByProject: StateFlow<Boolean> =
-        (LocalContext.current.applicationContext as RobocoApplication).prefs.groupByProject,
+        (LocalContext.current.applicationContext as ZeronApplication).prefs.groupByProject,
     onGroupByProjectChange: (Boolean) -> Unit =
-        (LocalContext.current.applicationContext as RobocoApplication).prefs::setGroupByProject,
+        (LocalContext.current.applicationContext as ZeronApplication).prefs::setGroupByProject,
     about: AboutSectionState = rememberAboutSectionState(),
     stayConnected: StateFlow<Boolean> =
-        (LocalContext.current.applicationContext as RobocoApplication).prefs.stayConnected,
+        (LocalContext.current.applicationContext as ZeronApplication).prefs.stayConnected,
     onStayConnectedChange: (Boolean) -> Unit =
-        (LocalContext.current.applicationContext as RobocoApplication).prefs::setStayConnected,
+        (LocalContext.current.applicationContext as ZeronApplication).prefs::setStayConnected,
 ) {
     val listState = rememberLazyListState()
     // 26: the tab's scroll-to-top handler for a re-select at the root; a

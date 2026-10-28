@@ -1,9 +1,9 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import sh.roboco.android.MainActivity
+import sh.zeron.android.MainActivity
 
 /**
  * The `text/plain` share target (android-ui-parity #139) — a no-UI

@@ -1,4 +1,4 @@
-package sh.roboco.android.update
+package sh.zeron.android.update
 
 import android.app.Application
 import android.content.Intent
@@ -106,7 +106,7 @@ class ApkInstallerStatusTest {
         val started = shadowOf(context).nextStartedActivity
         assertNotNull(started)
         assertEquals(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, started!!.action)
-        assertEquals(Uri.parse("package:sh.roboco.android"), started.data)
+        assertEquals(Uri.parse("package:sh.zeron.android"), started.data)
         // Started from the application context: the NEW_TASK flag is set.
         assertTrue(
             "FLAG_ACTIVITY_NEW_TASK",

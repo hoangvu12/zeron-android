@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import android.content.Context
 import androidx.compose.runtime.LaunchedEffect
@@ -23,21 +23,21 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.core.Fonts
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.TranscriptPalette
-import sh.roboco.android.design.color
-import sh.roboco.android.transcript.RowModel
-import sh.roboco.android.transcript.StyleFonts
-import uniffi.roboco_core.ColorRole
+import sh.zeron.android.core.Fonts
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.TranscriptPalette
+import sh.zeron.android.design.color
+import sh.zeron.android.transcript.RowModel
+import sh.zeron.android.transcript.StyleFonts
+import uniffi.zeron_core.ColorRole
 
 /**
  * The shimmer clock (ticket 122) on the Compose rule with the main clock
  * frozen: the phase follows the frame clock, wraps at 3.4 s, restarts when
  * the host row re-enters composition, and survives a new model version
- * for the same row (the Roboco adaptation of iOS's per-configure rebuild).
+ * for the same row (the Zeron adaptation of iOS's per-configure rebuild).
  * The reduce-motion case hosts a standalone [LiveShimmer] — `RowContext`
  * and `RealizedRow` need a live `TranscriptState`, which these paths do
  * not; the "shimmer" tag is looked up on this standalone host only (inside
@@ -176,7 +176,7 @@ class ShimmerClockTest {
         assertEquals(0.25f, before.phase(), 0.005f)
 
         // A streaming update: a new model version for the same row key —
-        // iOS rebuilds the ShimmerView (t resets); Roboco keeps the clock,
+        // iOS rebuilds the ShimmerView (t resets); Zeron keeps the clock,
         // like desktop's `shimmer_started_at`.
         compose.runOnUiThread {
             model = ShimmerSpecimen.model(fonts, 3f, version = 2uL)
@@ -197,7 +197,7 @@ class ShimmerClockTest {
         val clock = ShimmerClock()
         var show by mutableStateOf(true)
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 if (show) LiveShimmer(clock, model, model.display.widgets[0], fonts, color)
             }
         }

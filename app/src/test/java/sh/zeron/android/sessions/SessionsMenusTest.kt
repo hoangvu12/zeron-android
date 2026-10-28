@@ -1,14 +1,14 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.glass.Menu
-import sh.roboco.android.design.glass.MenuIcon
-import sh.roboco.android.design.glass.MenuItem
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.glass.Menu
+import sh.zeron.android.design.glass.MenuIcon
+import sh.zeron.android.design.glass.MenuItem
 
 /**
  * [sessionsOptionsMenu] and [sessionHeaderMenu] (android-ui-parity #46) —
@@ -90,19 +90,19 @@ class SessionsMenusTest {
         assertEquals("exactly four rows, nothing else", 4, menu.children.size)
 
         assertEquals("New Section\u2026", items[0].title)
-        assertEquals(MenuIcon.Symbol(RobocoIcons.FolderBadgePlus), items[0].icon)
+        assertEquals(MenuIcon.Symbol(ZeronIcons.FolderBadgePlus), items[0].icon)
         assertEquals("sessions-options-new-section", items[0].testTag)
 
         assertEquals("Collapse All", items[1].title)
-        assertEquals(MenuIcon.Symbol(RobocoIcons.RectangleCompressVertical), items[1].icon)
+        assertEquals(MenuIcon.Symbol(ZeronIcons.RectangleCompressVertical), items[1].icon)
         assertEquals("sessions-options-collapse-all", items[1].testTag)
 
         assertEquals("Group by Project", items[2].title)
-        assertEquals(MenuIcon.Symbol(RobocoIcons.SquareStack3dUp), items[2].icon)
+        assertEquals(MenuIcon.Symbol(ZeronIcons.SquareStack3dUp), items[2].icon)
         assertEquals("sessions-options-group-by-project", items[2].testTag)
 
         assertEquals("Archived", items[3].title)
-        assertEquals(MenuIcon.Symbol(RobocoIcons.Archivebox), items[3].icon)
+        assertEquals(MenuIcon.Symbol(ZeronIcons.Archivebox), items[3].icon)
         assertEquals("sessions-options-archived", items[3].testTag)
 
         items.forEach { item -> assertFalse("no destructive row in the ⋯ menu", item.destructive) }
@@ -176,11 +176,11 @@ class SessionsMenusTest {
         assertNull("no menu title", menu.title)
 
         assertEquals("Open", items[0].title)
-        assertEquals(MenuIcon.Symbol(RobocoIcons.ArrowUpRight), items[0].icon)
+        assertEquals(MenuIcon.Symbol(ZeronIcons.ArrowUpRight), items[0].icon)
         assertEquals("section-menu-open", items[0].testTag)
 
         assertEquals("Reorder\u2026", items[1].title)
-        assertEquals(MenuIcon.Symbol(RobocoIcons.ArrowUpArrowDown), items[1].icon)
+        assertEquals(MenuIcon.Symbol(ZeronIcons.ArrowUpArrowDown), items[1].icon)
         assertEquals("section-menu-reorder", items[1].testTag)
 
         // "Reorder…" does exactly what "Open" does (no auto-Edit, 47 owns
@@ -201,11 +201,11 @@ class SessionsMenusTest {
         assertEquals("section-menu-open", items[0].testTag)
 
         assertEquals("Rename Section\u2026", items[1].title)
-        assertEquals(MenuIcon.Symbol(RobocoIcons.Pencil), items[1].icon)
+        assertEquals(MenuIcon.Symbol(ZeronIcons.Pencil), items[1].icon)
         assertEquals("section-menu-rename", items[1].testTag)
 
         assertEquals("Delete Section", items[2].title)
-        assertEquals(MenuIcon.Symbol(RobocoIcons.Trash), items[2].icon)
+        assertEquals(MenuIcon.Symbol(ZeronIcons.Trash), items[2].icon)
         assertTrue("delete is the only destructive row", items[2].destructive)
         assertFalse(items[0].destructive)
         assertFalse(items[1].destructive)

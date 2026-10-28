@@ -1,4 +1,4 @@
-package sh.roboco.android.core
+package sh.zeron.android.core
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job

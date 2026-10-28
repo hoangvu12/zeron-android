@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.content.Context
 import android.graphics.ImageDecoder
@@ -25,14 +25,14 @@ import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import org.robolectric.shadows.ShadowChoreographer
-import sh.roboco.android.core.TextEngine
-import sh.roboco.android.core.UniffiSandbox
-import sh.roboco.android.debug.LAB_IMAGES_FIXTURE
-import sh.roboco.android.debug.LabImageReader
-import sh.roboco.android.debug.labFixturePng
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
-import uniffi.roboco_core.DebugEntry
+import sh.zeron.android.core.TextEngine
+import sh.zeron.android.core.UniffiSandbox
+import sh.zeron.android.debug.LAB_IMAGES_FIXTURE
+import sh.zeron.android.debug.LabImageReader
+import sh.zeron.android.debug.labFixturePng
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
+import uniffi.zeron_core.DebugEntry
 
 /**
  * The markdown-image rows goldens (ticket 137; recorded by
@@ -43,7 +43,7 @@ import uniffi.roboco_core.DebugEntry
  * square tile at x = 18, the 960 × 540 art aspect-fit on `elevated`),
  * `IOException` for the missing one (the full Failed text). Host core
  * required: the first Gradle run must build it without
- * `-ProbocoSkipCore`, since the rows come from this ticket's Rust layout.
+ * `-PzeronSkipCore`, since the rows come from this ticket's Rust layout.
  *
  * What the goldens must show, side by side with the iOS lab: "Here are
  * the screenshots." as a plain text row; the 260 dp image tile with the
@@ -122,8 +122,8 @@ class MarkdownImagesScreenshotTest {
                 loadImage = binding::load,
             )
             compose.setContent {
-                RobocoTheme(appearance) {
-                    Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+                ZeronTheme(appearance) {
+                    Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                         TranscriptHost(state, actions, Modifier.fillMaxSize())
                     }
                 }

@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -9,9 +9,9 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import sh.roboco.android.design.LocalGalleryCapture
-import sh.roboco.android.design.RobocoTheme
-import uniffi.roboco_core.DebugEntry
+import sh.zeron.android.design.LocalGalleryCapture
+import sh.zeron.android.design.ZeronTheme
+import uniffi.zeron_core.DebugEntry
 
 /**
  * The accessibility fixture (ticket 129), shared by this section and
@@ -78,7 +78,7 @@ fun TranscriptA11yGallerySection() {
         if (!capture) state.engine.setDebugEntries(A11yFixture, working = true)
     }
     CompositionLocalProvider(LocalTranscriptA11yBounds provides true) {
-        Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+        Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
             TranscriptHost(state, TranscriptActions(), Modifier.fillMaxSize())
         }
     }

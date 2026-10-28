@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Canvas
@@ -17,23 +17,23 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Fonts
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.TranscriptPalette
-import uniffi.roboco_core.BoxPrim
-import uniffi.roboco_core.BoxStyle
-import uniffi.roboco_core.ColorRole
-import uniffi.roboco_core.Decoration
-import uniffi.roboco_core.Fade
-import uniffi.roboco_core.FadeEdge
-import uniffi.roboco_core.FaceRole
-import uniffi.roboco_core.LinkHit
-import uniffi.roboco_core.RowDisplay
-import uniffi.roboco_core.Scroller
-import uniffi.roboco_core.StyleDesc
-import uniffi.roboco_core.TextRun
-import uniffi.roboco_core.Widget
+import sh.zeron.android.core.Fonts
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.TranscriptPalette
+import uniffi.zeron_core.BoxPrim
+import uniffi.zeron_core.BoxStyle
+import uniffi.zeron_core.ColorRole
+import uniffi.zeron_core.Decoration
+import uniffi.zeron_core.Fade
+import uniffi.zeron_core.FadeEdge
+import uniffi.zeron_core.FaceRole
+import uniffi.zeron_core.LinkHit
+import uniffi.zeron_core.RowDisplay
+import uniffi.zeron_core.Scroller
+import uniffi.zeron_core.StyleDesc
+import uniffi.zeron_core.TextRun
+import uniffi.zeron_core.Widget
 
 /**
  * The transcript-chrome specimen (debug gallery, ticket 64): the two
@@ -57,8 +57,8 @@ fun RowChromeFixturePage() {
     val context = LocalContext.current
     val density = LocalDensity.current.density
     // Read before the draw pass: appearance flips only swap the palette.
-    val dark = RobocoTheme.isDark
-    val background = RobocoTheme.palette.background
+    val dark = ZeronTheme.isDark
+    val background = ZeronTheme.palette.background
     val fonts = remember(context) {
         // StyleFonts' default constructor resolves typefaces through the
         // shared chain (FontChain), so make sure the chain is built —
@@ -143,7 +143,7 @@ private val CODE_LINES: List<List<Pair<String, ColorRole>>> = listOf(
     listOf(
         "    println!" to ColorRole.SYNTAX_FUNCTION,
         "(" to ColorRole.SYNTAX_PUNCTUATION,
-        "\"hello, roboco\"" to ColorRole.SYNTAX_STRING,
+        "\"hello, zeron\"" to ColorRole.SYNTAX_STRING,
         ");" to ColorRole.SYNTAX_PUNCTUATION,
     ),
     listOf("}" to ColorRole.SYNTAX_PUNCTUATION),
@@ -383,11 +383,11 @@ internal class FixtureRow(
 @Preview(name = "Row chrome light", widthDp = 390, heightDp = 720)
 @Composable
 private fun RowChromeLightPreview() {
-    RobocoTheme(Appearance.Light) { RowChromeFixturePage() }
+    ZeronTheme(Appearance.Light) { RowChromeFixturePage() }
 }
 
 @Preview(name = "Row chrome dark", widthDp = 390, heightDp = 720, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun RowChromeDarkPreview() {
-    RobocoTheme(Appearance.Dark) { RowChromeFixturePage() }
+    ZeronTheme(Appearance.Dark) { RowChromeFixturePage() }
 }

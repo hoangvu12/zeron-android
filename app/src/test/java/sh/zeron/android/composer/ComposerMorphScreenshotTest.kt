@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -32,20 +32,20 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.CapsuleShape
-import sh.roboco.android.design.GlassStage
-import sh.roboco.android.design.Icon
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.SymbolWeight
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.glass.ProvideHazeState
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.CapsuleShape
+import sh.zeron.android.design.GlassStage
+import sh.zeron.android.design.Icon
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.SymbolWeight
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.glass.ProvideHazeState
+import sh.zeron.android.design.uiStyle
 
 /**
  * The composer-morph goldens (android-ui-parity #56), recorded by
@@ -99,7 +99,7 @@ class ComposerMorphScreenshotTest {
     /** The composer with the real morph state and the fixture slots. */
     @Composable
     private fun BoxScope.MorphComposerFixture(attach: (ComposerMorphState) -> Unit) {
-        val palette = RobocoTheme.palette
+        val palette = ZeronTheme.palette
         val typeScale = LocalTypeScale.current
         val morph = rememberComposerMorphState(alwaysCard = false, hasImages = { false })
         attach(morph)
@@ -157,7 +157,7 @@ class ComposerMorphScreenshotTest {
                         .composerControl(morph),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Icon(RobocoIcons.ArrowUp, tint = Color.White, sizePt = 15f, weight = SymbolWeight.Bold)
+                    Icon(ZeronIcons.ArrowUp, tint = Color.White, sizePt = 15f, weight = SymbolWeight.Bold)
                 }
             },
         )
@@ -166,7 +166,7 @@ class ComposerMorphScreenshotTest {
     private fun shot(appearance: Appearance, file: String, drive: (ComposerMorphState) -> Unit) {
         var morph: ComposerMorphState? = null
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 ProvideHazeState {
                     GlassStage(
                         modifier = Modifier.size(390.dp, 220.dp),

@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -9,13 +9,13 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import uniffi.roboco_core.CoreException
-import uniffi.roboco_core.EngineState
-import uniffi.roboco_core.EngineView
-import uniffi.roboco_core.ParkReason
-import uniffi.roboco_core.PendingKind
-import uniffi.roboco_core.PendingSend
-import uniffi.roboco_core.SendState
+import uniffi.zeron_core.CoreException
+import uniffi.zeron_core.EngineState
+import uniffi.zeron_core.EngineView
+import uniffi.zeron_core.ParkReason
+import uniffi.zeron_core.PendingKind
+import uniffi.zeron_core.PendingSend
+import uniffi.zeron_core.SendState
 
 /**
  * The status banner's non-visual half (android-ui-parity #73):

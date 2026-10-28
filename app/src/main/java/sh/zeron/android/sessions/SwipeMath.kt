@@ -1,8 +1,8 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.design.IosSpring
+import sh.zeron.android.design.IosSpring
 import kotlin.math.abs
 import kotlin.math.hypot
 import kotlin.math.min

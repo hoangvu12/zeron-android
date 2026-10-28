@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -6,7 +6,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import sh.roboco.android.core.GeistMetrics
+import sh.zeron.android.core.GeistMetrics
 import java.io.File
 
 /**
@@ -27,7 +27,7 @@ class ProjectTileTest {
 
     @Test
     fun letterTrimsSwiftWhitespacesAndUppercases() {
-        assertEquals("R", ProjectTiles.letter("roboco"))
+        assertEquals("R", ProjectTiles.letter("zeron"))
         assertEquals("Z", ProjectTiles.letter("  zeron "))
         assertEquals("B", ProjectTiles.letter("\tblog"))
         assertEquals("E", ProjectTiles.letter(" edge"))

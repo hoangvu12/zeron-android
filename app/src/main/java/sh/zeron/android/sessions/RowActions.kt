@@ -1,7 +1,7 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.runtime.staticCompositionLocalOf
-import uniffi.roboco_core.SectionView
+import uniffi.zeron_core.SectionView
 
 /**
  * How one session/section write ended (android-ui-parity #42). The UI

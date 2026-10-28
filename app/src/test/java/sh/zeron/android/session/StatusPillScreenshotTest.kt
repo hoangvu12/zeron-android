@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -48,11 +48,11 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
 
 /**
  * The status pill's Robolectric/Roborazzi tests (android-ui-parity #73):
@@ -66,7 +66,7 @@ import sh.roboco.android.design.glass.Glass
  * Every test follows the freeze discipline: `mainClock.autoAdvance =
  * false`, a `Snapshot.sendApplyNotifications()` + one frame after each
  * state write, live spinners under `ProvideGlyphClock(frozenAtNanos = 0L)`
- * (nested inside [RobocoTheme]), and the glass fallback tier (Robolectric
+ * (nested inside [ZeronTheme]), and the glass fallback tier (Robolectric
  * has no haze source anyway, `Glass.forceFallback` pins it).
  */
 @RunWith(RobolectricTestRunner::class)
@@ -93,7 +93,7 @@ class StatusPillScreenshotTest {
 
     private fun host(appearance: Appearance = Appearance.Light, body: @Composable () -> Unit) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 ProvideGlyphClock(frozenAtNanos = 0L) { body() }
             }
         }

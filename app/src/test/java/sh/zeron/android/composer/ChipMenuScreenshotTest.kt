@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,19 +18,19 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.GalleryBackdrop
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.chipMenuELines
-import sh.roboco.android.design.chipMenuM1Lines
-import sh.roboco.android.design.chipMenuM2Lines
-import sh.roboco.android.design.chipMenuPLines
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.glass.GlassMenuPanel
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.GalleryBackdrop
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.chipMenuELines
+import sh.zeron.android.design.chipMenuM1Lines
+import sh.zeron.android.design.chipMenuM2Lines
+import sh.zeron.android.design.chipMenuPLines
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.GlassMenuPanel
 
 /**
  * The chip-menu goldens (android-ui-parity #89), recorded by
- * `./gradlew :app:recordRoborazziDebug --tests sh.roboco.android.composer.ChipMenuScreenshotTest`
+ * `./gradlew :app:recordRoborazziDebug --tests sh.zeron.android.composer.ChipMenuScreenshotTest`
  * and verified by `verifyRoborazziDebug`: the ticket's four panels —
  * M1 (model, resolved: "Opus 5" checked), M2 (model, loading), E
  * (reasoning effort: "High" checked) and P (pull request, the long
@@ -73,7 +73,7 @@ class ChipMenuScreenshotTest {
 
     private fun shot(appearance: Appearance, file: String) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 Box(Modifier.fillMaxSize()) {
                     GalleryBackdrop(Modifier.fillMaxSize())
                     Row(

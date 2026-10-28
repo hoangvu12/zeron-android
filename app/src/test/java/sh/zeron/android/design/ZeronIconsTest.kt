@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -7,7 +7,7 @@ import org.junit.Assert.assertSame
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import sh.roboco.android.R
+import sh.zeron.android.R
 
 /**
  * The registry tests (android-ui-parity #06), plain JVM — no Robolectric:
@@ -16,7 +16,7 @@ import sh.roboco.android.R
  * *resolution* (every `res` really exists and is a `zi_*` drawable) is a
  * Robolectric test in [IconSizingTest].
  */
-class RobocoIconsTest {
+class ZeronIconsTest {
 
     /** Every SF Symbol string on the kept screens and emitted by the core. */
     private val sfNames = listOf(
@@ -93,12 +93,12 @@ class RobocoIconsTest {
     @Test
     fun forSfNameResolvesEverySfSymbolOnTheKeptScreens() {
         for (name in sfNames) {
-            val icon = RobocoIcons.forSfName(name)
+            val icon = ZeronIcons.forSfName(name)
             assertNotNull("no drawable for SF Symbol \"$name\"", icon)
-            assertTrue("bySfName must contain \"$name\"", RobocoIcons.bySfName.containsKey(name))
+            assertTrue("bySfName must contain \"$name\"", ZeronIcons.bySfName.containsKey(name))
             assertTrue(
                 "SF rows resolve to a drawable, never a Number",
-                RobocoIcons.bySfName[name] is RobocoIcon.Vector,
+                ZeronIcons.bySfName[name] is ZeronIcon.Vector,
             )
         }
     }
@@ -117,26 +117,26 @@ class RobocoIconsTest {
             "wand.and.stars",
             "photo",
         )) {
-            assertNotNull("no drawable for core SF name \"$name\"", RobocoIcons.forSfName(name))
+            assertNotNull("no drawable for core SF name \"$name\"", ZeronIcons.forSfName(name))
         }
     }
 
     @Test
     fun theAliasesShareTheirGlyph() {
-        assertSame(RobocoIcons.PinSlash, RobocoIcons.forSfName("pin.slash"))
-        assertSame(RobocoIcons.PinSlash, RobocoIcons.forSfName("pin.slash.fill"))
-        assertSame(RobocoIcons.Doc, RobocoIcons.forSfName("doc"))
-        assertSame(RobocoIcons.DocText, RobocoIcons.forSfName("doc.text"))
-        assertSame(RobocoIcons.DocOnDoc, RobocoIcons.forSfName("doc.on.doc"))
-        assertSame(RobocoIcons.SquareOnSquare, RobocoIcons.forSfName("square.on.square"))
+        assertSame(ZeronIcons.PinSlash, ZeronIcons.forSfName("pin.slash"))
+        assertSame(ZeronIcons.PinSlash, ZeronIcons.forSfName("pin.slash.fill"))
+        assertSame(ZeronIcons.Doc, ZeronIcons.forSfName("doc"))
+        assertSame(ZeronIcons.DocText, ZeronIcons.forSfName("doc.text"))
+        assertSame(ZeronIcons.DocOnDoc, ZeronIcons.forSfName("doc.on.doc"))
+        assertSame(ZeronIcons.SquareOnSquare, ZeronIcons.forSfName("square.on.square"))
     }
 
     @Test
     fun numberCircleNamesResolveToNumberIcons() {
-        assertEquals(RobocoIcon.Number(0), RobocoIcons.forSfName("0.circle"))
-        assertEquals(RobocoIcon.Number(1), RobocoIcons.forSfName("1.circle"))
-        assertEquals(RobocoIcon.Number(3), RobocoIcons.forSfName("3.circle"))
-        assertEquals(RobocoIcon.Number(50), RobocoIcons.forSfName("50.circle"))
+        assertEquals(ZeronIcon.Number(0), ZeronIcons.forSfName("0.circle"))
+        assertEquals(ZeronIcon.Number(1), ZeronIcons.forSfName("1.circle"))
+        assertEquals(ZeronIcon.Number(3), ZeronIcons.forSfName("3.circle"))
+        assertEquals(ZeronIcon.Number(50), ZeronIcons.forSfName("50.circle"))
     }
 
     @Test
@@ -153,51 +153,51 @@ class RobocoIconsTest {
             "person.crop.circle", // dropped: account
             "rectangle.portrait.and.arrow.right", // dropped: sign out
             "sparkle", // dropped: sign-in mark
-            "tab-chat", // Roboco extras have no SF name
+            "tab-chat", // Zeron extras have no SF name
             "WifiOff",
             "",
         )) {
-            assertNull("forSfName(\"$name\") must be null", RobocoIcons.forSfName(name))
+            assertNull("forSfName(\"$name\") must be null", ZeronIcons.forSfName(name))
             // Unknown names repeat (every row): still null, never a throw.
-            assertNull(RobocoIcons.forSfName(name))
+            assertNull(ZeronIcons.forSfName(name))
         }
     }
 
     @Test
     fun entriesAreTheSingleSourceOfTheSfNameMap() {
-        val allSfNames = RobocoIcons.entries.flatMap { it.sfNames }
+        val allSfNames = ZeronIcons.entries.flatMap { it.sfNames }
         assertEquals("no SF name may be mapped twice", allSfNames.size, allSfNames.toSet().size)
-        assertEquals("bySfName covers exactly the entries' sfNames", allSfNames.toSet(), RobocoIcons.bySfName.keys)
-        for (entry in RobocoIcons.entries) {
+        assertEquals("bySfName covers exactly the entries' sfNames", allSfNames.toSet(), ZeronIcons.bySfName.keys)
+        for (entry in ZeronIcons.entries) {
             for (name in entry.sfNames) {
-                assertSame("bySfName[\"$name\"] must be ${entry.name}", entry.icon, RobocoIcons.bySfName[name])
+                assertSame("bySfName[\"$name\"] must be ${entry.name}", entry.icon, ZeronIcons.bySfName[name])
             }
         }
-        // 68 SF constants + 1 alias (pin.slash.fill) + 7 Roboco extras.
+        // 68 SF constants + 1 alias (pin.slash.fill) + 7 Zeron extras.
         // android-next#04 added Refresh (`arrow.clockwise`, the About
         // "Check for Updates" row; the approved design allows one new glyph).
-        assertEquals(69, RobocoIcons.bySfName.size)
-        assertEquals(75, RobocoIcons.entries.size)
+        assertEquals(69, ZeronIcons.bySfName.size)
+        assertEquals(75, ZeronIcons.entries.size)
         assertEquals(
             "constant names are unique",
-            RobocoIcons.entries.size,
-            RobocoIcons.entries.map { it.name }.toSet().size,
+            ZeronIcons.entries.size,
+            ZeronIcons.entries.map { it.name }.toSet().size,
         )
     }
 
     @Test
     fun opticalScalesMatchTheMappingTable() {
         val expected = mapOf(
-            RobocoIcons.Ellipsis to 1.15f,
-            RobocoIcons.Xmark to 1.35f,
-            RobocoIcons.ChevronDown to 1.1f,
-            RobocoIcons.ChevronRight to 1.1f,
-            RobocoIcons.ChevronBackward to 1.35f,
-            RobocoIcons.StopFill to 0.85f,
-            RobocoIcons.Checkmark to 1.05f,
+            ZeronIcons.Ellipsis to 1.15f,
+            ZeronIcons.Xmark to 1.35f,
+            ZeronIcons.ChevronDown to 1.1f,
+            ZeronIcons.ChevronRight to 1.1f,
+            ZeronIcons.ChevronBackward to 1.35f,
+            ZeronIcons.StopFill to 0.85f,
+            ZeronIcons.Checkmark to 1.05f,
         )
-        for (entry in RobocoIcons.entries) {
-            val icon = entry.icon as RobocoIcon.Vector
+        for (entry in ZeronIcons.entries) {
+            val icon = entry.icon as ZeronIcon.Vector
             val scale = expected[icon] ?: 1f
             assertEquals("opticalScale of ${entry.name}", scale, icon.opticalScale)
         }
@@ -206,8 +206,8 @@ class RobocoIconsTest {
 
     @Test
     fun autoMirrorIsExactlyTheDirectionalGlyphs() {
-        val mirrored = RobocoIcons.entries
-            .filter { (it.icon as RobocoIcon.Vector).autoMirror }
+        val mirrored = ZeronIcons.entries
+            .filter { (it.icon as ZeronIcon.Vector).autoMirror }
             .map { it.name }
         assertEquals(
             listOf("ArrowTurnDownRight", "ArrowTurnLeftUp", "ChevronRight", "ChevronBackward", "QueueForNextTurn"),
@@ -217,88 +217,88 @@ class RobocoIconsTest {
 
     @Test
     fun drawableIdsMatchTheMappingTable() {
-        val expected: List<Pair<RobocoIcon.Vector, Int>> = listOf(
-            RobocoIcons.Plus to R.drawable.zi_plus,
-            RobocoIcons.Ellipsis to R.drawable.zi_more_horizontal,
-            RobocoIcons.ArrowUp to R.drawable.zi_arrow_up,
-            RobocoIcons.ArrowDown to R.drawable.zi_arrow_down,
-            RobocoIcons.ArrowUpRight to R.drawable.zi_arrow_up_right,
-            RobocoIcons.ArrowUpArrowDown to R.drawable.zi_sort_vertical,
-            RobocoIcons.ArrowTurnDownRight to R.drawable.zi_arrow_turn_down_right,
-            RobocoIcons.ArrowTurnLeftUp to R.drawable.zi_arrow_turn_left_up,
-            RobocoIcons.ArrowUpCircleFill to R.drawable.zi_arrow_up_circle_fill,
-            RobocoIcons.Xmark to R.drawable.zi_close,
-            RobocoIcons.XmarkCircleFill to R.drawable.zi_xmark_circle_fill,
-            RobocoIcons.ChevronDown to R.drawable.zi_alt_arrow_down,
-            RobocoIcons.ChevronRight to R.drawable.zi_alt_arrow_right,
-            RobocoIcons.ChevronBackward to R.drawable.zi_alt_arrow_left,
-            RobocoIcons.StopFill to R.drawable.zi_stop,
-            RobocoIcons.StopCircle to R.drawable.zi_stop_circle,
-            RobocoIcons.QueueForNextTurn to R.drawable.zi_queue_send,
-            RobocoIcons.Pin to R.drawable.zi_pin,
-            RobocoIcons.PinFill to R.drawable.zi_pin_fill,
-            RobocoIcons.PinSlash to R.drawable.zi_pin_slash,
-            RobocoIcons.Archivebox to R.drawable.zi_archive_minimalistic,
-            RobocoIcons.ArchiveboxFill to R.drawable.zi_archivebox_fill,
-            RobocoIcons.Tray to R.drawable.zi_tray,
-            RobocoIcons.TrayAndArrowUp to R.drawable.zi_tray_arrow_up,
-            RobocoIcons.TrayAndArrowUpFill to R.drawable.zi_tray_arrow_up_fill,
-            RobocoIcons.Folder to R.drawable.zi_folder,
-            RobocoIcons.FolderFill to R.drawable.zi_folder_fill,
-            RobocoIcons.FolderBadgePlus to R.drawable.zi_folder_badge_plus,
-            RobocoIcons.FolderBadgeGearshape to R.drawable.zi_folder_badge_gear,
-            RobocoIcons.Pencil to R.drawable.zi_pen,
-            RobocoIcons.Trash to R.drawable.zi_trash_bin_minimalistic,
-            RobocoIcons.Doc to R.drawable.zi_document,
-            RobocoIcons.DocText to R.drawable.zi_document,
-            RobocoIcons.DocOnDoc to R.drawable.zi_copy,
-            RobocoIcons.SquareOnSquare to R.drawable.zi_copy,
-            RobocoIcons.DocOnClipboard to R.drawable.zi_clipboard,
-            RobocoIcons.Checkmark to R.drawable.zi_check,
-            RobocoIcons.CheckmarkCircle to R.drawable.zi_check_circle,
-            RobocoIcons.CheckmarkCircleFill to R.drawable.zi_check_circle_fill,
-            RobocoIcons.CheckmarkSquareFill to R.drawable.zi_check_square_fill,
-            RobocoIcons.Square to R.drawable.zi_square,
-            RobocoIcons.Desktopcomputer to R.drawable.zi_monitor,
-            RobocoIcons.Gauge to R.drawable.zi_speedometer,
-            RobocoIcons.Clock to R.drawable.zi_clock_circle,
-            RobocoIcons.Photo to R.drawable.zi_gallery,
-            RobocoIcons.PhotoOnRectangle to R.drawable.zi_gallery_stack,
-            RobocoIcons.Camera to R.drawable.zi_camera,
-            RobocoIcons.CharacterCursorIbeam to R.drawable.zi_text_cursor,
-            RobocoIcons.Link to R.drawable.zi_link,
-            RobocoIcons.Safari to R.drawable.zi_global,
-            RobocoIcons.WandAndStars to R.drawable.zi_magic_stick_3,
-            RobocoIcons.SunMax to R.drawable.zi_sun,
-            RobocoIcons.Moon to R.drawable.zi_moon,
-            RobocoIcons.CircleLeftHalfFilled to R.drawable.zi_circle_half,
-            RobocoIcons.SquareStack3dUp to R.drawable.zi_layers,
-            RobocoIcons.SquareAndArrowUp to R.drawable.zi_share,
-            RobocoIcons.Gearshape to R.drawable.zi_settings,
-            RobocoIcons.RectangleCompressVertical to R.drawable.zi_fold_vertical,
-            RobocoIcons.Line3Horizontal to R.drawable.zi_line_3_horizontal,
-            RobocoIcons.Magnifyingglass to R.drawable.zi_magnifer,
-            RobocoIcons.Bell to R.drawable.zi_bell,
-            RobocoIcons.QuestionmarkBubble to R.drawable.zi_chat_round_line,
-            RobocoIcons.ExclamationmarkTriangle to R.drawable.zi_danger_triangle,
-            RobocoIcons.ExclamationmarkCircle to R.drawable.zi_exclamation_circle,
-            RobocoIcons.InfoCircle to R.drawable.zi_info_circle,
-            RobocoIcons.ArrowTriangleBranch to R.drawable.zi_git_branch,
-            RobocoIcons.Command to R.drawable.zi_command,
-            RobocoIcons.Refresh to R.drawable.zi_refresh, // android-next#04
-            RobocoIcons.TabChat to R.drawable.zi_tab_chat,
-            RobocoIcons.TabSettings to R.drawable.zi_tab_settings,
-            RobocoIcons.RobocoBow to R.drawable.zi_roboco_bow, // android-next #03: replaced RobocoGlyph
-            RobocoIcons.WifiOff to R.drawable.zi_wifi_off,
-            RobocoIcons.Home to R.drawable.zi_home,
-            RobocoIcons.HardDrive to R.drawable.zi_hard_drive,
-            RobocoIcons.Laptop to R.drawable.zi_laptop,
+        val expected: List<Pair<ZeronIcon.Vector, Int>> = listOf(
+            ZeronIcons.Plus to R.drawable.zi_plus,
+            ZeronIcons.Ellipsis to R.drawable.zi_more_horizontal,
+            ZeronIcons.ArrowUp to R.drawable.zi_arrow_up,
+            ZeronIcons.ArrowDown to R.drawable.zi_arrow_down,
+            ZeronIcons.ArrowUpRight to R.drawable.zi_arrow_up_right,
+            ZeronIcons.ArrowUpArrowDown to R.drawable.zi_sort_vertical,
+            ZeronIcons.ArrowTurnDownRight to R.drawable.zi_arrow_turn_down_right,
+            ZeronIcons.ArrowTurnLeftUp to R.drawable.zi_arrow_turn_left_up,
+            ZeronIcons.ArrowUpCircleFill to R.drawable.zi_arrow_up_circle_fill,
+            ZeronIcons.Xmark to R.drawable.zi_close,
+            ZeronIcons.XmarkCircleFill to R.drawable.zi_xmark_circle_fill,
+            ZeronIcons.ChevronDown to R.drawable.zi_alt_arrow_down,
+            ZeronIcons.ChevronRight to R.drawable.zi_alt_arrow_right,
+            ZeronIcons.ChevronBackward to R.drawable.zi_alt_arrow_left,
+            ZeronIcons.StopFill to R.drawable.zi_stop,
+            ZeronIcons.StopCircle to R.drawable.zi_stop_circle,
+            ZeronIcons.QueueForNextTurn to R.drawable.zi_queue_send,
+            ZeronIcons.Pin to R.drawable.zi_pin,
+            ZeronIcons.PinFill to R.drawable.zi_pin_fill,
+            ZeronIcons.PinSlash to R.drawable.zi_pin_slash,
+            ZeronIcons.Archivebox to R.drawable.zi_archive_minimalistic,
+            ZeronIcons.ArchiveboxFill to R.drawable.zi_archivebox_fill,
+            ZeronIcons.Tray to R.drawable.zi_tray,
+            ZeronIcons.TrayAndArrowUp to R.drawable.zi_tray_arrow_up,
+            ZeronIcons.TrayAndArrowUpFill to R.drawable.zi_tray_arrow_up_fill,
+            ZeronIcons.Folder to R.drawable.zi_folder,
+            ZeronIcons.FolderFill to R.drawable.zi_folder_fill,
+            ZeronIcons.FolderBadgePlus to R.drawable.zi_folder_badge_plus,
+            ZeronIcons.FolderBadgeGearshape to R.drawable.zi_folder_badge_gear,
+            ZeronIcons.Pencil to R.drawable.zi_pen,
+            ZeronIcons.Trash to R.drawable.zi_trash_bin_minimalistic,
+            ZeronIcons.Doc to R.drawable.zi_document,
+            ZeronIcons.DocText to R.drawable.zi_document,
+            ZeronIcons.DocOnDoc to R.drawable.zi_copy,
+            ZeronIcons.SquareOnSquare to R.drawable.zi_copy,
+            ZeronIcons.DocOnClipboard to R.drawable.zi_clipboard,
+            ZeronIcons.Checkmark to R.drawable.zi_check,
+            ZeronIcons.CheckmarkCircle to R.drawable.zi_check_circle,
+            ZeronIcons.CheckmarkCircleFill to R.drawable.zi_check_circle_fill,
+            ZeronIcons.CheckmarkSquareFill to R.drawable.zi_check_square_fill,
+            ZeronIcons.Square to R.drawable.zi_square,
+            ZeronIcons.Desktopcomputer to R.drawable.zi_monitor,
+            ZeronIcons.Gauge to R.drawable.zi_speedometer,
+            ZeronIcons.Clock to R.drawable.zi_clock_circle,
+            ZeronIcons.Photo to R.drawable.zi_gallery,
+            ZeronIcons.PhotoOnRectangle to R.drawable.zi_gallery_stack,
+            ZeronIcons.Camera to R.drawable.zi_camera,
+            ZeronIcons.CharacterCursorIbeam to R.drawable.zi_text_cursor,
+            ZeronIcons.Link to R.drawable.zi_link,
+            ZeronIcons.Safari to R.drawable.zi_global,
+            ZeronIcons.WandAndStars to R.drawable.zi_magic_stick_3,
+            ZeronIcons.SunMax to R.drawable.zi_sun,
+            ZeronIcons.Moon to R.drawable.zi_moon,
+            ZeronIcons.CircleLeftHalfFilled to R.drawable.zi_circle_half,
+            ZeronIcons.SquareStack3dUp to R.drawable.zi_layers,
+            ZeronIcons.SquareAndArrowUp to R.drawable.zi_share,
+            ZeronIcons.Gearshape to R.drawable.zi_settings,
+            ZeronIcons.RectangleCompressVertical to R.drawable.zi_fold_vertical,
+            ZeronIcons.Line3Horizontal to R.drawable.zi_line_3_horizontal,
+            ZeronIcons.Magnifyingglass to R.drawable.zi_magnifer,
+            ZeronIcons.Bell to R.drawable.zi_bell,
+            ZeronIcons.QuestionmarkBubble to R.drawable.zi_chat_round_line,
+            ZeronIcons.ExclamationmarkTriangle to R.drawable.zi_danger_triangle,
+            ZeronIcons.ExclamationmarkCircle to R.drawable.zi_exclamation_circle,
+            ZeronIcons.InfoCircle to R.drawable.zi_info_circle,
+            ZeronIcons.ArrowTriangleBranch to R.drawable.zi_git_branch,
+            ZeronIcons.Command to R.drawable.zi_command,
+            ZeronIcons.Refresh to R.drawable.zi_refresh, // android-next#04
+            ZeronIcons.TabChat to R.drawable.zi_tab_chat,
+            ZeronIcons.TabSettings to R.drawable.zi_tab_settings,
+            ZeronIcons.ZeronBow to R.drawable.zi_zeron_bow, // android-next #03: replaced ZeronGlyph
+            ZeronIcons.WifiOff to R.drawable.zi_wifi_off,
+            ZeronIcons.Home to R.drawable.zi_home,
+            ZeronIcons.HardDrive to R.drawable.zi_hard_drive,
+            ZeronIcons.Laptop to R.drawable.zi_laptop,
         )
-        assertEquals("every registry constant is covered", RobocoIcons.entries.size, expected.size)
+        assertEquals("every registry constant is covered", ZeronIcons.entries.size, expected.size)
         assertEquals(
             "the mapping table's drawable set",
             expected.map { it.first }.toSet(),
-            RobocoIcons.entries.map { it.icon as RobocoIcon.Vector }.toSet(),
+            ZeronIcons.entries.map { it.icon as ZeronIcon.Vector }.toSet(),
         )
         for ((icon, res) in expected) {
             assertEquals(res, icon.res)

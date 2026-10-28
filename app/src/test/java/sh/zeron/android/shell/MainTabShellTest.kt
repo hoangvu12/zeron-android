@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.CompositionLocalProvider
@@ -24,15 +24,15 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Cue
-import sh.roboco.android.design.Feedback
-import sh.roboco.android.design.Haptic
-import sh.roboco.android.design.LocalFeedback
-import sh.roboco.android.design.LocalReduceMotion
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.Cue
+import sh.zeron.android.design.Feedback
+import sh.zeron.android.design.Haptic
+import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.design.LocalReduceMotion
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.glass.GlassMenuHost
 
 /**
  * Ticket 26's shell behaviour (Robolectric, 402 × 874 dp at xxhdpi): the
@@ -67,7 +67,7 @@ class MainTabShellTest {
     private fun setContent() {
         state = MainTabState(TabId.Sessions)
         compose.setContent {
-            RobocoTheme {
+            ZeronTheme {
                 CompositionLocalProvider(
                     LocalFeedback provides feedback,
                     LocalReduceMotion provides true,

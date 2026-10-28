@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import android.content.ClipboardManager
 import android.content.Context
@@ -47,23 +47,23 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.BuildConfig
-import sh.roboco.android.core.CoreStatus
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.Cue
-import sh.roboco.android.design.Feedback
-import sh.roboco.android.design.Haptic
-import sh.roboco.android.design.LocalFeedback
-import sh.roboco.android.design.LocalToaster
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.Toaster
-import sh.roboco.android.shell.NavRoute
-import sh.roboco.android.shell.NavStack
-import sh.roboco.android.shell.NavStackHost
-import sh.roboco.android.shell.SheetHost
-import sh.roboco.android.shell.SheetHostState
-import sh.roboco.android.shell.SheetStyle
-import sh.roboco.android.update.UpdateUiState
+import sh.zeron.android.BuildConfig
+import sh.zeron.android.core.CoreStatus
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.Cue
+import sh.zeron.android.design.Feedback
+import sh.zeron.android.design.Haptic
+import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.design.LocalToaster
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.Toaster
+import sh.zeron.android.shell.NavRoute
+import sh.zeron.android.shell.NavStack
+import sh.zeron.android.shell.NavStackHost
+import sh.zeron.android.shell.SheetHost
+import sh.zeron.android.shell.SheetHostState
+import sh.zeron.android.shell.SheetStyle
+import sh.zeron.android.update.UpdateUiState
 
 /**
  * The About section and Licenses screen behaviour (android-ui-parity
@@ -129,12 +129,12 @@ class LicensesBehaviourTest {
     ) {
         aboutStack = NavStack(AboutRoot)
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(
                     LocalToaster provides toaster,
                     LocalFeedback provides feedback,
                 ) {
-                    Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+                    Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                         NavStackHost(stack = aboutStack, active = true) { entry ->
                             if (entry.route === AboutRoot) {
                                 // Remembered in composition, not in the LazyColumn DSL.
@@ -164,7 +164,7 @@ class LicensesBehaviourTest {
         compose.mainClock.autoAdvance = false
         licensesStack = NavStack(AboutRoot).apply { push(LicensesPage) }
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(
                     LocalToaster provides toaster,
                     LocalFeedback provides feedback,
@@ -209,12 +209,12 @@ class LicensesBehaviourTest {
     /**
      * The Version subtitle for 0.9.2 (9002) and [core]. android-next#04's
      * approved panel F puts the build type after the version on non-release
-     * builds ("Roboco 0.9.2 (9002) debug · core 0.9.2"); unit tests run the
+     * builds ("Zeron 0.9.2 (9002) debug · core 0.9.2"); unit tests run the
      * debug variant, so the marker is part of the expected text.
      */
     private fun subtitle(core: String): String {
         val marker = if (BuildConfig.UPDATE_INSTALLER_ENABLED) "" else " ${BuildConfig.BUILD_TYPE}"
-        return "Roboco 0.9.2 (9002)$marker \u00B7 $core"
+        return "Zeron 0.9.2 (9002)$marker \u00B7 $core"
     }
 
     private fun rowImage(tag: String): PixelMap =
@@ -416,7 +416,7 @@ class LicensesBehaviourTest {
             .map { node -> node.config[SemanticsProperties.Text].joinToString("") { it.text } }
             .filterNot { it == "Licenses" }
         assertEquals(
-            listOf("Roboco", "Fonts and assets", "Android libraries", "Rust core"),
+            listOf("Zeron", "Fonts and assets", "Android libraries", "Rust core"),
             headings,
         )
         // The pushed screen shows the large title and the back circle.
@@ -436,8 +436,8 @@ class LicensesBehaviourTest {
     @Test
     fun untilLoadedOnlyTheLargeTitleShows() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
-                Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+            ZeronTheme(Appearance.Light) {
+                Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                     NavStackHost(stack = NavStack(LicensesPage), active = true) { _ ->
                         LicensesList(sections = null, onOpen = {})
                     }
@@ -482,9 +482,9 @@ class LicensesBehaviourTest {
         compose.mainClock.autoAdvance = false
         val inner = NavStack(LicensesPage)
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 SheetHost(hostState) {
-                    Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background))
+                    Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background))
                 }
             }
         }
@@ -556,11 +556,11 @@ class LicensesBehaviourTest {
             CoroutineScope(Dispatchers.Unconfined),
         )
         val sections = withTimeout(10_000) { model.sections.filterNotNull().first() }
-        // The repo's own licences (syncRobocoLicenses stages them for the
-        // test classpath): the Roboco section, with both entries.
-        val roboco = sections.firstOrNull { it.title == "Roboco" }
-        assertNotNull("the Roboco section loads from the real assets", roboco)
-        assertEquals(2, roboco!!.entries.size)
+        // The repo's own licences (syncZeronLicenses stages them for the
+        // test classpath): the Zeron section, with both entries.
+        val zeron = sections.firstOrNull { it.title == "Zeron" }
+        assertNotNull("the Zeron section loads from the real assets", zeron)
+        assertEquals(2, zeron!!.entries.size)
         // Empty sections never exist.
         assertTrue(sections.all { it.entries.isNotEmpty() })
     }

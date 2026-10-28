@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.gestures.scrollBy
@@ -18,13 +18,13 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.ActionSheetHost
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.BottomChromeInsets
-import sh.roboco.android.design.LocalBottomChrome
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
+import sh.zeron.android.design.ActionSheetHost
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.BottomChromeInsets
+import sh.zeron.android.design.LocalBottomChrome
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
 
 /**
  * The Settings screen goldens (android-ui-parity #103), recorded by
@@ -73,7 +73,7 @@ class SettingsScreenScreenshotTest {
 
     private fun shot(appearance: Appearance, file: String, content: @Composable () -> Unit) {
         compose.setContent {
-            RobocoTheme(appearance) { content() }
+            ZeronTheme(appearance) { content() }
         }
         compose.waitForIdle()
         compose.onRoot().captureRoboImage(file)
@@ -102,7 +102,7 @@ class SettingsScreenScreenshotTest {
     fun settingsScreenBottomLight() {
         val listState = LazyListState()
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(
                     LocalBottomChrome provides BottomChromeInsets(24.dp, 150.dp),
                 ) {

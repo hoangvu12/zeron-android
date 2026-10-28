@@ -1,4 +1,4 @@
-package sh.roboco.android.flows
+package sh.zeron.android.flows
 
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
@@ -18,7 +18,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import sh.roboco.android.MainActivity
+import sh.zeron.android.MainActivity
 
 /**
  * The preview panel + in-app browser flow (agent-previews ticket 05): the

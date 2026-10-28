@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import android.util.Log
 import androidx.activity.compose.PredictiveBackHandler
@@ -48,18 +48,18 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import sh.roboco.android.design.BottomChromeInsets
-import sh.roboco.android.design.IosSpring
-import sh.roboco.android.design.LocalBottomChrome
-import sh.roboco.android.design.LocalReduceMotion
-import sh.roboco.android.design.Motion
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.SmoothRoundedShape
-import sh.roboco.android.design.glass.GlassCircleButton
-import sh.roboco.android.sessions.LocalSessionListOpener
-import sh.roboco.android.sessions.SessionListOpener
-import sh.roboco.android.settings.SettingsScreen
+import sh.zeron.android.design.BottomChromeInsets
+import sh.zeron.android.design.IosSpring
+import sh.zeron.android.design.LocalBottomChrome
+import sh.zeron.android.design.LocalReduceMotion
+import sh.zeron.android.design.Motion
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.SmoothRoundedShape
+import sh.zeron.android.design.glass.GlassCircleButton
+import sh.zeron.android.sessions.LocalSessionListOpener
+import sh.zeron.android.sessions.SessionListOpener
+import sh.zeron.android.settings.SettingsScreen
 
 /**
  * The tablet Settings form-sheet dialog (android-ui-parity #104): the port
@@ -224,7 +224,7 @@ internal object SettingsFormSheetStyle : SheetStyle.Custom {
     override fun Frame(entry: SheetEntry, content: @Composable () -> Unit) {
         val host = LocalSheetHost.current!!
         val reduce = LocalReduceMotion.current
-        val palette = RobocoTheme.palette
+        val palette = ZeronTheme.palette
         val isTop = host.entries.lastOrNull() === entry
         val cardShape = remember { SmoothRoundedShape(SettingsDialogDefaults.CornerRadius) }
         val hostScope = rememberCoroutineScope()
@@ -466,7 +466,7 @@ internal fun SettingsDialogContent(
             LocalBottomChrome provides BottomChromeInsets.None,
             LocalPageSheetScope provides scope,
             // iOS pushes the session inside the form sheet only because
-            // splitViewController is nil there; Roboco routes it to the
+            // splitViewController is nil there; Zeron routes it to the
             // detail column (106 dismisses the card) — the adaptation,
             // also keeping "one live view per session" (33/106/108).
             LocalSessionListOpener provides SessionListOpener { id -> router.openSession(id) },
@@ -498,9 +498,9 @@ internal fun SettingsDialogContent(
  */
 @Composable
 private fun RowScope.DoneButton(scope: PageSheetScope) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     GlassCircleButton(
-        icon = RobocoIcons.Checkmark,
+        icon = ZeronIcons.Checkmark,
         contentDescription = "Done",
         onClick = { scope.dismiss(animated = true) },
         modifier = Modifier.testTag("settings-done"),

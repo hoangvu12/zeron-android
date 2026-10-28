@@ -1,4 +1,4 @@
-package sh.roboco.android.core
+package sh.zeron.android.core
 
 import android.content.ContentProvider
 import android.content.ContentValues
@@ -48,10 +48,10 @@ import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import uniffi.roboco_core.WallpaperEffect
+import uniffi.zeron_core.WallpaperEffect
 
 /** The authority the `set(uri)` fixtures are served under. */
-private const val AUTHORITY = "sh.roboco.test.images"
+private const val AUTHORITY = "sh.zeron.test.images"
 
 /** The store's prefs file name. */
 private const val PREFS_FILE = "wallpaper"

@@ -1,4 +1,4 @@
-package sh.roboco.android.accounts
+package sh.zeron.android.accounts
 
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.mutableStateOf
@@ -16,22 +16,22 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
 import androidx.compose.ui.text.input.KeyboardCapitalization
-import sh.roboco.android.design.ActionSheetAction
-import sh.roboco.android.design.ActionSheetModel
-import sh.roboco.android.design.ActionSheetPresenter
-import sh.roboco.android.design.ActionSheetStyle
-import sh.roboco.android.design.AlertButton
-import sh.roboco.android.design.AlertButtonRole
-import sh.roboco.android.design.AlertField
-import sh.roboco.android.design.Alerts
-import sh.roboco.android.design.RobocoAlert
-import sh.roboco.android.design.Toaster
-import uniffi.roboco_core.AgentAccount
-import uniffi.roboco_core.AgentAccountsSnapshot
+import sh.zeron.android.design.ActionSheetAction
+import sh.zeron.android.design.ActionSheetModel
+import sh.zeron.android.design.ActionSheetPresenter
+import sh.zeron.android.design.ActionSheetStyle
+import sh.zeron.android.design.AlertButton
+import sh.zeron.android.design.AlertButtonRole
+import sh.zeron.android.design.AlertField
+import sh.zeron.android.design.Alerts
+import sh.zeron.android.design.ZeronAlert
+import sh.zeron.android.design.Toaster
+import uniffi.zeron_core.AgentAccount
+import uniffi.zeron_core.AgentAccountsSnapshot
 
 /**
  * The Accounts & Usage page's copy (android-next#05, PR #578's wording
- * adapted to Roboco: "Zeron" → "Roboco", "provider accounts" → "agent
+ * adapted to Zeron: "Zeron" → "Zeron", "provider accounts" → "agent
  * accounts"). The ellipses are U+2026.
  */
 object AccountsCopy {
@@ -51,7 +51,7 @@ object AccountsCopy {
     const val Loading = "Loading accounts\u2026"
 
     /** No paired engine can be asked (the page is unreachable in practice). */
-    const val NoComputer = "No computer to ask yet. Open Roboco on a computer to add one."
+    const val NoComputer = "No computer to ask yet. Open Zeron on a computer to add one."
 
     /** The page's empty state. */
     fun noAccounts(deviceName: String) = "No agent accounts on $deviceName yet."
@@ -62,7 +62,7 @@ object AccountsCopy {
      * the phone cannot sign in).
      */
     fun signInSection(deviceName: String) =
-        "Switching changes the login $deviceName uses for new sessions. To add an account, sign in from Roboco on $deviceName."
+        "Switching changes the login $deviceName uses for new sessions. To add an account, sign in from Zeron on $deviceName."
 
     /** The switch confirmation toast on the page. */
     fun switchedToast(harness: String, login: String) = "$harness now uses $login"
@@ -98,7 +98,7 @@ object AccountsCopy {
 
     /** The not-switchable guard alert's message. */
     fun cantSwitchMessage(deviceName: String) =
-        "Roboco couldn't read its credentials on $deviceName. Sign in to it again there."
+        "Zeron couldn't read its credentials on $deviceName. Sign in to it again there."
 
     /** The context menu's switch row. */
     const val UseThisAccount = "Use This Account"
@@ -164,7 +164,7 @@ class AgentAccountsModel(
     private val sheets: ActionSheetPresenter,
     /** The selected device's display name (never its id). */
     private val deviceName: (deviceId: String) -> String,
-    private val harnessLabel: (harness: String) -> String = { uniffi.roboco_core.harnessLabel(it) },
+    private val harnessLabel: (harness: String) -> String = { uniffi.zeron_core.harnessLabel(it) },
     private val io: CoroutineDispatcher = Dispatchers.IO,
     private val nowMs: () -> Long = System::currentTimeMillis,
     /**
@@ -206,7 +206,7 @@ class AgentAccountsModel(
         private set
 
     /** Wave-10 40: the computer's whole agent catalog (`null` until it answers). */
-    var agents: List<uniffi.roboco_core.HarnessInfo>? by mutableStateOf(null)
+    var agents: List<uniffi.zeron_core.HarnessInfo>? by mutableStateOf(null)
         private set
 
     /** The agents whose switch is being written. */
@@ -228,7 +228,7 @@ class AgentAccountsModel(
 
     /** The newest probe's wording, for the page's about footer. */
     val updatedText: String?
-        get() = snapshot?.let { sh.roboco.android.accounts.updatedText(it, nowMs()) }
+        get() = snapshot?.let { sh.zeron.android.accounts.updatedText(it, nowMs()) }
 
     /**
      * Opens the page on `device`: the core's cached snapshot paints at
@@ -340,7 +340,7 @@ class AgentAccountsModel(
         if (account.active) return
         if (!account.switchable) {
             alerts.show(
-                RobocoAlert(
+                ZeronAlert(
                     title = AccountsCopy.CantSwitchTitle,
                     message = accountDeviceCantSwitch(),
                     buttons = listOf(AlertButton("OK", role = AlertButtonRole.Cancel)),
@@ -387,7 +387,7 @@ class AgentAccountsModel(
                     snapshot = previous
                 }
                 alerts.show(
-                    RobocoAlert(
+                    ZeronAlert(
                         title = AccountsCopy.SwitchFailedTitle,
                         message = describeAccountsError(t, nameOf(deviceId)),
                         buttons = listOf(AlertButton("OK", role = AlertButtonRole.Cancel)),
@@ -437,7 +437,7 @@ class AgentAccountsModel(
                 throw cancelled
             } catch (t: Throwable) {
                 alerts.show(
-                    RobocoAlert(
+                    ZeronAlert(
                         title = AccountsCopy.RemoveFailedTitle,
                         message = describeAccountsError(t, nameOf(deviceId)),
                         buttons = listOf(AlertButton("OK", role = AlertButtonRole.Cancel)),
@@ -449,7 +449,7 @@ class AgentAccountsModel(
 
     // ------------------------------------------------------------ Agents (40)
 
-    private fun applyAgents(list: List<uniffi.roboco_core.HarnessInfo>) {
+    private fun applyAgents(list: List<uniffi.zeron_core.HarnessInfo>) {
         agents = list
         offered = list.filter { it.offered }.map { it.id }
     }
@@ -482,7 +482,7 @@ class AgentAccountsModel(
                 throw cancelled
             } catch (t: Throwable) {
                 alerts.show(
-                    RobocoAlert(
+                    ZeronAlert(
                         title = AgentsCopy.failedTitle(on),
                         message = agentToggleFailure(t, nameOf(deviceId)),
                         buttons = listOf(AlertButton("OK", role = AlertButtonRole.Cancel)),
@@ -636,7 +636,7 @@ class AgentAccountsModel(
 
     private fun failed(message: String) {
         alerts.show(
-            RobocoAlert(
+            ZeronAlert(
                 title = SignInCopy.FailedTitle,
                 message = message,
                 buttons = listOf(AlertButton("OK", role = AlertButtonRole.Cancel)),
@@ -647,7 +647,7 @@ class AgentAccountsModel(
     /** "Paste the code": the trimmed code, or `null` on Cancel / back / an empty field. */
     private suspend fun askForCode(): String? = suspendCancellableCoroutine { cont ->
         alerts.show(
-            RobocoAlert(
+            ZeronAlert(
                 title = SignInCopy.PasteTitle,
                 message = SignInCopy.PasteMessage,
                 field = AlertField(

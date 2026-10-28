@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.os.Handler
 import android.os.Looper
@@ -48,7 +48,7 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.launch
-import sh.roboco.android.BuildConfig
+import sh.zeron.android.BuildConfig
 
 /**
  * The iOS 26 alert (ticket 18): the twin of
@@ -59,7 +59,7 @@ import sh.roboco.android.BuildConfig
  * outside-tap run the cancel action, IME Done fires primary, a handler runs
  * at most once).
  *
- * The card visual is [RobocoAlertCard] (AlertCard.kt, stateless); this file
+ * The card visual is [ZeronAlertCard] (AlertCard.kt, stateless); this file
  * owns the data model, the queue state and the in-window host. Callers own
  * every string.
  */
@@ -82,7 +82,7 @@ data class AlertField(
 
 /**
  * The alert's optional progress section (android-next#04, the update
- * alert's "Updating Roboco" state): a thin bar between the message and
+ * alert's "Updating Zeron" state): a thin bar between the message and
  * the buttons plus an optional label (`"10.3 of 24.5 MB"`). Immutable on
  * purpose — callers push a fresh copy through [Alerts.updateCurrent] to
  * move it, which keeps the card's presentation (id, animations, field
@@ -122,7 +122,7 @@ data class AlertButton(
 
 /** An alert: 1..n buttons, at most one of them [AlertButtonRole.Cancel] (checked in debug). */
 @Immutable
-data class RobocoAlert(
+data class ZeronAlert(
     val title: String,
     val message: String? = null,
     val field: AlertField? = null,
@@ -138,7 +138,7 @@ interface Alerts {
         get() = false
 
     /** Presents now, or after the alerts already shown/queued. Callable from any thread. */
-    fun show(alert: RobocoAlert)
+    fun show(alert: ZeronAlert)
 
     /**
      * Replaces the **showing** alert's content in place (android-next#04):
@@ -147,7 +147,7 @@ interface Alerts {
      * [AlertButton.morphsInPlace] handler. With nothing showing (or from
      * [Alerts.Noop]) the update is dropped and logged.
      */
-    fun updateCurrent(alert: RobocoAlert)
+    fun updateCurrent(alert: ZeronAlert)
 
     /** Clears the queue and fades the current alert out without running any handler. */
     fun dismissAll()
@@ -155,11 +155,11 @@ interface Alerts {
     companion object {
         /** Used outside an [AlertHost]: drops the alert and logs it. */
         val Noop: Alerts = object : Alerts {
-            override fun show(alert: RobocoAlert) {
+            override fun show(alert: ZeronAlert) {
                 Log.w("Alerts", "No AlertHost mounted; dropped: ${alert.title}")
             }
 
-            override fun updateCurrent(alert: RobocoAlert) {
+            override fun updateCurrent(alert: ZeronAlert) {
                 Log.w("Alerts", "No AlertHost mounted; dropped update: ${alert.title}")
             }
 
@@ -201,14 +201,14 @@ class AlertHostState : Alerts {
         private set
 
     /** The waiting alerts, oldest first. Main thread only. */
-    internal val queue = ArrayDeque<RobocoAlert>()
+    internal val queue = ArrayDeque<ZeronAlert>()
 
     private var nextId = 0L
     private val mainHandler by lazy { Handler(Looper.getMainLooper()) }
 
-    override fun show(alert: RobocoAlert) = onMain { present(alert) }
+    override fun show(alert: ZeronAlert) = onMain { present(alert) }
 
-    override fun updateCurrent(alert: RobocoAlert) = onMain {
+    override fun updateCurrent(alert: ZeronAlert) = onMain {
         // Same id: the composition's key(p.id) survives, so the card keeps
         // its animations and field state while the content swaps.
         current = current?.let { Presented(it.id, alert) }
@@ -229,16 +229,16 @@ class AlertHostState : Alerts {
         dismissRequested = null
     }
 
-    private fun present(alert: RobocoAlert) {
+    private fun present(alert: ZeronAlert) {
         if (BuildConfig.DEBUG) {
             require(alert.buttons.count { it.role == AlertButtonRole.Cancel } <= 1) {
-                "RobocoAlert allows at most one Cancel button (alert \"${alert.title}\")"
+                "ZeronAlert allows at most one Cancel button (alert \"${alert.title}\")"
             }
             require(alert.buttons.isNotEmpty()) {
-                "RobocoAlert needs at least one button (alert \"${alert.title}\")"
+                "ZeronAlert needs at least one button (alert \"${alert.title}\")"
             }
             require(alert.buttons.count { it.preferred } <= 1) {
-                "RobocoAlert allows at most one preferred button (alert \"${alert.title}\")"
+                "ZeronAlert allows at most one preferred button (alert \"${alert.title}\")"
             }
         }
         if (current != null) {
@@ -257,7 +257,7 @@ class AlertHostState : Alerts {
     }
 
     /** One presented alert: a stable identity plus the description. */
-    internal data class Presented(val id: Long, val alert: RobocoAlert)
+    internal data class Presented(val id: Long, val alert: ZeronAlert)
 }
 
 /**
@@ -411,7 +411,7 @@ private fun PresentedAlert(
                 .padding(16.dp),
             contentAlignment = Alignment.Center,
         ) {
-            RobocoAlertCard(
+            ZeronAlertCard(
                 alert = alert,
                 fieldValue = fieldValue,
                 onFieldValueChange = { fieldValue = it },

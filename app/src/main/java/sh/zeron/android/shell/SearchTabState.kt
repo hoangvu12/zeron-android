@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.Composable
@@ -13,7 +13,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import sh.roboco.android.RobocoApplication
+import sh.zeron.android.ZeronApplication
 
 /**
  * The Search tab's state (android-ui-parity #29) — the port of
@@ -21,7 +21,7 @@ import sh.roboco.android.RobocoApplication
  * (`ios:Threads/SessionListController.swift:516-539`): the query is the raw
  * field text (spaces are trimmed only by ticket 49's search, never here), it
  * survives tab switches and activity recreations — the holder lives outside
- * composition, in [RobocoApplication] — and it is gone after process death
+ * composition, in [ZeronApplication] — and it is gone after process death
  * (nothing here is written to instance state, unlike `MainTabState`).
  *
  * `previousTab` is **not** stored here: it is [MainTabState.previousTab]
@@ -111,7 +111,7 @@ val LocalSearchTabState = staticCompositionLocalOf<SearchTabState> { error("No S
 
 /**
  * [SearchTabState] in composition: the app-scoped instance
- * ([RobocoApplication]'s holder survives rotation, not process death — the
+ * ([ZeronApplication]'s holder survives rotation, not process death — the
  * query is deliberately not saveable). Non-app contexts (unit tests,
  * previews) get a throwaway instance; tests that drive the field pass
  * their own state into the fixture instead.
@@ -120,6 +120,6 @@ val LocalSearchTabState = staticCompositionLocalOf<SearchTabState> { error("No S
 fun rememberSearchTabState(): SearchTabState {
     val app = LocalContext.current.applicationContext
     return remember(app) {
-        (app as? RobocoApplication)?.searchTabState ?: SearchTabState()
+        (app as? ZeronApplication)?.searchTabState ?: SearchTabState()
     }
 }

@@ -1,11 +1,11 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import sh.roboco.android.core.GeistMetrics
-import sh.roboco.android.design.Motion
+import sh.zeron.android.core.GeistMetrics
+import sh.zeron.android.design.Motion
 
 /**
  * [LargeTitleMetrics]' pure math (android-ui-parity #25), as a **plain JUnit**

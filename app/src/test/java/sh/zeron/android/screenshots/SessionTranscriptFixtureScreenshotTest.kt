@@ -1,4 +1,4 @@
-package sh.roboco.android.screenshots
+package sh.zeron.android.screenshots
 
 import android.content.Context
 import androidx.compose.foundation.background
@@ -20,17 +20,17 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import org.robolectric.shadows.ShadowChoreographer
 import android.os.Looper
-import sh.roboco.android.core.TextEngine
-import sh.roboco.android.core.UniffiSandbox
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.transcript.TranscriptActions
-import sh.roboco.android.transcript.TranscriptHost
-import sh.roboco.android.transcript.TranscriptPerf
-import sh.roboco.android.transcript.TranscriptState
-import uniffi.roboco_core.DebugEntry
-import uniffi.roboco_core.layoutFixtureMarkdown
+import sh.zeron.android.core.TextEngine
+import sh.zeron.android.core.UniffiSandbox
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.transcript.TranscriptActions
+import sh.zeron.android.transcript.TranscriptHost
+import sh.zeron.android.transcript.TranscriptPerf
+import sh.zeron.android.transcript.TranscriptState
+import uniffi.zeron_core.DebugEntry
+import uniffi.zeron_core.layoutFixtureMarkdown
 
 /**
  * The transcript goldens of the parity suite (android-app#30 §3): the
@@ -152,12 +152,12 @@ class SessionTranscriptFixtureScreenshotTest {
             }
             TranscriptPerf.reset()
             compose.setContent {
-                RobocoTheme(appearance) {
+                ZeronTheme(appearance) {
                     ProvideGlyphClock(frozenAtNanos = 0L) {
                         Box(
                             Modifier
                                 .fillMaxSize()
-                                .background(RobocoTheme.palette.background),
+                                .background(ZeronTheme.palette.background),
                         ) {
                             TranscriptHost(state, TranscriptActions(), Modifier.fillMaxSize())
                         }

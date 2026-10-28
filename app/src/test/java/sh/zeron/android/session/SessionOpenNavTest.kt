@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import android.view.Choreographer
 import androidx.compose.foundation.layout.Box
@@ -26,23 +26,23 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.shell.LocalNavEntry
-import sh.roboco.android.shell.LocalNavStack
-import sh.roboco.android.shell.NavEntryEffect
-import sh.roboco.android.shell.NavKind
-import sh.roboco.android.shell.NavRoute
-import sh.roboco.android.shell.NavStack
-import sh.roboco.android.shell.NavStackHost
-import sh.roboco.android.transcript.FramePoster
-import sh.roboco.android.transcript.TranscriptState
-import uniffi.roboco_core.LayoutFrame
-import uniffi.roboco_core.NoHandle
-import uniffi.roboco_core.TextSystem
-import uniffi.roboco_core.TranscriptView
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.shell.LocalNavEntry
+import sh.zeron.android.shell.LocalNavStack
+import sh.zeron.android.shell.NavEntryEffect
+import sh.zeron.android.shell.NavKind
+import sh.zeron.android.shell.NavRoute
+import sh.zeron.android.shell.NavStack
+import sh.zeron.android.shell.NavStackHost
+import sh.zeron.android.transcript.FramePoster
+import sh.zeron.android.transcript.TranscriptState
+import uniffi.zeron_core.LayoutFrame
+import uniffi.zeron_core.NoHandle
+import uniffi.zeron_core.TextSystem
+import uniffi.zeron_core.TranscriptView
 
 /**
  * The open choreography against a real navigation stack
@@ -128,7 +128,7 @@ class SessionOpenNavTest {
 
     private fun host(stack: NavStack) {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 NavStackHost(stack, active = true) { entry ->
                     // A local: no smart cast on a main-module property.
                     val route = entry.route
@@ -336,7 +336,7 @@ class SessionOpenNavTest {
         var hostOn by mutableStateOf(true)
         val stack = NavStack(RootRoute)
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 if (hostOn) {
                     NavStackHost(stack, active = true) { entry ->
                         if (entry.route is SessionRoute) {
@@ -402,7 +402,7 @@ class SessionOpenNavTest {
         val state = wiringState()
         val stack = NavStack(RootRoute)
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 NavStackHost(stack, active = true) { entry ->
                     if (entry.route is SessionRoute) {
                         SessionScreen(controller, state)

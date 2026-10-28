@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,27 +38,27 @@ import kotlin.math.roundToInt
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import sh.roboco.android.RobocoApplication
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.GroupedAccessory
-import sh.roboco.android.design.GroupedPosition
-import sh.roboco.android.design.GroupedRow
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.SymbolWeight
-import sh.roboco.android.design.groupedSection
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.design.glass.GlassCircleButton
-import sh.roboco.android.design.glass.GlassTextCapsule
-import sh.roboco.android.design.glass.Menu
-import sh.roboco.android.design.glass.MenuIcon
-import sh.roboco.android.design.glass.MenuItem
-import sh.roboco.android.design.glass.hasContent
-import sh.roboco.android.design.glass.rememberGlassMenuState
-import sh.roboco.android.shell.PageSheetScope
-import sh.roboco.android.shell.SheetHostState
-import sh.roboco.android.shell.SheetStyle
+import sh.zeron.android.ZeronApplication
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.GroupedAccessory
+import sh.zeron.android.design.GroupedPosition
+import sh.zeron.android.design.GroupedRow
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.SymbolWeight
+import sh.zeron.android.design.groupedSection
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.design.glass.GlassCircleButton
+import sh.zeron.android.design.glass.GlassTextCapsule
+import sh.zeron.android.design.glass.Menu
+import sh.zeron.android.design.glass.MenuIcon
+import sh.zeron.android.design.glass.MenuItem
+import sh.zeron.android.design.glass.hasContent
+import sh.zeron.android.design.glass.rememberGlassMenuState
+import sh.zeron.android.shell.PageSheetScope
+import sh.zeron.android.shell.SheetHostState
+import sh.zeron.android.shell.SheetStyle
 
 /**
  * The New Project screen (android-ui-parity #110): the page-sheet skeleton
@@ -191,14 +191,14 @@ fun NewProjectScreen(
  */
 @Composable
 private fun FolderBrowserNavBar(controller: FolderBrowserController, enabled: Boolean, onClose: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
     Layout(
         content = {
             // 0: the ✕. 1: the title. 2: the capsule — the measure block
             // positions them by index.
             GlassCircleButton(
-                icon = RobocoIcons.Xmark,
+                icon = ZeronIcons.Xmark,
                 contentDescription = "Close",
                 onClick = onClose,
                 size = 44.dp,
@@ -283,7 +283,7 @@ internal fun engineMenu(controller: FolderBrowserController): Menu = Menu(
         MenuItem(
             title = host.name,
             subtitle = if (host.online) FolderBrowserCopy.Online else FolderBrowserCopy.Offline,
-            icon = MenuIcon.Symbol(RobocoIcons.Desktopcomputer),
+            icon = MenuIcon.Symbol(ZeronIcons.Desktopcomputer),
             testTag = "folder-engine-row",
             action = { controller.selectEngine(host.id) },
         )
@@ -356,7 +356,7 @@ private fun FolderList(controller: FolderBrowserController, nav: FolderNavState)
 /** 112: the filtered list's empty state — Geist Regular 13, `secondary`, centred. */
 @Composable
 private fun NoFoldersMatchLine() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
     BasicText(
         FolderHeaderTokens.NoMatch,
@@ -377,13 +377,13 @@ private fun NoFoldersMatchLine() {
  */
 @Composable
 private fun FolderRowView(row: FolderRow, position: GroupedPosition, onClick: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
     when (row) {
         FolderRow.Parent -> GroupedRow(
             title = FolderBrowserCopy.ParentFolder,
             position = position,
-            icon = RobocoIcons.ArrowTurnLeftUp,
+            icon = ZeronIcons.ArrowTurnLeftUp,
             iconTint = palette.accent,
             accessories = emptyList(),
             titleStyle = uiStyle(Face.Sans, ts.bodyScaled(17f), palette.text),
@@ -393,7 +393,7 @@ private fun FolderRowView(row: FolderRow, position: GroupedPosition, onClick: ()
         is FolderRow.Folder -> GroupedRow(
             title = row.name,
             position = position,
-            icon = if (row.isRepo) RobocoIcons.FolderBadgeGearshape else RobocoIcons.Folder,
+            icon = if (row.isRepo) ZeronIcons.FolderBadgeGearshape else ZeronIcons.Folder,
             iconTint = if (row.isRepo) palette.accent else palette.secondary,
             accessories = listOf(GroupedAccessory.Disclosure),
             testTag = "folder-row",
@@ -425,7 +425,7 @@ fun SheetHostState.presentNewProject(onCreated: (String) -> Unit): Boolean =
  */
 @Composable
 internal fun PageSheetScope.NewProjectSheetBody(onCreated: (String) -> Unit) {
-    val app = LocalContext.current.applicationContext as RobocoApplication
+    val app = LocalContext.current.applicationContext as ZeronApplication
     val pageScope = rememberCoroutineScope()
     val feed = app.workspaceFeed
     val hosts = remember {

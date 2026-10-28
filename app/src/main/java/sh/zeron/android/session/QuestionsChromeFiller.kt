@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 /**
  * Fills [SessionChrome.questions] from the composer state's open input
@@ -10,7 +10,7 @@ package sh.roboco.android.session
  *
  * The `entryId` of the FFI `InputRequest` is dropped, as on iOS. No FFI
  * call of its own: everything it needs is already in [ChromeInput].
- * Roboco's wire has no `prefill`/`multiline` (android-app#08 maps them
+ * Zeron's wire has no `prefill`/`multiline` (android-app#08 maps them
  * to `null`/`false`), but both are carried verbatim for a newer engine.
  */
 class QuestionsChromeFiller : ChromeFiller {

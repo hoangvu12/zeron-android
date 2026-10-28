@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 /**
  * The queue-edit text maths (android-ui-parity #83) — the Kotlin port of
@@ -51,7 +51,7 @@ object QueueEditText {
 /**
  * Every string this ticket owns (android-ui-parity #83), verbatim: the
  * iOS composer/alert strings from `SessionViewController.swift:410-415`
- * and the five failure messages from the Roboco desktop / web copy
+ * and the five failure messages from the Zeron desktop / web copy
  * (`crates/ui/src/queue.rs:1614-1640, 1677-1685`, mirrored in
  * `web/packages/app/src/lib/queue-actions.ts:229-276`).
  */

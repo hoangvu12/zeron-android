@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
@@ -42,28 +42,28 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.pairing.PairedEngineSink
-import sh.roboco.android.pairing.PairingBackend
-import sh.roboco.android.pairing.ProvidePairPage
-import sh.roboco.android.shell.NavStack
-import sh.roboco.android.shell.LocalNavEntry
-import sh.roboco.android.shell.LocalNavStack
-import sh.roboco.android.shell.LocalPageSheetScope
-import sh.roboco.android.shell.PageSheetScope
-import sh.roboco.android.shell.SheetHost
-import sh.roboco.android.shell.SheetHostState
-import sh.roboco.android.shell.SheetStyle
-import sh.roboco.android.shell.TabId
-import sh.roboco.android.shell.TabRootRoute
-import uniffi.roboco_core.EngineState
-import uniffi.roboco_core.EngineView
-import uniffi.roboco_core.PairedEngine
-import uniffi.roboco_core.RoomInviteTarget
-import uniffi.roboco_core.RoomJoinResult
-import uniffi.roboco_core.RoomRecord
-import uniffi.roboco_core.PairingTarget
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.pairing.PairedEngineSink
+import sh.zeron.android.pairing.PairingBackend
+import sh.zeron.android.pairing.ProvidePairPage
+import sh.zeron.android.shell.NavStack
+import sh.zeron.android.shell.LocalNavEntry
+import sh.zeron.android.shell.LocalNavStack
+import sh.zeron.android.shell.LocalPageSheetScope
+import sh.zeron.android.shell.PageSheetScope
+import sh.zeron.android.shell.SheetHost
+import sh.zeron.android.shell.SheetHostState
+import sh.zeron.android.shell.SheetStyle
+import sh.zeron.android.shell.TabId
+import sh.zeron.android.shell.TabRootRoute
+import uniffi.zeron_core.EngineState
+import uniffi.zeron_core.EngineView
+import uniffi.zeron_core.PairedEngine
+import uniffi.zeron_core.RoomInviteTarget
+import uniffi.zeron_core.RoomJoinResult
+import uniffi.zeron_core.RoomRecord
+import uniffi.zeron_core.PairingTarget
 
 /**
  * The Settings Devices section (android-ui-parity #102) through the real
@@ -118,7 +118,7 @@ class DevicesSectionTest {
      */
     private fun mount(appearance: Appearance = Appearance.Light) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 val devices = rememberDevicesSectionState(
                     engines = flow,
                     onOpenEngine = { openCalls += it },
@@ -127,7 +127,7 @@ class DevicesSectionTest {
                 LazyColumn(
                     Modifier
                         .fillMaxSize()
-                        .background(RobocoTheme.palette.background),
+                        .background(ZeronTheme.palette.background),
                 ) {
                     devicesSection(devices)
                 }
@@ -139,7 +139,7 @@ class DevicesSectionTest {
     /** The default handlers' mounting: a real [NavStack] behind the locals. */
     private fun mountWithStack(stack: NavStack) {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(
                     LocalNavStack provides stack,
                     LocalNavEntry provides stack.entries.first(),
@@ -148,7 +148,7 @@ class DevicesSectionTest {
                     LazyColumn(
                         Modifier
                             .fillMaxSize()
-                            .background(RobocoTheme.palette.background),
+                            .background(ZeronTheme.palette.background),
                     ) {
                         devicesSection(devices)
                     }
@@ -496,7 +496,7 @@ class DevicesSectionTest {
         val sheetHost = SheetHostState()
         val stack = NavStack(TabRootRoute(TabId.Settings))
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(
                     LocalNavStack provides stack,
                     LocalNavEntry provides stack.entries.first(),
@@ -511,7 +511,7 @@ class DevicesSectionTest {
                             LazyColumn(
                                 Modifier
                                     .fillMaxSize()
-                                    .background(RobocoTheme.palette.background),
+                                    .background(ZeronTheme.palette.background),
                             ) {
                                 devicesSection(devices)
                             }
@@ -542,7 +542,7 @@ class DevicesSectionTest {
         val stack = NavStack(TabRootRoute(TabId.Settings))
         val enclosing = RecordingSheetScope()
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(
                     LocalNavStack provides stack,
                     LocalNavEntry provides stack.entries.first(),
@@ -558,7 +558,7 @@ class DevicesSectionTest {
                                 LazyColumn(
                                     Modifier
                                         .fillMaxSize()
-                                        .background(RobocoTheme.palette.background),
+                                        .background(ZeronTheme.palette.background),
                                 ) {
                                     devicesSection(devices)
                                 }
@@ -601,7 +601,7 @@ class DevicesSectionTest {
         val sheetHost = SheetHostState()
         val stack = NavStack(TabRootRoute(TabId.Settings))
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(
                     LocalNavStack provides stack,
                     LocalNavEntry provides stack.entries.first(),
@@ -612,7 +612,7 @@ class DevicesSectionTest {
                         LazyColumn(
                             Modifier
                                 .fillMaxSize()
-                                .background(RobocoTheme.palette.background),
+                                .background(ZeronTheme.palette.background),
                         ) {
                             devicesSection(devices)
                         }

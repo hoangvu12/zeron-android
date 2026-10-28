@@ -1,4 +1,4 @@
-package sh.roboco.android.design.glass
+package sh.zeron.android.design.glass
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -35,10 +35,10 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
 import java.io.File
 
 /**
@@ -95,10 +95,10 @@ class GlassButtonsTest {
     fun circleClickFiresOnClickOnce() {
         var clicks = 0
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.fillMaxSize()) {
                     GlassCircleButton(
-                        RobocoIcons.Ellipsis, "More", { clicks++ },
+                        ZeronIcons.Ellipsis, "More", { clicks++ },
                         modifier = Modifier.testTag("circle"),
                     )
                 }
@@ -115,7 +115,7 @@ class GlassButtonsTest {
         var capsuleClicks = 0
         var prominentClicks = 0
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Column {
                     GlassTextCapsule("Edit", { capsuleClicks++ }, modifier = Modifier.testTag("capsule"))
                     ProminentGlassButton("Next", { prominentClicks++ }, modifier = Modifier.testTag("prominent"))
@@ -133,9 +133,9 @@ class GlassButtonsTest {
     @Test
     fun semanticsAreButtonsWithTheirLabels() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Column {
-                    GlassCircleButton(RobocoIcons.Ellipsis, "More", {})
+                    GlassCircleButton(ZeronIcons.Ellipsis, "More", {})
                     GlassTextCapsule("Edit", {})
                     ProminentGlassButton("Next", {})
                 }
@@ -160,10 +160,10 @@ class GlassButtonsTest {
         var capsuleClicks = 0
         var prominentClicks = 0
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Column {
                     GlassCircleButton(
-                        RobocoIcons.Ellipsis, "More", { circleClicks++ },
+                        ZeronIcons.Ellipsis, "More", { circleClicks++ },
                         modifier = Modifier.testTag("c"), enabled = false,
                     )
                     GlassTextCapsule("Edit", { capsuleClicks++ }, modifier = Modifier.testTag("t"), enabled = false)
@@ -192,10 +192,10 @@ class GlassButtonsTest {
         compose.mainClock.autoAdvance = false
         var clicks = 0
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.fillMaxSize()) {
                     ProminentGlassButton(
-                        "Use “roboco”", { clicks++ },
+                        "Use “zeron”", { clicks++ },
                         modifier = Modifier.testTag("p"), busy = true,
                     )
                 }
@@ -205,10 +205,10 @@ class GlassButtonsTest {
         // The spinner's tag merges into the clickable button node, so it is
         // only addressable in the unmerged tree.
         compose.onNodeWithTag(BusySpinnerTag, useUnmergedTree = true).assertExists()
-        compose.onNodeWithText("Use “roboco”").assertIsNotEnabled()
+        compose.onNodeWithText("Use “zeron”").assertIsNotEnabled()
         assertEquals(
             "In progress",
-            compose.onNodeWithText("Use “roboco”").fetchSemanticsNode()
+            compose.onNodeWithText("Use “zeron”").fetchSemanticsNode()
                 .config[SemanticsProperties.StateDescription],
         )
         compose.onNodeWithTag("p").performTouchInput { click(center) }
@@ -221,14 +221,14 @@ class GlassButtonsTest {
     @Test
     fun circleMeasuresItsSize() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Column {
                     GlassCircleButton(
-                        RobocoIcons.Ellipsis, "More", {},
+                        ZeronIcons.Ellipsis, "More", {},
                         modifier = Modifier.testTag("d44"),
                     )
                     GlassCircleButton(
-                        RobocoIcons.ArrowDown, "Jump to latest", {},
+                        ZeronIcons.ArrowDown, "Jump to latest", {},
                         size = 40.dp, iconPt = 15f,
                         modifier = Modifier.testTag("d40"),
                     )
@@ -243,7 +243,7 @@ class GlassButtonsTest {
     @Test
     fun textCapsuleIsExactly44DpTall() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 GlassTextCapsule("Edit", {}, modifier = Modifier.testTag("t"))
             }
         }
@@ -254,7 +254,7 @@ class GlassButtonsTest {
     @Test
     fun prominentCompactIsAtLeast44DpTall() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 ProminentGlassButton(
                     "Next", {},
                     contentPadding = ProminentGlassButtonDefaults.CompactPadding,
@@ -271,7 +271,7 @@ class GlassButtonsTest {
     // `fixed(17)` is a UIKit point, so the same holds at font scale 2.
     @Composable
     private fun ProminentHeightsFixture() {
-        RobocoTheme(Appearance.Light) {
+        ZeronTheme(Appearance.Light) {
             Column {
                 ProminentGlassButton(
                     "Next", {},
@@ -283,7 +283,7 @@ class GlassButtonsTest {
                     contentPadding = ProminentGlassButtonDefaults.PairingPadding,
                     modifier = Modifier.testTag("pairing"),
                 )
-                ProminentGlassButton("Use “roboco”", {}, modifier = Modifier.testTag("default"))
+                ProminentGlassButton("Use “zeron”", {}, modifier = Modifier.testTag("default"))
             }
         }
     }
@@ -316,10 +316,10 @@ class GlassButtonsTest {
         compose.mainClock.autoAdvance = false
         val source = MutableInteractionSource()
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.fillMaxSize()) {
                     GlassCircleButton(
-                        RobocoIcons.Ellipsis, "More", {},
+                        ZeronIcons.Ellipsis, "More", {},
                         modifier = Modifier.testTag("circle"),
                         interactionSource = source,
                     )
@@ -359,7 +359,7 @@ class GlassButtonsTest {
         compose.mainClock.autoAdvance = false
         val source = MutableInteractionSource()
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.fillMaxSize()) {
                     ProminentGlassButton(
                         "Next", {},
@@ -398,10 +398,10 @@ class GlassButtonsTest {
         compose.mainClock.autoAdvance = false
         val source = MutableInteractionSource()
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.fillMaxSize()) {
                     GlassCircleButton(
-                        RobocoIcons.Ellipsis, "More", {},
+                        ZeronIcons.Ellipsis, "More", {},
                         interactionSource = source,
                     )
                 }
@@ -420,7 +420,7 @@ class GlassButtonsTest {
         compose.mainClock.autoAdvance = false
         val source = MutableInteractionSource()
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.fillMaxSize()) {
                     ProminentGlassButton("Next", {}, interactionSource = source)
                 }
@@ -440,7 +440,7 @@ class GlassButtonsTest {
         // The ticket's grep check; NoMaterialImportsTest covers src/main
         // as a whole, this pins the three files the ticket names.
         for (name in listOf("GlassButtons.kt", "GlassPress.kt", "ActivitySpinner.kt")) {
-            val file = File("src/main/java/sh/roboco/android/design/glass/$name")
+            val file = File("src/main/java/sh/zeron/android/design/glass/$name")
             assertTrue("$name is missing under ${File(".").absolutePath}", file.isFile)
             val offenders = file.useLines { lines ->
                 lines.filter { it.trimStart().startsWith("import androidx.compose.material") }.toList()

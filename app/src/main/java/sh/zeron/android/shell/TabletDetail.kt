@@ -1,8 +1,8 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import sh.roboco.android.newsession.NewSessionScreen
+import sh.zeron.android.newsession.NewSessionScreen
 
 /**
  * The embedded new-session page in the detail column (android-ui-parity

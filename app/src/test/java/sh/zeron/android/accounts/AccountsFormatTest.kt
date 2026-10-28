@@ -1,15 +1,15 @@
-package sh.roboco.android.accounts
+package sh.zeron.android.accounts
 
 import java.time.ZoneId
 import java.util.Locale
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
-import uniffi.roboco_core.AgentAccount
-import uniffi.roboco_core.AgentAccountWarning
-import uniffi.roboco_core.AgentAccountsSnapshot
-import uniffi.roboco_core.AgentUsageWindow
-import uniffi.roboco_core.CoreException
+import uniffi.zeron_core.AgentAccount
+import uniffi.zeron_core.AgentAccountWarning
+import uniffi.zeron_core.AgentAccountsSnapshot
+import uniffi.zeron_core.AgentUsageWindow
+import uniffi.zeron_core.CoreException
 
 /**
  * The accounts derivations (android-next#05) on the plain JVM: the usage
@@ -229,7 +229,7 @@ class AccountsFormatTest {
             describeAccountsError(CoreException.HostUnavailable("down"), "Studio"),
         )
         assertEquals(
-            "Studio needs a newer Roboco to show accounts here.",
+            "Studio needs a newer Zeron to show accounts here.",
             describeAccountsError(CoreException.Unsupported("unknown method"), "Studio"),
         )
         assertEquals(
@@ -245,7 +245,7 @@ class AccountsFormatTest {
     @Test
     fun primaryDevicePrefersOnlineThenSessions() {
         fun device(id: String, online: Boolean, sessions: UInt = 0u) =
-            uniffi.roboco_core.DeviceView(
+            uniffi.zeron_core.DeviceView(
                 id = id,
                 engineId = id,
                 name = id,

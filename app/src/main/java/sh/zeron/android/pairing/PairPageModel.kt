@@ -1,4 +1,4 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import android.util.Log
 import androidx.annotation.StringRes
@@ -16,14 +16,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import sh.roboco.android.R
-import uniffi.roboco_core.PairedEngine
-import uniffi.roboco_core.PairException
-import uniffi.roboco_core.PairingTarget
-import uniffi.roboco_core.RoomException
-import uniffi.roboco_core.RoomInviteTarget
-import uniffi.roboco_core.RoomJoinResult
-import uniffi.roboco_core.RoomRecord
+import sh.zeron.android.R
+import uniffi.zeron_core.PairedEngine
+import uniffi.zeron_core.PairException
+import uniffi.zeron_core.PairingTarget
+import uniffi.zeron_core.RoomException
+import uniffi.zeron_core.RoomInviteTarget
+import uniffi.zeron_core.RoomJoinResult
+import uniffi.zeron_core.RoomRecord
 
 /**
  * The Pair page's redeem state (android-ui-parity #72), the port of the
@@ -240,7 +240,7 @@ class PairPageModel(
 
     /**
      * The live parse as a room invite (ticket 04): set when the trimmed
-     * field parses as `roboco-room:` — exactly one of [target] /
+     * field parses as `zeron-room:` — exactly one of [target] /
      * [roomTarget] is non-null at a time, and a submit dispatches on it.
      * Secret-free: the name and the member labels only.
      */
@@ -268,7 +268,7 @@ class PairPageModel(
 
     /**
      * `backend.parseRoom(input)` — the same live-parse effect's room arm:
-     * `null` unless the field is a `roboco-room:` invite.
+     * `null` unless the field is a `zeron-room:` invite.
      */
     internal fun parseRoomTarget(input: String): RoomInviteTarget? = backend.parseRoom(input)
 
@@ -277,7 +277,7 @@ class PairPageModel(
      * submit and a blank field; snapshots `knownEngineIds` BEFORE the
      * FFI call (the client's list already contains the new engines
      * afterwards); persists FIRST, then clears, haptics and closes. A
-     * `roboco-room:` field dispatches to the join instead (ticket 04):
+     * `zeron-room:` field dispatches to the join instead (ticket 04):
      * the room blob first, then every joined member's record — a partial
      * join is a success (the missing members heal on app start / network
      * change). On a store write failure for a NEW engine: `forget` then
@@ -290,9 +290,9 @@ class PairPageModel(
         if (url.isEmpty()) return
         // The dispatch is the prefix the Rust decoder gates on (the live
         // parse's `roomTarget` is display-only, exactly like `target`): a
-        // `roboco-room:` invite never goes to the pairing redeem, however
+        // `zeron-room:` invite never goes to the pairing redeem, however
         // fast the submit lands after typing.
-        val room = url.startsWith("roboco-room:")
+        val room = url.startsWith("zeron-room:")
         phase = PairPhase.Redeeming
         // Read before the call: after it returns, the client's list
         // already contains the new engines (the re-pair/dedupe check).

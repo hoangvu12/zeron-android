@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.app.Activity
 import android.content.Context
@@ -40,7 +40,7 @@ import androidx.core.view.WindowInsetsCompat
 import kotlin.math.roundToInt
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import sh.roboco.android.design.Motion
+import sh.zeron.android.design.Motion
 
 /**
  * The shared state of the interactive IME dismiss pipeline (133).
@@ -98,7 +98,7 @@ internal val LocalImeControl = staticCompositionLocalOf<ImeControl?> { null }
  * tap-to-dismiss (81), link taps (126), image tiles (66) and the scroll
  * (68) still get every event.
  *
- * `imeNestedScroll()` is deliberately **not** used (Roboco adaptation):
+ * `imeNestedScroll()` is deliberately **not** used (Zeron adaptation):
  * it consumes downward deltas to hide the IME wherever the finger is,
  * opens the IME at the fling's tail, and is driven by scroll deltas
  * rather than the finger position — three divergences from iOS.

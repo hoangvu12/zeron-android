@@ -1,4 +1,4 @@
-package sh.roboco.android.core
+package sh.zeron.android.core
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -7,7 +7,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import uniffi.roboco_core.WallpaperEffect
+import uniffi.zeron_core.WallpaperEffect
 
 /**
  * The `WallpaperCore.Ffi` seam against the real host library

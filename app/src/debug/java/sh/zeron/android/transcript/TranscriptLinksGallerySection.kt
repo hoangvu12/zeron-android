@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.background
@@ -21,15 +21,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import sh.roboco.android.R
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.LocalGalleryCapture
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.image.ImageViewerHost
-import sh.roboco.android.image.ImageViewerRequest
-import sh.roboco.android.image.rememberImageViewerState
+import sh.zeron.android.R
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.LocalGalleryCapture
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.image.ImageViewerHost
+import sh.zeron.android.image.ImageViewerRequest
+import sh.zeron.android.image.rememberImageViewerState
 
 /**
  * The "Transcript links" section of the debug design gallery (ticket
@@ -38,7 +38,7 @@ import sh.roboco.android.image.rememberImageViewerState
  * wide table with a link inside its scroller — with a real [LinkRouter]
  * behind `openLink`: http(s) opens a Custom Tab (light and dark follow
  * the gallery's appearance toggle), the system gets the other schemes,
- * and everything iOS no-ops (roboco-file:, file:, drive paths,
+ * and everything iOS no-ops (zeron-file:, file:, drive paths,
  * scheme-less paths — decision TRANSCRIPT-D4) does nothing. A one-line
  * readout at the bottom shows the last [LinkRoute], so `Ignore` taps are
  * visible as taps.
@@ -59,7 +59,7 @@ import sh.roboco.android.image.rememberImageViewerState
 @Composable
 fun TranscriptLinksGallerySection() {
     val capture = LocalGalleryCapture.current
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val context = LocalContext.current
     val state = remember { TranscriptState() }

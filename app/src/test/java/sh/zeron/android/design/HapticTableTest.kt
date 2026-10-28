@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.os.VibrationEffect
 import android.os.VibrationEffect.Composition as C

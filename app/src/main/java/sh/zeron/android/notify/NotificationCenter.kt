@@ -1,15 +1,15 @@
-package sh.roboco.android.notify
+package sh.zeron.android.notify
 
 import android.content.Context
 import android.util.Log
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import sh.roboco.android.background.RunWatchController
-import uniffi.roboco_core.NotificationSink
-import uniffi.roboco_core.RunActivity
-import uniffi.roboco_core.SessionEvent
-import uniffi.roboco_core.SessionEventKind
+import sh.zeron.android.background.RunWatchController
+import uniffi.zeron_core.NotificationSink
+import uniffi.zeron_core.RunActivity
+import uniffi.zeron_core.SessionEvent
+import uniffi.zeron_core.SessionEventKind
 
 /**
  * The Kotlin delivery half of the notifications (android-app#28): the
@@ -159,7 +159,7 @@ class NotificationCenter(
      * `onClientReady`). Never on the main thread: the FFI call spawns the
      * driver task.
      */
-    fun attachTo(client: uniffi.roboco_core.CoreClient) {
+    fun attachTo(client: uniffi.zeron_core.CoreClient) {
         if (!attached.compareAndSet(false, true)) return
         client.setNotificationSink(this)
     }
@@ -180,7 +180,7 @@ class NotificationCenter(
         if (engineCountSource() >= 2) engineName else null
 
     private companion object {
-        const val TAG = "RobocoNotify"
+        const val TAG = "ZeronNotify"
     }
 }
 

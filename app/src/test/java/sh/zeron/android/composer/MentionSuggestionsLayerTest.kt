@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -49,13 +49,13 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.Motion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
-import uniffi.roboco_core.FileMatch
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.Motion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
+import uniffi.zeron_core.FileMatch
 
 /**
  * [MentionSuggestionsHost] / the layer / the card (android-ui-parity #86):
@@ -99,7 +99,7 @@ class MentionSuggestionsLayerTest {
 
     /**
      * The ticket's stand-in harness (step 9): host + stub + anchor + field
-     * + a "Blur" control, over `RobocoTheme`. The field is focused by
+     * + a "Blur" control, over `ZeronTheme`. The field is focused by
      * tapping it (the real IME path is 57's; focus is what the binding
      * gates edits on).
      */
@@ -107,7 +107,7 @@ class MentionSuggestionsLayerTest {
         stubClicks = 0
         anchorHeight.value = 106.dp
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 val focus = remember { mutableStateOf(false) }
                 val focusManager = LocalFocusManager.current
                 val c = rememberComposerController()
@@ -144,7 +144,7 @@ class MentionSuggestionsLayerTest {
                             textStyle = uiStyle(
                                 Face.Sans,
                                 LocalTypeScale.current.fixed(16.5f),
-                                RobocoTheme.palette.text,
+                                ZeronTheme.palette.text,
                             ),
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -154,7 +154,7 @@ class MentionSuggestionsLayerTest {
                     }
                     BasicText(
                         "Blur",
-                        style = uiStyle(Face.SansMedium, LocalTypeScale.current.fixed(14f), RobocoTheme.palette.accent),
+                        style = uiStyle(Face.SansMedium, LocalTypeScale.current.fixed(14f), ZeronTheme.palette.accent),
                         modifier = Modifier
                             .align(Alignment.TopEnd)
                             .padding(12.dp)

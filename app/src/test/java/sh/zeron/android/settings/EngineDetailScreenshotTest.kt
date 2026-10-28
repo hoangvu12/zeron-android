@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -15,15 +15,15 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.shell.LocalNavEntry
-import sh.roboco.android.shell.LocalNavStack
-import sh.roboco.android.shell.NavRoute
-import sh.roboco.android.shell.NavStack
-import uniffi.roboco_core.EngineState
-import uniffi.roboco_core.EngineView
-import uniffi.roboco_core.ParkReason
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.shell.LocalNavEntry
+import sh.zeron.android.shell.LocalNavStack
+import sh.zeron.android.shell.NavRoute
+import sh.zeron.android.shell.NavStack
+import uniffi.zeron_core.EngineState
+import uniffi.zeron_core.EngineView
+import uniffi.zeron_core.ParkReason
 
 /**
  * The Engine detail goldens (android-ui-parity #140): the five
@@ -40,7 +40,7 @@ import uniffi.roboco_core.ParkReason
  * byte-stable without freezing anything.
  *
  * Record with
- * `./gradlew :app:recordRoborazziDebug --tests sh.roboco.android.settings.EngineDetailScreenshotTest`,
+ * `./gradlew :app:recordRoborazziDebug --tests sh.zeron.android.settings.EngineDetailScreenshotTest`,
  * verify with `:app:verifyRoborazziDebug --tests …`. Paths are relative
  * to the `roborazzi { outputDir }` (`src/test/screenshots`), landing
  * under `settings/`.
@@ -96,7 +96,7 @@ class EngineDetailScreenshotTest {
             id = "e3",
             name = "Build box",
             state = EngineState.Parked(ParkReason.INCOMPATIBLE),
-            lastError = "Build box runs an older Roboco (0.8.0). Update Roboco on that device to connect.",
+            lastError = "Build box runs an older Zeron (0.8.0). Update Zeron on that device to connect.",
             host = "10.0.0.7:27655",
             baseUrl = "http://10.0.0.7:27655",
             deviceId = deviceId,
@@ -111,7 +111,7 @@ class EngineDetailScreenshotTest {
     private val noticeUi = engineDetailUi(
         connectedView(
             version = "0.10.0",
-            notice = "MacBook Pro runs Roboco 0.10.0, newer than this app (0.9.2). " +
+            notice = "MacBook Pro runs Zeron 0.10.0, newer than this app (0.9.2). " +
                 "Everything should keep working; if something looks wrong, update the app.",
         ),
         now,
@@ -119,8 +119,8 @@ class EngineDetailScreenshotTest {
 
     private fun shotCards(appearance: Appearance, file: String, ui: EngineDetailUi, copied: Boolean = false) {
         compose.setContent {
-            RobocoTheme(appearance) {
-                Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+            ZeronTheme(appearance) {
+                Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                     EngineDetailCards(
                         ui = ui,
                         copied = copied,
@@ -196,7 +196,7 @@ class EngineDetailScreenshotTest {
         val pushed = stack.entries.last()
         val flow = MutableStateFlow<List<EngineView>?>(listOf(connectedView()))
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(
                     LocalNavStack provides stack,
                     LocalNavEntry provides pushed,

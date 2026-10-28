@@ -1,4 +1,4 @@
-package sh.roboco.android.update
+package sh.zeron.android.update
 
 import android.app.Application
 import android.content.Intent
@@ -24,8 +24,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
-import sh.roboco.android.design.AlertButtonRole
-import sh.roboco.android.design.AlertHostState
+import sh.zeron.android.design.AlertButtonRole
+import sh.zeron.android.design.AlertHostState
 
 /**
  * The update center's behaviour (android-next#04) over fakes: the launch
@@ -56,7 +56,7 @@ class UpdateCenterTest {
             val sha = sha256Hex(APK_BYTES)
             return """
                 {"version": "0.10.0", "date": "2026-10-20T13:37:00Z",
-                 "files": {"roboco-0.10.0-android-arm64-v8a.apk":
+                 "files": {"zeron-0.10.0-android-arm64-v8a.apk":
                    {"sha256": "$sha", "size": ${APK_BYTES.size}}}
                 }
             """.trimIndent()
@@ -159,7 +159,7 @@ class UpdateCenterTest {
         assertNotNull("the prompt presented", presented)
         val alert = presented!!.alert
         assertEquals("Update Available", alert.title)
-        assertEquals("Roboco 0.10.0 is available. You have 0.9.2.\nUpdate Roboco on your computer too.", alert.message)
+        assertEquals("Zeron 0.10.0 is available. You have 0.9.2.\nUpdate Zeron on your computer too.", alert.message)
         assertEquals(2, alert.buttons.size)
         assertEquals("Update", alert.buttons[0].title)
         assertTrue("Update is the preferred button", alert.buttons[0].preferred)
@@ -254,7 +254,7 @@ class UpdateCenterTest {
         center.onForeground(true)
         center.start()
         runCurrent()
-        assertEquals("Roboco 0.10.0 is available. You have 0.9.2.", alerts.current!!.alert.message)
+        assertEquals("Zeron 0.10.0 is available. You have 0.9.2.", alerts.current!!.alert.message)
     }
 
     @Test
@@ -286,7 +286,7 @@ class UpdateCenterTest {
         // The SAME alert (panel B is a morph, not a second alert).
         assertEquals(promptId, alerts.current!!.id)
         val alert = alerts.current!!.alert
-        assertEquals("Updating Roboco", alert.title)
+        assertEquals("Updating Zeron", alert.title)
         assertEquals("Downloading 0.10.0…", alert.message)
         assertNotNull("the progress section is up", alert.progress)
         assertEquals(1, alert.buttons.size)
@@ -296,11 +296,11 @@ class UpdateCenterTest {
         // Verified, signer-checked, handed to the installer; the alert's
         // job ends at the hand-off (it fades out).
         assertTrue(installer.installed.size == 1)
-        assertTrue(apkSource.opened!!.endsWith("roboco-0.10.0-android-arm64-v8a.apk"))
+        assertTrue(apkSource.opened!!.endsWith("zeron-0.10.0-android-arm64-v8a.apk"))
         // ...and the cached APK is what was handed over.
         val staged = installer.installed[0]
         assertTrue(staged.isFile)
-        assertTrue(staged.name == "roboco-0.10.0-android-arm64-v8a.apk")
+        assertTrue(staged.name == "zeron-0.10.0-android-arm64-v8a.apk")
     }
 
     @Test
@@ -327,7 +327,7 @@ class UpdateCenterTest {
 
         center.beginUpdate()
         runCurrent()
-        assertEquals("Updating Roboco", alerts.current!!.alert.title)
+        assertEquals("Updating Zeron", alerts.current!!.alert.title)
         assertTrue(installer.installed.size == 1)
     }
 
@@ -426,9 +426,9 @@ class UpdateCenterTest {
 
         // Panel C: the ask, in place of the install.
         val alert = alerts.current!!.alert
-        assertEquals("Allow Roboco to Install Updates", alert.title)
+        assertEquals("Allow Zeron to Install Updates", alert.title)
         assertEquals(
-            "Android asks once. Turn on \"Allow from this source\" for Roboco, then come back.",
+            "Android asks once. Turn on \"Allow from this source\" for Zeron, then come back.",
             alert.message,
         )
         assertEquals("Open Settings", alert.buttons[0].title)
@@ -489,7 +489,7 @@ class UpdateCenterTest {
                 .putExtra(PackageInstaller.EXTRA_STATUS_MESSAGE, "blocked by policy"),
         )
         assertEquals("Update Failed", alerts.current!!.alert.title)
-        assertEquals("Roboco couldn't be updated. blocked by policy", alerts.current!!.alert.message)
+        assertEquals("Zeron couldn't be updated. blocked by policy", alerts.current!!.alert.message)
     }
 
     // --------------------------------------------------- non-release (F)

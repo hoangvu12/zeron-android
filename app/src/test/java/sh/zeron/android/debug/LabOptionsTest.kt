@@ -1,11 +1,11 @@
-package sh.roboco.android.debug
+package sh.zeron.android.debug
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import sh.roboco.android.design.Appearance
+import sh.zeron.android.design.Appearance
 
 /**
  * The lab's launch-extra parsing (android-ui-parity #135) — the Android

@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import kotlin.coroutines.ContinuationInterceptor
 import kotlinx.coroutines.CompletableDeferred
@@ -19,13 +19,13 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import sh.roboco.android.composer.SendResult
-import sh.roboco.android.design.AlertButtonRole
-import sh.roboco.android.design.Alerts
-import sh.roboco.android.design.RobocoAlert
-import sh.roboco.android.shell.DraftHandoff
-import uniffi.roboco_core.NewSession
-import uniffi.roboco_core.SendRequest
+import sh.zeron.android.composer.SendResult
+import sh.zeron.android.design.AlertButtonRole
+import sh.zeron.android.design.Alerts
+import sh.zeron.android.design.ZeronAlert
+import sh.zeron.android.shell.DraftHandoff
+import uniffi.zeron_core.NewSession
+import uniffi.zeron_core.SendRequest
 
 /**
  * [NewSessionSendHandler] (android-ui-parity #94) — the Send sequence
@@ -38,7 +38,7 @@ import uniffi.roboco_core.SendRequest
  *
  * `runTest` with a [StandardTestDispatcher] as main (the handler's
  * caller) and a second one as IO, both on the test scheduler. Robolectric
- * because the fakes construct `uniffi.roboco_core` records
+ * because the fakes construct `uniffi.zeron_core` records
  * (android-app#13's rule).
  */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -89,12 +89,12 @@ class NewSessionSendHandlerTest {
 
     /** 18's alerts fake: records every shown alert. */
     private class RecordingAlerts : Alerts {
-        val shown = mutableListOf<RobocoAlert>()
-        override fun show(alert: RobocoAlert) {
+        val shown = mutableListOf<ZeronAlert>()
+        override fun show(alert: ZeronAlert) {
             shown += alert
         }
 
-        override fun updateCurrent(alert: RobocoAlert) {}
+        override fun updateCurrent(alert: ZeronAlert) {}
 
         override fun dismissAll() {}
     }

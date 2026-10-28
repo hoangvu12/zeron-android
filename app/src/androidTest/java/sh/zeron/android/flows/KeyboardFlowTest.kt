@@ -1,4 +1,4 @@
-package sh.roboco.android.flows
+package sh.zeron.android.flows
 
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.getBoundsInRoot
@@ -18,7 +18,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import sh.roboco.android.MainActivity
+import sh.zeron.android.MainActivity
 
 /**
  * The keyboard flow on a device (ticket 133, CI-only — no emulator or

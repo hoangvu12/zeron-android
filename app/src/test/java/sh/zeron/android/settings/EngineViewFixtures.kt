@@ -1,8 +1,8 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
-import uniffi.roboco_core.EngineDiagnostics
-import uniffi.roboco_core.EngineState
-import uniffi.roboco_core.EngineView
+import uniffi.zeron_core.EngineDiagnostics
+import uniffi.zeron_core.EngineState
+import uniffi.zeron_core.EngineView
 
 /**
  * The Devices rows' `EngineView` fixture (android-ui-parity #102): the

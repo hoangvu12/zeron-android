@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -48,11 +48,11 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.glass.Menu
-import sh.roboco.android.design.glass.MenuIcon
-import sh.roboco.android.design.glass.MenuItem
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.Menu
+import sh.zeron.android.design.glass.MenuIcon
+import sh.zeron.android.design.glass.MenuItem
 
 /**
  * The context menu's behaviour (android-ui-parity #16) through a real
@@ -118,10 +118,10 @@ class ContextMenuTest {
         liftRef: LiftRef? = null,
         rowPresent: MutableState<Boolean>? = null,
     ) {
-        RobocoTheme(Appearance.Light) {
+        ZeronTheme(Appearance.Light) {
             CompositionLocalProvider(LocalFeedback provides feedback) {
                 ContextMenuHost {
-                    Column(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+                    Column(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                         Spacer(Modifier.height(48.dp))
                         if (rowPresent?.value != false) {
                             val liftState = rememberContextMenuLiftState()
@@ -133,16 +133,16 @@ class ContextMenuTest {
                                 menu = {
                                     Menu(
                                         children = listOf(
-                                            MenuItem("Pin", icon = MenuIcon.Symbol(RobocoIcons.Pin)) { logs += "Pin" },
-                                            MenuItem("Rename…", icon = MenuIcon.Symbol(RobocoIcons.Pencil)) { logs += "Rename…" },
+                                            MenuItem("Pin", icon = MenuIcon.Symbol(ZeronIcons.Pin)) { logs += "Pin" },
+                                            MenuItem("Rename…", icon = MenuIcon.Symbol(ZeronIcons.Pencil)) { logs += "Rename…" },
                                             MenuItem(
                                                 "Archive",
-                                                icon = MenuIcon.Symbol(RobocoIcons.Archivebox),
+                                                icon = MenuIcon.Symbol(ZeronIcons.Archivebox),
                                                 destructive = true,
                                             ) { logs += "Archive" },
                                             MenuItem(
                                                 "Remove row",
-                                                icon = MenuIcon.Symbol(RobocoIcons.Trash),
+                                                icon = MenuIcon.Symbol(ZeronIcons.Trash),
                                                 destructive = true,
                                             ) { rowPresent?.value = false },
                                         ),
@@ -190,7 +190,7 @@ class ContextMenuTest {
             BasicText(
                 text,
                 Modifier.padding(start = 20.dp),
-                style = uiStyle(Face.SansMedium, typeScale.fixed(16.5f), RobocoTheme.palette.text),
+                style = uiStyle(Face.SansMedium, typeScale.fixed(16.5f), ZeronTheme.palette.text),
             )
         }
     }

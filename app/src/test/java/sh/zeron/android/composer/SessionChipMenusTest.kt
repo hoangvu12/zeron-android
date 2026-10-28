@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import java.util.Locale
 import java.util.concurrent.ExecutorService
@@ -16,18 +16,18 @@ import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import sh.roboco.android.design.glass.MenuElement
-import sh.roboco.android.design.glass.MenuIcon
-import sh.roboco.android.design.glass.MenuItem
-import sh.roboco.android.session.ChromeInput
-import sh.roboco.android.session.SessionChrome
-import uniffi.roboco_core.ChatConfig
-import uniffi.roboco_core.ContextUsage
-import uniffi.roboco_core.HarnessInfo
-import uniffi.roboco_core.ModelInfo
-import uniffi.roboco_core.ModelOption
-import uniffi.roboco_core.SandboxLevel
-import uniffi.roboco_core.SessionRow
+import sh.zeron.android.design.glass.MenuElement
+import sh.zeron.android.design.glass.MenuIcon
+import sh.zeron.android.design.glass.MenuItem
+import sh.zeron.android.session.ChromeInput
+import sh.zeron.android.session.SessionChrome
+import uniffi.zeron_core.ChatConfig
+import uniffi.zeron_core.ContextUsage
+import uniffi.zeron_core.HarnessInfo
+import uniffi.zeron_core.ModelInfo
+import uniffi.zeron_core.ModelOption
+import uniffi.zeron_core.SandboxLevel
+import uniffi.zeron_core.SessionRow
 
 /**
  * The chip menus' pure rules, provider and write paths
@@ -291,7 +291,7 @@ class SessionChipMenusTest {
         fill(menus, core, providerSwitch = false)
         menus.menu("model", RecordingPlatform())
         assertEquals(1, shown.last().tabs.size)
-        assertEquals("This computer needs a newer Roboco to switch provider.", shown.last().note)
+        assertEquals("This computer needs a newer Zeron to switch provider.", shown.last().note)
         assertTrue("no host read without the capability", core.methodNames().none { it.startsWith("listHarnesses") })
         Thread.sleep(50)
         assertTrue("the stale pick wrote nothing", core.setConfigs.isEmpty())
@@ -320,7 +320,7 @@ class SessionChipMenusTest {
         assertNull(providerSwitchNote(canSwitch = true, running = false, hostSwitches = true))
         assertEquals("You can switch provider when this turn ends.", providerSwitchNote(false, running = true, hostSwitches = true))
         assertNull("a send on its way, no note", providerSwitchNote(false, running = false, hostSwitches = true))
-        assertEquals("This computer needs a newer Roboco to switch provider.", providerSwitchNote(false, false, false))
+        assertEquals("This computer needs a newer Zeron to switch provider.", providerSwitchNote(false, false, false))
         val base = chatConfig(model = "claude-fable-5", reasoning = "high", modelOptions = mapOf("contextWindow" to "1m"))
         assertEquals(chatConfig(model = "claude-fable-5-1", reasoning = "high", modelOptions = mapOf("contextWindow" to "1m")),
             applyProviderPick(base, "claude-code", "claude-fable-5-1"))
@@ -532,7 +532,7 @@ class SessionChipMenusTest {
 
     @Test
     fun thePrMenuHoldsExactlyTheTwoRowsAndTheyDriveThePlatform() {
-        val url = "https://github.com/hoangvu12/roboco/pull/1234"
+        val url = "https://github.com/hoangvu12/zeron-android/pull/1234"
         val core = FakeChipMenuCore(
             row = chipMenuSessionRow(pullRequest = chipMenuPullRequest(title = "Fixture PR", url = url)),
             config = null,
@@ -549,8 +549,8 @@ class SessionChipMenusTest {
         assertEquals(2, rows.size)
         assertEquals("Open Pull Request", rows[0].title)
         assertEquals("Copy Link", rows[1].title)
-        assertEquals(sh.roboco.android.design.RobocoIcons.Safari, (rows[0].icon as MenuIcon.Symbol).icon)
-        assertEquals(sh.roboco.android.design.RobocoIcons.Link, (rows[1].icon as MenuIcon.Symbol).icon)
+        assertEquals(sh.zeron.android.design.ZeronIcons.Safari, (rows[0].icon as MenuIcon.Symbol).icon)
+        assertEquals(sh.zeron.android.design.ZeronIcons.Link, (rows[1].icon as MenuIcon.Symbol).icon)
         assertEquals("chip-menu-pr-open", rows[0].testTag)
         assertEquals("chip-menu-pr-copy", rows[1].testTag)
 

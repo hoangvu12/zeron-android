@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -16,13 +16,13 @@ import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
-import sh.roboco.android.design.glass.Menu
-import sh.roboco.android.design.glass.MenuElement
-import sh.roboco.android.design.glass.MenuIcon
-import sh.roboco.android.design.glass.MenuItem
-import sh.roboco.android.design.glass.MenuSection
-import uniffi.roboco_core.CoreException
-import uniffi.roboco_core.RepoRef
+import sh.zeron.android.design.glass.Menu
+import sh.zeron.android.design.glass.MenuElement
+import sh.zeron.android.design.glass.MenuIcon
+import sh.zeron.android.design.glass.MenuItem
+import sh.zeron.android.design.glass.MenuSection
+import uniffi.zeron_core.CoreException
+import uniffi.zeron_core.RepoRef
 
 /**
  * The checkout / model / effort menu content (android-ui-parity #114) —
@@ -61,14 +61,14 @@ class CheckoutModelEffortMenusTest {
     /** The ticket's row-1 project. */
     private val project = ProjectOption(
         id = "p1",
-        name = "roboco",
-        path = "/srv/roboco",
+        name = "zeron",
+        path = "/srv/zeron",
         device = "d1",
         deviceName = "Workstation",
         online = true,
         git = true,
         groupKey = "repo:r",
-        groupName = "roboco",
+        groupName = "zeron",
         colorIndex = 2,
     )
 
@@ -306,7 +306,7 @@ class CheckoutModelEffortMenusTest {
         )
         val first = branchDeferredOf(menus.checkout())
         assertSame(first, branchDeferredOf(menus.checkout()))
-        current = current.copy(device = "d2", path = "/other/roboco")
+        current = current.copy(device = "d2", path = "/other/zeron")
         assertNotSame(first, branchDeferredOf(menus.checkout()))
     }
 

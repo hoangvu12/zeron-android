@@ -1,4 +1,4 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -11,8 +11,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * Ticket 34's goldens: the pairing root on the ticket's device
@@ -41,7 +41,7 @@ class PairingRootScreenshotTest {
     private fun shot(file: String, status: PairingRootStatus, appearance: Appearance) {
         compose.mainClock.autoAdvance = false
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 PairingRoot(
                     status = status,
                     onPair = {},

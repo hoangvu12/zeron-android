@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import android.util.Log
 import androidx.compose.foundation.lazy.LazyListScope
@@ -13,27 +13,27 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.flow.StateFlow
-import sh.roboco.android.RobocoApplication
-import sh.roboco.android.design.GroupedAccessory
-import sh.roboco.android.design.GroupedPosition
-import sh.roboco.android.design.GroupedRow
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.groupedSection
-import sh.roboco.android.design.settingsTag
-import sh.roboco.android.pairing.LocalPairPage
-import sh.roboco.android.shell.LocalEnclosingSheet
-import sh.roboco.android.shell.LocalNavEntry
-import sh.roboco.android.shell.LocalNavStack
-import uniffi.roboco_core.EngineState
-import uniffi.roboco_core.EngineView
-import uniffi.roboco_core.ParkReason
+import sh.zeron.android.ZeronApplication
+import sh.zeron.android.design.GroupedAccessory
+import sh.zeron.android.design.GroupedPosition
+import sh.zeron.android.design.GroupedRow
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.groupedSection
+import sh.zeron.android.design.settingsTag
+import sh.zeron.android.pairing.LocalPairPage
+import sh.zeron.android.shell.LocalEnclosingSheet
+import sh.zeron.android.shell.LocalNavEntry
+import sh.zeron.android.shell.LocalNavStack
+import uniffi.zeron_core.EngineState
+import uniffi.zeron_core.EngineView
+import uniffi.zeron_core.ParkReason
 
 /**
  * The Settings "Devices" section (android-ui-parity #102): the port of
  * `MoreViewController.swift:189-190` — one row per **paired engine** (iOS
- * lists cloud execution hosts; Roboco lists `CoreClient.engines()`), then
- * a "Pair an engine" row (Roboco ADD: iOS adds devices through the cloud
- * account, Roboco pairs per engine).
+ * lists cloud execution hosts; Zeron lists `CoreClient.engines()`), then
+ * a "Pair an engine" row (Zeron ADD: iOS adds devices through the cloud
+ * account, Zeron pairs per engine).
  *
  * Every visual — geometry, fonts, colours, the 8 dp dot, the chevron,
  * separators, the pressed highlight — comes from ticket 70's
@@ -43,7 +43,7 @@ import uniffi.roboco_core.ParkReason
  * and the tap routing (push the Engine detail page, open the Pair page).
  *
  * Rows follow the live engine registry flow (ticket 71's
- * [RobocoApplication.coreStartup] `engines`) with **no extra delay**: a
+ * [ZeronApplication.coreStartup] `engines`) with **no extra delay**: a
  * pair, forget, rename or connection change shows up on the next frame,
  * with no debounce and no grace — iOS reloads
  * `apply(s, animatingDifferences: false)` at once
@@ -91,7 +91,7 @@ object DevicesCopy {
 object DevicesRowIds {
     const val Pair = "pair"
 
-    /** `device:<engineId>` — the iOS id prefix over Roboco's engine id. */
+    /** `device:<engineId>` — the iOS id prefix over Zeron's engine id. */
     fun engine(engineId: String) = "device:$engineId"
 }
 
@@ -217,7 +217,7 @@ class DevicesSectionState internal constructor(
 @Composable
 fun rememberDevicesSectionState(
     engines: StateFlow<List<EngineView>?> =
-        (LocalContext.current.applicationContext as RobocoApplication).coreStartup.engines,
+        (LocalContext.current.applicationContext as ZeronApplication).coreStartup.engines,
     onOpenEngine: ((engineId: String) -> Unit)? = null,
     onPair: (() -> Unit)? = null,
 ): DevicesSectionState {
@@ -229,7 +229,7 @@ fun rememberDevicesSectionState(
 
 /**
  * The default engine handler: push [EngineDetailRoute] (animated) on the
- * enclosing [sh.roboco.android.shell.NavStack]. The `stack.top.id ==
+ * enclosing [sh.zeron.android.shell.NavStack]. The `stack.top.id ==
  * entry.id` guard ignores a second tap while a push is already under way
  * (Settings is no longer on top) — the smallest guard that matches
  * UIKit's refusal to push from a controller that is mid-transition.
@@ -293,7 +293,7 @@ fun DevicesRow(
             position = position,
             modifier = modifier,
             subtitle = spec.label,
-            icon = RobocoIcons.Desktopcomputer,
+            icon = ZeronIcons.Desktopcomputer,
             accessories = listOf(GroupedAccessory.Dot(spec.connected), GroupedAccessory.Disclosure),
             testTag = settingsTag(spec.id),
             onClick = onClick,
@@ -303,7 +303,7 @@ fun DevicesRow(
             title = DevicesCopy.PairAnEngine,
             position = position,
             modifier = modifier,
-            icon = RobocoIcons.Plus,
+            icon = ZeronIcons.Plus,
             accessories = listOf(GroupedAccessory.Disclosure),
             testTag = settingsTag(spec.id),
             onClick = onClick,

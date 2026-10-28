@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -11,13 +11,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.GroupedHeader
-import sh.roboco.android.design.GroupedPosition
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.GroupedHeader
+import sh.zeron.android.design.GroupedPosition
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
 
 /**
  * The "Devices rows" page of the debug design gallery (android-ui-parity
@@ -84,7 +84,7 @@ private val devicesGalleryFixture = listOf(
     DevicesRowSpec.Engine(
         "e4",
         "Build box",
-        "Build box needs a newer Roboco app. Update the app to connect.",
+        "Build box needs a newer Zeron app. Update the app to connect.",
         connected = false,
     ),
     DevicesRowSpec.Pair,
@@ -94,7 +94,7 @@ private val devicesGalleryFixture = listOf(
 @Composable
 private fun DevicesRowsCaption(text: String) {
     val typeScale = LocalTypeScale.current
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     BasicText(
         text,
         style = uiStyle(Face.Sans, typeScale.fixed(12f), palette.secondary),
@@ -105,8 +105,8 @@ private fun DevicesRowsCaption(text: String) {
 @Preview(name = "light")
 @Composable
 private fun DevicesRowsGalleryLightPreview() {
-    RobocoTheme(Appearance.Light) {
-        Box(Modifier.background(RobocoTheme.palette.background)) {
+    ZeronTheme(Appearance.Light) {
+        Box(Modifier.background(ZeronTheme.palette.background)) {
             DevicesRowsGallerySection()
         }
     }
@@ -115,8 +115,8 @@ private fun DevicesRowsGalleryLightPreview() {
 @Preview(name = "dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun DevicesRowsGalleryDarkPreview() {
-    RobocoTheme(Appearance.Dark) {
-        Box(Modifier.background(RobocoTheme.palette.background)) {
+    ZeronTheme(Appearance.Dark) {
+        Box(Modifier.background(ZeronTheme.palette.background)) {
             DevicesRowsGallerySection()
         }
     }

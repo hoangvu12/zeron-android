@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.content.Context
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -13,9 +13,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.core.Fonts
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.core.Fonts
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The text-run goldens (recorded by `:app:recordRoborazziDebug`, verified
@@ -59,7 +59,7 @@ class TextRunsScreenshotTest {
 
     private fun shot(appearance: Appearance, dark: Boolean, file: String) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 TextRunsSpecimen(dark = dark)
             }
         }

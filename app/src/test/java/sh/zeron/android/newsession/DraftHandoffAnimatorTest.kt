@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.animate
@@ -47,15 +47,15 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.Motion
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.sheet.SmoothTopRoundedShape
-import sh.roboco.android.shell.DraftHandoff
-import sh.roboco.android.shell.HandoffAnimator
-import sh.roboco.android.shell.RouterHooks
-import sh.roboco.android.shell.SessionRoute
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.Motion
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.sheet.SmoothTopRoundedShape
+import sh.zeron.android.shell.DraftHandoff
+import sh.zeron.android.shell.HandoffAnimator
+import sh.zeron.android.shell.RouterHooks
+import sh.zeron.android.shell.SessionRoute
 
 /**
  * [DraftHandoffAnimator] (android-ui-parity #95) — the handoff's
@@ -213,7 +213,7 @@ class DraftHandoffAnimatorTest {
 
     private fun mount(content: @Composable () -> Unit = { DefaultBackdrop() }) {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 val h = remember { RouterHooks() }
                 hooks = h
                 if (hostShown.value) {
@@ -234,7 +234,7 @@ class DraftHandoffAnimatorTest {
     /** The default underlay: the light theme's page background. */
     @Composable
     private fun DefaultBackdrop() {
-        Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background))
+        Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background))
     }
 
     /** Runs the handoff and returns the animator the host registered. */
@@ -681,7 +681,7 @@ class DraftHandoffAnimatorTest {
         var clicks = 0
         mount(
             content = {
-                Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+                Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                     // Covers the composer picture's start frame
                     // (48..248, 2000..2080 px): 16..276 dp × 640..852 dp.
                     Box(

@@ -1,4 +1,4 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -16,10 +16,10 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.R
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
-import uniffi.roboco_core.PairingTarget
+import sh.zeron.android.R
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
+import uniffi.zeron_core.PairingTarget
 
 /**
  * Ticket 72's goldens: [PairPageContent] (17's header row included) on
@@ -38,7 +38,7 @@ import uniffi.roboco_core.PairingTarget
  * The clock is frozen and exactly one frame is run before each capture,
  * so the spinner sits at step 0 and the goldens stay byte-stable
  * (PairingRootScreenshotTest's convention). Recorded by
- * `./gradlew :app:recordRoborazziDebug --tests sh.roboco.android.pairing.PairPageScreenshotTest`,
+ * `./gradlew :app:recordRoborazziDebug --tests sh.zeron.android.pairing.PairPageScreenshotTest`,
  * verified with `:app:verifyRoborazziDebug`; the files land under
  * `src/test/screenshots/pairing/`. Colour checks (card
  * `#FFFFFF`/`#111113`, footer `secondary`, warning `#A16207`/`#FACC15`,
@@ -172,8 +172,8 @@ private val ShotError = ShotHttp.copy(
 @Composable
 private fun PairPageShotBody(fixture: PairShotFixture, appearance: Appearance) {
     val field = remember { TextFieldState(fixture.text) }
-    RobocoTheme(appearance) {
-        Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+    ZeronTheme(appearance) {
+        Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
             PairPageContent(
                 text = field,
                 target = fixture.target,

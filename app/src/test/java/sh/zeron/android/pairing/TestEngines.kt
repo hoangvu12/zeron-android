@@ -1,7 +1,7 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
-import uniffi.roboco_core.EngineTransport
-import uniffi.roboco_core.PairedEngine
+import uniffi.zeron_core.EngineTransport
+import uniffi.zeron_core.PairedEngine
 import java.util.UUID
 
 /**

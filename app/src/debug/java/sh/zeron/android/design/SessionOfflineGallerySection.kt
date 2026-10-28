@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.content.res.Configuration
 import androidx.compose.foundation.clickable
@@ -17,18 +17,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
-import sh.roboco.android.composer.ChipIcon
-import sh.roboco.android.composer.ComposerBar
-import sh.roboco.android.composer.ComposerChip
-import sh.roboco.android.composer.ComposerController
-import sh.roboco.android.composer.MentionSuggestionsHost
-import sh.roboco.android.composer.rememberComposerMorphState
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.glass.ProvideHazeState
-import sh.roboco.android.session.SessionChrome
-import sh.roboco.android.session.StatusPillRow
+import sh.zeron.android.composer.ChipIcon
+import sh.zeron.android.composer.ComposerBar
+import sh.zeron.android.composer.ComposerChip
+import sh.zeron.android.composer.ComposerController
+import sh.zeron.android.composer.MentionSuggestionsHost
+import sh.zeron.android.composer.rememberComposerMorphState
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.glass.ProvideHazeState
+import sh.zeron.android.session.SessionChrome
+import sh.zeron.android.session.StatusPillRow
 
 /**
  * The "Session offline" page of the debug design gallery
@@ -108,7 +108,7 @@ fun SessionOfflineGallerySection() {
                             // The live toggle (never in the capture): flips
                             // the controller's canWrite so the disabled
                             // look snaps to the live Queue arrow and back.
-                            val palette = RobocoTheme.palette
+                            val palette = ZeronTheme.palette
                             val typeScale = LocalTypeScale.current
                             BasicText(
                                 "canWrite: " + if (controller.canWrite) "on" else "off",
@@ -132,11 +132,11 @@ fun SessionOfflineGallerySection() {
 @Preview(name = "Session offline light")
 @Composable
 private fun SessionOfflineLightPreview() {
-    RobocoTheme(Appearance.Light) { SessionOfflineGallerySection() }
+    ZeronTheme(Appearance.Light) { SessionOfflineGallerySection() }
 }
 
 @Preview(name = "Session offline dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun SessionOfflineDarkPreview() {
-    RobocoTheme(Appearance.Dark) { SessionOfflineGallerySection() }
+    ZeronTheme(Appearance.Dark) { SessionOfflineGallerySection() }
 }

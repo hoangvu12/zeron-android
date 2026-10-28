@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.TestMonotonicFrameClock

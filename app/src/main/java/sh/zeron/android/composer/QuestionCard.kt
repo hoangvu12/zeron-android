@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -43,18 +43,18 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Icon
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoIcon
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.SymbolWeight
-import sh.roboco.android.design.glass.GlassSurface
-import sh.roboco.android.design.glass.ProminentGlassButton
-import sh.roboco.android.design.glass.ProminentGlassButtonDefaults
-import sh.roboco.android.design.rememberSmoothRoundedShape
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Icon
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronIcon
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.SymbolWeight
+import sh.zeron.android.design.glass.GlassSurface
+import sh.zeron.android.design.glass.ProminentGlassButton
+import sh.zeron.android.design.glass.ProminentGlassButtonDefaults
+import sh.zeron.android.design.rememberSmoothRoundedShape
+import sh.zeron.android.design.uiStyle
 
 /**
  * The question panel card (android-ui-parity #90): the port of iOS
@@ -162,7 +162,7 @@ fun QuestionPageContent(
     otherFocusRequester: FocusRequester? = null,
     onOtherFocusChanged: (Boolean) -> Unit = {},
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Column(
         modifier = modifier
@@ -237,15 +237,15 @@ private fun QuestionOptionRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val source = remember { MutableInteractionSource() }
     val pressed by source.collectIsPressedAsState()
     val ink = if (picked) palette.accent else palette.text
-    val icon: RobocoIcon? = when {
-        picked && multiSelect -> RobocoIcons.CheckmarkSquareFill
-        picked -> RobocoIcons.CheckmarkCircleFill
-        index + 1 <= MaxNumberedOption -> RobocoIcon.Number(index + 1)
+    val icon: ZeronIcon? = when {
+        picked && multiSelect -> ZeronIcons.CheckmarkSquareFill
+        picked -> ZeronIcons.CheckmarkCircleFill
+        index + 1 <= MaxNumberedOption -> ZeronIcon.Number(index + 1)
         else -> null // 51st+ option: no icon, no 10 dp gap (:120)
     }
     Row(
@@ -316,7 +316,7 @@ private fun QuestionOtherField(
     onOtherFocusChanged: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     BasicTextField(
         value = model.customText,
@@ -377,12 +377,12 @@ private fun QuestionOtherField(
  * and 13 each side (the 8 pt `textContainerInset` + UITextView's 5 pt
  * line-fragment padding), accent caret, scrolls vertically on its own when
  * the text outgrows the box. No placeholder (iOS has none), no label.
- * Roboco engines never send `multiline` today; the path stays for newer
+ * Zeron engines never send `multiline` today; the path stays for newer
  * engines.
  */
 @Composable
 private fun QuestionEditor(model: QuestionPageModel, actions: QuestionPageActions, modifier: Modifier = Modifier) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     BasicTextField(
         value = model.customText,
@@ -452,7 +452,7 @@ private fun QuestionButtonsRow(model: QuestionPageModel, actions: QuestionPageAc
  */
 @Composable
 private fun QuestionBackButton(onBack: () -> Unit, modifier: Modifier = Modifier) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val source = remember { MutableInteractionSource() }
     val pressed by source.collectIsPressedAsState()

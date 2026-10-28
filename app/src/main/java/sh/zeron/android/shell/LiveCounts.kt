@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -11,9 +11,9 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import uniffi.roboco_core.ChatIndicator
-import uniffi.roboco_core.FrontPage
-import uniffi.roboco_core.WorkspaceSnapshot
+import uniffi.zeron_core.ChatIndicator
+import uniffi.zeron_core.FrontPage
+import uniffi.zeron_core.WorkspaceSnapshot
 
 /**
  * What the "New session" accessory's live summary counts — the port of
@@ -95,8 +95,8 @@ fun liveCountsOf(front: FrontPage): LiveCounts = countLive(
  *  - the derivation runs on `Dispatchers.Default` — a few hundred rows of
  *    iteration are cheap, but never on the main thread.
  *
- * The owner is the shell owner (`RobocoAppContent`'s phone slot), which
- * reads ticket 40's `RobocoApplication.workspaceFeed.snapshot` once and
+ * The owner is the shell owner (`ZeronAppContent`'s phone slot), which
+ * reads ticket 40's `ZeronApplication.workspaceFeed.snapshot` once and
  * collects this flow through [rememberLiveCounts].
  */
 fun liveCountsFlow(workspace: Flow<WorkspaceSnapshot?>): Flow<LiveCounts> =

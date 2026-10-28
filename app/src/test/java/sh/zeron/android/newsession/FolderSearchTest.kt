@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import androidx.compose.ui.graphics.toArgb
 import kotlinx.coroutines.CancellationException
@@ -8,9 +8,9 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import sh.roboco.android.design.Palette
-import uniffi.roboco_core.CoreException
-import uniffi.roboco_core.FolderEntry
+import sh.zeron.android.design.Palette
+import uniffi.zeron_core.CoreException
+import uniffi.zeron_core.FolderEntry
 
 /**
  * The pure helpers of [FolderSearch.kt] (android-ui-parity #112), every
@@ -84,7 +84,7 @@ class FolderSearchTest {
         for (text in listOf("/disk2", "~/x", "~", "\\\\server", "C:\\Users", "  /disk2 ", "a:")) {
             assertTrue("expected path-shaped: \"$text\"", manualPathQuery(text))
         }
-        for (text in listOf("roboco", ".hidden", "", "   ", "ab:/x", "x")) {
+        for (text in listOf("zeron", ".hidden", "", "   ", "ab:/x", "x")) {
             assertFalse("expected plain: \"$text\"", manualPathQuery(text))
         }
     }
@@ -258,7 +258,7 @@ class FolderSearchTest {
 
     @Test
     fun coreErrorTextMapsClosedToTheDisconnectCopy() {
-        assertEquals("Roboco is disconnected.", coreErrorText(CoreException.Closed(), "fallback"))
+        assertEquals("Zeron is disconnected.", coreErrorText(CoreException.Closed(), "fallback"))
     }
 
     @Test

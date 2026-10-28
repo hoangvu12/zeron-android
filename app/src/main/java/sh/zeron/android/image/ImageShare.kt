@@ -1,4 +1,4 @@
-package sh.roboco.android.image
+package sh.zeron.android.image
 
 import android.content.ActivityNotFoundException
 import android.content.ClipData
@@ -25,7 +25,7 @@ import kotlinx.coroutines.withContext
  *
  * The compression and the prune run on [Dispatchers.IO]; the chooser
  * starts on Main. `ActivityNotFoundException` is swallowed (no handler,
- * no viewer change), as the ticket's Roboco adaptation notes.
+ * no viewer change), as the ticket's Zeron adaptation notes.
  */
 object ImageShare {
 

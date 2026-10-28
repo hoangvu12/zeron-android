@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
@@ -16,8 +16,8 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.testTag
-import sh.roboco.android.design.FadingHorizontalScroll
-import sh.roboco.android.design.glass.rememberGlassMenuState
+import sh.zeron.android.design.FadingHorizontalScroll
+import sh.zeron.android.design.glass.rememberGlassMenuState
 
 /**
  * The composer toolbar's chip row (android-ui-parity #59), the port of

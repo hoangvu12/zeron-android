@@ -1,9 +1,9 @@
-package sh.roboco.android.update
+package sh.zeron.android.update
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import sh.roboco.android.RobocoApplication
+import sh.zeron.android.ZeronApplication
 
 /**
  * The install-status receiver (android-next#04): the one entry point the
@@ -16,12 +16,12 @@ import sh.roboco.android.RobocoApplication
 class ApkInstallReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-        val app = context.applicationContext as? RobocoApplication ?: return
+        val app = context.applicationContext as? ZeronApplication ?: return
         app.updates.onInstallStatus(intent)
     }
 
     companion object {
         /** The action of the status PendingIntent's explicit intent. */
-        const val ACTION_STATUS = "sh.roboco.android.update.INSTALL_STATUS"
+        const val ACTION_STATUS = "sh.zeron.android.update.INSTALL_STATUS"
     }
 }

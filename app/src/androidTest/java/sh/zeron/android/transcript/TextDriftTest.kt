@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -7,12 +7,12 @@ import kotlin.math.abs
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
-import sh.roboco.android.core.FontChain
-import uniffi.roboco_core.ColorRole
-import uniffi.roboco_core.DebugEntry
-import uniffi.roboco_core.FaceRole
-import uniffi.roboco_core.TranscriptView
-import uniffi.roboco_core.layoutFixtureMarkdown
+import sh.zeron.android.core.FontChain
+import uniffi.zeron_core.ColorRole
+import uniffi.zeron_core.DebugEntry
+import uniffi.zeron_core.FaceRole
+import uniffi.zeron_core.TranscriptView
+import uniffi.zeron_core.layoutFixtureMarkdown
 
 /**
  * Run-width drift against the real platform paint (ticket 115, the hard

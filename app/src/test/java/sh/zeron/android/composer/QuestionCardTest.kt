@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -60,11 +60,11 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.gallery.QuestionCardFixtures
-import sh.roboco.android.design.glass.Glass
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.gallery.QuestionCardFixtures
+import sh.zeron.android.design.glass.Glass
 
 /**
  * [QuestionCard] — android-ui-parity #90's acceptance criteria (Robolectric
@@ -172,7 +172,7 @@ class QuestionCardTest {
                 val p = placement ?: return@setContent
                 val background = if (p.appearance == Appearance.Dark) Palette.Dark.background else Palette.Light.background
                 key(p.generation) {
-                    RobocoTheme(p.appearance) {
+                    ZeronTheme(p.appearance) {
                         Box(Modifier.fillMaxSize().background(background)) {
                             QuestionCard(p.model, p.actions, Modifier, p.glassVisible, p.animateGlass)
                             p.extra()
@@ -500,7 +500,7 @@ class QuestionCardTest {
         val requester = FocusRequester()
         val events = mutableListOf<Boolean>()
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.fillMaxSize().background(Palette.Light.background)) {
                     QuestionPageContent(
                         QuestionCardFixtures.A,
@@ -558,7 +558,7 @@ class QuestionCardTest {
         val counts = Counts()
         var visible by mutableStateOf(true)
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.fillMaxSize().background(Palette.Light.background)) {
                     QuestionCard(
                         QuestionCardFixtures.A,

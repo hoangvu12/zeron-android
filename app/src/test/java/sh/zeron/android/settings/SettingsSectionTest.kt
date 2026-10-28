@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import androidx.compose.ui.unit.dp
 import org.junit.Assert.assertEquals

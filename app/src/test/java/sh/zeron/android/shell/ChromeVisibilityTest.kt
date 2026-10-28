@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.activity.BackEventCompat
 import androidx.activity.ComponentActivity
@@ -50,18 +50,18 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.BottomChromeInsets
-import sh.roboco.android.design.BottomChromeTopState
-import sh.roboco.android.design.LocalBottomChrome
-import sh.roboco.android.design.LocalBottomChromeTop
-import sh.roboco.android.design.LocalToaster
-import sh.roboco.android.design.Motion
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.ToastHost
-import sh.roboco.android.design.Toaster
-import sh.roboco.android.design.glass.LocalHazeState
+import sh.zeron.android.design.BottomChromeInsets
+import sh.zeron.android.design.BottomChromeTopState
+import sh.zeron.android.design.LocalBottomChrome
+import sh.zeron.android.design.LocalBottomChromeTop
+import sh.zeron.android.design.LocalToaster
+import sh.zeron.android.design.Motion
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.ToastHost
+import sh.zeron.android.design.Toaster
+import sh.zeron.android.design.glass.LocalHazeState
 
 /**
  * Ticket 30's shell behaviour (Robolectric, 402 × 874 dp at xxhdpi):
@@ -111,7 +111,7 @@ class ChromeVisibilityTest {
 
     private fun setShellContent(state: MainTabState, probe: Probe, chromeTop: BottomChromeTopState? = null) {
         compose.setContent {
-            RobocoTheme {
+            ZeronTheme {
                 // A frozen glyph clock: the accessory's "2 working" spinner
                 // otherwise keeps a withFrameNanos loop running forever and
                 // Compose never idles (AppNotIdleException).
@@ -148,7 +148,7 @@ class ChromeVisibilityTest {
         chromeTop: BottomChromeTopState? = null,
     ) {
         compose.setContent {
-            RobocoTheme {
+            ZeronTheme {
                 ProvideGlyphClock(frozenAtNanos = 0L) { // see setShellContent
                     val holder = chromeTop
                     if (holder != null) {
@@ -195,7 +195,7 @@ class ChromeVisibilityTest {
             LocalTabBarMinimize provides minimize,
             LocalBottomChrome provides insets,
         ) {
-            Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+            Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                 Box(Modifier.fillMaxSize().hazeSource(haze)) {
                     val tab = tabs.selected
                     key(tab) {
@@ -556,7 +556,7 @@ class ChromeVisibilityTest {
         val probe = Probe()
         compose.mainClock.autoAdvance = false
         compose.setContent {
-            RobocoTheme {
+            ZeronTheme {
                 ToastHost {
                     ChromeFixture(tabs, probe, bottomInset = 22.dp)
                     probe.toaster = LocalToaster.current
@@ -620,7 +620,7 @@ class ChromeVisibilityTest {
         // place, keyed so the second one starts from fresh state.
         var fixture by mutableStateOf(frozen to probe)
         compose.setContent {
-            RobocoTheme {
+            ZeronTheme {
                 ProvideGlyphClock(frozenAtNanos = 0L) { // see setShellContent
                     val (tabs, p) = fixture
                     key(tabs) { ChromeFixture(tabs, p, 22.dp) }

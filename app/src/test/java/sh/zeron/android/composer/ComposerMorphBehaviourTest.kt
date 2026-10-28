@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -39,9 +39,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The capsule ⇄ card morph's behaviour (android-ui-parity #56): focus and
@@ -172,7 +172,7 @@ class ComposerMorphBehaviourTest {
         always = initialAlways
         field = TextFieldState(text)
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Fixture(
                     alwaysCard = always,
                     hasImages = { imageCount > 0 },

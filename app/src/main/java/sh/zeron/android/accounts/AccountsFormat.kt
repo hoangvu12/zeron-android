@@ -1,14 +1,14 @@
-package sh.roboco.android.accounts
+package sh.zeron.android.accounts
 
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.roundToInt
-import uniffi.roboco_core.AgentAccount
-import uniffi.roboco_core.AgentAccountsSnapshot
-import uniffi.roboco_core.AgentUsageWindow
-import uniffi.roboco_core.CoreException
+import uniffi.zeron_core.AgentAccount
+import uniffi.zeron_core.AgentAccountsSnapshot
+import uniffi.zeron_core.AgentUsageWindow
+import uniffi.zeron_core.CoreException
 
 /**
  * How agent accounts read everywhere they appear (the composer's usage
@@ -233,7 +233,7 @@ fun markSwitched(snapshot: AgentAccountsSnapshot, account: AgentAccount): AgentA
  */
 fun describeAccountsError(error: Throwable, deviceName: String): String = when (error) {
     is CoreException.HostUnavailable -> "$deviceName is offline. Accounts show up when it's back."
-    is CoreException.Unsupported -> "$deviceName needs a newer Roboco to show accounts here."
+    is CoreException.Unsupported -> "$deviceName needs a newer Zeron to show accounts here."
     else -> "Couldn't load accounts from $deviceName."
 }
 

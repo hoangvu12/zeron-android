@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.Executors
@@ -25,10 +25,10 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Test
-import sh.roboco.android.design.Toaster
-import uniffi.roboco_core.ClientEvent
-import uniffi.roboco_core.CoreException
-import uniffi.roboco_core.SectionView
+import sh.zeron.android.design.Toaster
+import uniffi.zeron_core.ClientEvent
+import uniffi.zeron_core.CoreException
+import uniffi.zeron_core.SectionView
 
 /**
  * `CoreRowActions` (android-ui-parity #42): every row of the ticket's

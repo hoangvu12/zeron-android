@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import android.content.res.Configuration
 import androidx.compose.foundation.clickable
@@ -43,22 +43,22 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.FadingText
-import sh.roboco.android.design.GlassStage
-import sh.roboco.android.design.Icon
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.SymbolWeight
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.glass.GlassSurface
-import sh.roboco.android.design.glass.ProvideHazeState
-import sh.roboco.android.design.glass.rememberGlassMenuState
-import sh.roboco.android.session.SessionChrome
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.FadingText
+import sh.zeron.android.design.GlassStage
+import sh.zeron.android.design.Icon
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.SymbolWeight
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.glass.GlassSurface
+import sh.zeron.android.design.glass.ProvideHazeState
+import sh.zeron.android.design.glass.rememberGlassMenuState
+import sh.zeron.android.session.SessionChrome
 
 /**
  * The queue panel's tokens (android-ui-parity #82) — the geometry of
@@ -114,7 +114,7 @@ object QueuePanelTokens {
     /** UIKit `.plain` dims its foreground while pressed (the ticket 14 convention). */
     const val PressedAlpha = 0.5f
 
-    /** Roboco read-only look (79): both button glyphs at 0.4. */
+    /** Zeron read-only look (79): both button glyphs at 0.4. */
     const val DisabledAlpha = 0.4f
 }
 
@@ -237,7 +237,7 @@ private fun QueueRow(
     onAction: (id: String, action: QueueAction) -> Unit,
     thumbnail: (@Composable (ref: String) -> Unit)?,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val menuState = rememberGlassMenuState()
     var anchor by remember { mutableStateOf(Rect.Zero) }
@@ -257,7 +257,7 @@ private fun QueueRow(
             // 12 pt medium clock in a 14.4 dp box, drawn unclipped inside
             // the 13 dp slot: the glyph's centre sits at x = 20.5.
             Icon(
-                RobocoIcons.Clock,
+                ZeronIcons.Clock,
                 tint = palette.tertiary,
                 sizePt = 12f,
                 weight = SymbolWeight.Medium,
@@ -291,7 +291,7 @@ private fun QueueRow(
             onClick = { onAction(item.id, QueueAction.SendNow) },
         ) {
             Icon(
-                RobocoIcons.ArrowUpCircleFill,
+                ZeronIcons.ArrowUpCircleFill,
                 tint = palette.text,
                 sizePt = 20f,
                 weight = SymbolWeight.Regular,
@@ -315,7 +315,7 @@ private fun QueueRow(
             modifier = Modifier.onGloballyPositioned { anchor = it.boundsInWindow() },
         ) {
             Icon(
-                RobocoIcons.Ellipsis,
+                ZeronIcons.Ellipsis,
                 tint = palette.secondary,
                 sizePt = 14f,
                 weight = SymbolWeight.Semibold,
@@ -332,7 +332,7 @@ private fun QueueRow(
  */
 @Composable
 private fun QueueFooter(text: String) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Box(
         Modifier
@@ -452,7 +452,7 @@ internal object QueuePanelFixtures {
 /** The preview harness: F5 over the striped backdrop in a 378 dp slot. */
 @Composable
 private fun QueuePanelPreviewBody(appearance: Appearance) {
-    RobocoTheme(appearance) {
+    ZeronTheme(appearance) {
         val hazeState = rememberHazeState()
         GlassMenuHost(hazeState = hazeState) {
             GlassStage(

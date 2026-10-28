@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.content.ClipboardManager
 import android.content.Context
@@ -35,19 +35,19 @@ import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import org.robolectric.shadows.ShadowChoreographer
-import sh.roboco.android.core.TextEngine
-import sh.roboco.android.core.UniffiSandbox
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.ContextMenuHost
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.ToastHost
-import uniffi.roboco_core.DebugEntry
-import uniffi.roboco_core.LayoutFrame
-import uniffi.roboco_core.LinkHit
-import uniffi.roboco_core.RowKind
-import uniffi.roboco_core.RowPlacement
-import uniffi.roboco_core.WidgetKind
+import sh.zeron.android.core.TextEngine
+import sh.zeron.android.core.UniffiSandbox
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ContextMenuHost
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.ToastHost
+import uniffi.zeron_core.DebugEntry
+import uniffi.zeron_core.LayoutFrame
+import uniffi.zeron_core.LinkHit
+import uniffi.zeron_core.RowKind
+import uniffi.zeron_core.RowPlacement
+import uniffi.zeron_core.WidgetKind
 
 /**
  * Ticket 129's semantics tree against the real core (the same JNA setup
@@ -139,7 +139,7 @@ class TranscriptAccessibilityTest {
     /** The ticket's host, with the offset pinned to the top when [pinTop]. */
     private fun host(state: TranscriptState, pinTop: Boolean = true) {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 // Frozen glyph clock: the fixture's Working row subscribes the
                 // trailer glyph to the theme's endless withFrameNanos loop, and
                 // an auto-advancing test clock never sees Compose idle.
@@ -496,7 +496,7 @@ class TranscriptAccessibilityTest {
             runCustomAction(codeRow, "Copy")
             compose.waitForIdle()
             assertEquals(codeBlock, clipText())
-            assertEquals("Roboco", clipboard().primaryClip!!.description.label.toString())
+            assertEquals("Zeron", clipboard().primaryClip!!.description.label.toString())
 
             runCustomAction(codeRow, "Copy Message")
             compose.waitForIdle()

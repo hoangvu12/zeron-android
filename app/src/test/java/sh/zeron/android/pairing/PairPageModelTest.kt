@@ -1,4 +1,4 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import android.content.ClipboardManager
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
@@ -23,18 +23,18 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
-import sh.roboco.android.R
-import sh.roboco.android.shell.SheetHostState
-import sh.roboco.android.shell.SheetStyle
-import uniffi.roboco_core.EngineRoomRef
-import uniffi.roboco_core.PairedEngine
-import uniffi.roboco_core.PairException
-import uniffi.roboco_core.PairingTarget
-import uniffi.roboco_core.RoomException
-import uniffi.roboco_core.RoomInviteTarget
-import uniffi.roboco_core.RoomJoinResult
-import uniffi.roboco_core.RoomMemberRecord
-import uniffi.roboco_core.RoomRecord
+import sh.zeron.android.R
+import sh.zeron.android.shell.SheetHostState
+import sh.zeron.android.shell.SheetStyle
+import uniffi.zeron_core.EngineRoomRef
+import uniffi.zeron_core.PairedEngine
+import uniffi.zeron_core.PairException
+import uniffi.zeron_core.PairingTarget
+import uniffi.zeron_core.RoomException
+import uniffi.zeron_core.RoomInviteTarget
+import uniffi.zeron_core.RoomJoinResult
+import uniffi.zeron_core.RoomMemberRecord
+import uniffi.zeron_core.RoomRecord
 
 /**
  * The Pair page's state machine and error mapping (android-ui-parity
@@ -133,7 +133,7 @@ class PairPageModelTest {
             res(R.string.pair_error_unreachable),
         )
         assertEquals(
-            "That Tailcat invite has expired. Run roboco engine tailcat invite again.",
+            "That Tailcat invite has expired. Run zeron engine tailcat invite again.",
             res(R.string.pair_error_tailcat_expired),
         )
         assertEquals(
@@ -183,7 +183,7 @@ class PairPageModelTest {
         )
         assertEquals(
             PairMessage.Res(R.string.pair_error_tailcat_unavailable),
-            describePairError(PairException.TailcatUnavailable("libroboco_tailcat.so is missing")),
+            describePairError(PairException.TailcatUnavailable("libzeron_tailcat.so is missing")),
         )
     }
 
@@ -542,7 +542,7 @@ class PairPageModelTest {
             ops += "onPaired"
             paired += Unit
         }
-        model.text.setTextAndPlaceCursorAtEnd("roboco-room:eyJ2IjoxLCJuYW1lIjoiSG9tZSBmbGVldCJ9")
+        model.text.setTextAndPlaceCursorAtEnd("zeron-room:eyJ2IjoxLCJuYW1lIjoiSG9tZSBmbGVldCJ9")
 
         model.submit()
         advanceUntilIdle()
@@ -589,7 +589,7 @@ class PairPageModelTest {
             paired += Unit
             ops += "onPaired"
         }
-        model.text.setTextAndPlaceCursorAtEnd("roboco-room:eyJ2IjoxfQ")
+        model.text.setTextAndPlaceCursorAtEnd("zeron-room:eyJ2IjoxfQ")
 
         model.submit()
         advanceUntilIdle()
@@ -604,7 +604,7 @@ class PairPageModelTest {
         val harness = harness()
         val model = model(harness)
         backend.joinImpl = { _ -> throw RoomException.Refused() }
-        model.text.setTextAndPlaceCursorAtEnd("roboco-room:eyJ2IjoxfQ")
+        model.text.setTextAndPlaceCursorAtEnd("zeron-room:eyJ2IjoxfQ")
 
         model.submit()
         advanceUntilIdle()
@@ -619,7 +619,7 @@ class PairPageModelTest {
         val harness = harness()
         val model = model(harness)
         backend.joinImpl = { _ -> throw RoomException.Throttled() }
-        model.text.setTextAndPlaceCursorAtEnd("roboco-room:eyJ2IjoxfQ")
+        model.text.setTextAndPlaceCursorAtEnd("zeron-room:eyJ2IjoxfQ")
 
         model.submit()
         advanceUntilIdle()
@@ -631,14 +631,14 @@ class PairPageModelTest {
     fun aRoomJoinParseFailureShowsTheReasonVerbatim() = runTest {
         val harness = harness()
         val model = model(harness)
-        backend.joinImpl = { _ -> throw RoomException.InvalidInvite("a room invite starts with roboco-room:") }
-        model.text.setTextAndPlaceCursorAtEnd("roboco-room:!!!")
+        backend.joinImpl = { _ -> throw RoomException.InvalidInvite("a room invite starts with zeron-room:") }
+        model.text.setTextAndPlaceCursorAtEnd("zeron-room:!!!")
 
         model.submit()
         advanceUntilIdle()
 
         assertEquals(
-            PairPhase.Error(PairMessage.Verbatim("a room invite starts with roboco-room:")),
+            PairPhase.Error(PairMessage.Verbatim("a room invite starts with zeron-room:")),
             model.phase,
         )
     }
@@ -648,7 +648,7 @@ class PairPageModelTest {
         val harness = harness()
         val model = model(harness)
         harness.sink.upsertRoomError = IOException("disk full")
-        model.text.setTextAndPlaceCursorAtEnd("roboco-room:eyJ2IjoxfQ")
+        model.text.setTextAndPlaceCursorAtEnd("zeron-room:eyJ2IjoxfQ")
 
         model.submit()
         advanceUntilIdle()
@@ -660,7 +660,7 @@ class PairPageModelTest {
         assertEquals(listOf("room-engine-1"), harness.sink.removes)
         assertTrue(harness.sink.upserts.isEmpty())
         assertEquals(PairPhase.Error(PairMessage.Res(R.string.pair_error_store)), model.phase)
-        assertEquals("roboco-room:eyJ2IjoxfQ", model.text.text.toString())
+        assertEquals("zeron-room:eyJ2IjoxfQ", model.text.text.toString())
     }
 
     @Test
@@ -668,7 +668,7 @@ class PairPageModelTest {
         val harness = harness()
         val model = model(harness)
         harness.sink.upsertError = IOException("disk full")
-        model.text.setTextAndPlaceCursorAtEnd("roboco-room:eyJ2IjoxfQ")
+        model.text.setTextAndPlaceCursorAtEnd("zeron-room:eyJ2IjoxfQ")
 
         model.submit()
         advanceUntilIdle()

@@ -1,11 +1,11 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
-import sh.roboco.android.composer.ChipIcon
-import sh.roboco.android.composer.ChipTint
-import sh.roboco.android.composer.ComposerChip
-import uniffi.roboco_core.ComposerState
-import uniffi.roboco_core.PullRequestState
-import uniffi.roboco_core.SessionRow
+import sh.zeron.android.composer.ChipIcon
+import sh.zeron.android.composer.ChipTint
+import sh.zeron.android.composer.ComposerChip
+import uniffi.zeron_core.ComposerState
+import uniffi.zeron_core.PullRequestState
+import uniffi.zeron_core.SessionRow
 import java.util.Locale
 
 /**
@@ -171,7 +171,7 @@ fun sessionChips(
  * what drives recomposition).
  */
 class SessionChipsFiller(
-    private val reasoningLabel: (String) -> String = { uniffi.roboco_core.reasoningLabel(it) },
+    private val reasoningLabel: (String) -> String = { uniffi.zeron_core.reasoningLabel(it) },
     /** Read per refresh, so a locale change regroups the context label on the next chrome. */
     private val locale: () -> Locale = { Locale.getDefault() },
 ) : ChromeFiller {

@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -6,9 +6,9 @@ import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import sh.roboco.android.RobocoApplication
-import uniffi.roboco_core.CoreClient
-import uniffi.roboco_core.FileMatch
+import sh.zeron.android.ZeronApplication
+import uniffi.zeron_core.CoreClient
+import uniffi.zeron_core.FileMatch
 
 /**
  * The New Session page's `@file` search seam (android-ui-parity #93) — the
@@ -17,7 +17,7 @@ import uniffi.roboco_core.FileMatch
  * is the picked project (its `spaceId`), and errors read as no matches.
  *
  * [rememberCoreFileSearch] resolves the client per call over
- * [RobocoApplication.clientOrNull] (ticket 71's accessor, the same seam 92's
+ * [ZeronApplication.clientOrNull] (ticket 71's accessor, the same seam 92's
  * catalog uses), so a pairing that completes after the page opened still
  * works. Tests pass a fake.
  */
@@ -54,6 +54,6 @@ fun CoreFileSearch(client: () -> CoreClient?): NewSessionFileSearch =
 /** The page's default search: the process's client, resolved per call. */
 @Composable
 fun rememberCoreFileSearch(): NewSessionFileSearch {
-    val app = LocalContext.current.applicationContext as RobocoApplication
+    val app = LocalContext.current.applicationContext as ZeronApplication
     return remember { CoreFileSearch { app.clientOrNull() } }
 }

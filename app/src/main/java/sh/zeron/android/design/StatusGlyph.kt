@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
@@ -240,7 +240,7 @@ fun StatusGlyph(kind: StatusGlyphKind, modifier: Modifier = Modifier, scale: Flo
     val reduce = LocalReduceMotion.current
     val dark = LocalIsDark.current
     val animated = !reduce && (kind == StatusGlyphKind.Spinner || kind == StatusGlyphKind.Trailer)
-    // Previews and tests outside RobocoTheme's clock drive a fallback of
+    // Previews and tests outside ZeronTheme's clock drive a fallback of
     // their own. It stays in phase with the app clock anyway: the frame
     // time base is absolute.
     val clock = LocalGlyphClock.current ?: remember { GlyphClock(null) }.also { GlyphClockDriver(it) }
@@ -344,12 +344,12 @@ fun StatusGlyph(kind: StatusGlyphKind, modifier: Modifier = Modifier, scale: Flo
  * glyph sits in a 4-dp-padded cell so the unclipped overflow (0.75 dp
  * spinner, 1 dp trailer) stays visible, and the row itself is 16-dp padded
  * — Roborazzi crops captures to the node bounds. No text: the goldens must
- * not depend on fonts. Requires [RobocoTheme] (the tones and [LocalIsDark]
+ * not depend on fonts. Requires [ZeronTheme] (the tones and [LocalIsDark]
  * have no default) and a frozen [ProvideGlyphClock].
  */
 @Composable
 internal fun StatusGlyphSampleRow() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     Row(
         Modifier.padding(16.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -373,7 +373,7 @@ private fun SampleCell(glyph: @Composable () -> Unit) {
 @Preview(name = "StatusGlyph light")
 @Composable
 private fun StatusGlyphLightPreview() {
-    RobocoTheme(Appearance.Light) {
+    ZeronTheme(Appearance.Light) {
         // Frozen at 0 ns: the preview never starts a frame loop, and it
         // overrides the theme's live clock (nested inside it).
         ProvideGlyphClock(frozenAtNanos = 0L) { StatusGlyphSampleRow() }
@@ -383,7 +383,7 @@ private fun StatusGlyphLightPreview() {
 @Preview(name = "StatusGlyph dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun StatusGlyphDarkPreview() {
-    RobocoTheme(Appearance.Dark) {
+    ZeronTheme(Appearance.Dark) {
         ProvideGlyphClock(frozenAtNanos = 0L) { StatusGlyphSampleRow() }
     }
 }

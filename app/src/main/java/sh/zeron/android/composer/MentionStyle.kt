@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -29,12 +29,12 @@ import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.LocalFonts
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
-import uniffi.roboco_core.FileMatch
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.LocalFonts
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
+import uniffi.zeron_core.FileMatch
 
 /**
  * Every occurrence of every token in [text], as merged, non-overlapping
@@ -147,7 +147,7 @@ class MentionVisualTransformation(
 @Composable
 @ReadOnlyComposable
 fun mentionSpanStyle(): SpanStyle = SpanStyle(
-    color = RobocoTheme.palette.accent,
+    color = ZeronTheme.palette.accent,
     fontFamily = LocalFonts.current.family(Face.SansMedium),
     fontWeight = FontWeight.Medium,
 )
@@ -193,7 +193,7 @@ fun MentionStyleDemo(showEncode: Boolean = false) {
     val text = "Look at @mod.rs, @lib.rs and @src/lib.rs next "
     var value by remember { mutableStateOf(TextFieldValue(text, TextRange(text.length))) }
     val ts = LocalTypeScale.current
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val query = MentionIndex.activeQuery(value)
     Column(
         Modifier
@@ -226,7 +226,7 @@ fun MentionStyleDemo(showEncode: Boolean = false) {
 /**
  * The gallery page for ticket 53's registration line in
  * `debug/design/Gallery.kt`: the fixture with the encode readout on —
- * typing `@` shows the live `activeQuery`, and the encoded `roboco-file:`
+ * typing `@` shows the live `activeQuery`, and the encoded `zeron-file:`
  * links are visible. Runs in the app process, where the core is loaded.
  */
 @Composable
@@ -237,11 +237,11 @@ fun MentionsGallerySection() {
 @Preview(name = "Mentions light")
 @Composable
 private fun MentionStyleLightPreview() {
-    RobocoTheme { MentionStyleDemo() }
+    ZeronTheme { MentionStyleDemo() }
 }
 
 @Preview(name = "Mentions dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun MentionStyleDarkPreview() {
-    RobocoTheme { MentionStyleDemo() }
+    ZeronTheme { MentionStyleDemo() }
 }

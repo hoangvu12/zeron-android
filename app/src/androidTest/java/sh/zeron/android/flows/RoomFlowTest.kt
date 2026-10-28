@@ -1,4 +1,4 @@
-package sh.roboco.android.flows
+package sh.zeron.android.flows
 
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -14,8 +14,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import sh.roboco.android.MainActivity
-import sh.roboco.android.RobocoApplication
+import sh.zeron.android.MainActivity
+import sh.zeron.android.ZeronApplication
 
 /**
  * The rooms flow (ADR 0011, ticket 04): the phone's scan-once. A room is
@@ -44,9 +44,9 @@ class RoomFlowTest {
     val compose: AndroidComposeTestRule<FixtureRule, MainActivity> =
         AndroidComposeTestRule(launch) { rule -> rule.mountedActivity() }
 
-    private val app: RobocoApplication
+    private val app: ZeronApplication
         get() = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext
-            as RobocoApplication
+            as ZeronApplication
 
     /** The room both tests join: main + slow as Direct loopback members. */
     private fun mintRoom(): String {

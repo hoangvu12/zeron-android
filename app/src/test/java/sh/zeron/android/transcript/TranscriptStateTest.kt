@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.runtime.snapshotFlow
@@ -24,15 +24,15 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import sh.roboco.android.transcript.widgets.ToolRailMemory
-import uniffi.roboco_core.FaceRole
-import uniffi.roboco_core.LayoutFrame
-import uniffi.roboco_core.LayoutListener
-import uniffi.roboco_core.NoHandle
-import uniffi.roboco_core.RowPlacement
-import uniffi.roboco_core.StyleDesc
-import uniffi.roboco_core.TextSystem
-import uniffi.roboco_core.TranscriptView
+import sh.zeron.android.transcript.widgets.ToolRailMemory
+import uniffi.zeron_core.FaceRole
+import uniffi.zeron_core.LayoutFrame
+import uniffi.zeron_core.LayoutListener
+import uniffi.zeron_core.NoHandle
+import uniffi.zeron_core.RowPlacement
+import uniffi.zeron_core.StyleDesc
+import uniffi.zeron_core.TextSystem
+import uniffi.zeron_core.TranscriptView
 
 /**
  * A frame with a fixed revision and style list. Counts [styles] calls so

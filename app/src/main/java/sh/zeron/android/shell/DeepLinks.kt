@@ -1,11 +1,11 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import java.io.ByteArrayOutputStream
 import java.util.Base64
 import java.util.Locale
 
 /**
- * One inbound link (android-ui-parity #36), parsed from a `roboco://` URI
+ * One inbound link (android-ui-parity #36), parsed from a `zeron://` URI
  * or the `route` launch extra (iOS's `-route`). The four navigation kinds
  * map one-to-one onto [AppRouter] calls; [Pair] goes to the pairing
  * handler ticket 139 registers, never to the router.
@@ -14,11 +14,11 @@ import java.util.Locale
  */
 sealed interface DeepLink {
 
-    /** `roboco://chat/<id>` / `route chat:<id>` — `router.openSession`. */
+    /** `zeron://chat/<id>` / `route chat:<id>` — `router.openSession`. */
     data class OpenChat(val chatId: String) : DeepLink
 
     /**
-     * `roboco://new[?prompt=…]` / `route new` — `router.presentNewSession`.
+     * `zeron://new[?prompt=…]` / `route new` — `router.presentNewSession`.
      * The prompt only **pre-fills** the composer (iOS
      * `NewSessionViewController.swift:78`: `composer.text = prompt ?? …`);
      * it is never sent automatically.
@@ -26,17 +26,17 @@ sealed interface DeepLink {
     data class NewSession(val prompt: String?) : DeepLink
 
     /**
-     * `roboco://settings` / `route more` — `router.showSettings`. `more`
+     * `zeron://settings` / `route more` — `router.showSettings`. `more`
      * is the Settings tab's iOS identifier (`MainTabController.swift:27`);
      * pr609's `settings` alias is dropped.
      */
     data object Settings : DeepLink
 
-    /** `roboco://search` / `route search` — `router.showSearch`. */
+    /** `zeron://search` / `route search` — `router.showSearch`. */
     data object Search : DeepLink
 
     /**
-     * The whole trimmed `roboco://pair…` string; ticket 139 decodes and
+     * The whole trimmed `zeron://pair…` string; ticket 139 decodes and
      * validates the `#url=` fragment. **Never log it** — the fragment
      * carries the pairing token — so the data class's generated
      * `toString()` is overridden (139): any generic log line that
@@ -48,7 +48,7 @@ sealed interface DeepLink {
 }
 
 /**
- * The `roboco://` deep-link grammar and the `route` extra grammar
+ * The `zeron://` deep-link grammar and the `route` extra grammar
  * (android-ui-parity #36), hand-written over the raw
  * `Intent.getDataString()` — never `android.net.Uri` (Robolectric-bound,
  * and its `getQueryParameter` `+` handling has varied by API level).
@@ -61,12 +61,12 @@ sealed interface DeepLink {
  */
 object DeepLinks {
 
-    const val SCHEME = "roboco"
+    const val SCHEME = "zeron"
 
     /**
      * `Intent.dataString` → link, or null when it isn't one we route:
-     * `roboco://voice`, `roboco://more`, the desktop's
-     * `roboco://open/chat/<id>?workspace=…`, other schemes, a missing
+     * `zeron://voice`, `zeron://more`, the desktop's
+     * `zeron://open/chat/<id>?workspace=…`, other schemes, a missing
      * `://`, and every malformed chat path. A null result is ignored,
      * never queued.
      */

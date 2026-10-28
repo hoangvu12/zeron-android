@@ -1,13 +1,13 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import uniffi.roboco_core.ColorRole
-import uniffi.roboco_core.RowDisplay
-import uniffi.roboco_core.Scroller
-import uniffi.roboco_core.Widget
-import uniffi.roboco_core.WidgetKind
+import uniffi.zeron_core.ColorRole
+import uniffi.zeron_core.RowDisplay
+import uniffi.zeron_core.Scroller
+import uniffi.zeron_core.Widget
+import uniffi.zeron_core.WidgetKind
 
 /**
  * The "not on a control" hit test (android-ui-parity #128), plain JVM —

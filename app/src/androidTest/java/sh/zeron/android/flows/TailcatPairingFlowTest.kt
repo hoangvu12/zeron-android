@@ -1,4 +1,4 @@
-package sh.roboco.android.flows
+package sh.zeron.android.flows
 
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -11,7 +11,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import sh.roboco.android.MainActivity
+import sh.zeron.android.MainActivity
 
 /**
  * The Tailcat smoke (android-next#02): the whole pairing path for an
@@ -19,7 +19,7 @@ import sh.roboco.android.MainActivity
  * fixture publishes a `main`-profile engine through the desktop adapter
  * against a local DERP relay; `flow-tests.sh` adb-reverses the relay and
  * the control port but never the engine port. So the seeded sessions can
- * only arrive through `libroboco_tailcat.so` loaded in this process: its
+ * only arrive through `libzeron_tailcat.so` loaded in this process: its
  * `dlopen` under ART, the getifaddrs interface getter, the WireGuard
  * tunnel over DERP, and the loopback WebSocket the core dials through it.
  *

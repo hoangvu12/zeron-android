@@ -1,9 +1,9 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import sh.roboco.android.design.Motion
+import sh.zeron.android.design.Motion
 
 /**
  * [SearchMorphGeometry] — android-ui-parity #29's acceptance criteria:

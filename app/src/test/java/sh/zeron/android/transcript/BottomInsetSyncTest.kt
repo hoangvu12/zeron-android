@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,11 +30,11 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.session.BottomStackModel
-import sh.roboco.android.session.SessionBottomStack
-import sh.roboco.android.session.rememberBottomStackState
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.session.BottomStackModel
+import sh.zeron.android.session.SessionBottomStack
+import sh.zeron.android.session.rememberBottomStackState
 
 /**
  * The inset sync of ticket 133 — [Modifier.transcriptBottomInset] over
@@ -84,7 +84,7 @@ class BottomInsetSyncTest {
         viewport.setTopInset(68f)
         viewport.onFrameApplied(CONTENT, first = true)
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 val stackState = rememberBottomStackState()
                 // Written in composition, read in measure: a change
                 // invalidates the measure and lands in the same frame.

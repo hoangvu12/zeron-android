@@ -1,8 +1,8 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
-import uniffi.roboco_core.ChatIndicator
-import uniffi.roboco_core.ProjectRef
-import uniffi.roboco_core.SessionRow
+import uniffi.zeron_core.ChatIndicator
+import uniffi.zeron_core.ProjectRef
+import uniffi.zeron_core.SessionRow
 
 /**
  * The Search screen's fixtures (android-ui-parity #49) — the ticket's
@@ -13,7 +13,7 @@ import uniffi.roboco_core.SessionRow
  * Main source set on purpose (the ticket's Files table): the previews
  * (main), the Robolectric / Roborazzi tests (`testDebugUnitTest`) and the
  * debug gallery all reach it. Everything is a plain FFI record — no JNA —
- * built like ticket 37's `SessionListFixtures` rows: project "roboco"
+ * built like ticket 37's `SessionListFixtures` rows: project "zeron"
  * (colour index 6), harness `claude-code`, branch `main`, no PR, not
  * unseen / pinned / send-failed; only the status and time label differ.
  */
@@ -78,7 +78,7 @@ internal object SearchFixtures {
         title = title,
         hasTitle = true,
         preview = null,
-        project = ProjectRef(id = "prj-roboco", name = "roboco", colorIndex = 6u),
+        project = ProjectRef(id = "prj-zeron", name = "zeron", colorIndex = 6u),
         deviceId = "device-eng1",
         deviceName = null,
         deviceOnline = true,

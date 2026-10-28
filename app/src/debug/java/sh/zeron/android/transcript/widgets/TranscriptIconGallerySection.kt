@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -14,14 +14,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalIsDark
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.TranscriptPalette
-import sh.roboco.android.design.uiStyle
-import uniffi.roboco_core.ColorRole
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalIsDark
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.TranscriptPalette
+import sh.zeron.android.design.uiStyle
+import uniffi.zeron_core.ColorRole
 
 /**
  * The "Transcript icons" section of the debug design gallery (ticket 124):
@@ -65,7 +65,7 @@ fun TranscriptIconGallerySection() {
 @Composable
 fun TranscriptIconFixture() {
     Column(
-        Modifier.background(RobocoTheme.palette.background),
+        Modifier.background(ZeronTheme.palette.background),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         IconCaption("Tool glyphs — 18 dp (tool lines), 13.5 dp (agent cards)")
@@ -147,7 +147,7 @@ private fun IconCellView(cell: IconCell) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         BasicText(
             cell.label,
-            style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(11f), RobocoTheme.palette.secondary),
+            style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(11f), ZeronTheme.palette.secondary),
         )
         Box(Modifier.size(cell.sizeDp.dp)) {
             TranscriptIcon(
@@ -177,7 +177,7 @@ private fun TaskCell(name: String, color: ColorRole) {
         }
         BasicText(
             "Task",
-            style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(16.5f), RobocoTheme.palette.text),
+            style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(16.5f), ZeronTheme.palette.text),
         )
     }
 }
@@ -187,7 +187,7 @@ private fun TaskCell(name: String, color: ColorRole) {
 private fun IconCaption(text: String) {
     BasicText(
         text,
-        style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(11f), RobocoTheme.palette.secondary),
+        style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(11f), ZeronTheme.palette.secondary),
     )
 }
 
@@ -198,11 +198,11 @@ private fun IconCaption(text: String) {
 @Preview(name = "light")
 @Composable
 private fun TranscriptIconLightPreview() {
-    RobocoTheme(Appearance.Light) { TranscriptIconFixture() }
+    ZeronTheme(Appearance.Light) { TranscriptIconFixture() }
 }
 
 @Preview(name = "dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun TranscriptIconDarkPreview() {
-    RobocoTheme(Appearance.Dark) { TranscriptIconFixture() }
+    ZeronTheme(Appearance.Dark) { TranscriptIconFixture() }
 }

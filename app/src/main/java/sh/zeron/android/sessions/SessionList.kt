@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FiniteAnimationSpec
@@ -63,20 +63,20 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.ReorderableLazyListState
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Icon
-import sh.roboco.android.design.LocalReduceMotion
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.Motion
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.SymbolWeight
-import sh.roboco.android.design.rememberSmoothRoundedShape
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.shell.LocalNavEntryOrNull
-import sh.roboco.android.shell.LocalNavStack
-import sh.roboco.android.shell.NavEntryEffect
-import uniffi.roboco_core.SessionRow as CoreSessionRow
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Icon
+import sh.zeron.android.design.LocalReduceMotion
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.Motion
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.SymbolWeight
+import sh.zeron.android.design.rememberSmoothRoundedShape
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.shell.LocalNavEntryOrNull
+import sh.zeron.android.shell.LocalNavStack
+import sh.zeron.android.shell.NavEntryEffect
+import uniffi.zeron_core.SessionRow as CoreSessionRow
 
 /**
  * The deselect fade — the stand-in for UIKit's unstated
@@ -280,7 +280,7 @@ class SessionListReorder(
  * `SessionRow`, 39's [SectionHeaderRow], this file's [FolderRow]), never
  * by this list and never with a ripple.
  *
- * **Recipe for screens inside [sh.roboco.android.shell.LargeTitleScaffold]**
+ * **Recipe for screens inside [sh.zeron.android.shell.LargeTitleScaffold]**
  * (tickets 40/45/46 — they do not use [SessionList]): call
  * `leadingItems(); sessionListItems(model, …)` inside the scaffold's
  * `content`, pass the scaffold's `listState` as the scroll state, and put
@@ -671,7 +671,7 @@ private fun LazyItemScope.itemAnimation(animate: Boolean): Modifier {
  */
 @Composable
 private fun PlainSectionHeader(title: String, modifier: Modifier = Modifier) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
     Box(
         modifier
@@ -737,7 +737,7 @@ private object FolderRowTokens {
  */
 @Composable
 private fun FolderRow(vm: FolderRowVM, highlight: () -> Float, modifier: Modifier = Modifier) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
     val nameStyle = uiStyle(Face.SansMedium, ts.scaled(17f), palette.secondary)
     val countStyle = uiStyle(Face.Sans, ts.scaled(17f), palette.tertiary)
@@ -748,7 +748,7 @@ private fun FolderRow(vm: FolderRowVM, highlight: () -> Float, modifier: Modifie
             withStyle(countStyle.toSpanStyle()) { append("  ${vm.count}") }
         }
     }
-    val icon = RobocoIcons.forSfName(vm.symbol)
+    val icon = ZeronIcons.forSfName(vm.symbol)
     val fillShape = rememberSmoothRoundedShape(FolderRowTokens.FillCornerRadius)
     // Draw-phase read: a press or fade redraws, never recomposes.
     val hl by rememberUpdatedState(highlight)
@@ -767,7 +767,7 @@ private fun FolderRow(vm: FolderRowVM, highlight: () -> Float, modifier: Modifie
                 softWrap = false,
                 overflow = TextOverflow.Ellipsis,
             )
-            Icon(RobocoIcons.ChevronRight, palette.tertiary, FolderRowTokens.ChevronPt, SymbolWeight.Semibold)
+            Icon(ZeronIcons.ChevronRight, palette.tertiary, FolderRowTokens.ChevronPt, SymbolWeight.Semibold)
         },
         modifier = modifier
             .fillMaxWidth()
@@ -915,7 +915,7 @@ fun SessionList(
     refreshWrapper: @Composable (list: @Composable () -> Unit) -> Unit = { it() },
     backdrop: @Composable BoxScope.() -> Unit = {},
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val openSessionState = rememberUpdatedState(onOpenSession)
     val openFolderState = rememberUpdatedState(onOpenFolder)
     val toggleSectionState = rememberUpdatedState(onToggleSection)

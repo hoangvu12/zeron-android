@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -40,21 +40,21 @@ import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.roundToInt
-import sh.roboco.android.composer.composerInput
-import sh.roboco.android.composer.composerMorphHost
-import sh.roboco.android.composer.rememberComposerMorphState
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.CapsuleShape
-import sh.roboco.android.design.LocalGalleryCapture
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.GlassSurface
-import sh.roboco.android.design.glass.ProvideHazeState
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.session.BottomStackModel
-import sh.roboco.android.session.BottomStackState
-import sh.roboco.android.session.SessionBottomStack
-import sh.roboco.android.session.rememberBottomStackState
+import sh.zeron.android.composer.composerInput
+import sh.zeron.android.composer.composerMorphHost
+import sh.zeron.android.composer.rememberComposerMorphState
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.CapsuleShape
+import sh.zeron.android.design.LocalGalleryCapture
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.GlassSurface
+import sh.zeron.android.design.glass.ProvideHazeState
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.session.BottomStackModel
+import sh.zeron.android.session.BottomStackState
+import sh.zeron.android.session.SessionBottomStack
+import sh.zeron.android.session.rememberBottomStackState
 
 /**
  * The "Keyboard inset sync" page of the debug design gallery
@@ -85,7 +85,7 @@ import sh.roboco.android.session.rememberBottomStackState
  */
 @Composable
 fun KeyboardInsetGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val viewport = remember { TranscriptViewport() }
     val stackState = rememberBottomStackState()
     var runway by remember { mutableStateOf(false) }
@@ -138,7 +138,7 @@ fun KeyboardInsetGallerySection() {
  */
 @Composable
 private fun FakeTranscript(viewport: TranscriptViewport, covered: Dp, runway: Boolean) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val density = LocalDensity.current.density
     // A remembered holder (like 65's state.hostCoordinates): both the
     // onPlaced write and the observer's read go through the SAME object,
@@ -221,7 +221,7 @@ private fun FakeRows(
  */
 @Composable
 private fun ComposerStandIn() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val morph = rememberComposerMorphState(alwaysCard = false, hasImages = { false })
     val field = remember { TextFieldState("") }
@@ -280,7 +280,7 @@ private fun runwayHeight(viewport: TranscriptViewport): Float = max(
  */
 @Composable
 private fun DriftReadout(viewport: TranscriptViewport, stackState: BottomStackState) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val density = LocalDensity.current
     val ime = WindowInsets.ime
@@ -338,7 +338,7 @@ private fun DriftReadout(viewport: TranscriptViewport, stackState: BottomStackSt
 /** One toggle row, label left, current value in accent right. */
 @Composable
 private fun KeyboardToggleRow(label: String, value: String, onClick: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Row(
         Modifier

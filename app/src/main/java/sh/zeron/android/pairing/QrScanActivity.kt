@@ -1,4 +1,4 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import android.Manifest
 import android.app.Activity
@@ -42,19 +42,19 @@ import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import sh.roboco.android.R
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.Feedback
-import sh.roboco.android.design.Haptic
-import sh.roboco.android.design.LocalFeedback
-import sh.roboco.android.design.ProvideFeedback
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.shell.applyRobocoEdgeToEdge
+import sh.zeron.android.R
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.Feedback
+import sh.zeron.android.design.Haptic
+import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.design.ProvideFeedback
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.shell.applyZeronEdgeToEdge
 
 /**
  * The QR scanner (android-ui-parity #138): a full-screen, always-dark
  * camera stage that decodes a pairing link (or a
- * `roboco://pair#url=…` wrapper), fires the Confirm haptic and hands the
+ * `zeron://pair#url=…` wrapper), fires the Confirm haptic and hands the
  * plain URL back to the Pair page's launcher, which fills the field and
  * submits at once (72's `acceptScanned`).
  *
@@ -98,7 +98,7 @@ class QrScanActivity : ComponentActivity() {
 
     /** The Rust parse seam (run on [executor]); injectable for tests. */
     internal var isPairingUrl: (String) -> Boolean = { s ->
-        runCatching { uniffi.roboco_core.parsePairingUrl(s) }.isSuccess
+        runCatching { uniffi.zeron_core.parsePairingUrl(s) }.isSuccess
     }
 
     private val executor = Executors.newSingleThreadExecutor { r -> Thread(r, "qr-analysis") }
@@ -121,7 +121,7 @@ class QrScanActivity : ComponentActivity() {
         // Before super, like MainActivity (35's helper): transparent bars
         // with light icons — the stage is always dark — and no contrast
         // scrims.
-        applyRobocoEdgeToEdge(isDark = true)
+        applyZeronEdgeToEdge(isDark = true)
         super.onCreate(savedInstanceState)
         reduceMotion = intent.getBooleanExtra(EXTRA_REDUCE_MOTION, false)
         asked = savedInstanceState?.getBoolean(KEY_ASKED) ?: false
@@ -156,7 +156,7 @@ class QrScanActivity : ComponentActivity() {
             setBackgroundColor(android.graphics.Color.BLACK)
         }
         setContent {
-            RobocoTheme(Appearance.Dark) {
+            ZeronTheme(Appearance.Dark) {
                 ProvideFeedback {
                     val current = LocalFeedback.current
                     SideEffect { this@QrScanActivity.feedback = current }
@@ -355,10 +355,10 @@ class QrScanActivity : ComponentActivity() {
 
     companion object {
         /** The decoded pairing URL, `exported = false` activity only. */
-        const val EXTRA_URL = "sh.roboco.android.pairing.URL"
+        const val EXTRA_URL = "sh.zeron.android.pairing.URL"
 
-        /** The launcher's reduced-motion flag (04's [sh.roboco.android.design.LocalReduceMotion]). */
-        const val EXTRA_REDUCE_MOTION = "sh.roboco.android.pairing.REDUCE_MOTION"
+        /** The launcher's reduced-motion flag (04's [sh.zeron.android.design.LocalReduceMotion]). */
+        const val EXTRA_REDUCE_MOTION = "sh.zeron.android.pairing.REDUCE_MOTION"
 
         private const val KEY_ASKED = "asked"
         private const val TAG = "QrScanner"

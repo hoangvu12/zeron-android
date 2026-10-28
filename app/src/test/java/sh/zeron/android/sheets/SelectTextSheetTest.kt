@@ -1,4 +1,4 @@
-package sh.roboco.android.sheets
+package sh.zeron.android.sheets
 
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Box
@@ -54,11 +54,11 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.sheet.GlassSheetState
-import sh.roboco.android.design.sheet.SheetDetent
-import sh.roboco.android.design.sheet.rememberGlassSheetState
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.sheet.GlassSheetState
+import sh.zeron.android.design.sheet.SheetDetent
+import sh.zeron.android.design.sheet.rememberGlassSheetState
 
 /**
  * [SelectTextSheet] and [TextSheetOverlay]'s behaviour (ticket 127) —
@@ -101,7 +101,7 @@ class SelectTextSheetTest {
     /**
      * Composes the sheet directly (own state, so the tests can read the
      * detents and the offset). [density] overrides `LocalDensity` — the
-     * theme builds its [sh.roboco.android.design.TypeScale] from it, so a
+     * theme builds its [sh.zeron.android.design.TypeScale] from it, so a
      * linear font scale shows up exactly.
      */
     private fun composeSheet(
@@ -150,7 +150,7 @@ class SelectTextSheetTest {
         val onDismiss = config.onDismiss
         run {
             val content: @Composable () -> Unit = {
-                RobocoTheme(Appearance.Light) {
+                ZeronTheme(Appearance.Light) {
                     Box(Modifier.fillMaxSize()) {
                         val d = LocalDensity.current
                         navBottomDp = with(d) {
@@ -368,7 +368,7 @@ class SelectTextSheetTest {
         var controllerRef: TextSheetController? = null
         var composerFocused = false
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 val controller = rememberTextSheetController()
                 controllerRef = controller
                 Box(Modifier.fillMaxSize()) {
@@ -409,7 +409,7 @@ class SelectTextSheetTest {
         compose.mainClock.autoAdvance = false
         var controllerRef: TextSheetController? = null
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 val controller = rememberTextSheetController()
                 controllerRef = controller
                 Box(Modifier.fillMaxSize()) { TextSheetOverlay(controller) }
@@ -445,13 +445,13 @@ class SelectTextSheetTest {
 
     private companion object {
         val Message =
-            "Roboco connects directly to the engines you pair with it.\n\n" +
+            "Zeron connects directly to the engines you pair with it.\n\n" +
                 "The transcript is paint-only, so the text in the list itself cannot be " +
                 "selected. Select Text shows the whole message here."
 
         /** 40 mono lines — taller than the medium content slot, so it scrolls. */
         val ToolPayload: String = buildString {
-            for (i in 1..39) appendLine("line $i: $ roboco engine start --port ${8674 + i}")
+            for (i in 1..39) appendLine("line $i: $ zeron engine start --port ${8674 + i}")
             append("k".repeat(160))
         }
 

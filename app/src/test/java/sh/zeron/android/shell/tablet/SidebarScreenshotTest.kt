@@ -1,4 +1,4 @@
-package sh.roboco.android.shell.tablet
+package sh.zeron.android.shell.tablet
 
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
@@ -21,19 +21,19 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.ContextMenuHost
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.sessions.LocalSidebarFixtures
-import sh.roboco.android.sessions.SearchFixtures
-import sh.roboco.android.sessions.SessionSearch
-import sh.roboco.android.sessions.SidebarFixtures
-import sh.roboco.android.shell.AppRouter
-import uniffi.roboco_core.SearchField
-import uniffi.roboco_core.SearchHit
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ContextMenuHost
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.sessions.LocalSidebarFixtures
+import sh.zeron.android.sessions.SearchFixtures
+import sh.zeron.android.sessions.SessionSearch
+import sh.zeron.android.sessions.SidebarFixtures
+import sh.zeron.android.shell.AppRouter
+import uniffi.zeron_core.SearchField
+import uniffi.zeron_core.SearchHit
 
 /**
  * The tablet sidebar's goldens (android-ui-parity #105) — the whole
@@ -59,7 +59,7 @@ import uniffi.roboco_core.SearchHit
  *   byte-stable).
  *
  * Recorded by `./gradlew :app:recordRoborazziDebug --tests
- * sh.roboco.android.shell.tablet.SidebarScreenshotTest`, verified by
+ * sh.zeron.android.shell.tablet.SidebarScreenshotTest`, verified by
  * `:app:verifyRoborazziDebug`, then reviewed side by side with an iPad in
  * landscape (the title, the field under it, the pinning, the placeholder,
  * the `rowActive` fill — the ticket's ★ values get one retune there).
@@ -112,7 +112,7 @@ class SidebarScreenshotTest {
         before: () -> Unit = {},
     ) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 ProvideGlyphClock(frozenAtNanos = 0L) {
                     ContextMenuHost {
                         GlassMenuHost(hazeState = rememberHazeState()) {

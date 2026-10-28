@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -40,23 +40,23 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.ContextMenuHost
-import sh.roboco.android.design.Cue
-import sh.roboco.android.design.Feedback
-import sh.roboco.android.design.Haptic
-import sh.roboco.android.design.LocalFeedback
-import sh.roboco.android.design.ProvideReduceMotion
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
-import uniffi.roboco_core.SessionRow
-import uniffi.roboco_core.SectionView
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ContextMenuHost
+import sh.zeron.android.design.Cue
+import sh.zeron.android.design.Feedback
+import sh.zeron.android.design.Haptic
+import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.design.ProvideReduceMotion
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
+import uniffi.zeron_core.SessionRow
+import uniffi.zeron_core.SectionView
 
 /**
  * The swipe behaviour (android-ui-parity #44) on 41's real list: rows
  * hosted through [SessionList] with the [rememberSessionRowActions]
  * wrapper, `Modifier.sessionRowActions` on the host and
- * [sh.roboco.android.design.ContextMenuHost] around everything (16 embeds
+ * [sh.zeron.android.design.ContextMenuHost] around everything (16 embeds
  * 15's panel). 393 × 852 dp at xxhdpi (1 dp = 3 px, row width 1179 px),
  * the same geometry ticket 41's tests pin.
  *
@@ -162,7 +162,7 @@ class SwipeRowTest {
                 LocalDensity provides Density(3f, 1f),
                 LocalLayoutDirection provides if (rtl) LayoutDirection.Rtl else LayoutDirection.Ltr,
             ) {
-                RobocoTheme(Appearance.Light) {
+                ZeronTheme(Appearance.Light) {
                     ContextMenuHost {
                         ProvideReduceMotion {
                             CompositionLocalProvider(LocalFeedback provides feedback) {

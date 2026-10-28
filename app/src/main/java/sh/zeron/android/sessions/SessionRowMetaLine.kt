@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,14 +23,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.math.max
 import kotlin.math.roundToInt
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.FadingText
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.PrBadge
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.rememberBranchIconPainter
-import sh.roboco.android.design.rememberProjectTilePainter
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.FadingText
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.PrBadge
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.rememberBranchIconPainter
+import sh.zeron.android.design.rememberProjectTilePainter
+import sh.zeron.android.design.uiStyle
 
 /**
  * The glyph's top inside its `AboveBaseline` placeholder, measured up from
@@ -91,7 +91,7 @@ private const val BRANCH = "meta.branch"
 @Composable
 fun SessionRowMetaLine(vm: SessionRowVM, modifier: Modifier = Modifier) {
     val ts = LocalTypeScale.current
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val m = remember(ts.factor) { SessionRowMetaMetrics.of(ts.factor) }
     // Ticket 12's painters: the tile is light/dark-aware and NOT tintable
     // (`.alwaysOriginal`); only the branch icon is a tinted template.

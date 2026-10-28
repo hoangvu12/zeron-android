@@ -1,4 +1,4 @@
-package sh.roboco.android.accounts
+package sh.zeron.android.accounts
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -10,17 +10,17 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import sh.roboco.android.design.ActionSheetModel
-import sh.roboco.android.design.ActionSheetPresenter
-import sh.roboco.android.design.ActionSheetStyle
-import sh.roboco.android.design.AlertButtonRole
-import sh.roboco.android.design.Alerts
-import sh.roboco.android.design.RobocoAlert
-import sh.roboco.android.design.Toaster
-import uniffi.roboco_core.AgentAccount
-import uniffi.roboco_core.AgentAccountsSnapshot
-import uniffi.roboco_core.AgentUsageWindow
-import uniffi.roboco_core.CoreException
+import sh.zeron.android.design.ActionSheetModel
+import sh.zeron.android.design.ActionSheetPresenter
+import sh.zeron.android.design.ActionSheetStyle
+import sh.zeron.android.design.AlertButtonRole
+import sh.zeron.android.design.Alerts
+import sh.zeron.android.design.ZeronAlert
+import sh.zeron.android.design.Toaster
+import uniffi.zeron_core.AgentAccount
+import uniffi.zeron_core.AgentAccountsSnapshot
+import uniffi.zeron_core.AgentUsageWindow
+import uniffi.zeron_core.CoreException
 
 /**
  * The Accounts & Usage page's behaviour (android-next#05) on the plain
@@ -89,12 +89,12 @@ class AgentAccountsModelTest {
     }
 
     private class FakeAlerts : Alerts {
-        val shown = mutableListOf<RobocoAlert>()
-        override fun show(alert: RobocoAlert) {
+        val shown = mutableListOf<ZeronAlert>()
+        override fun show(alert: ZeronAlert) {
             shown += alert
         }
 
-        override fun updateCurrent(alert: RobocoAlert) {}
+        override fun updateCurrent(alert: ZeronAlert) {}
 
         override fun dismissAll() {}
     }
@@ -201,7 +201,7 @@ class AgentAccountsModelTest {
         val load = model.load
         assertTrue("unsupported is terminal: $load", load is AccountsLoad.Unsupported)
         assertEquals(
-            "Studio needs a newer Roboco to show accounts here.",
+            "Studio needs a newer Zeron to show accounts here.",
             (load as AccountsLoad.Unsupported).message,
         )
         val callsBefore = core.calls.size
@@ -304,7 +304,7 @@ class AgentAccountsModelTest {
         assertEquals(1, alerts.shown.size)
         assertEquals("Can't switch to this login", alerts.shown[0].title)
         assertEquals(
-            "Roboco couldn't read its credentials on Studio. Sign in to it again there.",
+            "Zeron couldn't read its credentials on Studio. Sign in to it again there.",
             alerts.shown[0].message,
         )
         assertEquals(AlertButtonRole.Cancel, alerts.shown[0].buttons[0].role)

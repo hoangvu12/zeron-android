@@ -1,4 +1,4 @@
-package sh.roboco.android
+package sh.zeron.android
 
 import android.content.Intent
 import android.content.pm.ApplicationInfo
@@ -16,32 +16,32 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import sh.roboco.android.core.WallpaperStore
-import sh.roboco.android.composer.LocalDrafts
-import sh.roboco.android.design.GalleryLaunch
-import sh.roboco.android.notify.NotificationPermission
-import sh.roboco.android.notify.NotificationPrefs
-import sh.roboco.android.pairing.PairingLinks
-import sh.roboco.android.pairing.ffiAcceptsPairingUrl
-import sh.roboco.android.shell.AppRootState
-import sh.roboco.android.shell.DeepLink
-import sh.roboco.android.shell.DeepLinks
-import sh.roboco.android.shell.LaunchOptions
-import sh.roboco.android.shell.LocalShortcutSink
-import sh.roboco.android.shell.RootInput
-import sh.roboco.android.shell.RobocoAppContent
-import sh.roboco.android.shell.ShellShortcuts
-import sh.roboco.android.shell.ShortcutSink
-import sh.roboco.android.shell.WallpaperTarget
-import sh.roboco.android.shell.applyRobocoEdgeToEdge
-import sh.roboco.android.shell.holdFirstFrame
-import sh.roboco.android.shell.toExtrasMap
+import sh.zeron.android.core.WallpaperStore
+import sh.zeron.android.composer.LocalDrafts
+import sh.zeron.android.design.GalleryLaunch
+import sh.zeron.android.notify.NotificationPermission
+import sh.zeron.android.notify.NotificationPrefs
+import sh.zeron.android.pairing.PairingLinks
+import sh.zeron.android.pairing.ffiAcceptsPairingUrl
+import sh.zeron.android.shell.AppRootState
+import sh.zeron.android.shell.DeepLink
+import sh.zeron.android.shell.DeepLinks
+import sh.zeron.android.shell.LaunchOptions
+import sh.zeron.android.shell.LocalShortcutSink
+import sh.zeron.android.shell.RootInput
+import sh.zeron.android.shell.ZeronAppContent
+import sh.zeron.android.shell.ShellShortcuts
+import sh.zeron.android.shell.ShortcutSink
+import sh.zeron.android.shell.WallpaperTarget
+import sh.zeron.android.shell.applyZeronEdgeToEdge
+import sh.zeron.android.shell.holdFirstFrame
+import sh.zeron.android.shell.toExtrasMap
 
 /**
  * The single activity (android-ui-parity #35): edge-to-edge with
- * transparent system bars, then the app root — [RobocoAppContent], which
- * mounts `RobocoTheme`, the font gate, the overlay hosts and
- * [sh.roboco.android.shell.AppRoot] (pairing / phone tab shell / tablet
+ * transparent system bars, then the app root — [ZeronAppContent], which
+ * mounts `ZeronTheme`, the font gate, the overlay hosts and
+ * [sh.zeron.android.shell.AppRoot] (pairing / phone tab shell / tablet
  * split, with the 350 ms cross-fade).
  *
  * The platform splash is held ([holdFirstFrame]) until the root input
@@ -49,7 +49,7 @@ import sh.roboco.android.shell.toExtrasMap
  * paired user never sees the pairing root flash.
  *
  * Lifecycle observers (ProcessLifecycleOwner hooks) and the network
- * callback are registered in `RobocoApplication`, never here — #609
+ * callback are registered in `ZeronApplication`, never here — #609
  * added one observer per `onCreate` (review bug 2) and #621 redialed on
  * every rotation. **No `onStart`/`onStop` overrides** call the core.
  *
@@ -62,8 +62,8 @@ import sh.roboco.android.shell.toExtrasMap
  * Launch extras and deep links (android-ui-parity #36): `launchMode` is
  * `singleTask`, so every warm link arrives through [onNewIntent] with no
  * second activity instance. The `route` extra and any
- * `roboco://…` VIEW data go to the app-wide
- * [sh.roboco.android.shell.DeepLinkHub] (never straight to a router —
+ * `zeron://…` VIEW data go to the app-wide
+ * [sh.zeron.android.shell.DeepLinkHub] (never straight to a router —
  * the shell is not composed yet at cold start), which dispatches after
  * the shell's first frame and drops links while the pairing root is on
  * screen. The four debug extras (`wallpaper`, `wallpaper-effect`,
@@ -96,10 +96,10 @@ class MainActivity : ComponentActivity() {
         // transparent bars, icons following the effective night mode.
         // SystemBarsEffect re-applies it whenever the appearance changes
         // (ticket 96). The contrast scrims are off for good — see
-        // applyRobocoEdgeToEdge.
-        applyRobocoEdgeToEdge(isDark = resources.configuration.isNightModeActive)
+        // applyZeronEdgeToEdge.
+        applyZeronEdgeToEdge(isDark = resources.configuration.isNightModeActive)
         super.onCreate(savedInstanceState)
-        val app = application as RobocoApplication
+        val app = application as ZeronApplication
         // Ticket 36: the launch extras, on every `onCreate` (after a
         // recreation the restored intent still carries them). The debug
         // gate is the manifest's FLAG_DEBUGGABLE — the installed APK's
@@ -129,7 +129,7 @@ class MainActivity : ComponentActivity() {
                 // the in-memory default.
                 LocalDrafts provides app.drafts,
             ) {
-                RobocoAppContent(app, rootState)
+                ZeronAppContent(app, rootState)
             }
         }
         // The splash stays until the engine list is known (max 2000 ms).
@@ -175,7 +175,7 @@ class MainActivity : ComponentActivity() {
         )
         // The run watch's notifications-on gate: an Allow here must reach it
         // now, not on the next foreground edge.
-        (application as RobocoApplication).refreshNotificationsOn()
+        (application as ZeronApplication).refreshNotificationsOn()
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -189,13 +189,13 @@ class MainActivity : ComponentActivity() {
 
     /**
      * Ticket 36: a VIEW deep link and/or the `route` extra go to the
-     * app-wide [sh.roboco.android.shell.DeepLinkHub] — never straight to
+     * app-wide [sh.zeron.android.shell.DeepLinkHub] — never straight to
      * a router (the shell is not composed yet at cold start). An intent
      * carrying both submits both; the hub's single slot keeps the last
      * one, the route. Ticket 139 adds its `ACTION_SEND` branch here.
      */
     private fun handleIntent(intent: Intent) {
-        val hub = (application as RobocoApplication).deepLinks
+        val hub = (application as ZeronApplication).deepLinks
         if (intent.action == Intent.ACTION_VIEW) {
             val link = DeepLinks.parse(intent.dataString)
             if (link == null) {
@@ -278,7 +278,7 @@ class MainActivity : ComponentActivity() {
     override fun onKeyShortcut(keyCode: Int, event: KeyEvent?): Boolean =
         (event != null && shortcutSink.dispatch(event)) || super.onKeyShortcut(keyCode, event)
 
-    /** The system shortcut helper (Meta+/): the "Roboco" group while a shell is mounted. */
+    /** The system shortcut helper (Meta+/): the "Zeron" group while a shell is mounted. */
     override fun onProvideKeyboardShortcuts(
         data: MutableList<KeyboardShortcutGroup>,
         menu: Menu?,

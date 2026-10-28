@@ -1,4 +1,4 @@
-package sh.roboco.android.debug
+package sh.zeron.android.debug
 
 import android.content.Context
 import android.os.Looper
@@ -27,11 +27,11 @@ import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import org.robolectric.shadows.ShadowChoreographer
-import sh.roboco.android.core.TextEngine
-import sh.roboco.android.core.UniffiSandbox
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.transcript.TranscriptState
+import sh.zeron.android.core.TextEngine
+import sh.zeron.android.core.UniffiSandbox
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.transcript.TranscriptState
 
 /**
  * The Transcript Lab goldens (android-ui-parity #135; recorded by
@@ -41,7 +41,7 @@ import sh.roboco.android.transcript.TranscriptState
  * side with an iOS `-lab -turns 1` capture (393 pt) the row order, the
  * right-aligned user bubble, the code block, the table and the title
  * placement must match; pixel positions differ only by width. The input
- * row differs by design (the Roboco adaptation).
+ * row differs by design (the Zeron adaptation).
  *
  * Rasterisation is host-dependent: record on the Ubuntu runner, like
  * every golden here. This class also pins the two formula checks the
@@ -92,7 +92,7 @@ class TranscriptLabScreenshotTest {
         val controller = TranscriptLabController(state, scope = CoroutineScope(Dispatchers.Unconfined))
         try {
             compose.setContent {
-                RobocoTheme(Appearance.Light) {
+                ZeronTheme(Appearance.Light) {
                     TranscriptLabScreen(controller, LabOptions(turns = 1), runScripts = false)
                 }
             }
@@ -150,7 +150,7 @@ class TranscriptLabScreenshotTest {
                 shadowOf(Looper.getMainLooper()).idleFor(ShadowChoreographer.getFrameDelay())
             }
             compose.setContent {
-                RobocoTheme(appearance) {
+                ZeronTheme(appearance) {
                     TranscriptLabScreen(controller, LabOptions(turns = 1), runScripts = false)
                 }
             }

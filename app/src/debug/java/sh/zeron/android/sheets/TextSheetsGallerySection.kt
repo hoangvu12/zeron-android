@@ -1,4 +1,4 @@
-package sh.roboco.android.sheets
+package sh.zeron.android.sheets
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,11 +23,11 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.transcript.DetailWidget
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.transcript.DetailWidget
 
 /**
  * The "Text sheets" page of the debug design gallery (ticket 127): one
@@ -55,7 +55,7 @@ import sh.roboco.android.transcript.DetailWidget
  */
 @Composable
 fun TextSheetsGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val controller = rememberTextSheetController()
     Box(Modifier.fillMaxSize()) {
@@ -96,7 +96,7 @@ fun TextSheetsGallerySection() {
 /** One plain-text button row (no Material controls). */
 @Composable
 private fun GalleryButton(text: String, onClick: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     BasicText(
         text,
@@ -115,7 +115,7 @@ private fun GalleryButton(text: String, onClick: () -> Unit) {
  */
 @Composable
 private fun DetailWidgetDemo(controller: TextSheetController) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     Box(
         Modifier
             .width(320.dp)
@@ -159,7 +159,7 @@ private fun DetailWidgetDemo(controller: TextSheetController) {
 
 /** The short fixture: the preview's three-paragraph message. */
 private val ShortMessage =
-    "Roboco connects directly to the engines you pair with it — no account, no cloud, no sync.\n\n" +
+    "Zeron connects directly to the engines you pair with it — no account, no cloud, no sync.\n\n" +
         "The transcript is painted straight from the Rust layout core, so the text in the list itself " +
         "cannot be selected. Select Text shows the whole message here, where the system selection " +
         "handles and the Copy toolbar work.\n\n" +
@@ -174,6 +174,6 @@ private val LongProse: String = buildString {
 
 /** The tool-detail fixture: 40 mono lines, the last one 160 characters. */
 private val ToolPayload: String = buildString {
-    for (i in 1..39) appendLine("line $i: $ roboco engine start --port ${8674 + i}")
+    for (i in 1..39) appendLine("line $i: $ zeron engine start --port ${8674 + i}")
     append("k".repeat(160))
 }

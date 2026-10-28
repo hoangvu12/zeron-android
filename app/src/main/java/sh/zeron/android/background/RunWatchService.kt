@@ -1,4 +1,4 @@
-package sh.roboco.android.background
+package sh.zeron.android.background
 
 import android.app.Notification
 import android.app.PendingIntent
@@ -15,9 +15,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import sh.roboco.android.RobocoApplication
-import sh.roboco.android.notify.OngoingInput
-import sh.roboco.android.notify.ongoingContent
+import sh.zeron.android.ZeronApplication
+import sh.zeron.android.notify.OngoingInput
+import sh.zeron.android.notify.ongoingContent
 
 /**
  * The run-watching foreground service (android-app#28, type `dataSync`;
@@ -33,7 +33,7 @@ import sh.roboco.android.notify.ongoingContent
  *   `remoteMessaging` is defined as relaying text messages between
  *   devices, which watching agent runs is not. `specialUse` carries the
  *   `PROPERTY_SPECIAL_USE_FGS_SUBTYPE` justification Play would review;
- *   Roboco ships no Play build (ADR 0009), so nothing gates on it.
+ *   Zeron ships no Play build (ADR 0009), so nothing gates on it.
  *   `connectedDevice` needs a `CHANGE_NETWORK_STATE`-style prerequisite
  *   we do not otherwise use. Below API 34 there is no `specialUse` and
  *   `dataSync` has no limit, so Stay connected runs as `dataSync` there.
@@ -74,8 +74,8 @@ class RunWatchService : Service() {
     /** The FGS type last passed to `startForeground` (0 = not yet). */
     private var currentType = 0
 
-    private val app: RobocoApplication
-        get() = application as RobocoApplication
+    private val app: ZeronApplication
+        get() = application as ZeronApplication
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -197,9 +197,9 @@ class RunWatchService : Service() {
                 ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
             }
 
-        const val TAG = "RobocoRunWatch"
+        const val TAG = "ZeronRunWatch"
         const val NOTIFICATION_ID = 1
-        const val ACTION_DISMISSED = "sh.roboco.android.runwatch.DISMISSED"
+        const val ACTION_DISMISSED = "sh.zeron.android.runwatch.DISMISSED"
         const val REQUEST_DISMISSED = 28
     }
 }

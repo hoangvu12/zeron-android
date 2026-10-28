@@ -1,4 +1,4 @@
-package sh.roboco.android.core
+package sh.zeron.android.core
 
 import android.content.res.AssetManager
 import android.util.Log
@@ -22,12 +22,12 @@ sealed interface FontStatus {
 /**
  * The fail-loud font gate. Upstream iOS **silently skips** a face it cannot
  * register and falls back to the system font (`Fonts.swift:26-30, 55-59`);
- * Roboco does not: on Android the same pattern (#609 review bug 8) left the
+ * Zeron does not: on Android the same pattern (#609 review bug 8) left the
  * transcript silently blank, because the Rust layout worker never ran a pass
  * without faces (`mob:layout/mod.rs:561`). The bytes are build artefacts, so
  * a missing one is a packaging bug that must surface:
  *
- * - **debug** builds: `IllegalStateException` from `RobocoApplication` naming
+ * - **debug** builds: `IllegalStateException` from `ZeronApplication` naming
  *   every bad path;
  * - **release** builds: [status] stores [FontStatus.Missing], the message is
  *   logged, and `MainActivity` shows `FontsMissingScreen` instead of the app.
@@ -40,7 +40,7 @@ sealed interface FontStatus {
  */
 object FontGate {
 
-    private const val TAG = "Roboco"
+    private const val TAG = "Zeron"
 
     /** TrueType version 1.0: every bundled face starts `00 01 00 00`. */
     private val TRUE_TYPE_MAGIC = byteArrayOf(0, 1, 0, 0)

@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.SideEffect
@@ -11,8 +11,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.GlassMenuHost
 
 /**
  * Round 44 (SessionFlowTest risk reduction): the live counts reach the
@@ -40,7 +40,7 @@ class MainTabShellLiveCountsTest {
         var callerRuns = 0
         compose.setContent {
             SideEffect { callerRuns++ }
-            RobocoTheme {
+            ZeronTheme {
                 GlassMenuHost {
                     MainTabShell(
                         state = MainTabState(TabId.Sessions),

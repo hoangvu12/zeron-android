@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -29,42 +29,42 @@ import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.rememberHazeState
 import java.util.Locale
 import kotlinx.coroutines.delay
-import sh.roboco.android.composer.ChipIcon
-import sh.roboco.android.composer.ChipMenuCore
-import sh.roboco.android.composer.ChipStrip
-import sh.roboco.android.composer.ChipTint
-import sh.roboco.android.composer.ComposerChip
-import sh.roboco.android.composer.SessionChipMenus
-import sh.roboco.android.composer.rememberChipMenuPlatform
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.glass.GlassMenuPanel
-import sh.roboco.android.design.glass.MenuElement
-import sh.roboco.android.design.glass.MenuIcon
-import sh.roboco.android.design.glass.MenuItem
-import sh.roboco.android.design.glass.MenuLine
-import sh.roboco.android.design.glass.flattenLevel
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.session.ChromeInput
-import sh.roboco.android.session.ContextReading
-import sh.roboco.android.session.SessionChrome
-import sh.roboco.android.session.contextChip
-import sh.roboco.android.session.contextUsageCard
-import uniffi.roboco_core.ChatConfig
-import uniffi.roboco_core.ChatIndicator
-import uniffi.roboco_core.ComposerState
-import uniffi.roboco_core.ContextUsage
-import uniffi.roboco_core.HostCapabilities
-import uniffi.roboco_core.HostInfo
-import uniffi.roboco_core.LiveStatus
-import uniffi.roboco_core.ModelInfo
-import uniffi.roboco_core.ModelOption
-import uniffi.roboco_core.ModelOptionChoice
-import uniffi.roboco_core.PullRequest
-import uniffi.roboco_core.PullRequestState
-import uniffi.roboco_core.RoomState
-import uniffi.roboco_core.SandboxLevel
-import uniffi.roboco_core.SessionRow
+import sh.zeron.android.composer.ChipIcon
+import sh.zeron.android.composer.ChipMenuCore
+import sh.zeron.android.composer.ChipStrip
+import sh.zeron.android.composer.ChipTint
+import sh.zeron.android.composer.ComposerChip
+import sh.zeron.android.composer.SessionChipMenus
+import sh.zeron.android.composer.rememberChipMenuPlatform
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.glass.GlassMenuPanel
+import sh.zeron.android.design.glass.MenuElement
+import sh.zeron.android.design.glass.MenuIcon
+import sh.zeron.android.design.glass.MenuItem
+import sh.zeron.android.design.glass.MenuLine
+import sh.zeron.android.design.glass.flattenLevel
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.session.ChromeInput
+import sh.zeron.android.session.ContextReading
+import sh.zeron.android.session.SessionChrome
+import sh.zeron.android.session.contextChip
+import sh.zeron.android.session.contextUsageCard
+import uniffi.zeron_core.ChatConfig
+import uniffi.zeron_core.ChatIndicator
+import uniffi.zeron_core.ComposerState
+import uniffi.zeron_core.ContextUsage
+import uniffi.zeron_core.HostCapabilities
+import uniffi.zeron_core.HostInfo
+import uniffi.zeron_core.LiveStatus
+import uniffi.zeron_core.ModelInfo
+import uniffi.zeron_core.ModelOption
+import uniffi.zeron_core.ModelOptionChoice
+import uniffi.zeron_core.PullRequest
+import uniffi.zeron_core.PullRequestState
+import uniffi.zeron_core.RoomState
+import uniffi.zeron_core.SandboxLevel
+import uniffi.zeron_core.SessionRow
 
 /**
  * The "Session chip menus" page of the debug design gallery
@@ -94,7 +94,7 @@ import uniffi.roboco_core.SessionRow
  */
 @Composable
 fun ChipMenuGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val haze = rememberHazeState()
 
@@ -208,7 +208,7 @@ fun ChipMenuGallerySection() {
 /** One static fixture panel with its caption. */
 @Composable
 private fun ChipMenuStaticPanel(caption: String, lines: List<MenuLine>) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         ChipMenuLabel(caption, uiStyle(Face.Sans, typeScale.fixed(12f), palette.secondary))
@@ -229,7 +229,7 @@ private fun ChipMenuLabel(text: String, style: TextStyle) {
 /** One gallery toggle row: label left, current value in accent right. */
 @Composable
 private fun ChipMenuToggleRow(label: String, value: String, onClick: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Row(
         Modifier
@@ -402,7 +402,7 @@ internal fun gallerySessionRow(config: ChatConfig, modelLabel: String): SessionR
         provider = "github",
         number = 1234uL,
         title = "Android: session chip menus for model, reasoning effort and pull request with a long title",
-        url = "https://github.com/hoangvu12/roboco/pull/1234",
+        url = "https://github.com/hoangvu12/zeron-android/pull/1234",
         state = PullRequestState.OPEN,
         baseRef = "main",
         headRef = "feature",
@@ -492,8 +492,8 @@ fun chipMenuELines(): List<MenuLine> = flattenLevel(
 fun chipMenuPLines(): List<MenuLine> = flattenLevel(
     "Android: session chip menus for model, reasoning effort and pull request with a long title",
     listOf(
-        MenuItem("Open Pull Request", icon = MenuIcon.Symbol(RobocoIcons.Safari), testTag = "chip-menu-pr-open") {},
-        MenuItem("Copy Link", icon = MenuIcon.Symbol(RobocoIcons.Link), testTag = "chip-menu-pr-copy") {},
+        MenuItem("Open Pull Request", icon = MenuIcon.Symbol(ZeronIcons.Safari), testTag = "chip-menu-pr-open") {},
+        MenuItem("Copy Link", icon = MenuIcon.Symbol(ZeronIcons.Link), testTag = "chip-menu-pr-copy") {},
     ),
     resolved = { null },
     isRoot = true,
@@ -518,10 +518,10 @@ fun chipMenuContextLines(reading: ContextReading): List<MenuLine> {
 
 @Composable
 private fun ChipMenuPanelsPreviewBody(appearance: Appearance) {
-    RobocoTheme(appearance) {
+    ZeronTheme(appearance) {
         Column(
             Modifier
-                .background(RobocoTheme.palette.background)
+                .background(ZeronTheme.palette.background)
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {

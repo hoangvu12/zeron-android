@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -13,10 +13,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import sh.roboco.android.design.glass.MenuIcon
-import sh.roboco.android.design.glass.MenuItem
-import sh.roboco.android.design.glass.hasContent
-import uniffi.roboco_core.FolderListing
+import sh.zeron.android.design.glass.MenuIcon
+import sh.zeron.android.design.glass.MenuItem
+import sh.zeron.android.design.glass.hasContent
+import uniffi.zeron_core.FolderListing
 
 /**
  * [FolderBrowserController] (android-ui-parity #110): every acceptance row
@@ -469,7 +469,7 @@ class FolderBrowserControllerTest {
                 FolderRow.Folder("Desktop", isRepo = false),
                 FolderRow.Folder("Documents", isRepo = false),
                 FolderRow.Folder("Projects", isRepo = false),
-                FolderRow.Folder("roboco", isRepo = true),
+                FolderRow.Folder("zeron", isRepo = true),
                 FolderRow.Folder("zeron", isRepo = true),
             ),
             controller.rows,
@@ -497,7 +497,7 @@ class FolderBrowserControllerTest {
             listOf(
                 FolderRow.Parent,
                 FolderRow.Folder("Projects", isRepo = false),
-                FolderRow.Folder("roboco", isRepo = true),
+                FolderRow.Folder("zeron", isRepo = true),
             ),
             controller.rows,
         )
@@ -544,9 +544,9 @@ class FolderBrowserControllerTest {
         runCurrent()
         assertNull(controller.listingIsRepo)
 
-        controller.tap(FolderRow.Folder("roboco", isRepo = true))
+        controller.tap(FolderRow.Folder("zeron", isRepo = true))
         runCurrent()
-        source.complete(1, syntheticFolderListing("/Users/alice/roboco"))
+        source.complete(1, syntheticFolderListing("/Users/alice/zeron"))
         runCurrent()
         assertEquals(true, controller.listingIsRepo)
 

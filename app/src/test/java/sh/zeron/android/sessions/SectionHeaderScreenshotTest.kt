@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -17,9 +17,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The foldable section header's goldens (android-ui-parity #39): the six
@@ -36,7 +36,7 @@ import sh.roboco.android.design.RobocoTheme
  * its own taps. Roborazzi paths are relative to `roborazzi { outputDir }`
  * (`src/test/screenshots`), so the goldens land at
  * `src/test/screenshots/sessions/`; recorded by
- * `./gradlew :app:recordRoborazziDebug --tests sh.roboco.android.sessions.SectionHeaderScreenshotTest`,
+ * `./gradlew :app:recordRoborazziDebug --tests sh.zeron.android.sessions.SectionHeaderScreenshotTest`,
  * verified by `:app:verifyRoborazziDebug --tests …`.
  */
 @RunWith(RobolectricTestRunner::class)
@@ -52,9 +52,9 @@ class SectionHeaderScreenshotTest {
     /** The six fixtures, unpressed, on the page background. */
     private fun fixtures(appearance: Appearance) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 ProvideGlyphClock(frozenAtNanos = 0L) {
-                    Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+                    Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                         Column {
                             SectionHeaderFixtures.all.forEach { SectionHeaderRow(it, highlight = { 0f }) }
                         }
@@ -85,9 +85,9 @@ class SectionHeaderScreenshotTest {
         // advance.
         compose.mainClock.autoAdvance = false
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 ProvideGlyphClock(frozenAtNanos = 0L) {
-                    Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+                    Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                         SectionHeaderRow(SectionHeaderFixtures.mobile, highlight = { 0f })
                     }
                 }
@@ -102,9 +102,9 @@ class SectionHeaderScreenshotTest {
         compose.mainClock.autoAdvance = false
         var collapsed by mutableStateOf(false)
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 ProvideGlyphClock(frozenAtNanos = 0L) {
-                    Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+                    Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                         SectionHeaderRow(
                             SectionHeaderFixtures.p0.copy(collapsed = collapsed),
                             highlight = { 0f },
@@ -130,9 +130,9 @@ class SectionHeaderScreenshotTest {
         // The press → highlight wiring itself is ticket 41's (tested
         // there); this golden only draws the fill at full highlight.
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 ProvideGlyphClock(frozenAtNanos = 0L) {
-                    Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+                    Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                         SectionHeaderRow(SectionHeaderFixtures.p0, highlight = { 1f })
                     }
                 }

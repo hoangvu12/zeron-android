@@ -1,10 +1,10 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import sh.roboco.android.core.Face
+import sh.zeron.android.core.Face
 
 /**
  * The row's hand layout, pure (android-ui-parity #37):

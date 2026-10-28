@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -13,7 +13,7 @@ import androidx.compose.ui.node.PointerInputModifierNode
 import androidx.compose.ui.node.currentValueOf
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.util.fastForEach
-import uniffi.roboco_core.WidgetKind
+import uniffi.zeron_core.WidgetKind
 
 /**
  * The per-screen latch of "tap on the transcript puts the composer away"

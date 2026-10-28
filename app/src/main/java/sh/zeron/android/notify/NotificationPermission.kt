@@ -1,4 +1,4 @@
-package sh.roboco.android.notify
+package sh.zeron.android.notify
 
 import android.Manifest
 import android.app.Activity
@@ -170,7 +170,7 @@ internal fun Context.findActivity(): Activity? {
 /**
  * One call into the system `POST_NOTIFICATIONS` request. A class, not a
  * bare lambda, so [rememberNotificationSectionState] can hand it to the
- * non-composable [NotificationSectionState][sh.roboco.android.settings.NotificationSectionState]
+ * non-composable [NotificationSectionState][sh.zeron.android.settings.NotificationSectionState]
  * and android-app#28's first-session ask can reuse the same launcher.
  */
 class NotificationPermissionRequester internal constructor(private val launch: () -> Unit) {

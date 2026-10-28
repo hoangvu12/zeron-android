@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 /**
  * UIKit `UIScrollView`'s rubber-band coefficient: the one value the

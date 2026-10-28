@@ -1,4 +1,4 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import android.app.Application
 import android.content.Intent
@@ -13,7 +13,7 @@ import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
-import sh.roboco.android.MainActivity
+import sh.zeron.android.MainActivity
 
 /**
  * The share trampoline (android-ui-parity #139): `PairShareActivity`

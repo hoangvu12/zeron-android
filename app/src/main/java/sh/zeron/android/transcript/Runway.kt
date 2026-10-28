@@ -1,9 +1,9 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import kotlin.math.abs
 import kotlin.math.max
-import uniffi.roboco_core.LayoutFrame
-import uniffi.roboco_core.RowKind
+import uniffi.zeron_core.LayoutFrame
+import uniffi.zeron_core.RowKind
 
 /**
  * The rows the own-turn runway needs (69), so tests can fake a

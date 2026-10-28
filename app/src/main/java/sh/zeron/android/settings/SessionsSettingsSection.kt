@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import androidx.annotation.MainThread
 import androidx.compose.foundation.lazy.LazyListScope
@@ -6,17 +6,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
-import sh.roboco.android.R
-import sh.roboco.android.design.GroupedAccessory
-import sh.roboco.android.design.GroupedPosition
-import sh.roboco.android.design.GroupedRow
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoSwitch
-import sh.roboco.android.design.groupedSection
-import sh.roboco.android.design.settingsTag
-import sh.roboco.android.design.toggleTag
-import sh.roboco.android.sessions.FolderRoute
-import sh.roboco.android.shell.NavStack
+import sh.zeron.android.R
+import sh.zeron.android.design.GroupedAccessory
+import sh.zeron.android.design.GroupedPosition
+import sh.zeron.android.design.GroupedRow
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronSwitch
+import sh.zeron.android.design.groupedSection
+import sh.zeron.android.design.settingsTag
+import sh.zeron.android.design.toggleTag
+import sh.zeron.android.sessions.FolderRoute
+import sh.zeron.android.shell.NavStack
 
 /**
  * The "Sessions" section of the Settings screen (android-ui-parity #100):
@@ -25,12 +25,12 @@ import sh.roboco.android.shell.NavStack
  *
  *  - `groupByProject` — "Group by Project", subtitle "Sessions outside
  *    your sections, under their project", `square.stack.3d.up` icon and a
- *    ticket 98 [RobocoSwitch]. The switch is bound to the phone-local
- *    `groupByProject` preference (ticket 40's [sh.roboco.android.core.Prefs]):
+ *    ticket 98 [ZeronSwitch]. The switch is bound to the phone-local
+ *    `groupByProject` preference (ticket 40's [sh.zeron.android.core.Prefs]):
  *    iOS's `Row(id: "groupByProject", …, accessory: .toggle(app.groupByProject))`
  *    with `.valueChanged` → `toggled(_: _:)`, which writes the preference
  *    and nothing else — no haptic of its own (the switch's
- *    `Haptic.ToggleOn`/`ToggleOff` fire inside [RobocoSwitch] **before**
+ *    `Haptic.ToggleOn`/`ToggleOff` fire inside [ZeronSwitch] **before**
  *    `onCheckedChange`), no alert, no reload. The Sessions ⋯ menu
  *    "Group by Project" (ticket 46) flips the **same** preference, so
  *    `onGroupByProjectChange` must be the one true writer the screen hands
@@ -154,7 +154,7 @@ fun LazyListScope.sessionsSettingsSection(
  *
  * The switch is built inside the `GroupedAccessory.Custom` lambda (it
  * captures [groupByProject], so it cannot be hoisted to a file-level val),
- * and its tag goes through [RobocoSwitch]'s own `testTag` parameter only:
+ * and its tag goes through [ZeronSwitch]'s own `testTag` parameter only:
  * `toggle-groupByProject` appears exactly once.
  */
 @Composable
@@ -171,11 +171,11 @@ fun SessionsSettingsRowContent(
         SessionsSettingsRow.GroupByProject -> GroupedRow(
             title = strings.groupByProject,
             subtitle = strings.groupByProjectSubtitle,
-            icon = RobocoIcons.SquareStack3dUp,
+            icon = ZeronIcons.SquareStack3dUp,
             position = position,
             accessories = listOf(
                 GroupedAccessory.Custom {
-                    RobocoSwitch(
+                    ZeronSwitch(
                         checked = groupByProject,
                         onCheckedChange = onGroupByProjectChange,
                         testTag = toggleTag(row.id),
@@ -190,7 +190,7 @@ fun SessionsSettingsRowContent(
 
         SessionsSettingsRow.Archived -> GroupedRow(
             title = strings.archivedSessions,
-            icon = RobocoIcons.Archivebox,
+            icon = ZeronIcons.Archivebox,
             position = position,
             accessories = listOf(GroupedAccessory.Disclosure),
             testTag = settingsTag(row.id),

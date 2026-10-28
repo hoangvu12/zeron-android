@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -62,7 +62,7 @@ import kotlinx.coroutines.launch
  * `minimumInteractiveComponentSize` (Compose's pointer hit testing already
  * extends the 63 × 28 layout to the 48 dp minimum touch target).
  */
-object RobocoSwitchTokens {
+object ZeronSwitchTokens {
 
     /** The track's width (`2-settings.png`: 71.98 px / 1.1443 = 62.9 dp). */
     val Width = 63.dp
@@ -161,31 +161,31 @@ internal object SwitchMath {
  * outside the 63 × 28 bounds on purpose (no clip): the layout stays 63 × 28.
  */
 @Composable
-fun RobocoSwitchVisual(fraction: () -> Float, lift: () -> Float, modifier: Modifier = Modifier) {
-    val on = RobocoTheme.palette.accent
+fun ZeronSwitchVisual(fraction: () -> Float, lift: () -> Float, modifier: Modifier = Modifier) {
+    val on = ZeronTheme.palette.accent
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     // One Paint, mutated per draw: the lens shadow needs a real
     // setShadowLayer, which Compose's DrawScope cannot express.
     val shadowPaint = remember { android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG) }
     Spacer(
         modifier
-            .size(RobocoSwitchTokens.Width, RobocoSwitchTokens.Height)
+            .size(ZeronSwitchTokens.Width, ZeronSwitchTokens.Height)
             .drawBehind {
                 val f = fraction().coerceIn(0f, 1f)
                 val lens = lift().coerceIn(0f, 1f)
                 // The track colour follows the thumb: OFF grey ↔ accent.
-                drawRoundRect(lerp(RobocoSwitchTokens.OffTrack, on, f), cornerRadius = CornerRadius(size.height / 2f))
-                val tw = RobocoSwitchTokens.ThumbWidth.toPx()
-                val th = RobocoSwitchTokens.ThumbHeight.toPx()
-                val left = SwitchMath.thumbLeft(f, size.width, RobocoSwitchTokens.ThumbInset.toPx(), tw, rtl)
+                drawRoundRect(lerp(ZeronSwitchTokens.OffTrack, on, f), cornerRadius = CornerRadius(size.height / 2f))
+                val tw = ZeronSwitchTokens.ThumbWidth.toPx()
+                val th = ZeronSwitchTokens.ThumbHeight.toPx()
+                val left = SwitchMath.thumbLeft(f, size.width, ZeronSwitchTokens.ThumbInset.toPx(), tw, rtl)
                 // The lens scales about the resting knob's centre.
-                val s = 1f + (RobocoSwitchTokens.LiftScale - 1f) * lens
+                val s = 1f + (ZeronSwitchTokens.LiftScale - 1f) * lens
                 val w = tw * s
                 val h = th * s
                 val cx = left + tw / 2f
                 val cy = size.height / 2f
                 val rect = Rect(cx - w / 2f, cy - h / 2f, cx + w / 2f, cy + h / 2f)
-                val thumbAlpha = 1f - (1f - RobocoSwitchTokens.LiftedThumbAlpha) * lens
+                val thumbAlpha = 1f - (1f - ZeronSwitchTokens.LiftedThumbAlpha) * lens
                 if (lens < 0.001f) {
                     // At rest: opaque white, no rim, no shadow (measured).
                     drawRoundRect(Color.White, rect.topLeft, rect.size, CornerRadius(h / 2f))
@@ -195,10 +195,10 @@ fun RobocoSwitchVisual(fraction: () -> Float, lift: () -> Float, modifier: Modif
                     drawIntoCanvas { canvas ->
                         shadowPaint.color = Color.White.copy(alpha = thumbAlpha).toArgb()
                         shadowPaint.setShadowLayer(
-                            RobocoSwitchTokens.LiftShadowRadius.toPx(),
+                            ZeronSwitchTokens.LiftShadowRadius.toPx(),
                             0f,
-                            RobocoSwitchTokens.LiftShadowDy.toPx(),
-                            Color.Black.copy(alpha = RobocoSwitchTokens.LiftShadowAlpha * lens).toArgb(),
+                            ZeronSwitchTokens.LiftShadowDy.toPx(),
+                            Color.Black.copy(alpha = ZeronSwitchTokens.LiftShadowAlpha * lens).toArgb(),
                         )
                         canvas.nativeCanvas.drawRoundRect(
                             rect.left, rect.top, rect.right, rect.bottom, h / 2f, h / 2f, shadowPaint,
@@ -210,7 +210,7 @@ fun RobocoSwitchVisual(fraction: () -> Float, lift: () -> Float, modifier: Modif
                         rect.size,
                         CornerRadius(h / 2f),
                         alpha = lens,
-                        style = Stroke(RobocoSwitchTokens.LiftRim.toPx()),
+                        style = Stroke(ZeronSwitchTokens.LiftRim.toPx()),
                     )
                 }
             },
@@ -233,7 +233,7 @@ fun RobocoSwitchVisual(fraction: () -> Float, lift: () -> Float, modifier: Modif
  *   callback, the thumb springs back (wave-10 40's locked agent rows)
  */
 @Composable
-fun RobocoSwitch(
+fun ZeronSwitch(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
@@ -277,17 +277,17 @@ fun RobocoSwitch(
     LaunchedEffect(checked, dragging, reduce, releases) {
         if (dragging) return@LaunchedEffect
         val target = if (checked) 1f else 0f
-        if (reduce) fraction.snapTo(target) else fraction.animateTo(target, RobocoSwitchTokens.Slide.spec())
+        if (reduce) fraction.snapTo(target) else fraction.animateTo(target, ZeronSwitchTokens.Slide.spec())
     }
 
     // The lens: in while the finger is down (no lift under reduce motion),
     // out on release or cancel.
     LaunchedEffect(pressed, reduce) {
         val target = if (pressed && !reduce) 1f else 0f
-        if (reduce) lift.snapTo(target) else lift.animateTo(target, RobocoSwitchTokens.Lift.spec())
+        if (reduce) lift.snapTo(target) else lift.animateTo(target, ZeronSwitchTokens.Lift.spec())
     }
 
-    RobocoSwitchVisual(
+    ZeronSwitchVisual(
         fraction = { if (dragging) dragFraction else fraction.value },
         lift = { lift.value },
         modifier = modifier
@@ -298,7 +298,7 @@ fun RobocoSwitch(
                 onClick { commit(!latestChecked); true }
             }
             .pointerInput(rtl) {
-                val travelPx = RobocoSwitchTokens.Travel.toPx()
+                val travelPx = ZeronSwitchTokens.Travel.toPx()
                 awaitEachGesture {
                     val down = awaitFirstDown()
                     // Never consume the down: the LazyColumn above must be

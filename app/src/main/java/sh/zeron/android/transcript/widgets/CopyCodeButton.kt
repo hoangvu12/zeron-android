@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -31,14 +31,14 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.Haptic
-import sh.roboco.android.design.Icon
-import sh.roboco.android.design.LocalFeedback
-import sh.roboco.android.design.Motion
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.SymbolWeight
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.Haptic
+import sh.zeron.android.design.Icon
+import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.design.Motion
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.SymbolWeight
 
 /**
  * The code-block copy button (android-ui-parity #119; iOS `CopyButton`,
@@ -125,10 +125,10 @@ internal fun CopyCodeButton(
  */
 @Composable
 internal fun CopyCodeGlyph(copied: Boolean, modifier: Modifier = Modifier) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Icon(
-            icon = if (copied) RobocoIcons.Checkmark else RobocoIcons.SquareOnSquare,
+            icon = if (copied) ZeronIcons.Checkmark else ZeronIcons.SquareOnSquare,
             tint = if (copied) palette.accent else palette.tertiary,
             sizePt = 13f,
             weight = if (copied) SymbolWeight.Semibold else SymbolWeight.Medium,
@@ -173,7 +173,7 @@ internal fun writeCodeToClipboard(context: Context, payload: String): Boolean {
         cm.setPrimaryClip(ClipData.newPlainText("Code", payload))
         true
     } catch (e: RuntimeException) {
-        Log.w("Roboco", "copy code failed: $e")
+        Log.w("Zeron", "copy code failed: $e")
         false
     }
 }
@@ -195,10 +195,10 @@ private fun CopyCodeDarkPreview() {
     CopyCodePreviewBody()
 }
 
-/** Both states side by side on the code-card colour, inside [RobocoTheme]. */
+/** Both states side by side on the code-card colour, inside [ZeronTheme]. */
 @Composable
 private fun CopyCodePreviewBody() {
-    RobocoTheme(Appearance.System) {
+    ZeronTheme(Appearance.System) {
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             CopyCodePreviewCell(copied = false)
             CopyCodePreviewCell(copied = true)
@@ -212,7 +212,7 @@ private fun CopyCodePreviewCell(copied: Boolean) {
     Box(
         Modifier
             .size(44.dp, 32.dp)
-            .background(RobocoTheme.palette.codeBackground),
+            .background(ZeronTheme.palette.codeBackground),
     ) {
         CopyCodeGlyph(copied)
     }

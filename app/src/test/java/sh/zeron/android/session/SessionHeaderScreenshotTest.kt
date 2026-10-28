@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
@@ -16,8 +16,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The session header's goldens (android-ui-parity #52): the ticket's
@@ -62,7 +62,7 @@ class SessionHeaderScreenshotTest {
         content: @Composable () -> Unit,
     ) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 Box(Modifier.size(width, 240.dp).testTag(shotTag)) { content() }
             }
         }

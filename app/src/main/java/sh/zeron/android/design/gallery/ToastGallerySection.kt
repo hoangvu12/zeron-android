@@ -1,4 +1,4 @@
-package sh.roboco.android.design.gallery
+package sh.zeron.android.design.gallery
 
 import android.content.res.Configuration
 import android.util.Log
@@ -23,15 +23,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalToaster
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.ToastChromeFixture
-import sh.roboco.android.design.ToastHost
-import sh.roboco.android.design.ToastLongText
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalToaster
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.ToastChromeFixture
+import sh.zeron.android.design.ToastHost
+import sh.zeron.android.design.ToastLongText
+import sh.zeron.android.design.uiStyle
 
 /**
  * The "Toast" page of the debug design gallery (ticket 14): every caller
@@ -55,7 +55,7 @@ import sh.roboco.android.design.uiStyle
 @Composable
 fun ToastGallerySection() {
     val toaster = LocalToaster.current
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     var chromeVisible by remember { mutableStateOf(true) }
     var field by remember { mutableStateOf("") }
@@ -143,11 +143,11 @@ private fun GalleryLabel(text: String, style: TextStyle, modifier: Modifier = Mo
 @Preview(name = "Toast gallery light")
 @Composable
 private fun ToastGalleryLightPreview() {
-    RobocoTheme(Appearance.Light) { ToastHost { ToastGallerySection() } }
+    ZeronTheme(Appearance.Light) { ToastHost { ToastGallerySection() } }
 }
 
 @Preview(name = "Toast gallery dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun ToastGalleryDarkPreview() {
-    RobocoTheme(Appearance.Dark) { ToastHost { ToastGallerySection() } }
+    ZeronTheme(Appearance.Dark) { ToastHost { ToastGallerySection() } }
 }

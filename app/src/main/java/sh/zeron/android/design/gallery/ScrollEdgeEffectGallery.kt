@@ -1,4 +1,4 @@
-package sh.roboco.android.design.gallery
+package sh.zeron.android.design.gallery
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -35,16 +35,16 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.hazeSource
 import kotlin.math.roundToInt
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.glass.ProvideHazeState
-import sh.roboco.android.design.glass.ScrollEdgeEffect
-import sh.roboco.android.design.glass.ScrollEdgeEffectDefaults
-import sh.roboco.android.design.glass.contentUnderTopEdge
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.glass.ProvideHazeState
+import sh.zeron.android.design.glass.ScrollEdgeEffect
+import sh.zeron.android.design.glass.ScrollEdgeEffectDefaults
+import sh.zeron.android.design.glass.contentUnderTopEdge
 
 /**
  * The "Scroll edge effect" page of the debug design gallery (ticket 09):
@@ -55,7 +55,7 @@ import sh.roboco.android.design.glass.contentUnderTopEdge
  * `GallerySection("Scroll edge effect", layout = GalleryLayout.Fill) { ScrollEdgeEffectGallerySection() }`
  * — `Fill`, because the section owns a `LazyColumn`. The Light/Dark and
  * Force-reduce-motion toggles come from the gallery scaffold: the effect
- * reads [sh.roboco.android.design.LocalReduceMotion] through the theme, so
+ * reads [sh.zeron.android.design.LocalReduceMotion] through the theme, so
  * the engaged fade snaps when it is forced.
  *
  * The layout follows the per-screen Haze convention (`GlassHaze.kt`): the
@@ -64,7 +64,7 @@ import sh.roboco.android.design.glass.contentUnderTopEdge
  */
 @Composable
 fun ScrollEdgeEffectGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val statusBarTop = galleryStatusBarTop()
     // The toggle opens at the composition's real tier (blur on a 33+ device,
@@ -178,7 +178,7 @@ private fun ScrollEdgeEffectScreen(
     listState: LazyListState,
     chrome: @Composable BoxScope.() -> Unit = {},
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val height = ScrollEdgeEffectDefaults.height(statusBarTop)
     ProvideHazeState {
         Box(Modifier.fillMaxSize().background(palette.background)) {
@@ -231,7 +231,7 @@ private fun rememberPreScrolledListState(): LazyListState {
  */
 @Composable
 private fun ScrollEdgeEffectInlineTitle(statusBarTop: Dp) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Box(
         Modifier
@@ -255,7 +255,7 @@ private fun ScrollEdgeEffectInlineTitle(statusBarTop: Dp) {
  */
 @Composable
 private fun ScrollEdgeEffectFixtureRow(title: String) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Column(
         Modifier
@@ -296,7 +296,7 @@ private fun Toggle(text: String, style: TextStyle, onClick: () -> Unit) {
 @Preview(name = "light")
 @Composable
 private fun ScrollEdgeEffectLightPreview() {
-    RobocoTheme(Appearance.Light) {
+    ZeronTheme(Appearance.Light) {
         ScrollEdgeEffectFixture(mode = ScrollEdgeEngagedMode.Always, blur = true)
     }
 }
@@ -304,7 +304,7 @@ private fun ScrollEdgeEffectLightPreview() {
 @Preview(name = "dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun ScrollEdgeEffectDarkPreview() {
-    RobocoTheme(Appearance.Dark) {
+    ZeronTheme(Appearance.Dark) {
         ScrollEdgeEffectFixture(mode = ScrollEdgeEngagedMode.Always, blur = true)
     }
 }

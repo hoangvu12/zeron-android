@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -154,7 +154,7 @@ private fun Label(text: String, color: Color) {
 
 @Composable
 fun BrandMarksSample() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     Column(Modifier.background(palette.background)) {
         for (side in listOf(20.dp, 34.dp, 64.dp)) {
             Row {
@@ -175,7 +175,7 @@ fun BrandMarksSample() {
  */
 @Composable
 fun BrandMarksGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     Column(Modifier.background(palette.background)) {
         BrandMarksSample()
         Row {
@@ -195,7 +195,7 @@ fun BrandMarksGallerySection() {
 @Preview(widthDp = 720, heightDp = 240)
 @Composable
 private fun BrandMarksPreviewLight() {
-    RobocoTheme(Appearance.Light) {
+    ZeronTheme(Appearance.Light) {
         BrandMarksSample()
     }
 }
@@ -203,7 +203,7 @@ private fun BrandMarksPreviewLight() {
 @Preview(widthDp = 720, heightDp = 240)
 @Composable
 private fun BrandMarksPreviewDark() {
-    RobocoTheme(Appearance.Dark) {
+    ZeronTheme(Appearance.Dark) {
         BrandMarksSample()
     }
 }

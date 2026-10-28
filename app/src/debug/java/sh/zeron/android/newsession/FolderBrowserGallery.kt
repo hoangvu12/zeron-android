@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import android.content.res.Configuration
 import androidx.compose.foundation.clickable
@@ -20,19 +20,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.MutableStateFlow
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.GalleryBackdrop
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.shell.PageSheetScope
-import sh.roboco.android.shell.SheetHost
-import sh.roboco.android.shell.SheetStyle
-import sh.roboco.android.shell.rememberSheetHostState
-import uniffi.roboco_core.FolderEntry
-import uniffi.roboco_core.FolderListing
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.GalleryBackdrop
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.shell.PageSheetScope
+import sh.zeron.android.shell.SheetHost
+import sh.zeron.android.shell.SheetStyle
+import sh.zeron.android.shell.rememberSheetHostState
+import uniffi.zeron_core.FolderEntry
+import uniffi.zeron_core.FolderListing
 
 /**
  * The "New Project browser" page of the debug design gallery
@@ -67,7 +67,7 @@ fun posixHomeListing(): FolderListing = FolderListing(
         FolderEntry(name = "Desktop", isDir = true, isRepo = false),
         FolderEntry(name = "Documents", isDir = true, isRepo = false),
         FolderEntry(name = "Projects", isDir = true, isRepo = false),
-        FolderEntry(name = "roboco", isDir = true, isRepo = true),
+        FolderEntry(name = "zeron", isDir = true, isRepo = true),
         FolderEntry(name = "zeron", isDir = true, isRepo = true),
         FolderEntry(name = "notes.txt", isDir = false, isRepo = false),
     ),
@@ -89,7 +89,7 @@ fun windowsHomeListing(): FolderListing = FolderListing(
     path = "C:\\Users\\alice",
     entries = listOf(
         FolderEntry(name = "Projects", isDir = true, isRepo = false),
-        FolderEntry(name = "roboco", isDir = true, isRepo = true),
+        FolderEntry(name = "zeron", isDir = true, isRepo = true),
     ),
     truncated = false,
 )
@@ -183,7 +183,7 @@ private fun FakePresentingScreen(
     fixture: FolderBrowserFixtureId,
     onPick: (FolderBrowserFixtureId) -> Unit,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
     Box(Modifier.fillMaxSize()) {
         GalleryBackdrop(Modifier.fillMaxSize())
@@ -231,7 +231,7 @@ private fun FakePresentingScreen(
 /** One fixture toggle: SemiBold `text` when selected, Regular `secondary` when not. */
 @Composable
 private fun FixtureToggle(label: String, selected: Boolean, onSelect: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
     BasicText(
         label,
@@ -288,7 +288,7 @@ internal fun PageSheetScope.FolderBrowserFixtureSheetPage(fixture: FolderBrowser
 /** The preview stage: one settled New Project sheet over the backdrop, POSIX fixture. */
 @Composable
 private fun FolderBrowserPreviewStage(appearance: Appearance) {
-    RobocoTheme(appearance) {
+    ZeronTheme(appearance) {
         GlassMenuHost {
             val state = rememberSheetHostState()
             state.presentSettledForPreview("new-project", SheetStyle.Page(grabber = false)) {

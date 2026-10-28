@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -21,13 +21,13 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.GlassStage
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.sessions.LocalSidebarFixtures
-import sh.roboco.android.shell.tablet.settledEmptySessionsFixtures
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.GlassStage
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.sessions.LocalSidebarFixtures
+import sh.zeron.android.shell.tablet.settledEmptySessionsFixtures
 
 /**
  * Ticket 26's goldens: the bar on 22's striped [GlassStage] backdrop (the
@@ -75,7 +75,7 @@ class GlassTabBarScreenshotTest {
         val source = MutableInteractionSource()
         compose.mainClock.autoAdvance = false
         compose.setContent {
-            RobocoTheme {
+            ZeronTheme {
                 Box(Modifier.fillMaxSize()) {
                     val haze = rememberHazeState()
                     CompositionLocalProvider(LocalHazeState provides haze) {
@@ -206,7 +206,7 @@ class GlassTabBarScreenshotTest {
     private fun shellShot(file: String) {
         compose.mainClock.autoAdvance = false
         compose.setContent {
-            RobocoTheme {
+            ZeronTheme {
                 // Ticket 46: the Sessions root is the real screen now — its
                 // ⋯ needs a GlassMenuHost (the golden's background rows
                 // change accordingly; re-record with recordRoborazziDebug).

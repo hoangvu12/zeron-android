@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
@@ -30,7 +30,7 @@ class BrandMarksScreenshotTest {
     @Config(sdk = [36], qualifiers = "w720dp-h240dp-mdpi")
     fun brandMarksLight() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 BrandMarksSample()
             }
         }
@@ -41,7 +41,7 @@ class BrandMarksScreenshotTest {
     @Config(sdk = [36], qualifiers = "w720dp-h240dp-mdpi")
     fun brandMarksDark() {
         compose.setContent {
-            RobocoTheme(Appearance.Dark) {
+            ZeronTheme(Appearance.Dark) {
                 BrandMarksSample()
             }
         }

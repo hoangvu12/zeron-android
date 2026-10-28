@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -21,16 +21,16 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.GlassStage
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.GlassStage
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.GlassMenuHost
 
 /**
  * The action-button goldens (android-ui-parity #58), recorded by
- * `./gradlew :app:recordRoborazziDebug --tests sh.roboco.android.composer.ComposerActionButtonScreenshotTest`
+ * `./gradlew :app:recordRoborazziDebug --tests sh.zeron.android.composer.ComposerActionButtonScreenshotTest`
  * and verified by `verifyRoborazziDebug`:
  *
  *  - `action_button_{light,dark}.png` — the ticket's fixture: the
@@ -71,9 +71,9 @@ class ComposerActionButtonScreenshotTest {
 
     private fun rowShot(appearance: Appearance, file: String) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 GlassMenuHost(hazeState = rememberHazeState()) {
-                    Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+                    Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                         GlassStage(modifier = Modifier.align(Alignment.Center), height = 240.dp) {
                             ComposerActionButtonFixtureRow()
                         }
@@ -103,9 +103,9 @@ class ComposerActionButtonScreenshotTest {
     @Test
     fun menuLight() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 GlassMenuHost(hazeState = rememberHazeState()) {
-                    Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+                    Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                         GlassStage(modifier = Modifier.align(Alignment.Center), height = 240.dp) {
                             ComposerActionButtonFixtureRow()
                         }

@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -16,8 +16,8 @@ import org.robolectric.annotation.GraphicsMode
 
 /**
  * The switch goldens (android-ui-parity #98): the gallery fixture
- * (`RobocoSwitchGallerySection` — the state card with the five
- * `RobocoSwitchVisual` fixtures, the refusing "Notifications" row and the
+ * (`ZeronSwitchGallerySection` — the state card with the five
+ * `ZeronSwitchVisual` fixtures, the refusing "Notifications" row and the
  * accepting "Group by Project" row) in light and dark, on the ticket's
  * `w402dp-h420dp` phone at xxhdpi, so the 63 × 28 track, the 37 × 24 thumb
  * and the 16 dp card insets are all at their reference size for the
@@ -30,7 +30,7 @@ import org.robolectric.annotation.GraphicsMode
  * clock.
  *
  * Record with
- * `./gradlew :app:recordRoborazziDebug --tests sh.roboco.android.design.RobocoSwitchScreenshotTest`,
+ * `./gradlew :app:recordRoborazziDebug --tests sh.zeron.android.design.ZeronSwitchScreenshotTest`,
  * verify with `:app:verifyRoborazziDebug --tests …`. Paths are relative to
  * the `roborazzi { outputDir }` (`src/test/screenshots`), landing under
  * `design/`.
@@ -38,16 +38,16 @@ import org.robolectric.annotation.GraphicsMode
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "w402dp-h420dp-xxhdpi")
-class RobocoSwitchScreenshotTest {
+class ZeronSwitchScreenshotTest {
 
     @get:Rule
     val compose = createComposeRule()
 
     private fun shot(appearance: Appearance, file: String) {
         compose.setContent {
-            RobocoTheme(appearance) {
-                Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
-                    RobocoSwitchGallerySection()
+            ZeronTheme(appearance) {
+                Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
+                    ZeronSwitchGallerySection()
                 }
             }
         }
@@ -57,11 +57,11 @@ class RobocoSwitchScreenshotTest {
 
     @Test
     fun galleryLight() {
-        shot(Appearance.Light, "design/robocoswitch_light.png")
+        shot(Appearance.Light, "design/zeronswitch_light.png")
     }
 
     @Test
     fun galleryDark() {
-        shot(Appearance.Dark, "design/robocoswitch_dark.png")
+        shot(Appearance.Dark, "design/zeronswitch_dark.png")
     }
 }

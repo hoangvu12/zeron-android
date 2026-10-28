@@ -1,4 +1,4 @@
-package sh.roboco.android.sidechats
+package sh.zeron.android.sidechats
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -46,31 +46,31 @@ import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.FadingText
-import sh.roboco.android.design.Haptic
-import sh.roboco.android.design.LocalFeedback
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.StatusGlyph
-import sh.roboco.android.design.StatusGlyphKind
-import sh.roboco.android.design.glass.GlassCircleButton
-import sh.roboco.android.design.glass.Menu
-import sh.roboco.android.design.glass.MenuIcon
-import sh.roboco.android.design.glass.MenuItem
-import sh.roboco.android.design.glass.rememberGlassMenuState
-import sh.roboco.android.design.rememberSmoothRoundedShape
-import sh.roboco.android.design.sheet.GlassSheet
-import sh.roboco.android.design.sheet.GlassSheetDefaults
-import sh.roboco.android.design.sheet.SheetDetent
-import sh.roboco.android.design.sheet.rememberGlassSheetState
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.sessions.SectionHeaderRow
-import sh.roboco.android.sessions.SectionHeaderState
-import sh.roboco.android.sessions.SectionLive
-import sh.roboco.android.sessions.SessionRow
-import sh.roboco.android.sessions.rememberRowHighlight
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.FadingText
+import sh.zeron.android.design.Haptic
+import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.StatusGlyph
+import sh.zeron.android.design.StatusGlyphKind
+import sh.zeron.android.design.glass.GlassCircleButton
+import sh.zeron.android.design.glass.Menu
+import sh.zeron.android.design.glass.MenuIcon
+import sh.zeron.android.design.glass.MenuItem
+import sh.zeron.android.design.glass.rememberGlassMenuState
+import sh.zeron.android.design.rememberSmoothRoundedShape
+import sh.zeron.android.design.sheet.GlassSheet
+import sh.zeron.android.design.sheet.GlassSheetDefaults
+import sh.zeron.android.design.sheet.SheetDetent
+import sh.zeron.android.design.sheet.rememberGlassSheetState
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.sessions.SectionHeaderRow
+import sh.zeron.android.sessions.SectionHeaderState
+import sh.zeron.android.sessions.SectionLive
+import sh.zeron.android.sessions.SessionRow
+import sh.zeron.android.sessions.rememberRowHighlight
 
 /** The sheet's three foldable sections, in order (upstream #899's `Section`). */
 enum class SideChatsSection(val id: String, val title: String) {
@@ -81,7 +81,7 @@ enum class SideChatsSection(val id: String, val title: String) {
 
 /**
  * Which sections are folded, remembered across sheets for the process
- * (iOS keeps the set in `UserDefaults`; Roboco keeps it in memory — a
+ * (iOS keeps the set in `UserDefaults`; Zeron keeps it in memory — a
  * relaunch unfolds everything). Snapshot state, main thread only.
  */
 object SideChatsFolds {
@@ -212,13 +212,13 @@ fun sideChatsAddMenu(onNew: () -> Unit, onFork: () -> Unit): Menu = Menu(
     children = listOf(
         MenuItem(
             title = SideChatsCopy.NewSideChat,
-            icon = MenuIcon.Symbol(RobocoIcons.QuestionmarkBubble),
+            icon = MenuIcon.Symbol(ZeronIcons.QuestionmarkBubble),
             testTag = "side-chats-new",
             action = onNew,
         ),
         MenuItem(
             title = SideChatsCopy.ForkIntoSideChat,
-            icon = MenuIcon.Symbol(RobocoIcons.ArrowTriangleBranch),
+            icon = MenuIcon.Symbol(ZeronIcons.ArrowTriangleBranch),
             testTag = "side-chats-fork",
             action = onFork,
         ),
@@ -226,7 +226,7 @@ fun sideChatsAddMenu(onNew: () -> Unit, onFork: () -> Unit): Menu = Menu(
 )
 
 /**
- * The sheet's nav bar: [SheetHeaderRow][sh.roboco.android.design.sheet.SheetHeaderRow]'s
+ * The sheet's nav bar: [SheetHeaderRow][sh.zeron.android.design.sheet.SheetHeaderRow]'s
  * geometry (52 dp, 16 dp insets, 44 dp glass circles, the centred
  * SemiBold 17 title) with the + menu leading and the accent ✓ trailing.
  */
@@ -237,7 +237,7 @@ private fun SideChatsHeader(
     onFork: () -> Unit,
     onDone: () -> Unit,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val menuState = rememberGlassMenuState()
     // Written during layout, read only in the click lambda.
@@ -254,7 +254,7 @@ private fun SideChatsHeader(
         )
         if (canAdd) {
             GlassCircleButton(
-                icon = RobocoIcons.Plus,
+                icon = ZeronIcons.Plus,
                 contentDescription = SideChatsCopy.AddLabel,
                 onClick = { menuState.open(addBounds, sideChatsAddMenu(onNew, onFork)) },
                 modifier = Modifier
@@ -265,7 +265,7 @@ private fun SideChatsHeader(
             )
         }
         GlassCircleButton(
-            icon = RobocoIcons.Checkmark,
+            icon = ZeronIcons.Checkmark,
             contentDescription = "Done",
             onClick = onDone,
             filled = palette.accent,
@@ -404,7 +404,7 @@ internal fun SubagentRowView(
     modifier: Modifier = Modifier,
     nowMs: Long = System.currentTimeMillis(),
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
     val running = agent.running
     val glyph = when (agent.state) {

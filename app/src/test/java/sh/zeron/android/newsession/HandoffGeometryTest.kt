@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import androidx.compose.ui.geometry.Rect
 import org.junit.Assert.assertEquals

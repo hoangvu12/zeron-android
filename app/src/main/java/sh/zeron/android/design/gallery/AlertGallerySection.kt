@@ -1,4 +1,4 @@
-package sh.roboco.android.design.gallery
+package sh.zeron.android.design.gallery
 
 import android.util.Log
 import androidx.compose.foundation.background
@@ -16,17 +16,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.input.KeyboardCapitalization
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.AlertButton
-import sh.roboco.android.design.AlertButtonRole
-import sh.roboco.android.design.AlertField
-import sh.roboco.android.design.AlertHost
-import sh.roboco.android.design.AlertHostState
-import sh.roboco.android.design.AlertStripes
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoAlert
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.AlertButton
+import sh.zeron.android.design.AlertButtonRole
+import sh.zeron.android.design.AlertField
+import sh.zeron.android.design.AlertHost
+import sh.zeron.android.design.AlertHostState
+import sh.zeron.android.design.AlertStripes
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronAlert
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
 
 /**
  * The "Alert" page of the debug design gallery (ticket 18): one row per
@@ -36,7 +36,7 @@ import sh.roboco.android.design.uiStyle
  * gets.
  *
  * Ticket 22 owns the registration line in
- * `apps/android/app/src/debug/java/sh/roboco/android/design/Gallery.kt`:
+ * `apps/android/app/src/debug/java/sh/zeron/android/design/Gallery.kt`:
  * `GallerySection("Alert", GalleryLayout.Scroll, screenshotHeightDp = 640) { AlertGallerySection() }`
  * — that file does not exist yet (ticket 22 is not merged), same as ticket
  * 05's `HapticsGallerySection`. The gallery deep link `--es section alert`
@@ -50,7 +50,7 @@ import sh.roboco.android.design.uiStyle
 @Composable
 fun AlertGallerySection() {
     val alerts = remember { AlertHostState() }
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val hintStyle = uiStyle(Face.Sans, typeScale.scaled(13f), palette.secondary)
 
@@ -59,7 +59,7 @@ fun AlertGallerySection() {
     // pre-filled — the PR #685 capture's state.
     fun showNewFolder(name: String, message: String = "Create a folder in /Users/me/code on Studio.") {
         alerts.show(
-            RobocoAlert(
+            ZeronAlert(
                 title = "New Folder",
                 message = message,
                 field = AlertField(
@@ -102,7 +102,7 @@ fun AlertGallerySection() {
                 // Ticket 94: acknowledgement, one button, no field.
                 AlertDemoRow("OK — Couldn't start the session") {
                     alerts.show(
-                        RobocoAlert(
+                        ZeronAlert(
                             title = "Couldn't start the session",
                             message = "Choose a project or a host that can run it.",
                             buttons = listOf(AlertButton("OK")),
@@ -113,9 +113,9 @@ fun AlertGallerySection() {
                 // Ticket 99: two buttons, the cancel action carries a handler.
                 AlertDemoRow("Two buttons — Notifications are off") {
                     alerts.show(
-                        RobocoAlert(
+                        ZeronAlert(
                             title = "Notifications are off",
-                            message = "Allow notifications for Roboco in Android settings.",
+                            message = "Allow notifications for Zeron in Android settings.",
                             buttons = listOf(
                                 AlertButton("Not Now", role = AlertButtonRole.Cancel) {
                                     log("Not Now: reload (the cancel handler)")
@@ -129,7 +129,7 @@ fun AlertGallerySection() {
                 // Ticket 43: placeholder + Words capitalization.
                 AlertDemoRow("New Section — placeholder, Words") {
                     alerts.show(
-                        RobocoAlert(
+                        ZeronAlert(
                             title = "New Section",
                             field = AlertField(placeholder = "Name", capitalization = KeyboardCapitalization.Words),
                             buttons = listOf(
@@ -145,7 +145,7 @@ fun AlertGallerySection() {
                 // Ticket 43: pre-filled, the caret at the end (decision FOUNDATION-D2).
                 AlertDemoRow("Rename (pre-filled) — Rename Session") {
                     alerts.show(
-                        RobocoAlert(
+                        ZeronAlert(
                             title = "Rename Session",
                             field = AlertField(text = "Fix flaky test"),
                             buttons = listOf(
@@ -164,7 +164,7 @@ fun AlertGallerySection() {
                 // Destructive role (gallery-only copy).
                 AlertDemoRow("Destructive — Remove wallpaper?") {
                     alerts.show(
-                        RobocoAlert(
+                        ZeronAlert(
                             title = "Remove wallpaper?",
                             buttons = listOf(
                                 AlertButton("Cancel", role = AlertButtonRole.Cancel),
@@ -179,7 +179,7 @@ fun AlertGallerySection() {
                 // Three buttons: always stacked, Cancel last.
                 AlertDemoRow("Three buttons (stacked)") {
                     alerts.show(
-                        RobocoAlert(
+                        ZeronAlert(
                             title = "Version conflict",
                             message = "A session with this name already exists.",
                             buttons = listOf(
@@ -194,7 +194,7 @@ fun AlertGallerySection() {
                 // Two long titles: wider than the 108 dp half-capsule budget.
                 AlertDemoRow("Long titles (stack)") {
                     alerts.show(
-                        RobocoAlert(
+                        ZeronAlert(
                             title = "Version conflict",
                             buttons = listOf(
                                 AlertButton("Keep Both Versions") { log("keep both") },
@@ -208,14 +208,14 @@ fun AlertGallerySection() {
                 // faded out (the FIFO queue).
                 AlertDemoRow("Show twice — the FIFO queue") {
                     alerts.show(
-                        RobocoAlert(
+                        ZeronAlert(
                             title = "First",
                             message = "Only one alert is visible at a time.",
                             buttons = listOf(AlertButton("OK")),
                         ),
                     )
                     alerts.show(
-                        RobocoAlert(
+                        ZeronAlert(
                             title = "Second",
                             message = "The queued alert, in the frame after the first faded out.",
                             buttons = listOf(AlertButton("OK")),
@@ -229,7 +229,7 @@ fun AlertGallerySection() {
 
 @Composable
 private fun AlertDemoRow(label: String, onClick: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     BasicText(
         label,

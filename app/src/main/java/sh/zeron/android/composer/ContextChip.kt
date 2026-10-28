@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -26,20 +26,20 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.BranchIcon
-import sh.roboco.android.design.CapsuleShape
-import sh.roboco.android.design.HarnessMark
-import sh.roboco.android.design.Icon
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.PrIcon
-import sh.roboco.android.design.ProjectTile
-import sh.roboco.android.design.RobocoIcon
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.SymbolWeight
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.BranchIcon
+import sh.zeron.android.design.CapsuleShape
+import sh.zeron.android.design.HarnessMark
+import sh.zeron.android.design.Icon
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.PrIcon
+import sh.zeron.android.design.ProjectTile
+import sh.zeron.android.design.ZeronIcon
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.SymbolWeight
+import sh.zeron.android.design.uiStyle
 
 /**
  * One context chip of the composer toolbar (model, effort, branch, PR,
@@ -58,7 +58,7 @@ import sh.roboco.android.design.uiStyle
 
 /**
  * What sits before the title — [ComposerChip.icon] resolved, or
- * [ComposerChip.symbol] through [RobocoIcons.forSfName] when there is no
+ * [ComposerChip.symbol] through [ZeronIcons.forSfName] when there is no
  * icon (the SF name that does not resolve gives **no** icon, like
  * `UIImage(systemName:) == nil`).
  */
@@ -69,7 +69,7 @@ sealed interface ChipLeading {
      * An SF Symbol at point 11.5, Semibold, tinted with the chip's ink —
      * ticket 06's `Icon` box is `11.5 × 1.2 = 13.8` dp.
      */
-    data class Symbol(val icon: RobocoIcon) : ChipLeading
+    data class Symbol(val icon: ZeronIcon) : ChipLeading
 
     /** The harness's brand mark at 13 dp (ticket 13; Claude keeps `#D97757`). */
     data class Brand(val harness: String) : ChipLeading
@@ -135,7 +135,7 @@ object ChipTokens {
     /** Tinted ink: `tint.withAlphaComponent(0.85)`. */
     const val TintInkAlpha = 0.85f
 
-    /** Press overlay: `text` @0.06 inside the capsule (Roboco tuning, see the ticket's Comments). */
+    /** Press overlay: `text` @0.06 inside the capsule (Zeron tuning, see the ticket's Comments). */
     const val PressOverlayAlpha = 0.06f
 
     /** The id whose chip takes the mono PR variant (`chip.id == "pr"`, `:432`, `:446`). */
@@ -160,7 +160,7 @@ fun resolveChipTint(palette: Palette, tint: ChipTint): Color = when (tint) {
  * untinted chips are `controlFill` + `text`; tinted ones take the tone
  * wash (fill @ [ChipTokens.TintFillAlpha], ink @
  * [ChipTokens.TintInkAlpha]); a disabled chip (`canWrite == false`, the
- * Roboco offline read-only mode) keeps its fill and turns the ink
+ * Zeron offline read-only mode) keeps its fill and turns the ink
  * `tertiary`.
  */
 fun chipColors(palette: Palette, tint: Color?, enabled: Boolean): ChipColors = ChipColors(
@@ -182,7 +182,7 @@ fun ComposerChip.leading(): ChipLeading? = when (val i = icon) {
     ChipIcon.Branch -> ChipLeading.Branch
     ChipIcon.PullRequest -> ChipLeading.PullRequest
     is ChipIcon.Project -> ChipLeading.Project(i.name, i.colorIndex)
-    null -> symbol?.let(RobocoIcons::forSfName)?.let(ChipLeading::Symbol)
+    null -> symbol?.let(ZeronIcons::forSfName)?.let(ChipLeading::Symbol)
 }
 
 // ---------------------------------------------------------------------------
@@ -193,7 +193,7 @@ fun ComposerChip.leading(): ChipLeading? = when (val i = icon) {
  * The low-level chip: capsule fill, optional leading icon, one-line title
  * at a fixed size. Also the base of ticket 112's folder-browser locations
  * rail (Home + drives), which passes its own [colors] and a [ChipLeading]
- * built from `RobocoIcons` directly.
+ * built from `ZeronIcons` directly.
  *
  * The tap is **always consumed** (a plain `clickable` that no-ops when
  * [enabled] is false): iOS ignores touches that hit a `UIControl` in the
@@ -221,7 +221,7 @@ fun ContextChip(
     colors: ChipColors? = null,
     a11yLabel: String? = null,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val resolved = colors ?: chipColors(palette, tint, enabled)
     val interaction = remember { MutableInteractionSource() }
@@ -293,7 +293,7 @@ fun ContextChip(
         leading = chip.leading(),
         onClick = onClick,
         modifier = modifier.testTag("composer-chip-${chip.id}"),
-        tint = chip.tint?.let { resolveChipTint(RobocoTheme.palette, it) },
+        tint = chip.tint?.let { resolveChipTint(ZeronTheme.palette, it) },
         enabled = enabled,
         mono = pr,
         iconGap = if (pr) ChipTokens.PrIconGap else ChipTokens.IconGap,

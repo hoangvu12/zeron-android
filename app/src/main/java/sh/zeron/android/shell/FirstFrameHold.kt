@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import android.app.Activity
 import android.os.SystemClock
@@ -7,7 +7,7 @@ import android.view.ViewTreeObserver
 
 /**
  * Keeps the platform splash up until [ready] returns true or [timeoutMs]
- * passes (android-ui-parity #35; 2000 ms is a Roboco choice — iOS loads
+ * passes (android-ui-parity #35; 2000 ms is a Zeron choice — iOS loads
  * credentials synchronously, Android loads engines asynchronously and
  * must not flash the pairing root at a paired user).
  *

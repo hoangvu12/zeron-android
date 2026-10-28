@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
@@ -9,14 +9,14 @@ import androidx.compose.ui.text.font.FontSynthesis
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
-import sh.roboco.android.core.Face
+import sh.zeron.android.core.Face
 
 /**
  * The base [TextStyle] every UI label starts from — what a plain `UILabel`
  * gives the iOS app for free. `uiStyle` layers the face, size and colour on
  * top of it.
  */
-object RobocoTextDefaults {
+object ZeronTextDefaults {
 
     /**
      * - `includeFontPadding = false` — `UILabel` has no font padding; the
@@ -53,7 +53,7 @@ object RobocoTextDefaults {
 @Composable
 @ReadOnlyComposable
 fun uiStyle(face: Face, size: TextUnit, color: Color = Color.Unspecified): TextStyle =
-    RobocoTextDefaults.Base.copy(
+    ZeronTextDefaults.Base.copy(
         fontFamily = LocalFonts.current.family(face),
         fontWeight = face.weight,
         fontStyle = face.style,

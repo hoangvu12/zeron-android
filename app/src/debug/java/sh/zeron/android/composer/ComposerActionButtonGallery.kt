@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,12 +17,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.rememberHazeState
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.GlassStage
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.GlassStage
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.uiStyle
 
 /**
  * The "Composer action button" page of the debug design gallery
@@ -43,17 +43,17 @@ import sh.roboco.android.design.uiStyle
  *    readout under the stage logs `onSend(mode)` / `onStop()`.
  *
  * The section wraps itself in its own [GlassMenuHost] (the registry's
- * [sh.roboco.android.design.GalleryProviders] installs no host): the
+ * [sh.zeron.android.design.GalleryProviders] installs no host): the
  * window's content is the haze source the menu panels blur.
  *
- * Try it live (`adb shell am start -n sh.roboco.android/.MainActivity
+ * Try it live (`adb shell am start -n sh.zeron.android/.MainActivity
  * --es route gallery --es section composer_action_button`): tap the stop
- * square (one sharp click — the controller's [sh.roboco.android.design.Haptic.Stop],
+ * square (one sharp click — the controller's [sh.zeron.android.design.Haptic.Stop],
  * never a double buzz) and watch the log show `onStop()`.
  */
 @Composable
 fun ComposerActionButtonGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     GlassMenuHost(hazeState = rememberHazeState()) {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -76,7 +76,7 @@ fun ComposerActionButtonGallerySection() {
 /** The static five states, each labelled underneath, over the backdrop. */
 @Composable
 private fun StaticStatesRow() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     GlassStage(height = 120.dp) {
         Row(
@@ -108,7 +108,7 @@ private fun StaticStatesRow() {
  */
 @Composable
 private fun LiveDemo() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val controller = rememberComposerController()
     var log by remember { mutableStateOf("(nothing yet)") }
@@ -156,7 +156,7 @@ private fun LiveDemo() {
 /** A plain clickable text chip, like the morph section's (no Material). */
 @Composable
 private fun DemoChip(text: String, active: Boolean, onClick: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     BasicText(
         text,

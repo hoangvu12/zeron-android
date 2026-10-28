@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -15,10 +15,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import uniffi.roboco_core.CoreClient
-import uniffi.roboco_core.DriveEntry
-import uniffi.roboco_core.FolderListing
-import uniffi.roboco_core.PreparedPath
+import uniffi.zeron_core.CoreClient
+import uniffi.zeron_core.DriveEntry
+import uniffi.zeron_core.FolderListing
+import uniffi.zeron_core.PreparedPath
 
 /**
  * The typed-path state machine and the locations rail's data (android-ui-

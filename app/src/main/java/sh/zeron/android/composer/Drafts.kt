@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import android.content.Context
 import android.util.Log
@@ -26,19 +26,19 @@ import kotlinx.coroutines.launch
 
 /**
  * The failure sink of the draft store (android-ui-parity #84): production
- * logs `Log.w("Roboco", …)`. Plain-JVM tests swap this — the stub
+ * logs `Log.w("Zeron", …)`. Plain-JVM tests swap this — the stub
  * `android.util.Log` throws "not mocked" outside Robolectric (the same
  * seam `sessionLogW` provides for 51). Every line is content-free: never
  * draft text, never a draft key.
  */
 internal var draftsLogW: (String, Throwable?) -> Unit = { message, error ->
-    if (error == null) Log.w("Roboco", message) else Log.w("Roboco", message, error)
+    if (error == null) Log.w("Zeron", message) else Log.w("Zeron", message, error)
 }
 
 /**
  * The draft-store key space (android-ui-parity #84). iOS keys its one
  * `UserDefaults` "drafts" dictionary by raw chat id
- * (`ios:Session/SessionViewController.swift:668-682`); Roboco chat ids are
+ * (`ios:Session/SessionViewController.swift:668-682`); Zeron chat ids are
  * only unique per engine, so a chat key carries the engine id too — which
  * also lets [Drafts.forgetEngine] delete by prefix without ever decoding
  * the scoped id (that format belongs to Rust,
@@ -100,7 +100,7 @@ fun isDraftBlank(text: String): Boolean = text.all { c ->
  * stays `"  hi\n"`). Entries are never pruned — archive and delete do not
  * touch them; the only bulk deletion is [forgetEngine].
  *
- * Roboco adaptations (the ticket's ADAPT lines): the `UserDefaults`
+ * Zeron adaptations (the ticket's ADAPT lines): the `UserDefaults`
  * dictionary becomes one DataStore entry per draft in
  * `noBackupFilesDir` (drafts reference engine ids and chat ids that are
  * themselves not backed up — a restored backup would only hold orphans);
@@ -113,7 +113,7 @@ fun isDraftBlank(text: String): Boolean = text.all { c ->
  * synchronously (a `peek` right after it sees the new text: pop, then
  * immediately reopen the same chat) and launches the disk write on
  * [scope], which must outlive every screen
- * (`RobocoApplication.appScope`, never a screen or nav-entry scope —
+ * (`ZeronApplication.appScope`, never a screen or nav-entry scope —
  * those cancel exactly when the leave and dispose saves fire). Each
  * write job, inside `store.edit`, writes the mirror's **current** value
  * for its key (absent → remove), so writes are order-insensitive: the
@@ -127,7 +127,7 @@ fun isDraftBlank(text: String): Boolean = text.all { c ->
  */
 class Drafts(
     private val store: DataStore<Preferences>,
-    /** The process-lifetime scope (`RobocoApplication.appScope`) — outlives every screen. */
+    /** The process-lifetime scope (`ZeronApplication.appScope`) — outlives every screen. */
     private val scope: CoroutineScope,
     private val io: CoroutineDispatcher = Dispatchers.IO,
 ) {
@@ -155,7 +155,7 @@ class Drafts(
 
     /**
      * Starts the first disk read (idempotent; called once from
-     * `RobocoApplication.onCreate`, which always precedes any activity's
+     * `ZeronApplication.onCreate`, which always precedes any activity's
      * `setContent`). The read runs on [scope] with [io]; a failure is
      * logged and treated as an empty store, and the store is marked
      * loaded either way.
@@ -289,7 +289,7 @@ class Drafts(
         /**
          * The process's single DataStore for [FILE_NAME] (a second active
          * instance on the same file throws). Create once, in
-         * `RobocoApplication` — the same shape as ticket 71's
+         * `ZeronApplication` — the same shape as ticket 71's
          * `paired_engines.preferences_pb`.
          */
         fun createDataStore(context: Context, scope: CoroutineScope): DataStore<Preferences> =
@@ -306,7 +306,7 @@ class Drafts(
 
 /**
  * The draft store for composition. Production: `MainActivity` provides
- * `RobocoApplication.drafts`. The default is an in-memory store (no file,
+ * `ZeronApplication.drafts`. The default is an in-memory store (no file,
  * nothing persists) so previews, Robolectric hosts without the app and
  * the gallery need no setup — 92's new-session moments read it the same
  * way.

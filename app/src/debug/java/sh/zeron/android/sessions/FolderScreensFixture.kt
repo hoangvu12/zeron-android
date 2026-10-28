@@ -1,12 +1,12 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
-import uniffi.roboco_core.ChatIndicator
-import uniffi.roboco_core.FrontPage
-import uniffi.roboco_core.ProjectRef
-import uniffi.roboco_core.PullRequestGroups
-import uniffi.roboco_core.SectionView
-import uniffi.roboco_core.SessionRow
-import uniffi.roboco_core.WorkspaceSnapshot
+import uniffi.zeron_core.ChatIndicator
+import uniffi.zeron_core.FrontPage
+import uniffi.zeron_core.ProjectRef
+import uniffi.zeron_core.PullRequestGroups
+import uniffi.zeron_core.SectionView
+import uniffi.zeron_core.SessionRow
+import uniffi.zeron_core.WorkspaceSnapshot
 
 /**
  * The shared folder-screen fixtures (android-ui-parity #45) — the ticket's

@@ -1,4 +1,4 @@
-package sh.roboco.android.benchmark
+package sh.zeron.android.benchmark
 
 import android.os.SystemClock
 import androidx.benchmark.macro.FrameTimingMetric

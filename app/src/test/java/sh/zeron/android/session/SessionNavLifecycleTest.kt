@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import android.view.Choreographer
 import java.util.concurrent.LinkedBlockingQueue
@@ -10,15 +10,15 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import sh.roboco.android.shell.AppRouter
-import sh.roboco.android.shell.DraftHandoff
-import sh.roboco.android.transcript.FramePoster
-import sh.roboco.android.transcript.ModelPipeline
-import sh.roboco.android.transcript.TranscriptState
-import uniffi.roboco_core.LayoutFrame
-import uniffi.roboco_core.NoHandle
-import uniffi.roboco_core.TextSystem
-import uniffi.roboco_core.TranscriptView
+import sh.zeron.android.shell.AppRouter
+import sh.zeron.android.shell.DraftHandoff
+import sh.zeron.android.transcript.FramePoster
+import sh.zeron.android.transcript.ModelPipeline
+import sh.zeron.android.transcript.TranscriptState
+import uniffi.zeron_core.LayoutFrame
+import uniffi.zeron_core.NoHandle
+import uniffi.zeron_core.TextSystem
+import uniffi.zeron_core.TranscriptView
 
 /**
  * [SessionNavLifecycle] (android-ui-parity #85) — the UIKit

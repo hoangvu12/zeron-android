@@ -1,6 +1,6 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
-import uniffi.roboco_core.PreparedPath
+import uniffi.zeron_core.PreparedPath
 
 /**
  * Debug-only fake of the New Project write seam (android-ui-parity #111)

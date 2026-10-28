@@ -1,4 +1,4 @@
-package sh.roboco.android.accounts
+package sh.zeron.android.accounts
 
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.CancellationException
@@ -8,21 +8,21 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import sh.roboco.android.composer.ChipTint
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.Toaster
-import sh.roboco.android.design.glass.Menu
-import sh.roboco.android.design.glass.MenuIcon
-import sh.roboco.android.design.glass.MenuItem
-import sh.roboco.android.design.glass.MenuSection
-import sh.roboco.android.composer.ContextCardAccounts
-import sh.roboco.android.session.ChromeFiller
-import sh.roboco.android.session.ChromeInput
-import sh.roboco.android.session.CONTEXT_WARNING_SYMBOL
-import sh.roboco.android.session.SessionChipIds
-import sh.roboco.android.session.SessionChrome
-import uniffi.roboco_core.AgentAccount
-import uniffi.roboco_core.AgentAccountsSnapshot
+import sh.zeron.android.composer.ChipTint
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.Toaster
+import sh.zeron.android.design.glass.Menu
+import sh.zeron.android.design.glass.MenuIcon
+import sh.zeron.android.design.glass.MenuItem
+import sh.zeron.android.design.glass.MenuSection
+import sh.zeron.android.composer.ContextCardAccounts
+import sh.zeron.android.session.ChromeFiller
+import sh.zeron.android.session.ChromeInput
+import sh.zeron.android.session.CONTEXT_WARNING_SYMBOL
+import sh.zeron.android.session.SessionChipIds
+import sh.zeron.android.session.SessionChrome
+import uniffi.zeron_core.AgentAccount
+import uniffi.zeron_core.AgentAccountsSnapshot
 
 /**
  * The composer's plan usage (android-next#05) — the port of PR #578's
@@ -56,7 +56,7 @@ class SessionAccountUsage(
     private val core: AccountsCore,
     private val io: CoroutineDispatcher = Dispatchers.IO,
     private val nowMs: () -> Long = System::currentTimeMillis,
-    private val harnessLabel: (harness: String) -> String = { uniffi.roboco_core.harnessLabel(it) },
+    private val harnessLabel: (harness: String) -> String = { uniffi.zeron_core.harnessLabel(it) },
 ) : ChromeFiller, ContextCardAccounts {
 
     /**
@@ -223,7 +223,7 @@ class SessionAccountUsage(
                             subtitle = topWindowOf(account)
                                 ?.let { "${it.label} ${usagePercent(it.usedFraction)}" }
                                 ?: account.planLabel,
-                            icon = MenuIcon.Symbol(RobocoIcons.ArrowUpArrowDown),
+                            icon = MenuIcon.Symbol(ZeronIcons.ArrowUpArrowDown),
                             testTag = "context-menu-switch-${account.id}",
                         ) { switchTo(account) },
                     )
@@ -231,7 +231,7 @@ class SessionAccountUsage(
                 add(
                     MenuItem(
                         title = AccountsCopy.OpenPage,
-                        icon = MenuIcon.Symbol(RobocoIcons.Desktopcomputer),
+                        icon = MenuIcon.Symbol(ZeronIcons.Desktopcomputer),
                         testTag = "context-menu-open",
                     ) { onOpenAccounts() },
                 )

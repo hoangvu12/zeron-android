@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -23,13 +23,13 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.R
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.R
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
 
 /**
  * The observed state of the app root (android-ui-parity #35). [kind] is
@@ -61,7 +61,7 @@ class AppRootState {
  * `RootCrossfade` is first composed with `shown = target`, the
  * `SceneDelegate.swift:95-97` rule.
  *
- * Must be inside `RobocoTheme`. The root paints the window background
+ * Must be inside `ZeronTheme`. The root paints the window background
  * ([Palette.background]) under the roots (every root paints its own
  * opaque background too, so the cross-fade never shows it) and consumes
  * or pads **no** insets: every screen applies its own `safeDrawing`/`ime`.
@@ -89,7 +89,7 @@ fun AppRoot(
     BoxWithConstraints(
         modifier
             .fillMaxSize()
-            .background(RobocoTheme.palette.background),
+            .background(ZeronTheme.palette.background),
     ) {
         when (input) {
             RootInput.Loading -> {
@@ -99,7 +99,7 @@ fun AppRoot(
                     Modifier
                         .fillMaxSize()
                         .background(
-                            if (RobocoTheme.isDark) Palette.LaunchBackgroundDark else Palette.LaunchBackgroundLight,
+                            if (ZeronTheme.isDark) Palette.LaunchBackgroundDark else Palette.LaunchBackgroundLight,
                         ),
                 )
                 SideEffect { state.kind = null }
@@ -162,17 +162,17 @@ fun AppRoot(
 
 /**
  * The core-load failure screen (android-app#13's placeholder content,
- * moved here by ticket 35): full-screen launch background, "Roboco" in
+ * moved here by ticket 35): full-screen launch background, "Zeron" in
  * Geist SemiBold 22 and the diagnostic line in GeistMono 13 at 60 %
  * alpha, `#000000` light / `#FFFFFF` dark. The copy is verbatim:
- * "Couldn't load the Roboco core: <reason>".
+ * "Couldn't load the Zeron core: <reason>".
  */
 @Composable
 fun CoreUnavailableScreen(reason: String, modifier: Modifier = Modifier) {
     val typeScale = LocalTypeScale.current
     // #000000 on the light launch background, #FFFFFF on the dark one
     // (the placeholder's inks, kept verbatim).
-    val ink = if (RobocoTheme.isDark) Color(0xFFFFFFFF) else Color(0xFF000000)
+    val ink = if (ZeronTheme.isDark) Color(0xFFFFFFFF) else Color(0xFF000000)
     Box(
         modifier
             .fillMaxSize()
@@ -186,11 +186,11 @@ fun CoreUnavailableScreen(reason: String, modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.Center,
         ) {
             BasicText(
-                text = "Roboco",
+                text = "Zeron",
                 style = uiStyle(Face.SansSemibold, typeScale.fixed(22f), ink),
             )
             BasicText(
-                text = "Couldn't load the Roboco core: $reason",
+                text = "Couldn't load the Zeron core: $reason",
                 style = uiStyle(Face.Mono, typeScale.fixed(13f), ink.copy(alpha = 0.6f)),
             )
         }
@@ -241,8 +241,8 @@ private fun AppRootDarkPreview() {
 
 @Composable
 private fun AppRootPreviewBody(appearance: Appearance) {
-    RobocoTheme(appearance) {
-        val palette = RobocoTheme.palette
+    ZeronTheme(appearance) {
+        val palette = ZeronTheme.palette
         AppRoot(
             input = RootInput.Ready(hasEngines = true),
             state = remember { AppRootState() },

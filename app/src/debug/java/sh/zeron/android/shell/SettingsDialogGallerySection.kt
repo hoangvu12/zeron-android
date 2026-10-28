@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -30,22 +30,22 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.ActionSheetHost
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.GroupedAccessory
-import sh.roboco.android.design.GroupedRow
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoIcon
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoSwitch
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.groupedSection
-import sh.roboco.android.design.hairlineWidth
-import sh.roboco.android.design.sheet.SheetHeaderRow
-import sh.roboco.android.design.sheet.SheetLeading
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.sessions.rememberSessionListOpener
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.ActionSheetHost
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.GroupedAccessory
+import sh.zeron.android.design.GroupedRow
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronIcon
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronSwitch
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.groupedSection
+import sh.zeron.android.design.hairlineWidth
+import sh.zeron.android.design.sheet.SheetHeaderRow
+import sh.zeron.android.design.sheet.SheetLeading
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.sessions.rememberSessionListOpener
 
 /**
  * The "Settings dialog" page of the debug design gallery
@@ -66,7 +66,7 @@ import sh.roboco.android.sessions.rememberSessionListOpener
  *   page over the card through [LocalEnclosingSheet], exactly like 72/140
  *   stack on the real card);
  * - "Archived Sessions" routes through 41's real session-list opener, so
- *   the Roboco adaptation (a session tap goes to the app router, not the
+ *   the Zeron adaptation (a session tap goes to the app router, not the
  *   card's stack) can be tried live;
  * - the sidebar's field demonstrates the keyboard being put away on
  *   present (focus it, then Show Settings).
@@ -90,7 +90,7 @@ fun SettingsDialogGallerySection() {
 /**
  * The fake split the dialog presents over — shared by the gallery, the
  * previews and `SettingsDialogTest`'s fixture (the ticket's Verification:
- * "`RobocoTheme { SheetHost(state) { FakeSplit() } }` with the gallery's
+ * "`ZeronTheme { SheetHost(state) { FakeSplit() } }` with the gallery's
  * fake root"). Builds the presenter with the gallery's fake root and 24's
  * demo screen, and reports it (and the sidebar taps / the root screen's
  * disposal) back to the test through the optional hooks.
@@ -107,7 +107,7 @@ internal fun SettingsDialogFakeSplit(
         routeScreen = { entry -> NavDemoScreen(entry) },
     )
     SideEffect { onPresenterReady(presenter) }
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     var query by remember { mutableStateOf("") }
     Box(Modifier.fillMaxSize().background(palette.background)) {
@@ -170,7 +170,7 @@ internal fun SettingsDialogFakeSplit(
  * "Archived Sessions" stands in for "a list inside the card that opens a
  * session": it goes through 41's real `rememberSessionListOpener()`, which
  * the card overrides with `LocalSessionListOpener` → the app router (the
- * Roboco adaptation; iOS would push inside the sheet because
+ * Zeron adaptation; iOS would push inside the sheet because
  * `splitViewController` is nil there).
  */
 @Composable
@@ -190,7 +190,7 @@ internal fun SettingsDialogFakeRoot(
             key = "notifications",
             header = "Notifications",
             items = listOf(
-                FakeSettingsRow("Notifications", "When a session finishes, needs you or fails", RobocoIcons.Bell),
+                FakeSettingsRow("Notifications", "When a session finishes, needs you or fails", ZeronIcons.Bell),
             ),
             itemKey = { it.title },
         ) { row, position ->
@@ -200,7 +200,7 @@ internal fun SettingsDialogFakeRoot(
                 icon = row.icon,
                 position = position,
                 accessories = listOf(
-                    GroupedAccessory.Custom { RobocoSwitch(notificationsOn, { notificationsOn = it }) },
+                    GroupedAccessory.Custom { ZeronSwitch(notificationsOn, { notificationsOn = it }) },
                 ),
                 onClick = null,
             )
@@ -209,9 +209,9 @@ internal fun SettingsDialogFakeRoot(
             key = "appearance",
             header = "Appearance",
             items = listOf(
-                FakeSettingsRow("System", icon = RobocoIcons.CircleLeftHalfFilled, checked = true),
-                FakeSettingsRow("Light", icon = RobocoIcons.SunMax),
-                FakeSettingsRow("Dark", icon = RobocoIcons.Moon),
+                FakeSettingsRow("System", icon = ZeronIcons.CircleLeftHalfFilled, checked = true),
+                FakeSettingsRow("Light", icon = ZeronIcons.SunMax),
+                FakeSettingsRow("Dark", icon = ZeronIcons.Moon),
             ),
             itemKey = { it.title },
         ) { row, position ->
@@ -227,7 +227,7 @@ internal fun SettingsDialogFakeRoot(
             key = "wallpaper",
             header = "Wallpaper",
             items = listOf(
-                FakeSettingsRow("Choose Wallpaper…", "Shown behind new chats and the sessions list", RobocoIcons.Photo),
+                FakeSettingsRow("Choose Wallpaper…", "Shown behind new chats and the sessions list", ZeronIcons.Photo),
             ),
             itemKey = { it.title },
         ) { row, position ->
@@ -246,9 +246,9 @@ internal fun SettingsDialogFakeRoot(
                 FakeSettingsRow(
                     "Group by Project",
                     "Sessions outside your sections, under their project",
-                    RobocoIcons.SquareStack3dUp,
+                    ZeronIcons.SquareStack3dUp,
                 ),
-                FakeSettingsRow("Archived Sessions", icon = RobocoIcons.Archivebox),
+                FakeSettingsRow("Archived Sessions", icon = ZeronIcons.Archivebox),
             ),
             itemKey = { it.title },
         ) { row, position ->
@@ -258,7 +258,7 @@ internal fun SettingsDialogFakeRoot(
                 icon = row.icon,
                 position = position,
                 accessories = if (row.title == "Group by Project") {
-                    listOf(GroupedAccessory.Custom { RobocoSwitch(groupByProject, { groupByProject = it }) })
+                    listOf(GroupedAccessory.Custom { ZeronSwitch(groupByProject, { groupByProject = it }) })
                 } else {
                     listOf(GroupedAccessory.Disclosure)
                 },
@@ -303,14 +303,14 @@ internal fun SettingsDialogFakeRoot(
 private data class FakeSettingsRow(
     val title: String,
     val subtitle: String? = null,
-    val icon: RobocoIcon? = null,
+    val icon: ZeronIcon? = null,
     val checked: Boolean = false,
 )
 
 /** The placeholder page the "Stack page sheet" row presents over the card. */
 @Composable
 private fun DemoPairPage(sheetScope: PageSheetScope) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Column(Modifier.fillMaxSize()) {
         SheetHeaderRow(
@@ -330,7 +330,7 @@ private fun DemoPairPage(sheetScope: PageSheetScope) {
 /** One plain-text button row (no Material controls). */
 @Composable
 private fun GalleryTextButton(text: String, onClick: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     BasicText(
         text,
@@ -364,7 +364,7 @@ private fun SettingsDialogDarkPreview() {
 
 @Composable
 private fun SettingsDialogPreviewStage(appearance: Appearance) {
-    RobocoTheme(appearance) {
+    ZeronTheme(appearance) {
         ActionSheetHost {
             val state = rememberSheetHostState()
             val locals = rememberUpdatedState(currentCompositionLocalContext)

@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import android.content.res.Configuration
 import androidx.compose.animation.core.Animatable
@@ -41,21 +41,21 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlin.math.min
 import kotlin.math.roundToInt
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.Motion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.rememberSmoothRoundedShape
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.Motion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.rememberSmoothRoundedShape
+import sh.zeron.android.design.uiStyle
 
 /**
  * True for refs whose bytes are still crossing to the engine (ticket 67).
- * Upstream writes `pending://` refs (`RowView.swift:226`); Roboco's own
+ * Upstream writes `pending://` refs (`RowView.swift:226`); Zeron's own
  * echo names them `pending/<uuid>/<name>` (android-app#08 §Send step 5,
  * the web's legacy synthetic ref) until the upload lands and the row
  * switches to the absolute host path. Both prefixes are accepted, like
- * the Roboco web (`user-attachments.tsx:122-126`) and desktop
+ * the Zeron web (`user-attachments.tsx:122-126`) and desktop
  * (`transcript.rs:6186`); real host paths are absolute (`/…`, `C:\…`),
  * so `pending/` is unambiguous. If android-app#08 lands a different echo
  * prefix, add it here.
@@ -356,8 +356,8 @@ internal fun UploadRingFixtureRow(modifier: Modifier = Modifier) {
 @Preview(name = "light")
 @Composable
 private fun UploadRingLightPreview() {
-    RobocoTheme(Appearance.Light) {
-        Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+    ZeronTheme(Appearance.Light) {
+        Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
             UploadRingFixtureRow()
         }
     }
@@ -366,8 +366,8 @@ private fun UploadRingLightPreview() {
 @Preview(name = "dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun UploadRingDarkPreview() {
-    RobocoTheme(Appearance.Dark) {
-        Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+    ZeronTheme(Appearance.Dark) {
+        Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
             UploadRingFixtureRow()
         }
     }

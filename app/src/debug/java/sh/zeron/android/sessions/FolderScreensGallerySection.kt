@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -19,24 +19,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.ActionSheetHost
-import sh.roboco.android.design.ActionSheetHostState
-import sh.roboco.android.design.AlertHost
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalToaster
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.Toaster
-import sh.roboco.android.design.ToastHost
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.shell.NavStack
-import sh.roboco.android.shell.NavStackHost
-import sh.roboco.android.shell.PlaceholderTabRoot
-import sh.roboco.android.shell.TabId
-import sh.roboco.android.shell.TabRootRoute
-import uniffi.roboco_core.WorkspaceSnapshot
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.ActionSheetHost
+import sh.zeron.android.design.ActionSheetHostState
+import sh.zeron.android.design.AlertHost
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalToaster
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.Toaster
+import sh.zeron.android.design.ToastHost
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.shell.NavStack
+import sh.zeron.android.shell.NavStackHost
+import sh.zeron.android.shell.PlaceholderTabRoot
+import sh.zeron.android.shell.TabId
+import sh.zeron.android.shell.TabRootRoute
+import uniffi.zeron_core.WorkspaceSnapshot
 
 /** The gallery's kind picker: each value is one pushed folder screen. */
 private enum class FolderDemo(val label: String) {
@@ -122,7 +122,7 @@ private class FolderGalleryRowActions(
     override fun deleteSection(sectionId: String, onResult: (ActionOutcome) -> Unit) =
         sectionWrite("deleteSection($sectionId)", onResult)
 
-    override fun sectionsFor(engineId: String) = emptyList<uniffi.roboco_core.SectionView>()
+    override fun sectionsFor(engineId: String) = emptyList<uniffi.zeron_core.SectionView>()
 
     override fun report(error: Throwable) {
         log("report($error)")
@@ -152,7 +152,7 @@ private class FolderGalleryRowActions(
  */
 @Composable
 fun FolderScreensGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val toaster = LocalToaster.current
     val sheets = remember { ActionSheetHostState() }
@@ -241,7 +241,7 @@ fun FolderScreensGallerySection() {
 /** A toggle row: the label in `accent` when on, `secondary` when off. */
 @Composable
 private fun DemoRow(text: String, selected: Boolean, style: TextStyle, onClick: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val ink = if (selected) palette.accent else palette.secondary
     BasicText(
         text,
@@ -262,7 +262,7 @@ private fun DemoRow(text: String, selected: Boolean, style: TextStyle, onClick: 
 @Preview(name = "folder screens gallery light")
 @Composable
 private fun FolderScreensGalleryLightPreview() {
-    RobocoTheme(Appearance.Light) {
+    ZeronTheme(Appearance.Light) {
         AlertHost { ToastHost { FolderScreensGallerySection() } }
     }
 }
@@ -270,7 +270,7 @@ private fun FolderScreensGalleryLightPreview() {
 @Preview(name = "folder screens gallery dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun FolderScreensGalleryDarkPreview() {
-    RobocoTheme(Appearance.Dark) {
+    ZeronTheme(Appearance.Dark) {
         AlertHost { ToastHost { FolderScreensGallerySection() } }
     }
 }

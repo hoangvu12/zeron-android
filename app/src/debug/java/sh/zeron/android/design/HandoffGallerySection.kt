@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.content.res.Configuration
 import androidx.compose.animation.core.AnimationSpec
@@ -41,21 +41,21 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlin.math.max
 import kotlin.math.roundToInt
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.sheet.SmoothTopRoundedShape
-import sh.roboco.android.newsession.CapturedDraftHandoff
-import sh.roboco.android.newsession.HandoffArrivalTarget
-import sh.roboco.android.newsession.HandoffOverlayCanvas
-import sh.roboco.android.newsession.HandoffOverlayHost
-import sh.roboco.android.newsession.HandoffOverlaySet
-import sh.roboco.android.newsession.HandoffOverlayState
-import sh.roboco.android.newsession.bubbleStartRect
-import sh.roboco.android.newsession.fallbackBubbleTarget
-import sh.roboco.android.newsession.flightRect
-import sh.roboco.android.newsession.glideRect
-import sh.roboco.android.newsession.glideTarget
-import sh.roboco.android.shell.RouterHooks
-import sh.roboco.android.shell.SessionRoute
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.sheet.SmoothTopRoundedShape
+import sh.zeron.android.newsession.CapturedDraftHandoff
+import sh.zeron.android.newsession.HandoffArrivalTarget
+import sh.zeron.android.newsession.HandoffOverlayCanvas
+import sh.zeron.android.newsession.HandoffOverlayHost
+import sh.zeron.android.newsession.HandoffOverlaySet
+import sh.zeron.android.newsession.HandoffOverlayState
+import sh.zeron.android.newsession.bubbleStartRect
+import sh.zeron.android.newsession.fallbackBubbleTarget
+import sh.zeron.android.newsession.flightRect
+import sh.zeron.android.newsession.glideRect
+import sh.zeron.android.newsession.glideTarget
+import sh.zeron.android.shell.RouterHooks
+import sh.zeron.android.shell.SessionRoute
 
 /**
  * The "Handoff" page of the debug design gallery (android-ui-parity #95),
@@ -80,7 +80,7 @@ import sh.roboco.android.shell.SessionRoute
  */
 @Composable
 fun HandoffGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val density = LocalDensity.current
     val measurer = rememberTextMeasurer()
@@ -266,7 +266,7 @@ internal class HandoffGalleryTarget : HandoffArrivalTarget {
  */
 @Composable
 internal fun HandoffGalleryChat(target: HandoffGalleryTarget, modifier: Modifier = Modifier) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val density = LocalDensity.current
     val topDp = with(density) { WindowInsets.safeDrawing.getTop(this).toDp() }
@@ -413,8 +413,8 @@ private fun HandoffMidFlightStage(appearance: Appearance) {
     val density = LocalDensity.current
     val d = density.density
     val topInsetPx = WindowInsets.safeDrawing.getTop(density).toFloat()
-    RobocoTheme(appearance) {
-        val palette = RobocoTheme.palette
+    ZeronTheme(appearance) {
+        val palette = ZeronTheme.palette
         val typeScale = LocalTypeScale.current
         val measurer = rememberTextMeasurer()
         val style = uiStyle(Face.Sans, typeScale.bodyScaled(16.5f), palette.text)

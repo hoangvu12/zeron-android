@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.foundation.IndicationNodeFactory
 import androidx.compose.foundation.LocalIndication
@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.node.DelegatableNode
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import sh.roboco.android.design.glass.ProvideGlass
+import sh.zeron.android.design.glass.ProvideGlass
 
 /**
  * The appearance setting as the iOS app stores it
@@ -37,29 +37,29 @@ enum class Appearance(val storedValue: Int) {
 
 /**
  * The resolved palette. No default on purpose: a component rendered outside
- * [RobocoTheme] crashes at once instead of silently drawing light colours.
+ * [ZeronTheme] crashes at once instead of silently drawing light colours.
  */
-val LocalPalette = staticCompositionLocalOf<Palette> { error("No Palette: wrap content in RobocoTheme") }
+val LocalPalette = staticCompositionLocalOf<Palette> { error("No Palette: wrap content in ZeronTheme") }
 
 /** The resolved dark/light state; pairs with [LocalPalette]. */
-val LocalIsDark = staticCompositionLocalOf<Boolean> { error("No LocalIsDark: wrap content in RobocoTheme") }
+val LocalIsDark = staticCompositionLocalOf<Boolean> { error("No LocalIsDark: wrap content in ZeronTheme") }
 
 /**
  * The theme root: resolves [Appearance] to a [Palette] and provides it, the
  * dark state, accent text-selection colours, [NoIndication], the Geist
  * font families (ticket 03) and the [TypeScale] for the current density.
  *
- * The families are built once per process ([RobocoFonts] caches); the type
+ * The families are built once per process ([ZeronFonts] caches); the type
  * scale is rebuilt whenever [LocalDensity] changes (a font-scale change is
  * a configuration change), so every `scaled`/`bodyScaled` label
  * recomposes while `fixed` text keeps its dp size.
  *
  * This is a Compose-foundation theme — there is deliberately no Material
  * theme here, no dynamic colour and no theme generation from
- * `roboco-theme-export`.
+ * `zeron-theme-export`.
  */
 @Composable
-fun RobocoTheme(appearance: Appearance = Appearance.System, content: @Composable () -> Unit) {
+fun ZeronTheme(appearance: Appearance = Appearance.System, content: @Composable () -> Unit) {
     val dark = when (appearance) {
         Appearance.System -> isSystemInDarkTheme()
         Appearance.Light -> false
@@ -68,7 +68,7 @@ fun RobocoTheme(appearance: Appearance = Appearance.System, content: @Composable
     val palette = Palette.of(dark)
     val density = LocalDensity.current
     val context = LocalContext.current
-    val fonts = remember(context) { RobocoFonts.families(context) }
+    val fonts = remember(context) { ZeronFonts.families(context) }
     val typeScale = remember(density) { TypeScale.from(density) }
     // window.tintColor = Palette.accent (SceneDelegate.swift:15): the handles
     // are the accent; the wash is the desktop's accent.selection.
@@ -98,9 +98,9 @@ fun RobocoTheme(appearance: Appearance = Appearance.System, content: @Composable
 
 /**
  * Theme accessors, the function-plus-object pattern used by Compose theme
- * APIs: call sites read `RobocoTheme.palette.text`.
+ * APIs: call sites read `ZeronTheme.palette.text`.
  */
-object RobocoTheme {
+object ZeronTheme {
     val palette: Palette
         @Composable @ReadOnlyComposable get() = LocalPalette.current
 

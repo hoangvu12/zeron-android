@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
@@ -14,8 +14,8 @@ import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import uniffi.roboco_core.ClientEvent
-import uniffi.roboco_core.EngineState
+import uniffi.zeron_core.ClientEvent
+import uniffi.zeron_core.EngineState
 
 /** Fills nothing; distinguishes filler types for [SessionController.filler]. */
 private class NoopFiller : ChromeFiller {
@@ -97,13 +97,13 @@ class SessionControllerTest {
     fun createPublishesDerivedChromeBeforeTheIoLaneRuns() = runTest {
         val core = FakeSessionCore()
         core.composerResult = composerState(title = "T", hostName = "Vu-PC")
-        core.sessionRowResult = sessionRow(projectName = "roboco", harnessLabel = "Claude Code")
+        core.sessionRowResult = sessionRow(projectName = "zeron", harnessLabel = "Claude Code")
         val controller = newController(core)
 
         // Nothing on the io lane has run, yet the first frame's chrome is
         // already published (iOS: the initial refresh inside init).
         assertEquals("T", controller.chrome.value.title)
-        assertEquals("roboco @ Vu-PC", controller.chrome.value.subtitle)
+        assertEquals("zeron @ Vu-PC", controller.chrome.value.subtitle)
         assertEquals("Message Claude Code", controller.chrome.value.placeholder)
         assertEquals("dev", controller.hostDeviceId)
         assertEquals(1, core.composerCalls)
@@ -218,10 +218,10 @@ class SessionControllerTest {
     fun anEqualRefreshEmitsNothingAndAChangedHostNameEmitsTheNewSubtitle() = runTest {
         val core = FakeSessionCore()
         core.composerResult = composerState(hostName = "Vu-PC")
-        core.sessionRowResult = sessionRow(projectName = "roboco", harnessLabel = "Claude Code")
+        core.sessionRowResult = sessionRow(projectName = "zeron", harnessLabel = "Claude Code")
         val hub = syncHub()
         val controller = newController(core, hub = hub)
-        assertEquals("roboco @ Vu-PC", controller.chrome.value.subtitle)
+        assertEquals("zeron @ Vu-PC", controller.chrome.value.subtitle)
 
         val seen = mutableListOf<SessionChrome>()
         val collector = launch { controller.chrome.collect { seen += it } }
@@ -238,7 +238,7 @@ class SessionControllerTest {
         hub.onClientEvent(ClientEvent.WorkspaceChanged(3uL))
         advanceUntilIdle()
         assertEquals(2, seen.size)
-        assertEquals("roboco @ Vu-Tablet", seen[1].subtitle)
+        assertEquals("zeron @ Vu-Tablet", seen[1].subtitle)
 
         collector.cancel()
     }
@@ -296,7 +296,7 @@ class SessionControllerTest {
         controller.attach(fakeTranscriptView())
         advanceUntilIdle()
 
-        // iOS ignores the Bool (`CoreSessionSource.swift:26-29`); Roboco
+        // iOS ignores the Bool (`CoreSessionSource.swift:26-29`); Zeron
         // logs it and still marks the view attached.
         assertEquals(
             listOf("attachTranscript", "setViewAttached(true)"),
@@ -501,24 +501,24 @@ class SessionControllerTest {
     fun fillersRunInListOrderAfterOneBindEach() = runTest {
         val core = FakeSessionCore()
         core.composerResult = composerState(hostName = "Vu-PC")
-        core.sessionRowResult = sessionRow(projectName = "roboco", harnessLabel = "Claude Code")
+        core.sessionRowResult = sessionRow(projectName = "zeron", harnessLabel = "Claude Code")
         core.engineResult = engineView()
         val first = RecordingFiller("a")
         val second = RecordingFiller("b")
         val controller = newController(core, fillers = listOf(first, second))
 
-        assertEquals("roboco @ Vu-PC/a/b", controller.chrome.value.subtitle)
+        assertEquals("zeron @ Vu-PC/a/b", controller.chrome.value.subtitle)
         assertEquals(1, first.binds)
         assertEquals(1, second.binds)
 
         // The first filler saw the base fill; the second saw the first's output.
-        assertEquals("roboco @ Vu-PC", first.fills.single().subtitle)
-        assertEquals("roboco @ Vu-PC/a", second.fills.single().subtitle)
+        assertEquals("zeron @ Vu-PC", first.fills.single().subtitle)
+        assertEquals("zeron @ Vu-PC/a", second.fills.single().subtitle)
 
         // The input carries the pulled values — a filler makes no FFI call of its own.
         val input = first.inputs.single()
         assertEquals("chat-a", input.chatId)
-        assertEquals("roboco", input.row?.project?.name)
+        assertEquals("zeron", input.row?.project?.name)
         assertEquals("Vu-PC", input.composer.host.name)
         assertEquals("engine:v1:alpha", input.engine?.engineId)
     }

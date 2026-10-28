@@ -1,4 +1,4 @@
-package sh.roboco.android.core
+package sh.zeron.android.core
 
 import java.io.ByteArrayInputStream
 import kotlinx.coroutines.Dispatchers

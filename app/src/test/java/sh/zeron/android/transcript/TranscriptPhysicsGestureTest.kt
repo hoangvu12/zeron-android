@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,8 +20,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The iOS scroll physics of ticket 134 through the real pointer pipeline
@@ -31,7 +31,7 @@ import sh.roboco.android.design.RobocoTheme
  * is frozen (`autoAdvance = false`), so the rubber band's release
  * bounce is stepped frame by frame with `advanceTimeBy`.
  *
- * The content is wrapped in [RobocoTheme] because the chain's scroll
+ * The content is wrapped in [ZeronTheme] because the chain's scroll
  * indicator (decision TRANSCRIPT-D3) reads ticket 01's theme for its
  * colour; the indicator test injects the modifier's fade state through
  * [rememberTranscriptScrollIndicatorState] and reads its alpha.
@@ -52,7 +52,7 @@ class TranscriptPhysicsGestureTest {
     @Before
     fun setup() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 val state = rememberTranscriptScrollIndicatorState(viewport)
                 indicator = state
                 Box(

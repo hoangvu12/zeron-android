@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.TweenSpec
@@ -59,8 +59,8 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import sh.roboco.android.core.Face
-import sh.roboco.android.core.GeistMetrics
+import sh.zeron.android.core.Face
+import sh.zeron.android.core.GeistMetrics
 
 /**
  * The inset-grouped list primitive (android-ui-parity #70): the Compose port
@@ -183,7 +183,7 @@ object GroupedListTokens {
     @Composable
     @ReadOnlyComposable
     fun systemSecondaryLabel(): Color =
-        if (RobocoTheme.isDark) SecondaryLabelDark else SecondaryLabelLight
+        if (ZeronTheme.isDark) SecondaryLabelDark else SecondaryLabelLight
 
     /**
      * UIKit `tertiaryLabel` over `elevated`: light `#3C3C43`@0.3 =
@@ -193,7 +193,7 @@ object GroupedListTokens {
     @Composable
     @ReadOnlyComposable
     fun systemTertiaryLabel(): Color =
-        if (RobocoTheme.isDark) TertiaryLabelDark else TertiaryLabelLight
+        if (ZeronTheme.isDark) TertiaryLabelDark else TertiaryLabelLight
 
     /**
      * UIKit `separator`: light `#3C3C43`@0.29 = `#C6C6C8` on white, dark
@@ -203,7 +203,7 @@ object GroupedListTokens {
     @Composable
     @ReadOnlyComposable
     fun systemSeparator(): Color =
-        if (RobocoTheme.isDark) SeparatorDark else SeparatorLight
+        if (ZeronTheme.isDark) SeparatorDark else SeparatorLight
 }
 
 /** UIKit `secondaryLabel`, light / dark, alpha quantised through [rgba]. */
@@ -350,7 +350,7 @@ sealed interface GroupedAccessory {
     data class Value(val text: String) : GroupedAccessory
 
     /**
-     * A custom trailing accessory — ticket 98's `RobocoSwitch` slot. Not a
+     * A custom trailing accessory — ticket 98's `ZeronSwitch` slot. Not a
      * data class: lambdas have no equality. End padding 16 dp
      * ([GroupedListTokens.TrailingMargin]).
      */
@@ -414,7 +414,7 @@ fun GroupedHeader(text: String, modifier: Modifier = Modifier) {
 }
 
 /**
- * The section footer (a Roboco ADD — no footer exists in the reference
+ * The section footer (a Zeron ADD — no footer exists in the reference
  * screenshots): Geist 13 fixed, [color] (default `Palette.secondary`;
  * 140's error footer passes `tertiary`), 8 dp above, inset 16 dp inside the
  * card edges, bottom padding 0.
@@ -423,7 +423,7 @@ fun GroupedHeader(text: String, modifier: Modifier = Modifier) {
 fun GroupedFooter(
     text: String,
     modifier: Modifier = Modifier,
-    color: Color = RobocoTheme.palette.secondary,
+    color: Color = ZeronTheme.palette.secondary,
 ) {
     val horizontal = GroupedListTokens.HeaderHorizontal + GroupedListTokens.CardInset
     val ts = LocalTypeScale.current
@@ -489,7 +489,7 @@ fun GroupedRowContainer(
     previewPressed: Boolean = false,
     content: @Composable RowScope.() -> Unit,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val source = remember { MutableInteractionSource() }
     val highlight = remember { Animatable(if (previewPressed) 1f else 0f) }
     // Collect the interactions themselves, not collectIsPressedAsState():
@@ -585,7 +585,7 @@ fun GroupedRowContainer(
  * the `CTFont` at exactly that size with no `UIFontMetrics`
  * (`Fonts.swift:64-66`). Only the header follows Dynamic Type.
  *
- * @param icon the leading symbol (`RobocoIcons.forSfName(row.symbol)`), or
+ * @param icon the leading symbol (`ZeronIcons.forSfName(row.symbol)`), or
  *   null for a text-only row (the separator then starts 16 dp inside the
  *   card)
  * @param iconTint `Row.tint`; `Palette.secondary` by default
@@ -606,8 +606,8 @@ fun GroupedRow(
     position: GroupedPosition,
     modifier: Modifier = Modifier,
     subtitle: String? = null,
-    icon: RobocoIcon? = null,
-    iconTint: Color = RobocoTheme.palette.secondary,
+    icon: ZeronIcon? = null,
+    iconTint: Color = ZeronTheme.palette.secondary,
     destructive: Boolean = false,
     accessories: List<GroupedAccessory> = listOf(GroupedAccessory.Disclosure),
     titleStyle: TextStyle? = null,
@@ -671,7 +671,7 @@ private fun GroupedRowBody(
     modifier: Modifier,
     maxValueWidth: Dp,
     subtitle: String?,
-    icon: RobocoIcon?,
+    icon: ZeronIcon?,
     iconTint: Color,
     destructive: Boolean,
     accessories: List<GroupedAccessory>,
@@ -682,7 +682,7 @@ private fun GroupedRowBody(
     onLongClickLabel: String?,
     previewPressed: Boolean,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
     GroupedRowContainer(
         position = position,
@@ -755,14 +755,14 @@ private fun endPadding(accessory: GroupedAccessory): Dp = when (accessory) {
 
 @Composable
 private fun Accessory(accessory: GroupedAccessory, maxValueWidth: Dp) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
     when (accessory) {
         GroupedAccessory.Disclosure ->
             // Lays out at the chevron's own width (UIKit's accessory frame),
             // the 15.6 dp symbol box centred on it and drawn unclipped.
             Icon(
-                RobocoIcons.ChevronRight,
+                ZeronIcons.ChevronRight,
                 GroupedListTokens.systemTertiaryLabel(),
                 13f,
                 SymbolWeight.Semibold,
@@ -772,7 +772,7 @@ private fun Accessory(accessory: GroupedAccessory, maxValueWidth: Dp) {
             )
 
         is GroupedAccessory.Check ->
-            Icon(RobocoIcons.Checkmark, palette.accent, 17f, SymbolWeight.Semibold)
+            Icon(ZeronIcons.Checkmark, palette.accent, 17f, SymbolWeight.Semibold)
 
         is GroupedAccessory.Dot ->
             // A plain view on iOS: no semantics — the subtitle carries the

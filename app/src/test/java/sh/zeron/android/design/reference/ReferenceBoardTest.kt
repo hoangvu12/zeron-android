@@ -1,4 +1,4 @@
-package sh.roboco.android.design.reference
+package sh.zeron.android.design.reference
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -27,8 +27,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The reference board (android-ui-parity #23): the mock rendered at the
@@ -46,7 +46,7 @@ import sh.roboco.android.design.RobocoTheme
  *
  * Under Robolectric the glass tier resolves to the fallback fill and the
  * edge effect draws gradient-only, so the board's top band is less blurred
- * than iOS — expected (see the ticket's Roboco adaptation); the blur is
+ * than iOS — expected (see the ticket's Zeron adaptation); the blur is
  * judged on a device via the gallery's "Reference" page. Row G's CJK and
  * 🌏 may render as tofu, also expected.
  */
@@ -61,7 +61,7 @@ class ReferenceBoardTest {
     /**
      * The board canvas: 460 × 1000 dp at mdpi = the PNGs' pixel size, with
      * the mock's 402 × 874 dp canvas scaled through the density (1.14428
-     * px per dp). `LocalDensity` wraps `RobocoTheme` because ticket 03's
+     * px per dp). `LocalDensity` wraps `ZeronTheme` because ticket 03's
      * `TypeScale` reads the density inside the theme.
      */
     @Composable
@@ -69,7 +69,7 @@ class ReferenceBoardTest {
         CompositionLocalProvider(
             LocalDensity provides Density(ReferenceGeometry.BOARD_SCALE, 1f),
         ) {
-            RobocoTheme(appearance) { SessionsReferenceMock() }
+            ZeronTheme(appearance) { SessionsReferenceMock() }
         }
     }
 

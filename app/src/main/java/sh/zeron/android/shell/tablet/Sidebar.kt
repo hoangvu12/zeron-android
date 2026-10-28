@@ -1,4 +1,4 @@
-package sh.roboco.android.shell.tablet
+package sh.zeron.android.shell.tablet
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -20,17 +20,17 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
-import sh.roboco.android.design.LocalBottomChrome
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.sessions.LocalSessionListOpener
-import sh.roboco.android.sessions.SessionListOpener
-import sh.roboco.android.sessions.SessionsScreen
-import sh.roboco.android.shell.AppRouter
-import sh.roboco.android.shell.LocalAppRouter
-import sh.roboco.android.shell.NavEntryEffect
-import sh.roboco.android.shell.NavStack
-import sh.roboco.android.shell.NavStackHost
-import sh.roboco.android.shell.ShellRouteContent
+import sh.zeron.android.design.LocalBottomChrome
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.sessions.LocalSessionListOpener
+import sh.zeron.android.sessions.SessionListOpener
+import sh.zeron.android.sessions.SessionsScreen
+import sh.zeron.android.shell.AppRouter
+import sh.zeron.android.shell.LocalAppRouter
+import sh.zeron.android.shell.NavEntryEffect
+import sh.zeron.android.shell.NavStack
+import sh.zeron.android.shell.NavStackHost
+import sh.zeron.android.shell.ShellRouteContent
 
 /**
  * Ticket 33's sidebar slot content (android-ui-parity #105) — the port of

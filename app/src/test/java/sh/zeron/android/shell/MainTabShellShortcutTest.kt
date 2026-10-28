@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import android.view.KeyEvent
 import androidx.activity.ComponentActivity
@@ -12,9 +12,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.GlassMenuHost
 
 /**
  * The phone shell's one shortcut line (android-ui-parity #33, the
@@ -45,7 +45,7 @@ class MainTabShellShortcutTest {
     @Test
     fun theShellRegistersItsShortcutsOnTheSink() {
         compose.setContent {
-            RobocoTheme {
+            ZeronTheme {
                 CompositionLocalProvider(LocalShortcutSink provides sink) {
                     // Ticket 46: the real Sessions root needs the menu host
                     // and the frozen glyph clock (the loading spinner).
@@ -66,7 +66,7 @@ class MainTabShellShortcutTest {
     @Test
     fun ctrlNAndCtrlShiftFAreConsumedCtrlBIsNot() {
         compose.setContent {
-            RobocoTheme {
+            ZeronTheme {
                 CompositionLocalProvider(LocalShortcutSink provides sink) {
                     ProvideGlyphClock(frozenAtNanos = 0L) {
                         GlassMenuHost { MainTabShell(state = MainTabState(TabId.Sessions)) }

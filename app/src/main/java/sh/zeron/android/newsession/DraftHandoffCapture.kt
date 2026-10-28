@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import android.util.Log
 import androidx.compose.runtime.Composable
@@ -24,7 +24,7 @@ import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.unit.toIntSize
 import androidx.compose.ui.unit.toSize
 import kotlin.coroutines.cancellation.CancellationException
-import sh.roboco.android.shell.DraftHandoff
+import sh.zeron.android.shell.DraftHandoff
 
 /**
  * The captured draft handoff (android-ui-parity #94) — the port of
@@ -67,7 +67,7 @@ class CapturedDraftHandoff(
  * and the composer root read. One instance per page
  * ([rememberHandoffCaptureState]); **main thread only**.
  *
- * The Roboco adaptation of `DraftHandoff.capture`'s offscreen render:
+ * The Zeron adaptation of `DraftHandoff.capture`'s offscreen render:
  * Compose records `GraphicsLayer`s during the draw pass, so the hidden
  * states (text layer alpha 0, composer alpha 0) must be drawn for real
  * — a **freeze frame** (the scene layer's own bitmap, drawn above the

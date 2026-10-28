@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
@@ -26,7 +26,7 @@ import kotlinx.coroutines.flow.collectLatest
  * least one animated glyph is composed (reduce motion off), so all glyphs
  * on screen pulse together and an empty screen pays for no frame callbacks
  * at all. Per-glyph timers would cost one frame loop each; see the ticket's
- * Roboco adaptation notes.
+ * Zeron adaptation notes.
  */
 @Stable
 class GlyphClock internal constructor(internal val frozenAtNanos: Long?) {
@@ -54,7 +54,7 @@ class GlyphClock internal constructor(internal val frozenAtNanos: Long?) {
 val LocalGlyphClock = staticCompositionLocalOf<GlyphClock?> { null }
 
 /**
- * Provides the [GlyphClock] for a subtree. [RobocoTheme] wraps its content
+ * Provides the [GlyphClock] for a subtree. [ZeronTheme] wraps its content
  * in one (innermost, inside the palette and reduce-motion providers), so
  * every glyph in the app shares it. Tests and previews nest a **frozen**
  * [ProvideGlyphClock] inside the theme to pin the animation at a cycle

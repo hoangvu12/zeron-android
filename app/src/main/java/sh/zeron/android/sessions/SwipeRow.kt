@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.background
@@ -57,12 +57,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
-import sh.roboco.android.design.Feedback
-import sh.roboco.android.design.Haptic
-import sh.roboco.android.design.IconInBox
-import sh.roboco.android.design.LocalFeedback
-import sh.roboco.android.design.LocalReduceMotion
-import sh.roboco.android.design.RobocoIcon
+import sh.zeron.android.design.Feedback
+import sh.zeron.android.design.Haptic
+import sh.zeron.android.design.IconInBox
+import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.design.LocalReduceMotion
+import sh.zeron.android.design.ZeronIcon
 
 /**
  * `UISwipeActionsConfiguration` for one row (android-ui-parity #44): a
@@ -90,7 +90,7 @@ import sh.roboco.android.design.RobocoIcon
 @Immutable
 class SwipeAction(
     val title: String,
-    val icon: RobocoIcon,
+    val icon: ZeronIcon,
     val background: Color,
     val destructive: Boolean = false,
     val testTag: String,

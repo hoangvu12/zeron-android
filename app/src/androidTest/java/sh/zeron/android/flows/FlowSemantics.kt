@@ -1,4 +1,4 @@
-package sh.roboco.android.flows
+package sh.zeron.android.flows
 
 import android.graphics.Bitmap
 import android.os.SystemClock
@@ -10,7 +10,7 @@ import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.test.platform.app.InstrumentationRegistry
-import sh.roboco.android.shell.ScopedIds
+import sh.zeron.android.shell.ScopedIds
 
 /**
  * Shared semantics matchers and artefact helpers for the instrumented
@@ -58,7 +58,7 @@ object FlowSemantics {
     /**
      * Writes a PNG artefact into the app's external files dir, where the
      * flow script's artefact copy step picks it up (`adb pull
-     * /sdcard/Android/data/sh.roboco.android/files/<name>`), like the
+     * /sdcard/Android/data/sh.zeron.android/files/<name>`), like the
      * pre-rig `SessionFlowTest` did.
      */
     fun saveScreenshot(name: String) {

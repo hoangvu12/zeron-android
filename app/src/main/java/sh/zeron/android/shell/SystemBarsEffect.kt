@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
@@ -16,7 +16,7 @@ import androidx.compose.runtime.DisposableEffect
 fun SystemBarsEffect(isDark: Boolean) {
     val activity = LocalActivity.current as? ComponentActivity ?: return
     DisposableEffect(activity, isDark) {
-        activity.applyRobocoEdgeToEdge(isDark)
+        activity.applyZeronEdgeToEdge(isDark)
         onDispose { }
     }
 }
@@ -24,7 +24,7 @@ fun SystemBarsEffect(isDark: Boolean) {
 /**
  * Edge-to-edge with **transparent** system bars and icons that follow the
  * effective light/dark mode: dark icons in light mode, light in dark
- * (`SceneDelegate`'s window setup; Roboco draws under both bars). Called
+ * (`SceneDelegate`'s window setup; Zeron draws under both bars). Called
  * from `MainActivity.onCreate` (before `super`, per the androidx template)
  * and re-applied by [SystemBarsEffect].
  *
@@ -32,7 +32,7 @@ fun SystemBarsEffect(isDark: Boolean) {
  * `auto` re-enables the nav-bar contrast scrim on 3-button navigation, so
  * both contrast flags are reset after every call.
  */
-fun ComponentActivity.applyRobocoEdgeToEdge(isDark: Boolean) {
+fun ComponentActivity.applyZeronEdgeToEdge(isDark: Boolean) {
     val transparent = android.graphics.Color.TRANSPARENT
     val style = if (isDark) {
         SystemBarStyle.dark(transparent)

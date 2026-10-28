@@ -1,13 +1,13 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.ui.text.input.KeyboardCapitalization
-import sh.roboco.android.design.ActionSheetAction
-import sh.roboco.android.design.ActionSheetModel
-import sh.roboco.android.design.ActionSheetStyle
-import sh.roboco.android.design.AlertButton
-import sh.roboco.android.design.AlertButtonRole
-import sh.roboco.android.design.AlertField
-import sh.roboco.android.design.RobocoAlert
+import sh.zeron.android.design.ActionSheetAction
+import sh.zeron.android.design.ActionSheetModel
+import sh.zeron.android.design.ActionSheetStyle
+import sh.zeron.android.design.AlertButton
+import sh.zeron.android.design.AlertButtonRole
+import sh.zeron.android.design.AlertField
+import sh.zeron.android.design.ZeronAlert
 
 /**
  * The Sessions area's five small prompts (android-ui-parity #43) as pure
@@ -24,7 +24,7 @@ import sh.roboco.android.design.RobocoAlert
  * build a model and present it themselves.
  */
 
-/** Every string of the five prompts, verbatim from iOS (plus Roboco's "Create on" and offline toast). */
+/** Every string of the five prompts, verbatim from iOS (plus Zeron's "Create on" and offline toast). */
 object SessionPromptCopy {
     /** `:321`. */
     const val RenameSessionTitle = "Rename Session"
@@ -50,7 +50,7 @@ object SessionPromptCopy {
     /** `:504`. */
     const val DeleteSectionAction = "Delete Section"
 
-    /** Roboco's engine-chooser message (android-app#20:237); iOS has no equivalent. */
+    /** Zeron's engine-chooser message (android-app#20:237); iOS has no equivalent. */
     const val CreateOnMessage = "Create on"
 
     /** `:304`, `:312`, `:323`, `:403`, `:493`, `:509`. */
@@ -96,7 +96,7 @@ fun trimmedName(raw: String): String? = raw.trim().takeIf { it.isNotEmpty() }
  * on). Blank text on Rename closes the alert and does nothing; a
  * non-empty trim submits once.
  */
-fun renameSessionAlert(currentTitle: String, onRename: (String) -> Unit): RobocoAlert = RobocoAlert(
+fun renameSessionAlert(currentTitle: String, onRename: (String) -> Unit): ZeronAlert = ZeronAlert(
     title = SessionPromptCopy.RenameSessionTitle,
     field = AlertField(text = currentTitle),
     buttons = listOf(
@@ -110,7 +110,7 @@ fun renameSessionAlert(currentTitle: String, onRename: (String) -> Unit): Roboco
  * `.words` capitalization. Create is never disabled (`requiresText` stays
  * false); a blank trim dismisses the alert without creating.
  */
-fun newSectionAlert(onCreate: (String) -> Unit): RobocoAlert = RobocoAlert(
+fun newSectionAlert(onCreate: (String) -> Unit): ZeronAlert = ZeronAlert(
     title = SessionPromptCopy.NewSectionTitle,
     field = AlertField(
         placeholder = SessionPromptCopy.NewSectionPlaceholder,
@@ -124,12 +124,12 @@ fun newSectionAlert(onCreate: (String) -> Unit): RobocoAlert = RobocoAlert(
 
 /**
  * "Rename Section" (`:400-409`, `:490-500`): like Rename Session with the
- * section's raw [SectionView][uniffi.roboco_core.SectionView] name — never
+ * section's raw [SectionView][uniffi.zeron_core.SectionView] name — never
  * the header's `" · <engine>"` collision suffix (ticket 40) — pre-filled.
  * The trimmed name is what the write and the folder page's title update
  * both use.
  */
-fun renameSectionAlert(currentName: String, onRename: (String) -> Unit): RobocoAlert = RobocoAlert(
+fun renameSectionAlert(currentName: String, onRename: (String) -> Unit): ZeronAlert = ZeronAlert(
     title = SessionPromptCopy.RenameSectionTitle,
     field = AlertField(text = currentName),
     buttons = listOf(
@@ -149,7 +149,7 @@ data class EngineChoice(val engineId: String, val name: String, val connected: B
  * chat's engine** in snapshot order, then "No Section" — always last, even
  * when the chat is in no section. No checkmark on the current section (the
  * pr621 Android port adds one; iOS does not), no "New Section…" row.
- * Roboco scopes the list to one engine because a cross-engine assign is
+ * Zeron scopes the list to one engine because a cross-engine assign is
  * refused (`InvalidArgument`).
  */
 fun moveToSectionSheet(sections: List<SectionChoice>, onMove: (sectionId: String?) -> Unit): ActionSheetModel =
@@ -179,10 +179,10 @@ fun deleteSectionSheet(name: String, onDelete: () -> Unit): ActionSheetModel = A
 
 /**
  * "Delete session?" (upstream #967): an alert, not a sheet — Cancel, then
- * a destructive "Delete". Roboco has no Cloud machines, so the message is
+ * a destructive "Delete". Zeron has no Cloud machines, so the message is
  * always the plain "will be permanently deleted" one.
  */
-fun deleteSessionAlert(title: String, onDelete: () -> Unit): RobocoAlert = RobocoAlert(
+fun deleteSessionAlert(title: String, onDelete: () -> Unit): ZeronAlert = ZeronAlert(
     title = SessionPromptCopy.DeleteSessionTitle,
     message = SessionPromptCopy.deleteSessionMessage(title),
     buttons = listOf(
@@ -192,7 +192,7 @@ fun deleteSessionAlert(title: String, onDelete: () -> Unit): RobocoAlert = Roboc
 )
 
 /**
- * The "Create on" engine chooser (Roboco's step before the New Section
+ * The "Create on" engine chooser (Zeron's step before the New Section
  * alert when several engines are connected, android-app#20:237): one
  * default row per **connected** engine in pairing order. Duplicate engine
  * names list as-is; no source defines a disambiguation.

@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -33,14 +33,14 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.glass.GlassSurface
-import sh.roboco.android.design.glass.Menu
-import sh.roboco.android.design.glass.rememberGlassMenuState
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.GlassSurface
+import sh.zeron.android.design.glass.Menu
+import sh.zeron.android.design.glass.rememberGlassMenuState
+import sh.zeron.android.design.uiStyle
 
 /**
  * The Limited banner card's tokens — the geometry of the desktop's
@@ -115,7 +115,7 @@ fun LimitedBannerCard(
     animateGlass: Boolean = false,
     nowMs: () -> Long = System::currentTimeMillis,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val warning = palette.warning
     val menuState = rememberGlassMenuState()

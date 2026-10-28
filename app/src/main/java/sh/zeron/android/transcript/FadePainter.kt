@@ -1,12 +1,12 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.graphics.BlendMode
 import android.graphics.Canvas
 import android.graphics.LinearGradient
 import android.graphics.Paint
 import android.graphics.Shader
-import uniffi.roboco_core.Fade
-import uniffi.roboco_core.FadeEdge
+import uniffi.zeron_core.Fade
+import uniffi.zeron_core.FadeEdge
 
 /**
  * Paints the runs an overflow fade masks, through the fade's alpha ramp —

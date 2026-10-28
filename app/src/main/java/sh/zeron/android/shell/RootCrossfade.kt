@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.layout.Box
@@ -18,7 +18,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.hideFromAccessibility
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.zIndex
-import sh.roboco.android.design.Motion
+import sh.zeron.android.design.Motion
 
 /**
  * The window-level root swap (android-ui-parity #35): the port of

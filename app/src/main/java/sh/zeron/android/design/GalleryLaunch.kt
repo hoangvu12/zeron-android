@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.app.Activity
 import android.content.ActivityNotFoundException
@@ -20,13 +20,13 @@ import android.util.Log
  */
 object GalleryLaunch {
 
-    private const val TAG = "RobocoGallery"
+    private const val TAG = "ZeronGallery"
 
     const val ROUTE = "gallery"
 
     const val EXTRA_ROUTE = "route"
 
-    const val CLASS_NAME = "sh.roboco.android.design.DesignGalleryActivity"
+    const val CLASS_NAME = "sh.zeron.android.design.DesignGalleryActivity"
 
     /**
      * Starts the gallery when [source] carries `route=gallery` in a

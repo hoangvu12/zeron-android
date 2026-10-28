@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -47,9 +47,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.GlassTextCapsule
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.GlassTextCapsule
 
 /**
  * [LargeTitleScaffold]'s rendering and behaviour (android-ui-parity #25):
@@ -90,7 +90,7 @@ class LargeTitleScaffoldTest {
         onRowTap: () -> Unit = {},
     ) {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 LargeTitleFixtureScaffold(
                     mode = mode,
                     showBack = showBack,
@@ -117,7 +117,7 @@ class LargeTitleScaffoldTest {
     private fun hostSwitchable(first: LazyListState) {
         hostedListState = first
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 key(hostedListState) {
                     LargeTitleFixtureScaffold(listState = hostedListState, rows = 30)
                 }
@@ -218,7 +218,7 @@ class LargeTitleScaffoldTest {
     @Test
     fun longTitleNarrowsToStayClearOfBothBarItems() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 LargeTitleScaffold(
                     title = "Durable Object hibernation flush and cleanup",
                     topInset = 24.dp,
@@ -361,7 +361,7 @@ class LargeTitleScaffoldTest {
         val listState = LazyListState()
         compose.mainClock.autoAdvance = false
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 LargeTitleFixtureScaffold(listState = listState)
             }
         }
@@ -432,7 +432,7 @@ class LargeTitleScaffoldTest {
         val listState = LazyListState()
         val seen = mutableListOf<String>()
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 LaunchedEffect(listState) {
                     listState.interactionSource.interactions.collect { seen += it::class.simpleName.orEmpty() }
                 }
@@ -492,7 +492,7 @@ class LargeTitleScaffoldTest {
     @Test
     fun prefersLargeTitlesFalseDemotesAlwaysToInlineOnly() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(LocalPrefersLargeTitles provides false) {
                     LargeTitleFixtureScaffold()
                 }
@@ -513,7 +513,7 @@ class LargeTitleScaffoldTest {
         // (−52 … 0), so both titles exist; at 124 dp the item is not composed.
         val listState = LazyListState(0, dp(52f).toInt())
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 LargeTitleFixtureScaffold(title = title, listState = listState)
             }
         }
@@ -534,7 +534,7 @@ class LargeTitleScaffoldTest {
     fun rootHasNoBackCircleAndAPushedScreenHasOne() {
         val stack = NavStack(DemoRoute("Sessions"))
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 NavStackHost(stack = stack, active = true) { entry ->
                     LargeTitleScaffold(title = entry.route.paneTitle.orEmpty()) {
                         largeTitleFixtureRows(6)
@@ -574,7 +574,7 @@ class LargeTitleScaffoldTest {
         // position composes a fresh scaffold.
         var listState by mutableStateOf(LazyListState())
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 key(listState) {
                     LargeTitleScaffold(
                         title = "Sessions",
@@ -605,7 +605,7 @@ class LargeTitleScaffoldTest {
     fun callerContentPaddingIsDelegatedPerSide() {
         val callerPadding = RecordingPadding(bottom = 40.dp)
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 LargeTitleScaffold(
                     title = "Sessions",
                     topInset = 24.dp,

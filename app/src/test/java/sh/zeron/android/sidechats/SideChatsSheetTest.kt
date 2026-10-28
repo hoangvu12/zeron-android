@@ -1,4 +1,4 @@
-package sh.roboco.android.sidechats
+package sh.zeron.android.sidechats
 
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Box
@@ -24,14 +24,14 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.glass.MenuIcon
-import sh.roboco.android.design.glass.MenuItem
-import sh.roboco.android.sessions.SessionRowVM
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.glass.MenuIcon
+import sh.zeron.android.design.glass.MenuItem
+import sh.zeron.android.sessions.SessionRowVM
 
 /**
  * The Side Chats & Agents sheet (android-next #06, upstream #899's
@@ -91,7 +91,7 @@ class SideChatsSheetTest {
     private fun chat(id: String, title: String) = SessionRowVM(
         id = id,
         title = title,
-        projectName = "roboco",
+        projectName = "zeron",
         hasProject = true,
         colorIndex = 6,
         harness = "claude-code",
@@ -113,7 +113,7 @@ class SideChatsSheetTest {
 
     private fun mountList(ui: SideChatsUi) {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.fillMaxSize()) {
                     SideChatsList(
                         ui = ui,
@@ -229,7 +229,7 @@ class SideChatsSheetTest {
         assertNull(menu.title)
         val items = menu.children.map { it as MenuItem }
         assertEquals(listOf("New Side Chat", "Fork into Side Chat"), items.map { it.title })
-        assertEquals(RobocoIcons.ArrowTriangleBranch, (items[1].icon as MenuIcon.Symbol).icon)
+        assertEquals(ZeronIcons.ArrowTriangleBranch, (items[1].icon as MenuIcon.Symbol).icon)
         items[0].action()
         items[1].action()
         assertEquals(1, news)
@@ -242,7 +242,7 @@ class SideChatsSheetTest {
         val controller = SideChatsSheetController()
         controller.open()
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 GlassMenuHost {
                     Box(Modifier.fillMaxSize()) {
                         SideChatsOverlay(
@@ -274,7 +274,7 @@ class SideChatsSheetTest {
         controller.open()
         var news = 0
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 GlassMenuHost {
                     Box(Modifier.fillMaxSize()) {
                         SideChatsOverlay(

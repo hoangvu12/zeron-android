@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
@@ -31,21 +31,21 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.rememberHazeState
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.CapsuleShape
-import sh.roboco.android.design.GlassStage
-import sh.roboco.android.design.Icon
-import sh.roboco.android.design.LocalGalleryCapture
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.SymbolWeight
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.glass.GlassMenuPanel
-import sh.roboco.android.design.glass.Menu
-import sh.roboco.android.design.glass.flattenLevel
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.CapsuleShape
+import sh.zeron.android.design.GlassStage
+import sh.zeron.android.design.Icon
+import sh.zeron.android.design.LocalGalleryCapture
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.SymbolWeight
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.glass.GlassMenuPanel
+import sh.zeron.android.design.glass.Menu
+import sh.zeron.android.design.glass.flattenLevel
+import sh.zeron.android.design.uiStyle
 
 /**
  * The "Composer attach menu" page of the debug design gallery
@@ -66,13 +66,13 @@ import sh.roboco.android.design.uiStyle
  *    names.
  *
  * The live stage wraps itself in its own [GlassMenuHost] (the registry's
- * [sh.roboco.android.design.GalleryProviders] installs no host): the
+ * [sh.zeron.android.design.GalleryProviders] installs no host): the
  * stage content is the haze source the menu panels blur, and the menus
  * open in-window so the IME check (open the menu while focused — the
  * keyboard must stay up) works like the GlassMenu section's composer
  * demo.
  *
- * Try it live (`adb shell am start -n sh.roboco.android/.MainActivity
+ * Try it live (`adb shell am start -n sh.zeron.android/.MainActivity
  * --es route gallery --es section composer_attach_menu`): tap `+` on the
  * resting capsule — the menu covers the button and grows up from its
  * bottom-left corner, the composer neither moves nor morphs; pick three
@@ -82,7 +82,7 @@ import sh.roboco.android.design.uiStyle
  */
 @Composable
 fun AttachMenuGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Caption(
@@ -111,7 +111,7 @@ fun AttachMenuGallerySection() {
  */
 @Composable
 private fun StaticMenuStage(caption: String, menu: Menu) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Caption(caption, uiStyle(Face.Sans, typeScale.fixed(12f), palette.secondary))
@@ -145,7 +145,7 @@ private fun LiveStage() {
 
 @Composable
 private fun LiveBody() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val controller = rememberComposerController()
     val morph = rememberComposerMorphState(
@@ -208,7 +208,7 @@ private fun LiveBody() {
  */
 @Composable
 private fun BoxScope.AttachStageComposer(controller: ComposerController, morph: ComposerMorphState) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val field = remember { TextFieldState("Half-written thought") }
     ComposerSurface(
@@ -233,7 +233,7 @@ private fun BoxScope.AttachStageComposer(controller: ComposerController, morph: 
         placeholder = {
             BasicText(
                 "Message",
-                style = uiStyle(Face.Sans, typeScale.fixed(16.5f), RobocoTheme.palette.tertiary),
+                style = uiStyle(Face.Sans, typeScale.fixed(16.5f), ZeronTheme.palette.tertiary),
                 maxLines = 1,
             )
         },
@@ -245,7 +245,7 @@ private fun BoxScope.AttachStageComposer(controller: ComposerController, morph: 
 /** The action stand-in (58 owns the real one): a 34 dp accent circle. */
 @Composable
 private fun AttachStageAction(morph: ComposerMorphState) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     Box(
         Modifier
             .size(34.dp)
@@ -255,7 +255,7 @@ private fun AttachStageAction(morph: ComposerMorphState) {
         contentAlignment = Alignment.Center,
     ) {
         Icon(
-            RobocoIcons.ArrowUp,
+            ZeronIcons.ArrowUp,
             tint = Color.White,
             sizePt = 15f,
             weight = SymbolWeight.Bold,
@@ -286,7 +286,7 @@ private fun AttachMenuDarkPreview() {
 
 @Composable
 private fun AttachMenuPanelsPreview(appearance: Appearance) {
-    RobocoTheme(appearance) {
+    ZeronTheme(appearance) {
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             StaticMenuStage("All four", attachMenu(hasCamera = true, clipHasImage = true) {})
             StaticMenuStage("Minimal", attachMenu(hasCamera = false, clipHasImage = false) {})

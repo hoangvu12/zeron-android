@@ -1,4 +1,4 @@
-package sh.roboco.android.design.glass
+package sh.zeron.android.design.glass
 
 import android.content.Context
 import android.os.Build
@@ -116,7 +116,7 @@ class GlassCrashGuard(private val dir: File) {
 }
 
 /**
- * Resolves [LocalGlassTier] for a composition (ticket 07). `RobocoTheme`
+ * Resolves [LocalGlassTier] for a composition (ticket 07). `ZeronTheme`
  * wraps its content in this (next to `ProvideReduceMotion`), so every
  * [GlassSurface] reads the tier without extra wiring. The
  * "Force fallback glass" gallery toggle flips [Glass.forceFallback] and this

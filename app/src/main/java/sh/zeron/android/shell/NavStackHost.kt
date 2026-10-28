@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import android.content.res.Configuration
 import androidx.activity.BackEventCompat
@@ -39,9 +39,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.LayoutDirection
 import kotlinx.coroutines.CancellationException
-import sh.roboco.android.design.LocalReduceMotion
-import sh.roboco.android.design.Motion
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.LocalReduceMotion
+import sh.zeron.android.design.Motion
+import sh.zeron.android.design.ZeronTheme
 
 /** The [NavStack] of the host currently composing this content. */
 val LocalNavStack = staticCompositionLocalOf<NavStack> { error("No NavStack: compose content inside NavStackHost") }
@@ -199,7 +199,7 @@ fun NavStackHost(
     Layout(
         modifier = modifier
             .clipToBounds()
-            .background(RobocoTheme.palette.background),
+            .background(ZeronTheme.palette.background),
         content = {
             // entries + leaving in one keyed sequence, so an entry that moves
             // from entries to leaving at commit keeps its composition slot —
@@ -452,7 +452,7 @@ private fun Modifier.consumeAllPointers(): Modifier = pointerInput(Unit) {
 
 @Composable
 private fun NavPushHalfPreviewContent() {
-    RobocoTheme {
+    ZeronTheme {
         val stack = remember {
             NavStack(DemoRoute("Sessions")).apply {
                 holdHostlessOps()

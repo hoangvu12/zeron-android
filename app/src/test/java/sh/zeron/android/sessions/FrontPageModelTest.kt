@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
@@ -30,12 +30,12 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
-import sh.roboco.android.core.Prefs
-import sh.roboco.android.core.WorkspaceFeed
-import sh.roboco.android.core.testPrefsStore
-import sh.roboco.android.design.Haptic
-import uniffi.roboco_core.ClientEvent
-import uniffi.roboco_core.FrontPage
+import sh.zeron.android.core.Prefs
+import sh.zeron.android.core.WorkspaceFeed
+import sh.zeron.android.core.testPrefsStore
+import sh.zeron.android.design.Haptic
+import uniffi.zeron_core.ClientEvent
+import uniffi.zeron_core.FrontPage
 
 /**
  * `FrontPageModel` and `WorkspaceFeed` (android-ui-parity #40): the load

@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -45,7 +45,7 @@ import androidx.compose.ui.unit.sp
  */
 @Composable
 fun WallpaperHeroGallerySection(showLive: Boolean = true) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val density = LocalDensity.current
     val fixture = remember { wallpaperFixture() }
     val caption = TextStyle(fontFamily = FontFamily.Default, fontSize = 12.sp, color = palette.secondary)
@@ -135,11 +135,11 @@ internal fun wallpaperFixture(): ImageBitmap {
 @Preview(name = "Wallpaper hero - Light")
 @Composable
 private fun WallpaperHeroGallerySectionLightPreview() {
-    RobocoTheme(Appearance.Light) { WallpaperHeroGallerySection(showLive = false) }
+    ZeronTheme(Appearance.Light) { WallpaperHeroGallerySection(showLive = false) }
 }
 
 @Preview(name = "Wallpaper hero - Dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun WallpaperHeroGallerySectionDarkPreview() {
-    RobocoTheme(Appearance.Dark) { WallpaperHeroGallerySection(showLive = false) }
+    ZeronTheme(Appearance.Dark) { WallpaperHeroGallerySection(showLive = false) }
 }

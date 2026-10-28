@@ -1,4 +1,4 @@
-package sh.roboco.android.debug
+package sh.zeron.android.debug
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -11,8 +11,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The lab meters fixture: the illustrative result JSON from the ticket's
@@ -38,7 +38,7 @@ internal val FIXTURE_JSON =
  */
 @Composable
 fun LabMetersGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Box(
             Modifier.size(200.dp, 40.dp).background(palette.background),
@@ -68,8 +68,8 @@ private fun LabMetersDarkPreview() {
 
 @Composable
 private fun LabMetersPreviewBody(appearance: Appearance) {
-    RobocoTheme(appearance) {
-        Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+    ZeronTheme(appearance) {
+        Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
             LabMetersGallerySection()
         }
     }

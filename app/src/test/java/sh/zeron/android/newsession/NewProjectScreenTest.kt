@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
@@ -25,20 +25,20 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Alerts
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.GalleryBackdrop
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.shell.NewSessionSheetPlaceholder
-import sh.roboco.android.shell.SheetHost
-import sh.roboco.android.shell.SheetHostState
-import sh.roboco.android.shell.SheetStyle
-import uniffi.roboco_core.DriveEntry
-import uniffi.roboco_core.FolderEntry
-import uniffi.roboco_core.FolderListing
+import sh.zeron.android.design.Alerts
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.GalleryBackdrop
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.shell.NewSessionSheetPlaceholder
+import sh.zeron.android.shell.SheetHost
+import sh.zeron.android.shell.SheetHostState
+import sh.zeron.android.shell.SheetStyle
+import uniffi.zeron_core.DriveEntry
+import uniffi.zeron_core.FolderEntry
+import uniffi.zeron_core.FolderListing
 
 /**
  * The New Project screen's goldens and behaviour (android-ui-parity #110),
@@ -134,7 +134,7 @@ class NewProjectScreenTest {
     /**
      * 111's actions over a settled controller: the debug
      * [FakeProjectWriteApi] (never called — these tests never tap Use)
-     * and a dropped-alerts [sh.roboco.android.design.Alerts.Noop].
+     * and a dropped-alerts [sh.zeron.android.design.Alerts.Noop].
      */
     private fun actionsFor(controller: FolderBrowserController): FolderBrowserActions =
         FolderBrowserActions(
@@ -178,7 +178,7 @@ class NewProjectScreenTest {
             }
         }
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 GlassMenuHost {
                     SheetHost(state) { GalleryBackdrop(Modifier.fillMaxSize()) }
                 }
@@ -309,7 +309,7 @@ class NewProjectScreenTest {
             }
         }
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 GlassMenuHost {
                     SheetHost(state) { GalleryBackdrop(Modifier.fillMaxSize()) }
                 }

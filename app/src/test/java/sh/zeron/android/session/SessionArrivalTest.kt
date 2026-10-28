@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import android.view.Choreographer
 import androidx.compose.animation.core.AnimationSpec
@@ -58,18 +58,18 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.transcript.FramePoster
-import sh.roboco.android.transcript.TranscriptState
-import sh.roboco.android.transcript.firstUserBubbleInRoot
-import uniffi.roboco_core.LayoutFrame
-import uniffi.roboco_core.NoHandle
-import uniffi.roboco_core.TextSystem
-import uniffi.roboco_core.TranscriptView
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.transcript.FramePoster
+import sh.zeron.android.transcript.TranscriptState
+import sh.zeron.android.transcript.firstUserBubbleInRoot
+import uniffi.zeron_core.LayoutFrame
+import uniffi.zeron_core.NoHandle
+import uniffi.zeron_core.TextSystem
+import uniffi.zeron_core.TranscriptView
 
 /**
  * The handoff arrival hooks (android-ui-parity #77): Robolectric +
@@ -135,7 +135,7 @@ class SessionArrivalTest {
     /** Composes the reveal driver over an empty body and settles one frame. */
     private fun hostReveal(arrival: SessionArrival, driver: RevealDriver) {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 LaunchedEffect(driver.go) {
                     if (driver.go > 0) {
                         if (driver.stackChannel) arrival.revealArrivalComposer(driver.spec)
@@ -384,7 +384,7 @@ class SessionArrivalTest {
         // One setContent per test: detaching flips this flag instead.
         var anchored by mutableStateOf(true)
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.fillMaxSize()) {
                     Box(
                         Modifier
@@ -518,7 +518,7 @@ class SessionArrivalTest {
         val driver = RevealDriver()
         var sends = 0
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 LaunchedEffect(driver.go) {
                     if (driver.go > 0) {
                         if (driver.stackChannel) arrival.revealArrivalComposer(driver.spec)
@@ -598,7 +598,7 @@ class SessionArrivalTest {
         val arrival = SessionArrival()
         arrival.prepareArrival()
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 ProvideGlyphClock(frozenAtNanos = 0L) { ArrivalPreparedFixture(arrival) }
             }
         }
@@ -626,7 +626,7 @@ class SessionArrivalTest {
         val arrival = SessionArrival()
         arrival.prepareArrival()
         compose.setContent {
-            RobocoTheme(Appearance.Light) { ArrivalPreparedFixture(arrival) }
+            ZeronTheme(Appearance.Light) { ArrivalPreparedFixture(arrival) }
         }
         compose.waitForIdle()
         compose.mainClock.advanceTimeByFrame()
@@ -650,7 +650,7 @@ class SessionArrivalTest {
      */
     @Composable
     private fun ArrivalPreparedFixture(arrival: SessionArrival) {
-        val palette = RobocoTheme.palette
+        val palette = ZeronTheme.palette
         val reveal = remember { OpenReveal() }
         SessionScaffold(
             reveal = reveal,

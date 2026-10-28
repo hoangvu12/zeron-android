@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import java.nio.ByteBuffer
 import java.nio.charset.CharacterCodingException
@@ -14,7 +14,7 @@ sealed interface LinkRoute {
     /** http/https — a Custom Tab (iOS's in-app `SFSafariViewController`). */
     data class Web(val url: String) : LinkRoute
 
-    /** An image chip (`roboco-preview://image?ref=…`) — the viewer, from the row. */
+    /** An image chip (`zeron-preview://image?ref=…`) — the viewer, from the row. */
     data class Preview(val reference: String) : LinkRoute
 
     /** Any other recognized scheme — `Intent(ACTION_VIEW)`, as iOS's `UIApplication.open`. */
@@ -36,8 +36,8 @@ private const val PercentByte: Byte = 0x25
 /**
  * Routes a link URL (the Rust `LinkHit.url`, the markdown destination
  * verbatim). The rows are checked in the ticket's order: empty and
- * `#anchor` (row 1), `http`/`https` (2), `roboco-preview` (3),
- * `roboco-invoke`/`roboco-file`/`file` (4–6, the decision
+ * `#anchor` (row 1), `http`/`https` (2), `zeron-preview` (3),
+ * `zeron-invoke`/`zeron-file`/`file` (4–6, the decision
  * TRANSCRIPT-D4 no-ops), a Windows drive path (7, before the scheme
  * row), any other scheme (8, the system), and anything scheme-less (9).
  * Scheme matching is ASCII case-insensitive (RFC 3986; iOS's
@@ -51,15 +51,15 @@ fun routeLink(url: String): LinkRoute {
     if (raw.isEmpty() || raw.startsWith("#")) return LinkRoute.Ignore
     val scheme = SchemeRegex.find(raw)?.groupValues?.get(1)?.lowercase(Locale.ROOT)
     val fileShaped = scheme == null ||
-        scheme == "roboco-file" ||
+        scheme == "zeron-file" ||
         scheme == "file" ||
         WindowsDriveRegex.containsMatchIn(raw)
     return when {
         fileShaped -> if (namesImageFile(raw)) LinkRoute.Preview(raw) else LinkRoute.Ignore
         scheme == "http" || scheme == "https" -> LinkRoute.Web(raw)
-        scheme == "roboco-preview" -> previewRef(raw)?.let { LinkRoute.Preview(it) }
+        scheme == "zeron-preview" -> previewRef(raw)?.let { LinkRoute.Preview(it) }
             ?: LinkRoute.Ignore
-        scheme == "roboco-invoke" -> LinkRoute.Ignore
+        scheme == "zeron-invoke" -> LinkRoute.Ignore
         else -> LinkRoute.External(raw)
     }
 }
@@ -78,7 +78,7 @@ internal fun namesImageFile(link: String): Boolean {
 }
 
 /**
- * The `ref` value of an image-chip link (`roboco-preview://image?ref=…`),
+ * The `ref` value of an image-chip link (`zeron-preview://image?ref=…`),
  * percent-decoded, or `null` when there is none, it is empty, or it does
  * not decode. Hand-rolled on purpose: `Uri.getQueryParameter` and
  * `URLDecoder` both turn `+` into a space, and iOS's

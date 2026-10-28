@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
-import sh.roboco.android.design.glass.rememberGlassMenuState
+import sh.zeron.android.design.glass.rememberGlassMenuState
 
 /**
  * The composer's attach `+` as the attach-menu anchor (android-ui-parity
@@ -29,7 +29,7 @@ import sh.roboco.android.design.glass.rememberGlassMenuState
  * tap time (the latest placement, like UIKit's frame).
  *
  * Upstream PR #714's rules, met with no system transition: the host is
- * ticket 15's in-window [sh.roboco.android.design.glass.GlassMenuHost]
+ * ticket 15's in-window [sh.zeron.android.design.glass.GlassMenuHost]
  * (never a `Popup` or dialog — the IME and the field's focus are
  * untouched), and the [Modifier.composerControl] marker keeps the glass's
  * tap-to-focus from eating the tap, so opening the menu neither focuses
@@ -38,7 +38,7 @@ import sh.roboco.android.design.glass.rememberGlassMenuState
  * [ComposerController] state on open or close; the dismissing tap is
  * consumed by the menu's catcher and never reaches the transcript.
  *
- * [enabled][ComposerController.attachEnabled] is the Roboco gate (83:
+ * [enabled][ComposerController.attachEnabled] is the Zeron gate (83:
  * `false` while a queued edit is open): the button is ticket 55's
  * disabled state — no menu, no press look, `Palette.tertiary` glyph. The
  * same button serves the session composer (78) and the new-session

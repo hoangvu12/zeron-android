@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
@@ -73,7 +73,7 @@ import org.robolectric.annotation.GraphicsMode
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "w402dp-h420dp-xxhdpi")
-class RobocoSwitchTest {
+class ZeronSwitchTest {
 
     @get:Rule
     val compose = createComposeRule()
@@ -99,20 +99,20 @@ class RobocoSwitchTest {
         rtl: Boolean = false,
     ) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 CompositionLocalProvider(
                     LocalFeedback provides feedback,
                     LocalReduceMotion provides reduce,
                     LocalLayoutDirection provides (if (rtl) LayoutDirection.Rtl else LayoutDirection.Ltr),
                 ) {
-                    Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+                    Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                         Box(
                             Modifier
                                 .testTag("host")
-                                .background(RobocoTheme.palette.elevated)
+                                .background(ZeronTheme.palette.elevated)
                                 .padding(8.dp),
                         ) {
-                            RobocoSwitch(checked.value, onCheckedChange, testTag = "toggle-x")
+                            ZeronSwitch(checked.value, onCheckedChange, testTag = "toggle-x")
                         }
                     }
                 }
@@ -187,17 +187,17 @@ class RobocoSwitchTest {
     @Test
     fun rowPlacementIsTrailing16AndCentredOnTheRow() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(LocalFeedback provides feedback) {
-                    Column(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+                    Column(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                         GroupedRow(
                             title = "Group by Project",
                             subtitle = "Sessions outside your sections, under their project",
-                            icon = RobocoIcons.SquareStack3dUp,
+                            icon = ZeronIcons.SquareStack3dUp,
                             position = GroupedPosition.Single,
                             accessories = listOf(
                                 GroupedAccessory.Custom {
-                                    RobocoSwitch(false, {}, testTag = toggleTag("groupByProject"))
+                                    ZeronSwitch(false, {}, testTag = toggleTag("groupByProject"))
                                 },
                             ),
                             testTag = "row",
@@ -408,13 +408,13 @@ class RobocoSwitchTest {
         val values = mutableListOf<Boolean>()
         val state = ScrollState(0)
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(LocalFeedback provides feedback) {
-                    Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+                    Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                         // A 200 dp tall scrollable column with 1000 dp of
                         // content; the switch at the top.
                         Column(Modifier.fillMaxWidth().height(200.dp).verticalScroll(state)) {
-                            RobocoSwitch(on.value, { on.value = it; values += it }, testTag = "toggle-x")
+                            ZeronSwitch(on.value, { on.value = it; values += it }, testTag = "toggle-x")
                             Spacer(Modifier.height(972.dp))
                         }
                     }

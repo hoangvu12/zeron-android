@@ -1,20 +1,20 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
-import uniffi.roboco_core.ChatIndicator
-import uniffi.roboco_core.ChatConfig
-import uniffi.roboco_core.ComposerState
-import uniffi.roboco_core.ContextUsage
-import uniffi.roboco_core.HostCapabilities
-import uniffi.roboco_core.HostInfo
-import uniffi.roboco_core.LiveStatus
-import uniffi.roboco_core.ModelInfo
-import uniffi.roboco_core.ModelOption
-import uniffi.roboco_core.ModelOptionChoice
-import uniffi.roboco_core.PullRequest
-import uniffi.roboco_core.PullRequestState
-import uniffi.roboco_core.RoomState
-import uniffi.roboco_core.SandboxLevel
-import uniffi.roboco_core.SessionRow
+import uniffi.zeron_core.ChatIndicator
+import uniffi.zeron_core.ChatConfig
+import uniffi.zeron_core.ComposerState
+import uniffi.zeron_core.ContextUsage
+import uniffi.zeron_core.HostCapabilities
+import uniffi.zeron_core.HostInfo
+import uniffi.zeron_core.LiveStatus
+import uniffi.zeron_core.ModelInfo
+import uniffi.zeron_core.ModelOption
+import uniffi.zeron_core.ModelOptionChoice
+import uniffi.zeron_core.PullRequest
+import uniffi.zeron_core.PullRequestState
+import uniffi.zeron_core.RoomState
+import uniffi.zeron_core.SandboxLevel
+import uniffi.zeron_core.SessionRow
 
 /**
  * Fixtures shared by ticket 89's three test classes (the JVM rules test,
@@ -244,7 +244,7 @@ fun chipMenuSessionRow(
 /** The PR fixture the chip + menu tests share. */
 fun chipMenuPullRequest(
     title: String = "Fixture PR",
-    url: String = "https://github.com/hoangvu12/roboco/pull/1234",
+    url: String = "https://github.com/hoangvu12/zeron-android/pull/1234",
 ): PullRequest = PullRequest(
     provider = "github",
     number = 1234uL,

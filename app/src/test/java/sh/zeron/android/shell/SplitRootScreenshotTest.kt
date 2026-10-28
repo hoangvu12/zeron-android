@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import com.github.takahirom.roborazzi.captureRoboImage
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -9,9 +9,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.SplitRootFixture
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.SplitRootFixture
 
 /**
  * The split shell's goldens (android-ui-parity #33): the gallery's
@@ -47,7 +47,7 @@ class SplitRootScreenshotTest {
             initialDetailRoot = DetailRoot.Draft(prompt = null, focusOnAppear = false),
         )
         compose.setContent {
-            RobocoTheme(appearance) { SplitRootFixture(shell = shell) }
+            ZeronTheme(appearance) { SplitRootFixture(shell = shell) }
         }
         compose.waitForIdle()
         compose.onRoot().captureRoboImage(file)

@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 /**
  * The elapsed-time label of the status pill's Working banner and the

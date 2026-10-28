@@ -1,8 +1,8 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.graphics.Canvas
 import android.graphics.Paint
-import sh.roboco.android.design.Motion
+import sh.zeron.android.design.Motion
 
 /**
  * Streaming veil for one realized row (iOS `RowView.swift:111-141`): each

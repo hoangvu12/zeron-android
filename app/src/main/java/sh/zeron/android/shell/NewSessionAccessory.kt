@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import android.content.res.Configuration
 import androidx.compose.animation.core.Animatable
@@ -36,19 +36,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.CapsuleShape
-import sh.roboco.android.design.Icon
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.Motion
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.StatusGlyph
-import sh.roboco.android.design.StatusGlyphKind
-import sh.roboco.android.design.SymbolWeight
-import sh.roboco.android.design.glass.GlassSurface
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.CapsuleShape
+import sh.zeron.android.design.Icon
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.Motion
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.StatusGlyph
+import sh.zeron.android.design.StatusGlyphKind
+import sh.zeron.android.design.SymbolWeight
+import sh.zeron.android.design.glass.GlassSurface
+import sh.zeron.android.design.uiStyle
 
 /**
  * The accessory's geometry, exported for the tickets that place it
@@ -167,7 +167,7 @@ fun NewSessionAccessory(
     contentAlpha: () -> Float = { 1f },
     enabled: Boolean = true,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
     val src = remember { MutableInteractionSource() }
     val pressed by src.collectIsPressedAsState()
@@ -232,7 +232,7 @@ fun NewSessionAccessory(
                 // SF `plus`, point size 15, weight semibold, tint accent
                 // (MainTabController.swift:234, 250). Ticket 06's 18 dp box.
                 Icon(
-                    RobocoIcons.Plus,
+                    ZeronIcons.Plus,
                     tint = palette.accent,
                     sizePt = 15f,
                     weight = SymbolWeight.Semibold,
@@ -297,7 +297,7 @@ private fun AccessoryPreviewPage(content: @Composable () -> Unit) {
     Box(
         Modifier
             .fillMaxSize()
-            .background(RobocoTheme.palette.background)
+            .background(ZeronTheme.palette.background)
             .padding(horizontal = NewSessionAccessoryMetrics.SideMargin),
     ) {
         content()
@@ -318,7 +318,7 @@ private fun NewSessionAccessoryPreviewColumn() {
 @Preview(name = "Accessory – Light", widthDp = 402, heightDp = 260)
 @Composable
 private fun NewSessionAccessoryLightPreview() {
-    RobocoTheme(Appearance.System) {
+    ZeronTheme(Appearance.System) {
         NewSessionAccessoryPreviewColumn()
     }
 }
@@ -326,7 +326,7 @@ private fun NewSessionAccessoryLightPreview() {
 @Preview(name = "Accessory – Dark", uiMode = Configuration.UI_MODE_NIGHT_YES, widthDp = 402, heightDp = 260)
 @Composable
 private fun NewSessionAccessoryDarkPreview() {
-    RobocoTheme(Appearance.System) {
+    ZeronTheme(Appearance.System) {
         NewSessionAccessoryPreviewColumn()
     }
 }
@@ -334,7 +334,7 @@ private fun NewSessionAccessoryDarkPreview() {
 @Preview(name = "Accessory – Inline", widthDp = 200, heightDp = 120)
 @Composable
 private fun NewSessionAccessoryInlinePreview() {
-    RobocoTheme(Appearance.System) {
+    ZeronTheme(Appearance.System) {
         AccessoryPreviewPage {
             NewSessionAccessory(counts = LiveCounts(awaiting = 1), onTap = {}, inline = true)
         }

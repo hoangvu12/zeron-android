@@ -1,4 +1,4 @@
-package sh.roboco.android.design.sheet
+package sh.zeron.android.design.sheet
 
 import androidx.activity.BackEventCompat
 import androidx.activity.ComponentActivity
@@ -40,11 +40,11 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
 
 /**
  * The sheet's behaviour (ticket 17) — Robolectric + compose-ui-test at
@@ -117,7 +117,7 @@ class GlassSheetTest {
         config = next
         contentSet = true
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.fillMaxSize()) {
                     // The presenting content: any tap the scrim fails to
                     // consume would land here.
@@ -151,7 +151,7 @@ class GlassSheetTest {
     @Composable
     private fun SheetListContent(bottomInset: Dp) {
         val typeScale = LocalTypeScale.current
-        val palette = RobocoTheme.palette
+        val palette = ZeronTheme.palette
         LazyColumn(
             Modifier
                 .fillMaxSize()
@@ -435,7 +435,7 @@ class GlassSheetTest {
     @Test
     fun headerRowIs52DpHighWithBothButtonTagsStandalone() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.fillMaxSize()) {
                     SheetHeaderRow(
                         "Bash",
@@ -466,7 +466,7 @@ class GlassSheetTest {
     @Test
     fun grabberIsA44x20TargetWithUikitLabelsStandalone() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.fillMaxSize()) {
                     SheetGrabber(
                         Modifier.testTag("grabber"),

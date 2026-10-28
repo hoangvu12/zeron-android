@@ -1,4 +1,4 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import android.content.res.Resources
 import android.util.Log
@@ -17,25 +17,25 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import sh.roboco.android.R
-import sh.roboco.android.core.CoreStartup
-import sh.roboco.android.design.LocalToaster
-import sh.roboco.android.design.Toaster
-import sh.roboco.android.shell.LocalSheetHost
-import sh.roboco.android.shell.PageSheetScope
-import sh.roboco.android.shell.SheetHostState
-import sh.roboco.android.shell.SheetStyle
-import uniffi.roboco_core.CoreClient
-import uniffi.roboco_core.PairedEngine
-import uniffi.roboco_core.PairingTarget
-import uniffi.roboco_core.RoomInviteTarget
-import uniffi.roboco_core.RoomJoinResult
-import uniffi.roboco_core.RoomRecord
+import sh.zeron.android.R
+import sh.zeron.android.core.CoreStartup
+import sh.zeron.android.design.LocalToaster
+import sh.zeron.android.design.Toaster
+import sh.zeron.android.shell.LocalSheetHost
+import sh.zeron.android.shell.PageSheetScope
+import sh.zeron.android.shell.SheetHostState
+import sh.zeron.android.shell.SheetStyle
+import uniffi.zeron_core.CoreClient
+import uniffi.zeron_core.PairedEngine
+import uniffi.zeron_core.PairingTarget
+import uniffi.zeron_core.RoomInviteTarget
+import uniffi.zeron_core.RoomJoinResult
+import uniffi.zeron_core.RoomRecord
 
 /**
  * The QR scanner seam (ticket 138's screen, `fun interface`): opens the
  * scanner and hands back the decoded plain `http(s)://…/pair#token=…`
- * URL — 138 already unwrapped `roboco://pair#url=`. `null` until 138
+ * URL — 138 already unwrapped `zeron://pair#url=`. `null` until 138
  * lands (the Pair page hides the Scan row then).
  */
 fun interface QrScanRequest {
@@ -183,7 +183,7 @@ val LocalPairPage = staticCompositionLocalOf<PairPageLauncher?> { null }
 
 /**
  * Creates the [PairPageLauncher] and provides it as [LocalPairPage].
- * Must sit **inside** [sh.roboco.android.shell.SheetHost] (it presents
+ * Must sit **inside** [sh.zeron.android.shell.SheetHost] (it presents
  * through the host) and **outside** the root cross-fade, so a root swap
  * mid-redeem does not dispose the launcher (ticket 35 wires it inside
  * `RootHosts`).
@@ -239,10 +239,10 @@ class CoreClientPairingBackend(
 ) : PairingBackend {
 
     override fun parse(input: String): PairingTarget? =
-        runCatching { uniffi.roboco_core.parsePairingUrl(input) }.getOrNull()
+        runCatching { uniffi.zeron_core.parsePairingUrl(input) }.getOrNull()
 
     override fun parseRoom(input: String): RoomInviteTarget? =
-        runCatching { uniffi.roboco_core.parseRoomInvite(input) }.getOrNull()
+        runCatching { uniffi.zeron_core.parseRoomInvite(input) }.getOrNull()
 
     override suspend fun pair(url: String, replaceEngineId: String?): PairedEngine =
         client.pairEngine(url, replaceEngineId)

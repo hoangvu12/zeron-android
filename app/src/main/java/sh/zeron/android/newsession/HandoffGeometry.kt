@@ -1,7 +1,7 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import androidx.compose.ui.geometry.Rect
-import sh.roboco.android.design.Motion
+import sh.zeron.android.design.Motion
 import kotlin.math.min
 
 /**

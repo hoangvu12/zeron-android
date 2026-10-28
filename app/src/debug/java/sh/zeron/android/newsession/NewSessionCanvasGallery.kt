@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import android.content.res.Configuration
 import androidx.compose.foundation.clickable
@@ -22,21 +22,21 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.rememberHazeState
-import sh.roboco.android.composer.ComposerBar
-import sh.roboco.android.composer.ComposerChip
-import sh.roboco.android.composer.ComposerController
-import sh.roboco.android.composer.ChipIcon
-import sh.roboco.android.composer.rememberComposerController
-import sh.roboco.android.composer.rememberComposerMorphState
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.WallpaperHero
-import sh.roboco.android.design.WallpaperRender
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.design.wallpaperFixture
+import sh.zeron.android.composer.ComposerBar
+import sh.zeron.android.composer.ComposerChip
+import sh.zeron.android.composer.ComposerController
+import sh.zeron.android.composer.ChipIcon
+import sh.zeron.android.composer.rememberComposerController
+import sh.zeron.android.composer.rememberComposerMorphState
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.WallpaperHero
+import sh.zeron.android.design.WallpaperRender
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.design.wallpaperFixture
 
 /**
  * The "New session canvas" page of the debug design gallery
@@ -60,7 +60,7 @@ import sh.roboco.android.design.wallpaperFixture
  *  - **No wallpaper** — 21's `load` returns null: plain background;
  *  - **Narrow** — a 200 dp wide page, which gives the 2-line headline.
  *
- * Try it live (`adb shell am start -n sh.roboco.android/.MainActivity
+ * Try it live (`adb shell am start -n sh.zeron.android/.MainActivity
  * --es route gallery --es section new_session_canvas`): tap the page to
  * dismiss the keyboard, watch the composer ride the Keyboard toggle, and
  * drag the (text-only) field.
@@ -75,7 +75,7 @@ fun NewSessionCanvasGallerySection() {
 /** The gallery body — GlassMenuHost is required, so the stage is split off. */
 @Composable
 private fun NewSessionCanvasGalleryBody() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
     var embedded by remember { mutableStateOf(false) }
     var keyboard by remember { mutableStateOf(false) }
@@ -164,7 +164,7 @@ private fun configureCanvasGalleryComposer(controller: ComposerController) {
     controller.placeholder = "Describe the task"
     controller.canWrite = true
     controller.chips = listOf(
-        ComposerChip("project", "roboco", icon = ChipIcon.Project("roboco", 0)),
+        ComposerChip("project", "zeron", icon = ChipIcon.Project("zeron", 0)),
         ComposerChip("model", "Opus 4.5", icon = ChipIcon.Brand("claude-code")),
     )
 }
@@ -172,7 +172,7 @@ private fun configureCanvasGalleryComposer(controller: ComposerController) {
 /** One toggle row item: semibold text when on, plain when off. */
 @Composable
 private fun CanvasGalleryToggle(label: String, selected: Boolean, onSelect: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
     BasicText(
         label,
@@ -197,7 +197,7 @@ private val CanvasHarnesses = listOf(
 /** The preview stage: the sheet canvas at 411 × 857, fixture wallpaper. */
 @Composable
 private fun NewSessionCanvasPreviewStage(appearance: Appearance) {
-    RobocoTheme(appearance) {
+    ZeronTheme(appearance) {
         val controller = rememberComposerController()
         remember(controller) { configureCanvasGalleryComposer(controller); true }
         val morph = rememberComposerMorphState(

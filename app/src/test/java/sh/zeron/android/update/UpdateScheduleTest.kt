@@ -1,4 +1,4 @@
-package sh.roboco.android.update
+package sh.zeron.android.update
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

@@ -1,8 +1,8 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.view.Choreographer
 import java.util.concurrent.atomic.AtomicBoolean
-import uniffi.roboco_core.LayoutListener
+import uniffi.zeron_core.LayoutListener
 
 /**
  * Posts one-shot main-thread frame callbacks. Thread-safe.
@@ -27,7 +27,7 @@ class ChoreographerPoster(private val choreographer: Choreographer) : FramePoste
  * several frames land before the next vsync, only the newest is applied
  * (`ios:Transcript/FrameRelay.swift`).
  *
- * `frameReady` runs on the Rust layout thread (`roboco-layout`) through a
+ * `frameReady` runs on the Rust layout thread (`zeron-layout`) through a
  * JNA callback, so it must never throw and never touch the engine or
  * Compose state: it only flips [scheduled] and posts [callback]. The main
  * hop is a single [Choreographer.FrameCallback] — the apply lands on the

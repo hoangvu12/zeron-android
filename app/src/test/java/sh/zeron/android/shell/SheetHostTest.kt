@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.activity.BackEventCompat
 import androidx.activity.ComponentActivity
@@ -46,14 +46,14 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.sheet.SheetHeaderRow
-import sh.roboco.android.design.sheet.SheetLeading
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.sheet.SheetHeaderRow
+import sh.zeron.android.design.sheet.SheetLeading
+import sh.zeron.android.design.uiStyle
 
 /**
  * The sheet host's behaviour (android-ui-parity #31) — Robolectric +
@@ -109,7 +109,7 @@ class SheetHostTest {
     private fun setContent(presenting: @Composable () -> Unit = { Presenting() }) {
         compose.mainClock.autoAdvance = false
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 statusBarTop = WindowInsets.statusBars.getTop(LocalDensity.current).toFloat()
                 SheetHost(state) { presenting() }
             }
@@ -162,7 +162,7 @@ class SheetHostTest {
     private fun PageSheetScope.PlainSheetContent() {
         sheetScope = this
         val typeScale = LocalTypeScale.current
-        val palette = RobocoTheme.palette
+        val palette = ZeronTheme.palette
         Column(Modifier.fillMaxSize()) {
             BasicText("sheet", style = uiStyle(Face.Sans, typeScale.fixed(15f), palette.text))
         }
@@ -173,7 +173,7 @@ class SheetHostTest {
     private fun PageSheetScope.ListSheetContent() {
         sheetScope = this
         val typeScale = LocalTypeScale.current
-        val palette = RobocoTheme.palette
+        val palette = ZeronTheme.palette
         LazyColumn(Modifier.fillMaxSize().testTag("sheet-list")) {
             items(200) { line ->
                 BasicText(
@@ -207,7 +207,7 @@ class SheetHostTest {
         sheetScope = this
         var text by remember { mutableStateOf("") }
         val typeScale = LocalTypeScale.current
-        val palette = RobocoTheme.palette
+        val palette = ZeronTheme.palette
         Column(Modifier.fillMaxSize()) {
             BasicTextField(
                 value = text,

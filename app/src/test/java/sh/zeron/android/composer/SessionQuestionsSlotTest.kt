@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -48,19 +48,19 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.NoFeedback
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.session.FakeSessionCore
-import sh.roboco.android.session.QuestionsChromeFiller
-import sh.roboco.android.session.SessionController
-import sh.roboco.android.session.SessionEventHub
-import sh.roboco.android.session.SessionChrome
-import sh.roboco.android.session.composerState
-import uniffi.roboco_core.InputRequest
-import uniffi.roboco_core.UserInputQuestion
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.NoFeedback
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.session.FakeSessionCore
+import sh.zeron.android.session.QuestionsChromeFiller
+import sh.zeron.android.session.SessionController
+import sh.zeron.android.session.SessionEventHub
+import sh.zeron.android.session.SessionChrome
+import sh.zeron.android.session.composerState
+import uniffi.zeron_core.InputRequest
+import uniffi.zeron_core.UserInputQuestion
 
 /**
  * [SessionQuestionsSlot] — android-ui-parity #91's acceptance criteria
@@ -131,7 +131,7 @@ class SessionQuestionsSlotTest {
         )
         fixture?.let { state.configure(it) }
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.fillMaxSize().background(Palette.Light.background)) {
                     with(PreviewSlotScope) { SessionQuestionsSlot(state) }
                     extra()
@@ -407,7 +407,7 @@ class SessionQuestionsSlotTest {
 
         var captured: QuestionPanelState? = null
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 captured = rememberQuestionPanelState(
                     controller,
                     QuestionActions({ _, _ -> }, CoroutineScope(Dispatchers.Unconfined)),

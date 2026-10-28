@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Canvas
@@ -34,7 +34,7 @@ import kotlin.math.min
  */
 @Composable
 fun GalleryBackdrop(modifier: Modifier = Modifier) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     // Built once and reset per draw; the two ridges are size-dependent paths.
     val ridgeFar = remember { Path() }
     val ridgeNear = remember { Path() }
@@ -165,7 +165,7 @@ fun GlassStage(
 @Preview(name = "Backdrop light")
 @Composable
 private fun BackdropLightPreview() {
-    RobocoTheme(Appearance.System) {
+    ZeronTheme(Appearance.System) {
         GlassStage(height = 320.dp) {}
     }
 }
@@ -173,7 +173,7 @@ private fun BackdropLightPreview() {
 @Preview(name = "Backdrop dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun BackdropDarkPreview() {
-    RobocoTheme(Appearance.System) {
+    ZeronTheme(Appearance.System) {
         GlassStage(height = 320.dp) {}
     }
 }

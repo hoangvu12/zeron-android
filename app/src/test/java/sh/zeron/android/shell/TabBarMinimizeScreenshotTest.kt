@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,10 +16,10 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
-import sh.roboco.android.design.GlassStage
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.LocalHazeState
+import sh.zeron.android.design.GlassStage
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.LocalHazeState
 
 /**
  * Ticket 28's goldens: the chrome at p = 0, 0.5 and 1 over 22's striped
@@ -56,7 +56,7 @@ class TabBarMinimizeScreenshotTest {
         val minimized = p >= 0.999f
         compose.mainClock.autoAdvance = false
         compose.setContent {
-            RobocoTheme {
+            ZeronTheme {
                 ProvideGlyphClock(frozenAtNanos = 0L) {
                     Box(Modifier.fillMaxSize()) {
                         val haze = rememberHazeState()

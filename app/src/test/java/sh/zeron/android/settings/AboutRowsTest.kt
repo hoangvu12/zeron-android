@@ -1,12 +1,12 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import sh.roboco.android.core.CoreStatus
-import sh.roboco.android.design.GroupedAccessory
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.settingsTag
+import sh.zeron.android.core.CoreStatus
+import sh.zeron.android.design.GroupedAccessory
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.settingsTag
 
 /**
  * The pure half of the Settings About section (android-ui-parity #101):
@@ -21,17 +21,17 @@ class AboutRowsTest {
     @Test
     fun versionSubtitleFormatsAllThreeVersions() {
         assertEquals(
-            "Roboco 0.9.2 (9002) · core 0.9.2",
+            "Zeron 0.9.2 (9002) · core 0.9.2",
             versionSubtitle("0.9.2", 9002L, CoreStatus.Loaded("0.9.2")),
         )
         // The core may differ from the app (an engine-local build) — the
         // string still shows both, verbatim.
         assertEquals(
-            "Roboco 0.9.2 (9002) · core 0.9.1",
+            "Zeron 0.9.2 (9002) · core 0.9.1",
             versionSubtitle("0.9.2", 9002L, CoreStatus.Loaded("0.9.1")),
         )
         assertEquals(
-            "Roboco 1.2.0 (1002000) · core 1.2.0",
+            "Zeron 1.2.0 (1002000) · core 1.2.0",
             versionSubtitle("1.2.0", 1002000L, CoreStatus.Loaded("1.2.0")),
         )
     }
@@ -39,7 +39,7 @@ class AboutRowsTest {
     @Test
     fun versionSubtitleEndsWithCoreUnavailableWhenTheCoreFailed() {
         val subtitle = versionSubtitle("0.9.2", 9002L, CoreStatus.Failed("x"))
-        assertEquals("Roboco 0.9.2 (9002) · core unavailable", subtitle)
+        assertEquals("Zeron 0.9.2 (9002) · core unavailable", subtitle)
         assertTrue("must end with core unavailable", subtitle.endsWith("core unavailable"))
     }
 
@@ -55,14 +55,14 @@ class AboutRowsTest {
         assertEquals(AboutRowIds.Version, version.id)
         assertEquals("Version", version.title)
         assertEquals(subtitle, version.subtitle)
-        assertEquals(RobocoIcons.InfoCircle, version.icon)
+        assertEquals(ZeronIcons.InfoCircle, version.icon)
         assertEquals(emptyList<GroupedAccessory>(), version.accessories)
 
         val licenses = rows[1]
         assertEquals(AboutRowIds.Licenses, licenses.id)
         assertEquals("Licenses", licenses.title)
         assertEquals("Third-party notices", licenses.subtitle)
-        assertEquals(RobocoIcons.DocText, licenses.icon)
+        assertEquals(ZeronIcons.DocText, licenses.icon)
         assertEquals(listOf(GroupedAccessory.Disclosure), licenses.accessories)
     }
 
@@ -83,7 +83,7 @@ class AboutRowsTest {
         var opened = 0
         var copied = 0
         val state = AboutSectionState(
-            rows = aboutRows("Roboco 0.9.2 (9002) · core 0.9.2"),
+            rows = aboutRows("Zeron 0.9.2 (9002) · core 0.9.2"),
             openLicenses = { opened++ },
             copy = { copied++ },
         )
@@ -101,7 +101,7 @@ class AboutRowsTest {
     fun longPressingVersionCopiesExactlyTheSubtitle() {
         var copied = 0
         var copiedText: String? = null
-        val subtitle = "Roboco 0.9.2 (9002) · core unavailable"
+        val subtitle = "Zeron 0.9.2 (9002) · core unavailable"
         val state = AboutSectionState(
             rows = aboutRows(subtitle),
             openLicenses = { },
@@ -124,7 +124,7 @@ class AboutRowsTest {
     @Test
     fun theNoticesConstantsAreVerbatim() {
         assertEquals(
-            "Roboco bundles the SVG icon set and filename/folder associations from Symbols:\n" +
+            "Zeron bundles the SVG icon set and filename/folder associations from Symbols:\n" +
                 "https://github.com/miguelsolorio/vscode-symbols/tree/296ef1b62287fb2315cb5651e552e09e8c8e1de8",
             SymbolsHeader,
         )

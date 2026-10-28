@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -12,8 +12,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.core.Fonts
-import sh.roboco.android.design.TranscriptPalette
+import sh.zeron.android.core.Fonts
+import sh.zeron.android.design.TranscriptPalette
 
 /**
  * The layer-draw goldens (recorded by `:app:recordRoborazziDebug`, verified

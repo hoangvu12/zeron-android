@@ -1,7 +1,7 @@
 # R8 rules for the release build (debug is not minified; android-app#31).
 #
-# The Rust core (libroboco_mobile.so) is reached through UniFFI's generated
-# Kotlin (uniffi.roboco_core, under uniffi.**) on top of JNA. Both work by
+# The Rust core (libzeron_mobile.so) is reached through UniFFI's generated
+# Kotlin (uniffi.zeron_core, under uniffi.**) on top of JNA. Both work by
 # reflection and from native code: JNA reads Structure fields by name (and
 # their @FieldOrder), instantiates Structure and Callback classes, finds
 # `callback` methods on Callback interfaces, and its libjnidispatch calls
@@ -19,7 +19,7 @@
 # callback-interface vtables (com.sun.jna.Callback), Structure records
 # (RustBuffer, UniffiRustCallStatus, ForeignFuture*, VTables), the
 # `external`/Native.register methods and the handle maps. `uniffi.**` covers
-# uniffi.roboco_core.
+# uniffi.zeron_core.
 -keep class uniffi.** { *; }
 -keep interface uniffi.** { *; }
 

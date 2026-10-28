@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -16,15 +16,15 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.core.FontChain
-import sh.roboco.android.core.Fonts
-import sh.roboco.android.design.TranscriptPalette
-import uniffi.roboco_core.ColorRole
-import uniffi.roboco_core.Decoration
-import uniffi.roboco_core.FaceRole
-import uniffi.roboco_core.RowDisplay
-import uniffi.roboco_core.StyleDesc
-import uniffi.roboco_core.TextRun
+import sh.zeron.android.core.FontChain
+import sh.zeron.android.core.Fonts
+import sh.zeron.android.design.TranscriptPalette
+import uniffi.zeron_core.ColorRole
+import uniffi.zeron_core.Decoration
+import uniffi.zeron_core.FaceRole
+import uniffi.zeron_core.RowDisplay
+import uniffi.zeron_core.StyleDesc
+import uniffi.zeron_core.TextRun
 
 /**
  * Ticket 63's run painting over a recording [Canvas] (native graphics, the

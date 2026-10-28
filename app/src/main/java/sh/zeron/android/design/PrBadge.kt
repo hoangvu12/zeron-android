@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -32,8 +32,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlin.math.ceil
 import kotlin.math.max
-import sh.roboco.android.core.Face
-import uniffi.roboco_core.PullRequestState
+import sh.zeron.android.core.Face
+import uniffi.zeron_core.PullRequestState
 
 /**
  * A pull request's badge state — `SessionRowVM.PR` on iOS

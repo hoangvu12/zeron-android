@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -20,17 +20,17 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.FontStatus
+import sh.zeron.android.core.FontStatus
 
 /**
  * `FontsMissingScreen` title. Tests read this constant, not the literal.
- * The copy is Roboco-invented: iOS has no equivalent (it silently falls
+ * The copy is Zeron-invented: iOS has no equivalent (it silently falls
  * back); keep it minimal — system fonts, palette roles, no actions.
  */
-internal const val FONTS_MISSING_TITLE = "Roboco can't start"
+internal const val FONTS_MISSING_TITLE = "Zeron can't start"
 
 /** `FontsMissingScreen` body. Tests read this constant, not the literal. */
-internal const val FONTS_MISSING_BODY = "This build is missing bundled fonts. Reinstall Roboco."
+internal const val FONTS_MISSING_BODY = "This build is missing bundled fonts. Reinstall Zeron."
 
 /**
  * The release-build gate around the app's content: when the startup
@@ -57,23 +57,23 @@ fun FontGateHost(status: FontStatus, content: @Composable () -> Unit) {
  */
 @Composable
 fun FontsMissingScreen(paths: List<String>, modifier: Modifier = Modifier) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
 
-    val title = RobocoTextDefaults.Base.copy(
+    val title = ZeronTextDefaults.Base.copy(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.SemiBold,
         fontSize = typeScale.fixed(20f),
         color = palette.text,
         textAlign = TextAlign.Center,
     )
-    val body = RobocoTextDefaults.Base.copy(
+    val body = ZeronTextDefaults.Base.copy(
         fontFamily = FontFamily.Default,
         fontSize = typeScale.fixed(15f),
         color = palette.secondary,
         textAlign = TextAlign.Center,
     )
-    val pathStyle = RobocoTextDefaults.Base.copy(
+    val pathStyle = ZeronTextDefaults.Base.copy(
         fontFamily = FontFamily.Monospace,
         fontSize = typeScale.fixed(13f),
         color = palette.tertiary,

@@ -1,4 +1,4 @@
-package sh.roboco.android.design.glass
+package sh.zeron.android.design.glass
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -35,10 +35,10 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalReduceMotion
-import sh.roboco.android.design.Motion
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalReduceMotion
+import sh.zeron.android.design.Motion
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The scroll-edge effect's pure logic (ticket 09): the band height, the
@@ -124,7 +124,7 @@ class ScrollEdgeEffectTest {
     /** Composes the 120 × 60 dp red source with a scrim-only effect on top. */
     private fun redSource(appearance: Appearance = Appearance.Light, engaged: () -> Boolean) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 Box(Modifier.testTag("band").size(120.dp, 60.dp).background(red)) {
                     ScrollEdgeEffect(height = 60.dp, engaged = engaged(), blur = false)
                 }
@@ -176,7 +176,7 @@ class ScrollEdgeEffectTest {
     fun parameterlessHeightReadsTheStatusBarInset() {
         val observed = mutableListOf<Dp>()
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 observed.add(ScrollEdgeEffectDefaults.height())
             }
         }
@@ -239,7 +239,7 @@ class ScrollEdgeEffectTest {
     fun tapsInsideTheBandReachTheContentUnderneath() {
         var taps = 0
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.fillMaxSize()) {
                     Box(
                         Modifier
@@ -269,7 +269,7 @@ class ScrollEdgeEffectTest {
         var engaged by mutableStateOf(true)
         compose.mainClock.autoAdvance = false
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.fillMaxSize()) {
                     Box(
                         Modifier
@@ -348,7 +348,7 @@ class ScrollEdgeEffectTest {
     fun reduceMotionSnapsTheEngage() {
         var engaged by mutableStateOf(false)
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(LocalReduceMotion provides true) {
                     Box(Modifier.testTag("band").size(120.dp, 60.dp).background(red)) {
                         ScrollEdgeEffect(height = 60.dp, engaged = engaged, blur = false)

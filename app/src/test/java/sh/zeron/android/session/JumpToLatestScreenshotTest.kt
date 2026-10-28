@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -16,9 +16,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
 
 /**
  * The jump button's goldens (android-ui-parity #131): the ticket's stage
@@ -61,7 +61,7 @@ class JumpToLatestScreenshotTest {
 
     private fun shot(appearance: Appearance, file: String, content: @Composable () -> Unit) {
         compose.setContent {
-            RobocoTheme(appearance) { content() }
+            ZeronTheme(appearance) { content() }
         }
         compose.waitForIdle()
         compose.mainClock.advanceTimeByFrame()
@@ -112,7 +112,7 @@ class JumpToLatestScreenshotTest {
     private fun midShow(appearance: Appearance, file: String) {
         var visible by mutableStateOf(false)
         compose.setContent {
-            RobocoTheme(appearance) { JumpToLatestStage(visible = visible) }
+            ZeronTheme(appearance) { JumpToLatestStage(visible = visible) }
         }
         compose.waitForIdle()
         visible = true

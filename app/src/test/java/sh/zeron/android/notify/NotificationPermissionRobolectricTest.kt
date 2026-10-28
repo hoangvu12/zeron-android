@@ -1,4 +1,4 @@
-package sh.roboco.android.notify
+package sh.zeron.android.notify
 
 import android.Manifest
 import android.app.Application

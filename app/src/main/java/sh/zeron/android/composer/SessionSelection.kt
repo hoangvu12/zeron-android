@@ -1,7 +1,7 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
-import uniffi.roboco_core.ChatConfig
-import uniffi.roboco_core.SessionRow
+import uniffi.zeron_core.ChatConfig
+import uniffi.zeron_core.SessionRow
 
 /**
  * The model / reasoning selection a chip menu resolves against

@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import android.content.Context
 import androidx.compose.foundation.background
@@ -40,13 +40,13 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.R
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.TranscriptPalette
-import uniffi.roboco_core.ColorRole
+import sh.zeron.android.R
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.TranscriptPalette
+import uniffi.zeron_core.ColorRole
 
 /**
  * The icon widget's resolver, caches and drawing (ticket 124; Robolectric at
@@ -140,14 +140,14 @@ class TranscriptIconsTest {
     @Test
     fun sourceResolvesEveryCoreSfNameToItsRegistryGlyph() {
         val expected = mapOf(
-            "questionmark.bubble" to RobocoIcons.QuestionmarkBubble,
-            "exclamationmark.triangle" to RobocoIcons.ExclamationmarkTriangle,
-            "arrow.triangle.branch" to RobocoIcons.ArrowTriangleBranch,
-            "command" to RobocoIcons.Command,
-            "wand.and.stars" to RobocoIcons.WandAndStars,
-            "photo" to RobocoIcons.Photo,
-            "square" to RobocoIcons.Square,
-            "checkmark.square.fill" to RobocoIcons.CheckmarkSquareFill,
+            "questionmark.bubble" to ZeronIcons.QuestionmarkBubble,
+            "exclamationmark.triangle" to ZeronIcons.ExclamationmarkTriangle,
+            "arrow.triangle.branch" to ZeronIcons.ArrowTriangleBranch,
+            "command" to ZeronIcons.Command,
+            "wand.and.stars" to ZeronIcons.WandAndStars,
+            "photo" to ZeronIcons.Photo,
+            "square" to ZeronIcons.Square,
+            "checkmark.square.fill" to ZeronIcons.CheckmarkSquareFill,
         )
         for ((name, icon) in expected) {
             val source = TranscriptIcons.source(name)
@@ -184,7 +184,7 @@ class TranscriptIconsTest {
     fun composingAnUnknownIconTenTimesStillLogsOnce() {
         val tick = mutableIntStateOf(0)
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.size(16.dp)) {
                     // The role flips every recomposition, so the widget is
                     // genuinely re-resolved — the cache and the log-once
@@ -371,8 +371,8 @@ class TranscriptIconsTest {
     fun anAppearanceFlipSwapsFileIconArtAndToolTint() {
         val dark = mutableStateOf(false)
         compose.setContent {
-            RobocoTheme(if (dark.value) Appearance.Dark else Appearance.Light) {
-                val isDark = RobocoTheme.isDark
+            ZeronTheme(if (dark.value) Appearance.Dark else Appearance.Light) {
+                val isDark = ZeronTheme.isDark
                 Column {
                     Box(Modifier.testTag("tool").size(18.dp).background(Color.White)) {
                         TranscriptIcon("tool-pen", ColorRole.TEXT_SECONDARY, 18f, TranscriptPalette(isDark))
@@ -402,7 +402,7 @@ class TranscriptIconsTest {
     fun theWidgetExposesNoSemanticsNodeAndTapsPassThrough() {
         val taps = mutableListOf<Offset>()
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(
                     Modifier
                         .testTag("host")
@@ -444,7 +444,7 @@ class TranscriptIconsTest {
     private fun hostCells(appearance: Appearance, vararg cells: ProbeCell) {
         val isDark = appearance == Appearance.Dark
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 Column {
                     for (cell in cells) {
                         Box(

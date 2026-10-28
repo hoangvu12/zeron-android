@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
@@ -59,10 +59,10 @@ import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import sh.roboco.android.design.glass.GlassMenuContent
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.glass.Menu
-import sh.roboco.android.design.glass.MenuPlacement
+import sh.zeron.android.design.glass.GlassMenuContent
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.glass.Menu
+import sh.zeron.android.design.glass.MenuPlacement
 import kotlin.math.max
 import kotlin.math.roundToInt
 
@@ -80,7 +80,7 @@ import kotlin.math.roundToInt
  * sibling under `LocalHazeState provides ctxHaze` (ticket 07's convention:
  * the panel is never inside the source it blurs).
  *
- * Mount once wrapping the outermost app content, inside [RobocoTheme] and
+ * Mount once wrapping the outermost app content, inside [ZeronTheme] and
  * outside the alert, toast, action-sheet, glass-menu and sheet hosts
  * (ticket 35's `RootHosts` order). Until then the gallery
  * (`GalleryProviders`) and the tests wrap content in it.
@@ -314,7 +314,7 @@ private fun ContextMenuOverlay(
     hostCoords: LayoutCoordinates?,
 ) {
     val density = LocalDensity.current
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val dark = LocalIsDark.current
     val reduce = LocalReduceMotion.current
     val source = active.source

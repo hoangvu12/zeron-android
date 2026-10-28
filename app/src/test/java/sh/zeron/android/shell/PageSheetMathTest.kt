@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.ui.unit.dp
@@ -6,7 +6,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import sh.roboco.android.design.sheet.GlassSheetDefaults
+import sh.zeron.android.design.sheet.GlassSheetDefaults
 
 /**
  * The page sheet's pure half (android-ui-parity #31) — plain JUnit, no

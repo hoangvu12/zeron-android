@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import android.graphics.Bitmap
 import androidx.compose.ui.semantics.SemanticsActions
@@ -19,10 +19,10 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import sh.roboco.android.MainActivity
-import sh.roboco.android.core.WallpaperStore
-import sh.roboco.android.flows.FixtureRule
-import sh.roboco.android.flows.mountedActivity
+import sh.zeron.android.MainActivity
+import sh.zeron.android.core.WallpaperStore
+import sh.zeron.android.flows.FixtureRule
+import sh.zeron.android.flows.mountedActivity
 
 /**
  * The instrumented port of `testWallpaperSettings`

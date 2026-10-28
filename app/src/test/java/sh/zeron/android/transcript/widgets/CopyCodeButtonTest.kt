@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import android.content.ClipboardManager
 import android.content.Context
@@ -50,29 +50,29 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.Cue
-import sh.roboco.android.design.Feedback
-import sh.roboco.android.design.Haptic
-import sh.roboco.android.design.LocalFeedback
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.transcript.ManualPoster
-import sh.roboco.android.transcript.RealizedRow
-import sh.roboco.android.transcript.RowContext
-import sh.roboco.android.transcript.RowModel
-import sh.roboco.android.transcript.TranscriptActions
-import sh.roboco.android.transcript.TranscriptState
-import sh.roboco.android.transcript.WidgetBox
-import uniffi.roboco_core.LayoutFrame
-import uniffi.roboco_core.NoHandle
-import uniffi.roboco_core.RowDisplay
-import uniffi.roboco_core.RowKind
-import uniffi.roboco_core.RowPlacement
-import uniffi.roboco_core.TextSystem
-import uniffi.roboco_core.TranscriptView
-import uniffi.roboco_core.Widget
-import uniffi.roboco_core.WidgetKind
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.Cue
+import sh.zeron.android.design.Feedback
+import sh.zeron.android.design.Haptic
+import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.transcript.ManualPoster
+import sh.zeron.android.transcript.RealizedRow
+import sh.zeron.android.transcript.RowContext
+import sh.zeron.android.transcript.RowModel
+import sh.zeron.android.transcript.TranscriptActions
+import sh.zeron.android.transcript.TranscriptState
+import sh.zeron.android.transcript.WidgetBox
+import uniffi.zeron_core.LayoutFrame
+import uniffi.zeron_core.NoHandle
+import uniffi.zeron_core.RowDisplay
+import uniffi.zeron_core.RowKind
+import uniffi.zeron_core.RowPlacement
+import uniffi.zeron_core.TextSystem
+import uniffi.zeron_core.TranscriptView
+import uniffi.zeron_core.Widget
+import uniffi.zeron_core.WidgetKind
 
 /**
  * The code-block copy button's behaviour (ticket 119; Compose test rule at
@@ -157,13 +157,13 @@ class CopyCodeButtonTest {
         writeClip: (Context, String) -> Boolean = ::writeCodeToClipboard,
     ) {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(LocalFeedback provides feedback) {
                     Box(
                         Modifier
                             .testTag("cell")
                             .size(44.dp, 32.dp)
-                            .background(RobocoTheme.palette.codeBackground),
+                            .background(ZeronTheme.palette.codeBackground),
                     ) {
                         bump()
                         CopyCodeButton(payload(), Modifier, writeClip)
@@ -178,13 +178,13 @@ class CopyCodeButtonTest {
     /** The stateless glyph in the same cell, for the pixel probes. */
     private fun hostGlyph(appearance: Appearance, copied: Boolean) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 CompositionLocalProvider(LocalFeedback provides feedback) {
                     Box(
                         Modifier
                             .testTag("cell")
                             .size(44.dp, 32.dp)
-                            .background(RobocoTheme.palette.codeBackground),
+                            .background(ZeronTheme.palette.codeBackground),
                     ) {
                         CopyCodeGlyph(copied)
                     }
@@ -204,7 +204,7 @@ class CopyCodeButtonTest {
         val state = TranscriptState(TextSystem(NoHandle), ManualPoster()) { _, _ -> NoopEngine() }
             .also { states += it }
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(LocalFeedback provides feedback) {
                     Box(Modifier.size(393.dp, 104.dp)) {
                         val widgets = listOf(
@@ -581,7 +581,7 @@ class CopyCodeButtonTest {
     fun aVerticalDragThatScrollsTheTranscriptNeverCopies() {
         compose.mainClock.autoAdvance = true
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(LocalFeedback provides feedback) {
                     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
                         Box(Modifier.fillMaxWidth().height(500.dp))

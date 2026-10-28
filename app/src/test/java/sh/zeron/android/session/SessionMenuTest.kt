@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -33,41 +33,41 @@ import org.robolectric.annotation.GraphicsMode
 import org.robolectric.annotation.Implementation
 import org.robolectric.annotation.Implements
 import org.robolectric.shadows.ShadowClipboardManager
-import sh.roboco.android.design.AlertButtonRole
-import sh.roboco.android.design.Alerts
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalAlerts
-import sh.roboco.android.design.LocalToaster
-import sh.roboco.android.design.RobocoAlert
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.Toaster
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.glass.GlassMenuHostState
-import sh.roboco.android.design.glass.LocalGlassMenuHost
-import sh.roboco.android.design.glass.MenuIcon
-import sh.roboco.android.design.glass.MenuItem
-import sh.roboco.android.sessions.ActionOutcome
-import sh.roboco.android.sessions.LocalRowActions
-import sh.roboco.android.sessions.RowActions
-import sh.roboco.android.shell.AppRouter
-import sh.roboco.android.shell.DraftHandoff
-import sh.roboco.android.shell.LocalAppRouter
-import sh.roboco.android.shell.LocalNavEntry
-import sh.roboco.android.shell.LocalNavStack
-import sh.roboco.android.shell.NavEntry
-import sh.roboco.android.shell.NavRoute
-import sh.roboco.android.shell.NavStack
-import sh.roboco.android.transcript.FramePoster
-import sh.roboco.android.transcript.TranscriptState
-import uniffi.roboco_core.ClientEvent
-import uniffi.roboco_core.LayoutFrame
-import uniffi.roboco_core.NoHandle
-import uniffi.roboco_core.SectionView
-import uniffi.roboco_core.StyleDesc
-import uniffi.roboco_core.TextSystem
-import uniffi.roboco_core.TranscriptView
+import sh.zeron.android.design.AlertButtonRole
+import sh.zeron.android.design.Alerts
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalAlerts
+import sh.zeron.android.design.LocalToaster
+import sh.zeron.android.design.ZeronAlert
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.Toaster
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.glass.GlassMenuHostState
+import sh.zeron.android.design.glass.LocalGlassMenuHost
+import sh.zeron.android.design.glass.MenuIcon
+import sh.zeron.android.design.glass.MenuItem
+import sh.zeron.android.sessions.ActionOutcome
+import sh.zeron.android.sessions.LocalRowActions
+import sh.zeron.android.sessions.RowActions
+import sh.zeron.android.shell.AppRouter
+import sh.zeron.android.shell.DraftHandoff
+import sh.zeron.android.shell.LocalAppRouter
+import sh.zeron.android.shell.LocalNavEntry
+import sh.zeron.android.shell.LocalNavStack
+import sh.zeron.android.shell.NavEntry
+import sh.zeron.android.shell.NavRoute
+import sh.zeron.android.shell.NavStack
+import sh.zeron.android.transcript.FramePoster
+import sh.zeron.android.transcript.TranscriptState
+import uniffi.zeron_core.ClientEvent
+import uniffi.zeron_core.LayoutFrame
+import uniffi.zeron_core.NoHandle
+import uniffi.zeron_core.SectionView
+import uniffi.zeron_core.StyleDesc
+import uniffi.zeron_core.TextSystem
+import uniffi.zeron_core.TranscriptView
 
 /**
  * The ⋯ menu's content and actions (android-ui-parity #80): the pure
@@ -154,11 +154,11 @@ class SessionMenuTest {
 
     /** The [Alerts] fake: records every alert instead of presenting it. */
     private class RecordingAlerts : Alerts {
-        val shown = mutableListOf<RobocoAlert>()
-        override fun show(alert: RobocoAlert) {
+        val shown = mutableListOf<ZeronAlert>()
+        override fun show(alert: ZeronAlert) {
             shown += alert
         }
-        override fun updateCurrent(alert: RobocoAlert) {}
+        override fun updateCurrent(alert: ZeronAlert) {}
         override fun dismissAll() {}
     }
 
@@ -247,7 +247,7 @@ class SessionMenuTest {
         alerts: Alerts = Alerts.Noop,
     ) {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 GlassMenuHost {
                     ref.host = LocalGlassMenuHost.current
                     CompositionLocalProvider(
@@ -261,7 +261,7 @@ class SessionMenuTest {
                         val wired = rememberSessionMenu(controller, transcript)
                         SessionHeader(
                             title = "Fix the deploy script",
-                            subtitle = "roboco @ studio",
+                            subtitle = "zeron @ studio",
                             edgeEngaged = false,
                             onMore = { anchor ->
                                 ref.opens++
@@ -307,29 +307,29 @@ class SessionMenuTest {
         val archive = menu.children[4] as MenuItem
 
         assertEquals("Pin", pin.title)
-        assertEquals(RobocoIcons.Pin, (pin.icon as MenuIcon.Symbol).icon)
+        assertEquals(ZeronIcons.Pin, (pin.icon as MenuIcon.Symbol).icon)
         assertFalse(pin.destructive)
         assertFalse(pin.disabled)
         assertNull(pin.subtitle)
         assertFalse(pin.checked)
 
         assertEquals("Copy Transcript", copy.title)
-        assertEquals(RobocoIcons.DocOnDoc, (copy.icon as MenuIcon.Symbol).icon)
+        assertEquals(ZeronIcons.DocOnDoc, (copy.icon as MenuIcon.Symbol).icon)
         assertFalse(copy.destructive)
         assertFalse(copy.disabled)
 
         assertEquals("Previews", previews.title)
-        assertEquals(RobocoIcons.Safari, (previews.icon as MenuIcon.Symbol).icon)
+        assertEquals(ZeronIcons.Safari, (previews.icon as MenuIcon.Symbol).icon)
         assertFalse(previews.destructive)
         assertFalse("the panel owns its own honest states", previews.disabled)
 
         assertEquals("Account & Usage", accounts.title)
-        assertEquals(RobocoIcons.Gauge, (accounts.icon as MenuIcon.Symbol).icon)
+        assertEquals(ZeronIcons.Gauge, (accounts.icon as MenuIcon.Symbol).icon)
         assertFalse(accounts.destructive)
         assertFalse("cached reads only", accounts.disabled)
 
         assertEquals("Archive", archive.title)
-        assertEquals(RobocoIcons.Archivebox, (archive.icon as MenuIcon.Symbol).icon)
+        assertEquals(ZeronIcons.Archivebox, (archive.icon as MenuIcon.Symbol).icon)
         assertFalse("upstream #967: Archive is no longer destructive", archive.destructive)
         assertFalse(archive.disabled)
 
@@ -358,13 +358,13 @@ class SessionMenuTest {
             onArchive = {},
             onDelete = { deletes++ },
             title = "Fix the deploy script",
-            subtitle = "roboco @ studio",
+            subtitle = "zeron @ studio",
         )
-        assertEquals("Fix the deploy script\nroboco @ studio", menu.title)
+        assertEquals("Fix the deploy script\nzeron @ studio", menu.title)
         assertEquals(6, menu.children.size)
         val delete = menu.children[5] as MenuItem
         assertEquals("Delete", delete.title)
-        assertEquals(RobocoIcons.Trash, (delete.icon as MenuIcon.Symbol).icon)
+        assertEquals(ZeronIcons.Trash, (delete.icon as MenuIcon.Symbol).icon)
         assertTrue(delete.destructive)
         assertFalse(delete.disabled)
         assertEquals("session-menu-delete", delete.testTag)
@@ -379,8 +379,8 @@ class SessionMenuTest {
     fun theHeaderIsTheTitleOverWhereItRuns() {
         assertNull(sessionMenuHeader("", ""))
         assertEquals("Fix", sessionMenuHeader("Fix", ""))
-        assertEquals("roboco @ studio", sessionMenuHeader("", "roboco @ studio"))
-        assertEquals("Fix\nroboco @ studio", sessionMenuHeader("Fix", "roboco @ studio"))
+        assertEquals("zeron @ studio", sessionMenuHeader("", "zeron @ studio"))
+        assertEquals("Fix\nzeron @ studio", sessionMenuHeader("Fix", "zeron @ studio"))
     }
 
     @Test
@@ -396,7 +396,7 @@ class SessionMenuTest {
         )
         val unpin = menu.children[0] as MenuItem
         assertEquals("Unpin", unpin.title)
-        assertEquals(RobocoIcons.PinSlash, (unpin.icon as MenuIcon.Symbol).icon)
+        assertEquals(ZeronIcons.PinSlash, (unpin.icon as MenuIcon.Symbol).icon)
     }
 
     @Test

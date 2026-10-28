@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 /**
  * Re-emits SVG path data as single-space-separated tokens so androidx

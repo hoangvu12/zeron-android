@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.ImeAction
@@ -11,7 +11,7 @@ import androidx.compose.ui.text.input.KeyboardType
  * options and the test-tag mapping — everything that needs no composition.
  * `AlertCard.kt` and `Alert.kt` call these; `AlertRulesTest` pins them.
  *
- * Indexes are **list order** (the order of [RobocoAlert.buttons]); only the
+ * Indexes are **list order** (the order of [ZeronAlert.buttons]); only the
  * *placement* reorders (see [displayOrder]).
  */
 

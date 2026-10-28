@@ -1,4 +1,4 @@
-package sh.roboco.android.debug
+package sh.zeron.android.debug
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -15,8 +15,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The lab meter goldens (android-ui-parity #136; recorded by
@@ -45,9 +45,9 @@ class LabMetersScreenshotTest {
 
     private fun shot(appearance: Appearance, file: String, content: @Composable () -> Unit) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 Box(
-                    Modifier.fillMaxSize().background(RobocoTheme.palette.background),
+                    Modifier.fillMaxSize().background(ZeronTheme.palette.background),
                     contentAlignment = Alignment.Center,
                 ) {
                     content()

@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,8 +30,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.core.Face
-import sh.roboco.android.shell.LargeTitleScaffold
+import sh.zeron.android.core.Face
+import sh.zeron.android.shell.LargeTitleScaffold
 
 /**
  * The pull-to-refresh gesture (android-ui-parity #48) through a real
@@ -94,7 +94,7 @@ class PullToRefreshGestureTest {
      */
     @Composable
     private fun PullHost(rows: Int, withBackdrop: Boolean, reduceMotion: Boolean, refreshMs: Long) {
-        RobocoTheme(Appearance.Light) {
+        ZeronTheme(Appearance.Light) {
             CompositionLocalProvider(
                 LocalFeedback provides feedback,
                 LocalReduceMotion provides reduceMotion,
@@ -132,7 +132,7 @@ class PullToRefreshGestureTest {
     /** One plain 64-dp row — the ticket's list fixture. */
     @Composable
     private fun PlainRow(index: Int) {
-        val palette = RobocoTheme.palette
+        val palette = ZeronTheme.palette
         val typeScale = LocalTypeScale.current
         Box(Modifier.fillMaxWidth().height(64.dp).testTag("row-$index")) {
             BasicText(

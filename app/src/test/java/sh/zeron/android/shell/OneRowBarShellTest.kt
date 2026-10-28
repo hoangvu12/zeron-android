@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.CompositionLocalProvider
@@ -22,11 +22,11 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.LocalReduceMotion
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.LocalReduceMotion
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.GlassMenuHost
 
 /**
  * Wave-10 37 (upstream #967 + #971): the phone shell's one-row bottom bar.
@@ -59,7 +59,7 @@ class OneRowBarShellTest {
     private fun setContent() {
         state = MainTabState(TabId.Sessions)
         compose.setContent {
-            RobocoTheme {
+            ZeronTheme {
                 CompositionLocalProvider(LocalReduceMotion provides true) {
                     ProvideGlyphClock(frozenAtNanos = 0L) {
                         GlassMenuHost { MainTabShell(state = state, oneRowBar = true) }

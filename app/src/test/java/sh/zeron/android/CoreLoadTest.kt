@@ -1,4 +1,4 @@
-package sh.roboco.android
+package sh.zeron.android
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -6,8 +6,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import sh.roboco.android.core.CoreLoader
-import sh.roboco.android.core.CoreStatus
+import sh.zeron.android.core.CoreLoader
+import sh.zeron.android.core.CoreStatus
 
 /**
  * The Robolectric core smoke test (android-app#13, satisfying ticket 10's
@@ -23,13 +23,13 @@ class CoreLoadTest {
 
     @Test
     fun coreVersionMatchesTheAppVersion() {
-        assertEquals(BuildConfig.VERSION_NAME, uniffi.roboco_core.coreVersion())
+        assertEquals(BuildConfig.VERSION_NAME, uniffi.zeron_core.coreVersion())
     }
 
     @Test
     fun layoutFixtureMarkdownIsNonEmpty() {
         // Ticket 05/10's lab fixture: the transcript pipeline's own input.
-        assertTrue(uniffi.roboco_core.layoutFixtureMarkdown().isNotBlank())
+        assertTrue(uniffi.zeron_core.layoutFixtureMarkdown().isNotBlank())
     }
 
     @Test

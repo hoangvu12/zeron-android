@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,8 +17,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.design.LocalGalleryCapture
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.LocalGalleryCapture
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The row-motion section of the debug design gallery (ticket 132): a
@@ -46,7 +46,7 @@ import sh.roboco.android.design.RobocoTheme
 @Composable
 fun RowMotionGallerySection() {
     val capture = LocalGalleryCapture.current
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val state = remember { TranscriptState() }
     DisposableEffect(state) { onDispose { state.close() } }
     LaunchedEffect(capture) {

@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -28,19 +28,19 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.hazeSource
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.CapsuleShape
-import sh.roboco.android.design.GlassStage
-import sh.roboco.android.design.Icon
-import sh.roboco.android.design.LocalGalleryCapture
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.SymbolWeight
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.glass.ProvideHazeState
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.CapsuleShape
+import sh.zeron.android.design.GlassStage
+import sh.zeron.android.design.Icon
+import sh.zeron.android.design.LocalGalleryCapture
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.SymbolWeight
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.glass.ProvideHazeState
+import sh.zeron.android.design.uiStyle
 
 /**
  * The "Composer thumbnails" page of the debug design gallery
@@ -66,7 +66,7 @@ import sh.roboco.android.design.uiStyle
  */
 @Composable
 fun StagedThumbnailsGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     ProvideHazeState {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -108,7 +108,7 @@ private fun LiveThumbsStage() {
         StaticThumbsStage("3 images (capture)", 3)
         return
     }
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val images = remember {
         mutableStateListOf<StagedImage>().apply { addAll((0 until 3).map { fixtureStagedImage(it) }) }
     }
@@ -135,7 +135,7 @@ private fun LiveThumbsStage() {
 @Composable
 private fun ThumbsStageFrame(caption: String, content: @Composable BoxScope.() -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Caption(caption, uiStyle(Face.Sans, LocalTypeScale.current.fixed(12f), RobocoTheme.palette.secondary))
+        Caption(caption, uiStyle(Face.Sans, LocalTypeScale.current.fixed(12f), ZeronTheme.palette.secondary))
         GlassStage(
             height = 220.dp,
             backdropModifier = Modifier.hazeSource(LocalHazeState.current!!),
@@ -152,7 +152,7 @@ private fun ThumbsStageFrame(caption: String, content: @Composable BoxScope.() -
 @Composable
 private fun BoxScope.ThumbsStageComposer(images: List<StagedImage>, onRemove: (String) -> Unit) {
     val morph = remember { previewMorphState(1f, card = true) }
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     ComposerSurface(
         progress = { 1f },
         chipsInteractive = true,
@@ -179,11 +179,11 @@ private fun ThumbsStageAction(morph: ComposerMorphState) {
         Modifier
             .size(34.dp)
             .clip(CapsuleShape)
-            .background(RobocoTheme.palette.accent)
+            .background(ZeronTheme.palette.accent)
             .composerControl(morph),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(RobocoIcons.ArrowUp, tint = Color.White, sizePt = 15f, weight = SymbolWeight.Bold)
+        Icon(ZeronIcons.ArrowUp, tint = Color.White, sizePt = 15f, weight = SymbolWeight.Bold)
     }
 }
 
@@ -222,7 +222,7 @@ private fun ThumbsDarkPreview() {
 
 @Composable
 private fun ThumbsPreviewBody(appearance: Appearance) {
-    RobocoTheme(appearance) {
+    ZeronTheme(appearance) {
         ProvideHazeState {
             GlassStage(
                 height = 220.dp,

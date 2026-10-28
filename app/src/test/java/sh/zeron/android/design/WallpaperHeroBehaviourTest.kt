@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -41,7 +41,7 @@ import org.robolectric.annotation.GraphicsMode
  * launch costs one frame of alignment, so each timing advances single
  * frames until the value first ticks, then clocks the ticket's ms.
  *
- * `RobocoTheme` provides `LocalReduceMotion` (ticket 04's wrap);
+ * `ZeronTheme` provides `LocalReduceMotion` (ticket 04's wrap);
  * `ReduceMotion.debugOverride` is process-wide, hence the [After] reset.
  */
 @RunWith(RobolectricTestRunner::class)
@@ -91,7 +91,7 @@ class WallpaperHeroBehaviourTest {
 
     private fun mount(load: suspend (Boolean) -> WallpaperRender?) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 Box(Modifier.fillMaxSize()) {
                     WallpaperHero(changeKey = changeKey, load = load, modifier = Modifier.fillMaxSize())
                 }
@@ -256,7 +256,7 @@ class WallpaperHeroBehaviourTest {
         var clicks = 0
         val fake = GatedLoad()
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.fillMaxSize()) {
                     // The content underneath, then the hero on top of it.
                     Box(Modifier.fillMaxSize().clickable { clicks++ })

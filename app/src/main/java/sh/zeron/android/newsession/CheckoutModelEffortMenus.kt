@@ -1,17 +1,17 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import sh.roboco.android.composer.ChipMenuProvider
-import sh.roboco.android.design.glass.Menu
-import sh.roboco.android.design.glass.MenuElement
-import sh.roboco.android.design.glass.MenuIcon
-import sh.roboco.android.design.glass.MenuItem
-import sh.roboco.android.design.glass.MenuSection
-import uniffi.roboco_core.CoreClientInterface
-import uniffi.roboco_core.RepoRef
+import sh.zeron.android.composer.ChipMenuProvider
+import sh.zeron.android.design.glass.Menu
+import sh.zeron.android.design.glass.MenuElement
+import sh.zeron.android.design.glass.MenuIcon
+import sh.zeron.android.design.glass.MenuItem
+import sh.zeron.android.design.glass.MenuSection
+import uniffi.zeron_core.CoreClientInterface
+import uniffi.zeron_core.RepoRef
 
 /**
  * Ref names for a project, the current branch first (android-ui-parity

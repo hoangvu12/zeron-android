@@ -1,13 +1,13 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import sh.roboco.android.composer.ChipIcon
-import sh.roboco.android.composer.ChipTint
-import sh.roboco.android.composer.ComposerChip
-import uniffi.roboco_core.ContextUsage
-import uniffi.roboco_core.PullRequestState
+import sh.zeron.android.composer.ChipIcon
+import sh.zeron.android.composer.ChipTint
+import sh.zeron.android.composer.ComposerChip
+import uniffi.zeron_core.ContextUsage
+import uniffi.zeron_core.PullRequestState
 import java.util.Locale
 
 /**

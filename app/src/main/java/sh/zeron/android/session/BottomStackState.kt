@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.runtime.Composable
@@ -16,7 +16,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import sh.roboco.android.design.Motion
+import sh.zeron.android.design.Motion
 
 /**
  * The transcript's bottom insets for one layout pass of the bottom stack

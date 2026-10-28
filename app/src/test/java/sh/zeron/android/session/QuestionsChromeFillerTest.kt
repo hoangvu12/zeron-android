@@ -1,10 +1,10 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
-import uniffi.roboco_core.InputRequest
-import uniffi.roboco_core.UserInputQuestion
+import uniffi.zeron_core.InputRequest
+import uniffi.zeron_core.UserInputQuestion
 
 /**
  * [QuestionsChromeFiller] — android-ui-parity #91's chrome mapping, the
@@ -80,7 +80,7 @@ class QuestionsChromeFillerTest {
 
     @Test
     fun theWireDefaultsPassThroughForNewerEngines() {
-        // Roboco's wire fills prefill = null and multiline = false today;
+        // Zeron's wire fills prefill = null and multiline = false today;
         // the mapping carries both verbatim for a newer engine.
         val request = InputRequest(
             entryId = "e",

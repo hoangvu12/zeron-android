@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
@@ -6,13 +6,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import uniffi.roboco_core.SessionHandle
-import uniffi.roboco_core.UserInputAnswer
+import uniffi.zeron_core.SessionHandle
+import uniffi.zeron_core.UserInputAnswer
 
 /**
  * The fakeable FFI seam for the question panel's submit
- * (android-ui-parity #91) — [SessionCore][sh.roboco.android.session.SessionCore]
- * and [QueuePort][sh.roboco.android.composer.QueuePort] are the same idea.
+ * (android-ui-parity #91) — [SessionCore][sh.zeron.android.session.SessionCore]
+ * and [QueuePort][sh.zeron.android.composer.QueuePort] are the same idea.
  * Suspend and FFI-backed: **never call it on main** (the pr621 trap,
  * `ui/SessionScreen.kt:439` calls `respondInput` synchronously in a click
  * handler).
@@ -34,7 +34,7 @@ class CoreQuestionPort(private val handle: SessionHandle) : QuestionPort {
 /**
  * The port of `CoreSessionSource.answer` (`ios:Session/Session
  * /CoreSessionSource.swift:133-135`), with the failure reporting iOS's
- * `try?` cannot have: Roboco's `respondInput` is an engine RPC, so a
+ * `try?` cannot have: Zeron's `respondInput` is an engine RPC, so a
  * failure is logged, [onFailure][respond] re-arms the panel's
  * double-submit guard on main, and nothing is shown — no toast
  * (decision COMPOSER-D2).
@@ -49,9 +49,9 @@ class QuestionActions(
     private val appScope: CoroutineScope,
     private val io: CoroutineDispatcher = Dispatchers.IO,
     private val main: CoroutineDispatcher = Dispatchers.Main.immediate,
-    /** Production logs `Log.w("RobocoQuestions", …)`; plain-JVM tests swap this (the stub `android.util.Log` throws). */
+    /** Production logs `Log.w("ZeronQuestions", …)`; plain-JVM tests swap this (the stub `android.util.Log` throws). */
     private val logW: (String, Throwable) -> Unit = { message, error ->
-        android.util.Log.w("RobocoQuestions", message, error)
+        android.util.Log.w("ZeronQuestions", message, error)
     },
 ) {
     /**

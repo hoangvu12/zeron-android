@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -17,9 +17,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The accessory's goldens (android-ui-parity #27), recorded by
@@ -36,7 +36,7 @@ import sh.roboco.android.design.RobocoTheme
  * the plus, the label, the summary and the input dot.
  *
  * `ProvideGlyphClock(frozenAtNanos = 0L)` is nested **inside** the theme
- * so it overrides RobocoTheme's live clock: the spinner is deterministic
+ * so it overrides ZeronTheme's live clock: the spinner is deterministic
  * (the cycle-0 cell pattern). Rendered once per appearance.
  */
 @RunWith(RobolectricTestRunner::class)
@@ -49,7 +49,7 @@ class NewSessionAccessoryScreenshotTest {
 
     private fun shot(appearance: Appearance, file: String) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 ProvideGlyphClock(frozenAtNanos = 0L) {
                     NewSessionAccessoryFixture()
                 }
@@ -77,7 +77,7 @@ class NewSessionAccessoryScreenshotTest {
  */
 @Composable
 private fun NewSessionAccessoryFixture() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     Column(
         Modifier
             .fillMaxSize()

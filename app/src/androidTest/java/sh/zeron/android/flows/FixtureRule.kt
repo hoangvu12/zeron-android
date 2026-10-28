@@ -1,4 +1,4 @@
-package sh.roboco.android.flows
+package sh.zeron.android.flows
 
 import android.content.Intent
 import androidx.test.core.app.ActivityScenario
@@ -18,7 +18,7 @@ import org.junit.Assume.assumeTrue
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
-import sh.roboco.android.MainActivity
+import sh.zeron.android.MainActivity
 
 /**
  * The three fixture engines of the flow rig (android-app#30 §5):
@@ -196,7 +196,7 @@ class FixtureRule(
     }
 
     /**
-     * Mints a fresh `roboco-tailcat:` invite (`GET /mint-tailcat`,
+     * Mints a fresh `zeron-tailcat:` invite (`GET /mint-tailcat`,
      * android-next#02) from the [FixtureEngine.Tailcat] control URL.
      */
     fun mintTailcat(controlUrl: String): String? {

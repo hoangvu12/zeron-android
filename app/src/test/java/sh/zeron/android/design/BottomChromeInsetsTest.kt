@@ -1,11 +1,11 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.ui.unit.dp
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import sh.roboco.android.shell.bottomChromeContentPadding
-import sh.roboco.android.shell.tabBarBottomGap
+import sh.zeron.android.shell.bottomChromeContentPadding
+import sh.zeron.android.shell.tabBarBottomGap
 
 /**
  * Ticket 30's bottom insets math, plain JUnit:

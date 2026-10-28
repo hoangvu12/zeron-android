@@ -1,4 +1,4 @@
-package sh.roboco.android.core
+package sh.zeron.android.core
 
 import android.graphics.Paint
 import android.graphics.Typeface
@@ -7,8 +7,8 @@ import android.util.Log
 import android.util.LruCache
 import java.util.Collections
 import java.util.concurrent.atomic.AtomicLong
-import uniffi.roboco_core.FaceRole
-import uniffi.roboco_core.PlatformMeasurer
+import uniffi.zeron_core.FaceRole
+import uniffi.zeron_core.PlatformMeasurer
 
 /**
  * Minikin as ground truth for glyphs the bundled faces don't cover
@@ -178,7 +178,7 @@ class AndroidMeasurer(private val typefaces: Map<FaceRole, Typeface>) : Platform
      * nothing to serve.
      */
     companion object Stats {
-        private const val TAG = "Roboco"
+        private const val TAG = "Zeron"
 
         val calls = AtomicLong()
         val nanos = AtomicLong()
@@ -191,7 +191,7 @@ class AndroidMeasurer(private val typefaces: Map<FaceRole, Typeface>) : Platform
         fun report() {
             val measured = calls.get()
             if (measured > 0) {
-                Log.i("RobocoTranscript", "measurer: $measured calls, ${nanos.get() / 1_000_000}ms total")
+                Log.i("ZeronTranscript", "measurer: $measured calls, ${nanos.get() / 1_000_000}ms total")
             }
         }
     }

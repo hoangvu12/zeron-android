@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -16,15 +16,15 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import sh.roboco.android.core.PrefKeys
-import sh.roboco.android.core.WorkspaceCore
-import sh.roboco.android.design.Feedback
-import sh.roboco.android.design.Haptic
-import uniffi.roboco_core.CoreException
-import uniffi.roboco_core.EngineState
-import uniffi.roboco_core.EngineView
-import uniffi.roboco_core.SectionView
-import uniffi.roboco_core.WorkspaceSnapshot
+import sh.zeron.android.core.PrefKeys
+import sh.zeron.android.core.WorkspaceCore
+import sh.zeron.android.design.Feedback
+import sh.zeron.android.design.Haptic
+import uniffi.zeron_core.CoreException
+import uniffi.zeron_core.EngineState
+import uniffi.zeron_core.EngineView
+import uniffi.zeron_core.SectionView
+import uniffi.zeron_core.WorkspaceSnapshot
 
 /**
  * One offline fold override, persisted as
@@ -81,7 +81,7 @@ data class Fold(
 
 /**
  * The warning sink for failed fold writes: production logs
- * `Log.w("RobocoFold", …)`. Plain-JVM tests swap this — the stub
+ * `Log.w("ZeronFold", …)`. Plain-JVM tests swap this — the stub
  * `android.util.Log` throws "not mocked" outside Robolectric (the same
  * seam as `sessionLogW`).
  */
@@ -93,7 +93,7 @@ internal var foldLogW: (String, Throwable?) -> Unit = { message, error ->
     }
 }
 
-private const val TAG = "RobocoFold"
+private const val TAG = "ZeronFold"
 
 /**
  * The one fold-state owner per process (ticket 40; iOS loads `collapsed`

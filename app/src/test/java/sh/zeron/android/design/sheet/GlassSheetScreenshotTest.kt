@@ -1,4 +1,4 @@
-package sh.roboco.android.design.sheet
+package sh.zeron.android.design.sheet
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,14 +21,14 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.GalleryBackdrop
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.GalleryBackdrop
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.uiStyle
 
 /**
  * The sheet goldens (ticket 17), recorded by `recordRoborazziDebug` and
@@ -83,7 +83,7 @@ class GlassSheetScreenshotTest {
         body: @Composable () -> Unit = {},
     ) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 SheetShotFrame(detents, grabber, title, leading, trailing, body)
             }
         }
@@ -193,20 +193,20 @@ class GlassSheetScreenshotTest {
 
     /** The 80-character title: ellipsized a good 8 dp before the ✕ and the ✓. */
     private val LongTitle =
-        "Tool output from engine roboco-build-farm-runner-07 (branch ui-parity/sheet-017)"
+        "Tool output from engine zeron-build-farm-runner-07 (branch ui-parity/sheet-017)"
 
     /** The tool-detail body: fixed mono lines. */
     @Composable
     private fun MonoBody() {
         val typeScale = LocalTypeScale.current
-        val palette = RobocoTheme.palette
+        val palette = ZeronTheme.palette
         Column(
             Modifier.fillMaxSize().padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             for (i in 1..12) {
                 BasicText(
-                    "line $i: $ roboco engine start --port ${8674 + i}",
+                    "line $i: $ zeron engine start --port ${8674 + i}",
                     style = uiStyle(Face.Mono, typeScale.bodyScaled(13f), palette.text),
                 )
             }

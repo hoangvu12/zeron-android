@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import android.content.res.Configuration
 import androidx.annotation.VisibleForTesting
@@ -43,30 +43,30 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.delay
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.Icon
-import sh.roboco.android.design.LocalPalette
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.Motion
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.StatusGlyph
-import sh.roboco.android.design.StatusGlyphKind
-import sh.roboco.android.design.SymbolWeight
-import sh.roboco.android.design.TranscriptPalette
-import sh.roboco.android.design.color
-import sh.roboco.android.design.formatElapsed
-import sh.roboco.android.design.hairlineBorder
-import sh.roboco.android.design.uiStyle
-import uniffi.roboco_core.ColorRole
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.Icon
+import sh.zeron.android.design.LocalPalette
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.Motion
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.StatusGlyph
+import sh.zeron.android.design.StatusGlyphKind
+import sh.zeron.android.design.SymbolWeight
+import sh.zeron.android.design.TranscriptPalette
+import sh.zeron.android.design.color
+import sh.zeron.android.design.formatElapsed
+import sh.zeron.android.design.hairlineBorder
+import sh.zeron.android.design.uiStyle
+import uniffi.zeron_core.ColorRole
 
 /**
  * The trailer's fixed geometry — iOS `WorkingIndicatorView.layoutSubviews`
  * (`ios:Transcript/RowView.swift:445-446`). These two values are hard
  * platform constants, like the 14 of the Swift grid frame: they do **not**
- * scale with [sh.roboco.android.design.TypeScale.bodyFactor] or the font
+ * scale with [sh.zeron.android.design.TypeScale.bodyFactor] or the font
  * scale; only the label's font size does. The 22 works out to 8 dp of air
  * after the 14-dp glyph.
  */
@@ -116,7 +116,7 @@ fun ToolStatusWidget(running: Boolean, failed: Boolean, modifier: Modifier = Mod
             // 10, weight: .bold)` with `contentMode = .center`. The Icon
             // lays out the 12-dp box (10 × 1.2) and never clips the ink.
             Icon(
-                icon = if (failed) RobocoIcons.Xmark else RobocoIcons.Checkmark,
+                icon = if (failed) ZeronIcons.Xmark else ZeronIcons.Checkmark,
                 tint = if (failed) palette.danger else palette.tertiary,
                 sizePt = 10f,
                 weight = SymbolWeight.Bold,
@@ -349,7 +349,7 @@ internal fun StatusWidgetsFixture(nowMs: () -> Long = { FIXTURE_NOW }) {
     Column(
         Modifier
             .fillMaxWidth()
-            .background(RobocoTheme.palette.background)
+            .background(ZeronTheme.palette.background)
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -380,7 +380,7 @@ internal fun StatusWidgetsFixture(nowMs: () -> Long = { FIXTURE_NOW }) {
  */
 @Composable
 private fun AgentCardMock() {
-    val roles = TranscriptPalette(RobocoTheme.isDark)
+    val roles = TranscriptPalette(ZeronTheme.isDark)
     val cardShape = RoundedCornerShape(10.125.dp)
     Box(
         Modifier
@@ -419,7 +419,7 @@ private fun StatusWidgetsPreviewColumn() {
 @Preview(name = "StatusWidgets light")
 @Composable
 private fun StatusWidgetsLightPreview() {
-    RobocoTheme(Appearance.Light) {
+    ZeronTheme(Appearance.Light) {
         ProvideGlyphClock(frozenAtNanos = 0L) { StatusWidgetsPreviewColumn() }
     }
 }
@@ -427,7 +427,7 @@ private fun StatusWidgetsLightPreview() {
 @Preview(name = "StatusWidgets dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun StatusWidgetsDarkPreview() {
-    RobocoTheme(Appearance.Dark) {
+    ZeronTheme(Appearance.Dark) {
         ProvideGlyphClock(frozenAtNanos = 0L) { StatusWidgetsPreviewColumn() }
     }
 }

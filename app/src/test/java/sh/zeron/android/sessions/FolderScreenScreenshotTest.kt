@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
@@ -10,15 +10,15 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.shell.NavStack
-import sh.roboco.android.shell.NavStackHost
-import sh.roboco.android.shell.TabId
-import sh.roboco.android.shell.TabRootRoute
-import uniffi.roboco_core.WorkspaceSnapshot
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.shell.NavStack
+import sh.zeron.android.shell.NavStackHost
+import sh.zeron.android.shell.TabId
+import sh.zeron.android.shell.TabRootRoute
+import uniffi.zeron_core.WorkspaceSnapshot
 
 /**
  * The folder screens' goldens (android-ui-parity #45): the ticket's
@@ -33,7 +33,7 @@ import uniffi.roboco_core.WorkspaceSnapshot
  * animates while capturing. Roborazzi paths are relative to
  * `roborazzi { outputDir }` (`src/test/screenshots`), so the goldens land
  * at `src/test/screenshots/sessions/`. Recorded by
- * `./gradlew :app:recordRoborazziDebug --tests sh.roboco.android.sessions.FolderScreenScreenshotTest`,
+ * `./gradlew :app:recordRoborazziDebug --tests sh.zeron.android.sessions.FolderScreenScreenshotTest`,
  * verified by `:app:verifyRoborazziDebug --tests …`, then reviewed side by
  * side with `pr-assets/group-by-project/1-off.png` (the large title at 16,
  * the 44 × 44 ⋯ circle 16 dp from the end edge, the 62 dp rows).
@@ -55,7 +55,7 @@ class FolderScreenScreenshotTest {
     private fun shot(appearance: Appearance, file: String, route: FolderRoute, workspace: WorkspaceSnapshot?) {
         val stack = NavStack(TabRootRoute(TabId.Sessions)).apply { push(route, animated = false) }
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 ProvideGlyphClock(frozenAtNanos = 0L) {
                     GlassMenuHost {
                         NavStackHost(stack = stack, active = true) { entry ->

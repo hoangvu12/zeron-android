@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.PaddingValues
@@ -27,34 +27,34 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import sh.calvin.reorderable.rememberReorderableLazyListState
-import sh.roboco.android.RobocoApplication
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalBottomChrome
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.GlassCircleButton
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.glass.GlassTextCapsule
-import sh.roboco.android.design.glass.Menu
-import sh.roboco.android.design.glass.MenuIcon
-import sh.roboco.android.design.glass.MenuItem
-import sh.roboco.android.design.glass.rememberGlassMenuState
-import sh.roboco.android.shell.LargeTitleDefaults
-import sh.roboco.android.shell.LargeTitleScaffold
-import sh.roboco.android.shell.LocalNavStack
-import sh.roboco.android.shell.NavStack
-import sh.roboco.android.shell.NavStackHost
-import sh.roboco.android.shell.TabId
-import sh.roboco.android.shell.TabRootRoute
-import sh.roboco.android.shell.TitleMode
-import sh.roboco.android.shell.largeTitleDefaultTopInset
-import uniffi.roboco_core.ChatIndicator
-import uniffi.roboco_core.FrontPage
-import uniffi.roboco_core.ProjectRef
-import uniffi.roboco_core.PullRequestGroups
-import uniffi.roboco_core.SectionView
-import uniffi.roboco_core.SessionRow
-import uniffi.roboco_core.WorkspaceSnapshot
+import sh.zeron.android.ZeronApplication
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalBottomChrome
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.GlassCircleButton
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.glass.GlassTextCapsule
+import sh.zeron.android.design.glass.Menu
+import sh.zeron.android.design.glass.MenuIcon
+import sh.zeron.android.design.glass.MenuItem
+import sh.zeron.android.design.glass.rememberGlassMenuState
+import sh.zeron.android.shell.LargeTitleDefaults
+import sh.zeron.android.shell.LargeTitleScaffold
+import sh.zeron.android.shell.LocalNavStack
+import sh.zeron.android.shell.NavStack
+import sh.zeron.android.shell.NavStackHost
+import sh.zeron.android.shell.TabId
+import sh.zeron.android.shell.TabRootRoute
+import sh.zeron.android.shell.TitleMode
+import sh.zeron.android.shell.largeTitleDefaultTopInset
+import uniffi.zeron_core.ChatIndicator
+import uniffi.zeron_core.FrontPage
+import uniffi.zeron_core.ProjectRef
+import uniffi.zeron_core.PullRequestGroups
+import uniffi.zeron_core.SectionView
+import uniffi.zeron_core.SessionRow
+import uniffi.zeron_core.WorkspaceSnapshot
 
 /**
  * One folder's sessions (android-ui-parity #45) — the Android port of
@@ -73,7 +73,7 @@ import uniffi.roboco_core.WorkspaceSnapshot
  *   wired to ticket 43's [SessionPrompts] launchers;
  * - **Archived** — no trailing item, the rows use the archived variants
  *   (`archivedRows = true`), and an empty archive shows 41's
- *   "No archived sessions" (a Roboco addition; iOS shows a blank list).
+ *   "No archived sessions" (a Zeron addition; iOS shows a blank list).
  *
  * This ticket makes **no core calls**: 43's launchers own the prompts, 42's
  * [RowActions] own the writes, and the title updates / the pop only happen
@@ -250,7 +250,7 @@ private fun RowScope.FolderTrailing(
             val menuState = rememberGlassMenuState()
             var anchor by remember { mutableStateOf(Rect.Zero) }
             GlassCircleButton(
-                icon = RobocoIcons.Ellipsis,
+                icon = ZeronIcons.Ellipsis,
                 contentDescription = "More",
                 onClick = { menuState.open(anchor, sectionMenu(onRename, onDelete)) },
                 modifier = Modifier
@@ -272,13 +272,13 @@ private fun sectionMenu(onRename: () -> Unit, onDelete: () -> Unit): Menu = Menu
     children = listOf(
         MenuItem(
             title = "Rename Section\u2026",
-            icon = MenuIcon.Symbol(RobocoIcons.Pencil),
+            icon = MenuIcon.Symbol(ZeronIcons.Pencil),
             testTag = "folder-menu-rename",
             action = onRename,
         ),
         MenuItem(
             title = "Delete Section",
-            icon = MenuIcon.Symbol(RobocoIcons.Trash),
+            icon = MenuIcon.Symbol(ZeronIcons.Trash),
             destructive = true,
             testTag = "folder-menu-delete",
             action = onDelete,
@@ -306,7 +306,7 @@ private fun sectionMenu(onRename: () -> Unit, onDelete: () -> Unit): Menu = Menu
  */
 @Composable
 fun FolderRouteContent(route: FolderRoute) {
-    val app = LocalContext.current.applicationContext as RobocoApplication
+    val app = LocalContext.current.applicationContext as ZeronApplication
     val fixture = LocalSidebarFixtures.current
     val liveWorkspace by app.workspaceFeed.snapshot.collectAsState()
     val liveEngines by app.workspaceFeed.engines.collectAsState()
@@ -453,7 +453,7 @@ private fun FolderScreenPreview(
     workspace: WorkspaceSnapshot?,
     initialEditing: Boolean = false,
 ) {
-    RobocoTheme(appearance) {
+    ZeronTheme(appearance) {
         CompositionLocalProvider(LocalRowActions provides PreviewRowActions) {
             GlassMenuHost {
                 val stack = remember(route) {

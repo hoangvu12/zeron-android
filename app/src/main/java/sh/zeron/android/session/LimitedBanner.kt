@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
@@ -6,13 +6,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import sh.roboco.android.design.Toaster
-import sh.roboco.android.design.glass.Menu
-import sh.roboco.android.design.glass.MenuItem
-import sh.roboco.android.design.glass.MenuSection
-import uniffi.roboco_core.AgentAccount
-import uniffi.roboco_core.ResumeCandidates
-import uniffi.roboco_core.ResumeSwitchOutcome
+import sh.zeron.android.design.Toaster
+import sh.zeron.android.design.glass.Menu
+import sh.zeron.android.design.glass.MenuItem
+import sh.zeron.android.design.glass.MenuSection
+import uniffi.zeron_core.AgentAccount
+import uniffi.zeron_core.ResumeCandidates
+import uniffi.zeron_core.ResumeSwitchOutcome
 
 /**
  * The Limited chat's banner state on [SessionChrome] — the Android arm of
@@ -235,9 +235,9 @@ class LimitedBanner(
     private val nowMs: () -> Long = System::currentTimeMillis,
     /** The continue prompt's one shared spelling (the FFI constant; a
      *  seam so JVM tests inject it instead of touching JNA). */
-    private val continuePrompt: () -> String = { uniffi.roboco_core.resumeContinuePrompt() },
+    private val continuePrompt: () -> String = { uniffi.zeron_core.resumeContinuePrompt() },
     private val logW: (String, Throwable) -> Unit = { message, error ->
-        android.util.Log.w("RobocoSession", message, error)
+        android.util.Log.w("ZeronSession", message, error)
     },
 ) : ChromeFiller {
 

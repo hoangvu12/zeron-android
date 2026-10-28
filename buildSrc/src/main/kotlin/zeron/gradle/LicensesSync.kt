@@ -1,4 +1,4 @@
-package roboco.gradle
+package zeron.gradle
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
@@ -18,7 +18,7 @@ import java.io.File
  * generated APK assets (android-app#31): a sideloaded APK is the whole
  * distribution, so its licenses ship inside it. Settings → About (ticket
  * 26) displays these files from `assets/licenses/`, beside the font
- * licenses `syncRobocoFonts` stages and the `rust-crates.json` the
+ * licenses `syncZeronFonts` stages and the `rust-crates.json` the
  * `RustLicensesTask` writes.
  *
  * A dedicated task (rather than a bare `Sync`) so AGP's
@@ -44,9 +44,9 @@ abstract class LicensesSync : DefaultTask() {
 
     /**
      * The Tailcat adapter's Go licence bundle
-     * (`adapters/roboco-tailcat/licenses/bundle`: `DEPENDENCIES.txt`,
+     * (`adapters/zeron-tailcat/licenses/bundle`: `DEPENDENCIES.txt`,
      * `go/`, `modules/`), staged under `licenses/go/` with its layout kept
-     * — the APK ships `libroboco_tailcat.so` (android-next#02). Optional:
+     * — the APK ships `libzeron_tailcat.so` (android-next#02). Optional:
      * unset stages no `licenses/go/` at all.
      */
     @get:Optional

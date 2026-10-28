@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -13,13 +13,13 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
-import sh.roboco.android.composer.DEFAULT_HARNESS
-import sh.roboco.android.composer.Drafts
-import sh.roboco.android.composer.FakePrefsStore
-import sh.roboco.android.composer.foregroundAppScope
-import uniffi.roboco_core.NewSession
-import uniffi.roboco_core.SendRequest
-import uniffi.roboco_core.SessionTarget
+import sh.zeron.android.composer.DEFAULT_HARNESS
+import sh.zeron.android.composer.Drafts
+import sh.zeron.android.composer.FakePrefsStore
+import sh.zeron.android.composer.foregroundAppScope
+import uniffi.zeron_core.NewSession
+import uniffi.zeron_core.SendRequest
+import uniffi.zeron_core.SessionTarget
 
 /**
  * A side chat's draft (android-next #06, upstream #899's

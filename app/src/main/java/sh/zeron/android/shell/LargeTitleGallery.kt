@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -28,21 +28,21 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.CapsuleShape
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.TypeScale
-import sh.roboco.android.design.gallery.ScrollEdgeEffectFixtureMeta
-import sh.roboco.android.design.gallery.ScrollEdgeEffectFixtureTitles
-import sh.roboco.android.design.gallery.ScrollEdgeEffectRowHeight
-import sh.roboco.android.design.gallery.ScrollEdgeEffectRowMargin
-import sh.roboco.android.design.glass.GlassCircleButton
-import sh.roboco.android.design.glass.GlassTextCapsule
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.CapsuleShape
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.TypeScale
+import sh.zeron.android.design.gallery.ScrollEdgeEffectFixtureMeta
+import sh.zeron.android.design.gallery.ScrollEdgeEffectFixtureTitles
+import sh.zeron.android.design.gallery.ScrollEdgeEffectRowHeight
+import sh.zeron.android.design.gallery.ScrollEdgeEffectRowMargin
+import sh.zeron.android.design.glass.GlassCircleButton
+import sh.zeron.android.design.glass.GlassTextCapsule
+import sh.zeron.android.design.uiStyle
 
 /**
  * The "Large title scaffold" fixture and gallery section
@@ -112,7 +112,7 @@ internal fun LargeTitleFixtureScaffold(
         topInset = topInset,
         showBack = showBack,
         onBack = onBack,
-        trailing = { GlassCircleButton(RobocoIcons.Ellipsis, "More", onClick = {}) },
+        trailing = { GlassCircleButton(ZeronIcons.Ellipsis, "More", onClick = {}) },
         modifier = modifier,
     ) {
         largeTitleFixtureRows(rows, onRowTap)
@@ -134,7 +134,7 @@ internal fun LazyListScope.largeTitleFixtureRows(count: Int, onRowTap: () -> Uni
 
 @Composable
 private fun LargeTitleFixtureRow(title: String, modifier: Modifier = Modifier, onClick: () -> Unit = {}) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Column(
         modifier
@@ -164,7 +164,7 @@ private fun LargeTitleFixtureRow(title: String, modifier: Modifier = Modifier, o
  */
 @Composable
 fun LargeTitleGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     var mode by remember { mutableStateOf(TitleMode.Always) }
     var back by remember { mutableStateOf(false) }
@@ -182,7 +182,7 @@ fun LargeTitleGallerySection() {
                 when (trailingKind) {
                     TrailingKind.None -> {}
                     TrailingKind.Circle ->
-                        GlassCircleButton(RobocoIcons.Ellipsis, "More", onClick = {})
+                        GlassCircleButton(ZeronIcons.Ellipsis, "More", onClick = {})
                     TrailingKind.EditCapsule ->
                         GlassTextCapsule("Edit", onClick = {})
                 }
@@ -235,7 +235,7 @@ private fun trailingLabel(kind: TrailingKind): String = when (kind) {
  */
 @Composable
 private fun LargeTitlePinnedPlaceholder() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Box(
         Modifier
@@ -273,7 +273,7 @@ private fun GalleryToggle(
 @Preview(name = "light")
 @Composable
 private fun LargeTitleExpandedLightPreview() {
-    RobocoTheme(Appearance.Light) {
+    ZeronTheme(Appearance.Light) {
         LargeTitleFixtureScaffold(showBack = false, onBack = {})
     }
 }
@@ -281,7 +281,7 @@ private fun LargeTitleExpandedLightPreview() {
 @Preview(name = "dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun LargeTitleExpandedDarkPreview() {
-    RobocoTheme(Appearance.Dark) {
+    ZeronTheme(Appearance.Dark) {
         LargeTitleFixtureScaffold(showBack = false, onBack = {})
     }
 }
@@ -289,7 +289,7 @@ private fun LargeTitleExpandedDarkPreview() {
 @Preview(name = "collapsed light")
 @Composable
 private fun LargeTitleCollapsedLightPreview() {
-    RobocoTheme(Appearance.Light) {
+    ZeronTheme(Appearance.Light) {
         LargeTitleFixtureScaffold(
             showBack = true,
             onBack = {},
@@ -301,7 +301,7 @@ private fun LargeTitleCollapsedLightPreview() {
 @Preview(name = "collapsed dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun LargeTitleCollapsedDarkPreview() {
-    RobocoTheme(Appearance.Dark) {
+    ZeronTheme(Appearance.Dark) {
         LargeTitleFixtureScaffold(
             showBack = true,
             onBack = {},

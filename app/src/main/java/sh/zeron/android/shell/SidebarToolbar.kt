@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import android.content.res.Configuration
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -36,22 +36,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
-import sh.roboco.android.R
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.GlassStage
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.GlassButtonGroup
-import sh.roboco.android.design.glass.GlassCircleButton
-import sh.roboco.android.design.glass.GlassGroupItem
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.glass.Menu
-import sh.roboco.android.design.glass.rememberGlassMenuState
-import sh.roboco.android.sessions.rememberSessionsOptionsMenu
+import sh.zeron.android.R
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.GlassStage
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.GlassButtonGroup
+import sh.zeron.android.design.glass.GlassCircleButton
+import sh.zeron.android.design.glass.GlassGroupItem
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.glass.Menu
+import sh.zeron.android.design.glass.rememberGlassMenuState
+import sh.zeron.android.sessions.rememberSessionsOptionsMenu
 
 /**
  * Test-only: the toolbar row's fade (1 = fully visible), exposed through
- * the semantics tree exactly like [sh.roboco.android.design.AlertAlphaKey]
+ * the semantics tree exactly like [sh.zeron.android.design.AlertAlphaKey]
  * — the semantics block's snapshot reads are observed by the tree, so the
  * key follows the NavStack transition frame by frame without recomposing
  * the row. Production never reads it; UI tests assert
@@ -62,7 +62,7 @@ val SidebarToolbarAlphaKey = SemanticsPropertyKey<Float>("SidebarToolbarAlpha")
 /**
  * The sidebar toolbar's starred metrics (ticket 107). [ItemSize] is the
  * 44 dp item height — equal to 105's
- * [sh.roboco.android.shell.tablet.SidebarChromeMetrics.ToolbarHeight], the
+ * [sh.zeron.android.shell.tablet.SidebarChromeMetrics.ToolbarHeight], the
  * slot this row fills; **retune the row height and the bottom offset there
  * (105's single source), never here** — this object adds no offset of its
  * own.
@@ -193,12 +193,12 @@ internal fun SidebarToolbarContent(
         GlassButtonGroup(
             items = listOf(
                 GlassGroupItem(
-                    icon = RobocoIcons.Gearshape,
+                    icon = ZeronIcons.Gearshape,
                     contentDescription = stringResource(R.string.sidebar_settings),
                     testTag = "sidebar-settings",
                 ) { onSettings() },
                 GlassGroupItem(
-                    icon = RobocoIcons.Ellipsis,
+                    icon = ZeronIcons.Ellipsis,
                     contentDescription = stringResource(R.string.sidebar_options),
                     testTag = "sidebar-options",
                     interactionSource = optionsSource,
@@ -224,14 +224,14 @@ internal fun SidebarToolbarContent(
             },
         ) {
             GlassCircleButton(
-                icon = RobocoIcons.Plus,
+                icon = ZeronIcons.Plus,
                 contentDescription = stringResource(R.string.sidebar_new_session),
                 onClick = onNewSession,
                 modifier = Modifier.testTag("new-session"),
                 // The iOS 26 "prominent" item: the accent fill with a
                 // white glyph (opaque — 08's filled variant, no blur, no
                 // rim, no shadow; the ink defaults to white when filled).
-                filled = RobocoTheme.palette.accent,
+                filled = ZeronTheme.palette.accent,
             )
         }
     }
@@ -265,7 +265,7 @@ private fun BoxScope.SidebarToolbarPreviewSlot() {
 @Preview(name = "sidebar toolbar light", widthDp = 360, heightDp = 200)
 @Composable
 private fun SidebarToolbarLightPreview() {
-    RobocoTheme(Appearance.Light) {
+    ZeronTheme(Appearance.Light) {
         val haze = rememberHazeState()
         CompositionLocalProvider(LocalHazeState provides haze) {
             GlassStage(
@@ -281,7 +281,7 @@ private fun SidebarToolbarLightPreview() {
 @Preview(name = "sidebar toolbar dark", widthDp = 360, heightDp = 200, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun SidebarToolbarDarkPreview() {
-    RobocoTheme(Appearance.Dark) {
+    ZeronTheme(Appearance.Dark) {
         val haze = rememberHazeState()
         CompositionLocalProvider(LocalHazeState provides haze) {
             GlassStage(

@@ -1,31 +1,31 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import sh.roboco.android.design.color
-import sh.roboco.android.transcript.widgets.ActionButton
-import sh.roboco.android.transcript.widgets.CopyCodeButton
-import sh.roboco.android.transcript.widgets.DisclosureTarget
-import sh.roboco.android.transcript.widgets.ImageTile
-import sh.roboco.android.transcript.widgets.ImageTileCopy
-import sh.roboco.android.transcript.widgets.RailSpec
-import sh.roboco.android.transcript.widgets.ShimmerWidget
-import sh.roboco.android.transcript.widgets.SpinnerWidget
-import sh.roboco.android.transcript.widgets.SubagentLinkTarget
-import sh.roboco.android.transcript.widgets.ToolChevron
-import sh.roboco.android.transcript.widgets.ToolRail
-import sh.roboco.android.transcript.widgets.ToolStatusWidget
-import sh.roboco.android.transcript.widgets.ToolToggleTarget
-import sh.roboco.android.transcript.widgets.TranscriptIcon
-import sh.roboco.android.transcript.widgets.UploadRing
-import sh.roboco.android.transcript.widgets.WorkingIndicator
-import sh.roboco.android.transcript.widgets.isPendingReference
-import uniffi.roboco_core.ColorRole
-import uniffi.roboco_core.Widget
-import uniffi.roboco_core.WidgetKind
+import sh.zeron.android.design.color
+import sh.zeron.android.transcript.widgets.ActionButton
+import sh.zeron.android.transcript.widgets.CopyCodeButton
+import sh.zeron.android.transcript.widgets.DisclosureTarget
+import sh.zeron.android.transcript.widgets.ImageTile
+import sh.zeron.android.transcript.widgets.ImageTileCopy
+import sh.zeron.android.transcript.widgets.RailSpec
+import sh.zeron.android.transcript.widgets.ShimmerWidget
+import sh.zeron.android.transcript.widgets.SpinnerWidget
+import sh.zeron.android.transcript.widgets.SubagentLinkTarget
+import sh.zeron.android.transcript.widgets.ToolChevron
+import sh.zeron.android.transcript.widgets.ToolRail
+import sh.zeron.android.transcript.widgets.ToolStatusWidget
+import sh.zeron.android.transcript.widgets.ToolToggleTarget
+import sh.zeron.android.transcript.widgets.TranscriptIcon
+import sh.zeron.android.transcript.widgets.UploadRing
+import sh.zeron.android.transcript.widgets.WorkingIndicator
+import sh.zeron.android.transcript.widgets.isPendingReference
+import uniffi.zeron_core.ColorRole
+import uniffi.zeron_core.Widget
+import uniffi.zeron_core.WidgetKind
 
 /**
  * Dispatches one widget to its owning ticket's composable (ticket 65; iOS

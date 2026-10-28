@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import android.content.res.Configuration
 import androidx.compose.animation.core.Animatable
@@ -59,19 +59,19 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.CapsuleShape
-import sh.roboco.android.design.GlassStage
-import sh.roboco.android.design.IosSpring
-import sh.roboco.android.design.Icon
-import sh.roboco.android.design.IconInBox
-import sh.roboco.android.design.LocalReduceMotion
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.GlassSurface
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.CapsuleShape
+import sh.zeron.android.design.GlassStage
+import sh.zeron.android.design.IosSpring
+import sh.zeron.android.design.Icon
+import sh.zeron.android.design.IconInBox
+import sh.zeron.android.design.LocalReduceMotion
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.GlassSurface
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.uiStyle
 
 /**
  * The search morph's constants (android-ui-parity #29).
@@ -406,10 +406,10 @@ fun SearchTabField(
 /** The magnifier: the one content piece whose params follow `p` in composition. */
 @Composable
 private fun SearchMagnifier(progress: () -> Float) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val p = progress()
     Icon(
-        RobocoIcons.Magnifyingglass,
+        ZeronIcons.Magnifyingglass,
         tint = lerp(palette.text, palette.secondary, p.coerceIn(0f, 1f)),
         sizePt = SearchMorphGeometry.magnifierPt(p),
     )
@@ -427,7 +427,7 @@ private fun SearchFieldText(
     focusRequester: FocusRequester,
     interactionSource: MutableInteractionSource,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val keyboard = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
@@ -486,7 +486,7 @@ private fun SearchClearButton(
     focused: Boolean,
     focusRequester: FocusRequester,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val keyboard = LocalSoftwareKeyboardController.current
     Box(
         Modifier
@@ -508,7 +508,7 @@ private fun SearchClearButton(
             },
         contentAlignment = Alignment.Center,
     ) {
-        Icon(RobocoIcons.XmarkCircleFill, tint = palette.tertiary, sizePt = 17f)
+        Icon(ZeronIcons.XmarkCircleFill, tint = palette.tertiary, sizePt = 17f)
     }
 }
 
@@ -561,7 +561,7 @@ fun SearchReturnCircle(
     onTabTap: (TabId) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val focusManager = LocalFocusManager.current
     val source = remember { MutableInteractionSource() }
     val cellWidth = (pill0.w.dp - GlassTabBarDefaults.PlatterInset * 2) / 2
@@ -595,7 +595,7 @@ fun SearchReturnCircle(
                 }
                 // Layer 1: the previous tab's glyph, centred, fading in.
                 IconInBox(
-                    icon = if (previousTab == TabId.Settings) RobocoIcons.TabSettings else RobocoIcons.TabChat,
+                    icon = if (previousTab == TabId.Settings) ZeronIcons.TabSettings else ZeronIcons.TabChat,
                     tint = palette.text,
                     box = GlassTabBarDefaults.IconBox,
                     modifier = Modifier.graphicsLayer {
@@ -762,7 +762,7 @@ internal fun SearchMorphFixture(
 
 @Composable
 private fun SearchMorphPreviewContent() {
-    RobocoTheme {
+    ZeronTheme {
         val state = remember {
             SearchTabState().also { it.text.setTextAndPlaceCursorAtEnd("zeron") }
         }

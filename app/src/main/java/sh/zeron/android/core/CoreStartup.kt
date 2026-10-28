@@ -1,4 +1,4 @@
-package sh.roboco.android.core
+package sh.zeron.android.core
 
 import android.content.Context
 import android.util.Log
@@ -18,17 +18,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import sh.roboco.android.BuildConfig
-import sh.roboco.android.pairing.DeviceLabel
-import sh.roboco.android.pairing.PairedEngineStore
-import sh.roboco.android.session.SessionEventHub
-import uniffi.roboco_core.ClientEvent
-import uniffi.roboco_core.ClientListener
-import uniffi.roboco_core.CoreClient
-import uniffi.roboco_core.CoreConfig
-import uniffi.roboco_core.EngineView
-import uniffi.roboco_core.PairedEngine
-import uniffi.roboco_core.RoomRecord
+import sh.zeron.android.BuildConfig
+import sh.zeron.android.pairing.DeviceLabel
+import sh.zeron.android.pairing.PairedEngineStore
+import sh.zeron.android.session.SessionEventHub
+import uniffi.zeron_core.ClientEvent
+import uniffi.zeron_core.ClientListener
+import uniffi.zeron_core.CoreClient
+import uniffi.zeron_core.CoreConfig
+import uniffi.zeron_core.EngineView
+import uniffi.zeron_core.PairedEngine
+import uniffi.zeron_core.RoomRecord
 
 /** The startup pipeline's state; the splash (ticket 35) holds on `Loading`. */
 sealed interface CoreStartState {
@@ -152,7 +152,7 @@ class CoreStartup(
                     platform = "android",
                     appVersion = BuildConfig.VERSION_NAME,
                     showMockHarness = BuildConfig.DEBUG,
-                    // android-next#02: libroboco_tailcat.so, dlopen'ed by
+                    // android-next#02: libzeron_tailcat.so, dlopen'ed by
                     // the core on the first Tailcat dial.
                     nativeLibDir = context.applicationInfo.nativeLibraryDir,
                 )
@@ -208,6 +208,6 @@ class CoreStartup(
     }
 
     private companion object {
-        const val TAG = "Roboco"
+        const val TAG = "Zeron"
     }
 }

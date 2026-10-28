@@ -1,4 +1,4 @@
-package sh.roboco.android.accounts
+package sh.zeron.android.accounts
 
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.snapshots.Snapshot
@@ -21,29 +21,29 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.ActionSheetModel
-import sh.roboco.android.design.ActionSheetPresenter
-import sh.roboco.android.design.Alerts
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.ContextMenuHost
-import sh.roboco.android.design.LocalActionSheet
-import sh.roboco.android.design.LocalAlerts
-import sh.roboco.android.design.LocalToaster
-import sh.roboco.android.shell.LocalNavEntry
-import sh.roboco.android.design.RobocoAlert
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.Toaster
-import sh.roboco.android.shell.LocalNavStack
-import sh.roboco.android.shell.NavRoute
-import sh.roboco.android.shell.NavStack
-import sh.roboco.android.shell.NavStackHost
-import uniffi.roboco_core.AgentAccount
-import uniffi.roboco_core.AgentAccountsSnapshot
-import uniffi.roboco_core.AgentUsageWindow
-import uniffi.roboco_core.DeviceView
-import uniffi.roboco_core.FrontPage
-import uniffi.roboco_core.PullRequestGroups
-import uniffi.roboco_core.WorkspaceSnapshot
+import sh.zeron.android.design.ActionSheetModel
+import sh.zeron.android.design.ActionSheetPresenter
+import sh.zeron.android.design.Alerts
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ContextMenuHost
+import sh.zeron.android.design.LocalActionSheet
+import sh.zeron.android.design.LocalAlerts
+import sh.zeron.android.design.LocalToaster
+import sh.zeron.android.shell.LocalNavEntry
+import sh.zeron.android.design.ZeronAlert
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.Toaster
+import sh.zeron.android.shell.LocalNavStack
+import sh.zeron.android.shell.NavRoute
+import sh.zeron.android.shell.NavStack
+import sh.zeron.android.shell.NavStackHost
+import uniffi.zeron_core.AgentAccount
+import uniffi.zeron_core.AgentAccountsSnapshot
+import uniffi.zeron_core.AgentUsageWindow
+import uniffi.zeron_core.DeviceView
+import uniffi.zeron_core.FrontPage
+import uniffi.zeron_core.PullRequestGroups
+import uniffi.zeron_core.WorkspaceSnapshot
 
 /**
  * The Accounts & Usage page (android-next#05) through the real
@@ -102,12 +102,12 @@ class AgentAccountsScreenTest {
     }
 
     private class FakeAlerts : Alerts {
-        val shown = mutableListOf<RobocoAlert>()
-        override fun show(alert: RobocoAlert) {
+        val shown = mutableListOf<ZeronAlert>()
+        override fun show(alert: ZeronAlert) {
             shown += alert
         }
 
-        override fun updateCurrent(alert: RobocoAlert) {}
+        override fun updateCurrent(alert: ZeronAlert) {}
 
         override fun dismissAll() {}
     }
@@ -219,7 +219,7 @@ class AgentAccountsScreenTest {
         // would re-key the page's remembered model.
         val workScope = CoroutineScope(Dispatchers.Main.immediate)
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(
                     LocalNavStack provides stack,
                     LocalNavEntry provides pushed,
@@ -270,7 +270,7 @@ class AgentAccountsScreenTest {
             "where logins are added",
             textExists(
                 "Switching changes the login Studio uses for new sessions. " +
-                    "To add an account, sign in from Roboco on Studio.",
+                    "To add an account, sign in from Zeron on Studio.",
             ),
         )
     }

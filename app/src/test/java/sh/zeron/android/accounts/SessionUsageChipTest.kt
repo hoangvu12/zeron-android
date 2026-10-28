@@ -1,4 +1,4 @@
-package sh.roboco.android.accounts
+package sh.zeron.android.accounts
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -8,25 +8,25 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import sh.roboco.android.composer.ChipTint
-import sh.roboco.android.design.Toaster
-import sh.roboco.android.design.glass.MenuItem
-import sh.roboco.android.design.glass.MenuSection
-import sh.roboco.android.session.CONTEXT_WARNING_SYMBOL
-import sh.roboco.android.session.SessionChipIds
-import sh.roboco.android.session.SessionChrome
-import sh.roboco.android.session.contextChip
-import uniffi.roboco_core.AgentAccount
-import uniffi.roboco_core.AgentAccountsSnapshot
-import uniffi.roboco_core.AgentUsageWindow
-import uniffi.roboco_core.ChatIndicator
-import uniffi.roboco_core.ComposerState
-import uniffi.roboco_core.CoreException
-import uniffi.roboco_core.HostCapabilities
-import uniffi.roboco_core.HostInfo
-import uniffi.roboco_core.LiveStatus
-import uniffi.roboco_core.RoomState
-import uniffi.roboco_core.SessionRow
+import sh.zeron.android.composer.ChipTint
+import sh.zeron.android.design.Toaster
+import sh.zeron.android.design.glass.MenuItem
+import sh.zeron.android.design.glass.MenuSection
+import sh.zeron.android.session.CONTEXT_WARNING_SYMBOL
+import sh.zeron.android.session.SessionChipIds
+import sh.zeron.android.session.SessionChrome
+import sh.zeron.android.session.contextChip
+import uniffi.zeron_core.AgentAccount
+import uniffi.zeron_core.AgentAccountsSnapshot
+import uniffi.zeron_core.AgentUsageWindow
+import uniffi.zeron_core.ChatIndicator
+import uniffi.zeron_core.ComposerState
+import uniffi.zeron_core.CoreException
+import uniffi.zeron_core.HostCapabilities
+import uniffi.zeron_core.HostInfo
+import uniffi.zeron_core.LiveStatus
+import uniffi.zeron_core.RoomState
+import uniffi.zeron_core.SessionRow
 
 /**
  * The composer's plan usage (android-next#05), folded into android-next
@@ -119,7 +119,7 @@ class SessionUsageChipTest {
         deviceId: String = "device-1",
         harness: String? = "claude-code",
         running: Boolean = false,
-    ) = sh.roboco.android.session.ChromeInput(
+    ) = sh.zeron.android.session.ChromeInput(
         chatId = "chat-a",
         composer = ComposerState(
             chatId = "chat-a",
@@ -198,7 +198,7 @@ class SessionUsageChipTest {
 
     /** A chrome carrying the context chip #01's filler would have built. */
     private fun contextChrome(tokens: ULong, window: ULong?): SessionChrome {
-        val reading = sh.roboco.android.session.contextReading(tokens, window)!!
+        val reading = sh.zeron.android.session.contextReading(tokens, window)!!
         return SessionChrome(chips = listOf(contextChip(reading)))
     }
 
@@ -336,8 +336,8 @@ class SessionUsageChipTest {
         filler.fill(contextChrome(120_000uL, 1_048_576uL), input())
         advanceUntilIdle()
 
-        val card = sh.roboco.android.session.contextUsageCard(
-            sh.roboco.android.session.contextReading(120_000uL, 1_048_576uL)!!,
+        val card = sh.zeron.android.session.contextUsageCard(
+            sh.zeron.android.session.contextReading(120_000uL, 1_048_576uL)!!,
         )
         val augmented = filler.augmentContextCard(card)
         // #01's two context rows first, unchanged.
@@ -376,8 +376,8 @@ class SessionUsageChipTest {
         val filler = filler(core)
         filler.fill(contextChrome(120_000uL, 1_048_576uL), input())
         advanceUntilIdle()
-        val card = sh.roboco.android.session.contextUsageCard(
-            sh.roboco.android.session.contextReading(120_000uL, 1_048_576uL)!!,
+        val card = sh.zeron.android.session.contextUsageCard(
+            sh.zeron.android.session.contextReading(120_000uL, 1_048_576uL)!!,
         )
         // A harness with no accounts: the plain card.
         assertEquals(card, filler.augmentContextCard(card))
@@ -403,8 +403,8 @@ class SessionUsageChipTest {
         advanceUntilIdle()
 
         val card = filler.augmentContextCard(
-            sh.roboco.android.session.contextUsageCard(
-                sh.roboco.android.session.contextReading(120_000uL, 1_048_576uL)!!,
+            sh.zeron.android.session.contextUsageCard(
+                sh.zeron.android.session.contextReading(120_000uL, 1_048_576uL)!!,
             ),
         )
         // The open row runs the injected handler.
@@ -439,8 +439,8 @@ class SessionUsageChipTest {
         // tint still reads the pre-switch login.
         core.throwOnActivate = CoreException.HostException("no")
         val card = filler.augmentContextCard(
-            sh.roboco.android.session.contextUsageCard(
-                sh.roboco.android.session.contextReading(120_000uL, 1_048_576uL)!!,
+            sh.zeron.android.session.contextUsageCard(
+                sh.zeron.android.session.contextReading(120_000uL, 1_048_576uL)!!,
             ),
         )
         (card.rows().first { it.testTag == "context-menu-switch-bob" }.action)()
@@ -451,5 +451,5 @@ class SessionUsageChipTest {
     }
 }
 
-private fun sh.roboco.android.design.glass.Menu.rows(): List<MenuItem> =
+private fun sh.zeron.android.design.glass.Menu.rows(): List<MenuItem> =
     children.filterIsInstance<MenuItem>()

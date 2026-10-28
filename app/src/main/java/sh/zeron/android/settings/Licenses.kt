@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import android.content.res.AssetManager
 import android.content.res.Resources
@@ -9,11 +9,11 @@ import java.io.IOException
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
-import sh.roboco.android.R
+import sh.zeron.android.R
 
 /**
  * The Licenses screen's data (android-ui-parity #101): the four sections
- * ("Roboco", "Fonts and assets", "Android libraries", "Rust core"), the
+ * ("Zeron", "Fonts and assets", "Android libraries", "Rust core"), the
  * pure parsers of the two generated JSON inputs, and the repository that
  * loads everything from the APK assets on `Dispatchers.IO`.
  *
@@ -22,12 +22,12 @@ import sh.roboco.android.R
  * only the Gradle plugin's JSON).
  */
 
-private const val TAG = "Roboco"
+private const val TAG = "Zeron"
 
 /** Asset paths, the names android-app#13/#31 and this ticket stage. */
 object LicenseSources {
-    const val RobocoLicense = "licenses/LICENSE"
-    const val RobocoNotices = "licenses/THIRD_PARTY_NOTICES.md"
+    const val ZeronLicense = "licenses/LICENSE"
+    const val ZeronNotices = "licenses/THIRD_PARTY_NOTICES.md"
     const val GeistOfl = "licenses/Geist-OFL.txt"
     const val SymbolsLicense = "licenses/vscode-symbols-LICENSE.txt"
     const val SpdxDir = "licenses/spdx"
@@ -44,7 +44,7 @@ object LicenseSources {
  * `## Symbols` paragraph (the pinned commit is part of the URL).
  */
 const val SymbolsHeader =
-    "Roboco bundles the SVG icon set and filename/folder associations from Symbols:\n" +
+    "Zeron bundles the SVG icon set and filename/folder associations from Symbols:\n" +
     "https://github.com/miguelsolorio/vscode-symbols/tree/296ef1b62287fb2315cb5651e552e09e8c8e1de8"
 
 /**
@@ -54,8 +54,8 @@ const val SymbolsHeader =
  */
 const val SolarNotice =
     "Solar Icons by 480 Design\n\n" +
-    "Most of Roboco's line icons come from the Solar Icons set (Linear weight) by 480 Design. " +
-    "Some Android icons are drawn for Roboco in the Solar Linear style.\n\n" +
+    "Most of Zeron's line icons come from the Solar Icons set (Linear weight) by 480 Design. " +
+    "Some Android icons are drawn for Zeron in the Solar Linear style.\n\n" +
     "Solar Icons is licensed under the Creative Commons Attribution 4.0 International License (CC BY 4.0):\n" +
     "https://creativecommons.org/licenses/by/4.0/"
 
@@ -73,7 +73,7 @@ const val SeeLicenseFile = "See license file"
  */
 @Immutable
 data class LicenceEntry(
-    /** `roboco`, `geist`, `android:<uniqueId>`, `rust:<name>@<version>`, … */
+    /** `zeron`, `geist`, `android:<uniqueId>`, `rust:<name>@<version>`, … */
     val id: String,
     val title: String,
     val subtitle: String?,
@@ -284,7 +284,7 @@ class LicensesRepository(private val assets: AssetManager, private val resources
     /** The sections in screen order, empty sections dropped. */
     fun load(): List<LicenceSection> {
         val sections = listOf(
-            LicenceSection(key = "roboco", title = "Roboco", entries = robocoEntries()),
+            LicenceSection(key = "zeron", title = "Zeron", entries = zeronEntries()),
             LicenceSection(key = "assets", title = "Fonts and assets", entries = assetEntries()),
             LicenceSection(key = "android", title = "Android libraries", entries = androidEntries()),
             LicenceSection(key = "rust", title = "Rust core", entries = rustEntries()),
@@ -293,9 +293,9 @@ class LicensesRepository(private val assets: AssetManager, private val resources
         return sections.filter { it.entries.isNotEmpty() }
     }
 
-    private fun robocoEntries(): List<LicenceEntry> = listOfNotNull(
-        assetEntry(id = "roboco", title = "Roboco", subtitle = "MIT License", path = LicenseSources.RobocoLicense),
-        assetEntry(id = "notices", title = ThirdPartyNotices, subtitle = null, path = LicenseSources.RobocoNotices),
+    private fun zeronEntries(): List<LicenceEntry> = listOfNotNull(
+        assetEntry(id = "zeron", title = "Zeron", subtitle = "MIT License", path = LicenseSources.ZeronLicense),
+        assetEntry(id = "notices", title = ThirdPartyNotices, subtitle = null, path = LicenseSources.ZeronNotices),
     )
 
     private fun assetEntries(): List<LicenceEntry> = listOfNotNull(
@@ -355,8 +355,8 @@ class LicensesRepository(private val assets: AssetManager, private val resources
     private fun goEntries(): List<LicenceEntry> {
         val table = readAsset(LicenseSources.GoDependencies) ?: return emptyList()
         val kratos = assetEntry(
-            id = "go:roboco-tailcat",
-            title = "roboco-tailcat adapter (from Kratos)",
+            id = "go:zeron-tailcat",
+            title = "zeron-tailcat adapter (from Kratos)",
             subtitle = "MIT License",
             path = LicenseSources.KratosLicense,
         )

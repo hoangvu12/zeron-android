@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import android.content.res.Configuration
 import androidx.compose.animation.core.animate
@@ -41,19 +41,19 @@ import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.hazeSource
 import java.util.Locale
 import kotlinx.coroutines.delay
-import sh.roboco.android.composer.MentionSuggestionsHost
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalReduceMotion
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.Motion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.StatusGlyph
-import sh.roboco.android.design.StatusGlyphKind
-import sh.roboco.android.design.glass.GlassSurface
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.glass.ProvideHazeState
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.composer.MentionSuggestionsHost
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalReduceMotion
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.Motion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.StatusGlyph
+import sh.zeron.android.design.StatusGlyphKind
+import sh.zeron.android.design.glass.GlassSurface
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.glass.ProvideHazeState
+import sh.zeron.android.design.uiStyle
 
 /**
  * The Session screen's root scaffold (android-ui-parity #75) — the port of
@@ -104,7 +104,7 @@ fun SessionScaffold(
     // Read outside the provider: the reveal's reduce-motion branch must
     // see the real value, not the settle override.
     val reduce = LocalReduceMotion.current
-    Box(modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+    Box(modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
         ProvideHazeState {
             // 86's integration contract: the mention card's host sits
             // inside ProvideHazeState and outside 74's body box (the card
@@ -256,7 +256,7 @@ private const val SessionOpenFixtureParagraph =
     "Port the streaming fade-in veil from transcript.rs into Transcript."
 
 /** The fixture's subtitle (the reference capture's project @ engine line). */
-private const val SessionOpenFixtureSubtitle = "roboco @ MacBook Pro"
+private const val SessionOpenFixtureSubtitle = "zeron @ MacBook Pro"
 
 /**
  * The fixture header (52's, with the ticket's values): the reference title,
@@ -284,7 +284,7 @@ internal fun SessionOpenFixtureHeader(statusBarTop: Dp = 24.dp) {
  */
 @Composable
 private fun SessionOpenTranscriptStandIn(onTap: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Column(
         Modifier
@@ -374,7 +374,7 @@ internal fun SessionOpenFixture(
 @Preview(name = "holding")
 @Composable
 private fun SessionScaffoldHoldingPreview() {
-    RobocoTheme(Appearance.Light) {
+    ZeronTheme(Appearance.Light) {
         SessionOpenFixture(remember { OpenReveal().apply { begin(true) } })
     }
 }
@@ -382,7 +382,7 @@ private fun SessionScaffoldHoldingPreview() {
 @Preview(name = "holding dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun SessionScaffoldHoldingDarkPreview() {
-    RobocoTheme(Appearance.Dark) {
+    ZeronTheme(Appearance.Dark) {
         SessionOpenFixture(remember { OpenReveal().apply { begin(true) } })
     }
 }
@@ -450,7 +450,7 @@ fun SessionOpenGallerySection() {
         }
     }
 
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Column(Modifier.fillMaxSize()) {
         Box(Modifier.fillMaxWidth().height(560.dp)) {
@@ -483,7 +483,7 @@ fun SessionOpenGallerySection() {
 /** One gallery toggle row: label left, current value in accent right. */
 @Composable
 private fun SessionOpenToggleRow(label: String, value: String, onClick: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Row(
         Modifier

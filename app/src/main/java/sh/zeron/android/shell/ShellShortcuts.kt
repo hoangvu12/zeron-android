@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import android.content.Context
 import android.view.KeyEvent
@@ -12,7 +12,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.onPreviewKeyEvent
-import sh.roboco.android.R
+import sh.zeron.android.R
 
 /**
  * Hardware keyboard shortcuts (android-ui-parity #33), the Android port of
@@ -69,7 +69,7 @@ object ShellShortcuts {
 
     /**
      * The system shortcut helper (Meta+/, `Activity.onProvideKeyboardShortcuts`)
-     * entries: the `Roboco` group — "New Session" and "Search" whenever a
+     * entries: the `Zeron` group — "New Session" and "Search" whenever a
      * shell is mounted, plus "Toggle Sidebar" only while the split is up
      * (a compact phone would show a dead entry; iPad lists it even
      * collapsed, where it is a silent no-op). No shell (the pairing root)
@@ -114,7 +114,7 @@ fun dispatchShellShortcut(s: ShellShortcut, router: AppRouter, shell: TabletShel
     }
 
 /**
- * One per [sh.roboco.android.MainActivity]: lets
+ * One per [sh.zeron.android.MainActivity]: lets
  * `Activity.onKeyShortcut` reach the mounted shell when no Compose node
  * has focus (fresh launch, after `clearFocus()`). Compose dispatches key
  * events only to the focused node and its ancestors, so the root's

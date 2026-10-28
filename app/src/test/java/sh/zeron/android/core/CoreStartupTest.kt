@@ -1,4 +1,4 @@
-package sh.roboco.android.core
+package sh.zeron.android.core
 
 import android.app.Application
 import android.content.Context
@@ -34,20 +34,20 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.shadows.ShadowLog
-import sh.roboco.android.pairing.FakeSecretCipher
-import sh.roboco.android.pairing.PairedEngineStore
-import sh.roboco.android.pairing.newEngine
-import sh.roboco.android.session.SessionEventHub
-import uniffi.roboco_core.ClientEvent
-import uniffi.roboco_core.ClientListener
-import uniffi.roboco_core.CoreClient
-import uniffi.roboco_core.CoreConfig
-import uniffi.roboco_core.CoreException
-import uniffi.roboco_core.EngineState
-import uniffi.roboco_core.EngineView
-import uniffi.roboco_core.PairedEngine
-import uniffi.roboco_core.RoomRecord
-import uniffi.roboco_core.ParkReason
+import sh.zeron.android.pairing.FakeSecretCipher
+import sh.zeron.android.pairing.PairedEngineStore
+import sh.zeron.android.pairing.newEngine
+import sh.zeron.android.session.SessionEventHub
+import uniffi.zeron_core.ClientEvent
+import uniffi.zeron_core.ClientListener
+import uniffi.zeron_core.CoreClient
+import uniffi.zeron_core.CoreConfig
+import uniffi.zeron_core.CoreException
+import uniffi.zeron_core.EngineState
+import uniffi.zeron_core.EngineView
+import uniffi.zeron_core.PairedEngine
+import uniffi.zeron_core.RoomRecord
+import uniffi.zeron_core.ParkReason
 import java.io.File
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -61,7 +61,7 @@ import java.util.concurrent.atomic.AtomicInteger
  * `http://127.0.0.1:9` so the socket fails instantly and the engine is
  * Connecting/Reconnecting, never Parked.
  *
- * A plain [Application]: `RobocoApplication.onCreate` starts the app's own
+ * A plain [Application]: `ZeronApplication.onCreate` starts the app's own
  * pipeline (its own `CoreClient`, `Main.immediate` collectors and the
  * default main-posting session hub), which posts to the main looper on its
  * own schedule and made the "event path must not touch the main looper"

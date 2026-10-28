@@ -9,4 +9,4 @@ Byte-identical copies of upstream's PR assets, branch `pr-assets`, folder `group
 | 3-on.png | https://raw.githubusercontent.com/zeronsh/zeron/pr-assets/group-by-project/3-on.png | Sessions tab, Group by Project on | 07ccdd6d8977f66adfc504023b468e0ff90792bb15fe9ef24de167b996651b05 |
 
 460×1000 px RGB of a 402×874 pt iPhone canvas (1 pt = 460/402 px). Do not edit or re-encode.
-Used by `sh.roboco.android.design.reference.ReferenceBoardTest` (board: build/outputs/roborazzi/reference-board.png).
+Used by `sh.zeron.android.design.reference.ReferenceBoardTest` (board: build/outputs/roborazzi/reference-board.png).

@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import java.util.Base64
 import org.junit.Assert.assertEquals
@@ -21,67 +21,67 @@ class DeepLinksTest {
         ScopedIds.PREFIX + Base64.getUrlEncoder().withoutPadding()
             .encodeToString(json.toByteArray(Charsets.UTF_8))
 
-    private val pairLink = "roboco://pair#url=https%3A%2F%2Fh%3A27655%2Fpair%23token%3Dx"
+    private val pairLink = "zeron://pair#url=https%3A%2F%2Fh%3A27655%2Fpair%23token%3Dx"
 
     // --------------------------------------------------------------- parse
 
     @Test
     fun parseChat() {
-        assertEquals(DeepLink.OpenChat("abc"), DeepLinks.parse("roboco://chat/abc"))
+        assertEquals(DeepLink.OpenChat("abc"), DeepLinks.parse("zeron://chat/abc"))
         // Scheme and host case-insensitive; the id keeps its case.
-        assertEquals(DeepLink.OpenChat("AbC"), DeepLinks.parse("ROBOCO://Chat/AbC"))
+        assertEquals(DeepLink.OpenChat("AbC"), DeepLinks.parse("ZERON://Chat/AbC"))
         // A trailing slash is accepted.
-        assertEquals(DeepLink.OpenChat("abc"), DeepLinks.parse("roboco://chat/abc/"))
+        assertEquals(DeepLink.OpenChat("abc"), DeepLinks.parse("zeron://chat/abc/"))
         // The query and the fragment are split off before the path check.
-        assertEquals(DeepLink.OpenChat("a b"), DeepLinks.parse("roboco://chat/a%20b?x=1#y"))
+        assertEquals(DeepLink.OpenChat("a b"), DeepLinks.parse("zeron://chat/a%20b?x=1#y"))
         // A scoped id passes through verbatim (no base64 validation here).
         assertEquals(
             DeepLink.OpenChat("engine:v1:WyJrIiwiciJd"),
-            DeepLinks.parse("roboco://chat/engine:v1:WyJrIiwiciJd"),
+            DeepLinks.parse("zeron://chat/engine:v1:WyJrIiwiciJd"),
         )
         // Whitespace around the whole link is trimmed.
-        assertEquals(DeepLink.OpenChat("abc"), DeepLinks.parse("  roboco://chat/abc  "))
+        assertEquals(DeepLink.OpenChat("abc"), DeepLinks.parse("  zeron://chat/abc  "))
     }
 
     @Test
     fun parseNew() {
-        assertEquals(DeepLink.NewSession(null), DeepLinks.parse("roboco://new"))
-        assertEquals(DeepLink.NewSession(null), DeepLinks.parse("roboco://new/"))
-        assertEquals(DeepLink.NewSession("Fix tests"), DeepLinks.parse("roboco://new?prompt=Fix%20tests"))
+        assertEquals(DeepLink.NewSession(null), DeepLinks.parse("zeron://new"))
+        assertEquals(DeepLink.NewSession(null), DeepLinks.parse("zeron://new/"))
+        assertEquals(DeepLink.NewSession("Fix tests"), DeepLinks.parse("zeron://new?prompt=Fix%20tests"))
         // Form-style: `+` is a space in the prompt.
-        assertEquals(DeepLink.NewSession("Fix tests"), DeepLinks.parse("roboco://new?prompt=Fix+tests"))
+        assertEquals(DeepLink.NewSession("Fix tests"), DeepLinks.parse("zeron://new?prompt=Fix+tests"))
         // The first `prompt=` parameter wins; UTF-8 escapes decode.
-        assertEquals(DeepLink.NewSession("\u2713"), DeepLinks.parse("roboco://new?a=1&prompt=%E2%9C%93"))
+        assertEquals(DeepLink.NewSession("\u2713"), DeepLinks.parse("zeron://new?a=1&prompt=%E2%9C%93"))
         // Newlines are kept (the prompt is verbatim, not trimmed).
-        assertEquals(DeepLink.NewSession("line1\nline2"), DeepLinks.parse("roboco://new?prompt=line1%0Aline2"))
-        assertEquals(DeepLink.NewSession(" a"), DeepLinks.parse("roboco://new?prompt=%20a"))
+        assertEquals(DeepLink.NewSession("line1\nline2"), DeepLinks.parse("zeron://new?prompt=line1%0Aline2"))
+        assertEquals(DeepLink.NewSession(" a"), DeepLinks.parse("zeron://new?prompt=%20a"))
         // Blank results read as no prompt.
-        assertEquals(DeepLink.NewSession(null), DeepLinks.parse("roboco://new?prompt="))
-        assertEquals(DeepLink.NewSession(null), DeepLinks.parse("roboco://new?prompt=%20+"))
+        assertEquals(DeepLink.NewSession(null), DeepLinks.parse("zeron://new?prompt="))
+        assertEquals(DeepLink.NewSession(null), DeepLinks.parse("zeron://new?prompt=%20+"))
         // A malformed escape still opens the sheet, with no prompt.
-        assertEquals(DeepLink.NewSession(null), DeepLinks.parse("roboco://new?prompt=%GG"))
-        assertEquals(DeepLink.NewSession(null), DeepLinks.parse("roboco://new?prompt=a%"))
+        assertEquals(DeepLink.NewSession(null), DeepLinks.parse("zeron://new?prompt=%GG"))
+        assertEquals(DeepLink.NewSession(null), DeepLinks.parse("zeron://new?prompt=a%"))
         // Only the first `prompt=` counts.
-        assertEquals(DeepLink.NewSession("a"), DeepLinks.parse("roboco://new?a=1&prompt=a&prompt=b"))
+        assertEquals(DeepLink.NewSession("a"), DeepLinks.parse("zeron://new?a=1&prompt=a&prompt=b"))
     }
 
     @Test
     fun parseSettingsSearch() {
-        assertEquals(DeepLink.Settings, DeepLinks.parse("roboco://settings"))
-        assertEquals(DeepLink.Settings, DeepLinks.parse("roboco://Settings/"))
-        assertEquals(DeepLink.Search, DeepLinks.parse("roboco://search"))
-        assertEquals(DeepLink.Search, DeepLinks.parse("ROBOCO://SEARCH"))
+        assertEquals(DeepLink.Settings, DeepLinks.parse("zeron://settings"))
+        assertEquals(DeepLink.Settings, DeepLinks.parse("zeron://Settings/"))
+        assertEquals(DeepLink.Search, DeepLinks.parse("zeron://search"))
+        assertEquals(DeepLink.Search, DeepLinks.parse("ZERON://SEARCH"))
     }
 
     @Test
     fun parsePairKeepsTheWholeTrimmedString() {
         assertEquals(DeepLink.Pair(pairLink), DeepLinks.parse(pairLink))
-        assertEquals(DeepLink.Pair("roboco://pair"), DeepLinks.parse("roboco://pair"))
+        assertEquals(DeepLink.Pair("zeron://pair"), DeepLinks.parse("zeron://pair"))
         // Any path/fragment is accepted for the pair host.
-        assertEquals(DeepLink.Pair("roboco://pair/x#y"), DeepLinks.parse("roboco://pair/x#y"))
-        assertEquals(DeepLink.Pair("roboco://PAIR#url=x"), DeepLinks.parse("roboco://PAIR#url=x"))
+        assertEquals(DeepLink.Pair("zeron://pair/x#y"), DeepLinks.parse("zeron://pair/x#y"))
+        assertEquals(DeepLink.Pair("zeron://PAIR#url=x"), DeepLinks.parse("zeron://PAIR#url=x"))
         // The link is the trimmed original string.
-        assertEquals(DeepLink.Pair("roboco://pair"), DeepLinks.parse(" roboco://pair "))
+        assertEquals(DeepLink.Pair("zeron://pair"), DeepLinks.parse(" zeron://pair "))
     }
 
     @Test
@@ -89,36 +89,36 @@ class DeepLinksTest {
         assertNull(DeepLinks.parse(null))
         assertNull(DeepLinks.parse(""))
         assertNull(DeepLinks.parse("   "))
-        assertNull(DeepLinks.parse("roboco"))
-        assertNull(DeepLinks.parse("roboco:settings"))
+        assertNull(DeepLinks.parse("zeron"))
+        assertNull(DeepLinks.parse("zeron:settings"))
         assertNull(DeepLinks.parse("://settings"))
-        assertNull(DeepLinks.parse("roboco://"))
-        assertNull(DeepLinks.parse("https://roboco/chat/abc"))
+        assertNull(DeepLinks.parse("zeron://"))
+        assertNull(DeepLinks.parse("https://zeron/chat/abc"))
         // iOS-only and desktop-only hosts.
-        assertNull(DeepLinks.parse("roboco://voice"))
-        assertNull(DeepLinks.parse("roboco://more"))
-        assertNull(DeepLinks.parse("roboco://open/chat/abc?workspace=0123456789abcdef"))
+        assertNull(DeepLinks.parse("zeron://voice"))
+        assertNull(DeepLinks.parse("zeron://more"))
+        assertNull(DeepLinks.parse("zeron://open/chat/abc?workspace=0123456789abcdef"))
     }
 
     @Test
     fun parseRejectsMalformedChatPaths() {
-        assertNull(DeepLinks.parse("roboco://chat"))
-        assertNull(DeepLinks.parse("roboco://chat/"))
-        assertNull(DeepLinks.parse("roboco://chat/a/b"))
+        assertNull(DeepLinks.parse("zeron://chat"))
+        assertNull(DeepLinks.parse("zeron://chat/"))
+        assertNull(DeepLinks.parse("zeron://chat/a/b"))
         // A decoded slash is rejected like a literal one.
-        assertNull(DeepLinks.parse("roboco://chat/a%2Fb"))
+        assertNull(DeepLinks.parse("zeron://chat/a%2Fb"))
         // Malformed escapes.
-        assertNull(DeepLinks.parse("roboco://chat/%GG"))
-        assertNull(DeepLinks.parse("roboco://chat/%G1"))
-        assertNull(DeepLinks.parse("roboco://chat/%"))
-        assertNull(DeepLinks.parse("roboco://chat/a%"))
+        assertNull(DeepLinks.parse("zeron://chat/%GG"))
+        assertNull(DeepLinks.parse("zeron://chat/%G1"))
+        assertNull(DeepLinks.parse("zeron://chat/%"))
+        assertNull(DeepLinks.parse("zeron://chat/a%"))
     }
 
     @Test
     fun parseRejectsNonEmptyPaths() {
-        assertNull(DeepLinks.parse("roboco://settings/x"))
-        assertNull(DeepLinks.parse("roboco://search/x"))
-        assertNull(DeepLinks.parse("roboco://new/x"))
+        assertNull(DeepLinks.parse("zeron://settings/x"))
+        assertNull(DeepLinks.parse("zeron://search/x"))
+        assertNull(DeepLinks.parse("zeron://new/x"))
     }
 
     // ---------------------------------------------------------- parseRoute

@@ -1,12 +1,12 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
-import uniffi.roboco_core.ChatConfig
-import uniffi.roboco_core.CoreClient
-import uniffi.roboco_core.EngineView
-import uniffi.roboco_core.ComposerState
-import uniffi.roboco_core.SessionHandle
-import uniffi.roboco_core.SessionRow
-import uniffi.roboco_core.TranscriptView
+import uniffi.zeron_core.ChatConfig
+import uniffi.zeron_core.CoreClient
+import uniffi.zeron_core.EngineView
+import uniffi.zeron_core.ComposerState
+import uniffi.zeron_core.SessionHandle
+import uniffi.zeron_core.SessionRow
+import uniffi.zeron_core.TranscriptView
 
 /**
  * The narrow FFI surface [SessionController] needs (android-ui-parity

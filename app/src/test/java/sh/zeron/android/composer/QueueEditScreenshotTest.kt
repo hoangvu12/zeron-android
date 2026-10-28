@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -13,15 +13,15 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.QueueEditGallerySection
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.QueueEditGallerySection
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
 
 /**
  * The queue-edit goldens (android-ui-parity #83), recorded by
- * `:app:recordRoborazziDebug --tests 'sh.roboco.android.composer.QueueEditScreenshotTest'`
+ * `:app:recordRoborazziDebug --tests 'sh.zeron.android.composer.QueueEditScreenshotTest'`
  * and verified by `:app:verifyRoborazziDebug`: the gallery section's
  * stack **while editing row 1** — after `beginEdit("q1")` has resolved —
  * in light and dark. The frame shows:
@@ -79,7 +79,7 @@ class QueueEditScreenshotTest {
 
     private fun shot(appearance: Appearance) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 QueueEditGallerySection()
             }
         }

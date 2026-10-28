@@ -1,4 +1,4 @@
-package sh.roboco.android.debug
+package sh.zeron.android.debug
 
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
@@ -8,7 +8,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import sh.roboco.android.transcript.TranscriptPerf
+import sh.zeron.android.transcript.TranscriptPerf
 import java.util.Locale
 
 /**

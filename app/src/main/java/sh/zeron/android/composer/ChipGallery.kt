@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import android.content.res.Configuration
 import androidx.compose.foundation.ScrollState
@@ -23,24 +23,24 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.GalleryBackdrop
-import sh.roboco.android.design.LocalToaster
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.rememberSmoothRoundedShape
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.glass.GlassSurface
-import sh.roboco.android.design.glass.Menu
-import sh.roboco.android.design.glass.MenuItem
-import sh.roboco.android.design.glass.ProvideHazeState
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.session.ContextReading
-import sh.roboco.android.session.contextChip
-import sh.roboco.android.session.contextUsageCard
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.GalleryBackdrop
+import sh.zeron.android.design.LocalToaster
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.rememberSmoothRoundedShape
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.glass.GlassSurface
+import sh.zeron.android.design.glass.Menu
+import sh.zeron.android.design.glass.MenuItem
+import sh.zeron.android.design.glass.ProvideHazeState
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.session.ContextReading
+import sh.zeron.android.session.contextChip
+import sh.zeron.android.session.contextUsageCard
 import java.util.Locale
 
 /**
@@ -106,7 +106,7 @@ internal fun chipFixtureContextStrips(): List<List<ComposerChip>> =
 
 /** D — the new-session canvas row (`ios:Session/NewSessionViewController.swift:247-258`). */
 internal fun chipFixtureNewSession(): List<ComposerChip> = listOf(
-    ComposerChip(id = "project", title = "roboco", icon = ChipIcon.Project("roboco", 2)),
+    ComposerChip(id = "project", title = "zeron", icon = ChipIcon.Project("zeron", 2)),
     ComposerChip(id = "host", title = "Workstation", symbol = "desktopcomputer"),
     ComposerChip(id = "branch", title = "New worktree", icon = ChipIcon.Branch),
     ComposerChip(id = "model", title = "Opus 4.5", icon = ChipIcon.Brand("claude-code")),
@@ -119,7 +119,7 @@ internal fun chipFixtureNewSession(): List<ComposerChip> = listOf(
 
 @Composable
 fun ChipStripGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val toaster = LocalToaster.current
 
@@ -196,12 +196,12 @@ fun ChipStripGallerySection() {
                         Row(horizontalArrangement = Arrangement.spacedBy(ChipTokens.Spacing)) {
                             ContextChip(
                                 "Home",
-                                ChipLeading.Symbol(RobocoIcons.Home),
+                                ChipLeading.Symbol(ZeronIcons.Home),
                                 onClick = {},
                                 tint = palette.accent,
                             )
-                            ContextChip("C:", ChipLeading.Symbol(RobocoIcons.HardDrive), onClick = {})
-                            ContextChip("D:", ChipLeading.Symbol(RobocoIcons.HardDrive), onClick = {})
+                            ContextChip("C:", ChipLeading.Symbol(ZeronIcons.HardDrive), onClick = {})
+                            ContextChip("D:", ChipLeading.Symbol(ZeronIcons.HardDrive), onClick = {})
                         }
                     }
 
@@ -257,7 +257,7 @@ internal fun chipModelMenu(): Menu = Menu(
 /** One fixture: a small caption above a 26 dp-radius glass card holding the row. */
 @Composable
 private fun ChipCard(caption: String, content: @Composable () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Caption(caption, uiStyle(Face.Sans, typeScale.fixed(12f), palette.secondary))
@@ -295,7 +295,7 @@ private fun ChipStripDarkPreview() {
 @Composable
 private fun ChipStripPreview(appearance: Appearance) {
     val palette = Palette.of(appearance == Appearance.Dark)
-    RobocoTheme(appearance) {
+    ZeronTheme(appearance) {
         val typeScale = LocalTypeScale.current
         GlassMenuHost(hazeState = rememberHazeState()) {
             Column(

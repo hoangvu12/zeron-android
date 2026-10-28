@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
@@ -21,20 +21,20 @@ import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import sh.roboco.android.composer.ChipIcon
-import sh.roboco.android.composer.ChipStrip
-import sh.roboco.android.composer.ComposerChip
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.GalleryBackdrop
-import sh.roboco.android.design.GlassStage
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.glass.GlassMenuPanel
-import sh.roboco.android.design.glass.Menu
-import sh.roboco.android.design.glass.flattenLevel
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.composer.ChipIcon
+import sh.zeron.android.composer.ChipStrip
+import sh.zeron.android.composer.ComposerChip
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.GalleryBackdrop
+import sh.zeron.android.design.GlassStage
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.glass.GlassMenuPanel
+import sh.zeron.android.design.glass.Menu
+import sh.zeron.android.design.glass.flattenLevel
+import sh.zeron.android.design.uiStyle
 
 /**
  * The "New session project menus" page of the debug design gallery
@@ -42,7 +42,7 @@ import sh.roboco.android.design.uiStyle
  * `GallerySection("New session project menus", screenshotHeightDp = 1400)
  * { ProjectMenusGallerySection() }` (slug `new_session_project_menus`).
  *
- * The Roboco rename of upstream's demo data (`crates/client/src/demo/
+ * The Zeron rename of upstream's demo data (`crates/client/src/demo/
  * fixtures.rs:238-355`): three engines and five spaces, two of them
  * clones of the same repository on different engines — the grouping the
  * iOS UI test pins. Five **static panels** (P1, P2, R1, R2, R3 — the
@@ -66,8 +66,8 @@ fun ProjectMenusGallerySection() {
 // The fixture (the ticket's demo-data rename)
 // ---------------------------------------------------------------------
 
-/** `repo:github.com/hoangvu12/roboco` — the two clones' shared group key. */
-private const val RobocoRepo = "repo:github.com/hoangvu12/roboco"
+/** `repo:github.com/hoangvu12/zeron-android` — the two clones' shared group key. */
+private const val ZeronRepo = "repo:github.com/hoangvu12/zeron-android"
 
 private val FixtureHosts = listOf(
     HostOption("e2:dev-vps", "hetzner-01", online = true),
@@ -83,14 +83,14 @@ private val FixtureProjects = listOf(
         groupKey = "e3:space-blog", groupName = "blog", colorIndex = 6,
     ),
     ProjectOption(
-        id = "e1:space-roboco", name = "roboco", path = "/Users/dev/roboco",
+        id = "e1:space-zeron", name = "zeron", path = "/Users/dev/zeron",
         device = "e1:dev-mac", deviceName = "MacBook Pro", online = true, git = true,
-        groupKey = RobocoRepo, groupName = "roboco", colorIndex = 5,
+        groupKey = ZeronRepo, groupName = "zeron", colorIndex = 5,
     ),
     ProjectOption(
-        id = "e2:space-roboco-vps", name = "roboco", path = "/srv/src/roboco",
+        id = "e2:space-zeron-vps", name = "zeron", path = "/srv/src/zeron",
         device = "e2:dev-vps", deviceName = "hetzner-01", online = true, git = true,
-        groupKey = RobocoRepo, groupName = "roboco", colorIndex = 5,
+        groupKey = ZeronRepo, groupName = "zeron", colorIndex = 5,
     ),
     ProjectOption(
         id = "e2:space-edge", name = "edge", path = "/srv/deploys/edge",
@@ -98,17 +98,17 @@ private val FixtureProjects = listOf(
         groupKey = "e2:space-edge", groupName = "edge", colorIndex = 0,
     ),
     ProjectOption(
-        id = "e1:space-mobile", name = "Roboco Mobile", path = "/Users/dev/roboco-mobile",
+        id = "e1:space-mobile", name = "Zeron Mobile", path = "/Users/dev/zeron-mobile",
         device = "e1:dev-mac", deviceName = "MacBook Pro", online = true, git = true,
-        groupKey = "e1:space-mobile", groupName = "Roboco Mobile", colorIndex = 2,
+        groupKey = "e1:space-mobile", groupName = "Zeron Mobile", colorIndex = 2,
     ),
 )
 
 /** R2's extra clone: a third checkout of the repository, on the same engine as one. */
 private val FixtureFork = ProjectOption(
-    id = "e1:space-roboco-fork", name = "roboco-fork", path = "/Users/dev/src/roboco-fork",
+    id = "e1:space-zeron-fork", name = "zeron-fork", path = "/Users/dev/src/zeron-fork",
     device = "e1:dev-mac", deviceName = "MacBook Pro", online = true, git = true,
-    groupKey = RobocoRepo, groupName = "roboco", colorIndex = 5,
+    groupKey = ZeronRepo, groupName = "zeron", colorIndex = 5,
 )
 
 /** The live demo's fake created space ("New Project…" after 600 ms). */
@@ -137,7 +137,7 @@ internal fun ProjectMenusStaticPanels() {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         // Stage heights leave room for the font-scale-1.3 golden (the
         // panels grow ~30% taller; see ProjectMenusScreenshotTest).
-        PanelStage("P1 — project menu, a checkout picked (roboco checked)", projectMenuP1(), 500.dp)
+        PanelStage("P1 — project menu, a checkout picked (zeron checked)", projectMenuP1(), 500.dp)
         PanelStage("P2 — project menu, no project (No Project… checked)", projectMenuP2(), 500.dp)
         PanelStage("R1 — run on, the repository's two checkouts", runOnMenuR1(), 240.dp)
         PanelStage("R2 — run on, a third clone on the same engine (paths)", runOnMenuR2(), 310.dp)
@@ -145,10 +145,10 @@ internal fun ProjectMenusStaticPanels() {
     }
 }
 
-/** P1: the roboco group is checked (the checkmark replaces its tile). */
+/** P1: the zeron group is checked (the checkmark replaces its tile). */
 internal fun projectMenuP1(): Menu = buildProjectMenu(
     projects = FixtureProjects,
-    draft = NewSessionDraft(projectId = "e1:space-roboco"),
+    draft = NewSessionDraft(projectId = "e1:space-zeron"),
     onPickGroup = {},
     onNoProject = {},
     onNewProject = {},
@@ -163,20 +163,20 @@ internal fun projectMenuP2(): Menu = buildProjectMenu(
     onNewProject = {},
 )
 
-/** R1: the roboco group's two checkouts, one per engine. */
+/** R1: the zeron group's two checkouts, one per engine. */
 internal fun runOnMenuR1(): Menu = buildRunOnMenu(
-    checkouts = groupCheckouts(FixtureProjects, RobocoRepo),
+    checkouts = groupCheckouts(FixtureProjects, ZeronRepo),
     hosts = FixtureHosts,
-    draft = NewSessionDraft(projectId = "e1:space-roboco"),
+    draft = NewSessionDraft(projectId = "e1:space-zeron"),
     onPickCheckout = {},
     onPickHost = {},
 )
 
 /** R2: with the extra clone — both MacBook Pro rows show their paths. */
 internal fun runOnMenuR2(): Menu = buildRunOnMenu(
-    checkouts = groupCheckouts(FixtureProjects + FixtureFork, RobocoRepo),
+    checkouts = groupCheckouts(FixtureProjects + FixtureFork, ZeronRepo),
     hosts = FixtureHosts,
-    draft = NewSessionDraft(projectId = "e1:space-roboco"),
+    draft = NewSessionDraft(projectId = "e1:space-zeron"),
     onPickCheckout = {},
     onPickHost = {},
 )
@@ -193,7 +193,7 @@ internal fun runOnMenuR3(): Menu = buildRunOnMenu(
 /** One captioned menu panel over the busy backdrop. */
 @Composable
 private fun PanelStage(caption: String, menu: Menu, height: Dp) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         BasicText(caption, style = uiStyle(Face.SansMedium, typeScale.fixed(12f), palette.secondary))
@@ -229,10 +229,10 @@ private fun PanelStage(caption: String, menu: Menu, height: Dp) {
  */
 @Composable
 private fun ProjectMenusLiveDemo() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val scope = rememberCoroutineScope()
-    var draft by remember { mutableStateOf(NewSessionDraft(projectId = "e1:space-roboco")) }
+    var draft by remember { mutableStateOf(NewSessionDraft(projectId = "e1:space-zeron")) }
     var projects by remember { mutableStateOf(FixtureProjects) }
     var note by remember { mutableStateOf("Tap a chip — the menus are the page's real content.") }
 
@@ -311,7 +311,7 @@ private fun ProjectMenusLiveDemo() {
 
 @Composable
 private fun ProjectMenusPanelsPreviewBody(appearance: Appearance) {
-    RobocoTheme(appearance) {
+    ZeronTheme(appearance) {
         GlassMenuHost(hazeState = rememberHazeState()) {
             Row(
                 Modifier.height(470.dp),

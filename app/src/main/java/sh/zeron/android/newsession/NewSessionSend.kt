@@ -1,11 +1,11 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
-import sh.roboco.android.composer.SendResult
-import sh.roboco.android.composer.StagedImage
-import sh.roboco.android.design.Alerts
-import sh.roboco.android.shell.DraftHandoff
+import sh.zeron.android.composer.SendResult
+import sh.zeron.android.composer.StagedImage
+import sh.zeron.android.design.Alerts
+import sh.zeron.android.shell.DraftHandoff
 
 /**
  * The page-state seam the send handler drives (android-ui-parity #94)
@@ -53,7 +53,7 @@ class ModelNewSessionPage(private val m: NewSessionModel) : NewSessionPage {
  * capture the draft handoff, and call `onCreated`.
  *
  * The whole sequence runs inside one [NonCancellable] block (the
- * Roboco ADAPT — iOS is synchronous and cannot be interrupted): a
+ * Zeron ADAPT — iOS is synchronous and cannot be interrupted): a
  * sheet dismissed mid-call still finishes the send and opens the chat;
  * the capture then returns null (the page is detached) and
  * `onCreated(chatId, null)` opens it plainly. Nothing observable

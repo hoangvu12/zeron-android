@@ -1,10 +1,10 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.core.GeistMetrics
-import sh.roboco.android.design.roundHalfAway
+import sh.zeron.android.core.Face
+import sh.zeron.android.core.GeistMetrics
+import sh.zeron.android.design.roundHalfAway
 import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min

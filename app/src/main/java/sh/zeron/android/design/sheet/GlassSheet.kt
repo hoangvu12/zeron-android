@@ -1,4 +1,4 @@
-package sh.roboco.android.design.sheet
+package sh.zeron.android.design.sheet
 
 import android.content.res.Configuration
 import androidx.activity.compose.PredictiveBackHandler
@@ -77,15 +77,15 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.GalleryBackdrop
-import sh.roboco.android.design.IosSpring
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.ProvideHazeState
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.GalleryBackdrop
+import sh.zeron.android.design.IosSpring
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.ProvideHazeState
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.uiStyle
 
 /**
  * The detents of a sheet (android-ui-parity #17).
@@ -256,7 +256,7 @@ fun GlassSheet(
     glass: (@Composable GlassSheetScope.() -> Unit)? = null,
     content: @Composable GlassSheetScope.(bottomInset: Dp) -> Unit,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val density = LocalDensity.current
     val scope = rememberCoroutineScope()
     val currentOnDismiss by rememberUpdatedState(onDismiss)
@@ -350,7 +350,7 @@ fun GlassSheet(
         // implementations agree). The scrim consumes every gesture in
         // both cases, so nothing behind the sheet is ever reachable.
         val scrimAlpha =
-            if (RobocoTheme.isDark) GlassSheetDefaults.ScrimAlphaDark else GlassSheetDefaults.ScrimAlphaLight
+            if (ZeronTheme.isDark) GlassSheetDefaults.ScrimAlphaDark else GlassSheetDefaults.ScrimAlphaLight
         if (scrim) {
             Box(
                 Modifier
@@ -675,7 +675,7 @@ private fun SheetPreviewContent(
     grabber: Boolean,
     header: @Composable GlassSheetScope.() -> Unit,
 ) {
-    RobocoTheme(appearance) {
+    ZeronTheme(appearance) {
         Box(Modifier.fillMaxSize()) {
             GalleryBackdrop(Modifier.fillMaxSize())
             GlassSheet(
@@ -696,9 +696,9 @@ private fun SheetPreviewContent(
 @Composable
 private fun SheetPreviewText() {
     val typeScale = LocalTypeScale.current
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     BasicText(
-        "$ cd ~/engines/roboco\n$ roboco engine start\nlistening on ws://0.0.0.0:8675\n" +
+        "$ cd ~/engines/zeron\n$ zeron engine start\nlistening on ws://0.0.0.0:8675\n" +
             "paired: macbook-pro\n$ ",
         Modifier.padding(16.dp),
         style = uiStyle(Face.Mono, typeScale.bodyScaled(13f), palette.text),

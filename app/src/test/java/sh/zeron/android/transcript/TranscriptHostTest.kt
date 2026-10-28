@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.content.Context
 import android.os.Looper
@@ -35,14 +35,14 @@ import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import org.robolectric.shadows.ShadowChoreographer
-import sh.roboco.android.core.TextEngine
-import sh.roboco.android.core.UniffiSandbox
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
-import uniffi.roboco_core.ColorRole
-import uniffi.roboco_core.DebugEntry
-import uniffi.roboco_core.RowKind
+import sh.zeron.android.core.TextEngine
+import sh.zeron.android.core.UniffiSandbox
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
+import uniffi.zeron_core.ColorRole
+import uniffi.zeron_core.DebugEntry
+import uniffi.zeron_core.RowKind
 
 /**
  * The virtualized host against the real core (ticket 65; the same JNA
@@ -112,8 +112,8 @@ class TranscriptHostTest {
 
     private fun host(state: TranscriptState, actions: TranscriptActions = TranscriptActions()) {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
-                Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+            ZeronTheme(Appearance.Light) {
+                Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                     TranscriptHost(state, actions, Modifier.fillMaxSize())
                 }
             }
@@ -377,8 +377,8 @@ class TranscriptHostTest {
         var dark by mutableStateOf(false)
         try {
             compose.setContent {
-                RobocoTheme(if (dark) Appearance.Dark else Appearance.Light) {
-                    Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+                ZeronTheme(if (dark) Appearance.Dark else Appearance.Light) {
+                    Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                         TranscriptHost(state, TranscriptActions(), Modifier.fillMaxSize())
                     }
                 }

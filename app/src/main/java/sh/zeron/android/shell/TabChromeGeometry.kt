@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.util.lerp

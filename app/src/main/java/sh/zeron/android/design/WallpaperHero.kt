@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.graphics.BlurMaskFilter
 import android.graphics.PorterDuff
@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.dp
 import kotlin.math.max
 import kotlin.math.min
 import kotlinx.coroutines.launch
-import sh.roboco.android.core.WallpaperStore
+import sh.zeron.android.core.WallpaperStore
 
 /**
  * ios:Design/Wallpaper.swift:189-286 (`WallpaperView`): the wallpaper hero

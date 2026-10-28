@@ -1,4 +1,4 @@
-package sh.roboco.android.accounts
+package sh.zeron.android.accounts
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -47,45 +47,45 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import android.content.ClipData
 import android.content.ClipboardManager
-import sh.roboco.android.RobocoApplication
-import sh.roboco.android.composer.openInCustomTab
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.CapsuleShape
-import sh.roboco.android.design.GroupedAccessory
-import sh.roboco.android.design.GroupedFooter
-import sh.roboco.android.design.GroupedHeader
-import sh.roboco.android.design.GroupedPosition
-import sh.roboco.android.design.GroupedRow
-import sh.roboco.android.design.RobocoSwitch
-import sh.roboco.android.design.GroupedRowContainer
-import sh.roboco.android.design.HarnessMark
-import sh.roboco.android.design.Icon
-import sh.roboco.android.design.LiftHighlight
-import sh.roboco.android.design.LocalActionSheet
-import sh.roboco.android.design.LocalAlerts
-import sh.roboco.android.design.LocalBottomChrome
-import sh.roboco.android.design.LocalToaster
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.PullToRefreshState
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.SymbolWeight
-import sh.roboco.android.design.contextMenu
-import sh.roboco.android.design.rememberContextMenuLiftState
-import sh.roboco.android.design.rememberPullToRefreshState
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.design.glass.ActivitySpinner
-import sh.roboco.android.design.glass.GlassCircleButton
-import sh.roboco.android.design.glass.Menu
-import sh.roboco.android.design.glass.MenuIcon
-import sh.roboco.android.design.glass.MenuItem
-import sh.roboco.android.design.glass.rememberGlassMenuState
-import sh.roboco.android.shell.LargeTitleScaffold
-import uniffi.roboco_core.AgentAccount
-import uniffi.roboco_core.AgentAccountsSnapshot
-import uniffi.roboco_core.AgentUsageWindow
-import uniffi.roboco_core.DeviceView
-import uniffi.roboco_core.WorkspaceSnapshot
+import sh.zeron.android.ZeronApplication
+import sh.zeron.android.composer.openInCustomTab
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.CapsuleShape
+import sh.zeron.android.design.GroupedAccessory
+import sh.zeron.android.design.GroupedFooter
+import sh.zeron.android.design.GroupedHeader
+import sh.zeron.android.design.GroupedPosition
+import sh.zeron.android.design.GroupedRow
+import sh.zeron.android.design.ZeronSwitch
+import sh.zeron.android.design.GroupedRowContainer
+import sh.zeron.android.design.HarnessMark
+import sh.zeron.android.design.Icon
+import sh.zeron.android.design.LiftHighlight
+import sh.zeron.android.design.LocalActionSheet
+import sh.zeron.android.design.LocalAlerts
+import sh.zeron.android.design.LocalBottomChrome
+import sh.zeron.android.design.LocalToaster
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.PullToRefreshState
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.SymbolWeight
+import sh.zeron.android.design.contextMenu
+import sh.zeron.android.design.rememberContextMenuLiftState
+import sh.zeron.android.design.rememberPullToRefreshState
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.design.glass.ActivitySpinner
+import sh.zeron.android.design.glass.GlassCircleButton
+import sh.zeron.android.design.glass.Menu
+import sh.zeron.android.design.glass.MenuIcon
+import sh.zeron.android.design.glass.MenuItem
+import sh.zeron.android.design.glass.rememberGlassMenuState
+import sh.zeron.android.shell.LargeTitleScaffold
+import uniffi.zeron_core.AgentAccount
+import uniffi.zeron_core.AgentAccountsSnapshot
+import uniffi.zeron_core.AgentUsageWindow
+import uniffi.zeron_core.DeviceView
+import uniffi.zeron_core.WorkspaceSnapshot
 
 /**
  * The Accounts & Usage page (android-next#05) — the port of PR #578's
@@ -121,8 +121,8 @@ fun AgentAccountsScreen(
     signIn: AccountSignIn? = null,
 ) {
     val context = LocalContext.current
-    val dark = RobocoTheme.isDark
-    val app = context.applicationContext as? RobocoApplication
+    val dark = ZeronTheme.isDark
+    val app = context.applicationContext as? ZeronApplication
     val devicesFlow = workspace ?: app?.workspaceFeed?.snapshot
     val snapshot by (devicesFlow ?: remember { MutableStateFlow<WorkspaceSnapshot?>(null) }).collectAsState()
     val devices = remember(snapshot) {
@@ -259,7 +259,7 @@ private fun DevicePicker(devices: List<DeviceView>, model: AgentAccountsModel) {
     val menu = rememberGlassMenuState()
     var bounds by remember { mutableStateOf(Rect.Zero) }
     GlassCircleButton(
-        icon = RobocoIcons.Desktopcomputer,
+        icon = ZeronIcons.Desktopcomputer,
         contentDescription = "Computer",
         onClick = {
             val selected = model.deviceId
@@ -379,7 +379,7 @@ internal fun LazyListScope.agentAccountsPage(
                 GroupedFooter(
                     group.warnings.joinToString("\n"),
                     Modifier.testTag("accounts-${group.harness}-warning"),
-                    color = RobocoTheme.palette.warning,
+                    color = ZeronTheme.palette.warning,
                 )
             }
         }
@@ -434,7 +434,7 @@ internal fun LazyListScope.agentAccountsPage(
  */
 @Composable
 internal fun HarnessHeader(harness: String, label: String) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Row(
         Modifier
@@ -461,7 +461,7 @@ internal fun HarnessHeader(harness: String, label: String) {
  * The harness's display name (the core's static label helper — a pure
  * catalog lookup, like the new-session chips' `ChipLabels.harnessLabel`).
  */
-internal fun harnessLabelOf(harness: String): String = uniffi.roboco_core.harnessLabel(harness)
+internal fun harnessLabelOf(harness: String): String = uniffi.zeron_core.harnessLabel(harness)
 
 /**
  * One agent of the computer (wave-10 40, iOS's Providers computer row):
@@ -484,7 +484,7 @@ internal fun AgentToggleRowView(
         accessories = listOf(
             GroupedAccessory.Custom {
                 // A locked or busy switch refuses the flip without its haptic.
-                RobocoSwitch(
+                ZeronSwitch(
                     checked = agent.on,
                     onCheckedChange = onChange,
                     modifier = if (agent.toggleEnabled && !busy) Modifier else Modifier.alpha(0.5f),
@@ -510,7 +510,7 @@ internal fun AddAccountRowView(
     enabled: Boolean,
     onClick: () -> Unit,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     GroupedRowContainer(
         position = position,
@@ -520,7 +520,7 @@ internal fun AddAccountRowView(
         Spacer(Modifier.width(16.dp))
         Box(Modifier.size(40.dp), contentAlignment = Alignment.Center) {
             Icon(
-                RobocoIcons.Plus,
+                ZeronIcons.Plus,
                 if (enabled) palette.secondary else palette.tertiary,
                 14f,
                 SymbolWeight.Semibold,
@@ -547,7 +547,7 @@ internal fun AddAccountRowView(
  */
 @Composable
 internal fun SignInWaitingRow(state: SignInState, position: GroupedPosition, onCancel: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     GroupedRowContainer(
         position = position,
@@ -581,7 +581,7 @@ internal fun SignInWaitingRow(state: SignInState, position: GroupedPosition, onC
  */
 @Composable
 internal fun AccountsStatusRow(message: String) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     GroupedRowContainer(
         position = GroupedPosition.Single,
@@ -623,7 +623,7 @@ internal fun AgentAccountRow(
     model: AgentAccountsModel,
     modifier: Modifier = Modifier,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val liftState = rememberContextMenuLiftState()
     val clipboard = LocalClipboardManager.current
@@ -675,7 +675,7 @@ internal fun AgentAccountRow(
                     Spacer(Modifier.width(16.dp))
                 } else if (account.active) {
                     Icon(
-                        RobocoIcons.Checkmark,
+                        ZeronIcons.Checkmark,
                         palette.accent,
                         17f,
                         SymbolWeight.Semibold,
@@ -722,7 +722,7 @@ internal fun AgentAccountRow(
  */
 @Composable
 private fun Avatar(account: AgentAccount) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Box(Modifier.size(40.dp), contentAlignment = Alignment.Center) {
         Box(
@@ -786,7 +786,7 @@ private fun accountContextMenu(
             add(
                 MenuItem(
                     title = AccountsCopy.UseThisAccount,
-                    icon = MenuIcon.Symbol(RobocoIcons.CheckmarkCircle),
+                    icon = MenuIcon.Symbol(ZeronIcons.CheckmarkCircle),
                     testTag = "account-menu-use",
                 ) { model.switchTo(account) },
             )
@@ -795,7 +795,7 @@ private fun accountContextMenu(
             add(
                 MenuItem(
                     title = AccountsCopy.CopyEmail,
-                    icon = MenuIcon.Symbol(RobocoIcons.DocOnDoc),
+                    icon = MenuIcon.Symbol(ZeronIcons.DocOnDoc),
                     testTag = "account-menu-copy",
                 ) { copyEmail(email) },
             )
@@ -804,7 +804,7 @@ private fun accountContextMenu(
             add(
                 MenuItem(
                     title = AccountsCopy.RemoveAccountDots,
-                    icon = MenuIcon.Symbol(RobocoIcons.Trash),
+                    icon = MenuIcon.Symbol(ZeronIcons.Trash),
                     destructive = true,
                     testTag = "account-menu-remove",
                 ) { model.onRemove(account) },
@@ -830,7 +830,7 @@ internal fun UsageMeter(
     locale: java.util.Locale = java.util.Locale.getDefault(),
     zone: java.time.ZoneId = java.time.ZoneId.systemDefault(),
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val fraction = clampedFraction(window.usedFraction)
     val level = usageLevelOf(fraction)
@@ -873,7 +873,7 @@ internal fun UsageMeter(
  */
 @Composable
 internal fun MiniUsageView(window: AgentUsageWindow) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val fraction = clampedFraction(window.usedFraction)
     val level = usageLevelOf(fraction)
@@ -907,7 +907,7 @@ private fun MeterTrack(
     minWidthFraction: Float,
     width: androidx.compose.ui.unit.Dp? = null,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     Box(
         Modifier
             .then(if (width != null) Modifier.width(width) else Modifier.fillMaxWidth())
@@ -928,9 +928,9 @@ private fun MeterTrack(
 /** The level's paint (`Palette.accent` / `warning` / `danger`). */
 @Composable
 internal fun usageLevelColor(level: UsageLevel): Color = when (level) {
-    UsageLevel.Normal -> RobocoTheme.palette.accent
-    UsageLevel.Warning -> RobocoTheme.palette.warning
-    UsageLevel.Critical -> RobocoTheme.palette.danger
+    UsageLevel.Normal -> ZeronTheme.palette.accent
+    UsageLevel.Warning -> ZeronTheme.palette.warning
+    UsageLevel.Critical -> ZeronTheme.palette.danger
 }
 
 /**

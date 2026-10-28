@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -6,10 +6,10 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import sh.roboco.android.composer.ChipIcon
-import sh.roboco.android.composer.ChipMenuProvider
-import sh.roboco.android.composer.ChipTint
-import sh.roboco.android.composer.ComposerChip
+import sh.zeron.android.composer.ChipIcon
+import sh.zeron.android.composer.ChipMenuProvider
+import sh.zeron.android.composer.ChipTint
+import sh.zeron.android.composer.ComposerChip
 
 /**
  * [newSessionChips] + [String.swiftCapitalized] + [newSessionChipMenus]
@@ -39,14 +39,14 @@ class NewSessionChipsTest {
     /** The ticket's fixture A project (`P`). */
     private val p = ProjectOption(
         id = "p1",
-        name = "roboco",
-        path = "/srv/roboco",
+        name = "zeron",
+        path = "/srv/zeron",
         device = "d1",
         deviceName = "Workstation",
         online = true,
         git = true,
         groupKey = "repo:r",
-        groupName = "roboco",
+        groupName = "zeron",
         colorIndex = 2,
     )
 
@@ -95,11 +95,11 @@ class NewSessionChipsTest {
         val out = chips(NewSessionDraft(), project = p, models = listOf(c1, c2, x1))
         assertEquals(listOf("project", "host", "branch", "model", "effort"), out.map { it.id })
         assertEquals(
-            listOf("roboco", "Workstation", "Current branch", "Fable 5.1", "Xhigh"),
+            listOf("zeron", "Workstation", "Current branch", "Fable 5.1", "Xhigh"),
             out.map { it.title },
         )
         assertEquals(
-            listOf(ChipIcon.Project("roboco", 2), null, ChipIcon.Branch, ChipIcon.Brand("claude-code"), null),
+            listOf(ChipIcon.Project("zeron", 2), null, ChipIcon.Branch, ChipIcon.Brand("claude-code"), null),
             out.map { it.icon },
         )
         assertEquals(
@@ -111,10 +111,10 @@ class NewSessionChipsTest {
 
     @Test
     fun theProjectChipUsesTheGroupNameNotTheCheckoutName() {
-        val clone = p.copy(name = "roboco-clone")
+        val clone = p.copy(name = "zeron-clone")
         val out = chips(NewSessionDraft(projectId = "p1"), project = clone)
-        assertEquals("roboco", out[0].title)
-        assertEquals(ChipIcon.Project("roboco", 2), out[0].icon)
+        assertEquals("zeron", out[0].title)
+        assertEquals(ChipIcon.Project("zeron", 2), out[0].icon)
     }
 
     @Test

@@ -1,15 +1,15 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import androidx.compose.runtime.Immutable
-import uniffi.roboco_core.EngineState
-import uniffi.roboco_core.EngineView
-import uniffi.roboco_core.ParkReason
-import sh.roboco.android.pairing.tailcatAddressLabel
+import uniffi.zeron_core.EngineState
+import uniffi.zeron_core.EngineView
+import uniffi.zeron_core.ParkReason
+import sh.zeron.android.pairing.tailcatAddressLabel
 
 /**
  * The Engine detail page's pure model (android-ui-parity #140): the copy
  * table, the timings, the footer/row model of
- * [EngineDetailScreen][sh.roboco.android.settings.EngineDetailScreen] and
+ * [EngineDetailScreen][sh.zeron.android.settings.EngineDetailScreen] and
  * the pure functions behind its value cells — the port of the web's
  * `devices.ts` helpers (`formatLastSeen`, `platformLabel`, `shortId`) plus
  * the state→label mapping shared with ticket 102's Devices rows.

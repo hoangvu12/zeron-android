@@ -1,6 +1,6 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
-import sh.roboco.android.core.GeistMetrics
+import sh.zeron.android.core.GeistMetrics
 
 /**
  * [SessionHeader]'s pure geometry (android-ui-parity #52) — dp as `Float`,

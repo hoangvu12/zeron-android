@@ -1,4 +1,4 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -9,7 +9,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import sh.roboco.android.R
+import sh.zeron.android.R
 
 /**
  * [InboundPairing] (android-ui-parity #139) — behaviour A and table D
@@ -35,7 +35,7 @@ class InboundPairingTest {
         val accepted = mutableListOf<String>()
         val inbound = newInbound(control, logs, accepts = { accepted += it; StandInAccepts(it) })
 
-        inbound.onPairLink("roboco://pair#url=http%3A%2F%2Fh%2Fpair%23token%3Dx")
+        inbound.onPairLink("zeron://pair#url=http%3A%2F%2Fh%2Fpair%23token%3Dx")
         advanceUntilIdle()
 
         assertEquals(listOf("dismiss", "frame", "open"), control.ops)
@@ -52,7 +52,7 @@ class InboundPairingTest {
         val logs = mutableListOf<String>()
         val inbound = newInbound(control, logs)
 
-        inbound.onPairLink("roboco://pair#url=http%3A%2F%2Fh%2Fpair%23token%3Dx")
+        inbound.onPairLink("zeron://pair#url=http%3A%2F%2Fh%2Fpair%23token%3Dx")
         advanceUntilIdle()
 
         assertEquals(listOf("open"), control.ops)
@@ -67,7 +67,7 @@ class InboundPairingTest {
         val logs = mutableListOf<String>()
         val inbound = newInbound(control, logs)
 
-        inbound.onPairLink("roboco://pair#url=http%3A%2F%2Fh%2Fpair%23token%3Dx")
+        inbound.onPairLink("zeron://pair#url=http%3A%2F%2Fh%2Fpair%23token%3Dx")
         advanceUntilIdle()
 
         assertTrue(control.ops.isEmpty())
@@ -82,7 +82,7 @@ class InboundPairingTest {
         val logs = mutableListOf<String>()
         val inbound = newInbound(control, logs)
 
-        inbound.onPairLink("roboco://pair#url=http%3A%2F%2Fh%2Fpair%23token%3Dx")
+        inbound.onPairLink("zeron://pair#url=http%3A%2F%2Fh%2Fpair%23token%3Dx")
         advanceUntilIdle()
 
         // The dismissal and the frame still happened; the open did not.
@@ -100,7 +100,7 @@ class InboundPairingTest {
         val accepted = mutableListOf<String>()
         val inbound = newInbound(control, logs, accepts = { accepted += it; StandInAccepts(it) })
 
-        inbound.onPairLink("roboco://pair")
+        inbound.onPairLink("zeron://pair")
         advanceUntilIdle()
 
         assertTrue(accepted.isEmpty())
@@ -115,7 +115,7 @@ class InboundPairingTest {
         val accepted = mutableListOf<String>()
         val inbound = newInbound(control, logs, accepts = { accepted += it; StandInAccepts(it) })
 
-        inbound.onPairLink("roboco://pair#url=hello")
+        inbound.onPairLink("zeron://pair#url=hello")
         advanceUntilIdle()
 
         assertEquals(listOf("hello"), accepted)
@@ -131,9 +131,9 @@ class InboundPairingTest {
         val inbound = newInbound(control, logs)
 
         // Every logging path this ticket owns.
-        inbound.onPairLink("roboco://pair")
-        inbound.onPairLink("roboco://pair#url=hello")
-        inbound.onPairLink("roboco://pair#url=http%3A%2F%2Fh%2Fpair%23token%3Dx")
+        inbound.onPairLink("zeron://pair")
+        inbound.onPairLink("zeron://pair#url=hello")
+        inbound.onPairLink("zeron://pair#url=http%3A%2F%2Fh%2Fpair%23token%3Dx")
         advanceUntilIdle()
 
         assertEquals(

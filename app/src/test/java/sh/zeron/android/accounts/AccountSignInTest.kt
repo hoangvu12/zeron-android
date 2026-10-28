@@ -1,4 +1,4 @@
-package sh.roboco.android.accounts
+package sh.zeron.android.accounts
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -11,20 +11,20 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import sh.roboco.android.design.ActionSheetModel
-import sh.roboco.android.design.ActionSheetPresenter
-import sh.roboco.android.design.AlertButtonRole
-import sh.roboco.android.design.Alerts
-import sh.roboco.android.design.RobocoAlert
-import sh.roboco.android.design.Toaster
-import uniffi.roboco_core.AgentAccount
-import uniffi.roboco_core.AgentAccountsSnapshot
-import uniffi.roboco_core.AgentLoginRules
-import uniffi.roboco_core.CoreException
-import uniffi.roboco_core.DeviceLoginInfo
-import uniffi.roboco_core.DeviceLoginPollInfo
-import uniffi.roboco_core.HarnessInfo
-import uniffi.roboco_core.LoginOptionInfo
+import sh.zeron.android.design.ActionSheetModel
+import sh.zeron.android.design.ActionSheetPresenter
+import sh.zeron.android.design.AlertButtonRole
+import sh.zeron.android.design.Alerts
+import sh.zeron.android.design.ZeronAlert
+import sh.zeron.android.design.Toaster
+import uniffi.zeron_core.AgentAccount
+import uniffi.zeron_core.AgentAccountsSnapshot
+import uniffi.zeron_core.AgentLoginRules
+import uniffi.zeron_core.CoreException
+import uniffi.zeron_core.DeviceLoginInfo
+import uniffi.zeron_core.DeviceLoginPollInfo
+import uniffi.zeron_core.HarnessInfo
+import uniffi.zeron_core.LoginOptionInfo
 
 /**
  * Wave-10 34's "Add account" (upstream #966's iPhone `DeviceSignIn`) on
@@ -94,12 +94,12 @@ class AccountSignInTest {
     }
 
     private class FakeAlerts : Alerts {
-        val shown = mutableListOf<RobocoAlert>()
-        override fun show(alert: RobocoAlert) {
+        val shown = mutableListOf<ZeronAlert>()
+        override fun show(alert: ZeronAlert) {
             shown += alert
         }
         var dismissed = 0
-        override fun updateCurrent(alert: RobocoAlert) {}
+        override fun updateCurrent(alert: ZeronAlert) {}
         override fun dismissAll() {
             dismissed++
         }
@@ -422,7 +422,7 @@ class AccountSignInTest {
         assertTrue("one at a time", !r.model.startFirstLogin("grok"))
         r.model.cancelSignIn()
         advanceUntilIdle()
-        assertTrue("an agent Roboco doesn't sign in to starts nothing", !r.model.startFirstLogin("mock"))
+        assertTrue("an agent Zeron doesn't sign in to starts nothing", !r.model.startFirstLogin("mock"))
     }
 
     @Test

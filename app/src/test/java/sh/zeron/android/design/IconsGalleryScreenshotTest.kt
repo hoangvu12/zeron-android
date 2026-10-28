@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
@@ -33,7 +33,7 @@ class IconsGalleryScreenshotTest {
     @Config(sdk = [36], qualifiers = "w520dp-h2000dp-mdpi")
     fun iconsGalleryLight() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 IconsGallerySection()
             }
         }
@@ -44,7 +44,7 @@ class IconsGalleryScreenshotTest {
     @Config(sdk = [36], qualifiers = "w520dp-h2000dp-mdpi")
     fun iconsGalleryDark() {
         compose.setContent {
-            RobocoTheme(Appearance.Dark) {
+            ZeronTheme(Appearance.Dark) {
                 IconsGallerySection()
             }
         }

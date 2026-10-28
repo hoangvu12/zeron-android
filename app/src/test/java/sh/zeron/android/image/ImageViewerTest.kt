@@ -1,4 +1,4 @@
-package sh.roboco.android.image
+package sh.zeron.android.image
 
 import android.graphics.Bitmap
 import android.provider.Settings
@@ -62,11 +62,11 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.rememberSmoothRoundedShape
-import sh.roboco.android.transcript.widgets.imageTileRadius
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.rememberSmoothRoundedShape
+import sh.zeron.android.transcript.widgets.imageTileRadius
 
 /**
  * Ticket 125's viewer behaviour (Robolectric, `createAndroidComposeRule`,
@@ -113,10 +113,10 @@ class ImageViewerTest {
     private fun host(tileVisible: () -> Boolean = { true }) {
         state = ImageViewerState()
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 ImageViewerHost(state) {
                     BackHandler(enabled = true) { underPops++ }
-                    Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+                    Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                         if (tileVisible()) FixtureTile(state)
                     }
                 }
@@ -648,7 +648,7 @@ class ImageViewerTest {
 
     @Test
     fun anAnimatorScaleOfZeroSnapsTheCrossFadeOpen() {
-        // RobocoTheme installs ReduceMotion, which reads the animator scale:
+        // ZeronTheme installs ReduceMotion, which reads the animator scale:
         // 0 counts as reduced, so the open is the cross-fade. On a device the
         // window recomposer's MotionDurationScale (0) then snaps the tween;
         // the compose-test recomposer installs no MotionDurationScale (scale

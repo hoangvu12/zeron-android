@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -6,11 +6,11 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
-import sh.roboco.android.composer.ChipIcon
-import sh.roboco.android.composer.ChipMenuProvider
-import sh.roboco.android.composer.ChipTint
-import sh.roboco.android.composer.ComposerChip
-import sh.roboco.android.composer.ComposerController
+import sh.zeron.android.composer.ChipIcon
+import sh.zeron.android.composer.ChipMenuProvider
+import sh.zeron.android.composer.ChipTint
+import sh.zeron.android.composer.ComposerChip
+import sh.zeron.android.composer.ComposerController
 
 /**
  * The New Session page's chip ids (android-ui-parity #109) — the contract
@@ -64,13 +64,13 @@ interface ChipLabels {
 /** The production [ChipLabels] over the core's static catalog functions. */
 object CoreChipLabels : ChipLabels {
     override fun modelLabel(harness: String, model: String): String =
-        uniffi.roboco_core.modelLabel(harness, model)
+        uniffi.zeron_core.modelLabel(harness, model)
 
     override fun firstFallbackModelLabel(harness: String): String? =
-        uniffi.roboco_core.fallbackModels(harness).firstOrNull()?.label
+        uniffi.zeron_core.fallbackModels(harness).firstOrNull()?.label
 
     override fun harnessLabel(harness: String): String =
-        uniffi.roboco_core.harnessLabel(harness)
+        uniffi.zeron_core.harnessLabel(harness)
 }
 
 /**
@@ -100,9 +100,9 @@ object CoreChipLabels : ChipLabels {
  * - the effort title goes through [swiftCapitalized] (Foundation's
  *   `capitalized`: `Xhigh`, not the core's `X-High`).
  *
- * The Roboco addition: the `host` chip's [ChipTint.Warning] while the
+ * The Zeron addition: the `host` chip's [ChipTint.Warning] while the
  * resolved engine is offline (`!project.online`, or the hostless pick's
- * `!host.online`) — Roboco web's `DeviceChip` rule, carried over by
+ * `!host.online`) — Zeron web's `DeviceChip` rule, carried over by
  * android-app#25. Only the host chip is tinted, and it stays tappable (94
  * keeps the strip live while it gates Send).
  */

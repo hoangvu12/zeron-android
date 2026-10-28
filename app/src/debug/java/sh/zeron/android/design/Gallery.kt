@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.os.VibratorManager
 import androidx.compose.foundation.background
@@ -23,93 +23,93 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import java.util.Locale
-import sh.roboco.android.composer.AttachMenuGallerySection
-import sh.roboco.android.composer.ChipStripGallerySection
-import sh.roboco.android.composer.ComposerTextFieldGallerySection
-import sh.roboco.android.composer.ComposerActionButtonGallerySection
-import sh.roboco.android.composer.MentionStyleDemo
-import sh.roboco.android.composer.MentionSuggestionsGallerySection
-import sh.roboco.android.composer.MentionsGallerySection
-import sh.roboco.android.composer.StagedThumbnailsGallerySection
-import sh.roboco.android.composer.QuestionPanelBehaviourGallerySection
-import sh.roboco.android.debug.LabMetersGallerySection
-import sh.roboco.android.debug.TranscriptLabGallerySection
-import sh.roboco.android.design.gallery.AlertGallerySection
-import sh.roboco.android.design.gallery.GlassGallerySection
-import sh.roboco.android.design.gallery.QuestionCardGallerySection
-import sh.roboco.android.design.gallery.ScrollEdgeEffectGallerySection
-import sh.roboco.android.design.gallery.SearchTabMorphGallerySection
-import sh.roboco.android.design.gallery.TabBarMinimizeGallerySection
-import sh.roboco.android.design.gallery.ToastGallerySection
-import sh.roboco.android.design.reference.ReferenceGalleryPage
-import sh.roboco.android.design.sheet.GlassSheetGallerySection
-import sh.roboco.android.newsession.CheckoutModelEffortMenusGallerySection
-import sh.roboco.android.newsession.FolderBrowserGallerySection
-import sh.roboco.android.newsession.FolderBottomBarGallerySection
-import sh.roboco.android.newsession.HandoffCaptureGallerySection
-import sh.roboco.android.newsession.NewSessionCanvasGallerySection
-import sh.roboco.android.newsession.NewSessionChipsGallerySection
-import sh.roboco.android.newsession.ProjectMenusGallerySection
-import sh.roboco.android.sessions.ConnectionLineGallerySection
-import sh.roboco.android.newsession.FolderLocationsGallerySection
-import sh.roboco.android.sessions.FolderScreensGallerySection
-import sh.roboco.android.sessions.LocalSidebarFixtures
-import sh.roboco.android.sessions.PinnedReorderGallerySection
-import sh.roboco.android.shell.ChromeVisibilityGallerySection
-import sh.roboco.android.shell.LargeTitleGallerySection
-import sh.roboco.android.pairing.PairingRootGallerySection
-import sh.roboco.android.pairing.PairPageGallerySection
-import sh.roboco.android.pairing.QrScannerGallerySection
-import sh.roboco.android.session.BottomStackGallerySection
-import sh.roboco.android.session.SessionNavGallerySection
-import sh.roboco.android.session.JumpToLatestGallerySection
-import sh.roboco.android.session.SessionHeaderGallerySection
-import sh.roboco.android.session.SessionOpenGallerySection
-import sh.roboco.android.session.StatusPillGallerySection
-import sh.roboco.android.sessions.RowActionsGallerySection
-import sh.roboco.android.sessions.SearchGallerySection
-import sh.roboco.android.sessions.SessionListGallerySection
-import sh.roboco.android.sessions.SessionPromptsGallerySection
-import sh.roboco.android.sessions.SessionRowGallerySection
-import sh.roboco.android.sessions.SessionRowMetaGallerySection
-import sh.roboco.android.sessions.SessionsScreenGallerySection
-import sh.roboco.android.sessions.SectionHeaderGallerySection
-import sh.roboco.android.sessions.SwipeRowGallerySection
-import sh.roboco.android.settings.WallpaperRowsGallerySection
-import sh.roboco.android.settings.AboutGallerySection
-import sh.roboco.android.settings.DevicesRowsGallerySection
-import sh.roboco.android.settings.EngineDetailGallerySection
-import sh.roboco.android.settings.AppearanceGallerySection
-import sh.roboco.android.settings.NotificationRowsGallerySection
-import sh.roboco.android.settings.SettingsScreenGallerySection
-import sh.roboco.android.settings.SessionsSettingsGallerySection
-import sh.roboco.android.shell.NavGallerySection
-import sh.roboco.android.shell.AppRootGallerySection
-import sh.roboco.android.shell.NewSessionAccessoryGallerySection
-import sh.roboco.android.shell.PageSheetGallerySection
-import sh.roboco.android.shell.SettingsDialogGallerySection
-import sh.roboco.android.shell.TabBarGallerySection
-import sh.roboco.android.shell.SidebarToolbarGallerySection
-import sh.roboco.android.shell.tablet.SidebarGallerySection
-import sh.roboco.android.shell.tablet.settledEmptySessionsFixtures
-import sh.roboco.android.sheets.TextSheetsGallerySection
-import sh.roboco.android.image.ImageViewerGallerySection
-import sh.roboco.android.transcript.KeyboardInsetGallerySection
-import sh.roboco.android.transcript.RowChromeFixturePage
-import sh.roboco.android.transcript.RowMotionGallerySection
-import sh.roboco.android.transcript.ScrollerFixturePage
-import sh.roboco.android.transcript.TextRunsSpecimen
-import sh.roboco.android.transcript.TranscriptA11yGallerySection
-import sh.roboco.android.transcript.TranscriptHostGallerySection
-import sh.roboco.android.transcript.TranscriptLinksGallerySection
-import sh.roboco.android.transcript.widgets.CopyCodeGallerySection
-import sh.roboco.android.transcript.widgets.DisclosureGallerySection
-import sh.roboco.android.transcript.widgets.ImageTileGallerySection
-import sh.roboco.android.transcript.widgets.ImageTileStatesGallerySection
-import sh.roboco.android.transcript.widgets.ShimmerGallerySection
-import sh.roboco.android.transcript.widgets.StatusWidgetsGallerySection
-import sh.roboco.android.transcript.widgets.ToolRailGallerySection
-import sh.roboco.android.transcript.widgets.TranscriptIconGallerySection
+import sh.zeron.android.composer.AttachMenuGallerySection
+import sh.zeron.android.composer.ChipStripGallerySection
+import sh.zeron.android.composer.ComposerTextFieldGallerySection
+import sh.zeron.android.composer.ComposerActionButtonGallerySection
+import sh.zeron.android.composer.MentionStyleDemo
+import sh.zeron.android.composer.MentionSuggestionsGallerySection
+import sh.zeron.android.composer.MentionsGallerySection
+import sh.zeron.android.composer.StagedThumbnailsGallerySection
+import sh.zeron.android.composer.QuestionPanelBehaviourGallerySection
+import sh.zeron.android.debug.LabMetersGallerySection
+import sh.zeron.android.debug.TranscriptLabGallerySection
+import sh.zeron.android.design.gallery.AlertGallerySection
+import sh.zeron.android.design.gallery.GlassGallerySection
+import sh.zeron.android.design.gallery.QuestionCardGallerySection
+import sh.zeron.android.design.gallery.ScrollEdgeEffectGallerySection
+import sh.zeron.android.design.gallery.SearchTabMorphGallerySection
+import sh.zeron.android.design.gallery.TabBarMinimizeGallerySection
+import sh.zeron.android.design.gallery.ToastGallerySection
+import sh.zeron.android.design.reference.ReferenceGalleryPage
+import sh.zeron.android.design.sheet.GlassSheetGallerySection
+import sh.zeron.android.newsession.CheckoutModelEffortMenusGallerySection
+import sh.zeron.android.newsession.FolderBrowserGallerySection
+import sh.zeron.android.newsession.FolderBottomBarGallerySection
+import sh.zeron.android.newsession.HandoffCaptureGallerySection
+import sh.zeron.android.newsession.NewSessionCanvasGallerySection
+import sh.zeron.android.newsession.NewSessionChipsGallerySection
+import sh.zeron.android.newsession.ProjectMenusGallerySection
+import sh.zeron.android.sessions.ConnectionLineGallerySection
+import sh.zeron.android.newsession.FolderLocationsGallerySection
+import sh.zeron.android.sessions.FolderScreensGallerySection
+import sh.zeron.android.sessions.LocalSidebarFixtures
+import sh.zeron.android.sessions.PinnedReorderGallerySection
+import sh.zeron.android.shell.ChromeVisibilityGallerySection
+import sh.zeron.android.shell.LargeTitleGallerySection
+import sh.zeron.android.pairing.PairingRootGallerySection
+import sh.zeron.android.pairing.PairPageGallerySection
+import sh.zeron.android.pairing.QrScannerGallerySection
+import sh.zeron.android.session.BottomStackGallerySection
+import sh.zeron.android.session.SessionNavGallerySection
+import sh.zeron.android.session.JumpToLatestGallerySection
+import sh.zeron.android.session.SessionHeaderGallerySection
+import sh.zeron.android.session.SessionOpenGallerySection
+import sh.zeron.android.session.StatusPillGallerySection
+import sh.zeron.android.sessions.RowActionsGallerySection
+import sh.zeron.android.sessions.SearchGallerySection
+import sh.zeron.android.sessions.SessionListGallerySection
+import sh.zeron.android.sessions.SessionPromptsGallerySection
+import sh.zeron.android.sessions.SessionRowGallerySection
+import sh.zeron.android.sessions.SessionRowMetaGallerySection
+import sh.zeron.android.sessions.SessionsScreenGallerySection
+import sh.zeron.android.sessions.SectionHeaderGallerySection
+import sh.zeron.android.sessions.SwipeRowGallerySection
+import sh.zeron.android.settings.WallpaperRowsGallerySection
+import sh.zeron.android.settings.AboutGallerySection
+import sh.zeron.android.settings.DevicesRowsGallerySection
+import sh.zeron.android.settings.EngineDetailGallerySection
+import sh.zeron.android.settings.AppearanceGallerySection
+import sh.zeron.android.settings.NotificationRowsGallerySection
+import sh.zeron.android.settings.SettingsScreenGallerySection
+import sh.zeron.android.settings.SessionsSettingsGallerySection
+import sh.zeron.android.shell.NavGallerySection
+import sh.zeron.android.shell.AppRootGallerySection
+import sh.zeron.android.shell.NewSessionAccessoryGallerySection
+import sh.zeron.android.shell.PageSheetGallerySection
+import sh.zeron.android.shell.SettingsDialogGallerySection
+import sh.zeron.android.shell.TabBarGallerySection
+import sh.zeron.android.shell.SidebarToolbarGallerySection
+import sh.zeron.android.shell.tablet.SidebarGallerySection
+import sh.zeron.android.shell.tablet.settledEmptySessionsFixtures
+import sh.zeron.android.sheets.TextSheetsGallerySection
+import sh.zeron.android.image.ImageViewerGallerySection
+import sh.zeron.android.transcript.KeyboardInsetGallerySection
+import sh.zeron.android.transcript.RowChromeFixturePage
+import sh.zeron.android.transcript.RowMotionGallerySection
+import sh.zeron.android.transcript.ScrollerFixturePage
+import sh.zeron.android.transcript.TextRunsSpecimen
+import sh.zeron.android.transcript.TranscriptA11yGallerySection
+import sh.zeron.android.transcript.TranscriptHostGallerySection
+import sh.zeron.android.transcript.TranscriptLinksGallerySection
+import sh.zeron.android.transcript.widgets.CopyCodeGallerySection
+import sh.zeron.android.transcript.widgets.DisclosureGallerySection
+import sh.zeron.android.transcript.widgets.ImageTileGallerySection
+import sh.zeron.android.transcript.widgets.ImageTileStatesGallerySection
+import sh.zeron.android.transcript.widgets.ShimmerGallerySection
+import sh.zeron.android.transcript.widgets.StatusWidgetsGallerySection
+import sh.zeron.android.transcript.widgets.ToolRailGallerySection
+import sh.zeron.android.transcript.widgets.TranscriptIconGallerySection
 
 /**
  * How the gallery lays a section out inside the body (android-ui-parity #22).
@@ -215,7 +215,7 @@ object Gallery {
         },
         // Ticket 63 (text runs): every run-painting case through the real
         // RowModel path — Rust positions, decorations, mono double-width.
-        GallerySection("Transcript · Text runs") { TextRunsSpecimen(dark = RobocoTheme.isDark) },
+        GallerySection("Transcript · Text runs") { TextRunsSpecimen(dark = ZeronTheme.isDark) },
         // Ticket 31 (PageSheet + SheetHost): the large-detent page sheet
         // with the card-stack recession, stacking and the handoff hide.
         GallerySection("Page sheet", GalleryLayout.Fill, screenshotHeightDp = 891) { PageSheetGallerySection() },
@@ -310,7 +310,7 @@ object Gallery {
         // Ticket 98 (iOS toggle switch): the UISwitch port — 63 × 28 track,
         // accent on-tint, 37 × 24 capsule thumb, tap/drag, press lift,
         // ToggleOn/Off haptics; 420 dp of fixture card + interactive rows.
-        GallerySection("Switch", screenshotHeightDp = 420) { RobocoSwitchGallerySection() },
+        GallerySection("Switch", screenshotHeightDp = 420) { ZeronSwitchGallerySection() },
         // Ticket 87 (composer attach menu): the + pull-down and its staging
         // demo — static panels, a live ComposerSurface with the real button
         // (the live half is skipped under capture: it needs an activity's
@@ -569,7 +569,7 @@ object Gallery {
         // fail next submit) and a one-line answer caption under the
         // stage.
         GallerySection("Question panel behaviour") { QuestionPanelBehaviourGallerySection() },
-        // Ticket 112 (folder browser locations): the Roboco-only rail and
+        // Ticket 112 (folder browser locations): the Zeron-only rail and
         // search/typed-path field between the nav bar and the list —
         // Home + drives chips (the selected one in accentSoft/accent) and
         // the 40 dp search field, over the ticket's four fixtures A–D
@@ -762,8 +762,8 @@ val LocalGalleryCapture = staticCompositionLocalOf { false }
  */
 @Composable
 fun GalleryProviders(appearance: Appearance, capture: Boolean = false, content: @Composable () -> Unit) {
-    RobocoTheme(appearance) {
-        // Harmless if RobocoTheme already installs it (install is
+    ZeronTheme(appearance) {
+        // Harmless if ZeronTheme already installs it (install is
         // idempotent); kept so the gallery does not depend on that wiring.
         ProvideReduceMotion {
             val inner: @Composable () -> Unit = {
@@ -809,7 +809,7 @@ private fun SettledSessionsUnderCapture(content: @Composable () -> Unit) {
  */
 @Composable
 fun GallerySectionFrame(section: GallerySection, modifier: Modifier = Modifier) {
-    val background = RobocoTheme.palette.background
+    val background = ZeronTheme.palette.background
     when (section.layout) {
         GalleryLayout.Scroll -> Column(
             modifier

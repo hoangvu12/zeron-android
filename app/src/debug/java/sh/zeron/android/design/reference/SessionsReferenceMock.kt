@@ -1,4 +1,4 @@
-package sh.roboco.android.design.reference
+package sh.zeron.android.design.reference
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -34,37 +34,37 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.hazeSource
 import kotlin.math.ceil
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.BranchIcon
-import sh.roboco.android.design.CapsuleShape
-import sh.roboco.android.design.EdgeFade
-import sh.roboco.android.design.FadingText
-import sh.roboco.android.design.HarnessMark
-import sh.roboco.android.design.HorizontalFades
-import sh.roboco.android.design.Icon
-import sh.roboco.android.design.IconInBox
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.PrBadge
-import sh.roboco.android.design.ProjectTile
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoIcon
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.StatusGlyph
-import sh.roboco.android.design.StatusGlyphKind
-import sh.roboco.android.design.SymbolWeight
-import sh.roboco.android.design.glass.GlassCircleButton
-import sh.roboco.android.design.glass.GlassSurface
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.glass.ProvideHazeState
-import sh.roboco.android.design.glass.ScrollEdgeEffect
-import sh.roboco.android.design.glass.ScrollEdgeEffectDefaults
-import sh.roboco.android.design.horizontalFadeMask
-import sh.roboco.android.design.prBadgeMetrics
-import sh.roboco.android.design.prTone
-import sh.roboco.android.design.rgba
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.BranchIcon
+import sh.zeron.android.design.CapsuleShape
+import sh.zeron.android.design.EdgeFade
+import sh.zeron.android.design.FadingText
+import sh.zeron.android.design.HarnessMark
+import sh.zeron.android.design.HorizontalFades
+import sh.zeron.android.design.Icon
+import sh.zeron.android.design.IconInBox
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.PrBadge
+import sh.zeron.android.design.ProjectTile
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronIcon
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.StatusGlyph
+import sh.zeron.android.design.StatusGlyphKind
+import sh.zeron.android.design.SymbolWeight
+import sh.zeron.android.design.glass.GlassCircleButton
+import sh.zeron.android.design.glass.GlassSurface
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.glass.ProvideHazeState
+import sh.zeron.android.design.glass.ScrollEdgeEffect
+import sh.zeron.android.design.glass.ScrollEdgeEffectDefaults
+import sh.zeron.android.design.horizontalFadeMask
+import sh.zeron.android.design.prBadgeMetrics
+import sh.zeron.android.design.prTone
+import sh.zeron.android.design.rgba
+import sh.zeron.android.design.uiStyle
 
 /**
  * The static, pixel-placed mock of the iOS Sessions tab
@@ -92,7 +92,7 @@ import sh.roboco.android.design.uiStyle
  */
 @Composable
 fun SessionsReferenceMock(modifier: Modifier = Modifier) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     ProvideGlyphClock(frozenAtNanos = 0L) {
         ProvideHazeState {
             Box(
@@ -124,7 +124,7 @@ fun SessionsReferenceMock(modifier: Modifier = Modifier) {
                 // 3. chrome, all outside the source box.
                 RefInlineTitle()
                 GlassCircleButton(
-                    icon = RobocoIcons.Ellipsis,
+                    icon = ZeronIcons.Ellipsis,
                     contentDescription = "More",
                     onClick = {},
                     modifier = Modifier.offset(ReferenceGeometry.More.left, ReferenceGeometry.More.top),
@@ -142,7 +142,7 @@ fun SessionsReferenceMock(modifier: Modifier = Modifier) {
                         .size(289.dp, 62.dp),
                 )
                 GlassCircleButton(
-                    icon = RobocoIcons.Magnifyingglass,
+                    icon = ZeronIcons.Magnifyingglass,
                     contentDescription = "Search",
                     onClick = {},
                     modifier = Modifier.offset(ReferenceGeometry.Search.left, ReferenceGeometry.Search.top),
@@ -166,7 +166,7 @@ fun SessionsReferenceMock(modifier: Modifier = Modifier) {
  */
 @Composable
 private fun RefInlineTitle(modifier: Modifier = Modifier) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
     Box(
         modifier
@@ -204,7 +204,7 @@ private fun ceiledDp(px: Int, pxPerDp: Float): Dp = ceil(px / pxPerDp - 1e-3f).d
  */
 @Composable
 private fun RefRow(row: RefItem.Row, modifier: Modifier = Modifier) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
     val density = LocalDensity.current
     val pxPerDp = density.density
@@ -334,7 +334,7 @@ private fun RefRow(row: RefItem.Row, modifier: Modifier = Modifier) {
  */
 @Composable
 private fun RefMeta(row: RefItem.Row, boxWidth: Dp, modifier: Modifier = Modifier) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
     val branch = row.branch
     val nameStyle = uiStyle(Face.Sans, ts.fixed(ReferenceGeometry.META_PT), palette.secondary)
@@ -426,7 +426,7 @@ private fun RefMeta(row: RefItem.Row, boxWidth: Dp, modifier: Modifier = Modifie
  */
 @Composable
 private fun RefHeader(header: RefItem.Header, modifier: Modifier = Modifier) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
     val density = LocalDensity.current.density
     val measurer = rememberTextMeasurer()
@@ -465,7 +465,7 @@ private fun RefHeader(header: RefItem.Header, modifier: Modifier = Modifier) {
             contentAlignment = Alignment.Center,
         ) {
             Icon(
-                RobocoIcons.ChevronDown,
+                ZeronIcons.ChevronDown,
                 palette.tertiary,
                 sizePt = 11f,
                 weight = SymbolWeight.Semibold,
@@ -483,11 +483,11 @@ private fun RefHeader(header: RefItem.Header, modifier: Modifier = Modifier) {
  * `accentSoft` circle 7 dp in with the accent `+` (15 pt Semibold),
  * "New session" (Medium 16, `text`) at x 52, and "1 needs you" (Medium 13,
  * `secondary`) ending 16 dp from the right, an input dot 7 dp before it.
- * Not interactive in the mock (no voice button — Roboco has none).
+ * Not interactive in the mock (no voice button — Zeron has none).
  */
 @Composable
 private fun RefAccessory(modifier: Modifier = Modifier) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
     val density = LocalDensity.current.density
     val measurer = rememberTextMeasurer()
@@ -508,7 +508,7 @@ private fun RefAccessory(modifier: Modifier = Modifier) {
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
-                    RobocoIcons.Plus,
+                    ZeronIcons.Plus,
                     palette.accent,
                     sizePt = 15f,
                     weight = SymbolWeight.Semibold,
@@ -553,7 +553,7 @@ private fun RefAccessory(modifier: Modifier = Modifier) {
  */
 @Composable
 private fun RefTabPill(modifier: Modifier = Modifier) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     GlassSurface(modifier, shape = CapsuleShape) {
         Box(Modifier.fillMaxSize()) {
             Box(
@@ -563,12 +563,12 @@ private fun RefTabPill(modifier: Modifier = Modifier) {
                     .background(palette.controlFill, CapsuleShape),
             )
             RefTabItem(
-                RobocoIcons.TabChat,
+                ZeronIcons.TabChat,
                 "Sessions",
                 Modifier.offset(4.dp, 0.dp).size(140.5.dp, 62.dp),
             )
             RefTabItem(
-                RobocoIcons.TabSettings,
+                ZeronIcons.TabSettings,
                 "Settings",
                 Modifier.offset(144.5.dp, 0.dp).size(140.5.dp, 62.dp),
             )
@@ -578,8 +578,8 @@ private fun RefTabPill(modifier: Modifier = Modifier) {
 
 /** One tab slot: the 24 dp glyph centred horizontally at centre y 25 (m), label baseline y 50 (m). */
 @Composable
-private fun RefTabItem(icon: RobocoIcon, label: String, modifier: Modifier = Modifier) {
-    val palette = RobocoTheme.palette
+private fun RefTabItem(icon: ZeronIcon, label: String, modifier: Modifier = Modifier) {
+    val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
     Layout(
         content = {
@@ -621,11 +621,11 @@ private fun RefTabItem(icon: RobocoIcon, label: String, modifier: Modifier = Mod
 @Preview(name = "light", widthDp = 402, heightDp = 874)
 @Composable
 private fun SessionsReferenceMockLightPreview() {
-    RobocoTheme(Appearance.Light) { SessionsReferenceMock() }
+    ZeronTheme(Appearance.Light) { SessionsReferenceMock() }
 }
 
 @Preview(name = "dark", widthDp = 402, heightDp = 874, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun SessionsReferenceMockDarkPreview() {
-    RobocoTheme(Appearance.Dark) { SessionsReferenceMock() }
+    ZeronTheme(Appearance.Dark) { SessionsReferenceMock() }
 }

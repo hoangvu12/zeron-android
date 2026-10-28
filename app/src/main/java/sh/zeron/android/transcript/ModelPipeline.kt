@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.content.ComponentCallbacks2
 import android.os.Handler
@@ -9,8 +9,8 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
-import uniffi.roboco_core.LayoutFrame
-import uniffi.roboco_core.RowPlacement
+import uniffi.zeron_core.LayoutFrame
+import uniffi.zeron_core.RowPlacement
 
 /**
  * Where a model build came from (ticket 117): `SYNC` is 65's counted
@@ -113,7 +113,7 @@ internal fun prefetchRanges(
 /**
  * The pipeline's single worker (iOS's one serial `.userInitiated` queue,
  * `TranscriptListView.swift:23`): one thread named
- * `sh.roboco.transcript.prefetch` at [Process.THREAD_PRIORITY_DISPLAY]
+ * `sh.zeron.transcript.prefetch` at [Process.THREAD_PRIORITY_DISPLAY]
  * (−4 — above default background work, below the boosted UI and render
  * threads). The core thread times out after 10 s idle.
  */
@@ -121,7 +121,7 @@ internal fun prefetchExecutor(): ThreadPoolExecutor =
     ThreadPoolExecutor(1, 1, 10, TimeUnit.SECONDS, LinkedBlockingQueue()) { r ->
         Thread(
             { Process.setThreadPriority(Process.THREAD_PRIORITY_DISPLAY); r.run() },
-            "sh.roboco.transcript.prefetch",
+            "sh.zeron.transcript.prefetch",
         ).apply { isDaemon = true }
     }.apply { allowCoreThreadTimeOut(true) }
 

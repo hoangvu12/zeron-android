@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -11,8 +11,8 @@ import androidx.compose.runtime.saveable.SaveableStateHolder
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.withFrameNanos
-import sh.roboco.android.session.SessionDetachFence
-import sh.roboco.android.shell.tablet.SidebarState
+import sh.zeron.android.session.SessionDetachFence
+import sh.zeron.android.shell.tablet.SidebarState
 
 /**
  * The shell-state scope hoisted above ticket 35's Phone ↔ Split switch
@@ -34,14 +34,14 @@ import sh.roboco.android.shell.tablet.SidebarState
  * - 105's [SidebarState];
  * - 106's [PhoneRouterSlot], [SettingsPresenterSlot] and
  *   [TabletAppRouter] (with the router-owned persistent detail
- *   [NavStack]), moved here from 35's `RobocoAppContent`;
+ *   [NavStack]), moved here from 35's `ZeronAppContent`;
  * - a [SaveableStateHolder] the two shell slots key their
  *   `SaveableStateProvider` calls into, so each shell's saveable state
  *   (scroll positions, field text) survives a round trip;
  * - the [CarryOver] itself, wired to ticket 106's router through
  *   [TabletDetailColumn] and to the tab shell through [MainTabsColumn].
  *
- * The phone and split slots in `RobocoAppContent` read all of it through
+ * The phone and split slots in `ZeronAppContent` read all of it through
  * [LocalShellStates]; neither remembers anything of its own.
  */
 
@@ -188,7 +188,7 @@ internal fun ShellStateScope(
     // 105: not saved, as iOS.
     val sidebar = remember { SidebarState() }
     val saveable = rememberSaveableStateHolder()
-    // 106 step 7's block, moved here from RobocoAppContent (created each
+    // 106 step 7's block, moved here from ZeronAppContent (created each
     // ONCE, here): the slots and the router must outlive both shells.
     val phoneSlot = remember { PhoneRouterSlot() }
     val settingsSlot = remember { SettingsPresenterSlot() }

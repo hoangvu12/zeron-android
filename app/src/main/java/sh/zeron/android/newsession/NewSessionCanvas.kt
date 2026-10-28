@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -52,18 +52,18 @@ import dev.chrisbanes.haze.hazeSource
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
-import sh.roboco.android.composer.MentionSuggestionsHost
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.HarnessMark
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.WallpaperHero
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.glass.ProvideHazeState
-import sh.roboco.android.design.sheet.GlassSheetDefaults
-import sh.roboco.android.design.sheet.SheetHeaderRow
-import sh.roboco.android.design.sheet.SheetLeading
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.composer.MentionSuggestionsHost
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.HarnessMark
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.WallpaperHero
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.glass.ProvideHazeState
+import sh.zeron.android.design.sheet.GlassSheetDefaults
+import sh.zeron.android.design.sheet.SheetHeaderRow
+import sh.zeron.android.design.sheet.SheetLeading
+import sh.zeron.android.design.uiStyle
 
 /**
  * Insets after ancestor consumption, dp floats (android-ui-parity #93).
@@ -152,7 +152,7 @@ internal fun NewSessionCanvas(
 ) {
     ProvideHazeState {
         val haze = LocalHazeState.current!!
-        val palette = RobocoTheme.palette
+        val palette = ZeronTheme.palette
 
         // The consumed insets (what ancestors already lifted this page by)
         // and the live system insets, captured in composition and read in
@@ -343,7 +343,7 @@ internal fun NewSessionCanvas(
  */
 @Composable
 internal fun NewSessionHero(harness: String, modifier: Modifier = Modifier, headline: String = NewSessionHeadline) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Column(
         modifier,
@@ -379,7 +379,7 @@ const val SideChatHeadline = "Ask on the side"
  * The transparent nav bar (`:113-118`, `SplitRootController.swift:46-47`).
  *
  * - **Sheet**: 17's [SheetHeaderRow] reused as is — the 52 dp row every
- *   Roboco page sheet uses, Geist SemiBold 17 title, the ✕ glass circle
+ *   Zeron page sheet uses, Geist SemiBold 17 title, the ✕ glass circle
  *   (tag `sheet-close`, "Close") — exactly 31's placeholder bar. It draws
  *   no fill, so the wallpaper shows through it as on iOS 26.
  * - **Embedded**: a 44 dp row (25's `NavRowHeight`) after the status-bar
@@ -411,7 +411,7 @@ internal fun NewSessionNavBar(embedded: Boolean, onClose: () -> Unit, insets: Ca
             .height(NewSessionLayout.EmbeddedNavRowHeight.dp)
             .testTag("new-session-nav"),
     ) {
-        val palette = RobocoTheme.palette
+        val palette = ZeronTheme.palette
         val typeScale = LocalTypeScale.current
         BasicText(
             "New Session",

@@ -1,17 +1,17 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import sh.roboco.android.design.PrState
-import uniffi.roboco_core.ChatIndicator
-import uniffi.roboco_core.ProjectRef
-import uniffi.roboco_core.PullRequest
-import uniffi.roboco_core.PullRequestState
-import uniffi.roboco_core.SendState
-import uniffi.roboco_core.SessionRow
+import sh.zeron.android.design.PrState
+import uniffi.zeron_core.ChatIndicator
+import uniffi.zeron_core.ProjectRef
+import uniffi.zeron_core.PullRequest
+import uniffi.zeron_core.PullRequestState
+import uniffi.zeron_core.SendState
+import uniffi.zeron_core.SessionRow
 
 /**
  * `SessionRowVM.from` and `sessionRowA11yLabel` (android-ui-parity #37):

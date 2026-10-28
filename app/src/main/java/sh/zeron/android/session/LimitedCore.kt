@@ -1,10 +1,10 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import uniffi.roboco_core.CoreClient
-import uniffi.roboco_core.ResumeCandidates
-import uniffi.roboco_core.ResumeSwitchOutcome
+import uniffi.zeron_core.CoreClient
+import uniffi.zeron_core.ResumeCandidates
+import uniffi.zeron_core.ResumeSwitchOutcome
 
 /**
  * The Limited banner's core seam (the failover port's slice of the
@@ -15,7 +15,7 @@ import uniffi.roboco_core.ResumeSwitchOutcome
  *
  * Every method crosses FFI and blocks on the engine — run on an IO lane,
  * never main. The async FFI methods execute on the core's own runtime;
- * `withContext(Dispatchers.IO)` matches [AccountsCore][sh.roboco.android.accounts.AccountsCore]'s lane.
+ * `withContext(Dispatchers.IO)` matches [AccountsCore][sh.zeron.android.accounts.AccountsCore]'s lane.
  */
 interface LimitedCore {
     /** `ListResumeAccountCandidates`: the ranked switch targets for the

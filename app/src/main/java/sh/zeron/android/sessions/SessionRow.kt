@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -28,14 +28,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.FadingText
-import sh.roboco.android.design.HarnessMark
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.StatusGlyph
-import sh.roboco.android.design.rememberSmoothRoundedShape
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.FadingText
+import sh.zeron.android.design.HarnessMark
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.StatusGlyph
+import sh.zeron.android.design.rememberSmoothRoundedShape
+import sh.zeron.android.design.uiStyle
 
 /**
  * The two-line session row (android-ui-parity #37) — the port of iOS
@@ -64,7 +64,7 @@ import sh.roboco.android.design.uiStyle
  * pass; the ≤ 1 dp ceil slack is the documented rounding tolerance.
  *
  * @param isCurrent the session open beside the sidebar (tablet): a quiet
- *   [sh.roboco.android.design.Palette.rowActive] fill, replaced by the
+ *   [sh.zeron.android.design.Palette.rowActive] fill, replaced by the
  *   highlight while pressed (`SessionCell.swift:58-59`).
  * @param meta ticket 38's meta line ([SessionRowMetaLine]) — the slot's
  *   default, so every caller that omits it (41's list, 49's search
@@ -80,7 +80,7 @@ fun SessionRow(
     highlight: () -> Float = { 0f },
     meta: @Composable () -> Unit = { SessionRowMetaLine(vm) },
 ) {
-    val p = RobocoTheme.palette
+    val p = ZeronTheme.palette
     val ts = LocalTypeScale.current
     val density = LocalDensity.current
     val c = corner(vm)
@@ -222,7 +222,7 @@ fun SessionRow(
 @Composable
 private fun RunningAgentsPill(text: String, style: TextStyle) {
     Box(
-        Modifier.background(RobocoTheme.palette.controlFill, RoundedCornerShape(50)),
+        Modifier.background(ZeronTheme.palette.controlFill, RoundedCornerShape(50)),
         contentAlignment = Alignment.Center,
     ) {
         BasicText(text, style = style.copy(textAlign = TextAlign.Center), maxLines = 1, softWrap = false)

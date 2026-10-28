@@ -1,10 +1,10 @@
-package sh.roboco.android.core
+package sh.zeron.android.core
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import uniffi.roboco_core.FaceRole
+import uniffi.zeron_core.FaceRole
 
 /**
  * `FontChain`'s pure tables (plain JVM, for the merge check): the wide

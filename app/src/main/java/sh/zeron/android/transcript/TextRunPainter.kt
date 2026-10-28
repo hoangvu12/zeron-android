@@ -1,13 +1,13 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.graphics.Canvas
 import android.graphics.Paint
-import sh.roboco.android.core.FontChain
-import uniffi.roboco_core.Decoration
-import uniffi.roboco_core.TextRun
+import sh.zeron.android.core.FontChain
+import uniffi.zeron_core.Decoration
+import uniffi.zeron_core.TextRun
 
 /**
- * Draws one [TextRun] of a [uniffi.roboco_core.RowDisplay] — iOS
+ * Draws one [TextRun] of a [uniffi.zeron_core.RowDisplay] — iOS
  * `drawRun` (`ios:Transcript/RowModel.swift:66-81`) on the Android
  * canvas: the glyphs straight from the row string (never a slice
  * allocation) at

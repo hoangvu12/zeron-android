@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -15,10 +15,10 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
 
 /**
  * The question **panel behaviour** goldens (android-ui-parity #91),
@@ -73,7 +73,7 @@ class SessionQuestionsSlotScreenshotTest {
     private fun mount(appearance: Appearance): QuestionPanelState {
         val state = questionFixtureState(CoroutineScope(Dispatchers.Main.immediate))
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 QuestionPanelStage(state, height = 480.dp)
             }
         }

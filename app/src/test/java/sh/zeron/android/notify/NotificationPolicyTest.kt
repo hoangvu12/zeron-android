@@ -1,4 +1,4 @@
-package sh.roboco.android.notify
+package sh.zeron.android.notify
 
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue

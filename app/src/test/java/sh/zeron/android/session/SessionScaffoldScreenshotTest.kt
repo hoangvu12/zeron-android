@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -23,11 +23,11 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
 
 /**
  * The open choreography's goldens (android-ui-parity #75): the ticket's
@@ -69,7 +69,7 @@ class SessionScaffoldScreenshotTest {
 
     private fun shot(appearance: Appearance, file: String, content: @Composable () -> Unit) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 // The loader's spinner is live in the holding state; a
                 // frozen clock pins it at cycle 0 so the golden is stable.
                 ProvideGlyphClock(frozenAtNanos = 0L) { content() }
@@ -132,7 +132,7 @@ class SessionScaffoldScreenshotTest {
         val reveal = OpenReveal().apply { begin(true) }
         var appearance by mutableStateOf(Appearance.Light)
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 ProvideGlyphClock(frozenAtNanos = 0L) { SessionOpenFixture(reveal) }
             }
         }

@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -41,12 +41,12 @@ class NoDirectHapticsTest {
 
     @Test
     fun aStrayDirectHapticCallIsCaughtWithFileAndToken() {
-        val strayDir = appRoot().resolve("src/main/java/sh/roboco/android")
+        val strayDir = appRoot().resolve("src/main/java/sh/zeron/android")
         val stray = File.createTempFile("stray", ".kt", strayDir)
         try {
             stray.writeText(
                 """
-                package sh.roboco.android
+                package sh.zeron.android
 
                 import androidx.compose.ui.platform.LocalHapticFeedback
 
@@ -62,11 +62,11 @@ class NoDirectHapticsTest {
         }
     }
 
-    /** `apps/android/app`: `user.dir` under Gradle unit tests, else via `roboco.repoRoot`, else walking up. */
+    /** `apps/android/app`: `user.dir` under Gradle unit tests, else via `zeron.repoRoot`, else walking up. */
     private fun appRoot(): File {
         val userDir = File(System.getProperty("user.dir")!!)
         if (userDir.resolve("src/main/java").isDirectory) return userDir
-        val repoRoot: String? = System.getProperty("roboco.repoRoot")
+        val repoRoot: String? = System.getProperty("zeron.repoRoot")
         if (repoRoot != null) {
             val app = File(repoRoot).resolve("apps/android/app")
             if (app.resolve("src/main/java").isDirectory) return app

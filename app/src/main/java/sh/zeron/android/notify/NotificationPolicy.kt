@@ -1,4 +1,4 @@
-package sh.roboco.android.notify
+package sh.zeron.android.notify
 
 /**
  * The notification delivery gates (android-app#28's policy table). Pure —

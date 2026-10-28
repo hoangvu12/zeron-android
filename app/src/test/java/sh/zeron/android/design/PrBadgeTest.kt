@@ -1,10 +1,10 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.ui.graphics.toArgb
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import uniffi.roboco_core.PullRequestState
+import uniffi.zeron_core.PullRequestState
 import kotlin.math.ceil
 
 /**

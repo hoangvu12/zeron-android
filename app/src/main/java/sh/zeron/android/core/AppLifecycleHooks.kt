@@ -1,4 +1,4 @@
-package sh.roboco.android.core
+package sh.zeron.android.core
 
 import android.app.Application
 import android.net.ConnectivityManager
@@ -13,7 +13,7 @@ import androidx.lifecycle.LifecycleOwner
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
-import uniffi.roboco_core.CoreClient
+import uniffi.zeron_core.CoreClient
 
 /**
  * The three OS lifecycle calls the core needs (android-ui-parity #35;
@@ -43,7 +43,7 @@ interface LifecycleSink {
     fun setNetworkChanged() {}
 }
 
-/** The production sink: the live [CoreClient]. Logs each call (`adb logcat -s Roboco`). */
+/** The production sink: the live [CoreClient]. Logs each call (`adb logcat -s Zeron`). */
 class CoreLifecycleSink(private val client: CoreClient) : LifecycleSink {
     override fun onForeground() {
         Log.d(TAG, "onForeground")
@@ -66,7 +66,7 @@ class CoreLifecycleSink(private val client: CoreClient) : LifecycleSink {
     }
 
     private companion object {
-        const val TAG = "Roboco"
+        const val TAG = "Zeron"
     }
 }
 
@@ -158,13 +158,13 @@ fun java.net.InetAddress.isRoutableAddress(): Boolean =
 
 /**
  * The process lifecycle hooks (android-ui-parity #35), registered **once
- * in `RobocoApplication.onCreate`** — never per `onCreate` of an activity
+ * in `ZeronApplication.onCreate`** — never per `onCreate` of an activity
  * (#609's observer leak) and never from an activity's `onStart`/`onStop`
  * (#621's redial per rotation):
  *
  * - `ProcessLifecycleOwner` `ON_START` → [onStart]: `onForeground()` then
  *   [afterForeground][] (iOS `refreshWorkspace()`, `AppModel.swift:289`;
- *   Roboco's workspace feed re-pulls through `ClientEvent`, so the app
+ *   Zeron's workspace feed re-pulls through `ClientEvent`, so the app
  *   passes `{}`);
  * - `ProcessLifecycleOwner` `ON_STOP` → [onStop]: `onBackground()` (the
  *   androidx owner dispatches it ~700 ms after the last activity stops,
@@ -227,8 +227,8 @@ class AppLifecycleHooks internal constructor(
     }
 
     companion object {
-        private const val TAG = "Roboco"
-        private const val THREAD_NAME = "roboco-lifecycle"
+        private const val TAG = "Zeron"
+        private const val THREAD_NAME = "zeron-lifecycle"
 
         /** Process-wide: exactly one install per process (the #609 leak guard). */
         private val installed = AtomicBoolean(false)
@@ -237,7 +237,7 @@ class AppLifecycleHooks internal constructor(
         private var instance: AppLifecycleHooks? = null
 
         /**
-         * Call exactly once, from `RobocoApplication.onCreate` (main
+         * Call exactly once, from `ZeronApplication.onCreate` (main
          * thread). A second call logs a warning and returns the first
          * instance, adding no second observer.
          */

@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.util.Log
 import androidx.annotation.VisibleForTesting
@@ -45,13 +45,13 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
-import sh.roboco.android.core.Face
+import sh.zeron.android.core.Face
 
 /**
  * The pull-to-refresh control (android-ui-parity #48): the port of every
  * iOS `SessionListController`'s `UIRefreshControl`
  * (`ios:Threads/SessionListController.swift:103-112`) — pull the list
- * past the top, release, "redial and re-probe" (Roboco: `CoreClient.
+ * past the top, release, "redial and re-probe" (Zeron: `CoreClient.
  * refresh()`, android-app#06), the spinner holds ≥ 0.6 s and ≤ 3 s, then
  * the list settles back. The indicator is the app's own cell spinner
  * ([StatusGlyph] [StatusGlyphKind.Spinner] at ×1.75), **not** a system
@@ -159,7 +159,7 @@ object PullToRefreshMath {
 
 /**
  * The warning sink for refresh failures: production logs
- * `Log.w("RobocoPull", …)`. Plain-JVM tests swap this — the stub
+ * `Log.w("ZeronPull", …)`. Plain-JVM tests swap this — the stub
  * `android.util.Log` throws "not mocked" outside Robolectric (the same
  * seam as `FoldState.foldLogW`).
  */
@@ -171,7 +171,7 @@ internal var pullRefreshLogW: (String, Throwable?) -> Unit = { message, error ->
     }
 }
 
-private const val TAG = "RobocoPull"
+private const val TAG = "ZeronPull"
 
 // ---------------------------------------------------------------------------
 // Timing
@@ -527,10 +527,10 @@ fun PullToRefreshIndicator(state: PullToRefreshState, navBottom: Dp, modifier: M
  */
 @Composable
 private fun PullToRefreshIndicatorSample(appearance: Appearance) {
-    RobocoTheme(appearance) {
+    ZeronTheme(appearance) {
         ProvideGlyphClock(frozenAtNanos = 0L) {
             val typeScale = LocalTypeScale.current
-            val palette = RobocoTheme.palette
+            val palette = ZeronTheme.palette
             val state = rememberPullToRefreshState(onRefresh = { delay(60_000) })
             LaunchedEffect(state) { state.startRefresh() }
             Box(Modifier.fillMaxSize().background(palette.background)) {

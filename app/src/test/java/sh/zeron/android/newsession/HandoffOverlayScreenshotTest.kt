@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
@@ -26,21 +26,21 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.HandoffGalleryChat
-import sh.roboco.android.design.HandoffGalleryHero
-import sh.roboco.android.design.HandoffGalleryTarget
-import sh.roboco.android.design.HandoffGalleryText
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.RouterlessHandoffRoute
-import sh.roboco.android.design.buildHandoffGalleryFixture
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.shell.RouterHooks
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.HandoffGalleryChat
+import sh.zeron.android.design.HandoffGalleryHero
+import sh.zeron.android.design.HandoffGalleryTarget
+import sh.zeron.android.design.HandoffGalleryText
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.RouterlessHandoffRoute
+import sh.zeron.android.design.buildHandoffGalleryFixture
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.shell.RouterHooks
 
 /**
  * The handoff overlays' goldens (android-ui-parity #95) — the gallery
@@ -96,8 +96,8 @@ class HandoffOverlayScreenshotTest {
      */
     private fun mount(appearance: Appearance) {
         compose.setContent {
-            RobocoTheme(appearance) {
-                val palette = RobocoTheme.palette
+            ZeronTheme(appearance) {
+                val palette = ZeronTheme.palette
                 val typeScale = LocalTypeScale.current
                 val measurer = rememberTextMeasurer()
                 val density = LocalDensity.current

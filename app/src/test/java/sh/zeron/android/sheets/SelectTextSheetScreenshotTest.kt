@@ -1,4 +1,4 @@
-package sh.roboco.android.sheets
+package sh.zeron.android.sheets
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -25,11 +25,11 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.sheet.rememberGlassSheetState
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.sheet.rememberGlassSheetState
 
 /**
  * The text-sheet goldens (ticket 127), recorded by `recordRoborazziDebug`
@@ -82,8 +82,8 @@ class SelectTextSheetScreenshotTest {
     ) {
         compose.setContent {
             val content: @Composable () -> Unit = {
-                RobocoTheme(appearance) {
-                    val palette = RobocoTheme.palette
+                ZeronTheme(appearance) {
+                    val palette = ZeronTheme.palette
                     Box(Modifier.fillMaxSize().background(palette.background)) {
                         val state = rememberGlassSheetState(
                             if (mono) SelectTextDefaults.MonoDetents else SelectTextDefaults.SansDetents,
@@ -153,7 +153,7 @@ class SelectTextSheetScreenshotTest {
 
     /** The preview's three-paragraph message. */
     private val ThreeParagraphs =
-        "Roboco connects directly to the engines you pair with it — no account, no cloud, no sync.\n\n" +
+        "Zeron connects directly to the engines you pair with it — no account, no cloud, no sync.\n\n" +
             "The transcript is painted straight from the Rust layout core, so the text in the list itself " +
             "cannot be selected. Select Text shows the whole message here, where the system selection " +
             "handles and the Copy toolbar work.\n\n" +
@@ -161,7 +161,7 @@ class SelectTextSheetScreenshotTest {
 
     /** 40 mono lines, the last one 160 characters (the wrap fixture). */
     private val ToolPayload: String = buildString {
-        for (i in 1..39) appendLine("line $i: $ roboco engine start --port ${8674 + i}")
+        for (i in 1..39) appendLine("line $i: $ zeron engine start --port ${8674 + i}")
         append("k".repeat(160))
     }
 }

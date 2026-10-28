@@ -1,7 +1,7 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import androidx.compose.runtime.Stable
-import sh.roboco.android.transcript.TranscriptState
+import sh.zeron.android.transcript.TranscriptState
 
 /**
  * Per Session screen state (android-ui-parity #75): everything that must

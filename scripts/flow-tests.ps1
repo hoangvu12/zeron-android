@@ -9,15 +9,15 @@
 #   2. SDK pieces: emulator, platform-tools, and the system image:
 #        sdkmanager "emulator" "platform-tools" "system-images;android-36;google_apis;x86_64"
 #   3. The AVD:
-#        avdmanager create avd -n roboco36 -k "system-images;android-36;google_apis;x86_64" -d pixel_7
+#        avdmanager create avd -n zeron36 -k "system-images;android-36;google_apis;x86_64" -d pixel_7
 #   4. `emulator -accel-check` must report WHPX, then
-#        emulator -avd roboco36 -no-snapshot-save
+#        emulator -avd zeron36 -no-snapshot-save
 #   5. The Rust core toolchain (the fixture is a host binary):
 #        rustup target add x86_64-linux-android   # for the app's core
 #        cargo install cargo-ndk                  # NDK r28+ (28.2.13676358)
 #   6. Build the fixture and the app core (sccache picks both up; add this
 #      worktree's root to sccache's basedirs, docs/reference/windows-development.md):
-#        cargo build --locked -p roboco-engine --example android_fixture
+#        cargo build --locked -p zeron-engine --example android_fixture
 #
 # Usage (the emulator must be attached):
 #   apps\android\scripts\flow-tests.ps1
@@ -40,7 +40,7 @@ $Artifacts = 'app\build\flow-artifacts'
 New-Item -ItemType Directory -Force -Path $Artifacts | Out-Null
 
 if (-not (Test-Path $FixtureBin)) {
-  Write-Error "flow-tests: $FixtureBin is missing - build it first: cargo build --locked -p roboco-engine --example android_fixture"
+  Write-Error "flow-tests: $FixtureBin is missing - build it first: cargo build --locked -p zeron-engine --example android_fixture"
 }
 
 # The mock-harness env knobs (§5's table) are set by the fixture binary
@@ -82,7 +82,7 @@ try {
   }
 
   # 3. The suite. The device filters (@Tour, @TabletOnly, @PhysicalDeviceOnly,
-  #    @Ignore) live in the app's RobocoTestRunner: a comma-separated
+  #    @Ignore) live in the app's ZeronTestRunner: a comma-separated
   #    notAnnotation argument arrived cut at its first comma on CI.
   .\gradlew.bat :app:connectedDebugAndroidTest `
     "-Pandroid.testInstrumentationRunnerArguments.fixtureMain=http://127.0.0.1:$MainControl" `
@@ -100,9 +100,9 @@ finally {
   }
   Start-Sleep -Seconds 1
   adb logcat -d > (Join-Path $Artifacts 'logcat.txt') 2>$null
-  adb pull /sdcard/Android/data/sh.roboco.android/files (Join-Path $Artifacts 'app-files') 2>$null
-  adb shell "ls /sdcard/roboco-tour-*.mp4" 2>$null
+  adb pull /sdcard/Android/data/sh.zeron.android/files (Join-Path $Artifacts 'app-files') 2>$null
+  adb shell "ls /sdcard/zeron-tour-*.mp4" 2>$null
   if ($LASTEXITCODE -eq 0) {
-    adb pull /sdcard/roboco-tour-*.mp4 $Artifacts 2>$null
+    adb pull /sdcard/zeron-tour-*.mp4 $Artifacts 2>$null
   }
 }

@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -22,20 +22,20 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.composer.ComposerBar
-import sh.roboco.android.composer.ComposerChip
-import sh.roboco.android.composer.ComposerController
-import sh.roboco.android.composer.ChipIcon
-import sh.roboco.android.composer.rememberComposerController
-import sh.roboco.android.composer.rememberComposerMorphState
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.WallpaperHero
-import sh.roboco.android.design.WallpaperRender
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.wallpaperFixture
+import sh.zeron.android.composer.ComposerBar
+import sh.zeron.android.composer.ComposerChip
+import sh.zeron.android.composer.ComposerController
+import sh.zeron.android.composer.ChipIcon
+import sh.zeron.android.composer.rememberComposerController
+import sh.zeron.android.composer.rememberComposerMorphState
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.WallpaperHero
+import sh.zeron.android.design.WallpaperRender
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.wallpaperFixture
 
 /**
  * The New Session canvas's goldens (android-ui-parity #93): the ticket's
@@ -53,8 +53,8 @@ import sh.roboco.android.design.wallpaperFixture
  * testable core over [wallpaperFixture].
  *
  * Record with `./gradlew :app:recordRoborazziDebug --tests
- * sh.roboco.android.newsession.NewSessionCanvasScreenshotTest --tests
- * sh.roboco.android.newsession.NewSessionCanvasEmbeddedScreenshotTest`,
+ * sh.zeron.android.newsession.NewSessionCanvasScreenshotTest --tests
+ * sh.zeron.android.newsession.NewSessionCanvasEmbeddedScreenshotTest`,
  * verify with `:app:verifyRoborazziDebug --tests …`, then review side by
  * side with an iOS 26 simulator run of `testNewSessionFromAccessory` and
  * `testNewSessionHeadlineStaysAboveComposer`.
@@ -172,12 +172,12 @@ private fun goldenShot(
     width: Dp? = null,
 ) {
     compose.setContent {
-        RobocoTheme(appearance) {
+        ZeronTheme(appearance) {
             // The real ComposerBar's attach button opens its menu through
             // rememberGlassMenuState, which throws without a GlassMenuHost
             // above (production: RootHosts mounts it above every sheet).
             GlassMenuHost {
-                Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+                Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                     Box(
                         Modifier
                             .then(if (width != null) Modifier.width(width) else Modifier.fillMaxSize())
@@ -222,7 +222,7 @@ private fun goldenComposerConfig(controller: ComposerController) {
     controller.placeholder = "Describe the task"
     controller.canWrite = true
     controller.chips = listOf(
-        ComposerChip("project", "roboco", icon = ChipIcon.Project("roboco", 0)),
+        ComposerChip("project", "zeron", icon = ChipIcon.Project("zeron", 0)),
         ComposerChip("model", "Opus 4.5", icon = ChipIcon.Brand("claude-code")),
     )
 }

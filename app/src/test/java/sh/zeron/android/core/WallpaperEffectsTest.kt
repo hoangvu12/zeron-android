@@ -1,10 +1,10 @@
-package sh.roboco.android.core
+package sh.zeron.android.core
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import uniffi.roboco_core.WallpaperEffect
+import uniffi.zeron_core.WallpaperEffect
 
 /**
  * The effect catalogue, character for character

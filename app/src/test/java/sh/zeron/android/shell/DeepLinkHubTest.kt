@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import java.util.Base64
 import org.junit.After
@@ -104,18 +104,18 @@ class DeepLinkHubTest {
     fun pairIsHeldThenDeliveredEvenOnThePairingRoot() {
         val hub = hub()
         hub.showingPairingRoot(true)
-        hub.submit(DeepLink.Pair("roboco://pair#url=x"))
+        hub.submit(DeepLink.Pair("zeron://pair#url=x"))
         // Held, not dropped, while the pairing root is on screen.
         val received = mutableListOf<String>()
         val unregister = hub.registerPairingHandler { link -> received.add(link) }
-        assertEquals(listOf("roboco://pair#url=x"), received)
+        assertEquals(listOf("zeron://pair#url=x"), received)
         unregister()
         // After unregistering, a pair link is held again.
-        hub.submit(DeepLink.Pair("roboco://pair#url=y"))
-        assertEquals(listOf("roboco://pair#url=x"), received)
+        hub.submit(DeepLink.Pair("zeron://pair#url=y"))
+        assertEquals(listOf("zeron://pair#url=x"), received)
         val second = mutableListOf<String>()
         hub.registerPairingHandler { link -> second.add(link) }
-        assertEquals(listOf("roboco://pair#url=y"), second)
+        assertEquals(listOf("zeron://pair#url=y"), second)
     }
 
     @Test
@@ -123,7 +123,7 @@ class DeepLinkHubTest {
         val router = FakeRouter()
         val hub = hub()
         hub.attachRouter(router)
-        hub.submit(DeepLink.Pair("roboco://pair"))
+        hub.submit(DeepLink.Pair("zeron://pair"))
         assertTrue(router.calls.isEmpty())
     }
 

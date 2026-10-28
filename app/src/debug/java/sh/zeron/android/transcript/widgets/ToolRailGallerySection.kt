@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,10 +24,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlin.math.min
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
 
 /**
  * The "Tool rail" section of the debug design gallery (ticket 121): the
@@ -95,7 +95,7 @@ fun ToolRailFixture(
     token: Any?,
     modifier: Modifier = Modifier,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val height = railHeightDp(spec)
     Box(modifier.width(390.dp).height(height).background(palette.background)) {
         RailStandIns(spec)
@@ -118,7 +118,7 @@ private fun railHeightDp(spec: RailSpec): Dp =
  */
 @Composable
 private fun RailStandIns(spec: RailSpec) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     for (i in 0 until spec.count) {
         val top = spec.tops[i]
         Box(
@@ -179,7 +179,7 @@ private fun LiveRailDemo() {
 private fun Caption(text: String) {
     BasicText(
         text,
-        style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(13.5f), RobocoTheme.palette.secondary),
+        style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(13.5f), ZeronTheme.palette.secondary),
     )
 }
 
@@ -188,7 +188,7 @@ private fun Caption(text: String) {
 private fun DemoChip(text: String, onClick: () -> Unit) {
     BasicText(
         text,
-        style = uiStyle(Face.SansMedium, LocalTypeScale.current.fixed(14f), RobocoTheme.palette.accent),
+        style = uiStyle(Face.SansMedium, LocalTypeScale.current.fixed(14f), ZeronTheme.palette.accent),
         modifier = Modifier
             .clickable(interactionSource = null, indication = null, onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 6.dp),

@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
@@ -38,7 +38,7 @@ class StatusTone(
  * a warm paper grey, dark is true black; the accent is a single violet.
  * Colours are paint-only — nothing here affects layout.
  *
- * [Light] and [Dark] are immutable singletons; [RobocoTheme] picks between
+ * [Light] and [Dark] are immutable singletons; [ZeronTheme] picks between
  * them, and non-Compose code (notifications, Canvas painters, Views) uses
  * [of].
  */
@@ -119,7 +119,7 @@ class Palette private constructor(
 
             return Palette(
                 isDark = isDark,
-                // Roboco Light / Roboco Dark (crates/theme builtins): cool neutrals,
+                // Zeron Light / Zeron Dark (crates/theme builtins): cool neutrals,
                 // violet accent. iOS draws the builtin shell, not `background`.
                 background = d(0xF3F3F5, 0x060606),
                 rowActive = if (isDark) rgba(0xFFFFFF, 0.06) else rgba(0xFFFFFF, 0.9), // dual(white 0.9, white 0.06)

@@ -1,4 +1,4 @@
-package sh.roboco.android.notify
+package sh.zeron.android.notify
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -16,8 +16,8 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import sh.roboco.android.MainActivity
-import sh.roboco.android.R
+import sh.zeron.android.MainActivity
+import sh.zeron.android.R
 
 /**
  * The notification copy that has no per-kind owner (android-app#28,
@@ -29,10 +29,10 @@ import sh.roboco.android.R
  */
 object NotifyCopy {
     const val LinkLostTitle = "Connection unavailable"
-    const val LinkLostReconnecting = "Roboco is trying to reconnect"
+    const val LinkLostReconnecting = "Zeron is trying to reconnect"
     const val LinkLostOffline = "Your device is offline"
     const val BudgetTitle = "Background updates paused"
-    const val BudgetText = "Open Roboco to resume."
+    const val BudgetText = "Open Zeron to resume."
 }
 
 /**
@@ -339,7 +339,7 @@ class Notifier(private val context: Context) {
         val intent = Intent(context, MainActivity::class.java).apply {
             action = Intent.ACTION_VIEW
             if (chatId != null) {
-                data = Uri.parse("roboco://chat/$chatId")
+                data = Uri.parse("zeron://chat/$chatId")
             }
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
@@ -373,11 +373,11 @@ class Notifier(private val context: Context) {
     }
 
     private companion object {
-        const val TAG = "RobocoNotify"
+        const val TAG = "ZeronNotify"
         const val CHANNEL_VERSION = 1
         const val NOTIFICATION_ID = 1
         const val BUDGET_TAG = "budget"
-        val SMALL_ICON = R.drawable.zi_roboco_bow
+        val SMALL_ICON = R.drawable.zi_zeron_bow
     }
 }
 
@@ -393,7 +393,7 @@ private fun NotificationKind.chimeResource(): String = when (this) {
     NotificationKind.Failed -> "chime_attention"
 }
 
-/** The system-settings channel name of a kind (Roboco web's labels). */
+/** The system-settings channel name of a kind (Zeron web's labels). */
 private fun NotificationKind.channelName(): String = when (this) {
     NotificationKind.Done -> "Task completed"
     NotificationKind.Input -> "Input required"

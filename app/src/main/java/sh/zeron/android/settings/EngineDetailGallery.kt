@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -12,11 +12,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
 
 /**
  * The "Engine detail" page of the debug design gallery (android-ui-parity
@@ -52,7 +52,7 @@ fun EngineDetailGallerySection() {
     Column(Modifier.widthIn(max = 402.dp)) {
         engineDetailGalleryFixtures.forEach { fixture ->
             EngineDetailCaption(fixture.label)
-            Box(Modifier.fillMaxWidth().background(RobocoTheme.palette.background)) {
+            Box(Modifier.fillMaxWidth().background(ZeronTheme.palette.background)) {
                 EngineDetailCards(
                     ui = fixture.ui,
                     copied = fixture.copied,
@@ -139,7 +139,7 @@ private val engineDetailGalleryFixtures = listOf(
             lastConnected = "3d ago",
             deviceId = "3f9c2a7e-5b1d-4c8e-9a6f-0d2e4b7c1a95",
             footer = EngineFooter(
-                "Build box runs an older Roboco (0.8.0). Update Roboco on that device to connect.",
+                "Build box runs an older Zeron (0.8.0). Update Zeron on that device to connect.",
                 FooterTone.Error,
             ),
             canRename = false,
@@ -152,7 +152,7 @@ private val engineDetailGalleryFixtures = listOf(
         ui = connectedGalleryUi.copy(
             version = "v0.10.0",
             footer = EngineFooter(
-                "MacBook Pro runs Roboco 0.10.0, newer than this app (0.9.2). " +
+                "MacBook Pro runs Zeron 0.10.0, newer than this app (0.9.2). " +
                     "Everything should keep working; if something looks wrong, update the app.",
                 FooterTone.Notice,
             ),
@@ -164,7 +164,7 @@ private val engineDetailGalleryFixtures = listOf(
 @Composable
 private fun EngineDetailCaption(text: String) {
     val typeScale = LocalTypeScale.current
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     BasicText(
         text,
         style = uiStyle(Face.Sans, typeScale.fixed(12f), palette.secondary),
@@ -175,8 +175,8 @@ private fun EngineDetailCaption(text: String) {
 @Preview(name = "light")
 @Composable
 private fun EngineDetailGalleryLightPreview() {
-    RobocoTheme(Appearance.Light) {
-        Box(Modifier.background(RobocoTheme.palette.background)) {
+    ZeronTheme(Appearance.Light) {
+        Box(Modifier.background(ZeronTheme.palette.background)) {
             EngineDetailGallerySection()
         }
     }
@@ -185,8 +185,8 @@ private fun EngineDetailGalleryLightPreview() {
 @Preview(name = "dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun EngineDetailGalleryDarkPreview() {
-    RobocoTheme(Appearance.Dark) {
-        Box(Modifier.background(RobocoTheme.palette.background)) {
+    ZeronTheme(Appearance.Dark) {
+        Box(Modifier.background(ZeronTheme.palette.background)) {
             EngineDetailGallerySection()
         }
     }
@@ -196,8 +196,8 @@ private fun EngineDetailGalleryDarkPreview() {
 @Preview(name = "connected-light")
 @Composable
 private fun EngineDetailConnectedLightPreview() {
-    RobocoTheme(Appearance.Light) {
-        Box(Modifier.background(RobocoTheme.palette.background)) {
+    ZeronTheme(Appearance.Light) {
+        Box(Modifier.background(ZeronTheme.palette.background)) {
             EngineDetailCards(
                 ui = engineDetailGalleryFixtures[0].ui,
                 copied = false,
@@ -215,8 +215,8 @@ private fun EngineDetailConnectedLightPreview() {
 @Preview(name = "revoked-dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun EngineDetailRevokedDarkPreview() {
-    RobocoTheme(Appearance.Dark) {
-        Box(Modifier.background(RobocoTheme.palette.background)) {
+    ZeronTheme(Appearance.Dark) {
+        Box(Modifier.background(ZeronTheme.palette.background)) {
             EngineDetailCards(
                 ui = engineDetailGalleryFixtures[2].ui,
                 copied = false,

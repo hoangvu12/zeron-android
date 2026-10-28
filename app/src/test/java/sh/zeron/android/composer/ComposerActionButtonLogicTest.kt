@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -7,9 +7,9 @@ import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.glass.MenuIcon
-import sh.roboco.android.design.glass.MenuItem
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.glass.MenuIcon
+import sh.zeron.android.design.glass.MenuItem
 
 /**
  * [actionButtonLook] and [deliveryMenu] (android-ui-parity #58) — the pure
@@ -61,14 +61,14 @@ class ComposerActionButtonLogicTest {
         // 1. Idle, empty, writable: the disabled send.
         assertLook(
             ComposerController.deriveAction(running = false, hasContent = false, canWrite = true, canSteer = false, preferred = DeliveryMode.Queue),
-            visual = ComposerAction.Send, icon = RobocoIcons.ArrowUp, iconPt = ActionButtonTokens.SendIconPt,
+            visual = ComposerAction.Send, icon = ZeronIcons.ArrowUp, iconPt = ActionButtonTokens.SendIconPt,
             fill = ActionFill.ControlFill, ink = ActionInk.Tertiary, enabled = false,
             a11y = "Send message", hasMenu = false,
         )
         // 2. Idle with content: accent send, white arrow.
         assertLook(
             ComposerController.deriveAction(running = false, hasContent = true, canWrite = true, canSteer = false, preferred = DeliveryMode.Queue),
-            visual = ComposerAction.Send, icon = RobocoIcons.ArrowUp, iconPt = ActionButtonTokens.SendIconPt,
+            visual = ComposerAction.Send, icon = ZeronIcons.ArrowUp, iconPt = ActionButtonTokens.SendIconPt,
             fill = ActionFill.Accent, ink = ActionInk.White, enabled = true,
             a11y = "Send message", hasMenu = false,
         )
@@ -77,7 +77,7 @@ class ComposerActionButtonLogicTest {
         for (hasContent in listOf(false, true)) {
             assertLook(
                 ComposerController.deriveAction(running = false, hasContent = hasContent, canWrite = false, canSteer = false, preferred = DeliveryMode.Queue),
-                visual = ComposerAction.Send, icon = RobocoIcons.ArrowUp, iconPt = ActionButtonTokens.SendIconPt,
+                visual = ComposerAction.Send, icon = ZeronIcons.ArrowUp, iconPt = ActionButtonTokens.SendIconPt,
                 fill = ActionFill.ControlFill, ink = ActionInk.Tertiary, enabled = false,
                 a11y = "Send message", hasMenu = false,
             )
@@ -85,7 +85,7 @@ class ComposerActionButtonLogicTest {
         // 5. Running, empty: the inverted stop.
         assertLook(
             ComposerController.deriveAction(running = true, hasContent = false, canWrite = true, canSteer = false, preferred = DeliveryMode.Queue),
-            visual = ComposerAction.Stop, icon = RobocoIcons.StopFill, iconPt = ActionButtonTokens.StopIconPt,
+            visual = ComposerAction.Stop, icon = ZeronIcons.StopFill, iconPt = ActionButtonTokens.StopIconPt,
             fill = ActionFill.Text, ink = ActionInk.Background, enabled = true,
             a11y = "Stop response", hasMenu = false,
         )
@@ -93,14 +93,14 @@ class ComposerActionButtonLogicTest {
         // visual action is Send — the grey arrow, never a grey stop square.
         assertLook(
             ComposerController.deriveAction(running = true, hasContent = false, canWrite = false, canSteer = false, preferred = DeliveryMode.Queue),
-            visual = ComposerAction.Send, icon = RobocoIcons.ArrowUp, iconPt = ActionButtonTokens.SendIconPt,
+            visual = ComposerAction.Send, icon = ZeronIcons.ArrowUp, iconPt = ActionButtonTokens.SendIconPt,
             fill = ActionFill.ControlFill, ink = ActionInk.Tertiary, enabled = false,
             a11y = "Send message", hasMenu = false,
         )
         // 7. Running with content, no steering support: queue look, menu.
         assertLook(
             ComposerController.deriveAction(running = true, hasContent = true, canWrite = true, canSteer = false, preferred = DeliveryMode.Queue),
-            visual = ComposerAction.Queue, icon = RobocoIcons.ArrowUp, iconPt = ActionButtonTokens.SendIconPt,
+            visual = ComposerAction.Queue, icon = ZeronIcons.ArrowUp, iconPt = ActionButtonTokens.SendIconPt,
             fill = ActionFill.Accent, ink = ActionInk.White, enabled = true,
             a11y = "Queue message", hasMenu = true,
         )
@@ -108,14 +108,14 @@ class ComposerActionButtonLogicTest {
         // label switches to "Steer"; the look does not.
         assertLook(
             ComposerController.deriveAction(running = true, hasContent = true, canWrite = true, canSteer = true, preferred = DeliveryMode.Steer),
-            visual = ComposerAction.Queue, icon = RobocoIcons.ArrowUp, iconPt = ActionButtonTokens.SendIconPt,
+            visual = ComposerAction.Queue, icon = ZeronIcons.ArrowUp, iconPt = ActionButtonTokens.SendIconPt,
             fill = ActionFill.Accent, ink = ActionInk.White, enabled = true,
             a11y = "Steer", hasMenu = true,
         )
         // 9. Steer preferred but unsupported: plain queue.
         assertLook(
             ComposerController.deriveAction(running = true, hasContent = true, canWrite = true, canSteer = false, preferred = DeliveryMode.Steer),
-            visual = ComposerAction.Queue, icon = RobocoIcons.ArrowUp, iconPt = ActionButtonTokens.SendIconPt,
+            visual = ComposerAction.Queue, icon = ZeronIcons.ArrowUp, iconPt = ActionButtonTokens.SendIconPt,
             fill = ActionFill.Accent, ink = ActionInk.White, enabled = true,
             a11y = "Queue message", hasMenu = true,
         )
@@ -123,7 +123,7 @@ class ComposerActionButtonLogicTest {
         // the disabled send look, no menu.
         assertLook(
             ComposerController.deriveAction(running = true, hasContent = true, canWrite = false, canSteer = true, preferred = DeliveryMode.Steer),
-            visual = ComposerAction.Send, icon = RobocoIcons.ArrowUp, iconPt = ActionButtonTokens.SendIconPt,
+            visual = ComposerAction.Send, icon = ZeronIcons.ArrowUp, iconPt = ActionButtonTokens.SendIconPt,
             fill = ActionFill.ControlFill, ink = ActionInk.Tertiary, enabled = false,
             a11y = "Send message", hasMenu = false,
         )
@@ -136,7 +136,7 @@ class ComposerActionButtonLogicTest {
         for (action in listOf(ComposerAction.Stop, ComposerAction.Queue)) {
             assertLook(
                 ActionState(action, enabled = false, steering = true, deliveryMenu = true),
-                visual = ComposerAction.Send, icon = RobocoIcons.ArrowUp, iconPt = ActionButtonTokens.SendIconPt,
+                visual = ComposerAction.Send, icon = ZeronIcons.ArrowUp, iconPt = ActionButtonTokens.SendIconPt,
                 fill = ActionFill.ControlFill, ink = ActionInk.Tertiary, enabled = false,
                 a11y = "Send message", hasMenu = false,
             )
@@ -177,7 +177,7 @@ class ComposerActionButtonLogicTest {
         val queue = menu.children[0] as MenuItem
         assertEquals("Queue for next turn", queue.title)
         assertNull(queue.subtitle)
-        assertEquals(MenuIcon.Symbol(RobocoIcons.QueueForNextTurn), queue.icon)
+        assertEquals(MenuIcon.Symbol(ZeronIcons.QueueForNextTurn), queue.icon)
         assertFalse(queue.destructive)
         assertEquals("composer-delivery-queue", queue.testTag)
         queue.action()
@@ -186,7 +186,7 @@ class ComposerActionButtonLogicTest {
         val steer = menu.children[1] as MenuItem
         assertEquals("Steer now", steer.title)
         assertEquals("Deliver into the running turn", steer.subtitle)
-        assertEquals(MenuIcon.Symbol(RobocoIcons.ArrowTurnDownRight), steer.icon)
+        assertEquals(MenuIcon.Symbol(ZeronIcons.ArrowTurnDownRight), steer.icon)
         assertFalse(steer.destructive)
         assertEquals("composer-delivery-steer", steer.testTag)
         steer.action()
@@ -195,7 +195,7 @@ class ComposerActionButtonLogicTest {
         val interrupt = menu.children[2] as MenuItem
         assertEquals("Stop and send", interrupt.title)
         assertNull(interrupt.subtitle)
-        assertEquals(MenuIcon.Symbol(RobocoIcons.StopCircle), interrupt.icon)
+        assertEquals(MenuIcon.Symbol(ZeronIcons.StopCircle), interrupt.icon)
         assertTrue("the third row is destructive", interrupt.destructive)
         assertEquals("composer-delivery-interrupt", interrupt.testTag)
         interrupt.action()

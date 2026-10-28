@@ -16,7 +16,7 @@ plugins {
 // ---------------------------------------------------------------------------
 
 android {
-    namespace = "sh.roboco.android.benchmark"
+    namespace = "sh.zeron.android.benchmark"
     compileSdk = 37
 
     defaultConfig {

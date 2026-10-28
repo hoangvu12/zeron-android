@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -16,12 +16,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
 
 /**
  * The "Section header" fixtures (android-ui-parity #39): the ticket's
@@ -76,7 +76,7 @@ internal object SectionHeaderFixtures {
  */
 @Composable
 fun SectionHeaderGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
     var states by remember { mutableStateOf(SectionHeaderFixtures.all) }
     Column(Modifier.background(palette.background)) {
@@ -111,11 +111,11 @@ fun SectionHeaderGallerySection() {
 /** The ticket's preview body: the six fixtures plus a pressed seventh row. */
 @Composable
 private fun SectionHeaderPreviewBody(appearance: Appearance) {
-    RobocoTheme(appearance) {
+    ZeronTheme(appearance) {
         // Frozen at 0 ns: the spinner rows render the cycle-0 pattern and
         // the preview never starts a frame loop.
         ProvideGlyphClock(frozenAtNanos = 0L) {
-            Column(Modifier.background(RobocoTheme.palette.background)) {
+            Column(Modifier.background(ZeronTheme.palette.background)) {
                 SectionHeaderFixtures.all.forEach { SectionHeaderRow(it, highlight = { 0f }) }
                 SectionHeaderRow(SectionHeaderFixtures.all[1], highlight = { 1f })
             }

@@ -1,4 +1,4 @@
-package sh.roboco.android.image
+package sh.zeron.android.image
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect

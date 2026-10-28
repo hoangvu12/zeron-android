@@ -1,4 +1,4 @@
-package sh.roboco.android.sidechats
+package sh.zeron.android.sidechats
 
 import android.util.Log
 import androidx.compose.runtime.Stable
@@ -8,8 +8,8 @@ import androidx.compose.runtime.setValue
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import sh.roboco.android.design.Toaster
-import uniffi.roboco_core.CoreException
+import sh.zeron.android.design.Toaster
+import uniffi.zeron_core.CoreException
 
 /** The fork's failure copy, verbatim from upstream #899's `AppModel.forkSideChat`. */
 object SideChatForkCopy {
@@ -49,7 +49,7 @@ class SideChatFork(
     private val fork: suspend (sourceId: String) -> String,
     private val scope: CoroutineScope,
     private val toaster: Toaster,
-    private val logW: (String, Throwable?) -> Unit = { message, error -> Log.w("RobocoSideChats", message, error) },
+    private val logW: (String, Throwable?) -> Unit = { message, error -> Log.w("ZeronSideChats", message, error) },
 ) {
     var forking: Boolean by mutableStateOf(false)
         private set

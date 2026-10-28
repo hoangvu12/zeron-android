@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -27,13 +27,13 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.NoFeedback
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.hairlineBorder
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.NoFeedback
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.hairlineBorder
+import sh.zeron.android.design.uiStyle
 
 /**
  * The "Composer text field" page of the debug design gallery
@@ -97,7 +97,7 @@ fun ComposerTextFieldFixture(
     if (focused) {
         LaunchedEffect(requester) { runCatching { requester.requestFocus() } }
     }
-    Box(Modifier.width(slotWidth).hairlineBorder(RobocoTheme.palette.hairline, RectangleShape)) {
+    Box(Modifier.width(slotWidth).hairlineBorder(ZeronTheme.palette.hairline, RectangleShape)) {
         ComposerTextField(
             controller = controller,
             isCard = isCard,
@@ -141,7 +141,7 @@ fun ComposerTextFieldGallerySection() {
  */
 @Composable
 private fun ComposerTextFieldLiveFixture() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val scope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
@@ -192,8 +192,8 @@ private fun ComposerTextFieldLiveFixture() {
 @Preview(name = "Composer text field light")
 @Composable
 private fun ComposerTextFieldPreviewLight() {
-    RobocoTheme(Appearance.Light) {
-        Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background).padding(16.dp)) {
+    ZeronTheme(Appearance.Light) {
+        Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background).padding(16.dp)) {
             ComposerTextFieldGalleryStages()
         }
     }
@@ -202,8 +202,8 @@ private fun ComposerTextFieldPreviewLight() {
 @Preview(name = "Composer text field dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun ComposerTextFieldPreviewDark() {
-    RobocoTheme(Appearance.Dark) {
-        Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background).padding(16.dp)) {
+    ZeronTheme(Appearance.Dark) {
+        Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background).padding(16.dp)) {
             ComposerTextFieldGalleryStages()
         }
     }

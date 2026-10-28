@@ -1,4 +1,4 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 /**
  * Authenticated encryption for small secrets, so the production

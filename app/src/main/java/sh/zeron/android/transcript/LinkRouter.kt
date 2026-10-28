@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.app.Activity
 import android.content.ActivityNotFoundException
@@ -22,8 +22,8 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import sh.roboco.android.design.LocalIsDark
-import sh.roboco.android.design.Palette
+import sh.zeron.android.design.LocalIsDark
+import sh.zeron.android.design.Palette
 
 /**
  * The platform side of link routing (ticket 126): everything that needs

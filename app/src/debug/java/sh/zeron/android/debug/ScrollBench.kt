@@ -1,7 +1,7 @@
-package sh.roboco.android.debug
+package sh.zeron.android.debug
 
 import androidx.compose.runtime.withFrameNanos
-import sh.roboco.android.transcript.TranscriptViewport
+import sh.zeron.android.transcript.TranscriptViewport
 import java.util.Locale
 import kotlin.math.max
 import kotlin.math.min

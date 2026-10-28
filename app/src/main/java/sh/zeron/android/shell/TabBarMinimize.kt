@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
@@ -22,8 +22,8 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import sh.roboco.android.design.LocalReduceMotion
-import sh.roboco.android.design.Motion
+import sh.zeron.android.design.LocalReduceMotion
+import sh.zeron.android.design.Motion
 import kotlin.math.sign
 
 /**

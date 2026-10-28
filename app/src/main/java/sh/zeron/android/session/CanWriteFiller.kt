@@ -1,16 +1,16 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
-import uniffi.roboco_core.EngineState
-import uniffi.roboco_core.EngineView
+import uniffi.zeron_core.EngineState
+import uniffi.zeron_core.EngineView
 
 /**
- * Roboco's read-only mode (android-ui-parity #79): writes to an engine
+ * Zeron's read-only mode (android-ui-parity #79): writes to an engine
  * that is not `Connected` are **refused, never queued** (android-app#06/
  * #07/#08 — the core fails them at once with
  * `HostUnavailable("Engine is offline; reconnecting")`, the same message
  * as the web client's `client.ts:260`). iOS has no such mode: upstream
  * saved sends into a cloud outbox and kept every control enabled while
- * offline. Roboco cannot save sends, so the controls switch off instead,
+ * offline. Zeron cannot save sends, so the controls switch off instead,
  * and the iOS offline banner is deliberately not ported (73's pill copy
  * replaces it).
  *
@@ -22,7 +22,7 @@ internal fun canWriteFor(engine: EngineView?): Boolean = engine?.state is Engine
 
 /**
  * Fills [SessionChrome.canWrite] (ticket 51's field and hook), registered
- * by `RobocoApplication.onCreate` in ticket 76's [ChromeFillerRegistry]
+ * by `ZeronApplication.onCreate` in ticket 76's [ChromeFillerRegistry]
  * at slot [ChromeFillerRegistry.CAN_WRITE] — 10, the first filler, so
  * later fillers (73's banner at 30) can read `chrome.canWrite`.
  *

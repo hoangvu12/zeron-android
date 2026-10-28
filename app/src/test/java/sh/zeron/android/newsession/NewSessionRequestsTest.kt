@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import androidx.compose.ui.graphics.ImageBitmap
 import org.junit.Assert.assertArrayEquals
@@ -10,15 +10,15 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import sh.roboco.android.composer.StagedImage
-import uniffi.roboco_core.BusyPolicy
-import uniffi.roboco_core.SandboxLevel
-import uniffi.roboco_core.SessionTarget
+import sh.zeron.android.composer.StagedImage
+import uniffi.zeron_core.BusyPolicy
+import uniffi.zeron_core.SandboxLevel
+import uniffi.zeron_core.SessionTarget
 
 /**
  * [NewSessionRequests] and [newSessionCanWrite] (android-ui-parity #94)
  * — the Request mapping and Offline gate tables, field by field. Runs
- * under Robolectric because it constructs `uniffi.roboco_core` records
+ * under Robolectric because it constructs `uniffi.zeron_core` records
  * (android-app#13's rule; the `StagedImage` thumb needs a platform
  * `ImageBitmap`).
  */

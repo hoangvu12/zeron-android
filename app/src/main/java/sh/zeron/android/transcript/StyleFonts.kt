@@ -1,10 +1,10 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.graphics.Paint
 import android.util.Log
-import sh.roboco.android.core.FontChain
-import uniffi.roboco_core.FaceRole
-import uniffi.roboco_core.StyleDesc
+import sh.zeron.android.core.FontChain
+import uniffi.zeron_core.FaceRole
+import uniffi.zeron_core.StyleDesc
 
 /**
  * style id → [StyleDesc] (data half, ticket 61) and style id → [Paint]
@@ -113,6 +113,6 @@ class StyleFonts(
         }
 
     private companion object {
-        const val TAG = "RobocoTranscript"
+        const val TAG = "ZeronTranscript"
     }
 }

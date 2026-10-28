@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -12,15 +12,15 @@ import org.junit.Assert.assertSame
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import sh.roboco.android.composer.QueueChromeFiller
-import sh.roboco.android.shell.RouterHooks
-import sh.roboco.android.shell.SessionRouteFactory
-import uniffi.roboco_core.ClientEvent
-import uniffi.roboco_core.EngineState
-import uniffi.roboco_core.NoHandle
-import uniffi.roboco_core.ParkReason
-import uniffi.roboco_core.QueueGate
-import uniffi.roboco_core.TextSystem
+import sh.zeron.android.composer.QueueChromeFiller
+import sh.zeron.android.shell.RouterHooks
+import sh.zeron.android.shell.SessionRouteFactory
+import uniffi.zeron_core.ClientEvent
+import uniffi.zeron_core.EngineState
+import uniffi.zeron_core.NoHandle
+import uniffi.zeron_core.ParkReason
+import uniffi.zeron_core.QueueGate
+import uniffi.zeron_core.TextSystem
 
 /** Fills nothing; distinguishes filler types for the slot-order test. */
 private class TagFiller(private val tag: String) : ChromeFiller {
@@ -28,13 +28,13 @@ private class TagFiller(private val tag: String) : ChromeFiller {
         chrome.copy(error = chrome.error?.let { "$it/$tag" } ?: tag)
 }
 
-/** A [uniffi.roboco_core.QueueItem] with only the queue filler's fields apart (82's test). */
+/** A [uniffi.zeron_core.QueueItem] with only the queue filler's fields apart (82's test). */
 private fun queueItem(
     id: String,
     text: String,
     visibleText: String = text,
     gate: QueueGate? = null,
-) = uniffi.roboco_core.QueueItem(
+) = uniffi.zeron_core.QueueItem(
     id = id,
     text = text,
     visibleText = visibleText,
@@ -181,7 +181,7 @@ class SessionRouteFactoryTest {
 
     @Test
     fun offlineEngineStillOpens() = runTest {
-        // iOS has one cloud workspace; Roboco has N engines. An offline,
+        // iOS has one cloud workspace; Zeron has N engines. An offline,
         // reconnecting or parked engine's chat opens from cache (read-only
         // via 79) — only NotFound, Closed or no client fail. And the
         // factory pre-checks nothing: the open makes exactly the first

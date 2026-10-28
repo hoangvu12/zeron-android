@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable

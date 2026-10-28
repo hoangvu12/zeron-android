@@ -1,4 +1,4 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.ui.semantics.LiveRegionMode
@@ -26,9 +26,9 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.BusySpinnerTag
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.BusySpinnerTag
 
 /**
  * The pairing root's geometry and behaviour (android-ui-parity #34) —
@@ -79,7 +79,7 @@ class PairingRootTest {
     ) {
         if (freezeClock) compose.mainClock.autoAdvance = false
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 PairingRoot(status = status, onPair = { clicks++ }, safeInsets = insets)
             }
         }
@@ -131,7 +131,7 @@ class PairingRootTest {
         assertEquals(346f, (logo.top.value + tagline.bottom.value) / 2f, 1f)
         // Line boxes: 1.3 × 34 = 44.2 and 1.3 × 17 = 22.1; the tagline is
         // one line at 393 dp (it stays one line on any window ≥ 334 dp).
-        assertEquals(44.2f, textBounds("Roboco").heightDp(), 1f)
+        assertEquals(44.2f, textBounds("Zeron").heightDp(), 1f)
         assertEquals(22.1f, tagline.heightDp(), 1f)
     }
 
@@ -182,7 +182,7 @@ class PairingRootTest {
     fun titleTaglineAndCapsuleSizesIgnoreFontScale() {
         RuntimeEnvironment.setFontScale(2f)
         host(PairingRootStatus.None)
-        assertEquals(44.2f, textBounds("Roboco").heightDp(), 1f)
+        assertEquals(44.2f, textBounds("Zeron").heightDp(), 1f)
         assertEquals(22.1f, textBounds("This phone has no paired engine yet.").heightDp(), 1f)
         val capsule = bounds("pair-engine")
         assertEquals(52.1f, capsule.heightDp(), 1.5f)
@@ -201,7 +201,7 @@ class PairingRootTest {
         assertTrue("tagline clips the start margin: left ${tagline.left.value}", tagline.left.value >= 23f)
         assertTrue("tagline clips the end margin: right ${tagline.right.value}", tagline.right.value <= 277f)
         // The title is still one line.
-        assertEquals(44.2f, textBounds("Roboco").heightDp(), 1f)
+        assertEquals(44.2f, textBounds("Zeron").heightDp(), 1f)
     }
 
     @Test
@@ -277,10 +277,10 @@ class PairingRootTest {
             Role.Button,
             compose.onNodeWithTag("pair-engine").fetchSemanticsNode().config[SemanticsProperties.Role],
         )
-        // android-next #03: the artwork tile is labelled "Roboco" (the
+        // android-next #03: the artwork tile is labelled "Zeron" (the
         // ticket's acceptance), no longer a decorative unlabelled glyph.
         val logo = compose.onNodeWithTag("pairing-root-logo").fetchSemanticsNode()
-        assertEquals(listOf("Roboco"), logo.config.getOrNull(SemanticsProperties.ContentDescription))
+        assertEquals(listOf("Zeron"), logo.config.getOrNull(SemanticsProperties.ContentDescription))
         // Android-only: TalkBack announces a redeem error politely.
         assertEquals(
             LiveRegionMode.Polite,

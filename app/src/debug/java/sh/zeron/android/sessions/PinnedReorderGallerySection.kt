@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -22,17 +22,17 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import sh.calvin.reorderable.rememberReorderableLazyListState
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalToaster
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.Toaster
-import sh.roboco.android.design.glass.GlassTextCapsule
-import sh.roboco.android.design.uiStyle
-import uniffi.roboco_core.SectionView
-import uniffi.roboco_core.SessionRow
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalToaster
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.Toaster
+import sh.zeron.android.design.glass.GlassTextCapsule
+import sh.zeron.android.design.uiStyle
+import uniffi.zeron_core.SectionView
+import uniffi.zeron_core.SessionRow
 
 /**
  * The "Pinned reorder" page of the debug design gallery
@@ -53,7 +53,7 @@ import uniffi.roboco_core.SessionRow
  */
 @Composable
 fun PinnedReorderGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val toaster = LocalToaster.current
 
@@ -134,7 +134,7 @@ private fun pinnedReorderGalleryRows(): List<SessionRow> = listOf(
 /** A toggle row: the label in `accent` when on, `secondary` when off. */
 @Composable
 private fun PinnedReorderToggleRow(text: String, checked: Boolean, onClick: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     BasicText(
         text,
@@ -197,7 +197,7 @@ private class PinnedReorderGalleryActions(
 @Preview(name = "Pinned reorder – light", widthDp = 393, heightDp = 852)
 @Composable
 private fun PinnedReorderLightPreview() {
-    RobocoTheme(Appearance.Light) {
+    ZeronTheme(Appearance.Light) {
         ProvideGlyphClock(frozenAtNanos = 0L) {
             PinnedReorderGallerySection()
         }
@@ -207,7 +207,7 @@ private fun PinnedReorderLightPreview() {
 @Preview(name = "Pinned reorder – dark", widthDp = 393, heightDp = 852, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun PinnedReorderDarkPreview() {
-    RobocoTheme(Appearance.Dark) {
+    ZeronTheme(Appearance.Dark) {
         ProvideGlyphClock(frozenAtNanos = 0L) {
             PinnedReorderGallerySection()
         }

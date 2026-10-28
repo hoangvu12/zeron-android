@@ -1,4 +1,4 @@
-package sh.roboco.android.flows
+package sh.zeron.android.flows
 
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
@@ -13,9 +13,9 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import sh.roboco.android.MainActivity
-import sh.roboco.android.RobocoApplication
-import sh.roboco.android.notify.NotificationPrefs
+import sh.zeron.android.MainActivity
+import sh.zeron.android.ZeronApplication
+import sh.zeron.android.notify.NotificationPrefs
 
 /**
  * The notification flow (android-app#28, CI-only — no emulator in the
@@ -36,7 +36,7 @@ import sh.roboco.android.notify.NotificationPrefs
  *    is open again (the `transcript` root on top).
  *
  * Run: `./gradlew :app:connectedDebugAndroidTest
- * -Pandroid.testInstrumentationRunnerArguments.class=sh.roboco.android.flows.NotificationFlowTest`.
+ * -Pandroid.testInstrumentationRunnerArguments.class=sh.zeron.android.flows.NotificationFlowTest`.
  */
 @RunWith(AndroidJUnit4::class)
 class NotificationFlowTest {
@@ -55,9 +55,9 @@ class NotificationFlowTest {
     private val device: UiDevice
         get() = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
 
-    private val app: RobocoApplication
+    private val app: ZeronApplication
         get() = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext
-            as RobocoApplication
+            as ZeronApplication
 
     @Before
     fun setUp() {
@@ -70,7 +70,7 @@ class NotificationFlowTest {
         // Notifications on: the master + every kind.
         val prefs = NotificationPrefs.get(app)
         prefs.enabled = true
-        for (kind in sh.roboco.android.notify.NotificationKind.entries) {
+        for (kind in sh.zeron.android.notify.NotificationKind.entries) {
             prefs.set(kind, true)
         }
     }

@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.CompositionLocalProvider
@@ -12,11 +12,11 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.BottomChromeInsets
-import sh.roboco.android.design.LocalBottomChrome
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.BottomChromeInsets
+import sh.zeron.android.design.LocalBottomChrome
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The Search screen's goldens (android-ui-parity #49): the ticket's four
@@ -34,7 +34,7 @@ import sh.roboco.android.design.RobocoTheme
  * cycle-0 pattern and nothing animates while capturing. Roborazzi paths
  * are relative to `roborazzi { outputDir }` (`src/test/screenshots`), so
  * the goldens land at `src/test/screenshots/sessions/`. Recorded by
- * `./gradlew :app:recordRoborazziDebug --tests sh.roboco.android.sessions.SearchScreenScreenshotTest`,
+ * `./gradlew :app:recordRoborazziDebug --tests sh.zeron.android.sessions.SearchScreenScreenshotTest`,
  * verified by `:app:verifyRoborazziDebug --tests …`, then reviewed side by
  * side with the iOS app's Search tab (title, rows, Recent on empty query)
  * and an iOS 26 system "No Results" capture for the ★ metrics.
@@ -50,7 +50,7 @@ class SearchScreenScreenshotTest {
     /** Hosts one fixture; the only `setContent` of each test. */
     private fun shot(appearance: Appearance, file: String, results: SearchResults) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 ProvideGlyphClock(frozenAtNanos = 0L) {
                     CompositionLocalProvider(LocalBottomChrome provides BottomChromeInsets(24.dp, 150.dp)) {
                         SearchScreenContent(

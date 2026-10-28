@@ -1,4 +1,4 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import java.util.Locale
 
@@ -18,7 +18,7 @@ sealed interface ScanVerdict {
      * A pairing URL, a Tailcat invite (redeemed through the in-process
      * Tailcat tunnel, android-next#02), a room invite (ADR 0011, ticket 04
      * — the Pair page joins it: scan once, reach every member) or an
-     * unwrapped `roboco://pair#url=…` — accept, close, auto-submit.
+     * unwrapped `zeron://pair#url=…` — accept, close, auto-submit.
      */
     data class Pairing(val url: String) : ScanVerdict
 }
@@ -28,17 +28,17 @@ sealed interface ScanVerdict {
  * 1–5 with 2b, in order):
  *
  * 1. `raw.trim()` empty → [ScanVerdict.Ignore];
- * 2. starts with `roboco:` (ASCII case-insensitive) → `decodePairLink`; a
+ * 2. starts with `zeron:` (ASCII case-insensitive) → `decodePairLink`; a
  *    null unwrap is [ScanVerdict.Foreign], otherwise continue at row 3 with
  *    the unwrapped string trimmed (one level only — a nested
- *    `roboco://` is not unwrapped again);
+ *    `zeron://` is not unwrapped again);
  * 2b. any `isWhitespace()`/`isISOControl()` char after the trim/unwrap →
  *    [ScanVerdict.Foreign] (a hidden newline must not fill the field);
- * 3. starts with `roboco-tailcat:` (case-sensitive, Rust's
+ * 3. starts with `zeron-tailcat:` (case-sensitive, Rust's
  *    `INVITE_PREFIX`, `crates/proto/src/tailcat.rs`) →
  *    [ScanVerdict.Pairing] — the Pair page pairs it over Tailcat
  *    (android-next#02);
- * 3b. starts with `roboco-room:` (case-sensitive, Rust's
+ * 3b. starts with `zeron-room:` (case-sensitive, Rust's
  *    `INVITE_PREFIX`, `crates/proto/src/room.rs`) →
  *    [ScanVerdict.Pairing] — the Pair page joins the room (ticket 04);
  * 4. [isPairingUrl] (ticket 72's `PairingBackend.parse` != null) →
@@ -51,21 +51,21 @@ sealed interface ScanVerdict {
 fun classifyScan(raw: String, isPairingUrl: (String) -> Boolean): ScanVerdict {
     var s = raw.trim()
     if (s.isEmpty()) return ScanVerdict.Ignore
-    if (asciiStartsWithIgnoreCase(s, "roboco:")) {
+    if (asciiStartsWithIgnoreCase(s, "zeron:")) {
         val unwrapped = decodePairLink(s) ?: return ScanVerdict.Foreign
         s = unwrapped.trim()
     }
     if (s.any { it.isWhitespace() || it.isISOControl() }) return ScanVerdict.Foreign
-    if (s.startsWith("roboco-tailcat:")) return ScanVerdict.Pairing(s)
-    if (s.startsWith("roboco-room:")) return ScanVerdict.Pairing(s)
+    if (s.startsWith("zeron-tailcat:")) return ScanVerdict.Pairing(s)
+    if (s.startsWith("zeron-room:")) return ScanVerdict.Pairing(s)
     if (isPairingUrl(s)) return ScanVerdict.Pairing(s)
     return ScanVerdict.Foreign
 }
 
 /**
- * `roboco://pair[/]#url=<pct-encoded pairing URL>` → the decoded URL, or
+ * `zeron://pair[/]#url=<pct-encoded pairing URL>` → the decoded URL, or
  * `null`. The prefix gate (before the first `#`, compared ASCII
- * case-insensitively against `roboco://pair` / `roboco://pair/`) is this
+ * case-insensitively against `zeron://pair` / `zeron://pair/`) is this
  * ticket's addition — for deep links 36's router does the equivalent
  * "host is `pair`" check; the decoding itself is [PairingLinks.urlFromDeepLink].
  */
@@ -73,7 +73,7 @@ fun decodePairLink(link: String): String? {
     val i = link.indexOf('#')
     if (i < 0) return null
     val head = link.substring(0, i).lowercase(Locale.ROOT)
-    if (head != "roboco://pair" && head != "roboco://pair/") return null
+    if (head != "zeron://pair" && head != "zeron://pair/") return null
     return PairingLinks.urlFromDeepLink(link)
 }
 
@@ -106,7 +106,7 @@ class RejectDebouncer(private val windowMs: Long = FOREIGN_CAPTION_MS) {
 }
 
 /**
- * `s.startsWith(prefix)` with ASCII-only case folding (`roboco:` in any
+ * `s.startsWith(prefix)` with ASCII-only case folding (`zeron:` in any
  * case); `String.lowercase()` is Unicode-aware and folds chars like the
  * Kelvin sign into ASCII, which the grammar does not.
  */

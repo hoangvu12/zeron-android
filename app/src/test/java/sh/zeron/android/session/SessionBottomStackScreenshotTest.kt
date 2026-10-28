@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -19,10 +19,10 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
 
 /**
  * The bottom stack's goldens (android-ui-parity #74): the ticket's
@@ -69,7 +69,7 @@ class SessionBottomStackScreenshotTest {
 
     private fun shot(appearance: Appearance, file: String, content: @Composable () -> Unit) {
         compose.setContent {
-            RobocoTheme(appearance) { content() }
+            ZeronTheme(appearance) { content() }
         }
         compose.waitForIdle()
         compose.mainClock.advanceTimeByFrame()
@@ -172,7 +172,7 @@ class SessionBottomStackScreenshotTest {
     @Test
     fun theFadeIsSolidAtTheComposerAndClear44Above() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 BottomStackStandIn(model = BottomStackModel(), imeOverride = 24.dp)
             }
         }

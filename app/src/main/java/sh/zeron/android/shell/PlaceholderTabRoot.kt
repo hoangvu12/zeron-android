@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,11 +19,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.LocalBottomChrome
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.LocalBottomChrome
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.uiStyle
 
 /**
  * Placeholder rows per tab (items 1…40); the interim content until
@@ -47,7 +47,7 @@ private const val PLACEHOLDER_ROWS = 40
  */
 @Composable
 fun PlaceholderTabRoot(tab: TabId) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val listState = rememberLazyListState()
     RegisterScrollToTop(listState)
@@ -98,7 +98,7 @@ fun PlaceholderTabRoot(tab: TabId) {
  */
 @Composable
 fun PlaceholderDetail(route: PlaceholderDetailRoute) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     Box(
         modifier = Modifier
             .fillMaxSize()

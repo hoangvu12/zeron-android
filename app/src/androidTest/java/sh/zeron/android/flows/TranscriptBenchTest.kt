@@ -1,4 +1,4 @@
-package sh.roboco.android.flows
+package sh.zeron.android.flows
 
 import android.content.Intent
 import android.os.Build
@@ -9,7 +9,7 @@ import org.junit.Assume.assumeTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.json.JSONObject
-import sh.roboco.android.debug.TranscriptLabActivity
+import sh.zeron.android.debug.TranscriptLabActivity
 import java.io.File
 
 /**

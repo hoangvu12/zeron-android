@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.launch

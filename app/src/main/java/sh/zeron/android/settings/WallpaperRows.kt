@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import android.content.ActivityNotFoundException
 import android.net.Uri
@@ -19,20 +19,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.flow.StateFlow
-import sh.roboco.android.core.WallpaperEffects
-import sh.roboco.android.core.WallpaperStore
-import sh.roboco.android.design.ActionSheetAction
-import sh.roboco.android.design.ActionSheetModel
-import sh.roboco.android.design.ActionSheetPresenter
-import sh.roboco.android.design.GroupedAccessory
-import sh.roboco.android.design.GroupedPosition
-import sh.roboco.android.design.GroupedRow
-import sh.roboco.android.design.LocalActionSheet
-import sh.roboco.android.design.RobocoIcon
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.groupedSection
-import sh.roboco.android.design.settingsTag
-import uniffi.roboco_core.WallpaperEffect
+import sh.zeron.android.core.WallpaperEffects
+import sh.zeron.android.core.WallpaperStore
+import sh.zeron.android.design.ActionSheetAction
+import sh.zeron.android.design.ActionSheetModel
+import sh.zeron.android.design.ActionSheetPresenter
+import sh.zeron.android.design.GroupedAccessory
+import sh.zeron.android.design.GroupedPosition
+import sh.zeron.android.design.GroupedRow
+import sh.zeron.android.design.LocalActionSheet
+import sh.zeron.android.design.ZeronIcon
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.groupedSection
+import sh.zeron.android.design.settingsTag
+import uniffi.zeron_core.WallpaperEffect
 
 /**
  * The "Wallpaper" section of the Settings screen (android-ui-parity #97):
@@ -81,7 +81,7 @@ data class WallpaperRowSpec(
     val id: String,
     val title: String,
     val subtitle: String?,
-    val icon: RobocoIcon,
+    val icon: ZeronIcon,
     val destructive: Boolean,
     val accessories: List<GroupedAccessory>,
 )
@@ -101,7 +101,7 @@ fun wallpaperRows(state: WallpaperStore.State): List<WallpaperRowSpec> {
         id = WallpaperRowIds.Choose,
         title = if (state.set) "Change Wallpaper\u2026" else "Choose Wallpaper\u2026",
         subtitle = if (state.set) state.name else "Shown behind new chats and the sessions list",
-        icon = RobocoIcons.Photo,
+        icon = ZeronIcons.Photo,
         destructive = false,
         accessories = listOf(GroupedAccessory.Disclosure),
     )
@@ -113,7 +113,7 @@ fun wallpaperRows(state: WallpaperStore.State): List<WallpaperRowSpec> {
             id = WallpaperRowIds.Effect,
             title = "Effect",
             subtitle = "${WallpaperEffects.label(effect)} \u2014 ${WallpaperEffects.detail(effect)}",
-            icon = RobocoIcons.WandAndStars,
+            icon = ZeronIcons.WandAndStars,
             destructive = false,
             accessories = listOf(GroupedAccessory.Disclosure),
         ),
@@ -121,7 +121,7 @@ fun wallpaperRows(state: WallpaperStore.State): List<WallpaperRowSpec> {
             id = WallpaperRowIds.Remove,
             title = "Remove Wallpaper",
             subtitle = null,
-            icon = RobocoIcons.Trash,
+            icon = ZeronIcons.Trash,
             destructive = true,
             accessories = emptyList(),
         ),

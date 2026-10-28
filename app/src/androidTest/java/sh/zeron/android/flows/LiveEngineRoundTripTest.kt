@@ -1,4 +1,4 @@
-package sh.roboco.android.flows
+package sh.zeron.android.flows
 
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -11,19 +11,19 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import sh.roboco.android.MainActivity
+import sh.zeron.android.MainActivity
 
 /**
  * The Android port of `uit:LiveStackTests.swift`'s
  * `testSendRoundTripsThroughRealEngine` (android-app#30): the whole
  * pairing path a real user takes — **no debug `pair` extra**. The test
  * mints a fresh pairing URL from the rig's control endpoint, types it
- * into the visible pairing root's Pair page (the Roboco adaptation of
+ * into the visible pairing root's Pair page (the Zeron adaptation of
  * upstream's edge sign-in: no cloud, the phone pairs with the engine
  * directly, ADR 0004), submits, then a new session → send → the mock
  * harness's reply streams back and the turn settles.
  *
- * Upstream ran this against a `wrangler dev` edge; Roboco's "real stack"
+ * Upstream ran this against a `wrangler dev` edge; Zeron's "real stack"
  * is the fixture engine on this host (`adb reverse`), which the rig
  * starts. The `harness mock` extra is still sent — a live-stack test
  * never pins a real agent (the fixture's registry lists only the mock
@@ -54,7 +54,7 @@ class LiveEngineRoundTripTest {
         // 1. The pairing root is what a fresh install shows (no pair
         //    extra, no stored engines): title, tagline, the entry button.
         compose.waitUntil(timeoutMillis = 10_000) {
-            compose.onAllNodesWithText("Roboco").fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithText("Zeron").fetchSemanticsNodes().isNotEmpty()
         }
         compose.waitUntil(timeoutMillis = 5_000) {
             compose.onAllNodesWithTag("pairing-root").fetchSemanticsNodes().isNotEmpty()

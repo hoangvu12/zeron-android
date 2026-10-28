@@ -1,4 +1,4 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import androidx.camera.core.ImageProxy
 import com.google.zxing.BinaryBitmap

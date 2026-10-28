@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.content.Context
 import android.graphics.Typeface
@@ -12,12 +12,12 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import java.util.concurrent.atomic.AtomicInteger
-import sh.roboco.android.BuildConfig
-import sh.roboco.android.core.Face
-import sh.roboco.android.core.FontGate
-import sh.roboco.android.core.FontLoadException
-import sh.roboco.android.core.Fonts
-import sh.roboco.android.core.role
+import sh.zeron.android.BuildConfig
+import sh.zeron.android.core.Face
+import sh.zeron.android.core.FontGate
+import sh.zeron.android.core.FontLoadException
+import sh.zeron.android.core.Fonts
+import sh.zeron.android.core.role
 
 /**
  * The two Compose families the app's UI text is set in: `Geist` (8 faces,
@@ -26,14 +26,14 @@ import sh.roboco.android.core.role
  * italics and the Mono italic; this table ships all 12.
  */
 @Immutable
-class RobocoFontFamilies(val geist: FontFamily, val geistMono: FontFamily) {
+class ZeronFontFamilies(val geist: FontFamily, val geistMono: FontFamily) {
 
     /** The family a [Face] belongs to. */
     fun family(face: Face): FontFamily = if (face.mono) geistMono else geist
 }
 
 /**
- * Builds the [RobocoFontFamilies] from the shared font chain (ticket 60):
+ * Builds the [ZeronFontFamilies] from the shared font chain (ticket 60):
  * each entry is a [ChainFont] that resolves through [ChainLoader] to the
  * `FontChain` typeface for its role — the same chain the Rust layout
  * engine measures with and the transcript painter draws with, so UI
@@ -43,10 +43,10 @@ class RobocoFontFamilies(val geist: FontFamily, val geistMono: FontFamily) {
  * This is the Compose-side port of `CTFontManagerRegisterGraphicsFont`
  * (`Fonts.swift:22-36`): one source of truth for measurement and drawing.
  */
-object RobocoFonts {
+object ZeronFonts {
 
     @Volatile
-    private var cached: RobocoFontFamilies? = null
+    private var cached: ZeronFontFamilies? = null
 
     /** Test hook: how many typefaces [ChainLoader] has resolved so far. */
     internal val chainLoads = AtomicInteger()
@@ -58,14 +58,14 @@ object RobocoFonts {
      * `applicationContext` may be the preview context — the merged assets
      * are there too.
      */
-    fun families(context: Context): RobocoFontFamilies {
+    fun families(context: Context): ZeronFontFamilies {
         cached?.let { return it }
         return synchronized(this) {
             cached ?: build().also { cached = it }
         }
     }
 
-    private fun build(): RobocoFontFamilies = RobocoFontFamilies(
+    private fun build(): ZeronFontFamilies = ZeronFontFamilies(
         geist = FontFamily(Face.entries.filter { !it.mono }.map { ChainFont(it) }),
         geistMono = FontFamily(Face.entries.filter { it.mono }.map { ChainFont(it) }),
     )
@@ -80,7 +80,7 @@ object RobocoFonts {
 /**
  * One [Face] as a Compose font over the shared chain. `Blocking` is
  * required: `Async`/`OptionalLocal` would draw a system font first — a
- * visible flash. With `FontSynthesis.None` (in `RobocoTextDefaults.Base`)
+ * visible flash. With `FontSynthesis.None` (in `ZeronTextDefaults.Base`)
  * Compose returns the chain typeface untouched, so a Mono 700 request
  * matches `MonoSemibold` and any Mono italic `MonoItalic`, exactly like
  * Rust's `FaceRole::of`.
@@ -98,7 +98,7 @@ private class ChainFont(val face: Face) :
 
 private object ChainLoader : AndroidFont.TypefaceLoader {
     override fun loadBlocking(context: Context, font: AndroidFont): Typeface {
-        RobocoFonts.chainLoads.incrementAndGet()
+        ZeronFonts.chainLoads.incrementAndGet()
         return loadChainTypeface(context, (font as ChainFont).face, BuildConfig.DEBUG)
     }
 
@@ -124,9 +124,9 @@ internal fun loadChainTypeface(context: Context, face: Face, debug: Boolean): Ty
 
 /**
  * The resolved font families. No default on purpose: a component rendered
- * outside [RobocoTheme] fails at once instead of silently drawing Roboto
+ * outside [ZeronTheme] fails at once instead of silently drawing Roboto
  * (the fonts being *the* thing this app's text must not fall back from).
  */
-val LocalFonts = staticCompositionLocalOf<RobocoFontFamilies> {
-    error("LocalFonts not provided: wrap content in RobocoTheme")
+val LocalFonts = staticCompositionLocalOf<ZeronFontFamilies> {
+    error("LocalFonts not provided: wrap content in ZeronTheme")
 }

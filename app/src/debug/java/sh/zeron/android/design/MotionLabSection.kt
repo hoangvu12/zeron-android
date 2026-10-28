@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
@@ -46,7 +46,7 @@ import androidx.compose.ui.unit.dp
 import java.util.Locale
 import kotlin.math.abs
 import kotlinx.coroutines.launch
-import sh.roboco.android.core.Face
+import sh.zeron.android.core.Face
 
 /**
  * One Motion-lab row (android-ui-parity #22): a name, a label computed from
@@ -213,7 +213,7 @@ fun MotionLabSection() {
         Row(verticalAlignment = Alignment.CenterVertically) {
             BasicText(
                 "Tap a row to run its spec (0 → 1, tap again for 1 → 0). Handoff rows follow Force reduce motion.",
-                style = uiStyle(Face.Sans, typeScale.fixed(13f), RobocoTheme.palette.secondary),
+                style = uiStyle(Face.Sans, typeScale.fixed(13f), ZeronTheme.palette.secondary),
                 modifier = Modifier.weight(1f),
             )
             Spacer(Modifier.width(12.dp))
@@ -249,7 +249,7 @@ fun MotionLabSection() {
         MotionLab.timers.forEach { (name, ms) ->
             BasicText(
                 "$name $ms",
-                style = uiStyle(Face.Mono, typeScale.fixed(11f), RobocoTheme.palette.secondary),
+                style = uiStyle(Face.Mono, typeScale.fixed(11f), ZeronTheme.palette.secondary),
                 maxLines = 1,
             )
         }
@@ -262,7 +262,7 @@ private fun LabGroupHeader(title: String) {
     Spacer(Modifier.height(16.dp))
     BasicText(
         title,
-        style = uiStyle(Face.SansSemibold, LocalTypeScale.current.fixed(13f), RobocoTheme.palette.secondary),
+        style = uiStyle(Face.SansSemibold, LocalTypeScale.current.fixed(13f), ZeronTheme.palette.secondary),
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
     )
@@ -275,7 +275,7 @@ private fun LabGroupHeader(title: String) {
  */
 @Composable
 private fun PlayAllCapsule(onPlay: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Box(
         Modifier
@@ -372,7 +372,7 @@ private fun LabRowShell(
     onClick: () -> Unit,
     onTrackSized: ((Float) -> Unit)? = null,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Row(
         Modifier
@@ -409,7 +409,7 @@ private fun LabRowShell(
  */
 @Composable
 private fun LabTrack(modifier: Modifier, p: () -> Float, onTrackSized: ((Float) -> Unit)?) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val density = LocalDensity.current
     Canvas(
         modifier

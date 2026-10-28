@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -27,16 +27,16 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.GlassStage
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.glass.rememberGlassMenuState
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.sessions.SessionsScreenActions
-import sh.roboco.android.sessions.sessionsOptionsMenu
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.GlassStage
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.glass.rememberGlassMenuState
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.sessions.SessionsScreenActions
+import sh.zeron.android.sessions.sessionsOptionsMenu
 
 /**
  * The "Sidebar toolbar" page of the debug design gallery (ticket 107),
@@ -97,7 +97,7 @@ private fun ToolbarAtRest() {
 /** One captioned frame: the caption plus [ToolbarStage]'s 360 × 200 stage. */
 @Composable
 private fun ToolbarFrame(caption: String, content: @Composable BoxScope.() -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         BasicText(caption, style = uiStyle(Face.Sans, typeScale.fixed(12f), palette.secondary))
@@ -145,7 +145,7 @@ private fun ToolbarStage(
  */
 @Composable
 private fun PressedOptionsFrame() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val toggleStyle = uiStyle(Face.SansMedium, typeScale.fixed(14f), palette.accent)
     val optionsSource = remember { MutableInteractionSource() }
@@ -204,7 +204,7 @@ private fun PressedOptionsFrame() {
  */
 @Composable
 private fun MenuFrame() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val actions = remember { RecordingActions() }
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {

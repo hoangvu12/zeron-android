@@ -1,4 +1,4 @@
-package sh.roboco.android.sidechats
+package sh.zeron.android.sidechats
 
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -24,19 +24,19 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.Toaster
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.glass.MenuIcon
-import sh.roboco.android.design.glass.MenuItem
-import sh.roboco.android.design.glass.MenuSection
-import sh.roboco.android.session.SessionHeader
-import sh.roboco.android.session.SessionHeaderMetrics
-import sh.roboco.android.session.SideChatMenuRows
-import sh.roboco.android.session.sessionMenu
-import uniffi.roboco_core.CoreException
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.Toaster
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.MenuIcon
+import sh.zeron.android.design.glass.MenuItem
+import sh.zeron.android.design.glass.MenuSection
+import sh.zeron.android.session.SessionHeader
+import sh.zeron.android.session.SessionHeaderMetrics
+import sh.zeron.android.session.SideChatMenuRows
+import sh.zeron.android.session.sessionMenu
+import uniffi.zeron_core.CoreException
 
 /**
  * The side chats' entry points (android-next #06): the header's second
@@ -79,10 +79,10 @@ class SideChatsEntryTest {
     fun theHeaderButtonCarriesTheBadgeAndOpensTheSheet() {
         var taps = 0
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 SessionHeader(
                     title = "Streaming veil on transcript rows",
-                    subtitle = "roboco @ MacBook Pro",
+                    subtitle = "zeron @ MacBook Pro",
                     edgeEngaged = false,
                     onMore = {},
                     showBack = true,
@@ -108,10 +108,10 @@ class SideChatsEntryTest {
     @Test
     fun noAccessoryNoButton() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 SessionHeader(
                     title = "A chat with nothing hanging off it",
-                    subtitle = "roboco @ studio",
+                    subtitle = "zeron @ studio",
                     edgeEngaged = false,
                     onMore = {},
                     showBack = true,
@@ -159,7 +159,7 @@ class SideChatsEntryTest {
         assertTrue("an inline group: hairlines above and below", group.inline)
         val rows = group.children.map { it as MenuItem }
         assertEquals(listOf("New Side Chat", "Fork into Side Chat"), rows.map { it.title })
-        assertEquals(RobocoIcons.ArrowTriangleBranch, (rows[1].icon as MenuIcon.Symbol).icon)
+        assertEquals(ZeronIcons.ArrowTriangleBranch, (rows[1].icon as MenuIcon.Symbol).icon)
         assertEquals(
             listOf("session-menu-new-side-chat", "session-menu-fork-side-chat"),
             rows.map { it.testTag },
@@ -259,6 +259,6 @@ class SideChatsEntryTest {
         assertEquals("Subagent", subagentSubtitle(AgentState.Done, " "))
         val copy = subagentMenu(onCopyTranscript = {}).children.single() as MenuItem
         assertEquals("Copy Transcript", copy.title)
-        assertEquals(RobocoIcons.DocOnDoc, (copy.icon as MenuIcon.Symbol).icon)
+        assertEquals(ZeronIcons.DocOnDoc, (copy.icon as MenuIcon.Symbol).icon)
     }
 }

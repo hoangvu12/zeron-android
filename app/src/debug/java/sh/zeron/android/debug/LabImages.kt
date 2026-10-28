@@ -1,4 +1,4 @@
-package sh.roboco.android.debug
+package sh.zeron.android.debug
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -19,11 +19,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import sh.roboco.android.transcript.AttachmentReader
+import sh.zeron.android.transcript.AttachmentReader
 
 /**
  * The lab's fake image loader (android-ui-parity #135): the bundled
- * `lab/lab-image.png` (a copy of `dist/roboco.png`, 512×512 RGBA) for
+ * `lab/lab-image.png` (a copy of `dist/zeron.png`, 512×512 RGBA) for
  * **every** reference, so inline markdown images (137) and image rows
  * can be exercised without an engine. The fixture has no images, so
  * today this is dormant.
@@ -38,7 +38,7 @@ import sh.roboco.android.transcript.AttachmentReader
 object LabImages {
 
     private const val ASSET = "lab/lab-image.png"
-    private const val TAG = "RobocoLab"
+    private const val TAG = "ZeronLab"
 
     private val mutex = Mutex()
 
@@ -198,7 +198,7 @@ object LabImageReader : AttachmentReader {
     /** The lab image the `images` extra serves, verbatim from #817's demo. */
     internal const val LAB_LANDSCAPE = "/workspace/calculator/5-plus-3.png"
 
-    /** The portrait companion (the Roboco addition). */
+    /** The portrait companion (the Zeron addition). */
     internal const val LAB_PORTRAIT = "/workspace/calculator/portrait.png"
 
     private val readsByRef = ConcurrentHashMap<String, AtomicInteger>()

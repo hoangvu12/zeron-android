@@ -1,5 +1,5 @@
 <resources>
-    <style name="Theme.Roboco" parent="android:Theme.Material.Light.NoActionBar">
+    <style name="Theme.Zeron" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:windowBackground">@color/launch_background</item>
         <item name="android:windowSplashScreenBackground">@color/launch_background</item>
         <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_icon_blank</item>
@@ -11,7 +11,7 @@
          first frame of the camera stage (ios:Transcript/ImageViewer.swift:22).
          values/ only — it must not change in values-night; the stage is
          black in both modes. -->
-    <style name="Theme.Roboco.Scanner" parent="Theme.Roboco">
+    <style name="Theme.Zeron.Scanner" parent="Theme.Zeron">
         <item name="android:windowBackground">@android:color/black</item>
     </style>
 </resources>

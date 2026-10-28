@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalDensity
@@ -17,25 +17,25 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.GlassMenuHost
 
 /**
  * The Project / Run on menu goldens (android-ui-parity #113) — the five
  * static panel fixtures of the "New session project menus" gallery page
- * (P1, P2, R1, R2, R3, over [sh.roboco.android.design.GalleryBackdrop])
+ * (P1, P2, R1, R2, R3, over [sh.zeron.android.design.GalleryBackdrop])
  * in light and dark, at the mdpi phone width where the ticket's dp
  * geometry reads 1:1.
  *
  * Recorded by `./gradlew :app:recordRoborazziDebug --tests
- * sh.roboco.android.newsession.ProjectMenusScreenshotTest`, verified by
+ * sh.zeron.android.newsession.ProjectMenusScreenshotTest`, verified by
  * `:app:verifyRoborazziDebug --tests …`, then reviewed side by side with
- * the iOS Simulator's `-demo -route new` menus: P1's checked `roboco`
+ * the iOS Simulator's `-demo -route new` menus: P1's checked `zeron`
  * row shows the checkmark in the leading slot while the other project
  * rows show their 18 dp tiles centred 36 dp from the panel edge with
- * titles at 61 dp, the separator sits between `Roboco Mobile` and
+ * titles at 61 dp, the separator sits between `Zeron Mobile` and
  * `No Project…`, and R2's two MacBook Pro rows show their paths.
  *
  * `Glass.forceFallback` and the frozen main clock follow the gallery
@@ -85,7 +85,7 @@ class ProjectMenusScreenshotTest {
     fun goldenAtFontScale13() {
         compose.setContent {
             CompositionLocalProvider(LocalDensity provides Density(1f, fontScale = 1.3f)) {
-                RobocoTheme(Appearance.Light) {
+                ZeronTheme(Appearance.Light) {
                     GlassMenuHost(hazeState = rememberHazeState()) {
                         ProjectMenusStaticPanels()
                     }
@@ -100,7 +100,7 @@ class ProjectMenusScreenshotTest {
 
     private fun goldenShot(appearance: Appearance, file: String) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 GlassMenuHost(hazeState = rememberHazeState()) {
                     ProjectMenusStaticPanels()
                 }

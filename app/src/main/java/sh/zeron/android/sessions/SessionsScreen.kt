@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -36,33 +36,33 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import sh.roboco.android.RobocoApplication
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.ContextMenuHost
-import sh.roboco.android.design.LocalBottomChrome
-import sh.roboco.android.design.LiftHighlight
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.WallpaperArtwork
-import sh.roboco.android.design.WallpaperHero
-import sh.roboco.android.design.WallpaperRender
-import sh.roboco.android.design.contextMenu
-import sh.roboco.android.design.glass.GlassCircleButton
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.glass.rememberGlassMenuState
-import sh.roboco.android.design.rememberContextMenuLiftState
-import sh.roboco.android.design.wallpaperFixture
-import sh.roboco.android.shell.LargeTitleDefaults
-import sh.roboco.android.shell.LargeTitleScaffold
-import sh.roboco.android.shell.LocalAppRouter
-import sh.roboco.android.shell.LocalNavEntry
-import sh.roboco.android.shell.LocalNavStack
-import sh.roboco.android.shell.NavStack
-import sh.roboco.android.shell.NavStackHost
-import sh.roboco.android.shell.RegisterScrollToTop
-import sh.roboco.android.shell.TabId
-import sh.roboco.android.shell.TabRootRoute
-import sh.roboco.android.shell.TitleMode
+import sh.zeron.android.ZeronApplication
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ContextMenuHost
+import sh.zeron.android.design.LocalBottomChrome
+import sh.zeron.android.design.LiftHighlight
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.WallpaperArtwork
+import sh.zeron.android.design.WallpaperHero
+import sh.zeron.android.design.WallpaperRender
+import sh.zeron.android.design.contextMenu
+import sh.zeron.android.design.glass.GlassCircleButton
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.glass.rememberGlassMenuState
+import sh.zeron.android.design.rememberContextMenuLiftState
+import sh.zeron.android.design.wallpaperFixture
+import sh.zeron.android.shell.LargeTitleDefaults
+import sh.zeron.android.shell.LargeTitleScaffold
+import sh.zeron.android.shell.LocalAppRouter
+import sh.zeron.android.shell.LocalNavEntry
+import sh.zeron.android.shell.LocalNavStack
+import sh.zeron.android.shell.NavStack
+import sh.zeron.android.shell.NavStackHost
+import sh.zeron.android.shell.RegisterScrollToTop
+import sh.zeron.android.shell.TabId
+import sh.zeron.android.shell.TabRootRoute
+import sh.zeron.android.shell.TitleMode
 
 /**
  * The Sessions tab root (android-ui-parity #46) — the Android port of
@@ -97,7 +97,7 @@ import sh.roboco.android.shell.TitleMode
  *
  * [SessionsScreenContent] is the injectable half (sections, actions, hero
  * and bottom padding as parameters); this wrapper reads the app's
- * singletons (40's `FrontPageModel`, the single [sh.roboco.android.core.WorkspaceFeed])
+ * singletons (40's `FrontPageModel`, the single [sh.zeron.android.core.WorkspaceFeed])
  * and 43's prompt backend, which the sessions tab provides
  * (`SessionPrompts`'s note: 35 provides only [LocalRowActions]).
  */
@@ -113,7 +113,7 @@ fun SessionsScreen(
     pinnedAccessoryHeight: Dp = 0.dp,
     filters: Boolean = pinnedAccessory != null,
 ) {
-    val app = LocalContext.current.applicationContext as RobocoApplication
+    val app = LocalContext.current.applicationContext as ZeronApplication
     // 43: the prompts' engine list comes from the live client; provided
     // here for everything under this screen (46's own actions pass it
     // explicitly; 44's row commands read the ambient).
@@ -386,7 +386,7 @@ internal fun SessionsScreenContent(
  * default for the ellipsis glyph), tap-opened. The menu is built inside
  * the click handler — never during composition — and the button follows
  * 15's rule for buttons with their own `clickable`:
- * [sh.roboco.android.design.glass.rememberGlassMenuState] + `open`, not
+ * [sh.zeron.android.design.glass.rememberGlassMenuState] + `open`, not
  * `Modifier.glassMenu`.
  */
 @Composable
@@ -394,7 +394,7 @@ private fun SessionsOptionsButton(actions: SessionsScreenActions) {
     val menu = rememberGlassMenuState()
     var anchor by remember { mutableStateOf(Rect.Zero) }
     GlassCircleButton(
-        icon = RobocoIcons.Ellipsis,
+        icon = ZeronIcons.Ellipsis,
         contentDescription = "More",
         onClick = { menu.open(anchor, sessionsOptionsMenu(actions)) },
         modifier = Modifier
@@ -428,7 +428,7 @@ private object PreviewSessionsActions : SessionsScreenActions {
 
 @Composable
 private fun SessionsScreenPreview(appearance: Appearance) {
-    RobocoTheme(appearance) {
+    ZeronTheme(appearance) {
         ContextMenuHost {
             GlassMenuHost {
                 val stack = remember { NavStack(TabRootRoute(TabId.Sessions)) }

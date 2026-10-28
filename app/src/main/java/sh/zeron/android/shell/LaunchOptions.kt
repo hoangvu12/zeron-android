@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import java.io.File
 
@@ -31,7 +31,7 @@ internal var launchOptionsLog: (String) -> Unit = { message ->
  * - `pair` (android-app#30's flow rig) is a comma-separated list of
  *   pairing URLs the flow tests mint from `android_fixture`'s `/mint`
  *   endpoint. Debug-only like the rest: [MainActivity] hands them to
- *   `RobocoApplication.redeemLaunchPairs` before the first frame is
+ *   `ZeronApplication.redeemLaunchPairs` before the first frame is
  *   released, so the shell never shows the pairing root mid-rig.
  *
  * Wrong types (an `Int` where a `String` is expected) read as absent;

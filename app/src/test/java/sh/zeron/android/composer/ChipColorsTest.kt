@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -7,13 +7,13 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
 import org.junit.Test
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.RobocoIcons
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.ZeronIcons
 
 /**
  * The chip paint and the leading-icon resolution (android-ui-parity #59),
  * plain JVM: [chipColors] and [resolveChipTint] are pure over the palette,
- * and [ComposerChip.leading] is a pure lookup over [RobocoIcons].
+ * and [ComposerChip.leading] is a pure lookup over [ZeronIcons].
  *
  * The expected ARGBs are the ticket's Spec table as explicit literals —
  * never recomputed through `copy`/`rgba` — so a quantisation mistake
@@ -122,7 +122,7 @@ class ChipColorsTest {
         val leading = chip.leading()
         assertNotNull(leading)
         val symbol = leading as ChipLeading.Symbol
-        assertSame(RobocoIcons.Gauge, symbol.icon)
+        assertSame(ZeronIcons.Gauge, symbol.icon)
     }
 
     /** Every icon kind resolves to its leading counterpart. */
@@ -132,8 +132,8 @@ class ChipColorsTest {
         assertEquals(ChipLeading.Branch, ComposerChip("branch", "main", icon = ChipIcon.Branch).leading())
         assertEquals(ChipLeading.PullRequest, ComposerChip("pr", "1234", icon = ChipIcon.PullRequest).leading())
         assertEquals(
-            ChipLeading.Project("roboco", 2),
-            ComposerChip("project", "roboco", icon = ChipIcon.Project("roboco", 2)).leading(),
+            ChipLeading.Project("zeron", 2),
+            ComposerChip("project", "zeron", icon = ChipIcon.Project("zeron", 2)).leading(),
         )
         assertNull(ComposerChip("context", "62%", icon = null, symbol = null).leading())
     }

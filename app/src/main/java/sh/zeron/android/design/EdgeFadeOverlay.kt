@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.runtime.Composable
@@ -26,7 +26,7 @@ import androidx.compose.ui.graphics.toArgb
  */
 @Composable
 fun EdgeFadeOverlay(modifier: Modifier = Modifier) {
-    val bg = RobocoTheme.palette.background
+    val bg = ZeronTheme.palette.background
     Spacer(
         modifier.drawWithCache {
             // Every stop is the same colour with the stop's alpha

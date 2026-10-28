@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -7,38 +7,38 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import sh.roboco.android.RobocoApplication
-import sh.roboco.android.composer.CoreQueueEditPort
-import sh.roboco.android.composer.CoreQuestionPort
-import sh.roboco.android.composer.DraftKey
-import sh.roboco.android.composer.LocalDrafts
-import sh.roboco.android.composer.QuestionPort
-import sh.roboco.android.composer.QueueActions
-import sh.roboco.android.composer.QueueEditController
-import sh.roboco.android.composer.QueueEditPort
-import sh.roboco.android.accounts.SessionAccountUsage
-import sh.roboco.android.composer.SessionChipMenus
-import sh.roboco.android.composer.sessionDraftSaver
-import sh.roboco.android.design.LocalToaster
-import sh.roboco.android.newsession.SideChatParent
-import sh.roboco.android.sessions.rememberSessionListOpener
-import sh.roboco.android.sidechats.SideChatDraftRoute
-import sh.roboco.android.sidechats.SideChatFork
-import sh.roboco.android.sidechats.SideChatsButton
-import sh.roboco.android.sidechats.SideChatsModel
-import sh.roboco.android.sidechats.SideChatsOverlay
-import sh.roboco.android.sidechats.SideChatsSheetController
-import sh.roboco.android.sidechats.SideChatsUi
-import sh.roboco.android.sidechats.SubagentOpenRequest
-import sh.roboco.android.sidechats.rememberSubagentOpener
-import sh.roboco.android.sidechats.sideChatsSupported
-import sh.roboco.android.shell.LocalNavEntry
-import sh.roboco.android.shell.LocalNavStack
-import sh.roboco.android.shell.NavRoute
-import sh.roboco.android.shell.SessionRoute
-import sh.roboco.android.transcript.AttachmentReader
-import sh.roboco.android.transcript.TranscriptState
-import uniffi.roboco_core.TextSystem
+import sh.zeron.android.ZeronApplication
+import sh.zeron.android.composer.CoreQueueEditPort
+import sh.zeron.android.composer.CoreQuestionPort
+import sh.zeron.android.composer.DraftKey
+import sh.zeron.android.composer.LocalDrafts
+import sh.zeron.android.composer.QuestionPort
+import sh.zeron.android.composer.QueueActions
+import sh.zeron.android.composer.QueueEditController
+import sh.zeron.android.composer.QueueEditPort
+import sh.zeron.android.accounts.SessionAccountUsage
+import sh.zeron.android.composer.SessionChipMenus
+import sh.zeron.android.composer.sessionDraftSaver
+import sh.zeron.android.design.LocalToaster
+import sh.zeron.android.newsession.SideChatParent
+import sh.zeron.android.sessions.rememberSessionListOpener
+import sh.zeron.android.sidechats.SideChatDraftRoute
+import sh.zeron.android.sidechats.SideChatFork
+import sh.zeron.android.sidechats.SideChatsButton
+import sh.zeron.android.sidechats.SideChatsModel
+import sh.zeron.android.sidechats.SideChatsOverlay
+import sh.zeron.android.sidechats.SideChatsSheetController
+import sh.zeron.android.sidechats.SideChatsUi
+import sh.zeron.android.sidechats.SubagentOpenRequest
+import sh.zeron.android.sidechats.rememberSubagentOpener
+import sh.zeron.android.sidechats.sideChatsSupported
+import sh.zeron.android.shell.LocalNavEntry
+import sh.zeron.android.shell.LocalNavStack
+import sh.zeron.android.shell.NavRoute
+import sh.zeron.android.shell.SessionRoute
+import sh.zeron.android.transcript.AttachmentReader
+import sh.zeron.android.transcript.TranscriptState
+import uniffi.zeron_core.TextSystem
 
 /**
  * One opened session (android-ui-parity #76) — the port of
@@ -267,7 +267,7 @@ class SessionScreenRoute internal constructor(
         val sheet = remember(entry) { entry.retain(SideChatsSheetKey) { SideChatsSheetController() } }
         val subagentOpener = rememberSubagentOpener()
         val openChat = rememberSessionListOpener()
-        val app = LocalContext.current.applicationContext as? RobocoApplication
+        val app = LocalContext.current.applicationContext as? ZeronApplication
         val toaster = LocalToaster.current
         val fork: SideChatFork? = remember(entry) {
             val live = core as? CoreSessionCore

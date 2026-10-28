@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
@@ -13,7 +13,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.glass.Glass
+import sh.zeron.android.design.glass.Glass
 
 /**
  * The toast goldens (ticket 14), recorded by `recordRoborazziDebug` and
@@ -55,7 +55,7 @@ class ToastScreenshotTest {
         val state = ToasterState()
         compose.mainClock.autoAdvance = false
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 ToastHost(state, ToastAnnouncer { }) {
                     ToastChromeFixture(Modifier.fillMaxSize())
                 }

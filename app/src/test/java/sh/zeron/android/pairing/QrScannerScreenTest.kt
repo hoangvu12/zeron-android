@@ -1,4 +1,4 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import android.app.Activity
 import android.content.Context
@@ -31,9 +31,9 @@ import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import org.robolectric.Robolectric.buildActivity
-import sh.roboco.android.R
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.R
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The scanner screen's geometry, caption states, foreign timer and
@@ -53,7 +53,7 @@ import sh.roboco.android.design.RobocoTheme
  *   `LaunchedEffect` + `delay` timer) at the frozen clock: 1999 ms → still
  *   foreign, +2 ms → hint;
  * - `qr-open-settings` click → `ACTION_APPLICATION_DETAILS_SETTINGS`
- *   with `package:sh.roboco.android` data, through the activity's shared
+ *   with `package:sh.zeron.android` data, through the activity's shared
  *   [openAppDetailsSettings] on a Robolectric activity.
  */
 @RunWith(RobolectricTestRunner::class)
@@ -83,7 +83,7 @@ class QrScannerScreenTest {
         onOpenSettings: () -> Unit = {},
     ) {
         compose.setContent {
-            RobocoTheme(Appearance.Dark) {
+            ZeronTheme(Appearance.Dark) {
                 QrScannerContent(
                     state = state,
                     onClose = {},
@@ -135,7 +135,7 @@ class QrScannerScreenTest {
         // stroke is not drawn. Same slot, so same bounds in both phases.
         val state = mutableStateOf(QrScannerUiState(ScannerPhase.Scanning, showForeign = false))
         compose.setContent {
-            RobocoTheme(Appearance.Dark) {
+            ZeronTheme(Appearance.Dark) {
                 QrScannerContent(
                     state = state.value,
                     onClose = {},
@@ -194,7 +194,7 @@ class QrScannerScreenTest {
     fun theCaptionTextFollowsTheState() {
         val state = mutableStateOf(QrScannerUiState(ScannerPhase.Scanning, showForeign = false))
         compose.setContent {
-            RobocoTheme(Appearance.Dark) {
+            ZeronTheme(Appearance.Dark) {
                 QrScannerContent(
                     state = state.value,
                     onClose = {},
@@ -256,7 +256,7 @@ class QrScannerScreenTest {
     fun theForeignCaptionTimesOutAfterTwoSeconds() {
         val state = mutableStateOf(QrScannerUiState(ScannerPhase.Scanning, showForeign = true))
         compose.setContent {
-            RobocoTheme(Appearance.Dark) {
+            ZeronTheme(Appearance.Dark) {
                 // The gallery's timer — the same 2 s reset the activity
                 // runs in lifecycleScope.
                 val showForeign = state.value.showForeign
@@ -302,6 +302,6 @@ class QrScannerScreenTest {
         val started = shadowOf(activity).nextStartedActivity
         assertNotNull(started)
         assertEquals(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, started!!.action)
-        assertEquals(Uri.fromParts("package", "sh.roboco.android", null), started.data)
+        assertEquals(Uri.fromParts("package", "sh.zeron.android", null), started.data)
     }
 }

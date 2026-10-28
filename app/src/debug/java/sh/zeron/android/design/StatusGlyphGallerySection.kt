@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,14 +14,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
+import sh.zeron.android.core.Face
 
 /**
  * The "Status glyph" section of the design gallery (android-ui-parity #11,
  * registered in `Gallery.sections`): the four visible kinds, every status
  * tone as a dot, the transcript boxes, the ×1.75 loader spinner and a
  * session-row corner sample. The gallery frame provides the theme, so the
- * glyphs run on RobocoTheme's shared clock — every spinner on the page
+ * glyphs run on ZeronTheme's shared clock — every spinner on the page
  * pulses in sync, and the "Force reduce motion" toggle freezes them at the
  * static (cycle-0) alphas by dropping their clock subscriptions.
  *
@@ -32,7 +32,7 @@ import sh.roboco.android.core.Face
  */
 @Composable
 fun StatusGlyphGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
 
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -100,7 +100,7 @@ fun StatusGlyphGallerySection() {
 private fun RowLabel(text: String) {
     BasicText(
         text,
-        style = uiStyle(Face.Mono, LocalTypeScale.current.fixed(11f), RobocoTheme.palette.secondary),
+        style = uiStyle(Face.Mono, LocalTypeScale.current.fixed(11f), ZeronTheme.palette.secondary),
     )
 }
 
@@ -111,7 +111,7 @@ private fun GlyphSample(label: String, glyph: @Composable () -> Unit) {
         Box(Modifier.padding(4.dp)) { glyph() }
         BasicText(
             label,
-            style = uiStyle(Face.Mono, LocalTypeScale.current.fixed(11f), RobocoTheme.palette.tertiary),
+            style = uiStyle(Face.Mono, LocalTypeScale.current.fixed(11f), ZeronTheme.palette.tertiary),
         )
     }
 }

@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import android.graphics.Bitmap
 import android.view.View
@@ -54,8 +54,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * [HandoffCaptureState.capture] (android-ui-parity #94) — the handoff
@@ -126,7 +126,7 @@ class HandoffCaptureTest {
      */
     private fun mount(sceneShape: Shape = SheetShape) {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 val density = LocalDensity.current
                 val view = LocalView.current
                 hostView = view

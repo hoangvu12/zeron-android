@@ -1,4 +1,4 @@
-package sh.roboco.android.flows
+package sh.zeron.android.flows
 
 import android.content.ComponentName
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
@@ -14,16 +14,16 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import sh.roboco.android.MainActivity
-import sh.roboco.android.RobocoApplication
-import sh.roboco.android.background.RunWatchController
-import sh.roboco.android.background.RunWatchService
-import sh.roboco.android.notify.NotificationPrefs
+import sh.zeron.android.MainActivity
+import sh.zeron.android.ZeronApplication
+import sh.zeron.android.background.RunWatchController
+import sh.zeron.android.background.RunWatchService
+import sh.zeron.android.notify.NotificationPrefs
 
 /**
  * The run-watching foreground service's presence (android-app#28,
  * CI-only — no emulator in the worker slots), the acceptance's
- * `adb shell dumpsys activity services sh.roboco.android` check, run
+ * `adb shell dumpsys activity services sh.zeron.android` check, run
  * through UiDevice's shell — now both sides of it, on ticket 30's rig
  * (the pre-rig version could only verify the absent state):
  *
@@ -49,9 +49,9 @@ class RunWatchServiceTest {
     private val device: UiDevice
         get() = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
 
-    private val app: RobocoApplication
+    private val app: ZeronApplication
         get() = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext
-            as RobocoApplication
+            as ZeronApplication
 
     @Test
     fun theServiceIsAbsentWhenNothingIsWorking() {
@@ -95,9 +95,9 @@ class RunWatchServiceTest {
     }
 
     /**
-     * `dumpsys activity services sh.roboco.android` mentions the service.
+     * `dumpsys activity services sh.zeron.android` mentions the service.
      * dumpsys prints the component in its SHORT form
-     * (`sh.roboco.android/.background.RunWatchService`), which never contains
+     * (`sh.zeron.android/.background.RunWatchService`), which never contains
      * the fully-qualified class name the old check searched for: the service
      * ran (the system logged its FGS start) but this check never saw it
      * (run 38567067554), and the "absent" test passed vacuously. Both forms
@@ -105,7 +105,7 @@ class RunWatchServiceTest {
      */
     private fun servicePresent(): Boolean {
         val dump = device.executeShellCommand(
-            "dumpsys activity services sh.roboco.android",
+            "dumpsys activity services sh.zeron.android",
         )
         val component = ComponentName(app, RunWatchService::class.java)
         return dump.contains(component.flattenToShortString()) || dump.contains(component.flattenToString())

@@ -1,4 +1,4 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Canvas
@@ -48,16 +48,16 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import kotlin.math.min
 import kotlinx.coroutines.delay
-import sh.roboco.android.R
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.GlassCircleButton
-import sh.roboco.android.design.glass.ProminentGlassButton
-import sh.roboco.android.design.rememberSmoothRoundedShape
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.R
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.GlassCircleButton
+import sh.zeron.android.design.glass.ProminentGlassButton
+import sh.zeron.android.design.rememberSmoothRoundedShape
+import sh.zeron.android.design.uiStyle
 
 /**
  * The scanner's phases (android-ui-parity #138). `Requesting` covers "the
@@ -85,7 +85,7 @@ internal const val QrOpenSettingsTag = "qr-open-settings"
  * reticle, the caption 24 dp under it and the 44/15 glass ✕ 16/8 inside
  * the safe area (ImageViewer's `Glass.circleButton` placement). Do **not**
  * wrap this in a theme: the activity, previews and the gallery wrap it in
- * `RobocoTheme(Appearance.Dark)` — the stage is always dark — and 07's
+ * `ZeronTheme(Appearance.Dark)` — the stage is always dark — and 07's
  * `GlassSurface` picks the fallback fill for the ✕ because no
  * `LocalHazeState` is provided (the preview is a `SurfaceView` Haze cannot
  * sample). Caption changes are instant, like 72's footers.
@@ -126,12 +126,12 @@ fun QrScannerContent(
         // default. Left edge 16 dp from the safe-area start, top 8 dp
         // below it (ios:Transcript/ImageViewer.swift:35,41-42).
         GlassCircleButton(
-            icon = RobocoIcons.Xmark,
+            icon = ZeronIcons.Xmark,
             contentDescription = stringResource(R.string.qr_close),
             onClick = onClose,
             size = 44.dp,
             iconPt = 15f,
-            ink = RobocoTheme.palette.text,
+            ink = ZeronTheme.palette.text,
             modifier = Modifier
                 .windowInsetsPadding(insets.only(WindowInsetsSides.Top + WindowInsetsSides.Start))
                 .padding(start = 16.dp, top = 8.dp)
@@ -292,7 +292,7 @@ internal fun FakeCameraPreview(modifier: Modifier = Modifier) {
 private fun QrScannerPreviewBody(state: QrScannerUiState) {
     // The forced-dark wrap is part of the screen (SHELL-D2): light and
     // dark previews render identically.
-    RobocoTheme(Appearance.Dark) {
+    ZeronTheme(Appearance.Dark) {
         QrScannerContent(
             state = state,
             onClose = {},
@@ -378,10 +378,10 @@ fun QrScannerGallerySection() {
         }
     }
 
-    RobocoTheme(Appearance.Dark) {
+    ZeronTheme(Appearance.Dark) {
         // Read inside the forced-dark wrap: the readout's ink follows the
         // stage, not the gallery's current appearance.
-        val palette = RobocoTheme.palette
+        val palette = ZeronTheme.palette
         val typeScale = LocalTypeScale.current
         Column(Modifier.fillMaxSize().background(Color.Black)) {
             Row(
@@ -441,7 +441,7 @@ fun QrScannerGallerySection() {
 /** One toggle: SemiBold label when selected, Regular `secondary` when not. */
 @Composable
 private fun QrGalleryToggle(label: String, selected: Boolean, onSelect: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     BasicText(
         label,

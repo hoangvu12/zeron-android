@@ -1,4 +1,4 @@
-package sh.roboco.android.shell.tablet
+package sh.zeron.android.shell.tablet
 
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.gestures.scrollBy
@@ -49,22 +49,22 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.ContextMenuHost
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.sessions.FolderRoute
-import sh.roboco.android.sessions.LocalSidebarFixtures
-import sh.roboco.android.sessions.SearchFixtures
-import sh.roboco.android.sessions.SessionSearch
-import sh.roboco.android.sessions.SessionsScreenFixtures
-import sh.roboco.android.sessions.SidebarFixtures
-import sh.roboco.android.shell.AppRouter
-import sh.roboco.android.shell.DraftHandoff
-import uniffi.roboco_core.SearchField
-import uniffi.roboco_core.SearchHit
-import uniffi.roboco_core.SessionRow
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ContextMenuHost
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.sessions.FolderRoute
+import sh.zeron.android.sessions.LocalSidebarFixtures
+import sh.zeron.android.sessions.SearchFixtures
+import sh.zeron.android.sessions.SessionSearch
+import sh.zeron.android.sessions.SessionsScreenFixtures
+import sh.zeron.android.sessions.SidebarFixtures
+import sh.zeron.android.shell.AppRouter
+import sh.zeron.android.shell.DraftHandoff
+import uniffi.zeron_core.SearchField
+import uniffi.zeron_core.SearchHit
+import uniffi.zeron_core.SessionRow
 
 /** "Wrangler deploy hygiene" — the one hit of the "wrangler" query. */
 private val deployRow: SessionRow =
@@ -145,7 +145,7 @@ class SidebarTest {
 
     private fun mount() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 ProvideGlyphClock(frozenAtNanos = 0L) {
                     ContextMenuHost {
                         GlassMenuHost(hazeState = rememberHazeState()) {

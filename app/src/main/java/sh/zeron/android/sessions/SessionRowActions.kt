@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.lazy.LazyListState
@@ -12,20 +12,20 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import sh.roboco.android.R
-import sh.roboco.android.design.ContextMenuLiftState
-import sh.roboco.android.design.LiftHighlight
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.contextMenu
-import sh.roboco.android.design.glass.Menu
-import sh.roboco.android.design.glass.MenuIcon
-import sh.roboco.android.design.glass.MenuItem
-import sh.roboco.android.design.glass.MenuSection
-import sh.roboco.android.design.rememberContextMenuLiftState
-import sh.roboco.android.shell.LocalAppRouter
-import uniffi.roboco_core.SessionRow
-import uniffi.roboco_core.SectionView
+import sh.zeron.android.R
+import sh.zeron.android.design.ContextMenuLiftState
+import sh.zeron.android.design.LiftHighlight
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.contextMenu
+import sh.zeron.android.design.glass.Menu
+import sh.zeron.android.design.glass.MenuIcon
+import sh.zeron.android.design.glass.MenuItem
+import sh.zeron.android.design.glass.MenuSection
+import sh.zeron.android.design.rememberContextMenuLiftState
+import sh.zeron.android.shell.LocalAppRouter
+import uniffi.zeron_core.SessionRow
+import uniffi.zeron_core.SectionView
 
 /**
  * The session-row wiring (android-ui-parity #44): which swipe actions and
@@ -183,7 +183,7 @@ fun sessionSwipeActions(
         return null to listOf(
             SwipeAction(
                 title = strings(R.string.swipe_unarchive),
-                icon = RobocoIcons.TrayAndArrowUpFill,
+                icon = ZeronIcons.TrayAndArrowUpFill,
                 background = accent,
                 testTag = "swipe-action-unarchive",
                 perform = { cmd.unarchive(row().id) },
@@ -193,14 +193,14 @@ fun sessionSwipeActions(
     val pinned = vm().pinned
     val pin = SwipeAction(
         title = strings(if (pinned) R.string.swipe_unpin else R.string.swipe_pin),
-        icon = if (pinned) RobocoIcons.PinSlash else RobocoIcons.PinFill,
+        icon = if (pinned) ZeronIcons.PinSlash else ZeronIcons.PinFill,
         background = accent,
         testTag = if (pinned) "swipe-action-unpin" else "swipe-action-pin",
         perform = { cmd.setPinned(row().id, !vm().pinned) },
     )
     val archive = SwipeAction(
         title = strings(R.string.swipe_archive),
-        icon = RobocoIcons.ArchiveboxFill,
+        icon = ZeronIcons.ArchiveboxFill,
         background = secondary,
         destructive = true,
         testTag = "swipe-action-archive",
@@ -208,7 +208,7 @@ fun sessionSwipeActions(
     )
     val move = SwipeAction(
         title = strings(R.string.swipe_move),
-        icon = RobocoIcons.FolderFill,
+        icon = ZeronIcons.FolderFill,
         background = SwipeTokens.MoveTint,
         testTag = "swipe-action-move",
         perform = { cmd.moveToSectionSheet(row()) },
@@ -245,12 +245,12 @@ fun sessionRowMenu(
             children = listOf(
                 MenuItem(
                     title = strings(R.string.swipe_unarchive),
-                    icon = MenuIcon.Symbol(RobocoIcons.TrayAndArrowUp),
+                    icon = MenuIcon.Symbol(ZeronIcons.TrayAndArrowUp),
                     testTag = "row-menu-unarchive",
                 ) { cmd.unarchive(row.id) },
                 MenuItem(
                     title = strings(R.string.menu_rename),
-                    icon = MenuIcon.Symbol(RobocoIcons.Pencil),
+                    icon = MenuIcon.Symbol(ZeronIcons.Pencil),
                     testTag = "row-menu-rename",
                 ) { cmd.renameSession(row) },
                 deleteRowItem(row, cmd, strings),
@@ -260,30 +260,30 @@ fun sessionRowMenu(
     val pinned = vm.pinned
     val pinItem = MenuItem(
         title = strings(if (pinned) R.string.swipe_unpin else R.string.swipe_pin),
-        icon = MenuIcon.Symbol(if (pinned) RobocoIcons.PinSlash else RobocoIcons.Pin),
+        icon = MenuIcon.Symbol(if (pinned) ZeronIcons.PinSlash else ZeronIcons.Pin),
         testTag = if (pinned) "row-menu-unpin" else "row-menu-pin",
     ) { cmd.setPinned(row.id, !pinned) }
     val moveSection = MenuSection(
         title = strings(R.string.menu_move_to_section),
-        icon = MenuIcon.Symbol(RobocoIcons.Folder),
+        icon = MenuIcon.Symbol(ZeronIcons.Folder),
         inline = false,
         children = sections.map { section ->
             MenuItem(
                 title = section.name,
-                icon = MenuIcon.Symbol(RobocoIcons.Folder),
+                icon = MenuIcon.Symbol(ZeronIcons.Folder),
                 testTag = "row-menu-section-${section.id}",
             ) { cmd.move(row.id, section.id) }
         } + listOf(
             MenuItem(
                 title = strings(R.string.menu_no_section),
-                icon = MenuIcon.Symbol(RobocoIcons.Tray),
+                icon = MenuIcon.Symbol(ZeronIcons.Tray),
                 testTag = "row-menu-no-section",
             ) { cmd.move(row.id, null) },
             // Creates the section only — never moves the chat (`:292-294`);
             // scoped to the chat's engine (android-app#20:239).
             MenuItem(
                 title = strings(R.string.menu_new_section),
-                icon = MenuIcon.Symbol(RobocoIcons.FolderBadgePlus),
+                icon = MenuIcon.Symbol(ZeronIcons.FolderBadgePlus),
                 testTag = "row-menu-new-section",
             ) { cmd.newSection(row.engineId) },
         ),
@@ -295,12 +295,12 @@ fun sessionRowMenu(
             moveSection,
             MenuItem(
                 title = strings(R.string.menu_rename),
-                icon = MenuIcon.Symbol(RobocoIcons.Pencil),
+                icon = MenuIcon.Symbol(ZeronIcons.Pencil),
                 testTag = "row-menu-rename",
             ) { cmd.renameSession(row) },
             MenuItem(
                 title = strings(R.string.swipe_archive),
-                icon = MenuIcon.Symbol(RobocoIcons.Archivebox),
+                icon = MenuIcon.Symbol(ZeronIcons.Archivebox),
                 testTag = "row-menu-archive",
                 // No slide: the row just disappears when the snapshot drops it.
             ) { cmd.archive(row.id) { } },
@@ -313,7 +313,7 @@ fun sessionRowMenu(
 private fun deleteRowItem(row: SessionRow, cmd: SessionRowCommands, strings: (Int) -> String): MenuItem =
     MenuItem(
         title = strings(R.string.menu_delete),
-        icon = MenuIcon.Symbol(RobocoIcons.Trash),
+        icon = MenuIcon.Symbol(ZeronIcons.Trash),
         destructive = true,
         testTag = "row-menu-delete",
     ) { cmd.deleteSession(row) }
@@ -385,7 +385,7 @@ internal fun sessionRowWrapper(coordinator: SwipeCoordinator, cmd: SessionRowCom
         // row as it is when it fires, not when the wrapper was composed.
         val vm by rememberUpdatedState(ctx.vm)
         val rec by rememberUpdatedState(ctx.row)
-        val palette = RobocoTheme.palette
+        val palette = ZeronTheme.palette
         val res = LocalContext.current.resources
         val strings: (Int) -> String = { id -> res.getString(id) }
         val (lead, trail) = remember(ctx.archived, ctx.vm.pinned, palette) {

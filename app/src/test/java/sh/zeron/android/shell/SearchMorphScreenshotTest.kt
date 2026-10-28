@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.runtime.remember
@@ -12,8 +12,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * Ticket 29's goldens: the search chrome fixture ("Search tab morph", the
@@ -53,7 +53,7 @@ class SearchMorphScreenshotTest {
     private fun shot(file: String, p: Float, text: String = "", imeLift: Float = 0f) {
         compose.mainClock.autoAdvance = false
         compose.setContent {
-            RobocoTheme {
+            ZeronTheme {
                 ProvideGlyphClock(frozenAtNanos = 0L) {
                     val state = remember {
                         SearchTabState().also {

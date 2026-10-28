@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import android.content.res.Configuration
 import android.graphics.Bitmap
@@ -42,20 +42,20 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.CapsuleShape
-import sh.roboco.android.design.LocalGalleryCapture
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.TranscriptPalette
-import sh.roboco.android.design.color
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.transcript.AttachmentReader
-import sh.roboco.android.transcript.TranscriptActions
-import sh.roboco.android.transcript.TranscriptImageBinding
-import sh.roboco.android.transcript.TranscriptImageLoader
-import uniffi.roboco_core.ColorRole
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.CapsuleShape
+import sh.zeron.android.design.LocalGalleryCapture
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.TranscriptPalette
+import sh.zeron.android.design.color
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.transcript.AttachmentReader
+import sh.zeron.android.transcript.TranscriptActions
+import sh.zeron.android.transcript.TranscriptImageBinding
+import sh.zeron.android.transcript.TranscriptImageLoader
+import uniffi.zeron_core.ColorRole
 
 /**
  * The "Image tile" section of the debug design gallery (ticket 66): the
@@ -91,7 +91,7 @@ fun ImageTileGallerySection() {
         ScaledStage { ImageTileFixture(loaded = true) }
         return
     }
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
 
     var reloadKey by remember { mutableIntStateOf(0) }
@@ -234,7 +234,7 @@ private fun TileSlot(
 
 /** `ColorRole.CHIP_BACKGROUND` of the current appearance (#E7E7EB / #1C1C20). */
 @Composable
-private fun chipColor(): Color = Color(TranscriptPalette(RobocoTheme.isDark).color(ColorRole.CHIP_BACKGROUND))
+private fun chipColor(): Color = Color(TranscriptPalette(ZeronTheme.isDark).color(ColorRole.CHIP_BACKGROUND))
 
 /** The deterministic fixture's actions (no decoder, no reader). */
 private fun fixtureActions(loaded: Boolean): TranscriptActions {
@@ -277,7 +277,7 @@ private fun ScaledStage(content: @Composable () -> Unit) {
 /** One gallery control: a `BasicText` label in a clickable capsule (ticket 22's style). */
 @Composable
 private fun TileControl(label: String, active: Boolean = false, onClick: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Box(
         Modifier
@@ -364,8 +364,8 @@ private var fixtureCache: Bitmap? = null
 @Preview(name = "ImageTile light", widthDp = 393, heightDp = 380)
 @Composable
 private fun ImageTileLightPreview() {
-    RobocoTheme(Appearance.Light) {
-        Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+    ZeronTheme(Appearance.Light) {
+        Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
             ImageTileFixture(loaded = true)
         }
     }
@@ -374,8 +374,8 @@ private fun ImageTileLightPreview() {
 @Preview(name = "ImageTile dark", widthDp = 393, heightDp = 380, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun ImageTileDarkPreview() {
-    RobocoTheme(Appearance.Dark) {
-        Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+    ZeronTheme(Appearance.Dark) {
+        Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
             ImageTileFixture(loaded = true)
         }
     }

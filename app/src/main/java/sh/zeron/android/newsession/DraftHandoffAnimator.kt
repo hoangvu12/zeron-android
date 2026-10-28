@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import android.os.Looper
 import androidx.compose.animation.core.animate
@@ -11,12 +11,12 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
-import sh.roboco.android.design.HandoffTimings
-import sh.roboco.android.design.Motion
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.shell.DraftHandoff
-import sh.roboco.android.shell.HandoffAnimator
-import sh.roboco.android.shell.SessionRoute
+import sh.zeron.android.design.HandoffTimings
+import sh.zeron.android.design.Motion
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.shell.DraftHandoff
+import sh.zeron.android.shell.HandoffAnimator
+import sh.zeron.android.shell.SessionRoute
 
 /**
  * The draft handoff animator (android-ui-parity #95) — the port of

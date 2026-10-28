@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -9,15 +9,15 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import sh.roboco.android.design.Feedback
-import sh.roboco.android.design.Haptic
-import sh.roboco.android.design.Motion
-import sh.roboco.android.session.SessionChrome
+import sh.zeron.android.design.Feedback
+import sh.zeron.android.design.Haptic
+import sh.zeron.android.design.Motion
+import sh.zeron.android.session.SessionChrome
 
 /**
  * Kotlin twin of the FFI `UserInputAnswer` (android-ui-parity #91), kept
  * FFI-free so the panel state is plain-JVM testable: the port
- * ([QuestionPort]) maps it onto `uniffi.roboco_core.UserInputAnswer`
+ * ([QuestionPort]) maps it onto `uniffi.zeron_core.UserInputAnswer`
  * only when it actually crosses FFI.
  */
 data class QuestionAnswer(val questionId: String, val labels: List<String>)
@@ -30,7 +30,7 @@ data class QuestionAnswer(val questionId: String, val labels: List<String>)
  * state); ticket 90's card renders the values this class exposes and
  * calls back into it.
  *
- * The two Roboco adaptations iOS does not have (both from the ticket):
+ * The two Zeron adaptations iOS does not have (both from the ticket):
  * - a reset keyed on the request id **as well as** the item list, so a
  *   re-asked identical question set can be submitted again;
  * - one pending auto-advance job, bound to the page it was scheduled
@@ -87,7 +87,7 @@ class QuestionPanelState(
     /** The request id the current `items` were configured under (the second reset key). */
     private var resetRequestId: String? = null
 
-    /** The pending auto-advance job, or null. At most one exists (the Roboco adaptation). */
+    /** The pending auto-advance job, or null. At most one exists (the Zeron adaptation). */
     private var autoAdvance: Job? = null
 
     val count: Int get() = items.size
@@ -171,7 +171,7 @@ class QuestionPanelState(
      * single replaces (re-tapping the picked option keeps it picked).
      * Single-select then schedules [advance] in
      * [autoAdvanceMs][Motion.QuestionAutoAdvanceMs], bound to this page
-     * (the Roboco single-job rule).
+     * (the Zeron single-job rule).
      */
     fun pick(pageIndex: Int, option: String) {
         if (pageIndex != page) return
@@ -236,7 +236,7 @@ class QuestionPanelState(
      * or pageless; a non-last page pages forward; the last page submits.
      * Submitting returns early with no haptic when `requestId == null`
      * (a stale timer after the request resolved elsewhere) or
-     * `!canWrite` (Roboco's read-only mode) — then builds every
+     * `!canWrite` (Zeron's read-only mode) — then builds every
      * question's answer in option order, sets `submitted`, plays
      * `Haptic.Confirm` and calls [onSubmit] exactly once per set.
      */

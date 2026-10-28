@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -33,7 +33,7 @@ interface SessionRoute {
      * `prepareArrival`, `SessionViewController.swift`'s alpha-0 state).
      * Plain state writes, main thread — ticket 77. The router calls it
      * **before** the push, so Compose never composes a visible frame first
-     * (the Roboco adaptation of `performWithoutAnimation`).
+     * (the Zeron adaptation of `performWithoutAnimation`).
      */
     fun prepareArrival()
 

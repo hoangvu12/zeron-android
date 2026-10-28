@@ -1,11 +1,11 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Test
-import uniffi.roboco_core.LinkHit
-import uniffi.roboco_core.Scroller
+import uniffi.zeron_core.LinkHit
+import uniffi.zeron_core.Scroller
 
 /**
  * [hitLink] — the iOS `RowView.link(at:)` hit-test

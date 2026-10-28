@@ -1,4 +1,4 @@
-package sh.roboco.android.core
+package sh.zeron.android.core
 
 import java.io.ByteArrayInputStream
 import java.io.FileNotFoundException
@@ -11,7 +11,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertThrows
 import org.junit.Test
-import uniffi.roboco_core.FaceRole
+import uniffi.zeron_core.FaceRole
 
 /**
  * `Fonts.load` (plain JVM, for the merge check, through the injectable

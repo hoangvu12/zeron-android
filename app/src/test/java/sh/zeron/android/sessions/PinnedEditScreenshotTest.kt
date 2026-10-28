@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -17,22 +17,22 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.ProvideGlyphClock
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.shell.NavStack
-import sh.roboco.android.shell.NavStackHost
-import sh.roboco.android.shell.TabId
-import sh.roboco.android.shell.TabRootRoute
-import uniffi.roboco_core.ChatIndicator
-import uniffi.roboco_core.FrontPage
-import uniffi.roboco_core.ProjectRef
-import uniffi.roboco_core.PullRequest
-import uniffi.roboco_core.PullRequestGroups
-import uniffi.roboco_core.PullRequestState
-import uniffi.roboco_core.SessionRow
-import uniffi.roboco_core.WorkspaceSnapshot
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ProvideGlyphClock
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.shell.NavStack
+import sh.zeron.android.shell.NavStackHost
+import sh.zeron.android.shell.TabId
+import sh.zeron.android.shell.TabRootRoute
+import uniffi.zeron_core.ChatIndicator
+import uniffi.zeron_core.FrontPage
+import uniffi.zeron_core.ProjectRef
+import uniffi.zeron_core.PullRequest
+import uniffi.zeron_core.PullRequestGroups
+import uniffi.zeron_core.PullRequestState
+import uniffi.zeron_core.SessionRow
+import uniffi.zeron_core.WorkspaceSnapshot
 
 /**
  * The Pinned Edit-mode goldens (android-ui-parity #47): the Pinned folder
@@ -56,7 +56,7 @@ import uniffi.roboco_core.WorkspaceSnapshot
  * paths are relative to `roborazzi { outputDir }`
  * (`src/test/screenshots`), so the goldens land at
  * `src/test/screenshots/sessions/`. Recorded by
- * `./gradlew :app:recordRoborazziDebug --tests sh.roboco.android.sessions.PinnedEditScreenshotTest`,
+ * `./gradlew :app:recordRoborazziDebug --tests sh.zeron.android.sessions.PinnedEditScreenshotTest`,
  * verified by `:app:verifyRoborazziDebug --tests …`, then reviewed side
  * by side with an iOS 26 simulator capture (Pinned folder, Edit tapped,
  * 3 pins) — handle position, separator presence and content shift.
@@ -89,7 +89,7 @@ class PinnedEditScreenshotTest {
     private fun editShot(appearance: Appearance, file: String) {
         val stack = NavStack(TabRootRoute(TabId.Sessions)).apply { push(FolderRoute.pinned(), animated = false) }
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 ProvideGlyphClock(frozenAtNanos = 0L) {
                     GlassMenuHost {
                         NavStackHost(stack = stack, active = true) { entry ->
@@ -121,9 +121,9 @@ class PinnedEditScreenshotTest {
     @Test
     fun rowLiftedLight() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 ProvideGlyphClock(frozenAtNanos = 0L) {
-                    Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+                    Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                         LiftedRowSample(PinnedEditFixtures.prBadgeVm(), Modifier.fillMaxWidth())
                     }
                 }

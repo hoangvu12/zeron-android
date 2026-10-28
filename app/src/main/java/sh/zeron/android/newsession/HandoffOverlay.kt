@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
@@ -41,16 +41,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import kotlin.math.max
 import kotlin.math.roundToInt
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.HandoffTimings
-import sh.roboco.android.design.LocalPalette
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.SmoothRoundedShape
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.shell.HandoffAnimator
-import sh.roboco.android.shell.LocalRouterHooks
-import sh.roboco.android.shell.RouterHooks
-import sh.roboco.android.shell.SessionRoute
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.HandoffTimings
+import sh.zeron.android.design.LocalPalette
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.SmoothRoundedShape
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.shell.HandoffAnimator
+import sh.zeron.android.shell.LocalRouterHooks
+import sh.zeron.android.shell.RouterHooks
+import sh.zeron.android.shell.SessionRoute
 
 /**
  * The states of one playing handoff (android-ui-parity #95) — the
@@ -150,7 +150,7 @@ class HandoffOverlayState internal constructor() {
 
 /**
  * The window-level host of the handoff overlays (android-ui-parity #95)
- * — the Roboco adaptation of `DraftHandoffAnimator`'s `window.addSubview`
+ * — the Zeron adaptation of `DraftHandoffAnimator`'s `window.addSubview`
  * calls: one Compose layer, mounted by ticket 35's `RootHosts` around
  * the `SheetHost`, above the app root and the (hidden) sheet, below
  * glass menus, action sheets, alerts and toasts.
@@ -162,7 +162,7 @@ class HandoffOverlayState internal constructor() {
  * [arrivalTargetOf]; the debug gallery and the tests inject a fake so a
  * fake route resolves to their fake target.
  *
- * Must sit inside `RobocoTheme` (the canvas reads the palette and the
+ * Must sit inside `ZeronTheme` (the canvas reads the palette and the
  * type scale) and inside the `LocalRouterHooks` provider.
  */
 @Composable

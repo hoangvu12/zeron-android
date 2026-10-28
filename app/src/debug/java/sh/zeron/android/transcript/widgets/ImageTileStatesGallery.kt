@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -32,21 +32,21 @@ import androidx.compose.ui.unit.dp
 import java.io.IOException
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
-import sh.roboco.android.core.Face
-import sh.roboco.android.debug.labGradientBitmap
-import sh.roboco.android.debug.serveLabFixture
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalGalleryCapture
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.TranscriptPalette
-import sh.roboco.android.design.color
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.transcript.AttachmentReader
-import sh.roboco.android.transcript.TranscriptActions
-import sh.roboco.android.transcript.TranscriptImageBinding
-import sh.roboco.android.transcript.TranscriptImageLoader
-import uniffi.roboco_core.ColorRole
+import sh.zeron.android.core.Face
+import sh.zeron.android.debug.labGradientBitmap
+import sh.zeron.android.debug.serveLabFixture
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalGalleryCapture
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.TranscriptPalette
+import sh.zeron.android.design.color
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.transcript.AttachmentReader
+import sh.zeron.android.transcript.TranscriptActions
+import sh.zeron.android.transcript.TranscriptImageBinding
+import sh.zeron.android.transcript.TranscriptImageLoader
+import uniffi.zeron_core.ColorRole
 
 /**
  * The "Image tile states" section of the debug design gallery (ticket
@@ -176,7 +176,7 @@ private fun StatesTileSlot(
 
 /** `ColorRole.CHIP_BACKGROUND` of the current appearance (#E7E7EB / #1C1C20). */
 @Composable
-private fun statesChipColor(): Color = Color(TranscriptPalette(RobocoTheme.isDark).color(ColorRole.CHIP_BACKGROUND))
+private fun statesChipColor(): Color = Color(TranscriptPalette(ZeronTheme.isDark).color(ColorRole.CHIP_BACKGROUND))
 
 /**
  * The deterministic fixture's actions (no reader): a sync hit for the
@@ -286,7 +286,7 @@ private fun InteractiveTile(
     name: String,
     reader: CountingReader,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val binding = remember(loader, reader) { TranscriptImageBinding(loader, { "gallery" }, reader) }
     val actions = remember(binding) {
@@ -312,8 +312,8 @@ private fun InteractiveTile(
 @Preview(name = "ImageTile states light", widthDp = 393, heightDp = 900)
 @Composable
 private fun ImageTileStatesLightPreview() {
-    RobocoTheme(Appearance.Light) {
-        Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+    ZeronTheme(Appearance.Light) {
+        Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
             ImageTileStatesFixture()
         }
     }
@@ -322,8 +322,8 @@ private fun ImageTileStatesLightPreview() {
 @Preview(name = "ImageTile states dark", widthDp = 393, heightDp = 900, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun ImageTileStatesDarkPreview() {
-    RobocoTheme(Appearance.Dark) {
-        Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+    ZeronTheme(Appearance.Dark) {
+        Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
             ImageTileStatesFixture()
         }
     }

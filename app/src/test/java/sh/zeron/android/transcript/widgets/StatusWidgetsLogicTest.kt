@@ -1,10 +1,10 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import androidx.compose.ui.graphics.Color
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import sh.roboco.android.design.formatElapsed
+import sh.zeron.android.design.formatElapsed
 
 /**
  * The status widgets' pure logic (android-ui-parity #123), plain JVM — no

@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.Image
@@ -37,15 +37,15 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
-import sh.roboco.android.design.CapsuleShape
-import sh.roboco.android.design.FadingHorizontalScroll
-import sh.roboco.android.design.Icon
-import sh.roboco.android.design.Motion
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.SymbolWeight
-import sh.roboco.android.design.hairlineBorder
-import sh.roboco.android.design.rememberSmoothRoundedShape
+import sh.zeron.android.design.CapsuleShape
+import sh.zeron.android.design.FadingHorizontalScroll
+import sh.zeron.android.design.Icon
+import sh.zeron.android.design.Motion
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.SymbolWeight
+import sh.zeron.android.design.hairlineBorder
+import sh.zeron.android.design.rememberSmoothRoundedShape
 
 /**
  * The staged-thumbnail strip's geometry (android-ui-parity #88), every
@@ -118,7 +118,7 @@ private const val RemovePressedAlpha = 0.12f
  *   falls through to ticket 56's glass tap-to-focus; the x button carries
  *   [controlModifier] (56's `Modifier.composerControl`), which excludes it
  *   from that detector, and consumes the tap itself.
- * - **Roboco addition:** [visible] (wired to
+ * - **Zeron addition:** [visible] (wired to
  *   `ComposerController.attachEnabled`, false while a queued message is
  *   edited) hides the strip — height 0, nothing composed, no semantics.
  *
@@ -283,7 +283,7 @@ private fun StagedThumbnail(
     val shape = rememberSmoothRoundedShape(StagedThumbMetrics.CornerRadius.dp)
     // Read per composition so a light/dark switch recolours the border in
     // the next frame (iOS keeps a stale border until the next rebuild).
-    val border = RobocoTheme.palette.hairline
+    val border = ZeronTheme.palette.hairline
     Box(
         Modifier
             // Placement-phase read of the slide: a running slide moves the
@@ -354,7 +354,7 @@ private fun RemoveImageButton(
         contentAlignment = Alignment.Center,
     ) {
         Icon(
-            RobocoIcons.Xmark,
+            ZeronIcons.Xmark,
             tint = Color.White,
             sizePt = StagedThumbMetrics.RemoveGlyphPt,
             weight = SymbolWeight.Bold,

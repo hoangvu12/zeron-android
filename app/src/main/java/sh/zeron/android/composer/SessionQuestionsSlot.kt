@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedContent
@@ -42,21 +42,21 @@ import dev.chrisbanes.haze.hazeSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.Feedback
-import sh.roboco.android.design.GlassStage
-import sh.roboco.android.design.LocalFeedback
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.Motion
-import sh.roboco.android.design.NoFeedback
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.glass.ProvideHazeState
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.session.BottomStackSlotScope
-import sh.roboco.android.session.SessionChrome
-import sh.roboco.android.session.SessionController
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.Feedback
+import sh.zeron.android.design.GlassStage
+import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.Motion
+import sh.zeron.android.design.NoFeedback
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.glass.ProvideHazeState
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.session.BottomStackSlotScope
+import sh.zeron.android.session.SessionChrome
+import sh.zeron.android.session.SessionController
 
 /**
  * The question panel's screen glue (android-ui-parity #91): the state
@@ -128,7 +128,7 @@ fun rememberQuestionPanelState(
 
 /**
  * The question panel in ticket 74's questions slot (91's step 6):
- * [QuestionCardGlass][sh.roboco.android.composer.QuestionCardGlass] (90)
+ * [QuestionCardGlass][sh.zeron.android.composer.QuestionCardGlass] (90)
  * wrapping one [AnimatedContent] whose target is [PageKey], so a page
  * move cross-dissolves the card **content** — 200 ms easeInOut
  * ([Motion.questionPage]), both pages interactive (iOS
@@ -143,7 +143,7 @@ fun rememberQuestionPanelState(
  * composing the slot never steals focus from the composer; when the
  * questions go away (`requestId == null`) and the panel itself holds
  * focus, it is cleared so the IME goes down while the slot collapses
- * (Roboco adaptation — 74 keeps the slot composed; iOS hides the view).
+ * (Zeron adaptation — 74 keeps the slot composed; iOS hides the view).
  * After IME Done the incoming page's Other field takes the focus the
  * outgoing field kept, so the keyboard stays up across the page move
  * (iOS: the same `UITextField` stays first responder).
@@ -254,7 +254,7 @@ fun BottomStackSlotScope.SessionQuestionsSlot(
 
 // ---------------------------------------------------------------------------
 // The fixtures (91's step 8): F1 is upstream's demo question
-// (transcripts.rs:801-815), F2 is Roboco's mock harness set
+// (transcripts.rs:801-815), F2 is Zeron's mock harness set
 // (crates/harness/src/mock.rs:19-45), F3 the multiline + prefill pair,
 // Dup the duplicate-id guard.
 // ---------------------------------------------------------------------------
@@ -386,7 +386,7 @@ internal object PreviewSlotScope : BottomStackSlotScope {
  */
 @Composable
 fun QuestionPanelBehaviourGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val feedback = LocalFeedback.current
 
@@ -438,7 +438,7 @@ fun QuestionPanelBehaviourGallerySection() {
 /** One gallery row: label left, current value in accent right (no Material). */
 @Composable
 private fun BehaviourRow(label: String, value: String = "", onClick: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Row(
         Modifier
@@ -489,11 +489,11 @@ private fun QuestionBehaviourPreviewBody() {
 @Preview(name = "Question behaviour – light")
 @Composable
 private fun QuestionBehaviourLightPreview() {
-    RobocoTheme(Appearance.Light) { QuestionBehaviourPreviewBody() }
+    ZeronTheme(Appearance.Light) { QuestionBehaviourPreviewBody() }
 }
 
 @Preview(name = "Question behaviour – dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun QuestionBehaviourDarkPreview() {
-    RobocoTheme(Appearance.Dark) { QuestionBehaviourPreviewBody() }
+    ZeronTheme(Appearance.Dark) { QuestionBehaviourPreviewBody() }
 }

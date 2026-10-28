@@ -1,4 +1,4 @@
-package sh.roboco.android.update
+package sh.zeron.android.update
 
 import java.io.ByteArrayInputStream
 import java.io.File
@@ -38,10 +38,10 @@ class ApkDownloadTest {
     @Test
     fun downloadsTheBytesWithTheDigest() = runTest {
         val bytes = "a fake apk, exactly".toByteArray()
-        val dest = tmp.newFile("roboco-0.10.0-android-arm64-v8a.apk")
+        val dest = tmp.newFile("zeron-0.10.0-android-arm64-v8a.apk")
         val progresses = mutableListOf<Long>()
         val result = ApkDownloader(io = kotlinx.coroutines.Dispatchers.Unconfined).download(
-            url = "https://example.invalid/roboco-0.10.0-android-arm64-v8a.apk",
+            url = "https://example.invalid/zeron-0.10.0-android-arm64-v8a.apk",
             dest = dest,
             source = FakeSource(bytes),
             onProgress = { read, total -> progresses.add(read); assertEquals(bytes.size.toLong(), total) },
@@ -58,7 +58,7 @@ class ApkDownloadTest {
 
     @Test
     fun aFailingSourceRefusesAndLeavesNoPartialFile() = runTest {
-        val dest = tmp.newFile("roboco-0.10.0-android-x86_64.apk")
+        val dest = tmp.newFile("zeron-0.10.0-android-x86_64.apk")
         val result = ApkDownloader(io = kotlinx.coroutines.Dispatchers.Unconfined).download(
             url = "https://example.invalid/a.apk",
             dest = dest,

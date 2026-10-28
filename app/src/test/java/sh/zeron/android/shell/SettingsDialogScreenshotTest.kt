@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.runtime.currentCompositionLocalContext
 import androidx.compose.runtime.rememberUpdatedState
@@ -19,10 +19,10 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
 
 /**
  * The tablet Settings dialog's goldens (android-ui-parity #104), recorded
@@ -72,7 +72,7 @@ class SettingsDialogScreenshotTest {
     private fun shot(appearance: Appearance, file: String, push: Boolean = false) {
         val state = SheetHostState()
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 val locals = rememberUpdatedState(currentCompositionLocalContext)
                 // Presented settled (idempotent while up): the captured
                 // frame is at rest, never mid-animation. The card content

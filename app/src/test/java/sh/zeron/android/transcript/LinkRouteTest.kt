@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -28,29 +28,29 @@ class LinkRouteTest {
     fun imageChipsRouteToThePreviewWithADecodedRef() {
         assertEquals(
             LinkRoute.Preview("/tmp/uploads/ab12cd34-Image_1.png"),
-            routeLink("roboco-preview://image?ref=%2Ftmp%2Fuploads%2Fab12cd34-Image_1.png"),
+            routeLink("zeron-preview://image?ref=%2Ftmp%2Fuploads%2Fab12cd34-Image_1.png"),
         )
         // `+` stays `+`: iOS's URLComponents.queryItems does not decode it.
         assertEquals(
             LinkRoute.Preview("a+b+c"),
-            routeLink("roboco-preview://image?ref=a+b%2Bc"),
+            routeLink("zeron-preview://image?ref=a+b%2Bc"),
         )
     }
 
     @Test
     fun badPreviewRefsAreIgnored() {
-        assertEquals(LinkRoute.Ignore, routeLink("roboco-preview://image?ref=%E0%A4"))
-        assertEquals(LinkRoute.Ignore, routeLink("roboco-preview://image?ref="))
-        assertEquals(LinkRoute.Ignore, routeLink("roboco-preview://image?x=1"))
+        assertEquals(LinkRoute.Ignore, routeLink("zeron-preview://image?ref=%E0%A4"))
+        assertEquals(LinkRoute.Ignore, routeLink("zeron-preview://image?ref="))
+        assertEquals(LinkRoute.Ignore, routeLink("zeron-preview://image?x=1"))
     }
 
     @Test
-    fun robocoFileLinksOpenImagesAndIgnoreTheRest() {
-        assertEquals(LinkRoute.Ignore, routeLink("roboco-invoke:7b7d"))
-        assertEquals(LinkRoute.Preview("roboco-file:src/a%20file.png"), routeLink("roboco-file:src/a%20file.png"))
-        assertEquals(LinkRoute.Preview("ROBOCO-FILE:x.png"), routeLink("ROBOCO-FILE:x.png"))
-        assertEquals(LinkRoute.Ignore, routeLink("roboco-file:src/components/"))
-        assertEquals(LinkRoute.Ignore, routeLink("roboco-file:src/main.rs"))
+    fun zeronFileLinksOpenImagesAndIgnoreTheRest() {
+        assertEquals(LinkRoute.Ignore, routeLink("zeron-invoke:7b7d"))
+        assertEquals(LinkRoute.Preview("zeron-file:src/a%20file.png"), routeLink("zeron-file:src/a%20file.png"))
+        assertEquals(LinkRoute.Preview("ZERON-FILE:x.png"), routeLink("ZERON-FILE:x.png"))
+        assertEquals(LinkRoute.Ignore, routeLink("zeron-file:src/components/"))
+        assertEquals(LinkRoute.Ignore, routeLink("zeron-file:src/main.rs"))
     }
 
     @Test
@@ -83,7 +83,7 @@ class LinkRouteTest {
     fun otherSchemesGoToTheSystem() {
         assertEquals(LinkRoute.External("mailto:dev@example.com"), routeLink("mailto:dev@example.com"))
         assertEquals(LinkRoute.External("tel:12345"), routeLink("tel:12345"))
-        assertEquals(LinkRoute.External("roboco://chat/abc"), routeLink("roboco://chat/abc"))
+        assertEquals(LinkRoute.External("zeron://chat/abc"), routeLink("zeron://chat/abc"))
         // Scheme-shaped: ACTION_VIEW finds no handler, so nothing happens,
         // as iOS's UIApplication.open does.
         assertEquals(LinkRoute.External("main.rs:42"), routeLink("main.rs:42"))
@@ -111,14 +111,14 @@ class LinkRouteTest {
 
     @Test
     fun previewRefTakesTheFirstRefItemAfterTheHash() {
-        assertEquals("/tmp/x.png", previewRef("roboco-preview://image?ref=%2Ftmp%2Fx.png&x=1"))
-        assertEquals("a+b", previewRef("roboco-preview://image?ref=a+b"))
+        assertEquals("/tmp/x.png", previewRef("zeron-preview://image?ref=%2Ftmp%2Fx.png&x=1"))
+        assertEquals("a+b", previewRef("zeron-preview://image?ref=a+b"))
         // The query ends at the first `#`.
-        assertNull(previewRef("roboco-preview://image?x=1#ref=y"))
+        assertNull(previewRef("zeron-preview://image?x=1#ref=y"))
         // An item without `=` does not count; the search continues.
-        assertNull(previewRef("roboco-preview://image?ref&x=1"))
-        assertEquals("late", previewRef("roboco-preview://image?ref&ref=late"))
-        assertNull(previewRef("roboco-preview://image"))
-        assertNull(previewRef("roboco-preview://image?ref="))
+        assertNull(previewRef("zeron-preview://image?ref&x=1"))
+        assertEquals("late", previewRef("zeron-preview://image?ref&ref=late"))
+        assertNull(previewRef("zeron-preview://image"))
+        assertNull(previewRef("zeron-preview://image?ref="))
     }
 }

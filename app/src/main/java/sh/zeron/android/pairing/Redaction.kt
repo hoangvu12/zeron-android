@@ -1,8 +1,8 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import android.net.Uri
-import uniffi.roboco_core.EngineTransport
-import uniffi.roboco_core.PairedEngine
+import uniffi.zeron_core.EngineTransport
+import uniffi.zeron_core.PairedEngine
 
 /**
  * The only debug-safe rendering of a [PairedEngine] (ticket 71's

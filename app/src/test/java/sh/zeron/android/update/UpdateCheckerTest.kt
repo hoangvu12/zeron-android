@@ -1,4 +1,4 @@
-package sh.roboco.android.update
+package sh.zeron.android.update
 
 import java.io.IOException
 import kotlinx.coroutines.test.runTest

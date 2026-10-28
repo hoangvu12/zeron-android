@@ -1,4 +1,4 @@
-package sh.roboco.android.design.glass
+package sh.zeron.android.design.glass
 
 import android.util.Log
 import android.view.accessibility.AccessibilityManager
@@ -103,29 +103,29 @@ import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Haptic
-import sh.roboco.android.design.HarnessMark
-import sh.roboco.android.design.Icon
-import sh.roboco.android.design.IosSpring
-import sh.roboco.android.design.LocalFeedback
-import sh.roboco.android.design.LocalReduceMotion
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.Motion
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.SmoothRoundedShape
-import sh.roboco.android.design.SymbolWeight
-import sh.roboco.android.design.rgba
-import sh.roboco.android.design.rememberSmoothRoundedShape
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Haptic
+import sh.zeron.android.design.HarnessMark
+import sh.zeron.android.design.Icon
+import sh.zeron.android.design.IosSpring
+import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.design.LocalReduceMotion
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.Motion
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.SmoothRoundedShape
+import sh.zeron.android.design.SymbolWeight
+import sh.zeron.android.design.rgba
+import sh.zeron.android.design.rememberSmoothRoundedShape
+import sh.zeron.android.design.uiStyle
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 
 /**
- * `GlassMenu` (android-ui-parity #15): Roboco's port of the iOS system
+ * `GlassMenu` (android-ui-parity #15): Zeron's port of the iOS system
  * menu (`UIMenu` / SwiftUI `Menu`), drawn with Compose foundation over
  * ticket 07's glass — **no Material** anywhere (no `DropdownMenu`, no
  * ripple). The measured geometry comes from the iOS 26 system-menu capture
@@ -350,7 +350,7 @@ internal val LocalGlassMenuHost = staticCompositionLocalOf<GlassMenuHostState?> 
  * popup would dismiss the IME (the composer's attach and send menus must
  * leave the keyboard up, as on iOS).
  *
- * Must be inside `RobocoTheme` (the panel needs the palette and the type
+ * Must be inside `ZeronTheme` (the panel needs the palette and the type
  * scale).
  */
 @Composable
@@ -955,7 +955,7 @@ fun GlassMenuPanel(
     maxHeight: Dp = Dp.Unspecified,
     focusRequester: FocusRequester? = null,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val slotReserved = reservesLeadingSlot(lines)
     val paneTitleText = (lines.firstNotNullOfOrNull { it as? MenuLine.Title })?.text ?: "Menu"
     val focusIndex = focusRequester?.let {
@@ -1059,7 +1059,7 @@ private fun textColumnStart(slotReserved: Boolean): Dp =
  */
 @Composable
 private fun MenuTitleLine(line: MenuLine.Title, slotReserved: Boolean) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val style = uiStyle(Face.Sans, typeScale.scaled(13f), palette.secondary)
     val modifier = Modifier
@@ -1089,7 +1089,7 @@ private fun MenuBackLine(
     onBack: () -> Unit,
     focusModifier: Modifier,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
@@ -1115,7 +1115,7 @@ private fun MenuBackLine(
             contentAlignment = Alignment.Center,
         ) {
             Icon(
-                RobocoIcons.ChevronBackward,
+                ZeronIcons.ChevronBackward,
                 palette.text,
                 sizePt = GlassMenuTokens.IconPt,
                 weight = SymbolWeight.Semibold,
@@ -1141,7 +1141,7 @@ private fun MenuBackLine(
 /** An inline section header: secondary 13, the icon centred in the leading slot. */
 @Composable
 private fun MenuHeaderLine(line: MenuLine.Header, slotReserved: Boolean) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Box(
         Modifier
@@ -1251,7 +1251,7 @@ private fun MenuSubmenuLine(
 /** The "Loading…" placeholder row: secondary 16, a polite live region, not clickable. */
 @Composable
 private fun MenuLoadingLine(slotReserved: Boolean) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Box(
         Modifier
@@ -1296,7 +1296,7 @@ private fun MenuRowLayout(
     focusModifier: Modifier = Modifier,
     informational: Boolean = false,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val titleInk = when {
         disabled -> palette.secondary // the capture: grey, also on destructive rows
@@ -1390,7 +1390,7 @@ private fun MenuRowLayout(
                     .padding(end = GlassMenuTokens.PadEnd),
             ) {
                 Icon(
-                    RobocoIcons.ChevronRight,
+                    ZeronIcons.ChevronRight,
                     palette.secondary,
                     sizePt = 13f,
                     weight = SymbolWeight.Semibold,
@@ -1408,7 +1408,7 @@ private fun MenuRowLayout(
 @Composable
 private fun LeadingContent(icon: MenuIcon?, checked: Boolean, ink: Color) {
     when {
-        checked -> Icon(RobocoIcons.Checkmark, ink, sizePt = GlassMenuTokens.IconPt)
+        checked -> Icon(ZeronIcons.Checkmark, ink, sizePt = GlassMenuTokens.IconPt)
         icon == null -> Unit
         icon is MenuIcon.Symbol -> Icon(icon.icon, ink, sizePt = GlassMenuTokens.IconPt)
         icon is MenuIcon.Brand -> HarnessMark(icon.harness, GlassMenuTokens.BrandSide, ink)

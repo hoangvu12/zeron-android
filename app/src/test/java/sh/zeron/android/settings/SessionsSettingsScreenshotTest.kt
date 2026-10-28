@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -16,10 +16,10 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.GroupedHeader
-import sh.roboco.android.design.GroupedPosition
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.GroupedHeader
+import sh.zeron.android.design.GroupedPosition
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The Sessions section goldens (android-ui-parity #100), recorded by
@@ -46,10 +46,10 @@ import sh.roboco.android.design.RobocoTheme
  * so ticket 70's geometry sits at its reference size. At rest nothing
  * animates — the switch holds its initial value, whose slide starts at
  * the target — so the goldens are byte-stable without freezing the clock
- * (the `RobocoSwitchScreenshotTest` precedent).
+ * (the `ZeronSwitchScreenshotTest` precedent).
  *
  * Record with
- * `./gradlew :app:recordRoborazziDebug --tests sh.roboco.android.settings.SessionsSettingsScreenshotTest`,
+ * `./gradlew :app:recordRoborazziDebug --tests sh.zeron.android.settings.SessionsSettingsScreenshotTest`,
  * verify with `./gradlew :app:verifyRoborazziDebug --tests …`.
  */
 @RunWith(RobolectricTestRunner::class)
@@ -63,13 +63,13 @@ class SessionsSettingsScreenshotTest {
     /** The section, the ticket's mounting, with the switch pinned to [on]. */
     private fun shotSection(appearance: Appearance, on: Boolean, file: String) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 val strings = sessionsSettingsStrings()
                 LazyColumn(
                     Modifier
                         .width(402.dp)
                         .fillMaxSize()
-                        .background(RobocoTheme.palette.background),
+                        .background(ZeronTheme.palette.background),
                 ) {
                     sessionsSettingsSection(
                         strings = strings,
@@ -107,12 +107,12 @@ class SessionsSettingsScreenshotTest {
     @Test
     fun archivedPressedLight() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Column(
                     Modifier
                         .width(402.dp)
                         .fillMaxSize()
-                        .background(RobocoTheme.palette.background),
+                        .background(ZeronTheme.palette.background),
                 ) {
                     val strings = sessionsSettingsStrings()
                     GroupedHeader(strings.header)

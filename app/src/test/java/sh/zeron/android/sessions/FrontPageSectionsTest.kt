@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -6,8 +6,8 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import uniffi.roboco_core.ChatIndicator
-import uniffi.roboco_core.FrontPage
+import uniffi.zeron_core.ChatIndicator
+import uniffi.zeron_core.FrontPage
 
 /**
  * `FrontPageSections` (android-ui-parity #40): the port of

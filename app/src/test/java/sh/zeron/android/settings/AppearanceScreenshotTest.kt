@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,8 +14,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The Appearance section goldens (android-ui-parity #96), recorded by
@@ -24,8 +24,8 @@ import sh.roboco.android.design.RobocoTheme
  * landing under `settings/`:
  *
  * - `settings/appearance_light.png` — [AppearanceRowsColumn] under
- *   `RobocoTheme(Light)`, current System: "System" checked, light card;
- * - `settings/appearance_dark.png` — under `RobocoTheme(Dark)`, current
+ *   `ZeronTheme(Light)`, current System: "System" checked, light card;
+ * - `settings/appearance_dark.png` — under `ZeronTheme(Dark)`, current
  *   Dark: "Dark" checked, dark card.
  *
  * The `appearance_light` golden is the side-by-side partner of
@@ -41,7 +41,7 @@ import sh.roboco.android.design.RobocoTheme
  * goldens are byte-stable without freezing the clock.
  *
  * Record with
- * `./gradlew :app:recordRoborazziDebug --tests sh.roboco.android.settings.AppearanceScreenshotTest`,
+ * `./gradlew :app:recordRoborazziDebug --tests sh.zeron.android.settings.AppearanceScreenshotTest`,
  * verify with `./gradlew :app:verifyRoborazziDebug --tests …`.
  */
 @RunWith(RobolectricTestRunner::class)
@@ -55,14 +55,14 @@ class AppearanceScreenshotTest {
     /** The section, the ticket's mounting, at the reference phone width. */
     private fun shotSection(appearance: Appearance, current: Appearance, file: String) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 AppearanceRowsColumn(
                     current = current,
                     onPick = {},
                     modifier = Modifier
                         .width(402.dp)
                         .fillMaxSize()
-                        .background(RobocoTheme.palette.background),
+                        .background(ZeronTheme.palette.background),
                 )
             }
         }

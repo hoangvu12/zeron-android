@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.layout.Box
@@ -24,16 +24,16 @@ import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.design.LiftHighlight
-import sh.roboco.android.design.LocalReduceMotion
-import sh.roboco.android.design.Motion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.contextMenu
-import uniffi.roboco_core.LayoutFrame
-import uniffi.roboco_core.RowKind
-import uniffi.roboco_core.RowPlacement
-import uniffi.roboco_core.Widget
-import uniffi.roboco_core.WidgetKind
+import sh.zeron.android.design.LiftHighlight
+import sh.zeron.android.design.LocalReduceMotion
+import sh.zeron.android.design.Motion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.contextMenu
+import uniffi.zeron_core.LayoutFrame
+import uniffi.zeron_core.RowKind
+import uniffi.zeron_core.RowPlacement
+import uniffi.zeron_core.Widget
+import uniffi.zeron_core.WidgetKind
 import kotlin.math.max
 
 /**
@@ -293,7 +293,7 @@ internal fun WidgetBox(ctx: RowContext, w: Widget) {
             .widgetSemantics(w.kind)
             .then(
                 if (outline) {
-                    val danger = RobocoTheme.palette.danger // #DC2626 light / #F87171 dark
+                    val danger = ZeronTheme.palette.danger // #DC2626 light / #F87171 dark
                     Modifier.drawBehind { drawRect(danger, style = Stroke(1f)) }
                 } else {
                     Modifier

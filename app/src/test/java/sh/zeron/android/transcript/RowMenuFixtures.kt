@@ -1,9 +1,9 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.os.Looper
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.shadows.ShadowChoreographer
-import uniffi.roboco_core.DebugEntry
+import uniffi.zeron_core.DebugEntry
 
 /**
  * The row-menu fixture (ticket 128), shared by `TranscriptRowMenuTest`

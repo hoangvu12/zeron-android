@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -16,13 +16,13 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The locations rail and search/typed-path field's goldens
  * (android-ui-parity #112), recorded by
- * `./gradlew :app:recordRoborazziDebug --tests sh.roboco.android.newsession.FolderLocationsScreenshotTest`
+ * `./gradlew :app:recordRoborazziDebug --tests sh.zeron.android.newsession.FolderLocationsScreenshotTest`
  * and verified by `verifyRoborazziDebug`:
  *
  *  - the ticket's four fixtures A–D in light and dark, each on the plain
@@ -61,8 +61,8 @@ class FolderLocationsScreenshotTest {
 
     private fun present(spec: FolderLocationsSpec, appearance: Appearance) {
         compose.setContent {
-            RobocoTheme(appearance) {
-                Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+            ZeronTheme(appearance) {
+                Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                     FolderLocationsStage(spec, Modifier.fillMaxWidth())
                 }
             }
@@ -123,8 +123,8 @@ class FolderLocationsScreenshotTest {
     @Config(sdk = [36], qualifiers = "w402dp-h560dp-mdpi")
     fun galleryLight() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
-                Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+            ZeronTheme(Appearance.Light) {
+                Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                     FolderLocationsGallerySection()
                 }
             }
@@ -137,8 +137,8 @@ class FolderLocationsScreenshotTest {
     @Config(sdk = [36], qualifiers = "w402dp-h560dp-mdpi")
     fun galleryDark() {
         compose.setContent {
-            RobocoTheme(Appearance.Dark) {
-                Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+            ZeronTheme(Appearance.Dark) {
+                Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                     FolderLocationsGallerySection()
                 }
             }

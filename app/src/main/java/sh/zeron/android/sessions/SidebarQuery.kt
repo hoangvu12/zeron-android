@@ -1,8 +1,8 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
-import uniffi.roboco_core.WorkspaceSnapshot
+import uniffi.zeron_core.WorkspaceSnapshot
 
 /**
  * What the sidebar's list shows (android-ui-parity #105) — the Android
@@ -53,7 +53,7 @@ fun sidebarListContent(rawQuery: String, results: SearchResults?): SidebarListCo
 /**
  * Fixture override for the tablet sidebar (105) — the gallery, previews
  * and Robolectric tests provide it around
- * [sh.roboco.android.shell.tablet.Sidebar] so the whole sidebar subtree
+ * [sh.zeron.android.shell.tablet.Sidebar] so the whole sidebar subtree
  * renders fixture data: [sections]/[collapsedIds] feed 46's root screen
  * (instead of the app's `FrontPageModel`), [workspace] feeds 45's pushed
  * folder pages (`FolderRouteContent` reads it instead of the app's

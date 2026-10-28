@@ -1,11 +1,11 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import java.util.Locale
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import sh.roboco.android.design.glass.MenuItem
+import sh.zeron.android.design.glass.MenuItem
 
 /**
  * android-next #01's pure context-usage rules: the reading table, the

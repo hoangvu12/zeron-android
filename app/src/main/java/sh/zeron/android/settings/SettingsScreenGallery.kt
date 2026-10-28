@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import android.content.res.Configuration
 import androidx.compose.foundation.lazy.LazyListScope
@@ -10,21 +10,21 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
-import sh.roboco.android.core.CoreStatus
-import sh.roboco.android.core.WallpaperStore
-import sh.roboco.android.design.ActionSheetHost
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.groupedSection
-import sh.roboco.android.notify.NotificationPrefs
-import sh.roboco.android.notify.NotificationStatus
-import sh.roboco.android.shell.NavRoute
-import sh.roboco.android.shell.NavStack
-import sh.roboco.android.shell.NavStackHost
-import uniffi.roboco_core.EngineDiagnostics
-import uniffi.roboco_core.EngineState
-import uniffi.roboco_core.EngineView
-import uniffi.roboco_core.WallpaperEffect
+import sh.zeron.android.core.CoreStatus
+import sh.zeron.android.core.WallpaperStore
+import sh.zeron.android.design.ActionSheetHost
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.groupedSection
+import sh.zeron.android.notify.NotificationPrefs
+import sh.zeron.android.notify.NotificationStatus
+import sh.zeron.android.shell.NavRoute
+import sh.zeron.android.shell.NavStack
+import sh.zeron.android.shell.NavStackHost
+import uniffi.zeron_core.EngineDiagnostics
+import uniffi.zeron_core.EngineState
+import uniffi.zeron_core.EngineView
+import uniffi.zeron_core.WallpaperEffect
 
 /**
  * The "Settings screen" page of the debug design gallery
@@ -146,7 +146,7 @@ private fun SettingsScreenGalleryContent(listState: LazyListState, live: Boolean
  * meter). Static like the wallpaper stand-in: no core, no loads.
  */
 private fun LazyListScope.galleryAgentAccountsSection() {
-    val rows = sh.roboco.android.accounts.agentAccountsRows(
+    val rows = sh.zeron.android.accounts.agentAccountsRows(
         deviceId = "device-e1",
         deviceName = "MacBook Pro",
         snapshot = galleryAccountsSnapshot(),
@@ -160,33 +160,33 @@ private fun LazyListScope.galleryAgentAccountsSection() {
     ) ?: return
     groupedSection(
         key = "agent-accounts",
-        header = sh.roboco.android.accounts.AgentAccountsSectionCopy.Header,
+        header = sh.zeron.android.accounts.AgentAccountsSectionCopy.Header,
         items = rows,
         itemKey = { it.id },
-        footer = sh.roboco.android.accounts.AccountsCopy.planUsageOn("MacBook Pro") +
+        footer = sh.zeron.android.accounts.AccountsCopy.planUsageOn("MacBook Pro") +
             " Usage updated just now.",
     ) { spec, position ->
-        sh.roboco.android.accounts.AgentAccountsRow(spec, position, onClick = {})
+        sh.zeron.android.accounts.AgentAccountsRow(spec, position, onClick = {})
     }
 }
 
 /** The section's fixture snapshot — pure records, no FFI. */
-private fun galleryAccountsSnapshot(): uniffi.roboco_core.AgentAccountsSnapshot =
-    uniffi.roboco_core.AgentAccountsSnapshot(
+private fun galleryAccountsSnapshot(): uniffi.zeron_core.AgentAccountsSnapshot =
+    uniffi.zeron_core.AgentAccountsSnapshot(
         accounts = listOf(
-            uniffi.roboco_core.AgentAccount(
+            uniffi.zeron_core.AgentAccount(
                 id = "alice-slot",
                 harness = "claude-code",
                 email = "alice@example.com",
                 planLabel = "Max 20\u00d7",
                 active = true,
                 usageWindows = listOf(
-                    uniffi.roboco_core.AgentUsageWindow(
+                    uniffi.zeron_core.AgentUsageWindow(
                         label = "Session",
                         usedFraction = 0.42f,
                         resetsAtMs = null,
                     ),
-                    uniffi.roboco_core.AgentUsageWindow(
+                    uniffi.zeron_core.AgentUsageWindow(
                         label = "Week",
                         usedFraction = 0.08f,
                         resetsAtMs = null,
@@ -200,7 +200,7 @@ private fun galleryAccountsSnapshot(): uniffi.roboco_core.AgentAccountsSnapshot 
                 switchable = true,
                 provider = null,
             ),
-            uniffi.roboco_core.AgentAccount(
+            uniffi.zeron_core.AgentAccount(
                 id = "bob-slot",
                 harness = "claude-code",
                 email = "bob@example.com",
@@ -215,14 +215,14 @@ private fun galleryAccountsSnapshot(): uniffi.roboco_core.AgentAccountsSnapshot 
                 switchable = true,
                 provider = null,
             ),
-            uniffi.roboco_core.AgentAccount(
+            uniffi.zeron_core.AgentAccount(
                 id = "codex-slot",
                 harness = "codex",
                 email = "dev@example.com",
                 planLabel = "Plus",
                 active = true,
                 usageWindows = listOf(
-                    uniffi.roboco_core.AgentUsageWindow(
+                    uniffi.zeron_core.AgentUsageWindow(
                         label = "Session",
                         usedFraction = 0.91f,
                         resetsAtMs = null,
@@ -330,7 +330,7 @@ private fun galleryEngine(): EngineView = EngineView(
 @Preview(name = "light", widthDp = 402, heightDp = 874)
 @Composable
 private fun SettingsScreenGalleryLightPreview() {
-    RobocoTheme(Appearance.Light) {
+    ZeronTheme(Appearance.Light) {
         ActionSheetHost { SettingsScreenGallerySection(live = false) }
     }
 }
@@ -338,7 +338,7 @@ private fun SettingsScreenGalleryLightPreview() {
 @Preview(name = "dark", widthDp = 402, heightDp = 874, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun SettingsScreenGalleryDarkPreview() {
-    RobocoTheme(Appearance.Dark) {
+    ZeronTheme(Appearance.Dark) {
         ActionSheetHost { SettingsScreenGallerySection(live = false) }
     }
 }

@@ -1,4 +1,4 @@
-package sh.roboco.android.browser
+package sh.zeron.android.browser
 
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.assertHasClickAction
@@ -16,15 +16,15 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.shell.LocalNavEntry
-import sh.roboco.android.shell.LocalNavStack
-import sh.roboco.android.shell.NavStack
-import sh.roboco.android.shell.NavStackHost
-import uniffi.roboco_core.PreviewPanelPhase
-import uniffi.roboco_core.PreviewPanelState
-import uniffi.roboco_core.PreviewServiceRow
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.shell.LocalNavEntry
+import sh.zeron.android.shell.LocalNavStack
+import sh.zeron.android.shell.NavStack
+import sh.zeron.android.shell.NavStackHost
+import uniffi.zeron_core.PreviewPanelPhase
+import uniffi.zeron_core.PreviewPanelState
+import uniffi.zeron_core.PreviewServiceRow
 
 /**
  * The preview panel page (agent-previews ticket 05) through the real
@@ -50,7 +50,7 @@ class PreviewPanelScreenTest {
      * side does.
      */
     private class FakePreviewsCore : PreviewsCore {
-        var listener: uniffi.roboco_core.PreviewPanelListener? = null
+        var listener: uniffi.zeron_core.PreviewPanelListener? = null
         var current = PreviewPanelState(
             phase = PreviewPanelPhase.LOADING,
             engineId = "engine-1",
@@ -60,7 +60,7 @@ class PreviewPanelScreenTest {
 
         override suspend fun watch(
             chatId: String,
-            listener: uniffi.roboco_core.PreviewPanelListener,
+            listener: uniffi.zeron_core.PreviewPanelListener,
         ): PanelWatch = object : PanelWatch {
             init {
                 this@FakePreviewsCore.listener = listener
@@ -71,7 +71,7 @@ class PreviewPanelScreenTest {
         }
 
         override suspend fun proxyStatus() =
-            uniffi.roboco_core.PreviewProxyStatus(port = null, error = null)
+            uniffi.zeron_core.PreviewProxyStatus(port = null, error = null)
 
         override fun setProxyWatching(engineId: String, watching: Boolean) {}
     }
@@ -101,7 +101,7 @@ class PreviewPanelScreenTest {
         stack.push(route, animated = false)
         val pushed = stack.entries.last()
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(
                     LocalNavStack provides stack,
                     LocalNavEntry provides pushed,
@@ -126,7 +126,7 @@ class PreviewPanelScreenTest {
         compose.waitForIdle()
     }
 
-    private object TestRoot : sh.roboco.android.shell.NavRoute
+    private object TestRoot : sh.zeron.android.shell.NavRoute
 
     private fun textExists(text: String): Boolean =
         compose.onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty()

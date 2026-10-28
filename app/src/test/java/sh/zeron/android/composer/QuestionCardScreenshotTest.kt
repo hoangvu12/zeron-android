@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
@@ -16,15 +16,15 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.GlassStage
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.gallery.QuestionCardFixtures
-import sh.roboco.android.design.gallery.QuestionCardStages
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.glass.ProvideHazeState
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.GlassStage
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.gallery.QuestionCardFixtures
+import sh.zeron.android.design.gallery.QuestionCardStages
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.glass.ProvideHazeState
 
 /**
  * The question-card goldens (android-ui-parity #90), recorded by
@@ -65,7 +65,7 @@ class QuestionCardScreenshotTest {
     private fun shot(appearance: Appearance, key: String) {
         val stage = QuestionCardStages.first { it.key == key }
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 ProvideHazeState {
                     GlassStage(
                         modifier = Modifier.width(388.dp),

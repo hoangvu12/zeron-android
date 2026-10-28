@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -32,20 +32,20 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.CapsuleShape
-import sh.roboco.android.design.GlassStage
-import sh.roboco.android.design.Icon
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.SymbolWeight
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.glass.ProvideHazeState
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.CapsuleShape
+import sh.zeron.android.design.GlassStage
+import sh.zeron.android.design.Icon
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.SymbolWeight
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.glass.ProvideHazeState
+import sh.zeron.android.design.uiStyle
 
 /**
  * The composer-surface goldens (android-ui-parity #55), recorded by
@@ -97,7 +97,7 @@ class ComposerSurfaceScreenshotTest {
 
     private fun shot(appearance: Appearance, file: String, p: Float, withThumbs: Boolean) {
         compose.setContent {
-            RobocoTheme(appearance) {
+            ZeronTheme(appearance) {
                 ProvideHazeState {
                     GlassStage(
                         modifier = Modifier.size(390.dp, 220.dp),
@@ -151,7 +151,7 @@ class ComposerSurfaceScreenshotTest {
 
     @Composable
     private fun ShotPlaceholder() {
-        val palette = RobocoTheme.palette
+        val palette = ZeronTheme.palette
         val typeScale = LocalTypeScale.current
         BasicText(
             "Message",
@@ -163,7 +163,7 @@ class ComposerSurfaceScreenshotTest {
 
     @Composable
     private fun ShotChips() {
-        val palette = RobocoTheme.palette
+        val palette = ZeronTheme.palette
         val typeScale = LocalTypeScale.current
         Row(
             horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -184,18 +184,18 @@ class ComposerSurfaceScreenshotTest {
 
     @Composable
     private fun ShotAction() {
-        val palette = RobocoTheme.palette
+        val palette = ZeronTheme.palette
         Box(
             Modifier.size(34.dp).clip(CapsuleShape).background(palette.accent),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(RobocoIcons.ArrowUp, tint = Color.White, sizePt = 15f, weight = SymbolWeight.Bold)
+            Icon(ZeronIcons.ArrowUp, tint = Color.White, sizePt = 15f, weight = SymbolWeight.Bold)
         }
     }
 
     @Composable
     private fun ShotThumbs() {
-        val palette = RobocoTheme.palette
+        val palette = ZeronTheme.palette
         Row(
             modifier = Modifier.padding(top = 12.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),

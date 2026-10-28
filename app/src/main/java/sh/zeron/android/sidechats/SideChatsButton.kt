@@ -1,4 +1,4 @@
-package sh.roboco.android.sidechats
+package sh.zeron.android.sidechats
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -15,14 +15,14 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.SymbolWeight
-import sh.roboco.android.design.glass.GlassCircleButton
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.session.SessionHeaderDefaults
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.SymbolWeight
+import sh.zeron.android.design.glass.GlassCircleButton
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.session.SessionHeaderDefaults
 
 /** "Side chats and agents" (iOS `accessibilityLabel`), plus "N running" while anything runs. */
 fun sideChatsButtonLabel(badge: SideChatsBadge): String =
@@ -39,12 +39,12 @@ fun sideChatsButtonLabel(badge: SideChatsBadge): String =
  */
 @Composable
 fun SideChatsButton(badge: SideChatsBadge, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val fill = if (badge.accent) palette.accent else palette.secondary
     val ink = if (badge.accent) Color.White else palette.background
     Box(modifier) {
         GlassCircleButton(
-            icon = RobocoIcons.TabChat,
+            icon = ZeronIcons.TabChat,
             contentDescription = sideChatsButtonLabel(badge),
             onClick = onClick,
             modifier = Modifier.testTag("side-chats"),

@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
@@ -175,7 +175,7 @@ object MovePinNeighbours {
 }
 
 /**
- * The Pinned reorder's local state machine (47) — the Roboco port of
+ * The Pinned reorder's local state machine (47) — the Zeron port of
  * pr621's `PinnedRows` logic (not its visuals): a local [order] that
  * mirrors the snapshot **only while no drag or commit is active**, and a
  * third state, [committing], while ticket 42's asynchronous `movePin` is

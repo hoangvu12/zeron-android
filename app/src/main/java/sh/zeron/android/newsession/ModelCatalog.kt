@@ -1,13 +1,13 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.CancellationException
-import uniffi.roboco_core.CoreClient
-import uniffi.roboco_core.CoreException
-import uniffi.roboco_core.HarnessInfo
-import uniffi.roboco_core.ModelInfo
-import uniffi.roboco_core.fallbackHarnesses
-import uniffi.roboco_core.fallbackModels
+import uniffi.zeron_core.CoreClient
+import uniffi.zeron_core.CoreException
+import uniffi.zeron_core.HarnessInfo
+import uniffi.zeron_core.ModelInfo
+import uniffi.zeron_core.fallbackHarnesses
+import uniffi.zeron_core.fallbackModels
 
 /**
  * Where the New Session model catalog comes from (android-ui-parity #92)
@@ -40,7 +40,7 @@ private fun choice(h: HarnessInfo, m: ModelInfo): ModelChoice =
 
 /**
  * The live [ModelCatalogSource] over the process's client, resolved at
- * call time (ticket 71's `RobocoApplication.clientOrNull()`): `null`
+ * call time (ticket 71's `ZeronApplication.clientOrNull()`): `null`
  * before `CoreStartState.Ready` reads as an empty catalog.
  *
  * The FFI never throws by contract — `CoreClient.listHarnesses` /

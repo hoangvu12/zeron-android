@@ -1,4 +1,4 @@
-package sh.roboco.android.core
+package sh.zeron.android.core
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -8,12 +8,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import uniffi.roboco_core.ClientEvent
-import uniffi.roboco_core.Connectivity
-import uniffi.roboco_core.CoreClient
-import uniffi.roboco_core.CoreException
-import uniffi.roboco_core.EngineView
-import uniffi.roboco_core.WorkspaceSnapshot
+import uniffi.zeron_core.ClientEvent
+import uniffi.zeron_core.Connectivity
+import uniffi.zeron_core.CoreClient
+import uniffi.zeron_core.CoreException
+import uniffi.zeron_core.EngineView
+import uniffi.zeron_core.WorkspaceSnapshot
 
 /**
  * The workspace FFI seam (ticket 40) — the four calls the feed, the fold
@@ -42,7 +42,7 @@ interface WorkspaceCore {
 
 /**
  * The [WorkspaceCore] over the live [CoreClient], resolved at call time:
- * `RobocoApplication` builds this over `clientOrNull()` (ticket 71) so the
+ * `ZeronApplication` builds this over `clientOrNull()` (ticket 71) so the
  * feed and the fold state work from the moment `CoreStartup` flips to
  * `Ready`, without holding a client a failed start never produced. Before
  * `Ready` the calls refuse like an unreachable engine — nothing in the UI
@@ -51,7 +51,7 @@ interface WorkspaceCore {
 class CoreClientWorkspace(private val client: () -> CoreClient?) : WorkspaceCore {
 
     private fun live(): CoreClient =
-        client() ?: throw CoreException.HostUnavailable("the Roboco core has not started yet")
+        client() ?: throw CoreException.HostUnavailable("the Zeron core has not started yet")
 
     override fun workspaceRevision(): ULong = live().workspaceRevision()
 

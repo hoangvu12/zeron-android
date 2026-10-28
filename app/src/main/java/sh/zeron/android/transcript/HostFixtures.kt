@@ -1,6 +1,6 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
-import uniffi.roboco_core.DebugEntry
+import uniffi.zeron_core.DebugEntry
 
 /**
  * The transcript host's fixture (ticket 65), shared by the gallery section

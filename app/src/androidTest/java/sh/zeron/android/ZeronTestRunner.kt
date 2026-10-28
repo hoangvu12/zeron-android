@@ -1,4 +1,4 @@
-package sh.roboco.android
+package sh.zeron.android
 
 import android.os.Build
 import android.os.Bundle
@@ -29,7 +29,7 @@ import androidx.test.runner.AndroidJUnitRunner
  *   failure with an empty stack (it never "started"). Filtering them out
  *   keeps the parked port rows out of the report.
  */
-class RobocoTestRunner : AndroidJUnitRunner() {
+class ZeronTestRunner : AndroidJUnitRunner() {
 
     override fun onCreate(arguments: Bundle?) {
         val args = Bundle(arguments ?: Bundle())
@@ -57,9 +57,9 @@ class RobocoTestRunner : AndroidJUnitRunner() {
         const val INCLUDE_TOUR = "flowIncludeTour"
         const val TABLET_MIN_WIDTH_DP = 600
         const val IGNORE = "org.junit.Ignore"
-        const val TABLET_ONLY = "sh.roboco.android.flows.TabletOnly"
-        const val PHONE_ONLY = "sh.roboco.android.flows.PhoneOnly"
-        const val PHYSICAL_DEVICE_ONLY = "sh.roboco.android.flows.PhysicalDeviceOnly"
-        const val TOUR = "sh.roboco.android.flows.Tour"
+        const val TABLET_ONLY = "sh.zeron.android.flows.TabletOnly"
+        const val PHONE_ONLY = "sh.zeron.android.flows.PhoneOnly"
+        const val PHYSICAL_DEVICE_ONLY = "sh.zeron.android.flows.PhysicalDeviceOnly"
+        const val TOUR = "sh.zeron.android.flows.Tour"
     }
 }

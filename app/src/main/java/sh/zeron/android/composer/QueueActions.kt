@@ -1,15 +1,15 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import uniffi.roboco_core.SessionHandle
+import uniffi.zeron_core.SessionHandle
 
 /**
  * The fakeable FFI seam for the queue commands (android-ui-parity #82) —
- * [SessionCore][sh.roboco.android.session.SessionCore] is the same idea
+ * [SessionCore][sh.zeron.android.session.SessionCore] is the same idea
  * for ticket 51. All methods suspend and block in FFI: **never call them
  * on main** (the #609 trap). Names follow the generated UniFFI output of
  * `crates/mobile/src/client_ffi/session.rs`.
@@ -65,7 +65,7 @@ class QueueActions(
     private val scope: CoroutineScope,
     private val io: CoroutineDispatcher = Dispatchers.IO.limitedParallelism(1),
     private val logW: (String, Throwable) -> Unit = { message, error ->
-        android.util.Log.w("RobocoQueue", message, error)
+        android.util.Log.w("ZeronQueue", message, error)
     },
 ) {
     /**

@@ -1,9 +1,9 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
-import uniffi.roboco_core.LayoutFrame
+import uniffi.zeron_core.LayoutFrame
 
 /**
  * The row under the header's bottom edge and the offset's distance from

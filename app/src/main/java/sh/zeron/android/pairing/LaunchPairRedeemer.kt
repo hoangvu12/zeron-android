@@ -1,4 +1,4 @@
-package sh.roboco.android.pairing
+package sh.zeron.android.pairing
 
 import android.util.Log
 import kotlin.coroutines.cancellation.CancellationException
@@ -8,12 +8,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import uniffi.roboco_core.CoreClient
-import uniffi.roboco_core.PairedEngine
+import uniffi.zeron_core.CoreClient
+import uniffi.zeron_core.PairedEngine
 
 /**
  * The debug `pair` launch extra's redemption (android-app#30): the flow
- * rig's [FixtureRule][sh.roboco.android.flows.FixtureRule] mints fresh
+ * rig's [FixtureRule][sh.zeron.android.flows.FixtureRule] mints fresh
  * single-use pairing URLs from the `android_fixture` control endpoint and
  * hands them to `MainActivity` as a comma-separated extra. This class
  * redeems each through the live [CoreClient] and persists it — the same
@@ -113,7 +113,7 @@ class LaunchPairRedeemer(
     }
 
     private companion object {
-        const val TAG = "Roboco"
+        const val TAG = "Zeron"
         const val STARTUP_TIMEOUT_MS = 20_000L
         const val POLL_MS = 100L
     }

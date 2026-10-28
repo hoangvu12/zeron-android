@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 /**
  * The phone shell's three tabs (android-ui-parity #26), the port of

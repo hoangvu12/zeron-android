@@ -1,16 +1,16 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import sh.roboco.android.RobocoApplication
-import sh.roboco.android.design.LocalFeedback
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.glass.Menu
-import sh.roboco.android.design.glass.MenuIcon
-import sh.roboco.android.design.glass.MenuItem
-import sh.roboco.android.shell.NavStack
-import sh.roboco.android.shell.LocalNavStack
+import sh.zeron.android.ZeronApplication
+import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.glass.Menu
+import sh.zeron.android.design.glass.MenuIcon
+import sh.zeron.android.design.glass.MenuItem
+import sh.zeron.android.shell.NavStack
+import sh.zeron.android.shell.LocalNavStack
 
 /**
  * The Sessions tab's menus (android-ui-parity #46) — the port of
@@ -91,12 +91,12 @@ fun sessionsOptionsMenu(actions: SessionsScreenActions): Menu = Menu(
     children = listOf(
         MenuItem(
             title = "New Section\u2026",
-            icon = MenuIcon.Symbol(RobocoIcons.FolderBadgePlus),
+            icon = MenuIcon.Symbol(ZeronIcons.FolderBadgePlus),
             testTag = "sessions-options-new-section",
         ) { actions.newSection() },
         MenuItem(
             title = "Collapse All",
-            icon = MenuIcon.Symbol(RobocoIcons.RectangleCompressVertical),
+            icon = MenuIcon.Symbol(ZeronIcons.RectangleCompressVertical),
             testTag = "sessions-options-collapse-all",
         ) { actions.collapseAll() },
         // iOS: UIDeferredMenuElement.uncached { done([UIAction(state:
@@ -107,14 +107,14 @@ fun sessionsOptionsMenu(actions: SessionsScreenActions): Menu = Menu(
             val grouped = actions.groupByProject
             MenuItem(
                 title = "Group by Project",
-                icon = MenuIcon.Symbol(RobocoIcons.SquareStack3dUp),
+                icon = MenuIcon.Symbol(ZeronIcons.SquareStack3dUp),
                 checked = grouped,
                 testTag = "sessions-options-group-by-project",
             ) { actions.setGroupByProject(!actions.groupByProject) }
         },
         MenuItem(
             title = "Archived",
-            icon = MenuIcon.Symbol(RobocoIcons.Archivebox),
+            icon = MenuIcon.Symbol(ZeronIcons.Archivebox),
             testTag = "sessions-options-archived",
         ) { actions.openArchived() },
     ),
@@ -143,12 +143,12 @@ internal fun sessionHeaderMenu(id: String, actions: SessionsScreenActions): Menu
             children = listOf(
                 MenuItem(
                     title = "Open",
-                    icon = MenuIcon.Symbol(RobocoIcons.ArrowUpRight),
+                    icon = MenuIcon.Symbol(ZeronIcons.ArrowUpRight),
                     testTag = "section-menu-open",
                 ) { actions.openPinned() },
                 MenuItem(
                     title = "Reorder\u2026",
-                    icon = MenuIcon.Symbol(RobocoIcons.ArrowUpArrowDown),
+                    icon = MenuIcon.Symbol(ZeronIcons.ArrowUpArrowDown),
                     testTag = "section-menu-reorder",
                 ) { actions.openPinned() },
             ),
@@ -159,17 +159,17 @@ internal fun sessionHeaderMenu(id: String, actions: SessionsScreenActions): Menu
         children = listOf(
             MenuItem(
                 title = "Open",
-                icon = MenuIcon.Symbol(RobocoIcons.ArrowUpRight),
+                icon = MenuIcon.Symbol(ZeronIcons.ArrowUpRight),
                 testTag = "section-menu-open",
             ) { actions.openSection(id, name) },
             MenuItem(
                 title = "Rename Section\u2026",
-                icon = MenuIcon.Symbol(RobocoIcons.Pencil),
+                icon = MenuIcon.Symbol(ZeronIcons.Pencil),
                 testTag = "section-menu-rename",
             ) { actions.renameSection(id, name) },
             MenuItem(
                 title = "Delete Section",
-                icon = MenuIcon.Symbol(RobocoIcons.Trash),
+                icon = MenuIcon.Symbol(ZeronIcons.Trash),
                 destructive = true,
                 testTag = "section-menu-delete",
             ) { actions.deleteSection(id) },
@@ -192,7 +192,7 @@ internal fun sessionHeaderMenu(id: String, actions: SessionsScreenActions): Menu
  */
 @Composable
 internal fun rememberSessionsActions(navStack: NavStack): SessionsScreenActions {
-    val app = LocalContext.current.applicationContext as RobocoApplication
+    val app = LocalContext.current.applicationContext as ZeronApplication
     val frontPage = app.frontPage
     val prefs = app.prefs
     val feed = app.workspaceFeed

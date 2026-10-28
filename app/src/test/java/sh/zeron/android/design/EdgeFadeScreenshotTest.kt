@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
@@ -54,7 +54,7 @@ import org.robolectric.annotation.GraphicsMode
  *
  * Every fixture draws black content on a **parent** `Box` with a white
  * background — a background inside the masked node would be faded with it.
- * Record with `:app:recordRoborazziDebug --tests sh.roboco.android.design.EdgeFadeScreenshotTest`,
+ * Record with `:app:recordRoborazziDebug --tests sh.zeron.android.design.EdgeFadeScreenshotTest`,
  * verify with `:app:verifyRoborazziDebug --tests …`.
  */
 @RunWith(RobolectricTestRunner::class)
@@ -97,8 +97,8 @@ class EdgeFadeScreenshotTest {
 
     private fun galleryShot(appearance: Appearance, file: String) {
         compose.setContent {
-            RobocoTheme(appearance) {
-                Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background)) {
+            ZeronTheme(appearance) {
+                Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
                     EdgeFadeGallerySection()
                 }
             }
@@ -126,7 +126,7 @@ class EdgeFadeScreenshotTest {
     @Test
     fun overflowingTextFadesItsLtrTailOnly() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.testTag("t").size(200.dp, 24.dp).background(Color.White)) {
                     FadingText(longTitle, fixtureStyle(), Modifier.fillMaxSize())
                 }
@@ -143,7 +143,7 @@ class EdgeFadeScreenshotTest {
     @Test
     fun overflowingTextFadesItsRtlTailOnly() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                     Box(Modifier.testTag("t").size(200.dp, 24.dp).background(Color.White)) {
                         FadingText(longTitle, fixtureStyle(), Modifier.fillMaxSize())
@@ -161,7 +161,7 @@ class EdgeFadeScreenshotTest {
     @Test
     fun fittingTextCentresWithNoMask() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.testTag("t").size(200.dp, 24.dp).background(Color.White)) {
                     FadingText(
                         "Hi",
@@ -186,7 +186,7 @@ class EdgeFadeScreenshotTest {
     @Test
     fun onlyTheFirstHardLineIsMeasuredAndRead() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.testTag("t").size(100.dp, 24.dp).background(Color.White)) {
                     FadingText(
                         "short\n" + "m".repeat(48),
@@ -218,7 +218,7 @@ class EdgeFadeScreenshotTest {
     @Test
     fun widthInSlotsHugShortTextAndCapLongText() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Column {
                     Box(Modifier.testTag("hug").background(Color.White)) {
                         FadingText("Hi", fixtureStyle(), Modifier.widthIn(max = 100.dp))
@@ -249,7 +249,7 @@ class EdgeFadeScreenshotTest {
     private fun scroller(initial: Int = 0, rtl: Boolean = false, boxes: Int = 10): Pair<ScrollState, PixelMap> {
         val state = ScrollState(initial)
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(
                     LocalLayoutDirection provides if (rtl) LayoutDirection.Rtl else LayoutDirection.Ltr,
                 ) {
@@ -332,7 +332,7 @@ class EdgeFadeScreenshotTest {
         val state = ScrollState(0)
         val recompositions = intArrayOf(0)
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.size(200.dp, 28.dp).background(Color.White)) {
                     recompositions[0]++
                     FadingHorizontalScroll(
@@ -360,7 +360,7 @@ class EdgeFadeScreenshotTest {
     @Test
     fun overlayRampsPaletteBackgroundOverBlack() {
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.testTag("t").size(100.dp).background(Color.Black)) {
                     EdgeFadeOverlay(Modifier.matchParentSize())
                 }
@@ -395,7 +395,7 @@ class EdgeFadeScreenshotTest {
     fun overlayPassesTouchesThrough() {
         var clicked by mutableStateOf(false)
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 Box(Modifier.size(100.dp).testTag("t")) {
                     Spacer(Modifier.matchParentSize().clickable { clicked = true })
                     EdgeFadeOverlay(Modifier.matchParentSize())

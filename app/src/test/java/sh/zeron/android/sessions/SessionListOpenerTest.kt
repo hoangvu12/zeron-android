@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import android.os.Looper
 import androidx.compose.runtime.Composable
@@ -17,17 +17,17 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.shell.AppRouter
-import sh.roboco.android.shell.DraftHandoff
-import sh.roboco.android.shell.LocalAppRouter
-import sh.roboco.android.shell.LocalNavStack
-import sh.roboco.android.shell.LocalRouterHooks
-import sh.roboco.android.shell.NavRoute
-import sh.roboco.android.shell.NavStack
-import sh.roboco.android.shell.RouterHooks
-import sh.roboco.android.shell.SessionRoute
-import sh.roboco.android.shell.SessionRouteFactory
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.shell.AppRouter
+import sh.zeron.android.shell.DraftHandoff
+import sh.zeron.android.shell.LocalAppRouter
+import sh.zeron.android.shell.LocalNavStack
+import sh.zeron.android.shell.LocalRouterHooks
+import sh.zeron.android.shell.NavRoute
+import sh.zeron.android.shell.NavStack
+import sh.zeron.android.shell.RouterHooks
+import sh.zeron.android.shell.SessionRoute
+import sh.zeron.android.shell.SessionRouteFactory
 
 /**
  * The list's tap-to-open path (android-ui-parity #41) over fakes — the
@@ -114,7 +114,7 @@ class SessionListOpenerTest {
     ): (String) -> Unit {
         var opener: ((String) -> Unit)? = null
         compose.setContent {
-            RobocoTheme {
+            ZeronTheme {
                 val locals = listOfNotNull(
                     LocalNavStack provides stack,
                     LocalAppRouter provides router,

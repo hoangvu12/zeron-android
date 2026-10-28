@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.compose.ui.graphics.toArgb
 import org.junit.Assert.assertEquals
@@ -67,25 +67,25 @@ class SwitchMathTest {
 
     @Test
     fun travelIsWidthMinusTwoInsetsMinusThumb() {
-        assertEquals(22f, RobocoSwitchTokens.Travel.value, 0f)
+        assertEquals(22f, ZeronSwitchTokens.Travel.value, 0f)
     }
 
     @Test
     fun slideSpringIsSettleMatchedAt539() {
         // 0.35 s, ζ 0.85: ω = ln(1000)/(ζ·T), stiffness = ω² (FOUNDATION-D1).
-        assertEquals(539.14f, RobocoSwitchTokens.Slide.stiffness, 0.01f)
+        assertEquals(539.14f, ZeronSwitchTokens.Slide.stiffness, 0.01f)
     }
 
     @Test
     fun liftSpringIsCriticallyDampedAt1364() {
         // 0.25 s, ζ 1: ω = 9.2334/T, stiffness = ω² (FOUNDATION-D1).
-        assertEquals(1364.09f, RobocoSwitchTokens.Lift.stiffness, 0.01f)
+        assertEquals(1364.09f, ZeronSwitchTokens.Lift.stiffness, 0.01f)
     }
 
     @Test
     fun offTrackIsTheQuantisedSystemGrey() {
         // rgba(0x787880, 0.42): round(0.42·255) = 107 = 0x6B.
-        assertEquals(0x6B787880, RobocoSwitchTokens.OffTrack.toArgb())
+        assertEquals(0x6B787880, ZeronSwitchTokens.OffTrack.toArgb())
     }
 
     @Test

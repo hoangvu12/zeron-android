@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
@@ -6,11 +6,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import uniffi.roboco_core.CoreException
-import uniffi.roboco_core.EngineState
-import uniffi.roboco_core.EngineView
-import uniffi.roboco_core.ParkReason
-import uniffi.roboco_core.SendState
+import uniffi.zeron_core.CoreException
+import uniffi.zeron_core.EngineState
+import uniffi.zeron_core.EngineView
+import uniffi.zeron_core.ParkReason
+import uniffi.zeron_core.SendState
 
 /** The lite copy of the FFI `SendState` (android-ui-parity #73): no UniFFI types in the pure derivation. */
 enum class SendLite { Sending, Queued, Failed }
@@ -88,7 +88,7 @@ fun sendingBridge(sendStarted: Long?, turnStarted: Long?): Boolean =
  * Pure. Never returns `Editing` (a display overlay, [shownBanner]) and
  * never `Working` (the transcript tail owns it,
  * `CoreSessionSource.swift:89`). iOS's `.queued` / `.offline` relay-outbox
- * banners are dropped: Roboco refuses writes to a non-connected engine.
+ * banners are dropped: Zeron refuses writes to a non-connected engine.
  */
 fun deriveBanner(i: BannerInputs): SessionChrome.Banner {
     // 1 — the sticky send failure wins over everything.
@@ -173,7 +173,7 @@ fun bannerTapAction(banner: SessionChrome.Banner, engineConnected: Boolean): Ban
 
 /**
  * The `<error>` text of a failed send / setting change — iOS prints Swift
- * reflection (`HostUnavailable(message: "…")`); Roboco prints the
+ * reflection (`HostUnavailable(message: "…")`); Zeron prints the
  * exception's `reason` (the Rust `#[error]` text).
  *
  * For a `CoreException` an exhaustive `when` over the generated variants
@@ -235,7 +235,7 @@ class StatusBanner(
     private val retryDelivery: suspend () -> Unit,
     io: CoroutineDispatcher = Dispatchers.IO,
     private val logW: (String, Throwable) -> Unit = { message, error ->
-        android.util.Log.w("RobocoSession", message, error)
+        android.util.Log.w("ZeronSession", message, error)
     },
 ) : ChromeFiller, SendReporter {
     /** Ticket 83: cancels the queued-message edit. Main thread. */

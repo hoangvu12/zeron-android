@@ -1,4 +1,4 @@
-package sh.roboco.android.design.glass
+package sh.zeron.android.design.glass
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider

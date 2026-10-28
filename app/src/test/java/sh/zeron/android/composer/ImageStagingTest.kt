@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import android.content.ContentProvider
 import android.content.ContentValues
@@ -229,7 +229,7 @@ class ImageStagingTest {
     }
 
     private companion object {
-        const val AUTHORITY = "sh.roboco.test.attach"
+        const val AUTHORITY = "sh.zeron.test.attach"
     }
 }
 

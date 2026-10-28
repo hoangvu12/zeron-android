@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -28,16 +28,16 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.R
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.RobocoTheme
+import sh.zeron.android.R
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ZeronTheme
 
 /**
  * The root wiring of the appearance switch (android-ui-parity #96):
  *
  *  - the ticket's mounting — a `ComponentActivity` hosting
- *    `RobocoTheme(flow.collectAsState().value) { AppearanceWindowEffect(
- *    RobocoTheme.isDark); Box(palette.background) }` — under `notnight`:
+ *    `ZeronTheme(flow.collectAsState().value) { AppearanceWindowEffect(
+ *    ZeronTheme.isDark); Box(palette.background) }` — under `notnight`:
  *    with Light the root pixel is `#F3F3F5` and the window background
  *    `0xFFEDEDED`; one frozen-clock frame after `flow.value = Dark` the
  *    pixel is `#060606` and the window background `0xFF000000` (the
@@ -47,7 +47,7 @@ import sh.roboco.android.design.RobocoTheme
  *  - the same with the system in night and the choice Light: the
  *    composition override wins, everything stays light;
  *  - the splash resources android-app#13 wrote (verified by this
- *    ticket): `Theme.Roboco`'s `windowSplashScreenBackground` resolves to
+ *    ticket): `Theme.Zeron`'s `windowSplashScreenBackground` resolves to
  *    `#EDEDED` under `notnight` and `#000000` under `night`, and
  *    `windowSplashScreenAnimatedIcon` is the fully transparent blank.
  *
@@ -66,9 +66,9 @@ class AppearanceWindowTest {
     /** The ticket's root wiring, over a controllable preference flow. */
     private fun mountRoot(flow: MutableStateFlow<Appearance>) {
         compose.setContent {
-            RobocoTheme(flow.collectAsState().value) {
-                AppearanceWindowEffect(RobocoTheme.isDark)
-                Box(Modifier.fillMaxSize().background(RobocoTheme.palette.background))
+            ZeronTheme(flow.collectAsState().value) {
+                AppearanceWindowEffect(ZeronTheme.isDark)
+                Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background))
             }
         }
         compose.waitForIdle()
@@ -97,7 +97,7 @@ class AppearanceWindowTest {
     private fun splashBackgroundColor(): Int {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val attrs = context.obtainStyledAttributes(
-            R.style.Theme_Roboco,
+            R.style.Theme_Zeron,
             intArrayOf(android.R.attr.windowSplashScreenBackground),
         )
         val color = attrs.getColor(0, 0)
@@ -157,7 +157,7 @@ class AppearanceWindowTest {
     fun theSplashIconIsFullyTransparent() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val attrs = context.obtainStyledAttributes(
-            R.style.Theme_Roboco,
+            R.style.Theme_Zeron,
             intArrayOf(android.R.attr.windowSplashScreenAnimatedIcon),
         )
         val icon = attrs.getDrawable(0) ?: error("windowSplashScreenAnimatedIcon must resolve")

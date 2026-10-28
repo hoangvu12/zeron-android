@@ -1,4 +1,4 @@
-package sh.roboco.android.settings
+package sh.zeron.android.settings
 
 import android.os.Build
 import androidx.compose.ui.test.hasAnyAncestor
@@ -20,10 +20,10 @@ import org.junit.Assume.assumeTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import sh.roboco.android.MainActivity
-import sh.roboco.android.design.toggleTag
-import sh.roboco.android.flows.FixtureRule
-import sh.roboco.android.flows.mountedActivity
+import sh.zeron.android.MainActivity
+import sh.zeron.android.design.toggleTag
+import sh.zeron.android.flows.FixtureRule
+import sh.zeron.android.flows.mountedActivity
 
 /**
  * The instrumented port of the Settings half of `testNotificationTapOpensSession`

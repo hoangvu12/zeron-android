@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -30,13 +30,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Icon
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.ProminentGlassButton
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Icon
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.ProminentGlassButton
+import sh.zeron.android.design.uiStyle
 
 /**
  * The folder browser's bottom stack geometry (dp), the port of
@@ -109,7 +109,7 @@ fun FolderBrowserBottomBar(
     onNewFolder: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
     Column(
         modifier
@@ -160,7 +160,7 @@ fun FolderBrowserBottomBar(
  */
 @Composable
 private fun NewFolderButton(enabled: Boolean, onClick: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
     val ink = if (enabled) palette.text else palette.tertiary
     val source = remember { MutableInteractionSource() }
@@ -192,7 +192,7 @@ private fun NewFolderButton(enabled: Boolean, onClick: () -> Unit) {
         ) {
             // Decorative glyph: the button's own text is the label.
             Icon(
-                RobocoIcons.FolderBadgePlus,
+                ZeronIcons.FolderBadgePlus,
                 tint = ink,
                 sizePt = FolderBottomBarTokens.NewFolderIconPt,
             )

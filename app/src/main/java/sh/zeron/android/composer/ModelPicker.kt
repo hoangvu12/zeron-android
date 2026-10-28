@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -48,21 +48,21 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.CapsuleShape
-import sh.roboco.android.design.Haptic
-import sh.roboco.android.design.HarnessMark
-import sh.roboco.android.design.Icon
-import sh.roboco.android.design.LocalFeedback
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.SymbolWeight
-import sh.roboco.android.design.glass.GlassCircleButton
-import sh.roboco.android.design.sheet.GlassSheet
-import sh.roboco.android.design.sheet.SheetDetent
-import sh.roboco.android.design.sheet.rememberGlassSheetState
-import sh.roboco.android.design.uiStyle
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.CapsuleShape
+import sh.zeron.android.design.Haptic
+import sh.zeron.android.design.HarnessMark
+import sh.zeron.android.design.Icon
+import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.SymbolWeight
+import sh.zeron.android.design.glass.GlassCircleButton
+import sh.zeron.android.design.sheet.GlassSheet
+import sh.zeron.android.design.sheet.SheetDetent
+import sh.zeron.android.design.sheet.rememberGlassSheetState
+import sh.zeron.android.design.uiStyle
 
 /**
  * The phone's tabbed model picker (wave-10 38, upstream #966's
@@ -234,7 +234,7 @@ private fun ModelPickerSheet(request: ModelPickerRequest, onDismissed: () -> Uni
             val sheet = this
             Box(Modifier.fillMaxSize()) {
                 GlassCircleButton(
-                    icon = RobocoIcons.Xmark,
+                    icon = ZeronIcons.Xmark,
                     contentDescription = ModelPickerCopy.Close,
                     onClick = { sheet.dismiss() },
                     modifier = Modifier
@@ -244,7 +244,7 @@ private fun ModelPickerSheet(request: ModelPickerRequest, onDismissed: () -> Uni
                     size = ModelPickerHeaderMetrics.CloseSize,
                     iconPt = 13f,
                     weight = SymbolWeight.Semibold,
-                    ink = RobocoTheme.palette.secondary,
+                    ink = ZeronTheme.palette.secondary,
                 )
             }
         },
@@ -309,7 +309,7 @@ private object ModelPickerHeaderMetrics {
 /** "Model" over where it runs (with one provider, its mark first); room on the right for the close circle. */
 @Composable
 private fun ModelPickerHeader(subtitle: String, harness: String?) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Row(
         Modifier
@@ -348,9 +348,9 @@ private fun ModelPickerHeader(subtitle: String, harness: String?) {
  */
 @Composable
 private fun ProviderSwitcher(tabs: List<ModelPickerTab>, selected: Int, onSelect: (Int) -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
-    val thumb = if (RobocoTheme.isDark) Color.White.copy(alpha = 0.14f) else Color.White
+    val thumb = if (ZeronTheme.isDark) Color.White.copy(alpha = 0.14f) else Color.White
     Row(
         Modifier
             .padding(start = 20.dp, end = 20.dp, top = 14.dp)
@@ -405,7 +405,7 @@ private fun ModelPickerPage(
     bottomInset: Dp,
     onPick: (ModelPickerRow) -> Unit,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     var query by remember(tab.harness) { mutableStateOf("") }
     val visible = rows?.let { filterModels(it, query) }.orEmpty()
@@ -452,7 +452,7 @@ private fun ModelPickerPage(
 /** A model: its name over one or two lines of what it's for; the current one tinted and checked. */
 @Composable
 private fun ModelRow(row: ModelPickerRow, current: Boolean, onClick: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Row(
         Modifier
@@ -484,7 +484,7 @@ private fun ModelRow(row: ModelPickerRow, current: Boolean, onClick: () -> Unit)
         Spacer(Modifier.width(12.dp))
         Box(Modifier.width(20.dp), contentAlignment = Alignment.Center) {
             Icon(
-                RobocoIcons.Checkmark,
+                ZeronIcons.Checkmark,
                 palette.accent,
                 14f,
                 SymbolWeight.Semibold,
@@ -497,7 +497,7 @@ private fun ModelRow(row: ModelPickerRow, current: Boolean, onClick: () -> Unit)
 /** What to know before picking: a quiet tinted line over the list. */
 @Composable
 private fun ModelPickerNotice(text: String) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Row(
         Modifier
@@ -508,7 +508,7 @@ private fun ModelPickerNotice(text: String) {
             .padding(horizontal = 14.dp, vertical = 11.dp)
             .testTag("model-picker-notice"),
     ) {
-        Icon(RobocoIcons.InfoCircle, palette.secondary, 13f, SymbolWeight.Medium)
+        Icon(ZeronIcons.InfoCircle, palette.secondary, 13f, SymbolWeight.Medium)
         Spacer(Modifier.width(8.dp))
         BasicText(text, style = uiStyle(Face.Sans, typeScale.fixed(13f), palette.secondary))
     }
@@ -517,7 +517,7 @@ private fun ModelPickerNotice(text: String) {
 /** A loading row: two soft bars (static — no infinite animation to keep tests idle). */
 @Composable
 private fun ModelSkeletonRow(seed: Int) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val title = listOf(0.3f, 0.38f, 0.26f, 0.34f)[seed % 4]
     val detail = listOf(0.6f, 0.48f, 0.55f, 0.42f)[seed % 4]
     Column(Modifier.fillMaxWidth().padding(start = 14.dp, top = 16.dp, bottom = 16.dp)) {
@@ -542,7 +542,7 @@ private fun ModelSkeletonRow(seed: Int) {
 /** The page's search field, once the list is long. */
 @Composable
 private fun ModelSearchField(query: String, onQuery: (String) -> Unit, placeholder: String) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val style = uiStyle(Face.Sans, typeScale.fixed(15f), palette.text)
     Row(
@@ -555,7 +555,7 @@ private fun ModelSearchField(query: String, onQuery: (String) -> Unit, placehold
             .padding(horizontal = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(RobocoIcons.Magnifyingglass, palette.secondary, 14f, SymbolWeight.Medium)
+        Icon(ZeronIcons.Magnifyingglass, palette.secondary, 14f, SymbolWeight.Medium)
         Spacer(Modifier.width(8.dp))
         BasicTextField(
             value = query,

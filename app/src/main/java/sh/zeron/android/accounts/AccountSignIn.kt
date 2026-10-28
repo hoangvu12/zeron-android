@@ -1,15 +1,15 @@
-package sh.roboco.android.accounts
+package sh.zeron.android.accounts
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import uniffi.roboco_core.AgentAccount
-import uniffi.roboco_core.AgentAccountsSnapshot
-import uniffi.roboco_core.AgentLoginRules
-import uniffi.roboco_core.CoreClient
-import uniffi.roboco_core.CoreException
-import uniffi.roboco_core.DeviceLoginInfo
-import uniffi.roboco_core.DeviceLoginPollInfo
-import uniffi.roboco_core.HarnessInfo
+import uniffi.zeron_core.AgentAccount
+import uniffi.zeron_core.AgentAccountsSnapshot
+import uniffi.zeron_core.AgentLoginRules
+import uniffi.zeron_core.CoreClient
+import uniffi.zeron_core.CoreException
+import uniffi.zeron_core.DeviceLoginInfo
+import uniffi.zeron_core.DeviceLoginPollInfo
+import uniffi.zeron_core.HarnessInfo
 
 /**
  * "Add account" (wave-10 34, upstream #966's iPhone `DeviceSignIn`): the
@@ -67,12 +67,12 @@ class CoreAccountSignIn(
         client()?.deviceLoginCancel(deviceId, loginId)
     }
 
-    override fun rules(harness: String): AgentLoginRules = uniffi.roboco_core.agentLoginRules(harness)
+    override fun rules(harness: String): AgentLoginRules = uniffi.zeron_core.agentLoginRules(harness)
 
     private fun live(): CoreClient = client() ?: throw CoreException.Closed()
 }
 
-/** The sign-in's copy (upstream #966's iPhone strings, "Zeron" → "Roboco"). */
+/** The sign-in's copy (upstream #966's iPhone strings, "Zeron" → "Zeron"). */
 object SignInCopy {
     /** The waiting row (`ios:Cloud/AgentAccountsViewController.swift:300`). */
     const val Waiting = "Finish signing in in the browser…"
@@ -98,7 +98,7 @@ object SignInCopy {
 
     /**
      * The page's about footer once the phone can sign in (replacing
-     * [AccountsCopy.signInSection]'s "sign in from Roboco on …").
+     * [AccountsCopy.signInSection]'s "sign in from Zeron on …").
      */
     fun about(deviceName: String) =
         "Switching changes the login $deviceName uses for new sessions. Signing in runs on $deviceName; you finish in the browser here."
@@ -117,7 +117,7 @@ data class AddAccountRow(
  * The add rows under one agent's accounts (iOS `addRows`): one per login
  * option — the first account's title when the agent has none, else the
  * "add another" one — and none for an agent that keeps one login and has
- * it. An agent Roboco doesn't sign in to gets none. Pure.
+ * it. An agent Zeron doesn't sign in to gets none. Pure.
  */
 fun addAccountRows(harness: String, rules: AgentLoginRules, accounts: List<AgentAccount>): List<AddAccountRow> {
     if (!rules.signsIn) return emptyList()
@@ -234,7 +234,7 @@ fun agentToggleFailure(error: Throwable, deviceName: String): String = when (err
 /** Why a sign-in failed, for the alert. Pure. */
 fun signInFailure(error: Throwable, deviceName: String): String = when (error) {
     is CoreException.HostUnavailable -> "$deviceName is offline. Try again when it's back."
-    is CoreException.Unsupported -> "$deviceName needs a newer Roboco to sign in from this phone."
+    is CoreException.Unsupported -> "$deviceName needs a newer Zeron to sign in from this phone."
     is CoreException.HostException -> error.reason.ifBlank { SignInCopy.Failed }
     else -> SignInCopy.Failed
 }

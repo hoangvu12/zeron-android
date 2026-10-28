@@ -1,4 +1,4 @@
-package sh.roboco.android.sessions
+package sh.zeron.android.sessions
 
 import androidx.compose.foundation.lazy.LazyListItemInfo
 import androidx.compose.ui.unit.dp

@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -23,13 +23,13 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.glass.Glass
-import sh.roboco.android.shell.DemoRoute
-import sh.roboco.android.shell.NavStack
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.shell.DemoRoute
+import sh.zeron.android.shell.NavStack
 
 /**
  * The push/pop choreography's goldens (android-ui-parity #85): the
@@ -74,7 +74,7 @@ class SessionNavScreenshotTest {
 
     private fun shot(appearance: Appearance, file: String, content: @Composable () -> Unit) {
         compose.setContent {
-            RobocoTheme(appearance) { content() }
+            ZeronTheme(appearance) { content() }
         }
         compose.waitForIdle()
         compose.mainClock.advanceTimeByFrame()
@@ -158,7 +158,7 @@ class SessionNavScreenshotTest {
     fun theCapsuleBlendsAtThirtyPercentUnderAPushFrozenAt030() {
         var idle by mutableStateOf(false)
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 if (!idle) {
                     val stack = remember {
                         NavStack(DemoRoute("Sessions")).apply {

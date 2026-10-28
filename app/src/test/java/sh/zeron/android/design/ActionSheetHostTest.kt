@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
@@ -52,7 +52,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import org.robolectric.shadows.ShadowLog
-import sh.roboco.android.core.Face
+import sh.zeron.android.core.Face
 
 /**
  * Ticket 19's host behaviour (Robolectric, `createAndroidComposeRule`): the
@@ -98,7 +98,7 @@ class ActionSheetHostTest {
      */
     @Composable
     private fun DemoContent() {
-        val palette = RobocoTheme.palette
+        val palette = ZeronTheme.palette
         val typeScale = LocalTypeScale.current
         Box(
             Modifier
@@ -114,7 +114,7 @@ class ActionSheetHostTest {
     private fun host(content: @Composable () -> Unit = { DemoContent() }): ActionSheetHostState {
         val state = ActionSheetHostState()
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 ActionSheetHost(state = state) { content() }
             }
         }
@@ -536,7 +536,7 @@ class ActionSheetHostTest {
         val state = ActionSheetHostState()
         var presenter: ActionSheetPresenter? = null
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 ActionSheetHost(state = state) {
                     presenter = LocalActionSheet.current
                     DemoContent()
@@ -566,7 +566,7 @@ class ActionSheetHostTest {
         val state = ActionSheetHostState()
         var toaster: Toaster? = null
         compose.setContent {
-            RobocoTheme(Appearance.Light) {
+            ZeronTheme(Appearance.Light) {
                 ToastHost {
                     toaster = LocalToaster.current
                     ActionSheetHost(state = state) { DemoContent() }
@@ -676,7 +676,7 @@ class ActionSheetHostTest {
         val state = ActionSheetHostState()
         compose.setContent {
             CompositionLocalProvider(LocalDensity provides Density(3f, 2f)) {
-                RobocoTheme(Appearance.Light) {
+                ZeronTheme(Appearance.Light) {
                     ActionSheetHost(state = state) { DemoContent() }
                 }
             }

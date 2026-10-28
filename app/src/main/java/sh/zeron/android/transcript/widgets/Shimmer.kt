@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript.widgets
+package sh.zeron.android.transcript.widgets
 
 import android.content.res.Configuration
 import android.graphics.LinearGradient
@@ -25,17 +25,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlin.math.abs
 import kotlin.math.max
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.LocalReduceMotion
-import sh.roboco.android.design.Motion
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.color
-import sh.roboco.android.transcript.RowContext
-import sh.roboco.android.transcript.RowModel
-import sh.roboco.android.transcript.RunPainter
-import sh.roboco.android.transcript.StyleFonts
-import uniffi.roboco_core.ColorRole
-import uniffi.roboco_core.Widget
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.LocalReduceMotion
+import sh.zeron.android.design.Motion
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.color
+import sh.zeron.android.transcript.RowContext
+import sh.zeron.android.transcript.RowModel
+import sh.zeron.android.transcript.RunPainter
+import sh.zeron.android.transcript.StyleFonts
+import uniffi.zeron_core.ColorRole
+import uniffi.zeron_core.Widget
 
 /**
  * The live tool-group title's shimmer sweep (ticket 122; iOS `ShimmerView`,
@@ -119,7 +119,7 @@ internal class ShimmerMask {
 }
 
 /**
- * One clock per row host (ticket 65's [sh.roboco.android.transcript.RealizedRow]):
+ * One clock per row host (ticket 65's [sh.zeron.android.transcript.RealizedRow]):
  * it starts on the first frame after the row is composed and restarts only
  * when the row re-enters composition — a new model version for the same row
  * keeps the phase (iOS restarts on every configure; desktop's
@@ -253,11 +253,11 @@ internal fun ShimmerLayer(
 @Preview(name = "Shimmer light")
 @Composable
 private fun ShimmerLightPreview() {
-    RobocoTheme(Appearance.Light) { ShimmerSpecimen(dark = false, phase = 1f / 3f) }
+    ZeronTheme(Appearance.Light) { ShimmerSpecimen(dark = false, phase = 1f / 3f) }
 }
 
 @Preview(name = "Shimmer dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun ShimmerDarkPreview() {
-    RobocoTheme(Appearance.Dark) { ShimmerSpecimen(dark = true, phase = 1f / 3f) }
+    ZeronTheme(Appearance.Dark) { ShimmerSpecimen(dark = true, phase = 1f / 3f) }
 }

@@ -1,6 +1,6 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
-import sh.roboco.android.core.GeistMetrics
+import sh.zeron.android.core.GeistMetrics
 
 /**
  * [LargeTitleScaffold]'s collapse math (android-ui-parity #25) — pure, dp as

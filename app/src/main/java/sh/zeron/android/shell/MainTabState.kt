@@ -1,4 +1,4 @@
-package sh.roboco.android.shell
+package sh.zeron.android.shell
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
@@ -9,8 +9,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import sh.roboco.android.design.Feedback
-import sh.roboco.android.design.Haptic
+import sh.zeron.android.design.Feedback
+import sh.zeron.android.design.Haptic
 
 /**
  * The phone shell's tab state (android-ui-parity #26): the selected tab,

@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 /**
  * Debug-only Kotlin copy of PR #621's `HostPaths` rules (ticket 110's

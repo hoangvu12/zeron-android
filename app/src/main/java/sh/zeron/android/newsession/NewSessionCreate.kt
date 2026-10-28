@@ -1,29 +1,29 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import android.util.Log
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import sh.roboco.android.composer.StagedImage
-import sh.roboco.android.design.AlertButton
-import sh.roboco.android.design.AlertButtonRole
-import sh.roboco.android.design.RobocoAlert
-import uniffi.roboco_core.BusyPolicy
-import uniffi.roboco_core.ChatConfig
-import uniffi.roboco_core.CoreClient
-import uniffi.roboco_core.NewSession
-import uniffi.roboco_core.OutgoingAttachment
-import uniffi.roboco_core.SandboxLevel
-import uniffi.roboco_core.SendRequest
-import uniffi.roboco_core.SessionTarget
-import uniffi.roboco_core.WorktreeSpec
+import sh.zeron.android.composer.StagedImage
+import sh.zeron.android.design.AlertButton
+import sh.zeron.android.design.AlertButtonRole
+import sh.zeron.android.design.ZeronAlert
+import uniffi.zeron_core.BusyPolicy
+import uniffi.zeron_core.ChatConfig
+import uniffi.zeron_core.CoreClient
+import uniffi.zeron_core.NewSession
+import uniffi.zeron_core.OutgoingAttachment
+import uniffi.zeron_core.SandboxLevel
+import uniffi.zeron_core.SendRequest
+import uniffi.zeron_core.SessionTarget
+import uniffi.zeron_core.WorktreeSpec
 
 /**
  * The core calls behind a new session's first send (android-ui-parity
  * #94) — the port of `AppModel.createSession`'s three steps
  * (`ios:App/AppModel.swift:618-643`). [CoreClient] and
- * [uniffi.roboco_core.SessionHandle] are JNA-backed objects the JVM
+ * [uniffi.zeron_core.SessionHandle] are JNA-backed objects the JVM
  * cannot construct, so everything the send handler drives goes through
  * this seam and tests fake it.
  *
@@ -45,7 +45,7 @@ interface NewSessionCore {
 
 /**
  * The live [NewSessionCore] over the app's client holder
- * (`RobocoApplication.clientOrNull()`, ticket 71): `null` before the
+ * (`ZeronApplication.clientOrNull()`, ticket 71): `null` before the
  * startup load finished or after a failed start — exactly iOS's
  * `guard let client` (`AppModel.swift:621`) — becomes an error here, so
  * the creator's catch turns it into the failure alert.
@@ -204,7 +204,7 @@ class NewSessionCreator(
  * missing target, a missing client, or any core failure (offline
  * engine, `HostUnavailable`, RPC error) — the composer stays `Kept`.
  */
-val StartFailedAlert = RobocoAlert(
+val StartFailedAlert = ZeronAlert(
     title = "Couldn't start the session",
     message = "Choose a project or a host that can run it.",
     buttons = listOf(AlertButton("OK", AlertButtonRole.Default)),
@@ -215,14 +215,14 @@ val StartFailedAlert = RobocoAlert(
  * `create(sideOf:)` copy verbatim): the parent is gone or the create
  * failed — the composer stays `Kept`.
  */
-val SideChatStartFailedAlert = RobocoAlert(
+val SideChatStartFailedAlert = ZeronAlert(
     title = "Couldn't start the side chat",
     message = "Its session is no longer available.",
     buttons = listOf(AlertButton("OK", AlertButtonRole.Default)),
 )
 
 /**
- * The canvas composer's offline gate (94's Roboco ADD, the parent
+ * The canvas composer's offline gate (94's Zeron ADD, the parent
  * spec's "Send is disabled while the target engine is offline"): the
  * picked project's or host's engine must be online. An id **not** in
  * the options counts as online (`true`) — a stale id reaches the send

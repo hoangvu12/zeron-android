@@ -1,4 +1,4 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
@@ -14,14 +14,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
+import sh.zeron.android.core.Face
 
 /**
  * The fixture names, colorIndex 0…7 in order (the ticket's gallery list).
  * `"?"` is the literal empty-project tile.
  */
 private val TILE_NAMES = listOf(
-    "zeron", "edge", "MacBook Pro", "blog", "Home", "Zeron iOS", "roboco", "?",
+    "zeron", "edge", "MacBook Pro", "blog", "Home", "Zeron iOS", "zeron", "?",
 )
 
 /**
@@ -36,7 +36,7 @@ private val TILE_NAMES = listOf(
  */
 @Composable
 fun MetaGlyphsGallerySection() {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         MetaLabel("PrBadge — size 11")
         Row(
@@ -87,10 +87,10 @@ fun MetaGlyphsGallerySection() {
 
         MetaLabel("ProjectTile floorMod — 9 renders as 1, −1 as 7")
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            ProjectTile("roboco", 1, side = 14.dp)
-            ProjectTile("roboco", 9, side = 14.dp)
-            ProjectTile("roboco", 7, side = 14.dp)
-            ProjectTile("roboco", -1, side = 14.dp)
+            ProjectTile("zeron", 1, side = 14.dp)
+            ProjectTile("zeron", 9, side = 14.dp)
+            ProjectTile("zeron", 7, side = 14.dp)
+            ProjectTile("zeron", -1, side = 14.dp)
         }
 
         MetaLabel("ProjectTile bitmap painter — 14 dp (must match the 14 dp row)")
@@ -118,7 +118,7 @@ fun MetaGlyphsGallerySection() {
 /** Section caption: mono 11 pt in `secondary` (`#62626A` / `#A9A9AE`). */
 @Composable
 private fun MetaLabel(text: String) {
-    BasicText(text, style = uiStyle(Face.Mono, LocalTypeScale.current.fixed(11f), RobocoTheme.palette.secondary))
+    BasicText(text, style = uiStyle(Face.Mono, LocalTypeScale.current.fixed(11f), ZeronTheme.palette.secondary))
 }
 
 // ---------------------------------------------------------------------------
@@ -128,15 +128,15 @@ private fun MetaLabel(text: String) {
 @Preview(name = "Meta glyphs light")
 @Composable
 private fun MetaGlyphsLightPreview() {
-    RobocoTheme(Appearance.Light) {
-        Box(Modifier.background(RobocoTheme.palette.background)) { MetaGlyphsGallerySection() }
+    ZeronTheme(Appearance.Light) {
+        Box(Modifier.background(ZeronTheme.palette.background)) { MetaGlyphsGallerySection() }
     }
 }
 
 @Preview(name = "Meta glyphs dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun MetaGlyphsDarkPreview() {
-    RobocoTheme(Appearance.Dark) {
-        Box(Modifier.background(RobocoTheme.palette.background)) { MetaGlyphsGallerySection() }
+    ZeronTheme(Appearance.Dark) {
+        Box(Modifier.background(ZeronTheme.palette.background)) { MetaGlyphsGallerySection() }
     }
 }

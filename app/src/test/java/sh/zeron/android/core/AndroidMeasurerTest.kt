@@ -1,4 +1,4 @@
-package sh.roboco.android.core
+package sh.zeron.android.core
 
 import android.content.Context
 import android.graphics.Typeface
@@ -13,7 +13,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import org.robolectric.shadows.ShadowLog
-import uniffi.roboco_core.FaceRole
+import uniffi.zeron_core.FaceRole
 
 /**
  * `AndroidMeasurer` under Robolectric (native graphics, real GeistMono

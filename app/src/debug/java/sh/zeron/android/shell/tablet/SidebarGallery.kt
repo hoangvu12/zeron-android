@@ -1,4 +1,4 @@
-package sh.roboco.android.shell.tablet
+package sh.zeron.android.shell.tablet
 
 import android.content.res.Configuration
 import androidx.compose.foundation.clickable
@@ -24,30 +24,30 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.AlertHost
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.ContextMenuHost
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.ToastHost
-import sh.roboco.android.design.glass.GlassMenuHost
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.sessions.FrontPageSections
-import sh.roboco.android.sessions.LocalSidebarFixtures
-import sh.roboco.android.sessions.SearchFixtures
-import sh.roboco.android.sessions.SessionSearch
-import sh.roboco.android.sessions.SessionsScreenFixtures
-import sh.roboco.android.sessions.SidebarFixtures
-import sh.roboco.android.shell.AppRouter
-import sh.roboco.android.shell.DraftHandoff
-import sh.roboco.android.shell.SidebarToolbar
-import uniffi.roboco_core.FrontPage
-import uniffi.roboco_core.PullRequestGroups
-import uniffi.roboco_core.SearchField
-import uniffi.roboco_core.SearchHit
-import uniffi.roboco_core.SectionView
-import uniffi.roboco_core.WorkspaceSnapshot
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.AlertHost
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.ContextMenuHost
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.ToastHost
+import sh.zeron.android.design.glass.GlassMenuHost
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.sessions.FrontPageSections
+import sh.zeron.android.sessions.LocalSidebarFixtures
+import sh.zeron.android.sessions.SearchFixtures
+import sh.zeron.android.sessions.SessionSearch
+import sh.zeron.android.sessions.SessionsScreenFixtures
+import sh.zeron.android.sessions.SidebarFixtures
+import sh.zeron.android.shell.AppRouter
+import sh.zeron.android.shell.DraftHandoff
+import sh.zeron.android.shell.SidebarToolbar
+import uniffi.zeron_core.FrontPage
+import uniffi.zeron_core.PullRequestGroups
+import uniffi.zeron_core.SearchField
+import uniffi.zeron_core.SearchHit
+import uniffi.zeron_core.SectionView
+import uniffi.zeron_core.WorkspaceSnapshot
 
 /**
  * The "Tablet sidebar" page of the debug design gallery
@@ -76,7 +76,7 @@ import uniffi.roboco_core.WorkspaceSnapshot
  */
 @Composable
 fun SidebarGallerySection(currentInitially: String? = null) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val state = rememberSidebarState()
     var current by remember { mutableStateOf(currentInitially) }
@@ -146,7 +146,7 @@ private const val CurrentRowId = "chat-models"
 /** The gallery's text button. */
 @Composable
 private fun SidebarGalleryButton(label: String, onClick: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     BasicText(
         label,
@@ -298,7 +298,7 @@ private val gallerySearch: SessionSearch = { q, _ ->
 
 @Composable
 private fun SidebarGalleryPreviewBody(appearance: Appearance) {
-    RobocoTheme(appearance) {
+    ZeronTheme(appearance) {
         ContextMenuHost {
             AlertHost {
                 ToastHost {

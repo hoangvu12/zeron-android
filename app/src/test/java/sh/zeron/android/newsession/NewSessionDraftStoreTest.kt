@@ -1,4 +1,4 @@
-package sh.roboco.android.newsession
+package sh.zeron.android.newsession
 
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.datastore.core.DataStore
@@ -27,12 +27,12 @@ import org.junit.runner.RunWith
 import org.junit.rules.TemporaryFolder
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import sh.roboco.android.composer.DraftKey
-import sh.roboco.android.composer.Drafts
-import sh.roboco.android.composer.FakePrefsStore
-import sh.roboco.android.composer.StagedImage
-import sh.roboco.android.composer.foregroundAppScope
-import sh.roboco.android.core.testPrefsStore
+import sh.zeron.android.composer.DraftKey
+import sh.zeron.android.composer.Drafts
+import sh.zeron.android.composer.FakePrefsStore
+import sh.zeron.android.composer.StagedImage
+import sh.zeron.android.composer.foregroundAppScope
+import sh.zeron.android.core.testPrefsStore
 
 /**
  * [NewSessionDraftStore] (android-ui-parity #92) — the store's whole

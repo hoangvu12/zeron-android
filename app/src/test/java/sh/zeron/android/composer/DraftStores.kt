@@ -1,4 +1,4 @@
-package sh.roboco.android.composer
+package sh.zeron.android.composer
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -14,7 +14,7 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 
 /**
- * The app-scope stand-in of the draft-store tests (`RobocoApplication.appScope`):
+ * The app-scope stand-in of the draft-store tests (`ZeronApplication.appScope`):
  * a **foreground** scope on the test scheduler.
  *
  * Not `backgroundScope`: `TestCoroutineScheduler.advanceUntilIdle()`

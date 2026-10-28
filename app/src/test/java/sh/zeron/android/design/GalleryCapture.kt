@@ -1,8 +1,8 @@
-package sh.roboco.android.design
+package sh.zeron.android.design
 
 import com.github.takahirom.roborazzi.captureRoboImage
 import org.robolectric.RuntimeEnvironment
-import sh.roboco.android.design.glass.Glass
+import sh.zeron.android.design.glass.Glass
 
 /**
  * The gallery Roborazzi helper (android-ui-parity #22): captures one section

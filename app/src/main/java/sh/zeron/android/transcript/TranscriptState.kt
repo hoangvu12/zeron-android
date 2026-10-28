@@ -1,4 +1,4 @@
-package sh.roboco.android.transcript
+package sh.zeron.android.transcript
 
 import android.content.ComponentCallbacks2
 import android.os.Looper
@@ -15,14 +15,14 @@ import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.platform.AndroidUiDispatcher
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.sp
-import sh.roboco.android.core.TextEngine
-import sh.roboco.android.design.ReduceMotion
-import sh.roboco.android.transcript.widgets.ToolRailMemory
-import uniffi.roboco_core.LayoutFrame
-import uniffi.roboco_core.LayoutListener
-import uniffi.roboco_core.RowPlacement
-import uniffi.roboco_core.TextSystem
-import uniffi.roboco_core.TranscriptView
+import sh.zeron.android.core.TextEngine
+import sh.zeron.android.design.ReduceMotion
+import sh.zeron.android.transcript.widgets.ToolRailMemory
+import uniffi.zeron_core.LayoutFrame
+import uniffi.zeron_core.LayoutListener
+import uniffi.zeron_core.RowPlacement
+import uniffi.zeron_core.TextSystem
+import uniffi.zeron_core.TranscriptView
 import kotlin.coroutines.ContinuationInterceptor
 import kotlin.math.max
 
@@ -70,7 +70,7 @@ interface RunwayHooks {
  *
  * Construct from composition or any thread (round 51): the production
  * constructor resolves the MAIN looper's Choreographer before creating the
- * Rust engine (which spawns the `roboco-layout` worker), so frames always
+ * Rust engine (which spawns the `zeron-layout` worker), so frames always
  * apply on main; everything after construction is main-thread only.
  * Owners pass `TextEngine.await()` from a main-dispatcher
  * coroutine; the default argument is a convenience for tests and the lab.
@@ -110,7 +110,7 @@ class TranscriptState internal constructor(
     /**
      * The model pipeline (117): the insertion-ordered row-model cache,
      * the async upgrade path, the directional prefetch and their single
-     * `sh.roboco.transcript.prefetch` worker. Main thread only, like the
+     * `sh.zeron.transcript.prefetch` worker. Main thread only, like the
      * rest of this class; completions hop back through the pipeline's
      * main handler and check `closed` first.
      */
@@ -596,7 +596,7 @@ class TranscriptState internal constructor(
          */
         fun bodyTextScale(density: Density): Float = with(density) { 17.sp.toDp().value } / 17f
 
-        private const val TAG = "RobocoTranscript"
+        private const val TAG = "ZeronTranscript"
 
         /**
          * The MAIN looper's Choreographer, from whichever thread constructs

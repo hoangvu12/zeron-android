@@ -1,4 +1,4 @@
-package sh.roboco.android.session
+package sh.zeron.android.session
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -44,21 +44,21 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.Appearance
-import sh.roboco.android.design.FadingText
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.RobocoIcons
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.SymbolWeight
-import sh.roboco.android.design.glass.GlassCircleButton
-import sh.roboco.android.design.glass.LocalHazeState
-import sh.roboco.android.design.glass.ProvideHazeState
-import sh.roboco.android.design.glass.ScrollEdgeEffect
-import sh.roboco.android.design.glass.ScrollEdgeEffectDefaults
-import sh.roboco.android.design.glass.contentUnderTopEdge
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.shell.LocalNavStack
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.Appearance
+import sh.zeron.android.design.FadingText
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.SymbolWeight
+import sh.zeron.android.design.glass.GlassCircleButton
+import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.design.glass.ProvideHazeState
+import sh.zeron.android.design.glass.ScrollEdgeEffect
+import sh.zeron.android.design.glass.ScrollEdgeEffectDefaults
+import sh.zeron.android.design.glass.contentUnderTopEdge
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.shell.LocalNavStack
 
 /**
  * The session header's tunables (android-ui-parity #52): UIKit's
@@ -130,7 +130,7 @@ object SessionHeaderDefaults {
  * - The circles: [GlassCircleButton] 44 × 44 at 16 (+ display cutout), the
  *   chevron Semibold (06's `ChevronBackward`, auto-mirrored in RTL), the ⋯
  *   Medium — both at 17 pt, both with 08's default bar ink
- *   ([sh.roboco.android.design.glass.GlassButtonDefaults.barGlyphInk],
+ *   ([sh.zeron.android.design.glass.GlassButtonDefaults.barGlyphInk],
  *   SESSIONS-D1; no local override).
  * - The title view is centred on the **full** width (not between the
  *   buttons), its width hugging the wider line, capped at
@@ -259,7 +259,7 @@ fun SessionHeader(
                         // circle, 08's default bar ink (SESSIONS-D1). The
                         // glyph mirrors itself in RTL (06's autoMirror).
                         GlassCircleButton(
-                            icon = RobocoIcons.ChevronBackward,
+                            icon = ZeronIcons.ChevronBackward,
                             contentDescription = "Back",
                             onClick = onBack,
                             modifier = Modifier.testTag("nav-back"),
@@ -279,7 +279,7 @@ fun SessionHeader(
                     // padding and the button's own size, so the reported
                     // rect is the 44 circle itself, in window px.
                     GlassCircleButton(
-                        icon = RobocoIcons.Ellipsis,
+                        icon = ZeronIcons.Ellipsis,
                         contentDescription = "More",
                         onClick = { onMore(moreBounds) },
                         modifier = Modifier
@@ -337,7 +337,7 @@ fun SessionTitleView(
     maxWidth: Dp,
     modifier: Modifier = Modifier,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Column(
         modifier.widthIn(max = maxWidth),
@@ -430,7 +430,7 @@ internal fun rememberSessionHeaderFixtureListState(offsetDp: Float = 120f): Lazy
 @Composable
 internal fun SessionHeaderFixture(
     title: String = SessionHeaderReferenceTitle,
-    subtitle: String = "roboco @ MacBook Pro",
+    subtitle: String = "zeron @ MacBook Pro",
     showBack: Boolean = true,
     engaged: Boolean? = null,
     statusBarTop: Dp = 24.dp,
@@ -439,7 +439,7 @@ internal fun SessionHeaderFixture(
     onMore: (anchorInWindow: Rect) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val isEngaged = engaged ?: listState.contentUnderTopEdge
     ProvideHazeState {
@@ -487,11 +487,11 @@ internal fun SessionHeaderFixture(
 @Preview(name = "light")
 @Composable
 private fun SessionHeaderLightPreview() {
-    RobocoTheme(Appearance.Light) { SessionHeaderFixture() }
+    ZeronTheme(Appearance.Light) { SessionHeaderFixture() }
 }
 
 @Preview(name = "dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun SessionHeaderDarkPreview() {
-    RobocoTheme(Appearance.Dark) { SessionHeaderFixture() }
+    ZeronTheme(Appearance.Dark) { SessionHeaderFixture() }
 }

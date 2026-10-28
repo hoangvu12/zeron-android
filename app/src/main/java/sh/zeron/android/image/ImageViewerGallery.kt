@@ -1,4 +1,4 @@
-package sh.roboco.android.image
+package sh.zeron.android.image
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -40,14 +40,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import sh.roboco.android.core.Face
-import sh.roboco.android.design.CapsuleShape
-import sh.roboco.android.design.LocalTypeScale
-import sh.roboco.android.design.Palette
-import sh.roboco.android.design.RobocoTheme
-import sh.roboco.android.design.rememberSmoothRoundedShape
-import sh.roboco.android.design.uiStyle
-import sh.roboco.android.transcript.widgets.imageTileRadius
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.CapsuleShape
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.Palette
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.rememberSmoothRoundedShape
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.transcript.widgets.imageTileRadius
 
 /**
  * The "Image viewer" section of the debug design gallery (ticket 125,
@@ -78,7 +78,7 @@ import sh.roboco.android.transcript.widgets.imageTileRadius
 @Composable
 fun ImageViewerGallerySection() {
     val state = rememberImageViewerState()
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val scope = rememberCoroutineScope()
 
@@ -207,7 +207,7 @@ private fun ViewerGalleryTile(
             .size(fixture.tileWidth, fixture.tileHeight)
             .onPlaced { placed -> coords = placed }
             .clip(rememberSmoothRoundedShape(radius))
-            .background(RobocoTheme.palette.controlFill)
+            .background(ZeronTheme.palette.controlFill)
             .clickable(interactionSource = null, indication = null) {
                 val placed = coords ?: return@clickable
                 state.show(
@@ -238,7 +238,7 @@ private fun ViewerGalleryTile(
 /** One gallery control: a `BasicText` label in a clickable capsule (ticket 22's style). */
 @Composable
 private fun ViewerGalleryControl(label: String, active: Boolean, onClick: () -> Unit) {
-    val palette = RobocoTheme.palette
+    val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Box(
         Modifier
