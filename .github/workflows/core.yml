@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           submodules: true
 
@@ -41,6 +41,9 @@ jobs:
         with:
           path: core-out
           key: core-${{ steps.pin.outputs.sha }}-${{ env.ZERON_ANDROID_ABIS }}-${{ env.ZERON_ANDROID_PROFILE }}
+
+      - uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
+        if: steps.cache.outputs.cache-hit != 'true'
 
       - name: Android NDK
         if: steps.cache.outputs.cache-hit != 'true'
@@ -55,7 +58,7 @@ jobs:
           rustup show active-toolchain || rustup toolchain install
           rustup target add aarch64-linux-android
 
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         if: steps.cache.outputs.cache-hit != 'true'
         with:
           workspaces: zeron
@@ -80,7 +83,7 @@ jobs:
       - name: Sizes
         run: find core-out -type f \( -name '*.so' -o -name '*.kt' \) -exec ls -la {} \;
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: zeron-core
           path: core-out
