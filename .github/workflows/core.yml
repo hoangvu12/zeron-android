@@ -1,0 +1,88 @@
+name: Core
+
+# Builds Zeron's Rust mobile core (zeron/crates/mobile) for Android, a Linux
+# host build of it for JVM tests (Robolectric loads it through JNA), and its
+# Kotlin bindings. The outputs only change when the zeron/ submodule moves, so
+# they are cached under its commit and later jobs reuse them.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: core-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NDK_VERSION: 29.0.14206865
+  ZERON_ANDROID_ABIS: arm64-v8a
+  ZERON_ANDROID_PROFILE: mobile
+
+jobs:
+  core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - id: pin
+        name: zeron pin
+        run: echo "sha=$(git -C zeron rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - id: cache
+        uses: actions/cache@v4
+        with:
+          path: core-out
+          key: core-${{ steps.pin.outputs.sha }}-${{ env.ZERON_ANDROID_ABIS }}-${{ env.ZERON_ANDROID_PROFILE }}
+
+      - name: Android NDK
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          sdkmanager --install "ndk;$NDK_VERSION"
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/$NDK_VERSION" >> "$GITHUB_ENV"
+
+      - name: Rust toolchain
+        if: steps.cache.outputs.cache-hit != 'true'
+        working-directory: zeron
+        run: |
+          rustup show active-toolchain || rustup toolchain install
+          rustup target add aarch64-linux-android
+
+      - uses: Swatinem/rust-cache@v2
+        if: steps.cache.outputs.cache-hit != 'true'
+        with:
+          workspaces: zeron
+          key: android-core
+
+      - name: cargo-ndk
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: cargo install cargo-ndk --locked
+
+      - name: Android core + Kotlin bindings
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: bash zeron/scripts/android/build-core.sh "$GITHUB_WORKSPACE/core-out"
+
+      - name: Host core (JVM tests)
+        if: steps.cache.outputs.cache-hit != 'true'
+        working-directory: zeron
+        run: |
+          cargo build --locked -p zeron-mobile --lib --profile mobile
+          mkdir -p "$GITHUB_WORKSPACE/core-out/host"
+          cp target/mobile/libzeron_mobile.so "$GITHUB_WORKSPACE/core-out/host/"
+
+      - name: Sizes
+        run: find core-out -type f \( -name '*.so' -o -name '*.kt' \) -exec ls -la {} \;
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zeron-core
+          path: core-out
+          if-no-files-found: error
+          retention-days: 14
