@@ -1,11 +1,9 @@
-import roboco.gradle.AndroidAssetsGen
-import roboco.gradle.AndroidCoreBuild
-import roboco.gradle.HostCore
-import roboco.gradle.LicensesSync
-import roboco.gradle.RepoPaths
-import roboco.gradle.RobocoFonts
-import roboco.gradle.RobocoVersion
-import roboco.gradle.RustLicensesTask
+import zeron.gradle.AndroidAssetsGen
+import zeron.gradle.LicensesSync
+import zeron.gradle.RepoPaths
+import zeron.gradle.ZeronCoreImport
+import zeron.gradle.ZeronFonts
+import zeron.gradle.ZeronVersion
 import java.io.File
 import java.time.Duration
 import java.util.Properties
@@ -22,153 +20,66 @@ plugins {
 }
 
 // ---------------------------------------------------------------------------
-// Repo geometry: apps/android sits two levels below the repository root.
+// Repo geometry: this repository's root holds the app; Zeron's sources
+// (shared assets, Cargo.toml, notices) are in the zeron/ submodule.
 // ---------------------------------------------------------------------------
 val repoRootDir: File = RepoPaths.root(project)
+val zeronDir: File = RepoPaths.zeron(project)
+val uiAssetsDir: File = RepoPaths.uiAssets(project)
 
 // ---------------------------------------------------------------------------
-// ABIs (android-app#13): -ProbocoAbis / ROBOCO_ANDROID_ABIS, default both;
-// unit-test-only invocations default to the host emulator ABI (x86_64) so
-// day-to-day test runs never cross-compile arm64.
+// ABIs: -PzeronAbis / ZERON_ANDROID_ABIS, default arm64-v8a (the ABI the
+// Core workflow builds). They only pick the APK splits below; the core's
+// jniLibs decide which libraries exist.
 // ---------------------------------------------------------------------------
-val unitTestOnly: Boolean = gradle.startParameter.taskNames.isNotEmpty() &&
-    gradle.startParameter.taskNames.all { task ->
-        val name = task.substringAfterLast(':').lowercase()
-        name in setOf(
-            "test",
-            "testdebugunittest",
-            "compiledebugunittestkotlin",
-            "recordroborazzidebug",
-            "verifyroborazzidebug",
-            "parityreport",
-            "paritymanifest",
-        )
-    }
-
-val requestedAbis: List<String> = providers.gradleProperty("robocoAbis")
-    .orElse(providers.environmentVariable("ROBOCO_ANDROID_ABIS"))
+val requestedAbis: List<String> = providers.gradleProperty("zeronAbis")
+    .orElse(providers.environmentVariable("ZERON_ANDROID_ABIS"))
     .map { it.split(',', ' ', ';').filter(String::isNotBlank) }
-    .orElse(
-        providers.provider {
-            if (unitTestOnly) listOf("x86_64") else listOf("arm64-v8a", "x86_64")
-        },
-    )
+    .orElse(listOf("arm64-v8a"))
     .get()
 
 // ---------------------------------------------------------------------------
-// Version derivation from the workspace Cargo.toml (android-app#13).
+// Version derivation from Zeron's workspace Cargo.toml (android-app#13): the
+// app's version is the core release it is built on.
 // ---------------------------------------------------------------------------
-val appVersionName: String = RobocoVersion.versionName(
-    repoRootDir.resolve("Cargo.toml"),
-    providers.gradleProperty("robocoVersionName").orNull,
+val appVersionName: String = ZeronVersion.versionName(
+    zeronDir.resolve("Cargo.toml"),
+    providers.gradleProperty("zeronVersionName").orNull,
 )
-val appVersionCode: Int = RobocoVersion.versionCode(
+val appVersionCode: Int = ZeronVersion.versionCode(
     appVersionName,
-    providers.gradleProperty("robocoVersionCode").map { it.toInt() }.orNull,
+    providers.gradleProperty("zeronVersionCode").map { it.toInt() }.orNull,
 )
 
 // ---------------------------------------------------------------------------
-// The Rust core (android-app#10): one AndroidCoreBuild per build type, into
-// target/android-core/<profile> so switching build types never thrashes one
-// output directory. -ProbocoCoreProfile overrides the profile per build type.
+// The Rust core is never built by Gradle: the Core CI workflow runs
+// zeron/scripts/android/build-core.sh into a `core-out` directory, and
+// -PzeronCoreDir / ZERON_CORE_DIR points here at it. ZeronCoreImport stages
+// its kotlin/ (uniffi.zeron_core), jniLibs/ (libzeron_mobile.so +
+// libc++_shared.so per ABI) and host/ (JVM tests) and fails with a clear
+// message when it is missing.
 // ---------------------------------------------------------------------------
-val skipCore = providers.gradleProperty("robocoSkipCore").isPresent
-// android-next#02: the Go Tailcat transport is built unless
-// -ProbocoSkipTailcat or ROBOCO_ANDROID_TAILCAT=0/false/no/off (the xtask
-// reads the same variable).
-val tailcatEnabled: Boolean = !providers.gradleProperty("robocoSkipTailcat").isPresent &&
-    providers.environmentVariable("ROBOCO_ANDROID_TAILCAT")
-        .map { it.trim().lowercase() !in setOf("0", "false", "no", "off") }
-        .orElse(true)
-        .get()
-val coreLanguages = providers.gradleProperty("robocoCoreLanguages").orElse("mobile")
-// ci-speed#07: only the JVM tests load a host core (debugHostDir below), so
-// release and benchmark never build one, and debug builds it only when the
-// invocation may run those tests (HostCore). Without it the xtask reads the
-// bindings out of the first ABI's library (--skip-host).
-val debugHostCore: Boolean = HostCore.needed(gradle.startParameter.taskNames)
+// Resolved eagerly (relative paths against the repo root) so no Project
+// reference ends up in the configuration cache.
+val zeronCoreDir: String? = providers.gradleProperty("zeronCoreDir")
+    .orElse(providers.environmentVariable("ZERON_CORE_DIR"))
+    .orNull
+    ?.takeIf { it.isNotBlank() }
+    ?.let { repoRootDir.resolve(it).absolutePath }
+val coreOutDir = layout.buildDirectory.dir("generated/zeron-core")
 
-val coreSources = files(
-    repoRootDir.resolve("Cargo.toml"),
-    repoRootDir.resolve("Cargo.lock"),
-    repoRootDir.resolve(".cargo/config.toml"),
-    fileTree(repoRootDir.resolve("crates/mobile")),
-    fileTree(repoRootDir.resolve("crates/mobile-bindgen")),
-    fileTree(repoRootDir.resolve("crates/mobile-client")),
-    fileTree(repoRootDir.resolve("crates/text")),
-    fileTree(repoRootDir.resolve("crates/markdown")),
-    fileTree(repoRootDir.resolve("crates/doc")),
-    fileTree(repoRootDir.resolve("crates/proto")),
-    fileTree(repoRootDir.resolve("crates/syntax")),
-    fileTree(repoRootDir.resolve("crates/xtask")),
-    fileTree(repoRootDir.resolve("adapters/roboco-tailcat")) {
-        include("**/*.go", "go.mod", "go.sum")
-    },
-)
-
-fun coreTaskName(buildType: String): String =
-    "build" + buildType.replaceFirstChar { it.uppercase() } + "Core"
-
-// ui-parity #136: the `benchmark` build type runs the lab against a
-// release-config core, so it maps to `mobile-dist` like release.
-fun coreProfile(buildType: String): String =
-    providers.gradleProperty("robocoCoreProfile")
-        .orElse(if (buildType == "release" || buildType == "benchmark") "mobile-dist" else "mobile")
-        .get()
-
-// ui-parity#101: the Rust licence data's inputs — the workspace manifests
-// and lockfile (the resolved graph), every crate manifest (the licence
-// fields) and the xtask's own sources. Shared by both build types; each
-// type gets its own task and output directory below.
-val rustLicensesSources = files(
-    repoRootDir.resolve("Cargo.toml"),
-    repoRootDir.resolve("Cargo.lock"),
-    fileTree(repoRootDir.resolve("crates")) { include("*/Cargo.toml") },
-    fileTree(repoRootDir.resolve("crates/xtask/src")),
-)
-
-fun rustLicensesTaskName(buildType: String): String =
-    "rustLicenses" + buildType.replaceFirstChar { it.uppercase() }
-
-for (buildType in listOf("debug", "release", "benchmark")) {
-    val profileName = coreProfile(buildType)
-    val out = RepoPaths.androidCore(project, profileName)
-    tasks.register<AndroidCoreBuild>(coreTaskName(buildType)) {
-        group = "roboco"
-        description =
-            "Builds the Rust mobile core (profile $profileName) for " +
-                requestedAbis.joinToString() + " and generates the UniFFI Kotlin " +
-                "bindings (cargo xtask android-core)."
-        repoRoot.set(repoRootDir)
-        abis.set(requestedAbis)
-        profile.set(profileName)
-        languages.set(coreLanguages)
-        ndkHome.set(androidComponents.sdkComponents.ndkDirectory.map { it.asFile.absolutePath })
-        skipIfOutputsExist.set(skipCore)
-        buildHost.set(buildType == "debug" && debugHostCore)
-        tailcat.set(tailcatEnabled)
-        sources.from(coreSources)
-        kotlinDir.set(out.resolve("kotlin"))
-        jniLibsDir.set(out.resolve("jniLibs"))
-        hostDir.set(out.resolve("host"))
-    }
-    // ui-parity#101: the same build type's Rust licence data, run after the
-    // core build (cargo metadata needs the registry sources unpacked).
-    tasks.register<RustLicensesTask>(rustLicensesTaskName(buildType)) {
-        group = "roboco"
-        description =
-            "Writes assets/licenses/rust-crates.json (cargo xtask android-licenses, " +
-                "languages ${coreLanguages.get()})."
-        repoRoot.set(repoRootDir)
-        languages.set(coreLanguages)
-        sources.from(rustLicensesSources)
-        assetsDir.set(layout.buildDirectory.dir("generated/licenses/$buildType"))
-        dependsOn(coreTaskName(buildType))
-    }
+val importCore = tasks.register<ZeronCoreImport>("importZeronCore") {
+    group = "zeron"
+    description = "Stages the prebuilt Zeron core (-PzeronCoreDir / ZERON_CORE_DIR)."
+    coreDirPath.set(zeronCoreDir)
+    zeronCoreDir?.let { coreFiles.from(fileTree(it)) }
+    kotlinDir.set(coreOutDir.map { it.dir("kotlin") })
+    jniLibsDir.set(coreOutDir.map { it.dir("jniLibs") })
+    hostDir.set(coreOutDir.map { it.dir("host") })
 }
 
-// The debug core task, for JVM tests (they load the host library through JNA).
-val debugHostDir: File = RepoPaths.androidCore(project, coreProfile("debug")).resolve("host")
+// JVM tests load the host core through JNA.
+val hostCoreDir: File = coreOutDir.get().asFile.resolve("host")
 
 // ---------------------------------------------------------------------------
 // Release signing (android-app#31): CI env vars first, then a local
@@ -178,10 +89,10 @@ val debugHostDir: File = RepoPaths.androidCore(project, coreProfile("debug")).re
 // consulted unless a source is present, and only the release signingConfig
 // ever sees these values.
 //
-// Env: ROBOCO_ANDROID_KEYSTORE (path), ROBOCO_ANDROID_KEYSTORE_PASSWORD,
-//      ROBOCO_ANDROID_KEY_ALIAS, ROBOCO_ANDROID_KEY_PASSWORD
-// Local: -ProbocoKeystoreProperties=<path> with storeFile/storePassword/
-//        keyAlias/keyPassword (path resolution: apps/android/app-relative).
+// Env: ZERON_ANDROID_KEYSTORE (path), ZERON_ANDROID_KEYSTORE_PASSWORD,
+//      ZERON_ANDROID_KEY_ALIAS, ZERON_ANDROID_KEY_PASSWORD
+// Local: -PzeronKeystoreProperties=<path> with storeFile/storePassword/
+//        keyAlias/keyPassword (path resolution: relative to app/).
 // ---------------------------------------------------------------------------
 /** One resolved signing source; `null` means build unsigned. */
 data class ReleaseKeystore(
@@ -199,7 +110,7 @@ fun requiredKeystoreValue(name: String, source: String, value: String?): String 
 fun keystorePropertiesFile(path: String): ReleaseKeystore {
     val props = Properties().apply { file(path).inputStream().use { load(it) } }
     fun required(key: String): String =
-        requiredKeystoreValue(key, "-ProbocoKeystoreProperties ($path)", props.getProperty(key))
+        requiredKeystoreValue(key, "-PzeronKeystoreProperties ($path)", props.getProperty(key))
     return ReleaseKeystore(
         storeFile = file(required("storeFile")),
         storePassword = required("storePassword"),
@@ -209,60 +120,91 @@ fun keystorePropertiesFile(path: String): ReleaseKeystore {
 }
 
 val releaseKeystore: ReleaseKeystore? =
-    providers.environmentVariable("ROBOCO_ANDROID_KEYSTORE").orNull
+    providers.environmentVariable("ZERON_ANDROID_KEYSTORE").orNull
         ?.takeIf { it.isNotBlank() }
         ?.let { path ->
             ReleaseKeystore(
                 storeFile = file(path),
                 storePassword = requiredKeystoreValue(
-                    "ROBOCO_ANDROID_KEYSTORE_PASSWORD",
-                    "ROBOCO_ANDROID_KEYSTORE env vars",
-                    providers.environmentVariable("ROBOCO_ANDROID_KEYSTORE_PASSWORD").orNull,
+                    "ZERON_ANDROID_KEYSTORE_PASSWORD",
+                    "ZERON_ANDROID_KEYSTORE env vars",
+                    providers.environmentVariable("ZERON_ANDROID_KEYSTORE_PASSWORD").orNull,
                 ),
                 keyAlias = requiredKeystoreValue(
-                    "ROBOCO_ANDROID_KEY_ALIAS",
-                    "ROBOCO_ANDROID_KEYSTORE env vars",
-                    providers.environmentVariable("ROBOCO_ANDROID_KEY_ALIAS").orNull,
+                    "ZERON_ANDROID_KEY_ALIAS",
+                    "ZERON_ANDROID_KEYSTORE env vars",
+                    providers.environmentVariable("ZERON_ANDROID_KEY_ALIAS").orNull,
                 ),
                 keyPassword = requiredKeystoreValue(
-                    "ROBOCO_ANDROID_KEY_PASSWORD",
-                    "ROBOCO_ANDROID_KEYSTORE env vars",
-                    providers.environmentVariable("ROBOCO_ANDROID_KEY_PASSWORD").orNull,
+                    "ZERON_ANDROID_KEY_PASSWORD",
+                    "ZERON_ANDROID_KEYSTORE env vars",
+                    providers.environmentVariable("ZERON_ANDROID_KEY_PASSWORD").orNull,
                 ),
             )
         }
-        ?: providers.gradleProperty("robocoKeystoreProperties").orNull
+        ?: providers.gradleProperty("zeronKeystoreProperties").orNull
             ?.let(::keystorePropertiesFile)
+
+// ---------------------------------------------------------------------------
+// Debug signing: CI signs every debug APK with one shared test key so
+// consecutive builds install over each other on a phone. The workflow
+// decodes the PKCS12 keystore from repo secrets and passes its path here.
+// Without it (fork PRs, other machines) the default debug key is used.
+//
+// Env: ZERON_DEBUG_KEYSTORE (path), ZERON_DEBUG_KEYSTORE_PASSWORD,
+//      ZERON_DEBUG_KEY_ALIAS (the key password is the store password:
+//      a PKCS12 keystore has one password)
+// ---------------------------------------------------------------------------
+val debugKeystore: ReleaseKeystore? =
+    providers.environmentVariable("ZERON_DEBUG_KEYSTORE").orNull
+        ?.takeIf { it.isNotBlank() }
+        ?.let { path ->
+            val password = requiredKeystoreValue(
+                "ZERON_DEBUG_KEYSTORE_PASSWORD",
+                "ZERON_DEBUG_KEYSTORE env vars",
+                providers.environmentVariable("ZERON_DEBUG_KEYSTORE_PASSWORD").orNull,
+            )
+            ReleaseKeystore(
+                storeFile = file(path),
+                storePassword = password,
+                keyAlias = requiredKeystoreValue(
+                    "ZERON_DEBUG_KEY_ALIAS",
+                    "ZERON_DEBUG_KEYSTORE env vars",
+                    providers.environmentVariable("ZERON_DEBUG_KEY_ALIAS").orNull,
+                ),
+                keyPassword = password,
+            )
+        }
 
 // ---------------------------------------------------------------------------
 // ABI-split release APKs (android-app#31): one APK per ABI, no universal APK
 // (it would double the download for every phone). Intersected with
-// -ProbocoAbis, so a local -ProbocoAbis=arm64-v8a build produces one split.
+// -PzeronAbis, so a local -PzeronAbis=arm64-v8a build produces one split.
 // Splits apply to every variant: debug is also split, and Gradle's install
 // task picks the APK matching the connected device's ABI.
 // ---------------------------------------------------------------------------
 val splitAbis: List<String> = requestedAbis.filter { it in setOf("arm64-v8a", "x86_64") }
 
 // ---------------------------------------------------------------------------
-// The asset pipeline (android-app#13): roboco-android-assets converts the
-// shared line icons to VectorDrawables and rasterizes tool/file icons.
+// The asset pipeline (android-app#13): zeron-android-assets (vendored under
+// tools/android-assets) converts Zeron's shared line icons and this repo's
+// icons/ to VectorDrawables and rasterizes tool/file icons.
 // ---------------------------------------------------------------------------
-val iconsResDir = layout.buildDirectory.dir("generated/roboco-icons/res")
-val iconsAssetsDir = layout.buildDirectory.dir("generated/roboco-icons/assets")
+val iconsResDir = layout.buildDirectory.dir("generated/zeron-icons/res")
+val iconsAssetsDir = layout.buildDirectory.dir("generated/zeron-icons/assets")
 
-val generateAssets = tasks.register<AndroidAssetsGen>("generateRobocoAssets") {
-    group = "roboco"
+val generateAssets = tasks.register<AndroidAssetsGen>("generateZeronAssets") {
+    group = "zeron"
     description =
         "Converts the shared SVG icons to VectorDrawables and rasterized PNGs " +
-            "(roboco-android-assets)."
+            "(zeron-android-assets)."
     repoRoot.set(repoRootDir)
+    manifest.set(RepoPaths.androidAssetsManifest(project))
     sources.from(
-        repoRootDir.resolve("Cargo.toml"),
-        repoRootDir.resolve("Cargo.lock"),
-        fileTree(repoRootDir.resolve("crates/android-assets")),
-        fileTree(repoRootDir.resolve("crates/ui/assets/icons")),
-        fileTree(repoRootDir.resolve("crates/ui/assets/file-icons")),
-        fileTree(repoRootDir.resolve("apps/android/icons")),
+        fileTree(repoRootDir.resolve("tools/android-assets")) { exclude("target/**") },
+        fileTree(uiAssetsDir.resolve("icons")),
+        fileTree(uiAssetsDir.resolve("file-icons")),
+        fileTree(repoRootDir.resolve("icons")),
     )
     resDir.set(iconsResDir)
     assetsDir.set(iconsAssetsDir)
@@ -270,43 +212,40 @@ val generateAssets = tasks.register<AndroidAssetsGen>("generateRobocoAssets") {
 
 // The exact font bytes the Rust layout engine measures (the 12 faces the
 // iOS app registers with CoreText), plus the licenses the OFL requires.
-val fontsDir = layout.buildDirectory.dir("generated/roboco-fonts")
+val fontsDir = layout.buildDirectory.dir("generated/zeron-fonts")
 
-val syncFonts = tasks.register<roboco.gradle.FontsSync>("syncRobocoFonts") {
-    group = "roboco"
+val syncFonts = tasks.register<zeron.gradle.FontsSync>("syncZeronFonts") {
+    group = "zeron"
     description = "Copies the 12 bundled Geist faces and their licenses into the APK assets."
     fontFiles.setFrom(
-        RobocoFonts.FILES.map { repoRootDir.resolve("crates/ui/assets/fonts").resolve(it) },
+        ZeronFonts.FILES.map { uiAssetsDir.resolve("fonts").resolve(it) },
     )
     licenseFiles.setFrom(
         listOf(
-            repoRootDir.resolve("crates/ui/assets/fonts/licenses/Geist-OFL.txt"),
-            repoRootDir.resolve("crates/ui/assets/file-icons/LICENSE.symbols"),
+            uiAssetsDir.resolve("fonts/licenses/Geist-OFL.txt"),
+            uiAssetsDir.resolve("file-icons/LICENSE.symbols"),
         ),
     )
     assetsDir.set(fontsDir)
 }
 
-// The repo's distribution licenses (android-app#31): a sideloaded APK is the
-// whole distribution, so LICENSE and THIRD_PARTY_NOTICES.md ship inside it
-// under assets/licenses/, beside the font licenses above. The same task
+// Zeron's distribution licenses (android-app#31): a sideloaded APK is the
+// whole distribution, so zeron/LICENSE and zeron/THIRD_PARTY_NOTICES.md ship
+// inside it under assets/licenses/, beside the font licenses above. The same task
 // stages the committed SPDX fallback texts (ui-parity#101) — licences the
 // AboutLibraries plugin cannot fill offline — under assets/licenses/spdx/.
-val licensesDir = layout.buildDirectory.dir("generated/roboco-licenses")
+val licensesDir = layout.buildDirectory.dir("generated/zeron-licenses")
 
-val syncLicenses = tasks.register<LicensesSync>("syncRobocoLicenses") {
-    group = "roboco"
+val syncLicenses = tasks.register<LicensesSync>("syncZeronLicenses") {
+    group = "zeron"
     description = "Copies the repository license, notices and SPDX texts into the APK assets."
     noticeFiles.setFrom(
-        repoRootDir.resolve("LICENSE"),
-        repoRootDir.resolve("THIRD_PARTY_NOTICES.md"),
+        zeronDir.resolve("LICENSE"),
+        zeronDir.resolve("THIRD_PARTY_NOTICES.md"),
     )
     spdxFiles.setFrom(
-        fileTree(repoRootDir.resolve("apps/android/licenses/spdx")) { include("*.txt") },
+        fileTree(repoRootDir.resolve("licenses/spdx")) { include("*.txt") },
     )
-    // android-next#02: the Go Tailcat transport's licences.
-    goBundleDir.set(repoRootDir.resolve("adapters/roboco-tailcat/licenses/bundle"))
-    goLicenseFiles.setFrom(repoRootDir.resolve("adapters/roboco-tailcat/LICENSE.kratos"))
     assetsDir.set(licensesDir)
 }
 
@@ -315,16 +254,16 @@ val syncLicenses = tasks.register<LicensesSync>("syncRobocoLicenses") {
 // res/raw — the channels reference them as their sound. The "middle set"
 // name is the ticket's: `syncChimes`.
 // ---------------------------------------------------------------------------
-val chimesDir = layout.buildDirectory.dir("generated/roboco-chimes/res")
+val chimesDir = layout.buildDirectory.dir("generated/zeron-chimes/res")
 
-val syncChimes = tasks.register<roboco.gradle.ChimesSync>("syncChimes") {
-    group = "roboco"
+val syncChimes = tasks.register<zeron.gradle.ChimesSync>("syncChimes") {
+    group = "zeron"
     description =
         "Copies the desktop's session chimes into res/raw (chime_done/request/attention.wav)."
     chimeFiles.setFrom(
-        repoRootDir.resolve("crates/ui/assets/sounds/done.wav"),
-        repoRootDir.resolve("crates/ui/assets/sounds/request.wav"),
-        repoRootDir.resolve("crates/ui/assets/sounds/attention.wav"),
+        uiAssetsDir.resolve("sounds/done.wav"),
+        uiAssetsDir.resolve("sounds/request.wav"),
+        uiAssetsDir.resolve("sounds/attention.wav"),
     )
     outputDir.set(chimesDir)
 }
@@ -334,48 +273,29 @@ androidComponents {
     // android-ui-parity #22, 05's HapticsGalleryScreenshotTest, 11's gallery
     // test) do not compile for testReleaseUnitTest: the release variant has
     // no debug source set. Disable its unit tests in one place instead of
-    // moving every such test to src/testDebug. ui-parity #136: the benchmark
-    // variant carries the same debug sources, so it gets the same disable
-    // (release/benchmark unit-test variants stay disabled).
-    for (disableType in listOf("release", "benchmark")) {
-        beforeVariants(selector().withBuildType(disableType)) { v ->
-            (v as? com.android.build.api.variant.HasHostTestsBuilder)
-                ?.hostTests?.get(com.android.build.api.variant.HostTestBuilder.UNIT_TEST_TYPE)?.enable = false
-        }
-    }
-    // ui-parity #136: the benchmark variant (release config, debug-signed,
-    // profileable, non-debuggable) runs the debug-only lab sources — the
-    // Macrobenchmark builds need release-speed Compose, and the lab lives in
-    // src/debug. The AGP 9 variant API feeds the debug source set in as
-    // static sources (there is no src/debug/res; the assets carry the lab's
-    // fixture image, the manifest its two debug activities).
-    onVariants(selector().withBuildType("benchmark")) { v ->
-        v.sources.kotlin?.addStaticSourceDirectory("src/debug/java")
-        v.sources.assets?.addStaticSourceDirectory("src/debug/assets")
-        v.sources.manifests.addStaticManifestFile("src/debug/AndroidManifest.xml")
+    // moving every such test to src/testDebug.
+    beforeVariants(selector().withBuildType("release")) { v ->
+        (v as? com.android.build.api.variant.HasHostTestsBuilder)
+            ?.hostTests?.get(com.android.build.api.variant.HostTestBuilder.UNIT_TEST_TYPE)?.enable = false
     }
     onVariants { variant ->
-        val buildType = variant.buildType ?: return@onVariants
-        val coreTask = tasks.named<AndroidCoreBuild>(coreTaskName(buildType))
-        val rustLicensesTask = tasks.named<RustLicensesTask>(rustLicensesTaskName(buildType))
-        // AGP 9 variant API (no hard-coded sourceSets dirs): the generated
-        // Kotlin and jniLibs are outputs of the core task.
-        variant.sources.kotlin?.addGeneratedSourceDirectory(coreTask) { it.kotlinDir }
-        variant.sources.jniLibs?.addGeneratedSourceDirectory(coreTask) { it.jniLibsDir }
+        // AGP 9 variant API (no hard-coded sourceSets dirs): the staged
+        // core's Kotlin and jniLibs are outputs of the import task.
+        variant.sources.kotlin?.addGeneratedSourceDirectory(importCore) { it.kotlinDir }
+        variant.sources.jniLibs?.addGeneratedSourceDirectory(importCore) { it.jniLibsDir }
 
         variant.sources.res?.addGeneratedSourceDirectory(generateAssets) { it.resDir }
         variant.sources.res?.addGeneratedSourceDirectory(syncChimes) { it.outputDir }
         variant.sources.assets?.addGeneratedSourceDirectory(generateAssets) { it.assetsDir }
         variant.sources.assets?.addGeneratedSourceDirectory(syncFonts) { it.assetsDir }
         variant.sources.assets?.addGeneratedSourceDirectory(syncLicenses) { it.assetsDir }
-        variant.sources.assets?.addGeneratedSourceDirectory(rustLicensesTask) { it.assetsDir }
     }
 }
 
 // ---------------------------------------------------------------------------
 // AboutLibraries (ui-parity#101): emit the JSON only. offlineMode keeps the
 // build reproducible (no network in CI; the SPDX texts the plugin would
-// otherwise pull from spdx.org are committed under apps/android/licenses/
+// otherwise pull from spdx.org are committed under licenses/
 // and staged as assets/licenses/spdx/); fetchRemote* stays off too. The
 // plugin registers the per-variant export tasks that generate
 // res/raw/aboutlibraries.json from each variant's runtime classpath
@@ -407,20 +327,22 @@ aboutLibraries {
 
 // ---------------------------------------------------------------------------
 android {
-    namespace = "sh.roboco.android"
+    namespace = "sh.zeron.android"
     compileSdk = 37
-    ndkVersion = "28.2.13676358"
+    // Zeron's pin (zeron/apps/android): the NDK the core is built with,
+    // whose libc++_shared.so ships beside libzeron_mobile.so.
+    ndkVersion = "29.0.14206865"
 
     defaultConfig {
-        applicationId = "sh.roboco.android"
+        applicationId = "sh.zeron.android"
         minSdk = 31
         targetSdk = 36 // compile 37; target stays 36 for local-network permission
         versionCode = appVersionCode
         versionName = appVersionName
         // android-app#30: AndroidJUnitRunner + the in-process device filters
         // (@TabletOnly / @PhysicalDeviceOnly / @Tour / @Ignore) — see
-        // RobocoTestRunner for why not a comma-separated `notAnnotation`.
-        testInstrumentationRunner = "sh.roboco.android.RobocoTestRunner"
+        // ZeronTestRunner for why not a comma-separated `notAnnotation`.
+        testInstrumentationRunner = "sh.zeron.android.ZeronTestRunner"
         // android-app#30: the flow suite's isolation — each instrumented
         // test runs in its own process with wiped app data, so every test
         // starts unpaired and clean (the rig re-pairs via the `pair`
@@ -429,8 +351,7 @@ android {
         testInstrumentationRunnerArguments["clearPackageData"] = "true"
         // No ndk.abiFilters here: AGP refuses abiFilters alongside the ABI
         // splits below, and the splits' include (intersected with
-        // -ProbocoAbis) now decides which libroboco_mobile.so is packaged
-        // per APK. The core build tasks take the ABIs directly.
+        // -PzeronAbis) decides which libzeron_mobile.so is packaged per APK.
     }
 
     signingConfigs {
@@ -439,6 +360,15 @@ android {
         // before buildTypes, which look the config up by name.
         releaseKeystore?.let { keystore ->
             create("release") {
+                storeFile = keystore.storeFile
+                storePassword = keystore.storePassword
+                keyAlias = keystore.keyAlias
+                keyPassword = keystore.keyPassword
+            }
+        }
+        // The shared CI test key (above); otherwise AGP's default debug key.
+        debugKeystore?.let { keystore ->
+            getByName("debug") {
                 storeFile = keystore.storeFile
                 storePassword = keystore.storePassword
                 keyAlias = keystore.keyAlias
@@ -466,28 +396,12 @@ android {
             // debug key.
             releaseKeystore?.let { signingConfig = signingConfigs.getByName("release") }
             // android-next#04: only release builds install updates — their
-            // signer is the one the release APK must match. Debug and
-            // benchmark builds still check, but their Update action opens
-            // the releases page and the launch prompt stays off.
+            // signer is the one the release APK must match. Debug builds
+            // still check, but their Update action opens the releases page
+            // and the launch prompt stays off.
             buildConfigField("boolean", "UPDATE_INSTALLER_ENABLED", "true")
         }
         debug {
-            buildConfigField("boolean", "UPDATE_INSTALLER_ENABLED", "false")
-        }
-        // ui-parity #136: the Macrobenchmark build — release performance
-        // (initWith keeps R8 and the mobile-dist core), debug-signed so it
-        // installs locally, profileable and non-debuggable. The debug lab
-        // sources are fed in through the variant API above, and the
-        // `:benchmark` module targets this variant (matchingFallbacks for
-        // every other consumer).
-        create("benchmark") {
-            initWith(getByName("release"))
-            signingConfig = signingConfigs.getByName("debug")
-            matchingFallbacks += listOf("release")
-            isDebuggable = false
-            isProfileable = true
-            // android-next#04: debug-signed, like `debug` above — an update
-            // would refuse on the signer gate.
             buildConfigField("boolean", "UPDATE_INSTALLER_ENABLED", "false")
         }
     }
@@ -530,10 +444,7 @@ android {
         jniLibs {
             // Sideloaded APKs are downloaded from GitHub without store-side
             // compression; extracting the .so at install keeps the APK small.
-            // 16 KB compatibility comes from ticket 10's ELF alignment.
-            // android-next#02 also relies on it: the core dlopens
-            // libroboco_tailcat.so by absolute path under nativeLibraryDir,
-            // which holds the file only when libraries are extracted.
+            // 16 KB compatibility comes from the core's ELF alignment.
             useLegacyPackaging = true
         }
     }
@@ -545,12 +456,11 @@ android {
 // ---------------------------------------------------------------------------
 tasks.withType<Test>().configureEach {
     dependsOn(
-        tasks.named(coreTaskName("debug")),
+        importCore,
         generateAssets,
         syncFonts,
         syncLicenses,
         syncChimes,
-        tasks.named(rustLicensesTaskName("debug")),
     )
     javaLauncher.set(
         javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(21)) },
@@ -599,62 +509,15 @@ tasks.withType<Test>().configureEach {
     // eating the whole 90-min CI job. Imported: inside this block `java`
     // resolves to the project's java extension, not the package.
     timeout.set(Duration.ofMinutes(45))
-    // android-app#30's parity gate (G2–G4) is armed against goldens that
-    // are not recorded yet, so it fails until the first sign-off. It runs
-    // only when asked (-ProbocoParity: the android-screenshots CI job), not
-    // in the default unit run that gates every PR.
-    if (!providers.gradleProperty("robocoParity").isPresent) {
-        filter { excludeTestsMatching("sh.roboco.android.parity.*") }
-    }
-    systemProperty("jna.library.path", debugHostDir.absolutePath)
+    systemProperty("jna.library.path", hostCoreDir.absolutePath)
     systemProperty("robolectric.graphicsMode", "NATIVE")
     systemProperty("robolectric.pixelCopyRenderMode", "hardware")
-    systemProperty("roboco.repoRoot", repoRootDir.absolutePath)
-    systemProperty("roboco.generatedAssets", iconsAssetsDir.get().asFile.absolutePath)
-    systemProperty("roboco.generatedRes", iconsResDir.get().asFile.absolutePath)
-    systemProperty("roboco.generatedFonts", fontsDir.get().asFile.absolutePath)
-    systemProperty("roboco.generatedLicenses", licensesDir.get().asFile.absolutePath)
-    systemProperty("roboco.generatedChimes", chimesDir.get().asFile.absolutePath)
-}
-
-roborazzi {
-    // Reference images are committed goldens (ticket 14 extends this suite,
-    // ticket 30 owns the emulator-based part).
-    outputDir.set(file("src/test/screenshots"))
-}
-
-// ---------------------------------------------------------------------------
-// The iOS parity gate (android-app#30): the G5 report. G1 is Roborazzi's
-// `verifyRoborazziDebug`; G2–G4 are the `sh.roboco.android.parity` JVM
-// tests; this task writes the side-by-side board the reviewer walks
-// (`apps/android/parity/CHECKLIST.md`), uploaded by the
-// `android-screenshots` CI job on every run.
-// ---------------------------------------------------------------------------
-val parityDir: File = projectDir.parentFile.resolve("parity")
-
-val parityReport = tasks.register<roboco.gradle.ParityReport>("parityReport") {
-    group = "roboco"
-    description =
-        "Writes the iOS parity side-by-side board ([Android | iOS | abs-diff] per " +
-            "golden) plus index.html into build/parity/."
-    manifest.set(file(parityDir.resolve("manifest.json")))
-    goldens.from(fileTree("src/test/screenshots") { include("**/*.png") })
-    goldensRoot.set(file("src/test/screenshots"))
-    iosRefs.from(fileTree(parityDir.resolve("ios")) { include("**/*.png") })
-    iosRoot.set(parityDir.resolve("ios"))
-    outputDir.set(layout.buildDirectory.dir("parity"))
-}
-
-// G2's tooling (android-app#30): stub manifest entries for unlisted goldens,
-// and the sign-off mode (--sign=pending|all|<paths> --reviewer=… --date=…)
-// that pins reviewedSha256 to the recorded PNGs. See apps/android/parity/README.md.
-tasks.register<roboco.gradle.ParityManifest>("parityManifest") {
-    group = "roboco"
-    description =
-        "Adds stub parity-manifest entries for unlisted goldens; with --sign, pins " +
-            "reviewedSha256/reviewer/date for the reviewed entries."
-    manifest.set(file(parityDir.resolve("manifest.json")))
-    goldensDir.set(file("src/test/screenshots"))
+    systemProperty("zeron.repoRoot", repoRootDir.absolutePath)
+    systemProperty("zeron.generatedAssets", iconsAssetsDir.get().asFile.absolutePath)
+    systemProperty("zeron.generatedRes", iconsResDir.get().asFile.absolutePath)
+    systemProperty("zeron.generatedFonts", fontsDir.get().asFile.absolutePath)
+    systemProperty("zeron.generatedLicenses", licensesDir.get().asFile.absolutePath)
+    systemProperty("zeron.generatedChimes", chimesDir.get().asFile.absolutePath)
 }
 
 dependencies {
@@ -710,18 +573,9 @@ dependencies {
     implementation("${libs.jna.get()}@aar")
 
     debugImplementation(libs.compose.ui.tooling)
-    // JankStats, the lab bench's cross-check (ui-parity #136): debug and
-    // benchmark only — the lab code that imports it lives in src/debug,
-    // which the benchmark variant also compiles (the variant API above).
+    // JankStats, the lab bench's cross-check (ui-parity #136): debug only —
+    // the lab code that imports it lives in src/debug.
     debugImplementation(libs.androidx.metrics.performance)
-
-    // ui-parity #136: the benchmark variant compiles the same debug
-    // sources, so it mirrors every debugImplementation line. `add` with the
-    // configuration name: the Kotlin DSL has no typed accessor for a build
-    // type created in this same script.
-    add("benchmarkImplementation", libs.compose.ui.tooling)
-    add("benchmarkImplementation", libs.compose.ui.test.manifest)
-    add("benchmarkImplementation", libs.androidx.metrics.performance)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

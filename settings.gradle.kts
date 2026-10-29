@@ -20,8 +20,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Roboco"
+rootProject.name = "Zeron"
 include(":app")
-// ui-parity #136: the device-only macrobenchmark module (com.android.test)
-// for the ScrollPerformanceTests port — never in any app APK.
-include(":benchmark")

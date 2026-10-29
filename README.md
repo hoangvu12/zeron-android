@@ -19,7 +19,8 @@ Zeron's iPhone app, on Zeron's own Rust mobile core.
 ```
 zeron/        git submodule: zeronsh/zeron, pinned to a release tag
 app/          the Android app
-buildSrc/     Gradle helpers
+buildSrc/     Gradle helpers (prebuilt-core import, assets, fonts, chimes, licences)
+tools/        android-assets: SVG → VectorDrawable / PNG (vendored from Roboco)
 docs/port/    the iOS → Android gap audits that drive the port
 .github/      CI: builds the core and the APK (nothing builds locally)
 ```
@@ -28,10 +29,14 @@ docs/port/    the iOS → Android gap audits that drive the port
 
 Builds run on GitHub Actions; no Android SDK is needed locally.
 
-- `core` job: builds `zeron-mobile` for `arm64-v8a` with cargo-ndk, a Linux host
-  build for JVM tests, and the Kotlin bindings. Cached per `zeron/` commit, so
-  it only rebuilds when the submodule moves.
-- APKs and screenshot renders are uploaded as workflow artifacts.
+- `Core` workflow: builds `zeron-mobile` for `arm64-v8a` with cargo-ndk, a Linux
+  host build for JVM tests, and the Kotlin bindings into `core-out/`. Cached
+  per `zeron/` commit, so it only rebuilds when the submodule moves; it runs
+  on its own only when `zeron/` changes.
+- `App` workflow: takes `core-out/` from the Core workflow, builds the debug
+  APK with `-PzeronCoreDir=core-out` (or `ZERON_CORE_DIR`) and uploads it as
+  an artifact, signed with the shared test key so builds install over each
+  other.
 
 ## Updating Zeron
 

@@ -1,9 +1,9 @@
 <resources>
-    <string name="app_name">Roboco</string>
+    <string name="app_name">Zeron</string>
 
     <!-- The pairing root (android-ui-parity #34): the iOS SignIn layout with
-         Roboco's copy (web app-shell.tsx Welcome strings, "browser"→"phone"). -->
-    <string name="pairing_root_title" translatable="false">Roboco</string>
+         Zeron's copy (web app-shell.tsx Welcome strings, "browser"→"phone"). -->
+    <string name="pairing_root_title" translatable="false">Zeron</string>
     <string name="pairing_root_tagline">This phone has no paired engine yet.</string>
     <string name="pairing_root_pair">Pair an engine</string>
     <string name="pairing_root_redeeming">Redeeming the pairing link…</string>
@@ -11,17 +11,17 @@
     <!-- The Pair page (android-ui-parity #72): the web pair page's copy
          ("browser"→"phone"; the placeholder and hint carry the web's
          Tailcat half again since android-next#02 — the phone redeems
-         roboco-tailcat: invites through its own in-process Tailcat
+         zeron-tailcat: invites through its own in-process Tailcat
          tunnel), the hint and cleartext note from android-app#18, the
          error sentences from the web's pairing-errors.ts plus the three
          Tailcat failures. Ellipses are U+2026, the em dash U+2014, "→"
          U+2192, "·" U+00B7; apostrophes are ASCII. -->
     <string name="pair_title">Pair this phone</string>
     <string name="pair_section">Pairing link</string>
-    <string name="pair_placeholder" translatable="false">https://…/pair#token=…, roboco-tailcat:… or roboco-room:…</string>
+    <string name="pair_placeholder" translatable="false">https://…/pair#token=…, zeron-tailcat:… or zeron-room:…</string>
     <string name="pair_paste">Paste</string>
     <string name="pair_scan">Scan QR code</string>
-    <string name="pair_hint">Paste a pairing link, a roboco-tailcat: invite, or a roboco-room: room invite from any engine. Create one on that computer under Settings → Remote access.</string>
+    <string name="pair_hint">Paste a pairing link, a zeron-tailcat: invite, or a zeron-room: room invite from any engine. Create one on that computer under Settings → Remote access.</string>
     <string name="pair_target">Engine at %1$s</string>
     <string name="pair_target_tailcat">Engine over Tailcat · invite expires in %1$s</string>
     <string name="pair_cleartext">This link uses http://, so pairing and your session aren\'t encrypted. Use a trusted network or your own tunnel.</string>
@@ -30,7 +30,7 @@
     <string name="pair_submitting_tailcat">Connecting through Tailcat…</string>
     <string name="pair_error_refused">That pairing link did not work — it may have expired or already have been used.</string>
     <string name="pair_error_unreachable">Could not reach that engine. Check the URL and that the engine is running.</string>
-    <string name="pair_error_tailcat_expired">That Tailcat invite has expired. Run roboco engine tailcat invite again.</string>
+    <string name="pair_error_tailcat_expired">That Tailcat invite has expired. Run zeron engine tailcat invite again.</string>
     <string name="pair_error_tailcat_unreachable">Could not reach that engine over Tailcat. Check that it is running and online.</string>
     <string name="pair_error_tailcat_unavailable">Tailcat isn\'t available in this build.</string>
     <string name="pair_error_failed">Pairing failed.</string>
@@ -39,7 +39,7 @@
     <string name="pair_error_details_hide">Hide details</string>
 
     <!-- Rooms (ADR 0011, ticket 04): the Pair page's join-room arm —
-         the target line under a parsed roboco-room: invite (the room
+         the target line under a parsed zeron-room: invite (the room
          name and the member count only; the secret and the addresses
          never render), the capsule pair, and the two room-specific
          error sentences. A member engine without rooms-v1 never
@@ -68,7 +68,7 @@
          (UIKit's .close, not ImageViewer's "Close image preview"). The
          pane title reuses pair_scan. Apostrophes are ASCII, matching 72. -->
     <string name="qr_hint">Point the camera at a pairing QR code</string>
-    <string name="qr_foreign">That QR code isn\'t a Roboco pairing link.</string>
+    <string name="qr_foreign">That QR code isn\'t a Zeron pairing link.</string>
     <string name="qr_denied">Camera access is off. Allow it in Settings to scan, or paste the link instead.</string>
     <string name="qr_open_settings">Open Settings</string>
     <string name="qr_unavailable">The camera isn\'t available right now. Paste the link instead.</string>
@@ -77,7 +77,7 @@
     <!-- Hardware keyboard shortcuts (android-ui-parity #33), verbatim from
          ios:Shell/SplitRootController.swift:53-67: the system shortcut
          helper (Meta+/) group label and the three command titles. -->
-    <string name="shortcut_group" translatable="false">Roboco</string>
+    <string name="shortcut_group" translatable="false">Zeron</string>
     <string name="shortcut_new_session" translatable="false">New Session</string>
     <string name="shortcut_search" translatable="false">Search</string>
     <string name="shortcut_toggle_sidebar" translatable="false">Toggle Sidebar</string>
@@ -116,14 +116,14 @@
          (updates.png panels A–F). The launch alert (A), the in-place
          download state (B), the one-time install-permission ask (C), the
          About rows (D/E/F), and the short check-failure reasons. Copy uses
-         "Roboco"; the ellipsis is U+2026, the middle dot U+00B7;
+         "Zeron"; the ellipsis is U+2026, the middle dot U+00B7;
          apostrophes are ASCII. -->
     <string name="update_alert_title">Update Available</string>
-    <string name="update_alert_message">Roboco %1$s is available. You have %2$s.</string>
-    <string name="update_alert_engine_nudge">Update Roboco on your computer too.</string>
+    <string name="update_alert_message">Zeron %1$s is available. You have %2$s.</string>
+    <string name="update_alert_engine_nudge">Update Zeron on your computer too.</string>
     <string name="update_alert_update">Update</string>
     <string name="update_alert_later">Later</string>
-    <string name="update_downloading_title">Updating Roboco</string>
+    <string name="update_downloading_title">Updating Zeron</string>
     <string name="update_downloading_message">Downloading %1$s…</string>
     <string name="update_progress_of_mb">%1$s of %2$s MB</string>
     <string name="update_downloading_cancel">Cancel</string>
@@ -131,25 +131,25 @@
     <string name="update_failed_retry">Try Again</string>
     <string name="update_failed_not_now">Not Now</string>
     <string name="update_failed_network">The download didn\'t finish. Check your connection and try again.</string>
-    <string name="update_failed_storage">Roboco couldn\'t write the download. Check free space and try again.</string>
+    <string name="update_failed_storage">Zeron couldn\'t write the download. Check free space and try again.</string>
     <string name="update_failed_checksum">The download didn\'t match its published checksum, so it was discarded. Try again.</string>
     <string name="update_failed_signer">The update is signed by a different key than this install, so it can\'t replace it. Install it from the releases page instead.</string>
-    <string name="update_failed_install">Roboco couldn\'t be updated. %1$s</string>
-    <string name="update_failed_install_bare">Roboco couldn\'t be updated.</string>
-    <string name="update_permission_title">Allow Roboco to Install Updates</string>
-    <string name="update_permission_message">Android asks once. Turn on \"Allow from this source\" for Roboco, then come back.</string>
+    <string name="update_failed_install">Zeron couldn\'t be updated. %1$s</string>
+    <string name="update_failed_install_bare">Zeron couldn\'t be updated.</string>
+    <string name="update_permission_title">Allow Zeron to Install Updates</string>
+    <string name="update_permission_message">Android asks once. Turn on \"Allow from this source\" for Zeron, then come back.</string>
     <string name="update_permission_open">Open Settings</string>
     <string name="update_permission_not_now">Not Now</string>
-    <string name="update_row_update_title">Update to Roboco %1$s</string>
+    <string name="update_row_update_title">Update to Zeron %1$s</string>
     <string name="update_row_size_date">%1$s MB · Released %2$s</string>
     <string name="update_row_size">%1$s MB</string>
     <string name="update_row_released">Released %1$s</string>
     <string name="update_row_check_title">Check for Updates</string>
     <string name="update_row_checking">Checking…</string>
-    <string name="update_row_up_to_date">Roboco is up to date</string>
-    <string name="update_row_up_to_date_at">Roboco is up to date · checked %1$s</string>
+    <string name="update_row_up_to_date">Zeron is up to date</string>
+    <string name="update_row_up_to_date_at">Zeron is up to date · checked %1$s</string>
     <string name="update_row_error">Couldn\'t check: %1$s</string>
-    <string name="update_row_github_title">Roboco %1$s on GitHub</string>
+    <string name="update_row_github_title">Zeron %1$s on GitHub</string>
     <string name="update_row_github_subtitle">Debug build: install the release APK manually</string>
     <string name="update_checked_just_now">just now</string>
     <string name="update_checked_minutes_ago">%1$d min ago</string>

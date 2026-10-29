@@ -9,7 +9,7 @@
 #   apps/android/scripts/flow-tests.sh
 #
 # The fixture binary is built by the caller (CI's emulator job):
-#   cargo build --locked -p roboco-engine --example android_fixture
+#   cargo build --locked -p zeron-engine --example android_fixture
 # Local (Linux/KVM or Windows/WHPX): the same, then this script.
 
 set -uo pipefail
@@ -40,7 +40,7 @@ mkdir -p "$ARTIFACTS"
 
 if [[ ! -x "$FIXTURE_BIN" ]]; then
   echo "flow-tests: $FIXTURE_BIN is missing — build it first:" >&2
-  echo "  cargo build --locked -p roboco-engine --example android_fixture" >&2
+  echo "  cargo build --locked -p zeron-engine --example android_fixture" >&2
   exit 2
 fi
 
@@ -73,14 +73,14 @@ QUESTION_PID=$(start_fixture question "$QUESTION_PORT" "$QUESTION_CONTROL")
 
 # android-next#02: the Tailcat smoke, only when the Go pieces were built
 # (CI's emulator job builds the adapter and the local DERP relay and
-# exports ROBOCO_TAILCAT_ADAPTER / ROBOCO_TAILCAT_TESTDERP). The relay is
+# exports ZERON_TAILCAT_ADAPTER / ZERON_TAILCAT_TESTDERP). The relay is
 # all on 127.0.0.1; its DERP port is TCP, so adb reverse brings it to the
 # device, which then reaches the engine through the WireGuard tunnel.
 TESTDERP_PID=""
 TAILCAT_PID=""
 DERP_PORT=""
-if [[ -x "${ROBOCO_TAILCAT_ADAPTER:-}" && -x "${ROBOCO_TAILCAT_TESTDERP:-}" ]]; then
-  "$ROBOCO_TAILCAT_TESTDERP" --until-killed >"$ARTIFACTS/testderp.log" 2>"$ARTIFACTS/testderp.err" &
+if [[ -x "${ZERON_TAILCAT_ADAPTER:-}" && -x "${ZERON_TAILCAT_TESTDERP:-}" ]]; then
+  "$ZERON_TAILCAT_TESTDERP" --until-killed >"$ARTIFACTS/testderp.log" 2>"$ARTIFACTS/testderp.err" &
   TESTDERP_PID=$!
   deadline=$((SECONDS + 30))
   until grep -q '"derpMap"' "$ARTIFACTS/testderp.log" 2>/dev/null; do
@@ -97,7 +97,7 @@ if [[ -x "${ROBOCO_TAILCAT_ADAPTER:-}" && -x "${ROBOCO_TAILCAT_TESTDERP:-}" ]]; 
     --tailcat-derp-map "$DERP_MAP" >"$ARTIFACTS/fixture-tailcat.log" 2>&1 &
   TAILCAT_PID=$!
 else
-  echo "flow-tests: no Tailcat pieces (ROBOCO_TAILCAT_ADAPTER / ROBOCO_TAILCAT_TESTDERP); the Tailcat smoke skips"
+  echo "flow-tests: no Tailcat pieces (ZERON_TAILCAT_ADAPTER / ZERON_TAILCAT_TESTDERP); the Tailcat smoke skips"
 fi
 
 cleanup() {
@@ -117,9 +117,9 @@ cleanup() {
   sleep 1
   timeout 60 adb logcat -d >"$ARTIFACTS/logcat.txt" 2>/dev/null || true
   # The tests' PNG/mp4/JSON artefacts live in the app's external files dir.
-  timeout 120 adb pull /sdcard/Android/data/sh.roboco.android/files "$ARTIFACTS/app-files" >/dev/null 2>&1 || true
-  timeout 30 adb shell ls /sdcard/roboco-tour-*.mp4 >/dev/null 2>&1 && \
-    timeout 120 adb pull /sdcard/roboco-tour-*.mp4 "$ARTIFACTS/" >/dev/null 2>&1 || true
+  timeout 120 adb pull /sdcard/Android/data/sh.zeron.android/files "$ARTIFACTS/app-files" >/dev/null 2>&1 || true
+  timeout 30 adb shell ls /sdcard/zeron-tour-*.mp4 >/dev/null 2>&1 && \
+    timeout 120 adb pull /sdcard/zeron-tour-*.mp4 "$ARTIFACTS/" >/dev/null 2>&1 || true
 }
 trap cleanup EXIT
 
@@ -147,7 +147,7 @@ fi
 # 3. The suite. The @Tour tests (motion recordings) run in the tablet job
 #    (FLOW_INCLUDE_TOUR=1); the physical-device bench runs on a real
 #    device, never here.
-#    The device filters live in the app's RobocoTestRunner (an assumption
+#    The device filters live in the app's ZeronTestRunner (an assumption
 #    failure would be reported as a failure here, not a skip): it drops
 #    @TabletOnly below 600 dp, @PhysicalDeviceOnly on an emulator, @Ignore
 #    rows, and @Tour unless flowIncludeTour=true. A comma-separated
