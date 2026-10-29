@@ -190,8 +190,6 @@ fun chipMenuComposerState(
     queueError = null,
     lastSubmittedMessageId = null,
     contextUsage = contextUsage,
-    limit = null,
-    scheduledResumeFireAtMs = null,
 )
 
 /**
@@ -207,9 +205,9 @@ fun chipMenuSessionRow(
     branch: String? = null,
     pullRequest: PullRequest? = null,
     deviceId: String = "device-1",
+    harnessLabel: String? = harness?.let { "Claude Code" },
 ): SessionRow = SessionRow(
     id = id,
-    engineId = "engine:v1:alpha",
     revision = 1uL,
     title = "Session",
     hasTitle = true,
@@ -218,9 +216,9 @@ fun chipMenuSessionRow(
     deviceId = deviceId,
     deviceName = null,
     deviceOnline = true,
-    engineOnline = true,
+    isCloud = false,
     harness = harness,
-    harnessLabel = harness?.let { "Claude Code" },
+    harnessLabel = harnessLabel,
     model = model,
     modelLabel = modelLabel,
     reasoning = reasoning,
@@ -239,18 +237,20 @@ fun chipMenuSessionRow(
     pullRequest = pullRequest,
     sendState = null,
     parentChatId = null,
+    roomGen = 0u,
 )
 
 /** The PR fixture the chip + menu tests share. */
 fun chipMenuPullRequest(
     title: String = "Fixture PR",
     url: String = "https://github.com/hoangvu12/zeron-android/pull/1234",
+    state: PullRequestState = PullRequestState.OPEN,
 ): PullRequest = PullRequest(
     provider = "github",
     number = 1234uL,
     title = title,
     url = url,
-    state = PullRequestState.OPEN,
+    state = state,
     baseRef = "main",
     headRef = "feature",
 )

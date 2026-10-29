@@ -74,6 +74,7 @@ class QuestionCardTextTest {
         assertEquals("Back", QuestionCardText.BACK)
         assertEquals("Next", QuestionCardText.NEXT)
         assertEquals("Submit", QuestionCardText.SUBMIT)
+        assertEquals("Close without answering", QuestionCardText.CLOSE)
     }
 
     // ---------------------------------------------------------- the tags
@@ -91,6 +92,7 @@ class QuestionCardTextTest {
         assertEquals("question-editor", QuestionCardTags.EDITOR)
         assertEquals("question-next", QuestionCardTags.NEXT)
         assertEquals("question-card", QuestionCardTags.CARD)
+        assertEquals("question-close", QuestionCardTags.CLOSE)
     }
 
     // ------------------------------------------- the model's deriveds

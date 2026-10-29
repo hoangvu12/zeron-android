@@ -24,9 +24,10 @@ data class QuestionAnswer(val questionId: String, val labels: List<String>)
 
 /**
  * The question panel's behaviour (android-ui-parity #91) — the port of
- * `ios:Composer/QuestionPanel.swift:7-21, 98-214`: page, picks, custom
+ * `ios:Composer/QuestionPanel.swift:7-21, 131-255`: page, picks, custom
  * text, the answered rule, the 220 ms single-select auto-advance, the
- * double-submit guard and the answer build. Main thread only (snapshot
+ * double-submit guard, the answer build and the close without answering
+ * ([dismiss], #32). Main thread only (snapshot
  * state); ticket 90's card renders the values this class exposes and
  * calls back into it.
  *
@@ -245,6 +246,23 @@ class QuestionPanelState(
         submitted = true
         feedback.haptic(Haptic.Confirm)
         onSubmit(id, answers)
+    }
+
+    /**
+     * The corner close (iOS `dismissUnanswered()`, #32,
+     * `QuestionPanel.swift:249-255`): no answers at all is the decline —
+     * the run reads its harness's own "dismissed" and the transcript chip
+     * records the questions closed. Shares the once-per-set guard with
+     * [advance], so a close after Submit (or a second close) does
+     * nothing; no haptic (iOS plays none). The pending auto-advance is
+     * cancelled so a stale pick can't page the closed set.
+     */
+    fun dismiss() {
+        if (submitted) return
+        val id = requestId ?: return
+        cancelAutoAdvance()
+        submitted = true
+        onSubmit(id, emptyList())
     }
 
     /**

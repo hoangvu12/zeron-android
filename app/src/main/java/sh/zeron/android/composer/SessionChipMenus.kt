@@ -1,6 +1,5 @@
 package sh.zeron.android.composer
 
-import java.util.Locale
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
@@ -18,13 +17,10 @@ import sh.zeron.android.design.glass.MenuIcon
 import sh.zeron.android.design.glass.MenuItem
 import sh.zeron.android.session.ChromeFiller
 import sh.zeron.android.session.ChromeInput
-import sh.zeron.android.session.ContextReading
 import sh.zeron.android.session.CoreSessionCore
 import sh.zeron.android.session.SessionChrome
 import sh.zeron.android.session.SessionChipIds
 import sh.zeron.android.session.SessionCore
-import sh.zeron.android.session.contextReading
-import sh.zeron.android.session.contextUsageCard
 import uniffi.zeron_core.ChatConfig
 import uniffi.zeron_core.HarnessInfo
 import uniffi.zeron_core.ModelInfo
@@ -114,21 +110,6 @@ interface ChipMenuPlatform {
     fun copyLink(url: String)
 }
 
-/**
- * android-next #05: the account half of the context chip's menu —
- * [augmentContextCard] appends the Account section (the login in use
- * and every usage window with percent and written-out reset moment),
- * the session harness's other logins to switch to, and "Accounts &
- * Usage…" to #01's context-window details card, or returns the card
- * unchanged without account data. Implemented by the accounts
- * package's `SessionAccountUsage`; held by [SessionChipMenus.accounts]
- * so the plain context card stays the default (tests, previews).
- */
-interface ContextCardAccounts {
-    /** [card] with the account rows appended, or [card] unchanged. */
-    fun augmentContextCard(card: Menu): Menu
-}
-
 /** The deferred-cache key: the selection (tap time) plus the engine device. */
 private data class MenuKey(
     val chipId: String,
@@ -141,10 +122,10 @@ private data class MenuKey(
 /**
  * The chip menus' content and actions (android-ui-parity #89) — the port
  * of `CoreSessionSource.chipMenu` + `setConfig` (`ios:Session/
- * CoreSessionSource.swift:201-245`, with #664's selection, pick rule,
- * failure pill and immediate refresh). This ticket owns **the content and
- * the actions only**: ticket 15 draws the menu, ticket 59 anchors it to
- * the chip at tap time, ticket 73 shows the failure pill.
+ * CoreSessionSource.swift:201-245`, with #664's selection, pick rule
+ * and immediate refresh). This ticket owns **the content and the actions
+ * only**: ticket 15 draws the menu, ticket 59 anchors it to the chip at
+ * tap time.
  *
  * Threading (the #609 traps this ticket exists to avoid):
  * - [fill] stores a **snapshot** (row, config, host device) on the
@@ -165,25 +146,7 @@ private data class MenuKey(
 class SessionChipMenus(
     private val core: ChipMenuCore,
     private val io: CoroutineDispatcher = Dispatchers.IO,
-    /** The context card's number grouping, read at tap time. */
-    private val locale: () -> Locale = { Locale.getDefault() },
 ) : ChromeFiller {
-
-    /**
-     * Set by ticket 78's wiring (the session screen): `null` = the write
-     * succeeded, else the failure. Ticket 73's `StatusBanner` turns it
-     * into the `Couldn't change session settings: …` pill. Default no-op.
-     */
-    @Volatile
-    var onSettingResult: (Throwable?) -> Unit = {}
-
-    /**
-     * android-next #05: the context chip's account half, set by the
-     * session screen's wiring (this route's `SessionAccountUsage`).
-     * `null` (tests, previews) keeps the plain context card of #01.
-     */
-    @Volatile
-    var accounts: ContextCardAccounts? = null
 
     /**
      * Wave-10 38: the tabbed model picker (upstream #966). Set by the
@@ -233,8 +196,6 @@ class SessionChipMenus(
         val row: SessionRow?,
         val config: ChatConfig?,
         val deviceId: String,
-        /** android-next #01: the context card's numbers (`ComposerState.contextUsage`). */
-        val context: ContextReading?,
         /** Wave-10 39: the host advertises `provider-switch-v1`. */
         val hostSwitches: Boolean = false,
         /** A turn is running on the host. */
@@ -253,28 +214,28 @@ class SessionChipMenus(
     /**
      * Stores the snapshot and returns the chrome **unchanged** — this
      * filler fills no chrome field; the menus only decorate the chips
-     * ticket 78 already filled — except a model-less chat's model chip
-     * (wave-10 39), named from [defaultModel]: the built-in list's
-     * first (a static FFI read), then the host's, loaded on [writeScope].
+     * ticket 78 already filled — except the model chip of a row with no
+     * `modelLabel` (wave-10 39, #34's C12), named from [defaultModel]:
+     * the built-in list's first (a static FFI read), then the host's,
+     * loaded on [writeScope]. iOS: `row.modelLabel ?? defaultModel(for:
+     * row)?.label ?? row.harnessLabel`.
      */
     override fun fill(chrome: SessionChrome, input: ChromeInput): SessionChrome {
-        val usage = input.composer.contextUsage
         val sendState = input.composer.sendState
         val next = Snapshot(
             row = input.row,
             config = input.config,
             deviceId = input.composer.host.deviceId,
-            context = contextReading(usage?.tokens, usage?.window),
             hostSwitches = input.composer.host.capabilities.providerSwitch,
             running = input.composer.live.turnRunning,
             sendPending = sendState == SendState.SENDING || sendState == SendState.QUEUED,
         )
         snapshot = next
         if (next.canSwitch) readAheadHarnesses(next.deviceId)
-        // Wave-10 39 (I2): a chat with no model of its own names the
-        // model it runs (the host's default), never the bare agent name.
+        // Wave-10 39 (I2): a chat with no model label names the model it
+        // runs (the host's default), never the bare agent name.
         val row = input.row ?: return chrome
-        if (!row.model.isNullOrEmpty() || row.modelLabel != null) return chrome
+        if (row.modelLabel != null) return chrome
         val byDefault = defaultModel(next.deviceId, row.harness ?: DEFAULT_HARNESS) ?: return chrome
         val chips = chrome.chips.map { chip ->
             if (chip.id == SessionChipIds.Model) chip.copy(title = byDefault.label) else chip
@@ -330,18 +291,19 @@ class SessionChipMenus(
      * at tap time by ticket 59's strip. No FFI, no snapshot state writes:
      * it reads [snapshot] and builds the [Menu] per the ticket's table
      * (`model` / `effort` get one hoisted deferred; `pr` two rows;
-     * `branch` / anything else `null`). android-next #01: `context` opens
-     * the read-only details card from the composer's usage — it needs no
-     * row, so it is answered before iOS's row guard — and android-next
-     * #05 folds the account rows into it through [accounts]: the plain
-     * card without account data.
+     * `branch` / `context` / anything else `null` — iOS's context chip
+     * has no menu, #34).
      */
+    /**
+     * Whether [chipId] can open anything (iOS `chipMenu` + the model
+     * picker): model, effort and PR. The strip only gets providers for
+     * these, so branch and context read as plain buttons, not "Show menu".
+     */
+    fun hasMenu(chipId: String): Boolean =
+        chipId == SessionChipIds.Model || chipId == SessionChipIds.Effort || chipId == SessionChipIds.Pr
+
     fun menu(chipId: String, platform: ChipMenuPlatform): Menu? {
         val s = snapshot ?: return null
-        if (chipId == SessionChipIds.Context) {
-            val card = s.context?.let { contextUsageCard(it, locale()) } ?: return null
-            return accounts?.augmentContextCard(card) ?: card
-        }
         val row = s.row ?: return null // iOS: guard let row
         val sel = sessionSelection(s.config, row)
         val harness = sel?.harness ?: DEFAULT_HARNESS
@@ -523,9 +485,10 @@ class SessionChipMenus(
      * One config write: read the base **at pick time** (inside the lock,
      * so a second pick reads the config the first one produced), apply
      * the change, write the **full** config (a replace — harness, sandbox
-     * and untouched options survive), report the outcome and invalidate
-     * (iOS `refresh()`, success or failure alike). The optimistic refresh
-     * itself is android-app#08's, in the core.
+     * and untouched options survive) and invalidate (iOS `refresh()`,
+     * success or failure alike). A failure stays silent, as iOS's `try?
+     * setSessionConfig` (#28 dropped the setting-failure pill). The
+     * optimistic refresh itself is android-app#08's, in the core.
      */
     private fun write(change: (ChatConfig) -> ChatConfig) {
         writeScope.launch {
@@ -538,15 +501,13 @@ class SessionChipMenus(
                         modelOptions = emptyMap(),
                         sandbox = SandboxLevel.WORKSPACE_WRITE,
                     )
-                val result = try {
+                try {
                     core.setSessionConfig(change(base))
-                    null
                 } catch (cancelled: CancellationException) {
                     throw cancelled
                 } catch (t: Throwable) {
-                    t
+                    // iOS `try?`: nothing shown.
                 }
-                onSettingResult(result)
                 invalidate()
             }
         }
@@ -618,9 +579,6 @@ const val PR_OPEN_ROW = "Open Pull Request"
 
 /** The PR menu's second row. */
 const val PR_COPY_ROW = "Copy Link"
-
-/** The ⋯ menu's Account & Usage row (android-next#05). */
-const val ACCOUNT_USAGE_ROW = "Account & Usage"
 
 // ── the pure rules (unit-tested on the plain JVM) ──────────────────────────
 

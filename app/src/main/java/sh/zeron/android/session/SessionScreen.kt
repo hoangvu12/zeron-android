@@ -450,7 +450,8 @@ fun SessionScreen(
                 // iOS render :488-491: the provider map is rebuilt on
                 // every chrome change (the chips it decorates are).
                 binding.chipMenus = { chips ->
-                    chips.associate { chip -> chip.id to { menus.menu(chip.id, platform) } }
+                    chips.filter { menus.hasMenu(it.id) }
+                        .associate { chip -> chip.id to { menus.menu(chip.id, platform) } }
                 }
             }
             binding.apply(chrome)
