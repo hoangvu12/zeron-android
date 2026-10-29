@@ -10,6 +10,7 @@ in git (except the launcher mipmaps, which
 |---|---|---|
 | `tab-chat.svg`, `tab-settings.svg` | iOS tab glyphs, `apps/ios/Zeron/Assets.xcassets/TabIcons/` at upstream `zeronsh/zeron` sha `edb23db4b409df035808e38c44180d1c7a2d2d7e` | MIT (upstream) |
 | `file-icons-dark/*-dark.svg` (198) | iOS dark-appearance variants, `apps/ios/Zeron/Assets.xcassets/FileIcons/` at the same sha | MIT (upstream); art from vscode-symbols |
+| `github-mark.svg` | A copy of Zeron's `crates/ui/assets/icons/github-mark.svg` (the generator skips `*-mark.svg` line icons, which are painted from paths; Cloud's GitHub rows tint this one as an icon, #51) | GitHub's mark, as upstream uses it |
 | `zeron-bow.svg` | Drawn for Zeron (android-next #03): the ribbon-bow silhouette for the notification icon and the themed launcher icon | Zeron |
 
 The light file/folder icons and the line icons are **not** imported: they
