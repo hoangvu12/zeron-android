@@ -22,10 +22,10 @@ import uniffi.zeron_core.FolderListing
  * [FolderBrowserController] (android-ui-parity #110): every acceptance row
  * of the ticket's load-guard table — the synchronous default engine from
  * `initialHosts` (no `No paired engines yet.` flash, no call until the
- * first `updateEngines`), the generation guard (out-of-order replies,
+ * first `updateDevices`), the generation guard (out-of-order replies,
  * engine switches mid-flight), the failure strings and the
  * "last good folder stays usable only on the same engine" rule, the
- * `pr685` tap guard, the live host-list rules, the `onListingApplied` /
+ * `pr685` tap guard, the live host-list rules, the
  * `listingIsRepo` hooks, and the `engineMenu` model (the web
  * Engines/Devices rule, one row per engine, picks reload at home).
  *
@@ -51,17 +51,10 @@ class FolderBrowserControllerTest {
     private class GatedSource : FolderBrowserSource {
         val calls = mutableListOf<Pair<String, String?>>()
 
-        /** The `showHidden` flag of each recorded call (112's `.`-query reload). */
-        val hiddenFlags = mutableListOf<Boolean>()
         private val gates = mutableListOf<CompletableDeferred<FolderListing?>>()
 
-        override suspend fun listFolders(
-            deviceId: String,
-            path: String?,
-            showHidden: Boolean,
-        ): FolderListing? {
+        override suspend fun listFolders(deviceId: String, path: String?): FolderListing? {
             calls += deviceId to path
-            hiddenFlags += showHidden
             val gate = CompletableDeferred<FolderListing?>()
             synchronized(gates) { gates += gate }
             return gate.await()
@@ -79,9 +72,9 @@ class FolderBrowserControllerTest {
     ): FolderBrowserController =
         FolderBrowserController(source, FakeHostPaths, backgroundScope, initialHosts = initialHosts)
 
-    /** Opens the browser: first `updateEngines`, then the call is recorded but the reply pending. */
+    /** Opens the browser: first `updateDevices`, then the call is recorded but the reply pending. */
     private fun TestScope.open(controller: FolderBrowserController, hosts: List<HostOption>) {
-        controller.updateEngines(hosts)
+        controller.updateDevices(hosts)
         runCurrent()
     }
 
@@ -94,13 +87,13 @@ class FolderBrowserControllerTest {
 
         // Synchronous, before any coroutine runs: the capsule already shows
         // the default engine, never "No paired engines yet.".
-        assertEquals("MacBook Pro", controller.capsuleTitle)
-        assertTrue("no load before the first updateEngines", source.calls.isEmpty())
+        assertEquals("MacBook Pro", controller.deviceTitle)
+        assertTrue("no load before the first updateDevices", source.calls.isEmpty())
         assertNull(controller.listing)
         assertFalse(controller.loading)
 
         // The replayed hosts flow performs the first load.
-        controller.updateEngines(hosts)
+        controller.updateDevices(hosts)
         runCurrent()
         assertEquals(listOf("dev-mbp" to null), source.calls)
     }
@@ -110,8 +103,8 @@ class FolderBrowserControllerTest {
         val source = GatedSource()
         val controller = browser(source)
 
-        controller.updateEngines(hosts)
-        assertEquals("MacBook Pro", controller.capsuleTitle)
+        controller.updateDevices(hosts)
+        assertEquals("MacBook Pro", controller.deviceTitle)
         assertTrue(controller.loading)
         assertEquals(FolderBrowserCopy.Loading, controller.status)
 
@@ -124,7 +117,7 @@ class FolderBrowserControllerTest {
         assertFalse(controller.loading)
         assertEquals("/Users/alice", controller.status)
         assertEquals("/Users/alice", controller.path)
-        assertEquals("dev-mbp", controller.listingEngineId)
+        assertEquals("dev-mbp", controller.listingDeviceId)
         assertNull("home carries no repo hint", controller.listingIsRepo)
         assertEquals(1, controller.listingSerial)
         assertTrue(controller.listingUsable)
@@ -136,7 +129,7 @@ class FolderBrowserControllerTest {
         val controller = browser(source)
         open(controller, listOf(HostOption("dev-htz", "hetzner-01", online = false)))
 
-        assertEquals("hetzner-01", controller.capsuleTitle)
+        assertEquals("hetzner-01", controller.deviceTitle)
         assertEquals(listOf("dev-htz" to null), source.calls)
     }
 
@@ -145,38 +138,38 @@ class FolderBrowserControllerTest {
         val source = GatedSource()
         val controller = browser(source)
 
-        controller.updateEngines(emptyList())
-        assertEquals(FolderBrowserCopy.NoEngines, controller.status)
-        assertEquals(FolderBrowserCopy.NoEngines, controller.capsuleTitle)
+        controller.updateDevices(emptyList())
+        assertEquals(FolderBrowserCopy.NoDevices, controller.status)
+        assertEquals(FolderBrowserCopy.NoHosts, controller.deviceTitle)
         assertFalse(controller.loading)
         assertTrue(source.calls.isEmpty())
 
         controller.load("/some/path") // explicit load with no engine
         assertTrue(source.calls.isEmpty())
-        assertEquals(FolderBrowserCopy.NoEngines, controller.status)
+        assertEquals(FolderBrowserCopy.NoDevices, controller.status)
         assertFalse(controller.loading)
     }
 
     @Test
-    fun selectEngineRetitlesAtOnceAndReloadsAtHome() = runTest {
+    fun selectDeviceRetitlesAtOnceAndReloadsAtHome() = runTest {
         val source = GatedSource()
         val controller = browser(source)
         open(controller, hosts)
         source.complete(0, posixHomeListing())
         runCurrent()
 
-        controller.selectEngine("dev-htz")
-        assertEquals("the capsule re-titles at once", "hetzner-01", controller.capsuleTitle)
+        controller.selectDevice("dev-htz")
+        assertEquals("the capsule re-titles at once", "hetzner-01", controller.deviceTitle)
         runCurrent()
         assertEquals(listOf("dev-mbp" to null, "dev-htz" to null), source.calls)
 
         // Picking the already-selected engine also reloads at home.
-        controller.selectEngine("dev-htz")
+        controller.selectDevice("dev-htz")
         runCurrent()
         assertEquals(listOf("dev-mbp" to null, "dev-htz" to null, "dev-htz" to null), source.calls)
 
         // An unknown id is a no-op (no pick, no load).
-        controller.selectEngine("nope")
+        controller.selectDevice("nope")
         assertEquals(3, source.calls.size)
     }
 
@@ -195,9 +188,9 @@ class FolderBrowserControllerTest {
             HostOption("dev-mbp", "MacBook Pro 2", online = true),
             HostOption("dev-htz", "hetzner-01", online = true),
         )
-        controller.updateEngines(refreshed)
+        controller.updateDevices(refreshed)
 
-        assertEquals("the same-id entry replaces the engine (fresh name)", "MacBook Pro 2", controller.capsuleTitle)
+        assertEquals("the same-id entry replaces the engine (fresh name)", "MacBook Pro 2", controller.deviceTitle)
         assertEquals("no reload when the selected id stays", callsBefore, source.calls.size)
         assertEquals(1, controller.listingSerial)
     }
@@ -210,8 +203,8 @@ class FolderBrowserControllerTest {
         source.complete(0, posixHomeListing())
         runCurrent()
 
-        controller.updateEngines(listOf(HostOption("dev-htz", "hetzner-01", online = false)))
-        assertEquals("hetzner-01", controller.capsuleTitle)
+        controller.updateDevices(listOf(HostOption("dev-htz", "hetzner-01", online = false)))
+        assertEquals("hetzner-01", controller.deviceTitle)
         runCurrent()
         assertEquals(listOf("dev-mbp" to null, "dev-htz" to null), source.calls)
     }
@@ -220,12 +213,12 @@ class FolderBrowserControllerTest {
     fun aNullEngineWithANonEmptyListPicksAndLoads() = runTest {
         val source = GatedSource()
         val controller = browser(source)
-        controller.updateEngines(emptyList())
+        controller.updateDevices(emptyList())
         runCurrent()
         assertTrue(source.calls.isEmpty())
 
-        controller.updateEngines(hosts)
-        assertEquals("MacBook Pro", controller.capsuleTitle)
+        controller.updateDevices(hosts)
+        assertEquals("MacBook Pro", controller.deviceTitle)
         runCurrent()
         assertEquals(listOf("dev-mbp" to null), source.calls)
     }
@@ -291,7 +284,7 @@ class FolderBrowserControllerTest {
         runCurrent()
         assertTrue(controller.listingUsable)
 
-        controller.selectEngine("dev-htz")
+        controller.selectDevice("dev-htz")
         runCurrent()
         assertFalse("the last good listing came from another engine", controller.listingUsable)
         // The old engine's rows and title stay on screen.
@@ -311,16 +304,16 @@ class FolderBrowserControllerTest {
         val controller = browser(source)
         open(controller, hosts) // gate 0 pending on dev-mbp
 
-        controller.updateEngines(emptyList())
-        assertNull(controller.engine)
+        controller.updateDevices(emptyList())
+        assertNull(controller.device)
         assertFalse(controller.loading)
-        assertEquals(FolderBrowserCopy.NoEngines, controller.status)
-        assertEquals(FolderBrowserCopy.NoEngines, controller.capsuleTitle)
+        assertEquals(FolderBrowserCopy.NoDevices, controller.status)
+        assertEquals(FolderBrowserCopy.NoHosts, controller.deviceTitle)
 
         source.complete(0, posixHomeListing())
         runCurrent()
         assertNull("the late reply changes nothing", controller.listing)
-        assertEquals(FolderBrowserCopy.NoEngines, controller.status)
+        assertEquals(FolderBrowserCopy.NoDevices, controller.status)
         assertEquals(0, controller.listingSerial)
     }
 
@@ -367,7 +360,7 @@ class FolderBrowserControllerTest {
         source.complete(0, posixHomeListing())
         runCurrent()
 
-        controller.selectEngine("dev-htz")
+        controller.selectDevice("dev-htz")
         runCurrent()
         source.complete(1, null)
         runCurrent()
@@ -406,7 +399,7 @@ class FolderBrowserControllerTest {
 
         // When the listing came from another engine (the switch failed, so
         // nothing is loading and the old rows stay on screen).
-        controller.selectEngine("dev-htz")
+        controller.selectDevice("dev-htz")
         runCurrent()
         source.complete(source.calls.lastIndex, null)
         runCurrent()
@@ -515,27 +508,6 @@ class FolderBrowserControllerTest {
     // --------------------------------------------------------- the hooks
 
     @Test
-    fun onListingAppliedFiresOncePerAppliedListingAndNeverForStaleOrFailedReplies() = runTest {
-        val source = GatedSource()
-        val controller = browser(source)
-        val applied = mutableListOf<Pair<String, String>>()
-        controller.onListingApplied = { engineId, listing -> applied += engineId to listing.path }
-
-        open(controller, hosts)
-        source.complete(0, posixHomeListing())
-        runCurrent()
-        assertEquals(listOf("dev-mbp" to "/Users/alice"), applied)
-
-        controller.load("/a")
-        controller.load("/b")
-        runCurrent()
-        source.complete(1, windowsHomeListing()) // superseded — never fires
-        source.complete(2, null) // failed — never fires
-        runCurrent()
-        assertEquals(1, applied.size)
-    }
-
-    @Test
     fun listingIsRepoTracksTheRowThatReachedTheCurrentFolder() = runTest {
         val source = GatedSource()
         val controller = browser(source)
@@ -562,7 +534,7 @@ class FolderBrowserControllerTest {
         runCurrent()
         assertNull("the parent carries no hint", controller.listingIsRepo)
 
-        controller.selectEngine("dev-htz")
+        controller.selectDevice("dev-htz")
         runCurrent()
         source.complete(4, rootListing())
         runCurrent()
@@ -572,30 +544,31 @@ class FolderBrowserControllerTest {
     // -------------------------------------------------------- engine menu
 
     @Test
-    fun theEngineMenuFollowsTheWebTitleRuleAndPicksEngines() = runTest {
+    fun theDeviceMenuListsEveryHostAndPicksOne() = runTest {
         val source = GatedSource()
         val controller = browser(source, initialHosts = hosts)
 
-        val menu = engineMenu(controller)
-        assertEquals("Engines", menu.title)
+        val menu = deviceMenu(controller)
+        assertEquals("Device", menu.title)
         val rows = menu.children.filterIsInstance<MenuItem>()
         assertEquals(listOf("MacBook Pro", "hetzner-01"), rows.map { it.title })
         assertEquals(listOf("Online", "Offline"), rows.map { it.subtitle })
         assertTrue(rows.all { !it.checked })
         assertTrue(rows.all { it.icon is MenuIcon.Symbol })
-        assertTrue(rows.all { it.testTag == "folder-engine-row" })
+        assertTrue(rows.all { it.testTag == "folder-device-row" })
 
-        // One engine → "Devices"; no engines → no rows and no content.
+        // iOS titles the menu "Device" whatever the count; no hosts → no
+        // rows and no content.
         val single = browser(GatedSource(), initialHosts = listOf(hosts[0]))
-        assertEquals("Devices", engineMenu(single).title)
+        assertEquals("Device", deviceMenu(single).title)
         val none = browser(GatedSource(), initialHosts = emptyList())
-        val emptyMenu = engineMenu(none)
+        val emptyMenu = deviceMenu(none)
         assertTrue(emptyMenu.children.isEmpty())
         assertFalse("with no engines the capsule opens nothing", emptyMenu.hasContent())
 
         // A row pick selects the engine and reloads at home.
         rows[1].action()
-        assertEquals("hetzner-01", controller.capsuleTitle)
+        assertEquals("hetzner-01", controller.deviceTitle)
         runCurrent()
         assertEquals(listOf("dev-htz" to null), source.calls)
     }

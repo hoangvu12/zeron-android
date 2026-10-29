@@ -2,7 +2,6 @@ package sh.zeron.android.newsession
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,29 +14,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import sh.zeron.android.core.Face
-import sh.zeron.android.design.AlertButton
-import sh.zeron.android.design.AlertButtonRole
-import sh.zeron.android.design.AlertField
 import sh.zeron.android.design.Appearance
-import sh.zeron.android.design.LocalAlerts
 import sh.zeron.android.design.LocalTypeScale
-import sh.zeron.android.design.ZeronAlert
 import sh.zeron.android.design.ZeronTheme
 import sh.zeron.android.design.uiStyle
 
 /**
  * The "Folder bottom bar" section of the debug design gallery
- * (android-ui-parity #111): the status line, the plain New Folder…
- * button and the full-width Use capsule over folder rows — the ticket's
- * four fixtures (a)–(d), each in a fixed-height page whose rows run
- * underneath the background-less stack, plus the New Folder alert in
- * its retry-error state (through [LocalAlerts] — the gallery's own
- * `AlertHost` from [sh.zeron.android.design.GalleryProviders]).
+ * (android-ui-parity #111): the status line and the full-width Use
+ * capsule over folder rows — the ticket's four fixtures (a)–(d), each in
+ * a fixed-height page whose rows run underneath the background-less
+ * stack.
  *
  * The fixtures and the stage are shared verbatim with the screenshot
  * test `FolderBrowserBottomBarTest` (the debug source set is visible to
@@ -49,13 +39,12 @@ import sh.zeron.android.design.uiStyle
 // Fixtures (shared with the screenshot tests)
 // ---------------------------------------------------------------------------
 
-/** One bottom-bar state: the five inputs of [FolderBrowserBottomBar]. */
+/** One bottom-bar state: the four inputs of [FolderBrowserBottomBar]. */
 data class FolderBottomBarSpec(
     val status: String,
     val useTitle: String,
     val useEnabled: Boolean,
     val useBusy: Boolean,
-    val newFolderEnabled: Boolean,
 )
 
 /** The status of fixture (d): past two lines of the 13 pt label, so it ellipsizes. */
@@ -70,44 +59,24 @@ fun folderBottomBarFixtures(): List<Pair<String, FolderBottomBarSpec>> = listOf(
         useTitle = "Use \u201Csrv\u201D",
         useEnabled = true,
         useBusy = false,
-        newFolderEnabled = true,
     ),
     "b — loading (everything disabled)" to FolderBottomBarSpec(
         status = "Loading…",
         useTitle = "",
         useEnabled = false,
         useBusy = false,
-        newFolderEnabled = false,
     ),
     "c — creating the project (busy Use)" to FolderBottomBarSpec(
         status = "/srv",
         useTitle = "Use \u201Csrv\u201D",
         useEnabled = true,
         useBusy = true,
-        newFolderEnabled = false,
     ),
     "d — a two-line status that ellipsizes" to FolderBottomBarSpec(
         status = FOLDER_BOTTOM_BAR_LONG_STATUS,
         useTitle = "Use \u201Csrv\u201D",
         useEnabled = true,
         useBusy = false,
-        newFolderEnabled = true,
-    ),
-)
-
-/** The alert the retry flow re-shows: the invalid-name error, the name kept. */
-fun newFolderRetryAlert(): ZeronAlert = ZeronAlert(
-    title = "New Folder",
-    message = "Couldn't create the folder. Enter a folder name without path separators.",
-    field = AlertField(
-        text = "../outside",
-        placeholder = "Folder name",
-        capitalization = KeyboardCapitalization.None,
-        autocorrect = false,
-    ),
-    buttons = listOf(
-        AlertButton("Cancel", AlertButtonRole.Cancel),
-        AlertButton("Create", AlertButtonRole.Default, requiresText = true),
     ),
 )
 
@@ -133,9 +102,7 @@ internal fun FolderBottomBarStage(spec: FolderBottomBarSpec, modifier: Modifier 
             useTitle = spec.useTitle,
             useEnabled = spec.useEnabled,
             useBusy = spec.useBusy,
-            newFolderEnabled = spec.newFolderEnabled,
             onUse = {},
-            onNewFolder = {},
             modifier = Modifier.align(Alignment.BottomCenter),
         )
     }
@@ -170,17 +137,10 @@ private fun FolderFixtureRows(modifier: Modifier = Modifier) {
 
 @Composable
 fun FolderBottomBarGallerySection() {
-    val alerts = LocalAlerts.current
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         for ((label, spec) in folderBottomBarFixtures()) {
             FixtureCard(label, spec)
         }
-        // The retry state of the New Folder alert (ticket 18 renders it).
-        BasicText(
-            "Open the New Folder alert in its retry-error state",
-            Modifier.clickable(role = Role.Button) { alerts.show(newFolderRetryAlert()) },
-            style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(15f), ZeronTheme.palette.accent),
-        )
     }
 }
 

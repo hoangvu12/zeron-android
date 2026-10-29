@@ -237,7 +237,7 @@ class DraftsTest {
         f.drafts.save(DraftKey.NewSession, "ns").join()
         advanceUntilIdle()
 
-        f.drafts.forgetEngine("E1").join()
+        f.drafts.forgetDevice("E1").join()
         advanceUntilIdle()
 
         assertEquals("", f.drafts.peek(e1a))

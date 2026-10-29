@@ -48,7 +48,6 @@ import sh.zeron.android.newsession.HandoffCaptureGallerySection
 import sh.zeron.android.newsession.NewSessionCanvasGallerySection
 import sh.zeron.android.newsession.NewSessionChipsGallerySection
 import sh.zeron.android.newsession.ProjectMenusGallerySection
-import sh.zeron.android.newsession.FolderLocationsGallerySection
 import sh.zeron.android.sessions.FolderScreensGallerySection
 import sh.zeron.android.sessions.PinnedReorderGallerySection
 import sh.zeron.android.shell.LargeTitleGallerySection
@@ -517,14 +516,6 @@ object Gallery {
         // fail next submit) and a one-line answer caption under the
         // stage.
         GallerySection("Question panel behaviour") { QuestionPanelBehaviourGallerySection() },
-        // Ticket 112 (folder browser locations): the Zeron-only rail and
-        // search/typed-path field between the nav bar and the list —
-        // Home + drives chips (the selected one in accentSoft/accent) and
-        // the 40 dp search field, over the ticket's four fixtures A–D
-        // (Linux/Windows drives, a typed path, the disabled state).
-        GallerySection("Folder browser locations", screenshotHeightDp = 560) {
-            FolderLocationsGallerySection()
-        },
         // Ticket 89 (session chip menus): the Model / Reasoning effort / PR
         // menus behind the composer chips — a live ChipStrip over a fake
         // core (1.5 s catalog load, optimistic chip updates, failing
