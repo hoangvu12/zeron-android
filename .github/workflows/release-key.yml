@@ -1,0 +1,110 @@
+name: Release key
+
+# One-off (#66): mints Zeron Android's release signing key. Run it by hand
+# once; nothing else triggers it. The key lives only as repo secrets after
+# that, plus one encrypted backup the owner keeps:
+#
+#   1. a PKCS12 keystore, RSA 4096, valid 35 years, alias `zeron-release`,
+#      its password 32 random bytes (64 hex characters);
+#   2. a bundle of the keystore and release-key.txt (alias, password,
+#      certificate fingerprint);
+#   3. the bundle encrypted with
+#      `openssl enc -aes-256-cbc -pbkdf2 -iter 600000` under the passphrase
+#      in the ZERON_RELEASE_BACKUP_PASSPHRASE secret;
+#   4. only the encrypted file uploaded, as a one-day artifact.
+#
+# The password is masked and never printed; the plaintext keystore never
+# leaves the runner's temp directory and is deleted at the end. A
+# workflow's GITHUB_TOKEN cannot write repository secrets, so a person
+# decrypts the backup and sets ZERON_RELEASE_KEYSTORE_BASE64,
+# ZERON_RELEASE_KEYSTORE_PASSWORD and ZERON_RELEASE_KEY_ALIAS, which the
+# Release workflow signs with.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-key
+  cancel-in-progress: false
+
+jobs:
+  key:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Generate the key and its encrypted backup
+        env:
+          BACKUP_PASSPHRASE: ${{ secrets.ZERON_RELEASE_BACKUP_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          umask 077
+          if [ -z "$BACKUP_PASSPHRASE" ]; then
+            echo "::error::Set the ZERON_RELEASE_BACKUP_PASSPHRASE secret first (the backup is encrypted under it)."
+            exit 1
+          fi
+          work="$RUNNER_TEMP/release-key"
+          mkdir -p "$work/bundle" "$GITHUB_WORKSPACE/out"
+
+          # 32 random bytes as hex: no characters a shell, a secret or keytool mangles.
+          STORE_PASSWORD=$(openssl rand -hex 32)
+          echo "::add-mask::$STORE_PASSWORD"
+          export STORE_PASSWORD
+          alias=zeron-release
+
+          # The passwords go through the environment (`:env`), never argv.
+          # PKCS12 has one password: the key's is the store's.
+          keytool -genkeypair \
+            -storetype PKCS12 \
+            -keystore "$work/bundle/zeron-release.p12" \
+            -storepass:env STORE_PASSWORD \
+            -keypass:env STORE_PASSWORD \
+            -alias "$alias" \
+            -keyalg RSA -keysize 4096 -sigalg SHA256withRSA \
+            -validity 12784 \
+            -dname "CN=Zeron Android, O=Zeron"
+
+          # The certificate's fingerprint is public: logged, and kept in the bundle.
+          fingerprint=$(keytool -list -v -storetype PKCS12 \
+            -keystore "$work/bundle/zeron-release.p12" -storepass:env STORE_PASSWORD -alias "$alias" \
+            | awk -F': ' '/SHA256:/ { print $2; exit }')
+          echo "Release certificate SHA-256: $fingerprint"
+
+          {
+            echo "Zeron Android release key ($(date -u +%Y-%m-%d), run $GITHUB_RUN_ID)"
+            echo "keystore: zeron-release.p12 (PKCS12; the key password is the store password)"
+            echo "alias: $alias"
+            echo "password: $STORE_PASSWORD"
+            echo "certificate SHA-256: $fingerprint"
+          } > "$work/bundle/release-key.txt"
+
+          tar -czf "$work/bundle.tar.gz" -C "$work/bundle" zeron-release.p12 release-key.txt
+          openssl enc -aes-256-cbc -pbkdf2 -iter 600000 -salt \
+            -in "$work/bundle.tar.gz" \
+            -out "$GITHUB_WORKSPACE/out/zeron-release-key.tar.gz.enc" \
+            -pass env:BACKUP_PASSPHRASE
+
+          # The backup must open with the passphrase before anything else is trusted.
+          openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 \
+            -in "$GITHUB_WORKSPACE/out/zeron-release-key.tar.gz.enc" \
+            -pass env:BACKUP_PASSPHRASE \
+            | cmp - "$work/bundle.tar.gz"
+          echo "Encrypted backup verified ($(wc -c < "$GITHUB_WORKSPACE/out/zeron-release-key.tar.gz.enc") bytes)."
+
+      - name: Remove the plaintext key
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/release-key"
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: zeron-release-key-backup
+          path: out/zeron-release-key.tar.gz.enc
+          if-no-files-found: error
+          retention-days: 1
