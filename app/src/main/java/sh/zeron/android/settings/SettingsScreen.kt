@@ -102,7 +102,7 @@ enum class SettingsSection(val key: String) {
 
 /**
  * The engine-row id prefix 103's table names. Ticket 102 kept iOS's
- * `device:` prefix (`DevicesRowIds.engine`), and 102's own KDoc hands it
+ * `device:` prefix (`DevicesRowIds.device`), and 102's own KDoc hands it
  * to this map — so [SettingsDeviceIdPrefix] (taken from 102's constant,
  * never retyped) is the prefix the real rows carry, and the `engine:`
  * spelling 103's reviewer note expected is accepted alongside it: the map
@@ -110,8 +110,8 @@ enum class SettingsSection(val key: String) {
  */
 private const val SettingsEngineIdPrefix = "engine:"
 
-/** 102's engine-row id prefix, derived from [DevicesRowIds.engine] (see above). */
-private val SettingsDeviceIdPrefix = DevicesRowIds.engine("")
+/** 102's device-row id prefix, derived from [DevicesRowIds.device] (see above). */
+private val SettingsDeviceIdPrefix = DevicesRowIds.device("")
 
 /**
  * Pure: maps a row id (the part after `settings-`) to its section; null

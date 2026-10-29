@@ -45,8 +45,8 @@ import uniffi.zeron_core.SessionRow
  * The gallery's [RowActions] fake: every call logs to [log] (the "Last
  * result" line, e.g. `createSection(Infra 2)`), `onResult` fires
  * synchronously, and [failMode] imitates ticket 42's offline row for the
- * **section** writes only — the "Engine not connected" toast and
- * [ActionOutcome.EngineOffline] — so "Delete fails (offline)" shows a
+ * **section** writes only —
+ * [ActionOutcome.Failed] — so "Delete fails (offline)" shows a
  * refused delete that never pops.
  */
 private class LoggingRowActions(
@@ -67,8 +67,7 @@ private class LoggingRowActions(
     private fun sectionWrite(what: String, onResult: (ActionOutcome) -> Unit, onOk: () -> Unit = {}) {
         log(what)
         if (failMode()) {
-            toaster.show(SessionPromptCopy.EngineNotConnected)
-            onResult(ActionOutcome.EngineOffline)
+            onResult(ActionOutcome.Failed)
         } else {
             onOk()
             onResult(ActionOutcome.Ok)
@@ -122,10 +121,6 @@ private class LoggingRowActions(
         sectionWrite("deleteSection($sectionId)", onResult)
 
     override fun sections(): List<SectionView> = fixtureSections
-
-    override fun report(error: Throwable) {
-        log("report($error)")
-    }
 }
 
 /** The row the launchers take (44 passes the live record): id and displayed title. */

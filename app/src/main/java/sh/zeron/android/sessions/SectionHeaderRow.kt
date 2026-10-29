@@ -33,7 +33,6 @@ import androidx.compose.ui.unit.dp
 import sh.zeron.android.core.Face
 import sh.zeron.android.design.FadingText
 import sh.zeron.android.design.Icon
-import sh.zeron.android.design.IconInBox
 import sh.zeron.android.design.LocalTypeScale
 import sh.zeron.android.design.Motion
 import sh.zeron.android.design.ZeronIcons
@@ -232,8 +231,7 @@ fun SectionHeaderRow(
             .fillMaxWidth()
             .height(ts.scaledDp(SectionHeaderTokens.RowHeightPt))
             .clearAndSetSemantics {
-                contentDescription = "${state.title}, ${state.count}" +
-                    if (state.live == SectionLive.Offline) ", Offline" else ""
+                contentDescription = "${state.title}, ${state.count}"
                 stateDescription = if (state.collapsed) "Collapsed" else "Expanded"
                 testTag = "section-${state.id}"
             }
@@ -305,8 +303,7 @@ fun SectionHeaderRow(
  * The 12 × 12 live-glyph slot — `live.frame` (`SessionCell.swift:304`).
  * `StatusGlyph` may draw outside its box (the spinner overhangs 0.75 dp
  * top and bottom), so it is never clipped and is not interactive
- * (`StatusGlyph.swift:38`). The exhaustive `when` (no `else`) makes
- * ticket 50's `Offline` fail to compile until its branch exists.
+ * (`StatusGlyph.swift:38`).
  */
 @Composable
 private fun SectionLiveGlyph(live: SectionLive, modifier: Modifier = Modifier) {
@@ -315,13 +312,6 @@ private fun SectionLiveGlyph(live: SectionLive, modifier: Modifier = Modifier) {
         when (live) {
             SectionLive.Spinner -> StatusGlyph(StatusGlyphKind.Spinner)
             SectionLive.Input -> StatusGlyph(StatusGlyphKind.Dot(palette.status.input))
-            // Ticket 50: the wifi-off line glyph in `tertiary` (web rule:
-            // a glyph, never words — `space-filter.tsx:83-85`), so the
-            // header reads as one grey family with its count and chevron.
-            // `WifiOff` has the default opticalScale 1.0, SymbolWeight
-            // Regular: ≈10.75 dp wide ink, stroke 0.75 dp — the same as
-            // the web's 12 px icon.
-            SectionLive.Offline -> IconInBox(ZeronIcons.WifiOff, palette.tertiary, box = 12.dp)
         }
     }
 }

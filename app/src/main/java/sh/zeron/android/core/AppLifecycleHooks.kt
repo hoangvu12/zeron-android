@@ -152,9 +152,8 @@ class NetworkOnlineTracker(initialNetwork: Long?, initialOnline: Boolean) {
  * (#621's redial per rotation):
  *
  * - `ProcessLifecycleOwner` `ON_START` → [onStart]: `onForeground()` then
- *   [afterForeground][] (iOS `refreshWorkspace()`, `AppModel.swift:289`;
- *   Zeron's workspace feed re-pulls through `ClientEvent`, so the app
- *   passes `{}`);
+ *   [afterForeground][] (iOS `willEnterForeground` → `refreshWorkspace()`;
+ *   the app passes the workspace feed's re-read);
  * - `ProcessLifecycleOwner` `ON_STOP` → [onStop]: `onBackground()` (the
  *   androidx owner dispatches it ~700 ms after the last activity stops,
  *   so a rotation never triggers it);

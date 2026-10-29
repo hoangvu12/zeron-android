@@ -39,11 +39,6 @@ data class FrontPageUi(
     val collapsedIds: Set<String>,
     /** Per-id section metadata (kind, raw name). */
     val meta: Map<String, FrontSectionMeta>,
-    /**
-     * Section id → live value that replaces 41's row-derived one. Nothing
-     * fills it since the engine health model went (#8); always empty.
-     */
-    val liveOverrides: Map<String, SectionLive> = emptyMap(),
 )
 
 /**

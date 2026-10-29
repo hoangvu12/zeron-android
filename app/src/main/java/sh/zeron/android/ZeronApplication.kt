@@ -1,9 +1,12 @@
 package sh.zeron.android
 
 import android.app.Application
+import android.os.SystemClock
 import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -15,6 +18,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import sh.zeron.android.background.DeliveryHold
+import sh.zeron.android.background.DeliveryService
 import sh.zeron.android.background.RunWatchController
 import sh.zeron.android.composer.CoreChipMenuCore
 import sh.zeron.android.composer.Drafts
@@ -259,9 +264,8 @@ class ZeronApplication : Application() {
     }
 
     /**
-     * The single Kotlin `StateFlow<WorkspaceSnapshot?>` owner (ticket 40,
-     * the settled feed of this set — 27, 42, 49, 92 and 110 read it as
-     * `app.workspaceFeed.snapshot` / `.devices`). Its event sink is
+     * The single Kotlin `StateFlow<WorkspaceSnapshot?>` owner (#20 — read
+     * as `app.workspaceFeed.snapshot` / `.devices` / `.connectivity`). Its event sink is
      * registered lazily, but `onCreate` forces this property above
      * `sessionHolder.boot()` so no event is ever missed; `onCreate` also
      * resets it whenever the client changes, so one account's workspace
@@ -321,8 +325,8 @@ class ZeronApplication : Application() {
      * The one object every session/section write goes through (ticket
      * 42) — the [sh.zeron.android.sessions.RowActions] instance ticket
      * 35 provides as `LocalRowActions` inside the root `ToastHost`.
-     * Writes run on the serial IO lane, errors toast, a successful
-     * archive shows "Archived · Undo". App lifetime: a toast's Undo must
+     * Writes run on the serial IO lane, failures are only logged (iOS
+     * `attempt`), a successful archive shows "Archived · Undo". App lifetime: a toast's Undo must
      * outlive the screen that raised it (iOS's `[weak self]` on
      * `AppModel`).
      */
@@ -410,14 +414,23 @@ class ZeronApplication : Application() {
         // onStart/onStop (#621 redialed on every rotation). Before
         // `sessionHolder.boot()`: the sink resolves the live client, and
         // `clientReady()` (the client follower below) re-sends the
-        // network state to every client the holder publishes. The
-        // workspace feed re-pulls through ClientEvent after onForeground(),
-        // so `afterForeground` is a no-op (iOS's refreshWorkspace).
+        // network state to every client the holder publishes. Right after
+        // onForeground() the workspace is re-read (iOS
+        // `willEnterForeground` → `refreshWorkspace`), so relative times
+        // are fresh on return.
         lifecycleHooks = AppLifecycleHooks.install(
             app = this,
             lifecycle = ProcessLifecycleOwner.get().lifecycle,
             sink = { clientOrNull()?.let(::CoreLifecycleSink) },
+            afterForeground = { workspaceFeed.refresh() },
         )
+        // #20: iOS's 30 s workspace clock (docs/port/01 A13), while the
+        // app is in the foreground — iOS timers don't fire suspended.
+        applicationScope.launch {
+            ProcessLifecycleOwner.get().lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                workspaceFeed.runClock()
+            }
+        }
         // #13: Loading holds the splash until the stored account is known,
         // so a signed-in user never sees the welcome root flash; then the
         // root follows the client (`SceneDelegate.showRoot`: signed out →
@@ -506,6 +519,7 @@ class ZeronApplication : Application() {
         ProcessLifecycleOwner.get().lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onStart(owner: LifecycleOwner) {
+                    DeliveryService.release(this@ZeronApplication)
                     notifications.foreground = true
                     runWatch.onForeground(true)
                     refreshNotificationsOn()
@@ -514,6 +528,15 @@ class ZeronApplication : Application() {
                 override fun onStop(owner: LifecycleOwner) {
                     notifications.foreground = false
                     runWatch.onForeground(false)
+                    // #58: a just-sent message gets 25 s to reach the edge
+                    // (iOS `didEnterBackground`; ended on the next start).
+                    DeliveryService.release(this@ZeronApplication)
+                    val hold = DeliveryHold.shouldHold(
+                        now = SystemClock.elapsedRealtime(),
+                        signedIn = clientOrNull() != null,
+                        pending = DeliveryHold.pendingIn(workspaceFeed.snapshot.value),
+                    )
+                    if (hold) DeliveryService.hold(this@ZeronApplication)
                 }
             },
         )
@@ -539,6 +562,8 @@ class ZeronApplication : Application() {
             applicationScope.launch {
                 sessionHolder.client.collect { client ->
                     workspaceFeed.reset()
+                    // #58: sign-out ends the delivery hold (iOS clears it with the client).
+                    if (client == null) DeliveryService.release(this@ZeronApplication)
                     if (client != null) {
                         lifecycleHooks.clientReady()
                         notifications.attachTo(client)

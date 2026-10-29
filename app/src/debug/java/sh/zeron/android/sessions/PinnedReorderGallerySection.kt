@@ -43,7 +43,7 @@ import uniffi.zeron_core.SessionRow
  * it, the drag handles, the engine-block clamp, the auto-scroll and the
  * lift look. The readout line shows the last dispatched [PinMove]
  * (`move <id> after=<id> before=<id>`); "Fail next" makes the dispatch
- * answer [ActionOutcome.EngineOffline] with the ticket 42 toast, so the
+ * answer [ActionOutcome.Failed] with the ticket 42 toast, so the
  * snap-back is visible.
  *
  * Registered in `design/Gallery.kt` as
@@ -154,8 +154,8 @@ private fun PinnedReorderToggleRow(text: String, checked: Boolean, onClick: () -
 /**
  * The gallery's [RowActions] fake: only `movePin` matters — it logs the
  * move to the readout line and answers [ActionOutcome.Ok], or, when
- * "Fail next" is on, shows ticket 42's "Engine not connected" toast and
- * answers [ActionOutcome.EngineOffline] so the local order snaps back.
+ * "Fail next" is on,
+ * answers [ActionOutcome.Failed] so the local order snaps back.
  */
 private class PinnedReorderGalleryActions(
     private val toaster: Toaster,
@@ -167,8 +167,7 @@ private class PinnedReorderGalleryActions(
         val mv = PinMove(chatId, after, before)
         onMove(mv)
         if (failNext()) {
-            toaster.show(SessionPromptCopy.EngineNotConnected)
-            onResult(ActionOutcome.EngineOffline)
+            onResult(ActionOutcome.Failed)
         } else {
             onResult(ActionOutcome.Ok)
         }
@@ -188,7 +187,6 @@ private class PinnedReorderGalleryActions(
     override fun renameSection(sectionId: String, name: String, onResult: (ActionOutcome) -> Unit) {}
     override fun deleteSection(sectionId: String, onResult: (ActionOutcome) -> Unit) {}
     override fun sections(): List<SectionView> = emptyList()
-    override fun report(error: Throwable) {}
 }
 
 // ---------------------------------------------------------------------------
