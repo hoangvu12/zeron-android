@@ -13,18 +13,10 @@ import kotlinx.coroutines.flow.asStateFlow
  */
 enum class OnboardingStep { Appearance, Sync, GitHub, Agents, Notifications, Done }
 
-/**
- * The steps this build shows, in order. TODO(#54): GitHub and Agents (the
- * Cloud / Providers pages) go back in between Sync and Notifications.
- */
-internal val ShownSteps: List<OnboardingStep> = listOf(
-    OnboardingStep.Appearance,
-    OnboardingStep.Sync,
-    OnboardingStep.Notifications,
-    OnboardingStep.Done,
-)
+/** The steps, in order (#54 brought GitHub and Agents back). */
+internal val ShownSteps: List<OnboardingStep> = OnboardingStep.entries
 
-/** The numbered steps ("2 of 3"): every shown step but Done. */
+/** The numbered steps ("2 of 5"): every step but Done. */
 internal val NumberedSteps: List<OnboardingStep> = ShownSteps - OnboardingStep.Done
 
 /** "N of total" for [step]; null for Done (`Step.number`). */
@@ -37,7 +29,7 @@ internal val OnboardingStep.previous: OnboardingStep?
 internal val OnboardingStep.next: OnboardingStep
     get() = ShownSteps.getOrNull(ShownSteps.indexOf(this) + 1) ?: OnboardingStep.Done
 
-/** The first step after logging in (`.github` on iOS; Notifications until #54). */
+/** The first step after logging in (`.github`; Agents when Cloud is withheld). */
 internal val FirstSignedInStep: OnboardingStep = ShownSteps[ShownSteps.indexOf(OnboardingStep.Sync) + 1]
 
 /**
@@ -92,8 +84,15 @@ data class OnboardingScreen(val step: OnboardingStep, val animated: Boolean)
  *   this user has already finished onboarding on this phone (and for the
  *   demo). A sign-out closes it, as iOS's root swap dismisses it.
  * - Finishing marks the user onboarded.
+ * - [cloudWithheld] (the edge answered that this account has no Cloud,
+ *   `OnboardingViewController.cloudWithheld`): GitHub is skipped both ways,
+ *   and a status landing while it is on screen moves on to Agents (J2).
+ *   The numbering stays "N of 5", as on iOS.
  */
-class OnboardingModel(private val prefs: OnboardingPrefs) {
+class OnboardingModel(
+    private val prefs: OnboardingPrefs,
+    private val cloudWithheld: () -> Boolean = { false },
+) {
 
     private val _screen = MutableStateFlow<OnboardingScreen?>(null)
 
@@ -112,8 +111,17 @@ class OnboardingModel(private val prefs: OnboardingPrefs) {
     fun go(step: OnboardingStep) {
         val current = _screen.value ?: return
         if (current.step == OnboardingStep.Appearance) prefs.appearanceSeen = true
-        _screen.value = OnboardingScreen(step, animated = true)
+        _screen.value = OnboardingScreen(forward(step), animated = true)
     }
+
+    /** Cloud's status arrived (`refresh()`): on GitHub with Cloud withheld, move past it. */
+    fun onCloudStatus() {
+        if (_screen.value?.step == OnboardingStep.GitHub && cloudWithheld()) go(OnboardingStep.Agents)
+    }
+
+    /** GitHub is a Cloud step: withheld, the way forward lands on Agents. */
+    private fun forward(step: OnboardingStep): OnboardingStep =
+        if (step == OnboardingStep.GitHub && cloudWithheld()) OnboardingStep.Agents else step
 
     /**
      * Back (the footer's or the system's): the previous step, or — on the
@@ -122,7 +130,9 @@ class OnboardingModel(private val prefs: OnboardingPrefs) {
      */
     fun back(signedIn: Boolean) {
         val current = _screen.value ?: return
+        // Back from Agents skips a withheld GitHub, to Sync.
         val previous = current.step.previous
+            ?.let { if (it == OnboardingStep.GitHub && cloudWithheld()) OnboardingStep.Sync else it }
         when {
             previous != null -> go(previous)
             !signedIn -> _screen.value = null
@@ -139,7 +149,7 @@ class OnboardingModel(private val prefs: OnboardingPrefs) {
             userId == null -> null
             demo || prefs.onboarded(userId) -> null
             // Straight on from the sign-in steps: no transition.
-            else -> OnboardingScreen(FirstSignedInStep, animated = false)
+            else -> OnboardingScreen(forward(FirstSignedInStep), animated = false)
         }
     }
 

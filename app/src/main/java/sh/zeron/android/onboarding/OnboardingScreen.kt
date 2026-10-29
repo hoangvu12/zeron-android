@@ -35,6 +35,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -97,6 +98,12 @@ private fun Onboarding(app: ZeronApplication, screen: OnboardingScreen) {
     val palette = ZeronTheme.palette
     val signedIn = app.sessionHolder.client.collectAsState().value != null
     BackHandler { app.onboarding.back(signedIn) }
+    // `viewDidLoad`: signed in, read Cloud (GitHub, the agents' logins) for
+    // the Cloud steps; a status that lands on GitHub with Cloud withheld
+    // moves on (`refresh()`, J2).
+    LaunchedEffect(signedIn) { if (signedIn) app.cloud.refresh() }
+    val cloudInfo = app.cloud.info
+    LaunchedEffect(cloudInfo) { app.onboarding.onCloudStatus() }
     val slidePx = with(LocalDensity.current) { 20.dp.roundToPx() }
     Box(
         Modifier
@@ -150,6 +157,11 @@ private fun Onboarding(app: ZeronApplication, screen: OnboardingScreen) {
 
 @Composable
 private fun Page(app: ZeronApplication, step: OnboardingStep, signedIn: Boolean) {
+    // The agents list scrolls itself (`agentsPage` is not `scrolling(…)`).
+    if (step == OnboardingStep.Agents) {
+        AgentsPage(Modifier.fillMaxSize().padding(top = 6.dp))
+        return
+    }
     Column(
         Modifier
             .fillMaxSize()
@@ -161,13 +173,13 @@ private fun Page(app: ZeronApplication, step: OnboardingStep, signedIn: Boolean)
             OnboardingStep.Sync -> SyncPage(app, signedIn)
             OnboardingStep.Notifications -> NotificationsPage()
             OnboardingStep.Done -> DonePage(app)
-            // TODO(#54): the GitHub and Agents pages.
-            OnboardingStep.GitHub, OnboardingStep.Agents -> Unit
+            OnboardingStep.GitHub -> GitHubPage(app)
+            OnboardingStep.Agents -> Unit
         }
     }
 }
 
-/** The desktop's progress: a short bar per step, then "2 of 3". Kept (empty) on Done. */
+/** The desktop's progress: a short bar per step, then "2 of 5". Kept (empty) on Done. */
 @Composable
 private fun Progress(step: OnboardingStep) {
     val palette = ZeronTheme.palette
@@ -221,8 +233,12 @@ private fun Footer(app: ZeronApplication, step: OnboardingStep, signedIn: Boolea
                 }
             }
             OnboardingStep.Notifications -> NotificationsFooter(app) { model.go(step.next) }
-            // TODO(#54): GitHub's Continue / "Skip for now"; Agents' Continue.
-            OnboardingStep.GitHub, OnboardingStep.Agents -> PrimaryButton("Continue") { model.go(step.next) }
+            OnboardingStep.GitHub -> if (app.cloud.githubConnected) {
+                PrimaryButton("Continue") { model.go(step.next) }
+            } else {
+                GhostButton("Skip for now", tag = "onboarding-skip") { model.go(step.next) }
+            }
+            OnboardingStep.Agents -> PrimaryButton("Continue") { model.go(step.next) }
             OnboardingStep.Done -> Unit
         }
     }

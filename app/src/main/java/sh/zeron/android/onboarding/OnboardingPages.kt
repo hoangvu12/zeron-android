@@ -15,7 +15,31 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.layout
+import sh.zeron.android.accounts.LocalProvidersSummary
+import sh.zeron.android.accounts.ProvidersRoute
+import sh.zeron.android.accounts.ProvidersSummary
+import sh.zeron.android.cloud.GitHubConnectSheet
+import sh.zeron.android.core.CloudStore
+import sh.zeron.android.design.BottomChromeInsets
+import sh.zeron.android.design.GroupedListTokens
+import sh.zeron.android.design.LocalBottomChrome
+import sh.zeron.android.shell.LocalLargeTitleHostInsets
+import sh.zeron.android.shell.NavStack
+import sh.zeron.android.shell.NavStackHost
+import sh.zeron.android.shell.ShellRouteContent
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
@@ -200,10 +224,9 @@ internal fun SyncPage(app: ZeronApplication, signedIn: Boolean) {
         Heading("Sync your work", "Log in to keep your chats, projects and settings in step everywhere you use Zeron.")
         Card(
             listOf(
-                // TODO(#54): SF `iphone.and.arrow.forward` and `cloud` glyphs; nearest registry icons until then.
-                { CardRow(ZeronIcons.ArrowLeftArrowRight, "On every device", "Pick up a chat on your phone or another computer, right where you left it.") },
+                { CardRow(ZeronIcons.IphoneAndArrowForward, "On every device", "Pick up a chat on your phone or another computer, right where you left it.") },
                 { CardRow(ZeronIcons.Laptop, "Run agents anywhere", "Start work on any of your machines from whichever one you're at.") },
-                { CardRow(ZeronIcons.SquareStack3dUp, "Zeron Cloud", "Hand chats to cloud machines that keep going while your computer sleeps.") },
+                { CardRow(ZeronIcons.Cloud, "Zeron Cloud", "Hand chats to cloud machines that keep going while your computer sleeps.") },
             ),
         )
         val status: Pair<String, Color>? = when {
@@ -267,6 +290,132 @@ internal fun NotificationsFooter(app: ZeronApplication, onNext: () -> Unit) {
 }
 
 // ---------------------------------------------------------------------------
+// GitHub (`githubPage`, :339-358; `connectGitHub`, :630-632)
+// ---------------------------------------------------------------------------
+
+@Composable
+internal fun GitHubPage(app: ZeronApplication) {
+    val palette = ZeronTheme.palette
+    val cloud = app.cloud
+    var connecting by remember { mutableStateOf(false) }
+    PageStack {
+        Heading(
+            "Connect GitHub",
+            "Cloud agents work in your repositories on machines of their own. Connect GitHub so they can clone and push \u2014 or skip and do it later in Settings \u2192 Cloud.",
+        )
+        Card(
+            listOf {
+                val connected = cloud.githubConnected
+                val repos = cloud.repos?.size ?: 0
+                CardRow(
+                    icon = ZeronIcons.GithubMark,
+                    title = if (connected) cloud.githubAccount?.let { "@$it" } ?: "GitHub" else "GitHub",
+                    detail = if (connected) {
+                        if (repos == 1) "1 repository" else "$repos repositories"
+                    } else {
+                        "Clone and push from Cloud"
+                    },
+                ) {
+                    if (connected) {
+                        // `CloudRow.check()`: a 22 pt filled check in success green.
+                        Icon(ZeronIcons.CheckmarkCircleFill, tint = palette.success, sizePt = 22f, weight = SymbolWeight.Semibold)
+                    } else {
+                        RowButton("Connect", prominent = true, tag = "onboarding-github") { connecting = true }
+                    }
+                }
+            },
+        )
+    }
+    if (connecting) GitHubConnectSheet(onDismissed = { connecting = false })
+}
+
+// ---------------------------------------------------------------------------
+// Agents (`agentsPage`, :360-410)
+// ---------------------------------------------------------------------------
+
+/**
+ * Settings → Providers itself under the heading, its device switcher,
+ * switches and accounts included. The heading's line follows what the
+ * list found (`onSummary`). The list keeps a navigation stack of its own,
+ * so an agent's accounts open inside the step (iOS presents them as a
+ * sheet where there is no stack), and it fades out above the footer.
+ */
+@Composable
+internal fun AgentsPage(modifier: Modifier = Modifier) {
+    var detail by remember { mutableStateOf("Looking for coding agents\u2026") }
+    val summary = remember {
+        ProvidersSummary { place, cloud, names ->
+            detail = agentsDetail(place, cloud, names)
+        }
+    }
+    Column(modifier) {
+        Heading("Your agents", detail)
+        Spacer(Modifier.height(4.dp))
+        val stack = remember { NavStack(ProvidersRoute(embedded = true)) }
+        DisposableEffect(stack) { onDispose { stack.closeAll() } }
+        CompositionLocalProvider(
+            LocalProvidersSummary provides summary,
+            LocalLargeTitleHostInsets provides WindowInsets(0, 0, 0, 0),
+            LocalBottomChrome provides BottomChromeInsets.None,
+        ) {
+            NavStackHost(
+                stack = stack,
+                active = true,
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    // The list's inset-grouped margins line up with the page's.
+                    .layout { measurable, constraints ->
+                        val extra = (GroupedListTokens.CardInset * 2).roundToPx()
+                        val wide = constraints.copy(
+                            minWidth = constraints.minWidth + extra,
+                            maxWidth = constraints.maxWidth + extra,
+                        )
+                        val placeable = measurable.measure(wide)
+                        layout(constraints.maxWidth, placeable.height) {
+                            placeable.place(-extra / 2, 0)
+                        }
+                    }
+                    .fadingBottom(),
+            ) { entry ->
+                ShellRouteContent(entry.route)
+            }
+        }
+    }
+}
+
+/** The heading's line for what Providers found (`agentsPage`'s `onSummary`). */
+internal fun agentsDetail(place: String, cloud: Boolean, names: List<String>?): String = when {
+    names == null -> "Looking for coding agents on $place\u2026"
+    cloud -> "Cloud runs ${joinNames(names)} with your own subscriptions. Sign in to any you'd like to use."
+    names.isEmpty() -> "Zeron runs the coding agents you already use, and none are on $place yet."
+    else -> "Found ${if (names.size > 3) "${names.size} agents" else joinNames(names)} on $place. Turn on the ones you'd like to use."
+}
+
+/** "Claude Code", "Claude Code and Codex", "A, B and C" (`join`). */
+internal fun joinNames(names: List<String>): String = when (names.size) {
+    0 -> ""
+    1 -> names[0]
+    else -> names.dropLast(1).joinToString(", ") + " and " + names.last()
+}
+
+/** `FadingBottomView`: the content fades out over its last 28 dp (at most half its height). */
+private fun Modifier.fadingBottom(): Modifier = this
+    .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+    .drawWithContent {
+        drawContent()
+        val edge = if (size.height > 0f) minOf(0.5f, 28.dp.toPx() / size.height) else 0f
+        drawRect(
+            brush = Brush.verticalGradient(
+                0f to Color.Black,
+                (1f - edge) to Color.Black,
+                1f to Color.Transparent,
+            ),
+            blendMode = BlendMode.DstIn,
+        )
+    }
+
+// ---------------------------------------------------------------------------
 // Done (`donePage`, :424-501)
 // ---------------------------------------------------------------------------
 
@@ -278,6 +427,8 @@ internal fun DonePage(app: ZeronApplication) {
     val appearance by app.appearance.collectAsState()
     val wallpaper by remember(context) { WallpaperStore.get(context) }.state.collectAsState()
     val email = rememberSignedInEmail(app, signedIn = true)
+    val cloud = app.cloud
+    val withheld = cloud.info != null && !cloud.available
     Column(verticalArrangement = Arrangement.spacedBy(28.dp)) {
         // `spacer(24)` with no stack spacing after it: 24 above the badge.
         Column(
@@ -302,20 +453,27 @@ internal fun DonePage(app: ZeronApplication) {
                     "You're all set",
                     style = uiStyle(Face.SansSemibold, typeScale.fixed(28f), palette.text).copy(textAlign = TextAlign.Center),
                 )
-                // TODO(#54): "…on any of your computers, or on Cloud." once Cloud is offered.
                 BasicText(
-                    "Pick a project and start a session on any of your computers.",
+                    if (withheld) {
+                        "Pick a project and start a session on any of your computers."
+                    } else {
+                        "Pick a project and start a session \u2014 on any of your computers, or on Cloud."
+                    },
                     style = uiStyle(Face.Sans, typeScale.fixed(16f), palette.secondary).copy(textAlign = TextAlign.Center),
                 )
             }
         }
         val style = appearance.name
-        // TODO(#54): the GitHub and Cloud agents lines.
+        val agents = CloudStore.agents.filter { cloud.activeAccount(it) != null }.map { it.name }
         Summary(
-            listOf(
-                "Appearance" to if (wallpaper.set) "$style · Wallpaper" else style,
-                "Sync" to (email?.let { "Signed in as $it" } ?: "Signed in"),
-            ),
+            buildList {
+                add("Appearance" to if (wallpaper.set) "$style · Wallpaper" else style)
+                add("Sync" to (email?.let { "Signed in as $it" } ?: "Signed in"))
+                if (!withheld) {
+                    add("GitHub" to if (cloud.githubConnected) "Connected" else "Not yet \u00b7 Settings \u2192 Cloud")
+                    add("Cloud agents" to if (agents.isEmpty()) "Not yet \u00b7 Settings \u2192 Providers" else joinNames(agents))
+                }
+            },
         )
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Capsule(
