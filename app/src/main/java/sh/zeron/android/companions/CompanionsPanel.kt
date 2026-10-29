@@ -273,6 +273,9 @@ internal fun CompanionsList(
                     val highlight = rememberRowHighlight(src)
                     SwipeRow(
                         id = vm.id,
+                        // SwipeRow fills its parent's height: give it the
+                        // session row's (62 pt × TypeScale), as the list does.
+                        modifier = Modifier.height(LocalTypeScale.current.scaledDp(62f)),
                         leading = null,
                         trailing = listOf(
                             SwipeAction(
