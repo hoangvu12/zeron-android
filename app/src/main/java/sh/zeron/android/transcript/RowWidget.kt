@@ -14,7 +14,7 @@ import sh.zeron.android.transcript.widgets.ImageTileCopy
 import sh.zeron.android.transcript.widgets.RailSpec
 import sh.zeron.android.transcript.widgets.ShimmerWidget
 import sh.zeron.android.transcript.widgets.SpinnerWidget
-import sh.zeron.android.transcript.widgets.SubagentLinkTarget
+import sh.zeron.android.transcript.widgets.SubagentCard
 import sh.zeron.android.transcript.widgets.ToolChevron
 import sh.zeron.android.transcript.widgets.ToolRail
 import sh.zeron.android.transcript.widgets.ToolStatusWidget
@@ -59,14 +59,15 @@ internal fun RowWidget(ctx: RowContext, w: Widget) {
             onToggle = { ctx.state.toggleDetail(ctx.model.display.key, k.detail, k.open) },
         )
         is WidgetKind.Chevron -> ToolChevron(rowKey = ctx.model.display.key, expanded = k.expanded)
-        // android-next #06 (upstream #899's `subagentLink`; Zeron's
-        // `Subagent`): the whole spawn card opens the subagent's
-        // transcript, a no-op until it has a doc; the actions are read at
-        // click time so a rebuilt TranscriptActions is honoured.
-        // TODO(#31): the card's pressed wash, a11y value and disabled state.
-        is WidgetKind.Subagent -> SubagentLinkTarget(
+        // #31 (iOS `SubagentCardControl`): the whole spawn card opens the
+        // subagent's transcript; disabled until the host binds a doc. The
+        // actions are read at click time so a rebuilt TranscriptActions is
+        // honoured.
+        is WidgetKind.Subagent -> SubagentCard(
             title = k.title,
-            onOpen = { k.docId?.let { docId -> ctx.actions().openSubagent(docId, k.title, !k.running) } },
+            running = k.running,
+            failed = k.failed,
+            onOpen = k.docId?.let { docId -> { ctx.actions().openSubagent(docId, k.title, !k.running) } },
         )
         // TODO(#46): the agent visual host.
         is WidgetKind.Visual -> Unit
