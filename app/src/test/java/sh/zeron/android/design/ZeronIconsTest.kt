@@ -308,6 +308,8 @@ class ZeronIconsTest {
             ZeronIcons.Terminal to R.drawable.zi_terminal, // #33
             ZeronIcons.BubbleLeftAndBubbleRight to R.drawable.zi_bubble_left_and_bubble_right, // #40
             ZeronIcons.Refresh to R.drawable.zi_refresh, // android-next#04
+            ZeronIcons.PersonCropCircle to R.drawable.zi_user_circle, // #18
+            ZeronIcons.RectanglePortraitAndArrowRight to R.drawable.zi_logout_2, // #18
             ZeronIcons.TabChat to R.drawable.zi_tab_chat,
             ZeronIcons.TabSettings to R.drawable.zi_tab_settings,
             ZeronIcons.ZeronBow to R.drawable.zi_zeron_bow, // android-next #03: replaced ZeronGlyph

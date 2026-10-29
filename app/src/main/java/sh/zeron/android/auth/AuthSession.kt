@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import sh.zeron.android.core.CredentialStore
+import sh.zeron.android.core.Endpoints
 import uniffi.zeron_core.AuthCallback
 import uniffi.zeron_core.AuthExchange
 import uniffi.zeron_core.AuthOrg
@@ -23,10 +24,8 @@ import uniffi.zeron_core.CoreException
 import uniffi.zeron_core.Credentials
 import uniffi.zeron_core.authExchangeCode
 import uniffi.zeron_core.authListOrgs
-import uniffi.zeron_core.authProductionEdgeUrl
 import uniffi.zeron_core.authRefresh
 import uniffi.zeron_core.parseAuthCallback
-import uniffi.zeron_core.workosAuthorizeUrl
 
 /** Where sign-in is: the Sync step's "Log in" button and status label read it. */
 sealed interface SignInState {
@@ -65,12 +64,11 @@ interface AuthApi {
     suspend fun refresh(refreshToken: String, organizationId: String): AuthTokens
 }
 
-/** [AuthApi] over `uniffi.zeron_core` against the production edge. */
+/** [AuthApi] over `uniffi.zeron_core` against the production edge, or the debug overrides (#18). */
 object CoreAuthApi : AuthApi {
-    // TODO(#18): the debug `edge` / `workos` overrides.
-    private val edge: String get() = authProductionEdgeUrl()
+    private val edge: String get() = Endpoints.edgeUrl
 
-    override fun authorizeUrl(state: String): String = workosAuthorizeUrl(state)
+    override fun authorizeUrl(state: String): String = Endpoints.authorizeUrl(state)
 
     override fun parseCallback(url: String): AuthCallback? = parseAuthCallback(url)
 

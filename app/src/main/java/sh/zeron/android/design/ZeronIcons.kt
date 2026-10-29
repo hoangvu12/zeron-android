@@ -330,6 +330,12 @@ object ZeronIcons {
     /** SF `arrow.clockwise` — the update "Check for Updates" row (android-next#04). */
     val Refresh = ZeronIcon.Vector(R.drawable.zi_refresh)
 
+    /** SF `person.crop.circle` — Settings' Account row (#18). */
+    val PersonCropCircle = ZeronIcon.Vector(R.drawable.zi_user_circle)
+
+    /** SF `rectangle.portrait.and.arrow.right` — Settings' Sign Out row (#18). */
+    val RectanglePortraitAndArrowRight = ZeronIcon.Vector(R.drawable.zi_logout_2)
+
     // -----------------------------------------------------------------
     // Zeron / Android extras: no SF name, so [bySfName] omits them.
     // -----------------------------------------------------------------
@@ -467,6 +473,12 @@ object ZeronIcons {
         ),
         RegistryEntry("Terminal", listOf("apple.terminal"), Terminal),
         RegistryEntry("BubbleLeftAndBubbleRight", listOf("bubble.left.and.bubble.right"), BubbleLeftAndBubbleRight),
+        RegistryEntry("PersonCropCircle", listOf("person.crop.circle"), PersonCropCircle),
+        RegistryEntry(
+            "RectanglePortraitAndArrowRight",
+            listOf("rectangle.portrait.and.arrow.right"),
+            RectanglePortraitAndArrowRight,
+        ),
         // Zeron extras.
         RegistryEntry("TabChat", emptyList(), TabChat),
         RegistryEntry("TabSettings", emptyList(), TabSettings),

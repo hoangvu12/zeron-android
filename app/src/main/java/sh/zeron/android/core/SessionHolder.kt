@@ -5,7 +5,6 @@ import android.util.Log
 import java.io.File
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.Executors
-import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,7 +15,6 @@ import uniffi.zeron_core.ClientListener
 import uniffi.zeron_core.CoreClient
 import uniffi.zeron_core.CoreConfig
 import uniffi.zeron_core.Credentials
-import uniffi.zeron_core.authProductionEdgeUrl
 
 /**
  * One consumer of the core's event stream. Called on a Rust runtime
@@ -90,7 +88,8 @@ class SessionHolder<C : Any>(
     /** True once [boot] has started the stored account (or found none). */
     val booted: StateFlow<Boolean> = _booted.asStateFlow()
 
-    private val bootStarted = AtomicBoolean(false)
+    /** [boot] (or [relaunch], which stands in for it) has run (guarded by [lifecycle]). */
+    private var bootDone = false
     private val sinks = CopyOnWriteArrayList<ClientEventSink>()
     private val signOutListeners = CopyOnWriteArrayList<SignOutListener>()
 
@@ -128,11 +127,52 @@ class SessionHolder<C : Any>(
 
     /** Launch (`AppModel.init`): start the stored account, if any. Idempotent; blocks. */
     fun boot() {
-        if (!bootStarted.compareAndSet(false, true)) return
-        try {
-            credentials.stored()?.let(::start)
-        } finally {
-            _booted.value = true
+        synchronized(lifecycle) {
+            if (bootDone) return
+            bootDone = true
+            try {
+                credentials.stored()?.let(::startLocked)
+            } finally {
+                _booted.value = true
+            }
+        }
+    }
+
+    /**
+     * The debug launch extras (#18; iOS's DEBUG hooks in `AppModel.init`),
+     * applied once per fresh launch. Runs after [boot], waiting for one in
+     * progress, so the stored account never wins over them; arriving first,
+     * it boots in [boot]'s place.
+     *
+     * [clearStored] (`signedout`) forgets the stored account first, signing
+     * a running one out locally (its store is kept). [choose] then picks the
+     * account to start, given whether one is still stored; null keeps the
+     * stored one, which [restart] (the edge changed) starts again. Blocks.
+     */
+    fun relaunch(
+        clearStored: Boolean,
+        restart: Boolean,
+        choose: (hasStored: Boolean) -> Credentials?,
+    ) {
+        synchronized(lifecycle) {
+            val booting = !bootDone
+            bootDone = true
+            try {
+                if (clearStored) {
+                    if (_client.value != null && !isDemo) {
+                        signOutLocally(forget = false)
+                    } else {
+                        synchronized(auth) { credentials.clear() }
+                    }
+                }
+                val stored = credentials.stored()
+                val runsStored = _client.value != null && !isDemo
+                val next = choose(stored != null)
+                    ?: stored?.takeIf { booting || (restart && runsStored) }
+                next?.let(::startLocked)
+            } finally {
+                _booted.value = true
+            }
         }
     }
 
@@ -289,7 +329,8 @@ class SessionHolder<C : Any>(
                 credentials = credentials,
                 newClient = { dir, creds, listener ->
                     val config = CoreConfig(
-                        edgeUrl = authProductionEdgeUrl(),
+                        // Production, or the debug `edge` override (#18).
+                        edgeUrl = Endpoints.edgeUrl,
                         dataDir = dir.path,
                         deviceId = DeviceId.read(app),
                         deviceName = DeviceLabel.read(app),

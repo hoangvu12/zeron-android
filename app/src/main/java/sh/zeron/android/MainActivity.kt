@@ -111,6 +111,9 @@ class MainActivity : ComponentActivity() {
             // applies them before `showRoot`.
             if (debuggable) {
                 LaunchOptions.current.applyWallpaper(wallpaperTarget(WallpaperStore.get(this)))
+                // #18: signedout / dev / demo / edge / workos (and the demo a
+                // route implies); the root holds Loading until applied.
+                app.applyLaunchAccount(LaunchOptions.current)
             }
             handleIntent(intent)
         }

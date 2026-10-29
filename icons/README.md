@@ -25,7 +25,7 @@ at `assets/licenses/vscode-symbols-LICENSE.txt`.
 `check-circle`, `check-circle-fill`, `check-square-fill`,
 `arrow-up-circle-fill`, `xmark-circle-fill`, `stop-circle`,
 `exclamation-circle`, `speedometer`, `gallery`, `gallery-stack`, `camera`,
-`link`, `layers`, `share`, `line-3-horizontal` are [Solar
+`link`, `layers`, `share`, `line-3-horizontal`, `user-circle` are [Solar
 Icons](https://www.figma.com/community/file/1166834396438034778) by 480
 Design (CC BY 4.0,
 https://creativecommons.org/licenses/by/4.0/), unmodified except for

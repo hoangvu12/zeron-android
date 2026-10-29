@@ -129,17 +129,12 @@ class FixtureRule(
                     intent.putExtra(key, value)
                 }
                 if (pairAtLaunch) {
-                    val urls = engines.map { engine ->
-                        val minted = mint(control.getValue(engine))
-                        assertTrue(
-                            "the rig's ${engine.arg} control endpoint is broken: /mint failed",
-                            minted != null,
-                        )
-                        minted
-                    }
-                    // The debug `pair` extra (ticket 30 + ui-parity #36's
-                    // LaunchOptions): redeemed before the shell shows.
-                    intent.putExtra("pair", urls.joinToString(","))
+                    // #18: the removed `pair` extra's replacement is iOS's
+                    // `-demo -fast` (the core's offline demo workspace, its
+                    // fixture chats `chat-deploy`, `chat-veil`, …). Reviving
+                    // a flow means moving it off the fixture engines.
+                    intent.putExtra("demo", true)
+                    intent.putExtra("fast", true)
                 }
 
                 scenario = ActivityScenario.launch(intent)

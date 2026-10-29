@@ -20,6 +20,7 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import kotlinx.coroutines.flow.StateFlow
 import sh.zeron.android.ZeronApplication
 import sh.zeron.android.accounts.agentAccountsSection
+import sh.zeron.android.design.LocalActionSheet
 import sh.zeron.android.design.LocalBottomChrome
 import sh.zeron.android.shell.LargeTitleScaffold
 import sh.zeron.android.shell.LocalNavStack
@@ -57,10 +58,9 @@ import sh.zeron.android.shell.TitleMode
  * never an item placement animation anywhere in Settings). Only the
  * notification status cannot be observed, hence the lifecycle effect.
  *
- * iOS's **Account**, **Voice** and **Sign Out** sections are dropped
- * (`MoreViewController.swift:185-188, 191-194, 217-218`): Zeron has no
- * account and no voice (ADR 0004), and forgetting an engine (140) is the
- * nearest action to signing out.
+ * #18 adds iOS's **Account** section first and its untitled **Sign Out**
+ * section last (`AccountRows.kt`); Voice is still missing, and the full
+ * iOS order is #35's.
  */
 
 /** `MoreViewController.swift:31`: the title, verbatim (drawn by ticket 25). */
@@ -88,6 +88,8 @@ object SettingsScreenTokens {
  * unique across the screen (70 prefixes them `grouped:<key>:…`).
  */
 enum class SettingsSection(val key: String) {
+    /** #18: iOS's first section. */
+    Account("account"),
     AgentAccounts("agent-accounts"),
     Devices("devices"),
     Notifications("notifications"),
@@ -98,6 +100,9 @@ enum class SettingsSection(val key: String) {
     Wallpaper("wallpaper"),
     Sessions("sessions"),
     About("about"),
+
+    /** #18: iOS's untitled last section. */
+    SignOut("signout"),
 }
 
 /**
@@ -119,9 +124,12 @@ private val SettingsDeviceIdPrefix = DevicesRowIds.device("")
  * `agent-account:`/`agent-accounts:` (android-next#05),
  * `engine:`/`device:` rows (102), `notify:` (99),
  * `appearance:` (96), `wallpaper:` (97), 100's two rows, `about:` (101).
- * `account`, `voice` and `signout` (the dropped iOS sections) map to null.
+ * `account` and `signout` are #18's rows; `voice` (not ported) maps to null.
  */
 fun settingsSectionFor(id: String): SettingsSection? = when {
+    id == AccountRowIds.Account -> SettingsSection.Account
+    id == AccountRowIds.SignOut -> SettingsSection.SignOut
+
     id.startsWith("agent-account:") || id.startsWith("agent-accounts:") ->
         SettingsSection.AgentAccounts
 
@@ -195,8 +203,16 @@ fun SettingsScreen(
         (LocalContext.current.applicationContext as ZeronApplication).prefs.stayConnected,
     onStayConnectedChange: (Boolean) -> Unit =
         (LocalContext.current.applicationContext as ZeronApplication).prefs::setStayConnected,
+    account: StateFlow<AccountIdentity> =
+        (LocalContext.current.applicationContext as ZeronApplication).account,
+    onSignOut: () -> Unit =
+        (LocalContext.current.applicationContext as ZeronApplication)::signOut,
 ) {
     val listState = rememberLazyListState()
+    // #18: Account first, Sign Out last; the rest of the order is #35's.
+    val identity by account.collectAsState()
+    val signOut by rememberUpdatedState(onSignOut)
+    val sheets = LocalActionSheet.current
     // The ONE ON_RESUME re-read (99's contract): returning from system
     // settings, from the permission dialog, from the background, plus the
     // lifecycle catch-up when the effect enters composition in a resumed
@@ -210,6 +226,7 @@ fun SettingsScreen(
     val nav = LocalNavStack.current
     val sessionsStrings = sessionsSettingsStrings()
     SettingsScreenContent(listState, modifier, topInset, trailing) {
+        accountSection(identity)
         agentAccountsSection(accounts)
         devicesSection(devices)
         notificationSection(notifications)
@@ -228,6 +245,7 @@ fun SettingsScreen(
             onOpenArchived = { openArchived(nav) },
         )
         aboutSection(about)
+        signOutSection { sheets.show(signOutSheet { signOut() }) }
     }
 }
 
