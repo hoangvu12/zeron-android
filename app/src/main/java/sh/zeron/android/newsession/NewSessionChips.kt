@@ -165,13 +165,6 @@ fun newSessionChips(
 }
 
 /**
- * The chips a side chat's draft keeps: its parent's model and effort, for
- * reading only — `createSideChat` takes the parent's config, so the page
- * offers no picker or menu there (#37; the draft itself goes with #39).
- */
-private val SideChatChipIds = setOf(NewSessionChipIds.Model, NewSessionChipIds.Effort)
-
-/**
  * Foundation's `String.capitalized` (`CFStringCapitalize`), which the effort
  * titles (here and in ticket 114's effort rows) use: a letter is
  * title-cased when the last non-case-ignorable character before it was
@@ -262,16 +255,13 @@ fun NewSessionChipsEffect(
 ) {
     val chips by remember(model, labels) {
         derivedStateOf {
-            val all = newSessionChips(
+            newSessionChips(
                 model.draft,
                 model.project,
                 model.currentOptions?.hosts.orEmpty(),
                 model.models,
                 labels,
             )
-            // android-next #06: a side chat runs in its parent's checkout
-            // on its parent's host, with its parent's model and effort.
-            if (model.side == null) all else all.filter { it.id in SideChatChipIds }
         }
     }
     // Seed synchronously so the first composition already has the chips.

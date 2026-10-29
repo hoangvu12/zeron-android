@@ -32,7 +32,6 @@ import sh.zeron.android.notify.NotificationPermission
 import sh.zeron.android.notify.findActivity
 import sh.zeron.android.shell.DraftHandoff
 import sh.zeron.android.shell.LocalPageSheetScope
-import uniffi.zeron_core.FileMatch
 
 /**
  * The New Session page (android-ui-parity #93) — the port of
@@ -88,9 +87,6 @@ internal fun NewSessionScreenBody(
     // The chip title chain's labels: the core's catalog in the app; tests and
     // previews pass GalleryLabels to stay FFI-free (FakeCatalog's intent).
     labels: ChipLabels = CoreChipLabels,
-    // android-next #06: the side-chat draft's hero line and its own bar.
-    headline: String = NewSessionHeadline,
-    navBar: Boolean = true,
 ) {
     val composer = rememberComposerController(initialText = ns.initialText)
 
@@ -136,10 +132,9 @@ internal fun NewSessionScreenBody(
         // Runs once, before the first frame (iOS sets these in `init` and
         // `viewDidLoad`).
         bindNewSessionComposer(composer, project = { ns.project }, ns.initialImages, fileSearch)
-        // The model chip has no menu, so its tap lands here. A side chat
-        // takes its parent's config: no picker there (#39 owns its flow).
+        // The model chip has no menu, so its tap lands here.
         composer.onChipTap = { id ->
-            if (id == NewSessionChipIds.Model && ns.side == null) {
+            if (id == NewSessionChipIds.Model) {
                 modelPicker.present(
                     newSessionModelPicker(
                         models = ns.models,
@@ -154,9 +149,6 @@ internal fun NewSessionScreenBody(
                 )
             }
         }
-        // android-next #06: a side chat searches its parent's project (iOS
-        // `sideOf`: the parent's device and space; none when projectless).
-        ns.side?.let { side -> composer.mentionSearch = sideChatMentionSearch(side, fileSearch) }
         // 94: the real send handler replaces the `Kept` stub the bind
         // installs for direct-bind tests.
         composer.onSend = { text, images, _ -> handler.send(text, images) }
@@ -185,13 +177,7 @@ internal fun NewSessionScreenBody(
         )
     }
     val chipMenus = remember(projectMenus, checkoutMenus) {
-        // A side chat's model and effort chips only read its parent's
-        // config (`createSideChat` takes it): no menus there.
-        if (ns.side != null) {
-            newSessionChipMenus()
-        } else {
-            newSessionChipMenus(projectMenus.providers(), checkoutMenus.providers())
-        }
+        newSessionChipMenus(projectMenus.providers(), checkoutMenus.providers())
     }
     NewSessionChipsEffect(ns, composer, chipMenus, labels)
     val morph = rememberComposerMorphState(
@@ -225,8 +211,6 @@ internal fun NewSessionScreenBody(
             // outside). The caller's modifier sits on the Box around it, which
             // also hosts the model picker over the page (#37).
             modifier = Modifier.handoffScene(capture),
-            headline = headline,
-            navBar = navBar,
         )
         ModelPickerOverlay(modelPicker)
     }
@@ -271,29 +255,6 @@ internal fun bindNewSessionComposer(
         }
     }
     if (composer.onSend == null) composer.onSend = { _, _, _ -> SendResult.Kept }
-}
-
-/**
- * A side chat's `@` search (android-next #06, iOS `mentionSearch` with
- * `sideOf`): the parent's project on the parent's device, `[]` for a
- * projectless parent; errors read as no matches, cancellation propagates.
- */
-internal fun sideChatMentionSearch(
-    side: SideChatParent,
-    fileSearch: NewSessionFileSearch,
-): suspend (String) -> List<FileMatch> = { q ->
-    val space = side.projectId
-    if (space == null) {
-        emptyList()
-    } else {
-        try {
-            fileSearch.search(side.deviceId, space, q)
-        } catch (e: CancellationException) {
-            throw e
-        } catch (_: Throwable) {
-            emptyList()
-        }
-    }
 }
 
 /**

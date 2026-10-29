@@ -40,12 +40,6 @@ interface NewSessionCore {
     /** `CoreClient.createSession(newSession)` — returns the **scoped** chat id. */
     suspend fun createSession(newSession: NewSession): String
 
-    /**
-     * `CoreClient.createSideChat(parentId)` — a side chat under the parent,
-     * on its host with its config (iOS `AppModel.createSideChat`).
-     */
-    suspend fun createSideChat(parentId: String): String
-
     /** `CoreClient.openSession(chatId).send(request)` — open, then the first message. */
     suspend fun sendFirst(chatId: String, request: SendRequest)
 }
@@ -61,9 +55,6 @@ class CoreNewSessionCore(private val client: () -> CoreClient?) : NewSessionCore
 
     override suspend fun createSession(newSession: NewSession): String =
         (client() ?: error("no core client")).createSession(newSession)
-
-    override suspend fun createSideChat(parentId: String): String =
-        (client() ?: error("no core client")).createSideChat(parentId)
 
     override suspend fun sendFirst(chatId: String, request: SendRequest) {
         val c = client() ?: error("no core client")
@@ -89,10 +80,7 @@ internal object NewSessionRequests {
      * neither → `null`, and the caller fails **without** a core call (the
      * alert explains). Ids are the scoped ids the options carry.
      */
-    fun target(d: NewSessionDraft, side: SideChatParent? = null): SessionTarget? {
-        // android-next #06: ignored by the core for a side chat (the
-        // parent's host fills it), but the record needs one (iOS `sideOf`).
-        if (side != null) return SessionTarget.Projectless(deviceId = side.deviceId)
+    fun target(d: NewSessionDraft): SessionTarget? {
         val projectId = d.projectId
         if (projectId != null) return SessionTarget.Project(spaceId = projectId)
         val hostId = d.hostId
@@ -104,11 +92,9 @@ internal object NewSessionRequests {
      * `NewSession(target:config:branch:cwd:title:)` (`:629-630`):
      * `reasoning = effort` (nil ⇒ the engine chooses), `sandbox` is
      * always workspace-write on this canvas, `branch` only without a
-     * worktree (with one, the branch becomes the worktree's base). A side
-     * chat never gets here: Zeron's `NewSession` has no parent, so the
-     * creator calls `createSideChat(parentId)` instead.
+     * worktree (with one, the branch becomes the worktree's base).
      */
-    fun newSession(d: NewSessionDraft, target: SessionTarget, side: SideChatParent? = null): NewSession = NewSession(
+    fun newSession(d: NewSessionDraft, target: SessionTarget): NewSession = NewSession(
         target = target,
         config = ChatConfig(
             harness = d.harness,
@@ -117,7 +103,7 @@ internal object NewSessionRequests {
             modelOptions = emptyMap(),
             sandbox = SandboxLevel.WORKSPACE_WRITE,
         ),
-        branch = if (d.worktree || side != null) null else d.branch,
+        branch = if (d.worktree) null else d.branch,
         cwd = null,
         title = null,
     )
@@ -134,7 +120,6 @@ internal object NewSessionRequests {
         text: String,
         images: List<StagedImage>,
         projects: List<ProjectOption>,
-        side: SideChatParent? = null,
     ): SendRequest = SendRequest(
         text = text,
         attachments = images.map { image ->
@@ -145,8 +130,7 @@ internal object NewSessionRequests {
                 data = image.bytes,
             )
         },
-        // A side chat never makes a worktree (iOS `draft.worktree && parentId == nil`).
-        worktree = if (d.worktree && side == null) {
+        worktree = if (d.worktree) {
             projects.firstOrNull { it.id == d.projectId }?.let { project ->
                 WorktreeSpec(
                     repoPath = project.path,
@@ -190,23 +174,16 @@ class NewSessionCreator(
         text: String,
         images: List<StagedImage>,
         projects: List<ProjectOption>,
-        side: SideChatParent? = null,
     ): String? {
         // No target: fail without a core call and without a log — the
         // alert explains it, and there is no error to log.
-        val target = NewSessionRequests.target(d, side) ?: return null
+        val target = NewSessionRequests.target(d) ?: return null
         return withContext(io) {
             try {
-                // #39: no caller passes `side` any more — New Side Chat
-                // creates the chat at once from the session
-                // (`FreshSideChats.create`), taking the parent's config.
-                // The `side` plumbing can go with the New Session rework.
-                val chatId = if (side != null) {
-                    core.createSideChat(side.chatId)
-                } else {
-                    core.createSession(NewSessionRequests.newSession(d, target, side))
-                }
-                core.sendFirst(chatId, NewSessionRequests.sendRequest(d, text, images, projects, side))
+                // Side chats never come here: New Side Chat creates one at
+                // once from the session (`FreshSideChats.create`, #39).
+                val chatId = core.createSession(NewSessionRequests.newSession(d, target))
+                core.sendFirst(chatId, NewSessionRequests.sendRequest(d, text, images, projects))
                 chatId
             } catch (cancelled: CancellationException) {
                 throw cancelled
@@ -227,16 +204,5 @@ class NewSessionCreator(
 val StartFailedAlert = ZeronAlert(
     title = "Couldn't start the session",
     message = "Choose a project or a host that can run it.",
-    buttons = listOf(AlertButton("OK", AlertButtonRole.Default)),
-)
-
-/**
- * A side chat's failure alert (android-next #06, upstream #899's
- * `create(sideOf:)` copy verbatim): the parent is gone or the create
- * failed — the composer stays `Kept`.
- */
-val SideChatStartFailedAlert = ZeronAlert(
-    title = "Couldn't start the side chat",
-    message = "Its session is no longer available.",
     buttons = listOf(AlertButton("OK", AlertButtonRole.Default)),
 )
