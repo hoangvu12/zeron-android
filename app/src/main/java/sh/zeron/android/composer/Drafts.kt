@@ -38,11 +38,9 @@ internal var draftsLogW: (String, Throwable?) -> Unit = { message, error ->
 /**
  * The draft-store key space (android-ui-parity #84). iOS keys its one
  * `UserDefaults` "drafts" dictionary by raw chat id
- * (`ios:Session/SessionViewController.swift:668-682`); Zeron chat ids are
- * only unique per engine, so a chat key carries the engine id too — which
- * also lets [Drafts.forgetEngine] delete by prefix without ever decoding
- * the scoped id (that format belongs to Rust,
- * `crates/ui/src/engine_registry.rs`). The new-session key keeps the iOS
+ * (`ios:Session/SessionViewController.swift:668-682`); a chat key also
+ * carries the chat's host device id — which lets [Drafts.forgetDevice]
+ * delete by prefix without ever decoding the chat id. The new-session key keeps the iOS
  * literal (`AppModel.newSessionDraftKey`).
  */
 sealed interface DraftKey {
@@ -50,13 +48,13 @@ sealed interface DraftKey {
     val storageName: String
 
     /**
-     * One chat's composer draft. [engineId] is the client-minted engine id
-     * (`PairedEngine.engineId`, a UUID v4 — never contains `:`);
-     * [chatId] is the **scoped** chat id exactly as
-     * `SessionHandle.chatId()` returns it (`engine:v1:…`).
+     * One chat's composer draft. [deviceId] is the chat's host device id
+     * (`SessionCore.engineId`, the composer host's `deviceId` — a UUID,
+     * never contains `:`); [chatId] is the chat id exactly as
+     * `SessionHandle.chatId()` returns it.
      */
-    data class Chat(val engineId: String, val chatId: String) : DraftKey {
-        override val storageName: String get() = "chat:$engineId:$chatId"
+    data class Chat(val deviceId: String, val chatId: String) : DraftKey {
+        override val storageName: String get() = "chat:$deviceId:$chatId"
     }
 
     /**
@@ -98,17 +96,17 @@ fun isDraftBlank(text: String): Boolean = text.all { c ->
  * blank (Swift-blank) save **removes** the entry (no empty tombstones)
  * and a kept save stores the text **verbatim, untrimmed** (`"  hi\n"`
  * stays `"  hi\n"`). Entries are never pruned — archive and delete do not
- * touch them; the only bulk deletion is [forgetEngine].
+ * touch them; the only bulk deletion is [forgetDevice].
  *
  * Zeron adaptations (the ticket's ADAPT lines): the `UserDefaults`
  * dictionary becomes one DataStore entry per draft in
- * `noBackupFilesDir` (drafts reference engine ids and chat ids that are
+ * `noBackupFilesDir` (drafts reference device ids and chat ids that are
  * themselves not backed up — a restored backup would only hold orphans);
  * the synchronous `UserDefaults` read becomes an in-memory mirror warmed
  * at app start, with [peek] for synchronous use, [load] (suspending) as
  * the fallback, and the pending-load guard in [SessionDraftSaver].
  *
- * Threading: `save`, `peek`, `forgetEngine` and `warm` are called on the
+ * Threading: `save`, `peek`, `forgetDevice` and `warm` are called on the
  * main thread and never block it — [save] updates the mirror
  * synchronously (a `peek` right after it sees the new text: pop, then
  * immediately reopen the same chat) and launches the disk write on
@@ -139,7 +137,7 @@ class Drafts(
     /** Mutations queued while the first disk read is in flight; replayed on the disk map. */
     private val beforeLoad = ArrayList<(MutableMap<String, String>) -> Unit>()
 
-    /** Engine ids whose drafts were forgotten — later chat saves for them are ignored (this process). */
+    /** Device ids whose drafts were forgotten — later chat saves for them are ignored (this process). */
     private val forgotten = HashSet<String>()
 
     @Volatile
@@ -213,13 +211,13 @@ class Drafts(
      * iOS `Drafts.save(chatId, text)`: blank (Swift-blank) removes the
      * entry, otherwise the text is stored verbatim. The mirror is updated
      * synchronously; the disk write runs on [scope] and returns its
-     * [Job] (tests join it). A `Chat` key whose engine was forgotten is
+     * [Job] (tests join it). A `Chat` key whose device was forgotten is
      * ignored — a session still on a back stack must not re-create an
      * orphan key on its next leave.
      */
     fun save(key: DraftKey, text: String): Job {
         val name = key.storageName
-        if (key is DraftKey.Chat && synchronized(lock) { key.engineId in forgotten }) {
+        if (key is DraftKey.Chat && synchronized(lock) { key.deviceId in forgotten }) {
             return Job().apply { complete() }
         }
         mutate { m -> if (isDraftBlank(text)) m.remove(name) else m[name] = text }
@@ -243,15 +241,14 @@ class Drafts(
     }
 
     /**
-     * Deletes every `chat:<engineId>:*` draft from the mirror and the
-     * disk (ticket 140's forget sequence calls this between `removeStored`
-     * and `requestPop`), and makes every later `Chat` save for that engine
-     * a no-op for the rest of the process. The `new-session` key and other
-     * engines' drafts are untouched.
+     * Deletes every `chat:<deviceId>:*` draft from the mirror and the
+     * disk, and makes every later `Chat` save for that device a no-op for
+     * the rest of the process. The `new-session` key and other devices'
+     * drafts are untouched.
      */
-    fun forgetEngine(engineId: String): Job {
-        synchronized(lock) { forgotten.add(engineId) }
-        val prefix = "chat:$engineId:"
+    fun forgetDevice(deviceId: String): Job {
+        synchronized(lock) { forgotten.add(deviceId) }
+        val prefix = "chat:$deviceId:"
         mutate { m -> m.keys.removeAll { it.startsWith(prefix) } }
         return scope.launch(io) {
             awaitLoaded()

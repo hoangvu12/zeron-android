@@ -175,7 +175,7 @@ class ZeronApplication : Application() {
      * warms in `onCreate`, saves are blank-removing and verbatim (iOS
      * `Drafts`), and the disk writes run on [appScope] so they outlive
      * every screen. Ticket 140's forget sequence drops an engine's
-     * drafts through `forgetEngine`.
+     * drafts through `forgetDevice`.
      */
     val drafts by lazy {
         Drafts(
