@@ -29,10 +29,11 @@ import androidx.compose.ui.Modifier
  *   a host (a visual's scrub) ignore touches starting there, so one swipe
  *   never both goes back and drives the visual.
  *
- * iOS's own edge swipe-back is the system back here (`NavStackHost`'s
- * `PredictiveBackHandler`); nothing in the app adds a custom edge pan, and
- * `systemGestureExclusion` is left for small handles only (the system caps
- * it at 200 dp per edge).
+ * iOS's swipe-back is both: the system back in the edges (`NavStackHost`'s
+ * `PredictiveBackHandler`) and the in-app content pan everywhere else
+ * (#135, `swipeBackMayStart` uses this same edge test so one swipe never
+ * pops twice). `systemGestureExclusion` is left for small handles only (the
+ * system caps it at 200 dp per edge).
  */
 val WindowInsets.Companion.bottomChrome: WindowInsets
     @Composable
