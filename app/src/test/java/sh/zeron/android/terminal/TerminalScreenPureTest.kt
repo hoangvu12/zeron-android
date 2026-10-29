@@ -92,6 +92,20 @@ class TerminalScreenPureTest {
     }
 
     @Test
+    fun outputGoesToTheNewestLiveComposerOfTheChat() {
+        val got = mutableListOf<String>()
+        assertEquals(false, LiveComposers.append("chat-lc", "x"))
+        val first = LiveComposers.register("chat-lc") { got += "first:$it" }
+        val second = LiveComposers.register("chat-lc") { got += "second:$it" }
+        assertEquals(true, LiveComposers.append("chat-lc", "a"))
+        second.close()
+        LiveComposers.append("chat-lc", "b")
+        first.close()
+        assertEquals(false, LiveComposers.append("chat-lc", "c"))
+        assertEquals(listOf("second:a", "first:b"), got)
+    }
+
+    @Test
     fun terminalRowsSayTheirState() {
         val live = PanelTerminal("a", "zsh", "~ · Mac", TerminalRowState.Live)
         assertEquals("Live", live.trailing)
