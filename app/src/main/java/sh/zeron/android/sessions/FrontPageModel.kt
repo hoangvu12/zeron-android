@@ -7,18 +7,14 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import sh.zeron.android.core.Prefs
 import sh.zeron.android.core.WorkspaceFeed
 import sh.zeron.android.design.Feedback
-import uniffi.zeron_core.ConnectivityState
 
 /**
  * What the Sessions tab draws (ticket 40) — the `AppModel.frontPage`
@@ -27,9 +23,9 @@ import uniffi.zeron_core.ConnectivityState
  * section (not folded, not de-duplicated); ticket 41's
  * `buildSessionListItems` folds via [collapsedIds] and de-duplicates.
  *
- * The rebuild keys on the snapshot **revision** (not iOS's VM equality),
- * the grouping flag and the fold state — see the rebuild rule in the
- * ticket.
+ * The rebuild runs on every published snapshot (the feed publishes only
+ * when it differs — a 30 s clock read with the same revision still
+ * carries new time labels), the grouping flag and the fold state.
  */
 data class FrontPageUi(
     val revision: ULong,
@@ -66,12 +62,11 @@ class FrontPageModel(
         fold.awaitLoaded()
         emitAll(
             combine(
-                feed.snapshot.filterNotNull().distinctUntilChangedBy { it.revision },
+                feed.snapshot.filterNotNull(),
                 prefs.groupByProject,
                 fold.state,
             ) { ws, groupByProject, f ->
-                val built = FrontPageSections.build(ws.front, groupByProject)
-                val sectionsById = ws.front.sections.associateBy { it.id }
+                val built = FrontPageSections.build(ws.front, ws.projects, groupByProject)
                 FrontPageUi(
                     revision = ws.revision,
                     synced = ws.synced,
@@ -79,7 +74,7 @@ class FrontPageModel(
                     // Pure over the combined Fold — never `state.value` — so
                     // the rebuild is race-free.
                     collapsedIds = FrontPageSections.collapsedIds(built.sections) { id ->
-                        fold.isCollapsedIn(f, id, sectionsById[id])
+                        fold.isCollapsedIn(f, id)
                     },
                     meta = built.meta,
                 )
@@ -100,42 +95,24 @@ class FrontPageModel(
         .distinctUntilChanged()
         .stateIn(scope, SharingStarted.Eagerly, null)
 
-    init {
-        // Reconcile on every new snapshot revision and every connectivity
-        // change: stale pendings drop, overrides push.
-        scope.launch {
-            combine(
-                feed.snapshot.filterNotNull().distinctUntilChangedBy { it.revision },
-                feed.connectivity.map { it?.state == ConnectivityState.CONNECTED }.distinctUntilChanged(),
-            ) { ws, connected -> ws to connected }
-                .collect { (ws, connected) -> fold.reconcile(ws, connected) }
-        }
-    }
-
-    /**
-     * A header tap (`SessionListController.toggleSection`). A user section
-     * (an id in `front.sections`) is engine-synced; everything else is
-     * phone-local.
-     */
+    /** A header tap (`SessionListController.toggleSection`): every fold is phone-local. */
     fun toggleSection(id: String, feedback: Feedback) {
-        val ws = feed.snapshot.value ?: return
-        fold.toggle(id, ws.front.sections.firstOrNull { it.id == id }, feedback)
+        fold.toggle(id, feedback)
     }
 
     /**
-     * The ⋯ menu's Collapse All (`SessionListController.swift:416-421`):
+     * The ⋯ menu's Collapse All (`SessionListController.swift:581-586`):
      * fold every still-open id among Pinned (if pins exist), the user
      * sections and — only while grouping is on — the groups. Recent is
      * never touched, and each id goes through the same `toggleSection`
-     * path, so persistence, engine writes and haptics behave identically
+     * path, so persistence and haptics behave identically
      * (one `Haptic.Select` per toggled id; ticket 05's gate makes the
      * burst feel like one tick on device).
      */
     fun collapseAll(feedback: Feedback) {
         val ws = feed.snapshot.value ?: return
-        for (id in FrontPageSections.collapsibleIds(ws.front, prefs.groupByProject.value)) {
-            val section = ws.front.sections.firstOrNull { it.id == id }
-            if (!fold.isCollapsed(id, section)) fold.toggle(id, section, feedback)
+        for (id in FrontPageSections.collapsibleIds(ws.front, ws.projects, prefs.groupByProject.value)) {
+            if (!fold.isCollapsed(id)) fold.toggle(id, feedback)
         }
     }
 }

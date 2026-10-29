@@ -118,8 +118,8 @@ fun newSectionAlert(onCreate: (String) -> Unit): ZeronAlert = ZeronAlert(
 
 /**
  * "Rename Section" (`:400-409`, `:490-500`): like Rename Session with the
- * section's raw [SectionView][uniffi.zeron_core.SectionView] name — never
- * the header's `" · <engine>"` collision suffix (ticket 40) — pre-filled.
+ * section's raw [SectionView][uniffi.zeron_core.SectionView] name
+ * pre-filled.
  * The trimmed name is what the write and the folder page's title update
  * both use.
  */

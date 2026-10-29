@@ -24,10 +24,9 @@ import uniffi.zeron_core.DeviceView
 import uniffi.zeron_core.WorkspaceSnapshot
 
 /**
- * The workspace FFI seam — the calls the feed, the fold state and their
- * tests need (`zeron/crates/mobile/src/client_ffi/mod.rs`). Every method is
- * cheap, never blocks on the network and is safe from any thread;
- * [setSectionCollapsed] fails fast.
+ * The workspace FFI seam — the calls the feed and its tests need
+ * (`zeron/crates/mobile/src/client_ffi/mod.rs`). Every method is cheap,
+ * never blocks on the network and is safe from any thread.
  */
 interface WorkspaceCore {
     /** Current workspace revision (compare before pulling). */
@@ -38,16 +37,12 @@ interface WorkspaceCore {
 
     /** The aggregate connectivity posture. */
     fun connectivity(): Connectivity
-
-    /** Sets a user section's synced fold (optimistic overlay, background RPC). */
-    @Throws(CoreException::class)
-    fun setSectionCollapsed(sectionId: String, collapsed: Boolean)
 }
 
 /**
  * The [WorkspaceCore] over the live [CoreClient], resolved at call time:
  * `ZeronApplication` builds this over the session holder's
- * `clientOrNull()`, so the feed and the fold state always reach the
+ * `clientOrNull()`, so the feed always reaches the
  * current account's client and never hold one that was signed out. While
  * signed out the calls refuse like an unreachable host — nothing in the
  * UI can reach them then (there is no snapshot to draw sections from).
@@ -62,9 +57,6 @@ class CoreClientWorkspace(private val client: () -> CoreClient?) : WorkspaceCore
     override fun workspace(): WorkspaceSnapshot = live().workspace()
 
     override fun connectivity(): Connectivity = live().connectivity()
-
-    override fun setSectionCollapsed(sectionId: String, collapsed: Boolean) =
-        live().setSectionCollapsed(sectionId, collapsed)
 }
 
 /**

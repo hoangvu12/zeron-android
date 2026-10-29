@@ -169,7 +169,7 @@ fun FolderScreen(
 
     // The live raw name for the Rename prefill and the Delete prompt title:
     // read at menu-action time from the latest workspace, never the
-    // push-time route.title (which may carry 40's " · <engine>" suffix).
+    // push-time route.title (a rename since the push changes it).
     val latestWorkspace = rememberUpdatedState(workspace)
 
     fun rawName(): String? =

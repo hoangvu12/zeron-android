@@ -49,7 +49,7 @@ data class FolderRoute(val folderId: String, val title: String) : NavRoute {
         /** The Archived folder (`SessionListController.swift:431`, `MoreViewController.swift:247`). */
         fun archived() = FolderRoute(ARCHIVED, "Archived")
 
-        /** A user section; the title is the name as the caller shows it (possibly suffixed, 40). */
+        /** A user section; the title is the name as the caller shows it. */
         fun section(id: String, title: String) = FolderRoute(id, title)
     }
 }

@@ -131,8 +131,7 @@ fun sessionsOptionsMenu(actions: SessionsScreenActions): Menu = Menu(
  * - `"pinned"` → "Open" + "Reorder…" (both push the merged Pinned page —
  *   "Reorder…" never turns on Edit mode; the user taps Edit there, 47);
  * - a user section → "Open", "Rename Section…" (pre-filled with the
- *   **raw** name, never the header title with 40's `" · <engine>"`
- *   collision suffix) and "Delete Section" (destructive, **immediate** —
+ *   **raw** `SectionView` name) and "Delete Section" (destructive, **immediate** —
  *   iOS calls `app.deleteSection` with no confirmation; only the folder
  *   page's ⋯ asks first, 45).
  */

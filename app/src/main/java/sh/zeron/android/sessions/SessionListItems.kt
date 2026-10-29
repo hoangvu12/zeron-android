@@ -9,7 +9,7 @@ import uniffi.zeron_core.WorkspaceSnapshot
  * The warning sink for the duplicate-section-id skip in
  * [buildSessionListItems]: production logs `Log.w("ZeronSessionList", …)`.
  * Plain-JVM tests swap this — the stub `android.util.Log` throws "not
- * mocked" outside Robolectric (the same seam as `foldLogW`).
+ * mocked" outside Robolectric.
  */
 internal var sessionListLogW: (String) -> Unit = { Log.w(TAG, it) }
 

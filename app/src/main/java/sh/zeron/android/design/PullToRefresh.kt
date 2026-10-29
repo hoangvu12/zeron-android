@@ -161,7 +161,7 @@ object PullToRefreshMath {
  * The warning sink for refresh failures: production logs
  * `Log.w("ZeronPull", …)`. Plain-JVM tests swap this — the stub
  * `android.util.Log` throws "not mocked" outside Robolectric (the same
- * seam as `FoldState.foldLogW`).
+ * seam as `sessionListLogW`).
  */
 internal var pullRefreshLogW: (String, Throwable?) -> Unit = { message, error ->
     if (error == null) {
