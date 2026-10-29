@@ -17,7 +17,7 @@ import sh.zeron.android.notify.WorkingRun
 
 /**
  * The state the service renders: the working set (already projected to
- * [WorkingRun]s), the awaiting count, the paired-engine count, the
+ * [WorkingRun]s), the awaiting count, the execution-device count, the
  * budget/dismissal flags, and whether the service should be running.
  * `contentKey` is the repost identity: the working set / awaiting / titles
  * change it — the chronometer ticks without reposts.
@@ -25,21 +25,15 @@ import sh.zeron.android.notify.WorkingRun
 data class RunWatchState(
     val working: List<WorkingRun>,
     val awaiting: Int,
-    val engineCount: Int,
+    val deviceCount: Int,
     val budgetExhausted: Boolean,
     val liveUpdateDismissed: Boolean,
     /** True while the foreground service should be up. */
     val active: Boolean,
-    /**
-     * True while "Stay connected in background" holds the service (ADR
-     * 0010): the service runs as `specialUse` (no time limit) instead of
-     * `dataSync`. False whenever [active] is false.
-     */
-    val persistent: Boolean = false,
 ) {
     val contentKey: String
         get() = working.joinToString("|") { "${it.chatId}:${it.title}" } +
-            "#$awaiting@$engineCount"
+            "#$awaiting@$deviceCount"
 }
 
 /**
@@ -49,14 +43,14 @@ data class RunWatchState(
  * only keeps the process out of the cached/frozen set so the engine
  * connections and their notifications live.
  *
- * Inputs: `RunActivity` from the core, the process foreground state, the
- * notifications-on gate, the paired-engine count and the Stay connected
- * preference. Behaviour (the ticket's Lifecycle table, amended by ADR
- * 0010):
- * - **Start** while the app is foreground AND (`working` is non-empty AND
- *   notifications are on, OR Stay connected is on) (API 31+ forbids
- *   background FGS starts — the exception is caught and logged, never
- *   crashes);
+ * Inputs (#57, docs/port/05 §2.4): the run activity derived from the
+ * workspace snapshots (`NotificationCenter` → [onRunActivity]), the
+ * process foreground state, the notifications-on gate, whether an account
+ * is signed in, and the execution-device count (the subText). Behaviour
+ * (the ticket's Lifecycle table; D8 dropped ADR 0010's "Stay connected"):
+ * - **Start** while the app is foreground AND `working` is non-empty AND
+ *   notifications are on AND signed in (API 31+ forbids background FGS
+ *   starts — the exception is caught and logged, never crashes);
  * - **Keep** while `working` is non-empty, foreground or not (a run that
  *   starts while the service is up is included);
  * - **Linger** for [LINGER_MS] (2 min) after `working` empties (ADR
@@ -68,21 +62,13 @@ data class RunWatchState(
  *   instead of a reconnect. Longer would leave the "Staying connected"
  *   notification up for no one; most taps come within a minute or two;
  * - **Stop** after the linger, or at once when notifications turn off or
- *   the last engine is forgotten (unless Stay connected holds it; the
- *   last engine forgotten stops it either way);
- * - **Stay connected** (the opt-in Settings toggle, ADR 0010): while on
- *   and ≥ 1 engine is paired the service runs whether or not a run is
- *   Working and whether or not notifications are on, so the process and
- *   its sockets live in the background; [RunWatchState.persistent] tells
- *   the service to run as `specialUse` (no time limit). Off restores the
- *   rules above. It still only *starts* while the app is foreground (the
- *   toggle lives in Settings, and every later app open retries);
+ *   the account signs out;
  * - **Background-started runs:** with the service down there is no way
- *   to cover them. Android 12+ refuses `startForegroundService` from the
- *   background (no exemption applies: no FCM, no exact alarm, no battery
- *   optimisation opt-out), and a cached Android 14+ process is frozen and
- *   never sees the run start anyway. A run that starts while the service
- *   is up (a run, the linger or Stay connected) is kept;
+ *   to cover them (D8). Android 12+ refuses `startForegroundService` from
+ *   the background (no exemption applies: no FCM, no exact alarm, no
+ *   battery optimisation opt-out), and a cached Android 14+ process is
+ *   frozen and never sees the run start anyway. A run that starts while
+ *   the service is up (a run, or the linger) is kept;
  * - **onTimeout** (the API 35+ dataSync budget): the flag latches (forcing
  *   `active` false — the service `stopSelf()`s in its callback), a quiet
  *   "Background updates paused" notification posts; the next foreground
@@ -110,10 +96,10 @@ class RunWatchController(
 
     private var working: List<WorkingRun> = emptyList()
     private var awaiting: Int = 0
-    private var engineCount: Int = 0
+    private var deviceCount: Int = 0
+    private var signedIn: Boolean = false
     private var notificationsOn: Boolean = false
     private var foreground: Boolean = false
-    private var stayConnected: Boolean = false
 
     /** When `working` became empty; the linger counts from here. */
     private var emptySinceMs: Long? = null
@@ -145,7 +131,7 @@ class RunWatchController(
 
     // ── inputs ───────────────────────────────────────────────────────────
 
-    /** The core's aggregate activity (arrives off the main thread). */
+    /** The run activity from the latest workspace snapshot (arrives off the main thread). */
     fun onRunActivity(newWorking: List<WorkingRun>, newAwaiting: Int) {
         synchronized(gate) {
             val workingSetChanged = newWorking.map { "${it.chatId}:${it.title}:${it.fromThisDevice}" } !=
@@ -191,34 +177,34 @@ class RunWatchController(
         }
     }
 
-    /** Settings → "Stay connected in background" (ADR 0010). */
-    fun onStayConnected(on: Boolean) {
+    /** An account is signed in (the session holder has a client). */
+    fun onSignedIn(on: Boolean) {
         synchronized(gate) {
-            stayConnected = on
+            signedIn = on
             update()
         }
     }
 
-    /** The paired-engine count (parked engines count as paired). */
-    fun onEngineCount(count: Int) {
+    /** The account's execution devices; two or more name the device under a single run. */
+    fun onDeviceCount(count: Int) {
         synchronized(gate) {
-            engineCount = count
+            deviceCount = count
             update()
         }
     }
 
     /**
-     * Signed out (#18): the account's runs and engines are gone, so the
+     * Signed out (#18): the account's runs and devices are gone, so the
      * service stops now — no linger (nobody is left to tap a Done
      * notification) — and the next account starts from a clean slate.
-     * The process-wide gates (foreground, notifications, Stay connected)
-     * are kept.
+     * The process-wide gates (foreground, notifications) are kept.
      */
     fun signOut() {
         synchronized(gate) {
             working = emptyList()
             awaiting = 0
-            engineCount = 0
+            deviceCount = 0
+            signedIn = false
             emptySinceMs = null
             liveUpdateDismissed = false
             update()
@@ -263,26 +249,18 @@ class RunWatchController(
 
     // ── the decision ─────────────────────────────────────────────────────
 
-    private fun stateOf(active: Boolean, persistent: Boolean = false) = RunWatchState(
+    private fun stateOf(active: Boolean) = RunWatchState(
         working = working,
         awaiting = awaiting,
-        engineCount = engineCount,
+        deviceCount = deviceCount,
         budgetExhausted = budgetExhausted,
         liveUpdateDismissed = liveUpdateDismissed,
         active = active,
-        persistent = active && persistent,
     )
 
-    /** Stay connected holds the service on its own (ADR 0010). */
-    private fun persistent(): Boolean = stayConnected && engineCount > 0
-
     private fun shouldRun(): Boolean {
-        // Stay connected runs as specialUse: neither the dataSync budget
-        // nor the notifications gate applies (the user asked for the
-        // connection itself, not only for its notifications).
-        if (persistent()) return true
         if (budgetExhausted) return false
-        if (!notificationsOn || engineCount == 0) return false
+        if (!notificationsOn || !signedIn) return false
         if (working.isNotEmpty()) return true
         // The linger: queue handoffs, and the tap on the Done notification.
         val since = emptySinceMs ?: return false
@@ -309,18 +287,14 @@ class RunWatchController(
                 Log.w(TAG, "RunWatchService start not permitted: $error")
             }
         }
-        _state.value = stateOf(run, persistent())
+        _state.value = stateOf(run)
         scheduleStopCheck(run)
     }
 
-    /**
-     * A service held only by the linger needs a wake at its deadline. The
-     * wake is re-armed from the linger's own start, so turning Stay
-     * connected off mid-linger still stops on time.
-     */
+    /** A service held only by the linger needs a wake at its deadline. */
     private fun scheduleStopCheck(run: Boolean) {
         val since = emptySinceMs
-        if (run && working.isEmpty() && since != null && !persistent()) {
+        if (run && working.isEmpty() && since != null) {
             if (stopCheck?.isActive != true) {
                 val wait = (since + LINGER_MS - clock()).coerceAtLeast(0L) + 50
                 stopCheck = scope.launch {
@@ -341,7 +315,7 @@ class RunWatchController(
         private const val TAG = "ZeronRunWatch"
 
         /**
-         * How long the service outlives the last Working run (ADR 0010):
+         * How long the service outlives the last Working run:
          * long enough to tap the Done notification and come back to live
          * sockets, short enough that the ongoing notification does not
          * linger for no one. See the class KDoc.
