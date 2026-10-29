@@ -659,6 +659,11 @@ class ZeronApplication : Application() {
         applicationScope.launch {
             prefs.stayConnected.collect { runWatch.onStayConnected(it) }
         }
+        // #36: the stored math settings (and every Settings change) reach
+        // every live transcript, which reflows at once (iOS `didChange`).
+        applicationScope.launch {
+            prefs.math.collect { sh.zeron.android.transcript.MathSettings.update(it) }
+        }
         // #18: everything a sign-out clears beyond the holder's own
         // (client, credentials and profile, and — asked for — the core
         // dir): the notifications (iOS `push.signingOut`), the run watch,
