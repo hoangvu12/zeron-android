@@ -7,7 +7,9 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.union
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.NonRestartableComposable
+import androidx.compose.ui.Modifier
 
 /**
  * Navigation-mode-safe insets (#72). Android runs either gesture
@@ -36,6 +38,11 @@ val WindowInsets.Companion.bottomChrome: WindowInsets
     @Composable
     @NonRestartableComposable
     get() = navigationBars.union(mandatorySystemGestures.only(WindowInsetsSides.Bottom))
+
+/** Bottom padding of [bottomChrome] — `navigationBarsPadding()` that also clears the home-gesture area. */
+@Composable
+fun Modifier.bottomChromePadding(): Modifier =
+    windowInsetsPadding(WindowInsets.bottomChrome.only(WindowInsetsSides.Bottom))
 
 /** Pure: whether window x [x] lies in the back-gesture edge of a [windowWidth]-wide window. */
 fun inSystemGestureEdge(x: Float, windowWidth: Float, leftEdge: Float, rightEdge: Float): Boolean =
