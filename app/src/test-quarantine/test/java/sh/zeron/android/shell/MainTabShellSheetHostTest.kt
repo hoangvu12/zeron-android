@@ -41,7 +41,7 @@ class MainTabShellSheetHostTest {
                 SheetHost(root) {
                     GlassMenuHost {
                         MainTabShell(
-                            state = MainTabState(TabId.Sessions),
+                            state = MainTabState(),
                             routeContent = { _ ->
                                 seen = LocalSheetHost.current
                                 Box {}
@@ -63,7 +63,7 @@ class MainTabShellSheetHostTest {
             ZeronTheme {
                 GlassMenuHost {
                     MainTabShell(
-                        state = MainTabState(TabId.Sessions),
+                        state = MainTabState(),
                         routeContent = { _ ->
                             seen = LocalSheetHost.current
                             Box {}

@@ -33,9 +33,7 @@ import sh.zeron.android.design.glass.GlassMenuHost
 import sh.zeron.android.design.uiStyle
 import sh.zeron.android.shell.NavStack
 import sh.zeron.android.shell.NavStackHost
-import sh.zeron.android.shell.PlaceholderTabRoot
-import sh.zeron.android.shell.TabId
-import sh.zeron.android.shell.TabRootRoute
+import sh.zeron.android.shell.SessionsRootRoute
 import uniffi.zeron_core.WorkspaceSnapshot
 
 /** The gallery's kind picker: each value is one pushed folder screen. */
@@ -166,7 +164,7 @@ fun FolderScreensGallerySection() {
     // Starts on the Section folder (pushed hostless, so the resting top is
     // the screen the picker's other kinds replace).
     val stack = remember {
-        NavStack(TabRootRoute(TabId.Sessions)).apply {
+        NavStack(SessionsRootRoute).apply {
             push(FolderRoute.section(FolderFixtures.SECTION_ID, FolderFixtures.SECTION_NAME), animated = false)
         }
     }
@@ -227,7 +225,9 @@ fun FolderScreensGallerySection() {
                             if (route is FolderRoute) {
                                 FolderScreen(route = route, workspace = workspaceOf(route), loading = false)
                             } else {
-                                PlaceholderTabRoot(TabId.Sessions)
+                                // The list under the folder page: a blank
+                                // page background in this frame.
+                                Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background))
                             }
                         }
                     }

@@ -1,23 +1,21 @@
 package sh.zeron.android.shell
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Ticket 30's pure functions, plain JUnit: [chromeFrame] and
- * [accessoryRevealAlpha] against the Spec's worked-values table (W = 400
- * px, LTR unless stated), plus the idle / derivation rows through a real
- * [ChromeVisibilityController] over a real [NavStack] (24's
- * `holdHostlessOps` + `freeze` make the transitions inspectable without a
- * host).
+ * Ticket 30's pure functions, plain JUnit: [chromeFrame] against the Spec's
+ * worked-values table (W = 400 px, LTR unless stated), plus the idle /
+ * derivation rows through a real [ChromeVisibilityController] over the
+ * phone shell's real Sessions [NavStack] — the one-row bar shows on the
+ * list root only (24's `holdHostlessOps` + `freeze` make the transitions
+ * inspectable without a host).
  */
 class ChromeFrameTest {
 
-    /** A route that never hides the chrome (26's roots, folder pages). */
+    /** A route that does not hide the chrome by itself (a folder page). */
     private data class PlainRoute(val title: String) : NavRoute {
         override val paneTitle: String? get() = title
     }
@@ -29,7 +27,7 @@ class ChromeFrameTest {
     }
 
     private fun controller(): ChromeVisibilityController =
-        ChromeVisibilityController(MainTabState(TabId.Sessions), null, CoroutineScope(Dispatchers.Unconfined))
+        ChromeVisibilityController(MainTabState())
 
     /** The frame of a RidesBelow transition (over a Session) at [p]. */
     private fun rides(kind: NavKind, p: Float, rtl: Boolean = false, reduce: Boolean = false): ChromeFrame =
@@ -206,20 +204,44 @@ class ChromeFrameTest {
     }
 
     @Test
-    fun aControllerDerivesRidesAboveForAPushFromASession() {
+    fun theSessionsStackShowsTheBarOnItsRootOnly() {
+        val c = controller()
+        assertTrue(c.stack.chromeOnRootOnly)
+        // A page that keeps the chrome on its own still hides the bar
+        // above the list root (`hidesBottomBarWhenPushed`).
+        c.stack.push(PlainRoute("Settings"), animated = false)
+        assertEquals(ChromeFrame.Hidden, c.frame())
+        c.stack.pop(animated = false)
+        assertEquals(ChromeFrame.Shown, c.frame())
+    }
+
+    @Test
+    fun aPushOfAPlainPageRidesBelowLikeASession() {
         val c = controller()
         c.widthPx = 400f
         val s = c.stack
-        s.push(HidingRoute()) // completes hostlessly: the session is the top
         s.holdHostlessOps()
-        s.push(PlainRoute("Folder")) // from hides, to shows: RidesAbove
+        s.push(PlainRoute("Folder"))
         s.freeze(0.5f)
         val f = c.frame()
         assertTrue(f.placed)
-        assertEquals(200f, f.translationX, 1e-3f)
-        assertEquals(1f, f.alpha, 1e-3f)
-        assertTrue(f.clipLeft.isInfinite())
-        assertEquals(0f, f.dim, 1e-3f)
+        assertEquals(-60f, f.translationX, 1e-3f)
+        assertEquals(200f, f.clipRight, 1e-3f)
+    }
+
+    @Test
+    fun aPopBackToTheListRevealsTheBar() {
+        val c = controller()
+        c.widthPx = 400f
+        val s = c.stack
+        s.push(PlainRoute("Folder"), animated = false)
+        s.holdHostlessOps()
+        s.pop()
+        s.freeze(0.25f)
+        val f = c.frame()
+        assertTrue(f.placed)
+        assertEquals(-90f, f.translationX, 1e-3f)
+        assertEquals(100f, f.clipRight, 1e-3f)
     }
 
     @Test
@@ -234,51 +256,5 @@ class ChromeFrameTest {
         s.push(HidingRoute("Session 2"))
         s.freeze(0.5f)
         assertEquals(ChromeFrame.Hidden, c.frame())
-    }
-
-    // ------------------------------------------------------ accessory reveal
-
-    @Test
-    fun theRevealFadesTheContentWithThePopProgress() {
-        assertEquals(0.25f, accessoryRevealAlpha(fromShows = false, toShows = true, progress = 0.25f, reduceMotion = false), 1e-4f)
-        assertEquals(1f, accessoryRevealAlpha(fromShows = false, toShows = true, progress = 0.25f, reduceMotion = true), 1e-4f)
-        assertEquals(1f, accessoryRevealAlpha(fromShows = true, toShows = false, progress = 0.25f, reduceMotion = false), 1e-4f)
-        assertEquals(1f, accessoryRevealAlpha(fromShows = true, toShows = true, progress = 0.25f, reduceMotion = false), 1e-4f)
-        // Unclamped progress clamps to 0..1.
-        assertEquals(1f, accessoryRevealAlpha(false, true, 1.5f, false), 1e-4f)
-        assertEquals(0f, accessoryRevealAlpha(false, true, -0.2f, false), 1e-4f)
-    }
-
-    @Test
-    fun aPushToASessionLeavesTheContentAlphaAtOne() {
-        val c = controller()
-        val s = c.stack
-        s.holdHostlessOps()
-        s.push(HidingRoute())
-        s.freeze(0.5f)
-        assertEquals(1f, c.accessoryContentAlpha(), 1e-4f)
-    }
-
-    @Test
-    fun aPopFromASessionRevealsTheContentWithProgress() {
-        val c = controller()
-        val s = c.stack
-        s.push(HidingRoute()) // completes hostlessly
-        s.holdHostlessOps()
-        s.pop()
-        s.freeze(0.25f)
-        assertEquals(0.25f, c.accessoryContentAlpha(), 1e-4f)
-    }
-
-    @Test
-    fun theRevealStaysOneUnderReducedMotion() {
-        val c = controller()
-        c.reduceMotion = true
-        val s = c.stack
-        s.push(HidingRoute())
-        s.holdHostlessOps()
-        s.pop()
-        s.freeze(0.25f)
-        assertEquals(1f, c.accessoryContentAlpha(), 1e-4f)
     }
 }

@@ -18,20 +18,18 @@ import androidx.compose.ui.unit.dp
 import kotlin.math.max
 
 /**
- * The top edge of the bottom tab chrome actually on screen (ticket 14,
- * consumer of ticket 30): the Android port of iOS `chromeTop`
- * (`ios:Design/Toast.swift:29-45`) — `min(safe-area bottom, tab bar top,
- * accessory top)`, minus the pushed screen's own bottom bars.
+ * The top edge of the bottom bar actually on screen (ticket 14, consumer
+ * of ticket 30): the Android port of iOS `chromeTop`
+ * (`ios:Design/Toast.swift:29-45`, fed by `bottomBarFrame`) — the bar's
+ * top, or the safe-area bottom, minus the pushed screen's own bottom bars.
  *
  * A **holder** rather than a plain `Dp` composition local because
  * [ToastHost] sits *above* the shell in the tree and CompositionLocals only
  * flow down: the host creates the state and provides it, and the shell
- * (ticket 30) writes [top] from `onGloballyPositioned { boundsInRoot().top }`
- * (px → dp). It takes the min of the tab pill top and the accessory top,
- * and resets to [Dp.Unspecified] when the chrome hides or leaves
- * composition.
+ * writes [top] from the bar's placed position (px → dp), and resets it to
+ * [Dp.Unspecified] when the bar hides or leaves composition.
  *
- * [Dp.Unspecified] means "no tab chrome on screen" (a pushed Session screen,
+ * [Dp.Unspecified] means "no bottom bar on screen" (a pushed Session screen,
  * a hidden bar); readers fall back to the safe-area bottom
  * ([rememberSafeBottom]).
  */
@@ -46,16 +44,11 @@ val LocalBottomChromeTop = staticCompositionLocalOf { BottomChromeTopState() }
 
 /**
  * The bottom chrome's content insets (android-ui-parity #30): what the
- * screens under the chrome pad their lists with. [barBottom] is 26's
- * `tabBarBottomGap` (the pill's bottom gap), the one value both the chrome
- * layout and the padding derive from; [contentPadding] is
- * `barBottom + pill + gap + accessory + 8` computed from the **expanded**
- * geometry (`bottomChromeContentPadding`, in the shell package — it uses
- * 28's `TabChromeMetrics`), so lists never jump as the bar morphs.
- *
- * It deliberately does **not** include the IME or 29's IME lift: screens
- * with a focused field add their own (49's
- * `searchBottomPadding(contentPadding, barBottom, lift)`).
+ * screens under the phone's one-row bottom bar pad their lists with.
+ * [barBottom] is `tabBarBottomGap` (the bar's bottom margin), the one value
+ * both the bar's placement and the padding derive from; [contentPadding]
+ * is `barBottom + 48 + 8` plus the IME the bar rides on
+ * (`oneRowBarContentPadding`, in the shell package).
  *
  * `BottomChromeInsets.None` is the default outside a phone shell (tablet
  * sidebar, gallery, previews); tablet screens (105/107) provide their own.

@@ -107,10 +107,6 @@ class CarryOverTest {
             log += "tabs.popToFrontPage"
         }
 
-        override fun popSearchSessions() {
-            log += "tabs.popSearchSessions"
-        }
-
         override fun popAllToRoot() {
             log += "tabs.popAll"
         }
@@ -169,10 +165,9 @@ class CarryOverTest {
         val r = Rig(currentChatId = "c1", isCollapsed = false, shownChatId = null, detailIsEmpty = true)
         r.frameGate.complete(Unit)
         r.carryOver.onShellKindChanged(RootKind.Phone, RootKind.Split)
-        // Facts 5-7: the pops first (Sessions, then the Search
-        // adaptation), then the fenced detail open.
+        // Facts 5-7: the Sessions pop first, then the fenced detail open.
         assertEquals(
-            listOf("frame", "tabs.popToFrontPage", "tabs.popSearchSessions", "fence(c1)", "detail.show(c1)"),
+            listOf("frame", "tabs.popToFrontPage", "fence(c1)", "detail.show(c1)"),
             r.log,
         )
     }
@@ -183,7 +178,7 @@ class CarryOverTest {
         r.frameGate.complete(Unit)
         r.carryOver.onShellKindChanged(RootKind.Phone, RootKind.Split)
         // The column already shows it: only the pops.
-        assertEquals(listOf("frame", "tabs.popToFrontPage", "tabs.popSearchSessions"), r.log)
+        assertEquals(listOf("frame", "tabs.popToFrontPage"), r.log)
         assertEquals("c1", r.detail.shownChatId)
     }
 
@@ -193,7 +188,7 @@ class CarryOverTest {
         r.frameGate.complete(Unit)
         r.carryOver.onShellKindChanged(RootKind.Phone, RootKind.Split)
         assertEquals(
-            listOf("frame", "tabs.popToFrontPage", "tabs.popSearchSessions", "fence(c1)", "detail.show(c1)"),
+            listOf("frame", "tabs.popToFrontPage", "fence(c1)", "detail.show(c1)"),
             r.log,
         )
     }
@@ -205,7 +200,7 @@ class CarryOverTest {
         r.carryOver.onShellKindChanged(RootKind.Phone, RootKind.Split)
         // Fact 8: the draft only when nothing is open AND the column is empty.
         assertEquals(
-            listOf("frame", "tabs.popToFrontPage", "tabs.popSearchSessions", "detail.showDraft"),
+            listOf("frame", "tabs.popToFrontPage", "detail.showDraft"),
             r.log,
         )
     }
@@ -216,7 +211,7 @@ class CarryOverTest {
         r.frameGate.complete(Unit)
         r.carryOver.onShellKindChanged(RootKind.Phone, RootKind.Split)
         // A draft that stayed through the collapse is kept as is (fact 8).
-        assertEquals(listOf("frame", "tabs.popToFrontPage", "tabs.popSearchSessions"), r.log)
+        assertEquals(listOf("frame", "tabs.popToFrontPage"), r.log)
         assertFalse(r.detail.isEmpty)
     }
 
@@ -232,7 +227,7 @@ class CarryOverTest {
         r.frameGate.complete(Unit)
         advanceUntilIdle()
         assertEquals(
-            listOf("frame", "tabs.popToFrontPage", "tabs.popSearchSessions", "fence(c2)", "detail.show(c2)"),
+            listOf("frame", "tabs.popToFrontPage", "fence(c2)", "detail.show(c2)"),
             r.log,
         )
         assertTrue(job.isCompleted)
@@ -280,7 +275,7 @@ class CarryOverTest {
         r.frameGate.complete(Unit)
         r.carryOver.onShellKindChanged(RootKind.Phone, RootKind.Split)
         assertEquals(
-            listOf("frame", "tabs.popToFrontPage", "tabs.popSearchSessions", "detail.showDraft"),
+            listOf("frame", "tabs.popToFrontPage", "detail.showDraft"),
             r.log,
         )
     }
@@ -295,7 +290,7 @@ class CarryOverTest {
         r.frameGate.complete(Unit)
         r.carryOver.onShellKindChanged(RootKind.Phone, RootKind.Split)
         assertEquals(
-            listOf("frame", "tabs.popToFrontPage", "tabs.popSearchSessions", "fence(c3)", "detail.show(c3)"),
+            listOf("frame", "tabs.popToFrontPage", "fence(c3)", "detail.show(c3)"),
             r.log,
         )
     }
@@ -314,7 +309,7 @@ class CarryOverTest {
         r.frameGate.complete(Unit)
         r.carryOver.onShellKindChanged(RootKind.Phone, RootKind.Split)
         assertTrue(r.log.none { it == "detail.clear" || it.startsWith("detail.show") })
-        assertEquals(listOf("frame", "frame", "tabs.popToFrontPage", "tabs.popSearchSessions"), r.log)
+        assertEquals(listOf("frame", "frame", "tabs.popToFrontPage"), r.log)
         assertEquals("c1", r.detail.shownChatId)
     }
 
@@ -338,7 +333,7 @@ class CarryOverTest {
         assertEquals(
             listOf(
                 "frame", "detail.clear", "fence(c1)",
-                "frame", "tabs.popToFrontPage", "tabs.popSearchSessions", "fence(c1)", "detail.show(c1)",
+                "frame", "tabs.popToFrontPage", "fence(c1)", "detail.show(c1)",
             ),
             r.log,
         )

@@ -43,14 +43,12 @@ class RouterTest {
 
     /**
      * The error path's tail (cases 3, 4, 8, 17), verbatim from
-     * `MainTabController.swift:200-208`: order and toast copy.
+     * `MainTabController.swift:200-206`: order and toast copy.
      */
     private val errorTail = listOf(
         "dismissAlerts",
         "hideIme",
-        "select(Sessions)",
         "popToRoot(false)",
-        "syncAccessory",
         "toast($OPEN_ERROR_TOAST)",
     )
 
@@ -107,10 +105,6 @@ class RouterTest {
         var onCreated: ((chatId: String, handoff: DraftHandoff?) -> Unit)? = null
             private set
 
-        override fun selectTab(tab: TabId) {
-            log += "select($tab)"
-        }
-
         override val isSheetPresented: Boolean
             get() = sheet
 
@@ -142,12 +136,12 @@ class RouterTest {
             log += "push(${route.chatId},$animated)"
         }
 
-        override fun setAccessoryVisible(visible: Boolean, animated: Boolean) {
-            log += "setAccessoryVisible($visible,$animated)"
+        override fun pushSettings() {
+            log += "pushSettings"
         }
 
-        override fun syncAccessory() {
-            log += "syncAccessory"
+        override fun activateSearch() {
+            log += "activateSearch"
         }
 
         override fun hideIme() {
@@ -207,14 +201,13 @@ class RouterTest {
     // ------------------------------------------------- openSession(chatId)
 
     @Test
-    fun openSession_fromSettings_selectsPopsPushes() = runTest {
+    fun openSession_popsAndPushes() = runTest {
         val r = rig(testScheduler)
         r.router.openSession("c1")
         advanceUntilIdle()
-        // Fact 2 + acceptance: select first (fact 4: a failed open also
-        // lands on Sessions), then the applied result in one main-thread
+        // Fact 2 + acceptance: the applied result in one main-thread
         // turn: alerts, pop-to-root unanimated, push animated.
-        assertEquals(listOf("select(Sessions)", "dismissAlerts", "popToRoot(false)", "push(c1,true)"), r.log)
+        assertEquals(listOf("dismissAlerts", "popToRoot(false)", "push(c1,true)"), r.log)
     }
 
     @Test
@@ -223,10 +216,10 @@ class RouterTest {
         r.shell.sheet = true
         r.router.openSession("c1")
         advanceUntilIdle()
-        // `MainTabController.swift:218`: the presented sheet is dismissed
-        // animated, right after the tab selection, before the pop.
+        // `MainTabController.swift:213`: the presented sheet is dismissed
+        // animated, before the pop.
         assertEquals(
-            listOf("select(Sessions)", "dismissSheet(true)", "dismissAlerts", "popToRoot(false)", "push(c1,true)"),
+            listOf("dismissSheet(true)", "dismissAlerts", "popToRoot(false)", "push(c1,true)"),
             r.log,
         )
         assertFalse(r.shell.sheet)
@@ -238,9 +231,8 @@ class RouterTest {
         r.openImpl = { null }
         r.router.openSession("nope")
         advanceUntilIdle()
-        // The failable open: no push, no animator; the error path runs
-        // after the tab selection.
-        assertEquals(listOf("select(Sessions)") + errorTail, r.log)
+        // The failable open: no push, no animator; the error path runs.
+        assertEquals(errorTail, r.log)
     }
 
     @Test
@@ -251,7 +243,7 @@ class RouterTest {
         advanceUntilIdle()
         // Factory errors are logged ("open session failed") and treated
         // as the unknown-chat path.
-        assertEquals(listOf("select(Sessions)") + errorTail, r.log)
+        assertEquals(errorTail, r.log)
     }
 
     @Test
@@ -263,7 +255,7 @@ class RouterTest {
         // open dispatcher dispatched); had it run on the router's main
         // dispatcher, the check would have thrown and the log would be the
         // error path instead. The success log is the open-completed proof.
-        assertEquals(listOf("select(Sessions)", "dismissAlerts", "popToRoot(false)", "push(c1,true)"), r.log)
+        assertEquals(listOf("dismissAlerts", "popToRoot(false)", "push(c1,true)"), r.log)
     }
 
     // --------------------------------------------- openSession(id, handoff)
@@ -275,7 +267,7 @@ class RouterTest {
         r.router.openSession("c1", null)
         advanceUntilIdle()
         // Fact 5: a nil handoff behaves exactly like openSession(id).
-        assertEquals(listOf("select(Sessions)", "dismissAlerts", "popToRoot(false)", "push(c1,true)"), r.log)
+        assertEquals(listOf("dismissAlerts", "popToRoot(false)", "push(c1,true)"), r.log)
         assertNull(r.animator.onFinished)
     }
 
@@ -290,11 +282,9 @@ class RouterTest {
         // the animator runs last.
         assertEquals(
             listOf(
-                "select(Sessions)",
                 "prepareArrival(c1)",
                 "popToRoot(false)",
                 "push(c1,false)",
-                "setAccessoryVisible(false,false)",
                 "hideIme",
                 "hideSheetForHandoff",
                 "animator.run(c1)",
@@ -310,7 +300,7 @@ class RouterTest {
         // animator calls its completion twice.
         r.animator.onFinished?.invoke()
         r.animator.onFinished?.invoke()
-        assertEquals(listOf("dismissSheet(false)"), r.log.drop(8))
+        assertEquals(listOf("dismissSheet(false)"), r.log.drop(6))
         assertFalse(r.shell.sheet)
     }
 
@@ -324,7 +314,7 @@ class RouterTest {
         advanceUntilIdle()
         // The new-session sheet is dismissed instantly (showSessionOpenError
         // runs with the sheet up), no prepareArrival, no animator.
-        assertEquals(listOf("select(Sessions)", "dismissSheet(false)") + errorTail, r.log)
+        assertEquals(listOf("dismissSheet(false)") + errorTail, r.log)
         assertFalse(r.shell.sheet)
         assertNull(r.animator.onFinished)
     }
@@ -339,11 +329,9 @@ class RouterTest {
         advanceUntilIdle()
         assertEquals(
             listOf(
-                "select(Sessions)",
                 "prepareArrival(c1)",
                 "popToRoot(false)",
                 "push(c1,false)",
-                "setAccessoryVisible(false,false)",
                 "hideIme",
                 "hideSheetForHandoff",
                 "finishArrival(c1)",
@@ -365,7 +353,7 @@ class RouterTest {
         // The latest intent wins: the first open's route is discarded
         // (never pushed, never toasted) and the second applies.
         assertEquals(
-            listOf("select(Sessions)", "select(Sessions)", "discard(c1)", "dismissAlerts", "popToRoot(false)", "push(c2,true)"),
+            listOf("discard(c1)", "dismissAlerts", "popToRoot(false)", "push(c2,true)"),
             r.log,
         )
     }
@@ -376,7 +364,7 @@ class RouterTest {
         r.router.openSession("c1")
         r.router.showSettings()
         advanceUntilIdle()
-        assertEquals(listOf("select(Sessions)", "select(Settings)", "discard(c1)"), r.log)
+        assertEquals(listOf("pushSettings", "discard(c1)"), r.log)
     }
 
     // ------------------------------------------------ presentNewSession
@@ -398,11 +386,9 @@ class RouterTest {
         assertEquals(
             listOf(
                 "presentNewSession(fix the build)",
-                "select(Sessions)",
                 "prepareArrival(c1)",
                 "popToRoot(false)",
                 "push(c1,false)",
-                "setAccessoryVisible(false,false)",
                 "hideIme",
                 "hideSheetForHandoff",
                 "animator.run(c1)",
@@ -410,7 +396,7 @@ class RouterTest {
             r.log,
         )
         r.animator.onFinished?.invoke()
-        assertEquals(listOf("dismissSheet(false)"), r.log.drop(9))
+        assertEquals(listOf("dismissSheet(false)"), r.log.drop(7))
         assertFalse(r.shell.sheet)
     }
 
@@ -427,12 +413,32 @@ class RouterTest {
     // --------------------------------------- showSettings/showSearch/pop
 
     @Test
-    fun showSettings_showSearch_selectTabsOnly() = runTest {
+    fun showSettings_pushesSettings() = runTest {
         val r = rig(testScheduler)
         r.router.showSettings()
+        advanceUntilIdle()
+        // `MainTabController.swift:130-137`: nothing presented, so only the
+        // stack half (pop to the list, push Settings — the adapter's).
+        assertEquals(listOf("pushSettings"), r.log)
+    }
+
+    @Test
+    fun showSettings_withSheet_dismissesInstantlyFirst() = runTest {
+        val r = rig(testScheduler)
+        r.shell.sheet = true
+        r.router.showSettings()
+        advanceUntilIdle()
+        assertEquals(listOf("dismissSheet(false)", "pushSettings"), r.log)
+        assertFalse(r.shell.sheet)
+    }
+
+    @Test
+    fun showSearch_popsToTheListThenActivatesTheField() = runTest {
+        val r = rig(testScheduler)
         r.router.showSearch()
         advanceUntilIdle()
-        assertEquals(listOf("select(Settings)", "select(Search)"), r.log)
+        // `MainTabController.swift:139-142`: popToFrontPage, activateSearch.
+        assertEquals(listOf("popToRoot(false)", "activateSearch"), r.log)
     }
 
     @Test
@@ -440,8 +446,7 @@ class RouterTest {
         val r = rig(testScheduler)
         r.router.popToFrontPage()
         advanceUntilIdle()
-        // Fact 7: pops the Sessions stack to root without animation and
-        // does NOT select the tab.
+        // Fact 7: pops the Sessions stack to root without animation.
         assertEquals(listOf("popToRoot(false)"), r.log)
     }
 
@@ -468,7 +473,7 @@ class RouterTest {
         r.router.showSessionOpenError()
         advanceUntilIdle()
         // Fact 8, verbatim: instant sheet dismissal, alerts, IME down,
-        // Sessions, pop to root, accessory sync, then the toast.
+        // pop to root, then the toast.
         assertEquals(listOf("dismissSheet(false)") + errorTail, r.log)
         assertFalse(r.shell.sheet)
     }
@@ -499,7 +504,7 @@ class RouterTest {
         // withContext throws CancellationException on resume;
         // openSessionRoute discards the built route on the caller's
         // (main) dispatcher first: no push, no toast.
-        assertEquals(listOf("select(Sessions)", "discard(c1)"), r.log)
+        assertEquals(listOf("discard(c1)"), r.log)
     }
 
     // --------------------------------------------------------- defaults

@@ -44,8 +44,7 @@ import sh.zeron.android.shell.LargeTitleScaffold
 import sh.zeron.android.shell.LocalNavStack
 import sh.zeron.android.shell.NavStack
 import sh.zeron.android.shell.NavStackHost
-import sh.zeron.android.shell.TabId
-import sh.zeron.android.shell.TabRootRoute
+import sh.zeron.android.shell.SessionsRootRoute
 import sh.zeron.android.shell.TitleMode
 import sh.zeron.android.shell.largeTitleDefaultTopInset
 import uniffi.zeron_core.ChatIndicator
@@ -453,7 +452,7 @@ private fun FolderScreenPreview(
         CompositionLocalProvider(LocalRowActions provides PreviewRowActions) {
             GlassMenuHost {
                 val stack = remember(route) {
-                    NavStack(TabRootRoute(TabId.Sessions)).apply { push(route, animated = false) }
+                    NavStack(SessionsRootRoute).apply { push(route, animated = false) }
                 }
                 NavStackHost(stack = stack, active = true) { entry ->
                     val r = entry.route

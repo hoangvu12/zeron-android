@@ -185,7 +185,7 @@ private const val TAG = "ZeronSearch"
 
 /**
  * [WorkspaceSnapshot] → [SearchSource]: the revision plus `front.recent`.
- * Called off composition (the stateful [SearchScreen] maps the feed's
+ * Called off composition (the stateful [SessionsScreen] maps the feed's
  * flow with it).
  */
 fun WorkspaceSnapshot.toSearchSource(): SearchSource = SearchSource(revision, front.recent)
