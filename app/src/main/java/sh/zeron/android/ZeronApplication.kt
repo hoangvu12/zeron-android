@@ -788,11 +788,28 @@ class ZeronApplication : Application() {
     }
 
     /**
+     * The Relay setting (#130), already confirmed: accounts are per relay,
+     * so a signed-in account is signed out first, its store deleted (the
+     * root cross-fades to Welcome), then the new relay and WorkOS client
+     * are written. The demo runs on no relay and keeps running.
+     */
+    fun changeRelay(url: String?, workosClientId: String?) {
+        applicationScope.launch(Dispatchers.IO) {
+            if (sessionHolder.clientOrNull() != null && !sessionHolder.isDemo) {
+                sessionHolder.signOutLocally(forget = true)
+            }
+            Endpoints.setRelay(url, workosClientId)
+        }
+    }
+
+    /**
      * A fresh launch's debug extras that pick the account or the edge
      * (#18; `MainActivity` calls this only in debuggable builds, before
      * `setContent`): the sticky endpoint overrides are written, then the
      * holder applies `signedout` / `dev` / `demo` after (or instead of)
-     * the stored account's boot. The root holds `Loading` until done.
+     * the stored account's boot. A changed edge forgets the stored account
+     * like `signedout` does (#130: accounts are per relay). The root holds
+     * `Loading` until done.
      */
     internal fun applyLaunchAccount(options: LaunchOptions) {
         if (!options.touchesAccount || core !is CoreStatus.Loaded) return
@@ -801,8 +818,7 @@ class ZeronApplication : Application() {
             try {
                 val edgeChanged = Endpoints.applyLaunch(options.edge, options.workos)
                 sessionHolder.relaunch(
-                    clearStored = options.signedOut,
-                    restart = edgeChanged,
+                    clearStored = options.signedOut || edgeChanged,
                     choose = options::launchCredentials,
                 )
             } finally {

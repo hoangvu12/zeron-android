@@ -44,6 +44,7 @@ class SessionHolderTest {
     private val events = mutableListOf<ClientEvent>()
     private val signOuts = mutableListOf<Boolean>()
     private var refuse = false
+    private var relay: String? = null
 
     private val holder: SessionHolder<FakeClient> by lazy {
         SessionHolder<FakeClient>(
@@ -57,6 +58,7 @@ class SessionHolderTest {
             hop = { hops += it },
             sessionEvents = SessionEventHub { },
             log = { _, _ -> },
+            relay = { relay },
         ).also { h ->
             h.addEventSink { events += it }
             h.addSignOutListener { signOuts += it }
@@ -116,7 +118,7 @@ class SessionHolderTest {
     @Test
     fun aDemoLaunchBeforeBootNeverStartsTheStoredAccount() {
         store.store(account())
-        holder.relaunch(clearStored = false, restart = false) { demo }
+        holder.relaunch(clearStored = false) { demo }
         holder.boot()
         assertTrue(holder.booted.value)
         assertEquals(listOf<Credentials>(demo), built.map { it.credentials })
@@ -128,7 +130,7 @@ class SessionHolderTest {
     fun aDemoLaunchAfterBootReplacesTheStoredClient() {
         store.store(account())
         holder.boot()
-        holder.relaunch(clearStored = false, restart = false) { demo }
+        holder.relaunch(clearStored = false) { demo }
         assertTrue(built[0].shutDown)
         assertSame(built[1], holder.clientOrNull())
         assertTrue(holder.isDemo)
@@ -137,7 +139,7 @@ class SessionHolderTest {
     @Test
     fun noLaunchAccountBootsTheStoredOne() {
         store.store(account())
-        holder.relaunch(clearStored = false, restart = false) { null }
+        holder.relaunch(clearStored = false) { null }
         assertEquals(account(), built.single().credentials)
         assertTrue(holder.booted.value)
     }
@@ -146,7 +148,7 @@ class SessionHolderTest {
     fun signedOutWipesTheStoredAccountBeforeChoosing() {
         store.store(account())
         var sawStored: Boolean? = null
-        holder.relaunch(clearStored = true, restart = false) { stored -> sawStored = stored; null }
+        holder.relaunch(clearStored = true) { stored -> sawStored = stored; null }
         assertEquals(false, sawStored)
         assertNull(store.stored())
         assertNull(holder.client.value)
@@ -158,7 +160,7 @@ class SessionHolderTest {
         store.store(account())
         holder.boot()
         File(coreDir, "outbox.db").writeText("unsent")
-        holder.relaunch(clearStored = true, restart = false) { Credentials.Dev("alice", "org1") }
+        holder.relaunch(clearStored = true) { Credentials.Dev("alice", "org1") }
         assertTrue(built[0].shutDown)
         assertEquals(listOf(false), signOuts)
         assertNull(store.stored())
@@ -166,13 +168,35 @@ class SessionHolderTest {
     }
 
     @Test
-    fun aNewEdgeRestartsTheStoredAccount() {
+    fun aRelaunchAfterBootNeverRestartsTheStoredAccount() {
         store.store(account())
         holder.boot()
-        holder.relaunch(clearStored = false, restart = true) { null }
-        assertEquals(2, built.size)
-        assertTrue(built[0].shutDown)
-        assertEquals(account(), built[1].credentials)
+        holder.relaunch(clearStored = false) { null }
+        assertEquals(1, built.size)
+        assertFalse(built[0].shutDown)
+    }
+
+    // ------------------------------------------------------- relay (#130)
+
+    @Test
+    fun zeronsRelayKeepsThePreRelayOwner() {
+        relay = null
+        File(coreDir, "outbox.db").also { it.parentFile!!.mkdirs() }.writeText("unsent")
+        File(coreDir, ".owner").writeText("user_1/org_1")
+        assertTrue(holder.start(account()))
+        assertEquals("unsent", File(coreDir, "outbox.db").readText())
+        assertEquals("user_1/org_1", File(coreDir, ".owner").readText())
+    }
+
+    @Test
+    fun theSameAccountOnAnotherRelayStartsEmpty() {
+        assertTrue(holder.start(account()))
+        File(coreDir, "outbox.db").writeText("unsent")
+        holder.signOutLocally(forget = false)
+        relay = "https://relay.example.com"
+        assertTrue(holder.start(account()))
+        assertFalse(File(coreDir, "outbox.db").exists())
+        assertEquals("https://relay.example.com user_1/org_1", File(coreDir, ".owner").readText())
     }
 
     // --------------------------------------------------------------- start

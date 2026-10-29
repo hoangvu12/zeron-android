@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -78,6 +79,7 @@ import sh.zeron.android.design.ZeronSegmentedControl
 import sh.zeron.android.design.ZeronTheme
 import sh.zeron.android.design.uiStyle
 import sh.zeron.android.notify.rememberNotificationPermissionRequester
+import sh.zeron.android.settings.RelayLink
 import sh.zeron.android.settings.WallpaperRowIds
 import sh.zeron.android.settings.rememberWallpaperSectionState
 import sh.zeron.android.settings.wallpaperEffectSheet
@@ -228,6 +230,9 @@ internal fun SyncPage(app: ZeronApplication, signedIn: Boolean) {
                 modifier = Modifier.testTag("onboarding-sync-status"),
             )
         }
+        // #130: which relay "Log in" goes through, changeable before it does.
+        // Offset by the link's own padding, so its text lines up with the page's.
+        if (!signedIn) RelayLink(Modifier.offset(x = (-8).dp))
     }
 }
 

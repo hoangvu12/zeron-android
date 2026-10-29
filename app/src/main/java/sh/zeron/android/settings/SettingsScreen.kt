@@ -21,6 +21,7 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import kotlinx.coroutines.flow.StateFlow
 import sh.zeron.android.ZeronApplication
 import sh.zeron.android.core.CloudStore
+import sh.zeron.android.core.Endpoints
 import sh.zeron.android.shell.LaunchOptions
 import sh.zeron.android.design.LocalActionSheet
 import sh.zeron.android.design.LocalBottomChrome
@@ -125,7 +126,7 @@ private val SettingsDeviceIdPrefix = DevicesRowIds.device("")
  * `account` and `signout` are #18's rows, `voice` #61's.
  */
 fun settingsSectionFor(id: String): SettingsSection? = when {
-    id == AccountRowIds.Account -> SettingsSection.Account
+    id == AccountRowIds.Account || id == AccountRowIds.Relay -> SettingsSection.Account
     id == AccountRowIds.SignOut -> SettingsSection.SignOut
 
     id.startsWith("agent-account:") || id.startsWith("agent-accounts:") ->
@@ -205,9 +206,13 @@ fun SettingsScreen(
     /** #48: iOS `viewDidLoad`'s `app.cloud.refresh()` — Cloud's status for the "Agents" rows (#49). */
     refreshCloud: () -> Unit =
         (LocalContext.current.applicationContext as ZeronApplication).cloud::refresh,
+    /** #130: the custom relay (null on Zeron's) and the Relay setting. */
+    relay: StateFlow<String?> = Endpoints.relay,
+    onRelay: () -> Unit = rememberRelaySetting(),
 ) {
     val listState = rememberLazyListState()
     val identity by account.collectAsState()
+    val currentRelay by relay.collectAsState()
     val signOut by rememberUpdatedState(onSignOut)
     val sheets = LocalActionSheet.current
     val cloudRefresh by rememberUpdatedState(refreshCloud)
@@ -230,7 +235,7 @@ fun SettingsScreen(
     val voiceShown = voice != null && rememberVoiceVisible(voice)
     val voiceStyle = voice?.selectedStyle?.collectAsState()?.value
     SettingsScreenContent(listState, modifier, topInset, trailing) {
-        accountSection(identity)
+        accountSection(identity, currentRelay, onRelay)
         // #49: Providers, then Cloud and Billing when Cloud is offered.
         agentsSection(agents) { id -> openAgentsRow(nav, id) }
         devicesSection(devices)

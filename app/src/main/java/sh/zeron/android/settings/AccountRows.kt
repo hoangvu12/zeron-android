@@ -6,6 +6,7 @@ import sh.zeron.android.core.CredentialStore
 import sh.zeron.android.design.ActionSheetAction
 import sh.zeron.android.design.ActionSheetModel
 import sh.zeron.android.design.ActionSheetStyle
+import sh.zeron.android.design.GroupedAccessory
 import sh.zeron.android.design.GroupedRow
 import sh.zeron.android.design.ZeronIcons
 import sh.zeron.android.design.groupedSection
@@ -22,6 +23,9 @@ import sh.zeron.android.design.settingsTag
 /** The row ids (`settings-account`, `settings-signout`), iOS's. */
 object AccountRowIds {
     const val Account = "account"
+
+    /** #130: the Relay row under the account. */
+    const val Relay = "relay"
     const val SignOut = "signout"
 }
 
@@ -57,22 +61,40 @@ fun signOutSheet(onSignOut: () -> Unit): ActionSheetModel = ActionSheetModel(
     actions = listOf(ActionSheetAction("Sign Out", ActionSheetStyle.Destructive, onSelect = onSignOut)),
 )
 
-/** The Account section: one row, person icon, no accessory, no tap. */
-fun LazyListScope.accountSection(identity: AccountIdentity) {
+/**
+ * The Account section: the account row (person icon, no accessory, no
+ * tap), then #130's Relay row — "Zeron", or the custom relay's host — which
+ * opens the Relay setting.
+ */
+fun LazyListScope.accountSection(
+    identity: AccountIdentity,
+    relay: String? = null,
+    onRelay: () -> Unit = {},
+) {
     groupedSection(
         key = "account",
         header = "Account",
-        items = listOf(identity),
-        itemKey = { AccountRowIds.Account },
-    ) { row, position ->
-        GroupedRow(
-            title = accountName(row),
-            position = position,
-            subtitle = accountDetail(row),
-            icon = ZeronIcons.PersonCropCircle,
-            accessories = emptyList(),
-            testTag = settingsTag(AccountRowIds.Account),
-        )
+        items = listOf(AccountRowIds.Account, AccountRowIds.Relay),
+        itemKey = { it },
+    ) { id, position ->
+        when (id) {
+            AccountRowIds.Account -> GroupedRow(
+                title = accountName(identity),
+                position = position,
+                subtitle = accountDetail(identity),
+                icon = ZeronIcons.PersonCropCircle,
+                accessories = emptyList(),
+                testTag = settingsTag(AccountRowIds.Account),
+            )
+            else -> GroupedRow(
+                title = "Relay",
+                position = position,
+                icon = ZeronIcons.ServerRack,
+                accessories = listOf(GroupedAccessory.Value(relayLabel(relay)), GroupedAccessory.Disclosure),
+                testTag = settingsTag(AccountRowIds.Relay),
+                onClick = onRelay,
+            )
+        }
     }
 }
 

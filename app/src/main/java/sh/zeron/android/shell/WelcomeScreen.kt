@@ -40,6 +40,7 @@ import sh.zeron.android.design.LocalTypeScale
 import sh.zeron.android.design.WallpaperHero
 import sh.zeron.android.design.ZeronTheme
 import sh.zeron.android.design.uiStyle
+import sh.zeron.android.settings.RelayLink
 
 /**
  * The signed-out root: a port of `ios:Shell/SignInViewController.swift:58-106`
@@ -88,6 +89,9 @@ fun WelcomeScreen(onGetStarted: () -> Unit, modifier: Modifier = Modifier) {
                         .copy(textAlign = TextAlign.Center),
                 )
             }
+            // #130 (beyond iOS): the relay sign-in goes through, small in
+            // the top corner so the page itself is unchanged.
+            RelayLink(Modifier.align(Alignment.TopEnd).padding(top = 4.dp, end = 12.dp))
             // SignInVC:103-105: 24 pt side insets, 16 pt above the safe area.
             WelcomePrimaryButton(
                 title = "Get started",

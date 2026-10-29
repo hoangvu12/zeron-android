@@ -76,6 +76,8 @@ class SessionHolder<C : Any>(
      */
     val sessionEvents: SessionEventHub = SessionEventHub(),
     private val log: (String, Throwable?) -> Unit = { message, error -> Log.w(TAG, message, error) },
+    /** #130: the custom relay the account signs in on; null on Zeron's. Part of the store's owner. */
+    private val relay: () -> String? = { null },
 ) {
 
     private val _client = MutableStateFlow<C?>(null)
@@ -147,11 +149,11 @@ class SessionHolder<C : Any>(
      * [clearStored] (`signedout`) forgets the stored account first, signing
      * a running one out locally (its store is kept). [choose] then picks the
      * account to start, given whether one is still stored; null keeps the
-     * stored one, which [restart] (the edge changed) starts again. Blocks.
+     * stored one. A changed edge comes in as [clearStored] (#130: accounts
+     * are per relay). Blocks.
      */
     fun relaunch(
         clearStored: Boolean,
-        restart: Boolean,
         choose: (hasStored: Boolean) -> Credentials?,
     ) {
         synchronized(lifecycle) {
@@ -166,9 +168,7 @@ class SessionHolder<C : Any>(
                     }
                 }
                 val stored = credentials.stored()
-                val runsStored = _client.value != null && !isDemo
-                val next = choose(stored != null)
-                    ?: stored?.takeIf { booting || (restart && runsStored) }
+                val next = choose(stored != null) ?: stored?.takeIf { booting }
                 next?.let(::startLocked)
             } finally {
                 _booted.value = true
@@ -253,13 +253,18 @@ class SessionHolder<C : Any>(
         }
     }
 
-    /** Local docs belong to one identity: another account or org starts empty. */
+    /**
+     * Local docs belong to one identity: another account, org or relay
+     * (#130: accounts are per relay) starts empty. Zeron's relay keeps the
+     * pre-#130 owner, so an existing store survives the update.
+     */
     private fun claimCoreDir(credentials: Credentials) {
-        val owner = when (credentials) {
+        val account = when (credentials) {
             is Credentials.WorkOs -> "${credentials.userId}/${credentials.orgId}"
             is Credentials.Dev -> "${credentials.userId}/${credentials.orgId}"
             is Credentials.Demo -> return
         }
+        val owner = relay()?.let { "$it $account" } ?: account
         val marker = File(coreDir, OWNER_MARKER)
         if (runCatching { marker.readText() }.getOrNull() != owner) coreDir.deleteRecursively()
         coreDir.mkdirs()
@@ -330,7 +335,7 @@ class SessionHolder<C : Any>(
                 credentials = credentials,
                 newClient = { dir, creds, listener ->
                     val config = CoreConfig(
-                        // Production, or the debug `edge` override (#18).
+                        // Zeron's relay, the Relay setting (#130) or the debug `edge` override (#18).
                         edgeUrl = Endpoints.edgeUrl,
                         dataDir = dir.path,
                         deviceId = DeviceId.read(app),
@@ -346,6 +351,7 @@ class SessionHolder<C : Any>(
                 shutdown = { it.shutdown() },
                 hop = lane::execute,
                 sessionEvents = sessionEvents,
+                relay = { Endpoints.relay.value },
             )
         }
     }
