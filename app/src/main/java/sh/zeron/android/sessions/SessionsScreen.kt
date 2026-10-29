@@ -272,6 +272,16 @@ internal fun SessionsScreenContent(
     val freeAreaTop = topInset + LargeTitleDefaults.NavRowHeight +
         LargeTitleDefaults.LargeRowHeight + pinnedAccessoryHeight
 
+    // #24: dragging a session between sections (front page only; search
+    // results are not a place a session is put). The auto-scroll starts
+    // at the visible edges, below the bars.
+    val sectionDrag = rememberSectionDrag(
+        listState = listState,
+        items = model.items,
+        actions = actions,
+        scrollThresholdPadding = PaddingValues(top = freeAreaTop, bottom = bottomPadding),
+    )
+
     LargeTitleScaffold(
         title = "Sessions",
         mode = TitleMode.Always,
@@ -337,6 +347,7 @@ internal fun SessionsScreenContent(
                 currentChatId = currentChatId,
                 rowWrapper = rowWrapper,
                 headerWrapper = headerWrapper,
+                sectionDrag = sectionDrag,
             )
         }
     }

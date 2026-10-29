@@ -86,6 +86,17 @@ class FoldState(
         feedback.haptic(Haptic.Select)
     }
 
+    /**
+     * Opens [id] if folded — a drop into a folded section (iOS
+     * `performDropWith` removes it from `collapsed` and persists; the
+     * drop's own haptic is the only one).
+     */
+    fun expand(id: String) {
+        if (id !in _state.value.local) return
+        _state.update { fold -> Fold(fold.local - id) }
+        persist()
+    }
+
     private fun persist() {
         scope.launch(serial) {
             loaded.await()

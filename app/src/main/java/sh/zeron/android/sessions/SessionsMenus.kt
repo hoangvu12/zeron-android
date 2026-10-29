@@ -53,6 +53,9 @@ interface SessionsScreenActions {
     /** A header tap → 40's `FrontPageModel.toggleSection(id, feedback)`. */
     fun toggleSection(id: String)
 
+    /** A drop into folded section [id] opens it (#24, `FrontPageModel.expandSection`); previews do nothing. */
+    fun unfoldSection(id: String) {}
+
     /** The Pinned header menu's "Open" and "Reorder…" (both push the Pinned page, 45). */
     fun openPinned()
 
@@ -210,6 +213,8 @@ internal fun rememberSessionsActions(navStack: NavStack): SessionsScreenActions 
             override fun collapseAll() = frontPage.collapseAll(feedback)
 
             override fun toggleSection(id: String) = frontPage.toggleSection(id, feedback)
+
+            override fun unfoldSection(id: String) = frontPage.expandSection(id)
 
             override fun openPinned() {
                 navStack.push(FolderRoute.pinned(), animated = true)
