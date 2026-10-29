@@ -1,6 +1,5 @@
 package sh.zeron.android.flows
 
-import android.content.ClipboardManager
 import android.graphics.Point
 import android.os.SystemClock
 import android.provider.Settings
@@ -9,8 +8,6 @@ import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.click
@@ -37,15 +34,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
 import androidx.compose.ui.unit.height
-import java.net.HttpURLConnection
-import java.net.URL
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import java.util.Base64
 import java.util.UUID
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
@@ -62,10 +53,10 @@ import sh.zeron.android.ZeronApplication
 /**
  * The flow suite's SessionFlowTests port (android-app#30 §6): one Android
  * test per iOS test of `uit:SessionFlowTests.swift` with the same name
- * minus `test`, run against the **fixture engines** ([FixtureRule]) — a
- * real `zeron-engine` on the mock harness, paired exactly as a user
- * pairs — instead of upstream's in-app `-demo` host (D4: no demo
- * workspace in Zeron).
+ * minus `test`, run on the core's offline demo ([FixtureRule], #63) —
+ * upstream's own `-demo -fast` (iOS `AppModel.demoOptions()`): the
+ * seeded workspace in `zeron/crates/client/src/demo/`, no host, no
+ * network.
  *
  * Rows whose owning tickets have not landed yet stay in this class
  * `@Ignore`d with the ticket named, so the port table is visible in one
@@ -81,13 +72,19 @@ import sh.zeron.android.ZeronApplication
  * menus of ui-parity #92/#109/#113/#114 — the sheet itself, 93, and the
  * create + first send, 94, have landed).
  *
- * Route/engine per test (fixture §5): the `questionPanel*` test runs on
- * the `question` engine (`chat-ask`), the queue/cancelled-swipe rows on
- * the `slow` engine (`chat-long`), the jump/scroll-up rows on `main`'s
- * `chat-veil` — the fixture's own 30-turn big transcript (upstream's
- * `-big`; the slow engine's `chat-long` seeds no history, so a
- * 0.45 · height drag can never get 140 dp from the bottom there) — and
- * everything else on `main` (`chat-deploy` / the front page).
+ * Route and demo options per test ([routeFor], [extrasFor]): the
+ * question rows send a `?ask` prompt (the demo replies with one
+ * question); the queue / cancelled-swipe / live tool rows run with
+ * [SlowReply] (`fast` off + `longreply`: a paced reply that streams for
+ * seconds); the jump / scroll-up rows open `chat-veil` with `big` (a
+ * 120-turn synthetic transcript, upstream's `-big`); the error card is
+ * `chat-errored`'s seeded signed-out error; everything else is
+ * `chat-deploy` or the front page.
+ *
+ * Dropped with the fixture engines (#63): `offlineEngineIsReadOnly` (the
+ * demo has no host to take offline) and
+ * `forgottenEngineChatRouteReturnsToSessions` (scoped `engine:v1:` ids
+ * are gone; chat ids are plain).
  */
 @RunWith(AndroidJUnit4::class)
 class SessionFlowTest {
@@ -97,7 +94,7 @@ class SessionFlowTest {
 
     private val launch = FixtureRule(
         routeFor = { name -> routeFor(name) },
-        enginesFor = { name -> enginesFor(name) },
+        extrasFor = { name -> extrasFor(name) },
     )
 
     @Suppress("DEPRECATION") // the public AndroidComposeTestRule constructor is the one way to hand it a custom rule
@@ -113,21 +110,15 @@ class SessionFlowTest {
             as ZeronApplication
 
     @Before
-    fun requirePairedFixtureEngine() {
-        // The `pair` extra's redeem is async (it races this @Before by
-        // design — the first-frame hold usually settles it first). Poll
-        // briefly before running: a skip here means the rig broke, not
-        // that a slow load was mistaken for its absence.
+    fun requireDemoClient() {
+        // The `demo` extra's client starts during `onCreate` (#18's
+        // `applyLaunchAccount`); poll briefly so a slow start is not
+        // mistaken for a missing one.
         val deadline = System.currentTimeMillis() + 10_000
-        var engines = app.clientOrNull()?.engines().orEmpty()
-        while (engines.isEmpty() && System.currentTimeMillis() < deadline) {
+        while (app.clientOrNull() == null && System.currentTimeMillis() < deadline) {
             Thread.sleep(250)
-            engines = app.clientOrNull()?.engines().orEmpty()
         }
-        assertTrue(
-            "the rig's redeemed engine never appeared (android_fixture /mint + the pair extra)",
-            engines.isNotEmpty(),
-        )
+        assertTrue("the demo client never started (the `demo` launch extra)", app.clientOrNull() != null)
     }
 
     // ── the front page ──────────────────────────────────────────────────
@@ -240,7 +231,7 @@ class SessionFlowTest {
         val height = compose.activity.window.decorView.height
         device.swipe(width / 2, height / 4, width / 2, (height * 0.85f).toInt(), 30)
 
-        // The refresh runs against the real engine and the list settles
+        // The refresh runs against the demo workspace and the list settles
         // back — no sleeps: poll the row back to its resting position.
         compose.waitUntil(timeoutMillis = 5_000) {
             kotlin.math.abs(
@@ -262,7 +253,7 @@ class SessionFlowTest {
             .performTextInput("Summarize the launch post in three bullets.")
         compose.onNodeWithTag("composer-send").performClick()
         // Sending puts the keyboard away (the send landed), then the echo.
-        // `main` streams its ~20-row reply at once, so the prompt can leave
+        // The demo (`fast`) streams its reply almost at once, so the prompt can leave
         // the realized band before the wait polls (run 38552405016): page
         // back to it instead of waiting for it to be composed at the tail.
         compose.waitUntil(timeoutMillis = 3_000) { !imeVisible() }
@@ -313,42 +304,42 @@ class SessionFlowTest {
         FlowSemantics.saveScreenshot("draft-reopened.png")
     }
 
-    /** `testQuestionPanelAnswersAndResumes` (:86): the `question` engine's panel, answered. */
+    /** `testQuestionPanelAnswersAndResumes` (:86): a `?ask` prompt's question, answered. */
     @Test
     fun questionPanelAnswersAndResumes() {
         compose.waitUntil(timeoutMillis = 10_000) {
             compose.onAllNodesWithTag("composer-input").fetchSemanticsNodes().isNotEmpty()
         }
-        compose.onNodeWithTag("composer-input").performClick().performTextInput("Pick a tone for the post")
+        // `?ask`: the demo replies "Before I continue I need one decision:"
+        // and asks one single-select question (`transcripts::asking()`),
+        // like the iOS demo.
+        compose.onNodeWithTag("composer-input").performClick().performTextInput("Pick a tone for the post ?ask")
         compose.onNodeWithTag("composer-send").performClick()
         compose.waitUntil(timeoutMillis = 20_000) {
             compose.onAllNodesWithTag("question-option-0").fetchSemanticsNodes().isNotEmpty()
         }
+        compose.onAllNodesWithText("Should the fix cover Android too?")[0].assertExists()
         FlowSemantics.saveScreenshot("question.png")
         compose.onNodeWithTag("question-option-0").performClick()
-        // The mock asks TWO questions (crates/harness/src/mock.rs
-        // question_script): page 1 single-select auto-advances, page 2 is
-        // multi-select and needs a pick + Submit before the composer
-        // returns (the iOS demo asked one).
-        compose.waitUntil(timeoutMillis = 10_000) {
-            compose.onAllNodesWithText("Which suites should gate the merge?").fetchSemanticsNodes().isNotEmpty() &&
-                compose.onAllNodesWithTag("question-option-0").fetchSemanticsNodes().size == 1
+        // The last (only) page: a single-select pick may submit on its
+        // own; press Submit if the panel still shows it.
+        compose.waitForIdle()
+        if (compose.onAllNodesWithTag("question-next").fetchSemanticsNodes().isNotEmpty()) {
+            compose.onNodeWithTag("question-next").performClick()
         }
-        compose.onNodeWithTag("question-option-0").performClick()
-        compose.onNodeWithTag("question-next").performClick()
         // The composer returns after answering.
         compose.waitUntil(timeoutMillis = 10_000) {
             compose.onAllNodesWithTag("composer-input").fetchSemanticsNodes().isNotEmpty()
         }
     }
 
-    /** `testQueueWhileWorking` (:100): queue two follow-ups on the slow engine. */
+    /** `testQueueWhileWorking` (:100): queue two follow-ups behind a paced reply ([SlowReply]). */
     @Test
     fun queueWhileWorking() {
         compose.waitUntil(timeoutMillis = 10_000) {
             compose.onAllNodesWithTag("composer-input").fetchSemanticsNodes().isNotEmpty()
         }
-        awaitSlowEngineIdle()
+        awaitIdle()
         compose.onNodeWithTag("composer-input").performClick().performTextInput("Write a long reply please.")
         compose.onNodeWithTag("composer-send").performClick()
         compose.waitUntil(timeoutMillis = 5_000) {
@@ -383,7 +374,7 @@ class SessionFlowTest {
         compose.waitUntil(timeoutMillis = 10_000) {
             compose.onAllNodesWithTag("composer-input").fetchSemanticsNodes().isNotEmpty()
         }
-        awaitSlowEngineIdle()
+        awaitIdle()
         compose.onNodeWithTag("composer-input").performClick().performTextInput("Write a long reply please.")
         compose.onNodeWithTag("composer-send").performClick()
         compose.waitUntil(timeoutMillis = 5_000) {
@@ -398,7 +389,7 @@ class SessionFlowTest {
         compose.waitUntil(timeoutMillis = 5_000) {
             compose.onAllNodesWithTag("new-session").fetchSemanticsNodes().isNotEmpty()
         }
-        compose.onNode(FlowSemantics.sessionRow("chat-long")).performClick()
+        compose.onNode(FlowSemantics.sessionRow("chat-deploy")).performClick()
         compose.waitUntil(timeoutMillis = 10_000) {
             compose.onAllNodesWithContentDescription("More queue actions").fetchSemanticsNodes().isNotEmpty()
         }
@@ -419,14 +410,14 @@ class SessionFlowTest {
         compose.waitUntil(timeoutMillis = 10_000) {
             compose.onAllNodesWithTag("composer-input").fetchSemanticsNodes().isNotEmpty()
         }
-        awaitSlowEngineIdle()
+        awaitIdle()
         val before = compose.onAllNodesWithTag("row-markdown").fetchSemanticsNodes().size
 
         compose.onNodeWithTag("composer-input").performClick()
             .performTextInput("Summarize the launch post in three bullets.")
         compose.onNodeWithTag("composer-send").performClick()
         // The turn is running before the gesture: the send button flipped
-        // to Stop (the slow fixture keeps the reply streaming for seconds).
+        // to Stop ([SlowReply] keeps the reply streaming for seconds).
         compose.waitUntil(timeoutMillis = 5_000) {
             compose.onAllNodesWithContentDescription("Stop response").fetchSemanticsNodes().isNotEmpty()
         }
@@ -471,7 +462,7 @@ class SessionFlowTest {
         compose.waitUntil(timeoutMillis = 10_000) {
             compose.onAllNodesWithTag("composer-input").fetchSemanticsNodes().isNotEmpty()
         }
-        awaitSlowEngineIdle()
+        awaitIdle()
         val before = compose.onAllNodesWithTag("row-markdown").fetchSemanticsNodes().size
 
         compose.onNodeWithTag("composer-input").performClick()
@@ -581,7 +572,7 @@ class SessionFlowTest {
 
         // 81: the tap lands 8 dp in — inside the 18 dp row margin
         // (`mob:layout/rows.rs:124`), where no link or control can be (the
-        // fixture replies contain links, so the centre iOS taps at is not
+        // demo's transcripts contain links, so the centre iOS taps at is not
         // safe) — at the iOS 0.35 height.
         compose.onNodeWithTag("transcript").performTouchInput {
             click(Offset(8.dp.toPx(), height * 0.35f))
@@ -610,10 +601,9 @@ class SessionFlowTest {
             ?.isVisible(WindowInsetsCompat.Type.ime()) == true
 
     /**
-     * `testFileMentionSuggestions` (:265). "@mod", not iOS's "@lay": the
-     * engine ranks the `src/layout` FOLDER first for "lay" (picking it
-     * inserted "@layout ", run 38552405016); "mod" matches only
-     * `src/layout/mod.rs` in the fixture repo.
+     * `testFileMentionSuggestions` (:265). "@mod", not iOS's "@lay": in
+     * the demo's file list (`Client::search_files`) "mod" matches only
+     * `crates/mobile/src/layout/mod.rs`, while "lay" matches several.
      */
     @Test
     fun fileMentionSuggestions() {
@@ -662,7 +652,7 @@ class SessionFlowTest {
      * long-press menu deletes after "Delete session?" (Cancel keeps the
      * row); the session's ⋯ menu is headed by its title and deletes too,
      * back on the list without the row. Runs on `chat-home` — no other
-     * flow test reads it, and the fixture engine lives for the whole run.
+     * flow test reads it (each launch starts a fresh demo workspace).
      */
     @Test
     fun sessionMenuHeaderAndDelete() {
@@ -720,19 +710,16 @@ class SessionFlowTest {
     /**
      * Wave-10 35 (upstream #967's error card): a run refused as signed out
      * shows the red card with "Log in"; the tap opens the chat's agent on
-     * Accounts & Usage. The mock agent's `/error <message>` prompt fails
-     * the run with that message. Runs on `chat-preview` (its preview test
-     * only reads the composer and the ⋯ menu). The mock harness signs in
-     * to nothing, so no login starts here — `AccountSignInTest` covers the
-     * start.
+     * Accounts & Usage. On the demo's `chat-errored`, whose seeded history
+     * holds the signed-out ("Not logged in · Please run /login") and
+     * usage-limit errors — no send needed. No login starts here —
+     * `AccountSignInTest` covers the start.
      */
     @Test
     fun errorCardLogInOpensTheAgentsAccounts() {
         compose.waitUntil(timeoutMillis = 20_000) {
             compose.onAllNodesWithTag("composer-input").fetchSemanticsNodes().isNotEmpty()
         }
-        compose.onNodeWithTag("composer-input").performClick().performTextInput("/error Not logged in")
-        compose.onNodeWithTag("composer-send").performClick()
         compose.waitUntil(timeoutMillis = 30_000) {
             compose.onAllNodesWithTag("transcript-action-sign-in", useUnmergedTree = true)
                 .fetchSemanticsNodes().isNotEmpty()
@@ -742,7 +729,10 @@ class SessionFlowTest {
             device.pressBack()
             compose.waitUntil(timeoutMillis = 3_000) { !imeVisible() }
         }
-        compose.onAllNodesWithTag("transcript-action-sign-in", useUnmergedTree = true)[0].performClick()
+        // The semantics action: the seeded card may sit in the overscan
+        // band above the viewport, where an injected tap hits nothing.
+        compose.onAllNodesWithTag("transcript-action-sign-in", useUnmergedTree = true)[0]
+            .performSemanticsAction(SemanticsActions.OnClick)
         compose.waitUntil(timeoutMillis = 10_000) {
             compose.onAllNodesWithTag("agent-accounts").fetchSemanticsNodes().isNotEmpty()
         }
@@ -777,7 +767,7 @@ class SessionFlowTest {
     /**
      * `testToolGroupsRenderLikeDesktop` (:494): the static expanded view
      * on `chat-veil`, then a live streaming run screenshotted over time
-     * on the slow engine's `chat-long` — both engines paired.
+     * on `chat-deploy` ([SlowReply] paces it).
      */
     @Test
     @PhoneOnly("Back pops the session to the list; beside the split shell's sidebar Back leaves the app")
@@ -799,13 +789,13 @@ class SessionFlowTest {
             FlowSemantics.saveScreenshot("tool-row-detail.png")
         }
 
-        // Live: a streaming run on the slow engine's chat, screenshotted
-        // as the group streams in (the mock's paced events).
+        // Live: a paced streaming run on another chat, screenshotted as
+        // the group streams in.
         popSessionToList()
         compose.waitUntil(timeoutMillis = 5_000) {
-            compose.onAllNodes(FlowSemantics.sessionRow("chat-long")).fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodes(FlowSemantics.sessionRow("chat-deploy")).fetchSemanticsNodes().isNotEmpty()
         }
-        compose.onNode(FlowSemantics.sessionRow("chat-long")).performClick()
+        compose.onNode(FlowSemantics.sessionRow("chat-deploy")).performClick()
         compose.waitUntil(timeoutMillis = 10_000) {
             compose.onAllNodesWithTag("composer-input").fetchSemanticsNodes().isNotEmpty()
         }
@@ -828,7 +818,7 @@ class SessionFlowTest {
             compose.onAllNodesWithTag("composer-chip-effort").fetchSemanticsNodes().isNotEmpty()
         }
         compose.onNodeWithTag("composer-chip-effort").performClick()
-        // The mock model's efforts (Low…XHigh); the menu's first item.
+        // The chat's model's efforts (Low…XHigh); the menu's first item.
         compose.waitUntil(timeoutMillis = 5_000) {
             compose.onAllNodesWithText("Low").fetchSemanticsNodes().isNotEmpty()
         }
@@ -856,16 +846,17 @@ class SessionFlowTest {
             compose.onAllNodesWithTag("composer-chip-model").fetchSemanticsNodes().isNotEmpty()
         }
         compose.onNodeWithTag("composer-chip-model").performClick()
-        // Wave-10 38: the tabbed picker sheet (upstream #966), the mock
-        // engine's models (Mock 1 / Fable 5) on the chat's provider page.
+        // Wave-10 38: the tabbed picker sheet (upstream #966) on the chat's
+        // provider page: `chat-deploy` is Claude Code on Fable 5, and the
+        // demo lists the catalog's fallback models (`catalog.rs`).
         compose.waitUntil(timeoutMillis = 5_000) {
             compose.onAllNodesWithTag("model-picker").fetchSemanticsNodes().isNotEmpty()
         }
         compose.waitUntil(timeoutMillis = 10_000) {
-            compose.onAllNodesWithText("Mock 1").fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithText("Sonnet 5.5").fetchSemanticsNodes().isNotEmpty()
         }
         FlowSemantics.saveScreenshot("model-picker.png")
-        compose.onAllNodesWithText("Mock 1")[0].performClick()
+        compose.onAllNodesWithText("Sonnet 5.5")[0].performClick()
         // The pick lands, then the sheet closes itself.
         compose.waitUntil(timeoutMillis = 5_000) {
             compose.onAllNodesWithTag("model-picker").fetchSemanticsNodes().isEmpty()
@@ -898,10 +889,10 @@ class SessionFlowTest {
 
     /**
      * `testSendGlidesPromptToTopWithRunway` (:653): the prompt glides to the
-     * top of the transcript. On the `question` engine's `chat-runway`: its
-     * reply is one line and then waits for input, so the runway holds —
-     * `main` streams a reply taller than the viewport at once, which
-     * retires the runway on the first frame (run 38552405016).
+     * top of the transcript. A `?ask` prompt: the demo's reply is one line
+     * and then waits for the answer, so the runway holds — a plain reply
+     * is taller than the viewport and retires the runway on the first
+     * frame (run 38552405016).
      */
     @Test
     fun sendGlidesPromptToTopWithRunway() {
@@ -909,7 +900,7 @@ class SessionFlowTest {
             compose.onAllNodesWithTag("composer-input").fetchSemanticsNodes().isNotEmpty()
         }
         compose.onNodeWithTag("composer-input").performClick()
-            .performTextInput("Runway check: summarize the veil work")
+            .performTextInput("Runway check: summarize the veil work ?ask")
         compose.onNodeWithTag("composer-send").performClick()
         compose.waitUntil(timeoutMillis = 5_000) {
             compose.onAllNodes(FlowSemantics.startsWith("You: Runway check"))
@@ -925,96 +916,6 @@ class SessionFlowTest {
         FlowSemantics.saveScreenshot("runway.png")
     }
 
-    // ── the offline read-only flow (Zeron ADD, 79) ──────────────────
-
-    /**
-     * An engine dropping mid-session makes the chat read-only — writes
-     * are refused, never queued (android-app#06/#07). `GET
-     * /listener/stop` on the fixture's control port kills the engine's
-     * listener (every accepted WebSocket ends), the pill shows
-     * `Reconnecting… Cached history is read-only.` within 15 s, Send
-     * greys out (a click does nothing — the draft stays) and the cached
-     * transcript keeps painting, seeded turn included. After `GET
-     * /listener/start` the pill clears and Send re-enables within 30 s
-     * without leaving the screen (the redial backoff caps at 15 s plus
-     * 0–255 ms jitter, android-app#06).
-     */
-    @Test
-    fun offlineEngineIsReadOnly() {
-        compose.waitUntil(timeoutMillis = 10_000) {
-            compose.onAllNodesWithTag("transcript").fetchSemanticsNodes().isNotEmpty()
-        }
-        compose.waitUntil(timeoutMillis = 10_000) {
-            compose.onAllNodesWithText("Wrangler deploy hygiene").fetchSemanticsNodes().isNotEmpty()
-        }
-        compose.onNodeWithTag("composer-input").performClick()
-            .performTextInput("draft kept offline")
-        compose.onNodeWithTag("composer-send").assertIsEnabled()
-
-        val control = launch.controlUrl(FixtureEngine.Main)!!
-        try {
-            listenerCommand(control, "stop")
-
-            compose.waitUntil(timeoutMillis = 15_000) {
-                compose.onAllNodesWithText("Reconnecting… Cached history is read-only.")
-                    .fetchSemanticsNodes().isNotEmpty()
-            }
-
-            // Send is disabled and a click does nothing: the draft stays.
-            compose.onNodeWithTag("composer-send").assertIsNotEnabled()
-            compose.onNodeWithTag("composer-send").performClick()
-            compose.waitForIdle()
-            // Ticket 80 (79's step 9.7): the ⋯ menu's rows are gated —
-            // Pin and Archive read the engine and are inert, Copy
-            // Transcript reads only the cached frame and stays live, and
-            // the copy really lands on the clipboard.
-            compose.onNodeWithTag("session-more").performClick()
-            compose.waitUntil(timeoutMillis = 5_000) {
-                compose.onAllNodesWithTag("glass-menu").fetchSemanticsNodes().isNotEmpty()
-            }
-            compose.onNodeWithTag("session-menu-pin").assertIsNotEnabled()
-            compose.onNodeWithTag("session-menu-archive").assertIsNotEnabled()
-            compose.onNodeWithTag("session-menu-copy").assertIsEnabled()
-            compose.onNodeWithTag("session-menu-copy").performClick()
-            val clipboard = app.getSystemService(ClipboardManager::class.java)
-            compose.waitUntil(timeoutMillis = 5_000) {
-                val clip = clipboard?.primaryClip
-                clip != null && clip.itemCount > 0 &&
-                    clip.description.label?.toString() == "Transcript" &&
-                    clip.getItemAt(0).coerceToText(app).isNotBlank()
-            }
-            compose.waitUntil(timeoutMillis = 2_000) {
-                compose.onAllNodesWithTag("glass-menu").fetchSemanticsNodes().isEmpty()
-            }
-            assertEquals(
-                "the draft stays while offline",
-                "draft kept offline",
-                compose.onNodeWithTag("composer-input")
-                    .fetchSemanticsNode().config[SemanticsProperties.EditableText].text,
-            )
-
-            // The cached transcript keeps painting, seeded turn included.
-            assertTrue(compose.onAllNodesWithTag("transcript").fetchSemanticsNodes().isNotEmpty())
-            assertTrue(
-                compose.onAllNodesWithTag("row-markdown", useUnmergedTree = true)
-                    .fetchSemanticsNodes().isNotEmpty(),
-            )
-            FlowSemantics.saveScreenshot("offline-readonly.png")
-        } finally {
-            // Whatever happened above, later tests in this run get their
-            // engine back.
-            listenerCommand(control, "start")
-        }
-
-        // Recovery without reopening the screen.
-        compose.waitUntil(timeoutMillis = 30_000) {
-            compose.onAllNodesWithText("Reconnecting… Cached history is read-only.")
-                .fetchSemanticsNodes().isEmpty() &&
-                sendIsEnabled()
-        }
-        compose.onNodeWithTag("composer-send").assertIsEnabled()
-    }
-
     // ── the failed-open flows (the pre-rig tests, now on the rig) ───────
 
     /** `testUnknownChatRouteReturnsToSessions` (:213): the verbatim iOS unknown-id form. */
@@ -1022,13 +923,6 @@ class SessionFlowTest {
     @PhoneOnly("suspected tablet bug, ci-speed ticket 25: after the failed open the split still showed a transcript (run 40725884775)")
     fun unknownChatRouteReturnsToSessions() {
         failedOpenReturnsToSessions("unknown-chat-returned-to-sessions.png")
-    }
-
-    /** A well-formed scoped id whose engine key is not paired (the Zeron ADD of #76). */
-    @Test
-    @PhoneOnly("suspected tablet bug, ci-speed ticket 25: after the failed open the split still showed a transcript (run 40725884775)")
-    fun forgottenEngineChatRouteReturnsToSessions() {
-        failedOpenReturnsToSessions("forgotten-engine-chat-returned-to-sessions.png")
     }
 
     private fun failedOpenReturnsToSessions(artifactName: String) {
@@ -1059,9 +953,9 @@ class SessionFlowTest {
         compose.onAllNodesWithText("Unavailable").fetchSemanticsNodes().let { nodes ->
             assertTrue("no Unavailable failure UI", nodes.isEmpty())
         }
-        // No fixture prompt for a missing chat, and no row for it.
+        // No seeded prompt for a missing chat, and no row for it.
         compose.onAllNodes(FlowSemantics.userEcho()).fetchSemanticsNodes().let { nodes ->
-            assertTrue("no fixture user echo for a missing chat", nodes.isEmpty())
+            assertTrue("no user echo for a missing chat", nodes.isEmpty())
         }
         compose.onAllNodesWithTag("session-$chatId").fetchSemanticsNodes().let { nodes ->
             assertTrue("no row for the missing chat", nodes.isEmpty())
@@ -1112,11 +1006,9 @@ class SessionFlowTest {
      * thenHoldForDuration:)`), and the jump button must still be hittable
      * 3 s later as the proof the view stayed put.
      *
-     * On `main`'s `chat-veil` (30 turns of history — the drag needs
-     * content above the runway). `main`'s reply streams instantly (no
-     * `-longreply` pacing), so the "while streaming" window narrows to
-     * the send's own glide; the assertion is the same: no re-latch, no
-     * snap-back, the button stays.
+     * On `chat-veil` with `big` (120 turns of history — the drag needs
+     * content above the runway) and [SlowReply] (a paced `-longreply`
+     * reply), so the drag lands while the reply streams, as on iOS.
      */
     @Test
     fun scrollingUpWhileStreamingStaysPut() {
@@ -1247,32 +1139,25 @@ class SessionFlowTest {
             name.startsWith("archiveWithUndo") ||
             name.startsWith("sessionMenuHeaderAndDelete") ||
             name.startsWith("newSessionFromAccessory") -> null
-        name.startsWith("errorCardLogIn") -> "chat:chat-preview"
-        name.startsWith("questionPanel") -> "chat:chat-ask"
-        name.startsWith("sendGlides") -> "chat:chat-runway"
-        name.startsWith("toolGroupsRender") -> "chat:chat-veil"
-        name.startsWith("queue") ||
-            name.startsWith("cancelledSwipeBack") -> "chat:chat-long"
-        // 131's jump rows: the 30-turn big transcript, not the slow
-        // engine's history-less chat (see the class docs).
-        name.startsWith("jumpToLatest") ||
+        name.startsWith("errorCardLogIn") -> "chat:chat-errored"
+        // 131's jump rows: the big synthetic `chat-veil` (see [extrasFor]).
+        name.startsWith("toolGroupsRender") ||
+            name.startsWith("jumpToLatest") ||
             name.startsWith("scrollingUp") -> "chat:chat-veil"
         name.startsWith("unknownChat") -> "chat:${unknownChatId().also { routeChatId = it }}"
-        name.startsWith("forgottenEngine") -> "chat:${forgottenEngineChatId().also { routeChatId = it }}"
-        // offlineEngine… (79) and everything else: the main engine's
-        // chat-deploy, exactly like sendEchoesAndStreamsReply.
+        // Everything else (the question, queue and runway rows included):
+        // `chat-deploy`, exactly like sendEchoesAndStreamsReply.
         else -> "chat:chat-deploy"
     }
 
-    /** The engines to pair per test method (§5 profiles). */
-    private fun enginesFor(name: String): Set<FixtureEngine> = when {
-        name.startsWith("questionPanel") || name.startsWith("sendGlides") -> setOf(FixtureEngine.Question)
-        name.startsWith("toolGroupsRender") -> setOf(FixtureEngine.Main, FixtureEngine.Slow)
+    /** The demo options per test method (on top of the rule's `demo` + `fast`). */
+    private fun extrasFor(name: String): Map<String, Any> = when {
         name.startsWith("queue") ||
-            name.startsWith("cancelledSwipeBack") -> setOf(FixtureEngine.Slow)
-        name.startsWith("jumpToLatest") ||
-            name.startsWith("scrollingUp") -> setOf(FixtureEngine.Main)
-        else -> setOf(FixtureEngine.Main)
+            name.startsWith("cancelledSwipeBack") ||
+            name.startsWith("toolGroupsRender") -> SlowReply
+        name.startsWith("jumpToLatest") -> mapOf("big" to true)
+        name.startsWith("scrollingUp") -> SlowReply + ("big" to true)
+        else -> emptyMap()
     }
 
     /**
@@ -1291,11 +1176,10 @@ class SessionFlowTest {
     }
 
     /**
-     * The slow engine is shared across tests and its paced reply (~25 s)
-     * can outlive the previous test: start only once nothing is running
-     * (no "Stop response"), so a test's own send starts a fresh turn.
+     * Start only once nothing is running in the chat (no "Stop
+     * response"), so a test's own send starts a fresh turn.
      */
-    private fun awaitSlowEngineIdle() {
+    private fun awaitIdle() {
         compose.waitUntil(timeoutMillis = 60_000) {
             compose.onAllNodesWithContentDescription("Stop response").fetchSemanticsNodes().isEmpty()
         }
@@ -1318,57 +1202,4 @@ class SessionFlowTest {
 
     /** The verbatim iOS form (`SessionFlowTests.swift:215`). */
     private fun unknownChatId(): String = "missing-notification-chat-" + UUID.randomUUID()
-
-    /**
-     * A well-formed scoped id whose engine key is never paired:
-     * `engine:v1:<base64url-no-pad(JSON ["<uuid>","missing-chat"])>`
-     * (`crates/ui/src/engine_registry.rs:15,36-45`; the JSON is the
-     * `serde_json` tuple form, no spaces).
-     */
-    private fun forgottenEngineChatId(): String {
-        val json = "[\"${UUID.randomUUID()}\",\"missing-chat\"]"
-        val encoded = Base64.getUrlEncoder().withoutPadding()
-            .encodeToString(json.toByteArray(Charsets.UTF_8))
-        return "engine:v1:$encoded"
-    }
-
-    // ── the fixture engine's listener control (79) ─────────────────────
-
-    /**
-     * True when the composer's send button exists and carries no
-     * `disabled()` semantics — the waitUntil-safe form of
-     * `assertIsEnabled` (assertions throw inside the predicate; this
-     * reads the node's config instead).
-     */
-    private fun sendIsEnabled(): Boolean {
-        val nodes = compose.onAllNodesWithTag("composer-send").fetchSemanticsNodes()
-        return nodes.isNotEmpty() && !nodes[0].config.contains(SemanticsProperties.Disabled)
-    }
-
-    /**
-     * `GET /listener/<command>` (`stop` | `start`) on the fixture engine's
-     * control port — ticket 79's fixture routes, which drop and re-create
-     * the engine's remote listener mid-session. On IO like [FixtureRule]'s
-     * mint (the network-on-main guard); a non-200 fails loudly, because
-     * that means the rig broke, not the app.
-     */
-    private fun listenerCommand(controlUrl: String, command: String) {
-        runBlocking {
-            withContext(Dispatchers.IO) {
-                val base = controlUrl.trim().trimEnd('/')
-                val connection = URL("$base/listener/$command").openConnection() as HttpURLConnection
-                try {
-                    connection.connectTimeout = 10_000
-                    connection.readTimeout = 10_000
-                    assertEquals(
-                        "the fixture's /listener/$command failed",
-                        200,
-                        connection.responseCode,
-                    )
-                } finally {
-                    connection.disconnect()
-                }
-            }
-        }
-    }
 }

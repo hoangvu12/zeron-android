@@ -13,6 +13,9 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -89,25 +92,16 @@ class ToastHostTest {
 
     // ------------------------------------------------------------ helpers
 
-    /** The fake announcer: records every call. */
-    private class RecordingAnnouncer : ToastAnnouncer {
-        val calls = mutableListOf<String>()
-        override fun announce(text: String) {
-            calls.add(text)
-        }
-    }
-
     /** The host under test: a full-size clickable "underneath" plus a known chrome top. */
     @Composable
     private fun Host(
         state: ToasterState,
-        announcer: ToastAnnouncer,
         chromeTop: Dp = Dp.Unspecified,
         onUnderClick: (() -> Unit)? = null,
     ) {
         density = LocalDensity.current
         ZeronTheme(Appearance.Light) {
-            ToastHost(state, announcer) {
+            ToastHost(state) {
                 val chrome = LocalBottomChromeTop.current
                 chromeState = chrome
                 LaunchedEffect(chrome, chromeTop) {
@@ -190,7 +184,7 @@ class ToastHostTest {
     @Test
     fun oneToastSitsCentredTwelveDpAboveTheChrome() {
         val state = ToasterState()
-        compose.setContent { Host(state, RecordingAnnouncer(), chromeTop = 734.dp) }
+        compose.setContent { Host(state, chromeTop = 734.dp) }
         compose.waitForIdle()
         show(state, "Archived", "Undo")
         compose.mainClock.advanceTimeBy(600) // the rise settles
@@ -215,7 +209,7 @@ class ToastHostTest {
     @Test
     fun withoutChromeTheToastSitsTwelveDpAboveTheSafeAreaBottom() {
         val state = ToasterState()
-        compose.setContent { Host(state, RecordingAnnouncer()) }
+        compose.setContent { Host(state) }
         compose.waitForIdle()
         show(state, "Couldn't open session. Try again.")
         compose.mainClock.advanceTimeBy(600)
@@ -229,7 +223,7 @@ class ToastHostTest {
     @Test
     fun theSafeAreaBottomWinsWhenTheChromeIsLowerThanIt() {
         val state = ToasterState()
-        compose.setContent { Host(state, RecordingAnnouncer(), chromeTop = 900.dp) }
+        compose.setContent { Host(state, chromeTop = 900.dp) }
         compose.waitForIdle()
         show(state, "Archived")
         compose.mainClock.advanceTimeBy(600)
@@ -242,7 +236,7 @@ class ToastHostTest {
     @Test
     fun frame0IsSixteenDpLowAndFullyDematerialized() {
         val state = ToasterState()
-        compose.setContent { Host(state, RecordingAnnouncer()) }
+        compose.setContent { Host(state) }
         compose.waitForIdle()
         show(state, "Archived", "Undo")
         composeFrame()
@@ -254,7 +248,7 @@ class ToastHostTest {
     @Test
     fun theRiseSpringsToRestWhileTheGlassMaterializes() {
         val state = ToasterState()
-        compose.setContent { Host(state, RecordingAnnouncer()) }
+        compose.setContent { Host(state) }
         compose.waitForIdle()
         show(state, "Archived")
         composeFrame()
@@ -272,18 +266,29 @@ class ToastHostTest {
         assertEquals("settled bottom edge 12 dp above the safe bottom", dpPx(840f), toastBounds().bottom, 1f)
     }
 
+    /**
+     * #63: the label is a polite live region — TalkBack speaks it as the
+     * toast appears, without moving focus (`Toast.swift:99`'s
+     * announcement) — and nothing else in the capsule is one, so the
+     * action isn't read twice.
+     */
     @Test
-    fun theAnnouncerReceivesTheLabelTextOncePerToast() {
-        val announcer = RecordingAnnouncer()
+    fun theLabelIsAPoliteLiveRegionAndTheActionIsNot() {
         val state = ToasterState()
-        compose.setContent { Host(state, announcer) }
+        compose.setContent { Host(state) }
         compose.waitForIdle()
         show(state, "Archived", "Undo")
-        composeFrame() // the capsule's LaunchedEffect announces
-        assertEquals("exactly the label text, once", listOf("Archived"), announcer.calls)
-        compose.mainClock.advanceTimeBy(5000) // present, hold, dismiss
-        compose.waitForIdle()
-        assertEquals("nothing is announced on dismiss", listOf("Archived"), announcer.calls)
+        composeFrame()
+
+        compose.onNodeWithText("Archived")
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.LiveRegion, LiveRegionMode.Polite))
+        compose.onNodeWithTag("toast-action")
+            .assert(SemanticsMatcher.keyNotDefined(SemanticsProperties.LiveRegion))
+        assertEquals(
+            "exactly one live region: the label",
+            1,
+            compose.onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsProperties.LiveRegion)).fetchSemanticsNodes().size,
+        )
     }
 
     // ---------------------------------------------- hold and dismiss
@@ -291,7 +296,7 @@ class ToastHostTest {
     @Test
     fun theToastHoldsForFourSecondsThenDismissesAnimated() {
         val state = ToasterState()
-        compose.setContent { Host(state, RecordingAnnouncer(), chromeTop = 734.dp) }
+        compose.setContent { Host(state, chromeTop = 734.dp) }
         compose.waitForIdle()
         show(state, "Archived", "Undo")
 
@@ -316,7 +321,7 @@ class ToastHostTest {
     @Test
     fun theFallSlidesToTwelveDpWhileTheGlassFadesOut() {
         val state = ToasterState()
-        compose.setContent { Host(state, RecordingAnnouncer()) }
+        compose.setContent { Host(state) }
         compose.waitForIdle()
         show(state, "Archived")
         compose.mainClock.advanceTimeBy(1000) // fully settled
@@ -359,7 +364,7 @@ class ToastHostTest {
         // Regression guard: the hold job's cancellation must not take the
         // removal down with it (the fall runs in its own coroutine).
         val state = ToasterState()
-        compose.setContent { Host(state, RecordingAnnouncer()) }
+        compose.setContent { Host(state) }
         compose.waitForIdle()
         show(state, "Archived")
         compose.mainClock.advanceTimeBy(4300)
@@ -373,7 +378,7 @@ class ToastHostTest {
     fun tappingTheActionRunsTheHandlerThenDismissesAnimated() {
         var fired = 0
         val state = ToasterState()
-        compose.setContent { Host(state, RecordingAnnouncer()) }
+        compose.setContent { Host(state) }
         compose.waitForIdle()
         show(state, "Archived", "Undo") { fired++ }
         compose.mainClock.advanceTimeBy(600)
@@ -400,7 +405,7 @@ class ToastHostTest {
         // handler (unarchive twice would be wrong).
         var fired = 0
         val state = ToasterState()
-        compose.setContent { Host(state, RecordingAnnouncer()) }
+        compose.setContent { Host(state) }
         compose.waitForIdle()
         show(state, "Archived", "Undo") { fired++ }
         compose.mainClock.advanceTimeBy(600)
@@ -419,7 +424,7 @@ class ToastHostTest {
         // the fade runs; the graphicsLayer slide moves the hit area too.
         var fired = 0
         val state = ToasterState()
-        compose.setContent { Host(state, RecordingAnnouncer()) }
+        compose.setContent { Host(state) }
         compose.waitForIdle()
         show(state, "Archived", "Undo") { fired++ }
         compose.mainClock.advanceTimeBy(128) // mid-rise, mid-materialize
@@ -439,7 +444,7 @@ class ToastHostTest {
     fun theCapsuleSwallowsTapsWhileItsSurroundingsPassThrough() {
         var underClicks = 0
         val state = ToasterState()
-        compose.setContent { Host(state, RecordingAnnouncer(), onUnderClick = { underClicks++ }) }
+        compose.setContent { Host(state, onUnderClick = { underClicks++ }) }
         compose.waitForIdle()
         show(state, "Archived")
         compose.mainClock.advanceTimeBy(600)
@@ -464,7 +469,7 @@ class ToastHostTest {
     fun callingShowTwiceKeepsOnlyTheSecondToastAndItsOwnTimer() {
         var firstFired = 0
         val state = ToasterState()
-        compose.setContent { Host(state, RecordingAnnouncer()) }
+        compose.setContent { Host(state) }
         compose.waitForIdle()
         show(state, "First", "Undo") { firstFired++ }
         compose.mainClock.advanceTimeBy(1000)
@@ -492,7 +497,7 @@ class ToastHostTest {
     @Test
     fun showFromABackgroundThreadDisplaysTheToastWithoutSnapshotErrors() {
         val state = ToasterState()
-        compose.setContent { Host(state, RecordingAnnouncer()) }
+        compose.setContent { Host(state) }
         compose.waitForIdle()
 
         val done = CountDownLatch(1)
@@ -517,7 +522,7 @@ class ToastHostTest {
     fun reduceMotionSnapsTheGlassButStillSlides() {
         ReduceMotion.debugOverride = true
         val state = ToasterState()
-        compose.setContent { Host(state, RecordingAnnouncer()) }
+        compose.setContent { Host(state) }
         compose.waitForIdle()
         show(state, "Archived")
         composeFrame()
@@ -550,7 +555,7 @@ class ToastHostTest {
     @Test
     fun aMovingChromeTopCarriesTheToastWithTheRiseSpring() {
         val state = ToasterState()
-        compose.setContent { Host(state, RecordingAnnouncer(), chromeTop = 734.dp) }
+        compose.setContent { Host(state, chromeTop = 734.dp) }
         compose.waitForIdle()
         show(state, "Archived")
         compose.mainClock.advanceTimeBy(600)
@@ -582,7 +587,7 @@ class ToastHostTest {
     @Test
     fun aLongLabelWrapsToTwoLinesInsideMaxWidthAndKeepsTheActionVisible() {
         val state = ToasterState()
-        compose.setContent { Host(state, RecordingAnnouncer()) }
+        compose.setContent { Host(state) }
         compose.waitForIdle()
         show(state, ToastLongText, "Undo")
         compose.mainClock.advanceTimeBy(600)

@@ -24,9 +24,8 @@ import sh.zeron.android.MainActivity
  * The keyboard flow on a device (ticket 133, CI-only — no emulator or
  * device in the worker slots): the interactive IME dismiss on the real
  * session screen, the port of `iosui:SessionFlowTests.swift:547-564`'s
- * guard included. The session screen (ui-parity#75) and the FixtureRule
- * harness (android-app#30) have both landed, so this runs on the rig's
- * `main` engine and `chat-deploy`.
+ * guard included. It runs on the offline demo's `chat-deploy`
+ * ([FixtureRule], #63).
  *
  * The IME's top edge is tracked through raw window swipes (UiAutomator,
  * 8 dp inside the transcript's left edge — inside the 18 dp row margin so

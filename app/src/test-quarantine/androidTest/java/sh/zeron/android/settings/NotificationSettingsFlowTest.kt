@@ -44,10 +44,8 @@ import sh.zeron.android.flows.mountedActivity
  * back to the text "Allow") — Compose cannot reach into another process's
  * window.
  *
- * android-app#30: the launch now goes through the flow rig's
- * [FixtureRule] (the `main` fixture engine paired via the debug `pair`
- * extra, `route more`) — the Settings tab only exists behind a shell,
- * and the shell only exists with a paired engine.
+ * The launch goes through [FixtureRule] (#63: the offline demo, `route
+ * more`) — the Settings tab only exists behind the signed-in shell.
  */
 @RunWith(AndroidJUnit4::class)
 class NotificationSettingsFlowTest {
@@ -55,7 +53,7 @@ class NotificationSettingsFlowTest {
     private val device: UiDevice
         get() = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
 
-    /** Launched at rule application: the Settings tab (ticket 36's route extra), the rig's engine paired. */
+    /** Launched at rule application: the Settings tab (ticket 36's route extra), on the demo. */
     private val scenario = FixtureRule(routeFor = { "more" })
 
     @Suppress("DEPRECATION")

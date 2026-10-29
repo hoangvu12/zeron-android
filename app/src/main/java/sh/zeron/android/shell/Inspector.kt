@@ -1,5 +1,6 @@
 package sh.zeron.android.shell
 
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.animation.core.Animatable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -10,11 +11,32 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
 import sh.zeron.android.companions.CompanionSection
 
-/** iOS `preferredInspectorColumnWidth` (340 … 480). */
-internal val InspectorWidth = 400.dp
+/**
+ * The inspector column's width bounds (iOS `minimumInspectorColumnWidth` /
+ * `maximumInspectorColumnWidth`), the range its resize handle drags in
+ * (#63). Like UIKit, the width is not saved: every launch starts at 400.
+ */
+object InspectorColumn {
+    const val DefaultDp = 400f
+    const val MinDp = 340f
+    const val MaxDp = 480f
+
+    /** The TalkBack resize actions' step. */
+    const val StepDp = 20f
+
+    /**
+     * The width after dragging the column's leading edge by [dragDp]
+     * (positive = rightward, `draggable`'s raw delta): in LTR the column
+     * sits on the right, so dragging left widens it; in RTL it sits on the
+     * left, so dragging right does. Clamped.
+     */
+    fun widthAfterDrag(widthDp: Float, dragDp: Float, rtl: Boolean): Float =
+        clamp(if (rtl) widthDp + dragDp else widthDp - dragDp)
+
+    fun clamp(widthDp: Float): Float = widthDp.coerceIn(MinDp, MaxDp)
+}
 
 /** Below this the sidebar steps aside while the inspector shows (iOS `revealInspector`). */
 internal const val InspectorRoomyWidthDp = 1100f
@@ -67,6 +89,15 @@ class InspectorState(private val rootFor: (chatId: String) -> CompanionsRootRout
 
     /** The animated position, 0 hidden … 1 shown. */
     internal val progress = Animatable(0f)
+
+    /** The column's width in dp (#63's resize handle; [InspectorColumn] bounds). */
+    var widthDp: Float by mutableFloatStateOf(InspectorColumn.DefaultDp)
+        private set
+
+    /** Sets the width, clamped to [InspectorColumn.MinDp] … [InspectorColumn.MaxDp]. */
+    fun resize(widthDp: Float) {
+        this.widthDp = InspectorColumn.clamp(widthDp)
+    }
 
     /** The sidebar's visibility before the inspector made room for itself (iOS `modeBeforeInspector`). */
     private var sidebarBefore: Boolean? = null

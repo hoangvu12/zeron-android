@@ -136,4 +136,30 @@ class InspectorStateTest {
         inspector.hide(shell)
         assertFalse(shell.sidebarVisible)
     }
+
+    // ------------------------------------------------- the resize (#63)
+
+    @Test
+    fun theWidthStartsAt400AndResizesWithin340To480() {
+        val inspector = inspector()
+        assertEquals(400f, inspector.widthDp, 0f)
+        inspector.resize(452f)
+        assertEquals(452f, inspector.widthDp, 0f)
+        inspector.resize(900f)
+        assertEquals(480f, inspector.widthDp, 0f)
+        inspector.resize(10f)
+        assertEquals(340f, inspector.widthDp, 0f)
+    }
+
+    @Test
+    fun draggingTheLeadingEdgeTowardTheStartWidens() {
+        // LTR: the leading edge is on the left; dragging left (negative) widens.
+        assertEquals(430f, InspectorColumn.widthAfterDrag(400f, -30f, rtl = false), 0f)
+        assertEquals(370f, InspectorColumn.widthAfterDrag(400f, 30f, rtl = false), 0f)
+        // RTL mirrors it: the leading edge is on the right.
+        assertEquals(430f, InspectorColumn.widthAfterDrag(400f, 30f, rtl = true), 0f)
+        // Clamped both ways.
+        assertEquals(480f, InspectorColumn.widthAfterDrag(470f, -50f, rtl = false), 0f)
+        assertEquals(340f, InspectorColumn.widthAfterDrag(350f, 50f, rtl = false), 0f)
+    }
 }
