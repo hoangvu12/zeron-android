@@ -26,22 +26,17 @@ import sh.zeron.android.newsession.NewSessionScreen
 
 /**
  * The real [PhoneShell] (android-ui-parity #32): one adapter over the
- * neighbour tickets' landed state — 26's [MainTabState], 24's [NavStack]
- * (through `stack(TabId.Sessions)`), 31's [SheetHostState], 18's [Alerts],
- * 19's action sheet, 14's [Toaster] and the IME. Nothing of its own:
- * motion, scrim, recession and the chrome are those tickets' work, and the
- * router only asks for operations in an order.
- *
- * Accessory visibility is **derived** by ticket 30 from the selected
- * stack's top route (`NavRoute.hidesBottomChrome`, which 76's
- * `SessionScreenRoute` sets), so [setAccessoryVisible] and
- * [syncAccessory] are no-ops: the port keeps the calls so the router's
- * order stays testable against iOS, and pushing the Session route hides
- * the chrome group, popping to root shows it.
+ * neighbour tickets' landed state — the Sessions [NavStack]
+ * ([MainTabState.sessions]), the bar's [SearchTabState], 31's
+ * [SheetHostState], 18's [Alerts], 19's action sheet, 14's [Toaster] and
+ * the IME. Nothing of its own: motion, scrim, recession and the bar's
+ * visibility are those tickets' work (the bar is derived from the stack's
+ * top), and the router only asks for operations in an order.
  */
 @Stable
 internal class PhoneShellAdapter(
     private val tabs: MainTabState,
+    private val search: SearchTabState,
     private val sheetHost: SheetHostState?,
     private val alerts: Alerts,
     private val actionSheet: ActionSheetPresenter,
@@ -49,55 +44,27 @@ internal class PhoneShellAdapter(
     private val keyboard: SoftwareKeyboardController?,
     private val focusManager: FocusManager,
     private val view: View,
-    /** Wave-10 37: the one-row bar — Settings and Search are not tabs. */
-    private val oneRowBar: Boolean = false,
-    /** The bar's field, activated by Search (one-row bar only). */
-    private val search: SearchTabState? = null,
 ) : PhoneShell {
 
     /** 31's contract: the [SheetHandoff] from [hideSheetForHandoff], completed by [dismissSheet] once the motion ends. */
     private var pendingHandoff: SheetHandoff? = null
 
-    override fun selectTab(tab: TabId) {
-        if (oneRowBar) {
-            selectOnTheFrontPage(tab)
-            return
-        }
-        // Programmatic selection: no haptic, no re-select pop-to-root
-        // (those are onTabTap's user-path behaviours).
-        tabs.select(tab)
-    }
-
     override val isSheetPresented: Boolean
         get() = sheetHost?.isPresenting == true
 
-    /**
-     * The one-row bar's "tabs" (upstream #967's `showSettings` /
-     * `showSearch`): Sessions is the only stack. Settings dismisses a
-     * presented sheet and pushes over the list (once — a second
-     * `showSettings` with Settings on top does nothing); Search goes back
-     * to the list and activates the bar's field.
-     */
-    private fun selectOnTheFrontPage(tab: TabId) {
-        tabs.select(TabId.Sessions)
-        val stack = tabs.stack(TabId.Sessions)
-        when (tab) {
-            TabId.Settings -> {
-                if (isSheetPresented) dismissSheet(animated = false)
-                if (stack.top.route == SettingsRoute) return
-                stack.popToRoot(animated = false)
-                stack.push(SettingsRoute, animated = true)
-            }
-            TabId.Search -> {
-                stack.popToRoot(animated = false)
-                search?.activate()
-            }
-            TabId.Sessions -> Unit
-        }
+    override fun pushSettings() {
+        val stack = tabs.sessions
+        if (stack.top.route == SettingsRoute) return
+        stack.popToRoot(animated = false)
+        stack.push(SettingsRoute, animated = true)
+    }
+
+    override fun activateSearch() {
+        search.activate()
     }
 
     override fun presentNewSession(prompt: String?, onCreated: (chatId: String, handoff: DraftHandoff?) -> Unit) {
-        // `MainTabController.swift:136-148`: New Session in a page sheet at
+        // `MainTabController.swift:115-127`: New Session in a page sheet at
         // the large detent, grabber visible. The sheet's `imePadding`
         // shrinks the canvas's constraints; the canvas measures the rest
         // (the wallpaper keeps the IME-less page height through its
@@ -131,7 +98,7 @@ internal class PhoneShellAdapter(
     }
 
     override fun hideSheetForHandoff() {
-        // `MainTabController.swift:170-190`: the stack vanishes in one
+        // `MainTabController.swift:159-167`: the stack vanishes in one
         // frame (container alpha 0, scrim 0, recession reset) and is torn
         // down only once the handoff motion calls complete(). With no
         // sheet up there is nothing to hide — and no handle to store: a
@@ -153,31 +120,19 @@ internal class PhoneShellAdapter(
     }
 
     override fun popSessionsToRoot(animated: Boolean) {
-        tabs.stack(TabId.Sessions).popToRoot(animated)
+        tabs.sessions.popToRoot(animated)
     }
 
     override fun pushSession(route: SessionRoute, animated: Boolean) {
         // Every route the factory returns is also a NavRoute (76's
-        // SessionScreenRoute, hidesBottomChrome = true); 26's
+        // SessionScreenRoute, hidesBottomChrome = true);
         // ShellRouteContent renders it. 24 has no keyed-content push.
         val navRoute = route as? NavRoute
         if (navRoute == null) {
             Log.w(TAG, "SessionRoute ${route.chatId} is not a NavRoute; not pushing")
             return
         }
-        tabs.stack(TabId.Sessions).push(navRoute, animated)
-    }
-
-    override fun setAccessoryVisible(visible: Boolean, animated: Boolean) {
-        // No-op: ticket 30 derives the group's visibility from the top
-        // route's hidesBottomChrome — the non-animated Session push above
-        // already hid the chrome (the group rides/never leaves
-        // composition, upstream #577).
-    }
-
-    override fun syncAccessory() {
-        // No-op: ticket 30 re-derives on every tab change and stack
-        // change; after the popToRoot above the chrome shows again.
+        tabs.sessions.push(navRoute, animated)
     }
 
     override fun hideIme() {
@@ -203,7 +158,7 @@ internal class PhoneShellAdapter(
 
 /**
  * The adapter in composition: captures the neighbour tickets' state (the
- * [MainTabState] plus the sheet host, alerts, action sheet, toaster, IME
+ * [MainTabState] and the bar's search plus the sheet host, alerts, action sheet, toaster, IME
  * and view locals) and returns one stable [PhoneShell], so
  * [rememberPhoneAppRouter] does not recreate the router on recomposition.
  * Mount it inside the shell's [SheetHost] so [LocalSheetHost] is live; a
@@ -212,6 +167,7 @@ internal class PhoneShellAdapter(
 @Composable
 fun rememberPhoneShell(
     tabs: MainTabState,
+    search: SearchTabState,
     sheetHost: SheetHostState? = LocalSheetHost.current,
     alerts: Alerts = LocalAlerts.current,
     actionSheet: ActionSheetPresenter = LocalActionSheet.current,
@@ -219,10 +175,8 @@ fun rememberPhoneShell(
     keyboard: SoftwareKeyboardController? = LocalSoftwareKeyboardController.current,
     focusManager: FocusManager = LocalFocusManager.current,
     view: View = LocalView.current,
-    oneRowBar: Boolean = false,
-    search: SearchTabState? = null,
-): PhoneShell = remember(tabs, sheetHost, alerts, actionSheet, toaster, keyboard, focusManager, view, oneRowBar, search) {
-    PhoneShellAdapter(tabs, sheetHost, alerts, actionSheet, toaster, keyboard, focusManager, view, oneRowBar, search)
+): PhoneShell = remember(tabs, search, sheetHost, alerts, actionSheet, toaster, keyboard, focusManager, view) {
+    PhoneShellAdapter(tabs, search, sheetHost, alerts, actionSheet, toaster, keyboard, focusManager, view)
 }
 
 /** Unwraps [ContextWrapper]s down to the hosting [Activity], or null (previews, tests). */

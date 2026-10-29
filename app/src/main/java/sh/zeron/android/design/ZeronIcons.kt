@@ -195,6 +195,9 @@ object ZeronIcons {
     /** SF `pencil` — queue-row and row menus. */
     val Pencil = ZeronIcon.Vector(R.drawable.zi_pen)
 
+    /** SF `square.and.pencil` — the iPhone bottom bar's New session. */
+    val SquareAndPencil = ZeronIcon.Vector(R.drawable.zi_pen_new_square)
+
     /** SF `trash` — row menus, Settings wallpaper. */
     val Trash = ZeronIcon.Vector(R.drawable.zi_trash_bin_minimalistic)
 
@@ -388,6 +391,7 @@ object ZeronIcons {
             FolderBadgeGearshape,
         ),
         RegistryEntry("Pencil", listOf("pencil"), Pencil),
+        RegistryEntry("SquareAndPencil", listOf("square.and.pencil"), SquareAndPencil),
         RegistryEntry("Trash", listOf("trash"), Trash),
         RegistryEntry("Doc", listOf("doc"), Doc),
         RegistryEntry("DocText", listOf("doc.text"), DocText),

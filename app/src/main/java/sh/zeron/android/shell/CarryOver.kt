@@ -70,7 +70,7 @@ interface SplitDetailColumn {
 }
 
 /**
- * The phone tab shell as the carry-over needs it. Main thread. Works while
+ * The phone shell as the carry-over needs it. Main thread. Works while
  * `MainTabShell` is not composed — the pops and the open go through the
  * hoisted state (ticket 26) and ticket 106's [PhoneRouterSlot], never
  * through a router that already left composition.
@@ -83,10 +83,7 @@ interface TabsColumn {
     /** iOS `MainTabController.popToFrontPage()` (`:193-198`): Sessions stack → root, not animated. */
     fun popToFrontPage()
 
-    /** ADAPT: Search stack → root, not animated, only if it holds a Session entry. */
-    fun popSearchSessions()
-
-    /** Every tab stack → root, not animated (shell teardown). */
+    /** The Sessions stack → root, not animated (shell teardown). */
     fun popAllToRoot()
 }
 
@@ -101,9 +98,6 @@ sealed interface CarryOverStep {
 
     /** iOS `:176`: `tabs.popToFrontPage()`. */
     data object PopTabsToFrontPage : CarryOverStep
-
-    /** The Zeron adaptation: pop a session off the hidden Search stack too. */
-    data object PopSearchSessions : CarryOverStep
 
     /** iOS `:178-183`: the detail open (no dismissal, no animation). */
     data class ShowInDetail(val chatId: String) : CarryOverStep
@@ -121,10 +115,9 @@ object CarryOverPlan {
         if (captured != null) add(CarryOverStep.OpenInTabs(captured))
     }
 
-    /** iOS `:175-188` (+ the Search adaptation): pop the tabs first, then the detail work. */
+    /** iOS `:175-188`: pop the tabs first, then the detail work. */
     fun expand(current: String?, shownChatId: String?, detailIsEmpty: Boolean): List<CarryOverStep> = buildList {
         add(CarryOverStep.PopTabsToFrontPage)
-        add(CarryOverStep.PopSearchSessions)
         if (current != null) {
             if (shownChatId != current) add(CarryOverStep.ShowInDetail(current))
         } else if (detailIsEmpty) {
@@ -221,7 +214,6 @@ class CarryOver(
                 }
 
                 CarryOverStep.PopTabsToFrontPage -> tabs.popToFrontPage()
-                CarryOverStep.PopSearchSessions -> tabs.popSearchSessions()
                 is CarryOverStep.ShowInDetail -> {
                     awaitDetached(step.chatId)
                     detail.showSession(step.chatId)

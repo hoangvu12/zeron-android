@@ -23,7 +23,6 @@ import sh.zeron.android.accounts.agentAccountsSection
 import sh.zeron.android.design.LocalBottomChrome
 import sh.zeron.android.shell.LargeTitleScaffold
 import sh.zeron.android.shell.LocalNavStack
-import sh.zeron.android.shell.RegisterScrollToTop
 import sh.zeron.android.shell.TitleMode
 
 /**
@@ -198,9 +197,6 @@ fun SettingsScreen(
         (LocalContext.current.applicationContext as ZeronApplication).prefs::setStayConnected,
 ) {
     val listState = rememberLazyListState()
-    // 26: the tab's scroll-to-top handler for a re-select at the root; a
-    // no-op outside a tab (the tablet dialog has no LocalTabId).
-    RegisterScrollToTop(listState)
     // The ONE ON_RESUME re-read (99's contract): returning from system
     // settings, from the permission dialog, from the background, plus the
     // lifecycle catch-up when the effect enters composition in a resumed

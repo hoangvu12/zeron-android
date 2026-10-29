@@ -1,17 +1,13 @@
 package sh.zeron.android.shell
 
-import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.BlendMode
@@ -26,24 +22,19 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Density
 import kotlin.math.abs
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import sh.zeron.android.design.Motion
 
 /**
- * The whole bottom chrome group's frame for one instant (android-ui-parity
- * #30): whether it is **placed** at all, how it rides a navigation
+ * The bottom bar's frame for one instant (android-ui-parity #30): whether it is **placed** at all, how it rides a navigation
  * transition, and how the incoming screen covers it. Pure values —
  * [ChromeVisibilityController.frame] derives them from the selected
  * [NavStack], and `Modifier.chromeVisibility` consumes them in the
  * placement / draw / layer phases only.
  *
- * The group is **never removed from composition** (upstream #577):
- * `placed = false` skips its placement only, so measured size, the minimize
- * spring and the accessory's press state all survive. An unplaced node is
- * not drawn, not hit-tested and not in the a11y tree — the Android port of
- * iOS `hidesBottomBarWhenPushed` + `setBottomAccessory(nil)`.
+ * The bar is **never removed from composition**: `placed = false` skips
+ * its placement only, so its measured size, the search field's text and
+ * the expansion spring survive. An unplaced node is not drawn, not
+ * hit-tested and not in the a11y tree — the Android port of iOS
+ * `hidesBottomBarWhenPushed`.
  *
  * [translationX]/[clipLeft]/[clipRight] are in **window px**: the chrome
  * layout fills the shell, so its local coordinates are the window's
@@ -107,51 +98,22 @@ fun chromeFrame(
 }
 
 /**
- * Pure: the accessory **content**'s alpha on a reveal (iOS
- * `setAccessoryContentAlpha` from the pop's alongside block,
- * `ios:Session/SessionViewController.swift:212`): a pop **from** a
- * `hidesBottomChrome` route fades the content 0 → 1 with the transition
- * progress, tracking a predictive-back gesture. Everything else (a push, a
- * same-kind transition, reduced motion) leaves it 1 — the group alpha
- * already fades under reduced motion, so multiplying would square it.
- */
-fun accessoryRevealAlpha(fromShows: Boolean, toShows: Boolean, progress: Float, reduceMotion: Boolean): Float =
-    if (!fromShows && toShows && !reduceMotion) progress.coerceIn(0f, 1f) else 1f
-
-/**
- * The chrome group's visibility state holder (android-ui-parity #30): the
- * Android port of `MainTabController`'s `syncAccessory` /
- * `setAccessory(visible:)` / `prepareAccessoryForReveal()`
- * (`ios:Shell/MainTabController.swift:65-123`) as one derived rule over
- * the selected tab's [NavStack] — **derived, never flipped**: idle
- * placement comes from `stack.top`, transition placement from 24's
- * `chromePlacement`, and the completion of any transition re-derives it
+ * The bottom bar's visibility state holder (android-ui-parity #30): the
+ * Android port of iOS `hidesBottomBarWhenPushed` on the Sessions stack as
+ * one derived rule over [MainTabState.sessions] — **derived, never
+ * flipped**: idle placement comes from `stack.top`, transition placement
+ * from 24's `chromePlacement`, and the end of any transition re-derives it
  * (a cancelled predictive back ends hidden because the top is still the
- * Session, not because a flag was toggled twice).
- *
- * Also owns the after-Search content fade (iOS `:72-80`): an
- * [Animatable] snapped to 0 the frame the tab leaves Search, animated back
- * to 1 over `Motion.accessoryContentReturn()` (250 ms, 120 ms delay,
- * ease-out), skipped under reduced motion. Only the accessory **content**
- * fades — the glass capsule stays opaque, so an empty capsule shows for
- * the first 120 ms, as on iOS.
+ * pushed page, not because a flag was toggled twice).
  *
  * Every public getter is a snapshot read; call them from
  * layout/draw/layer lambdas or `snapshotFlow`, never in a composable body
  * that must not recompose per frame.
  */
 @Stable
-class ChromeVisibilityController internal constructor(
-    private val tabs: MainTabState,
-    private val minimize: TabBarMinimizeState?,
-    private val scope: CoroutineScope,
-) {
-    /** iOS `accessoryContent.alpha`: 1 at rest, 0 during the after-Search delay. */
-    internal val searchReturn = Animatable(1f)
+class ChromeVisibilityController internal constructor(private val tabs: MainTabState) {
 
-    private var fadeJob: Job? = null
-
-    /** The chrome layout's width in px (its `onSizeChanged`). */
+    /** The bar layout's width in px (its `onSizeChanged`). */
     internal var widthPx by mutableFloatStateOf(0f)
 
     /** The layout direction, as seen by the shell (a `SideEffect`). */
@@ -160,35 +122,24 @@ class ChromeVisibilityController internal constructor(
     /** Reduce Motion, as seen by the shell (a `SideEffect`). */
     internal var reduceMotion by mutableStateOf(false)
 
-    /** [TabChromeLayout]'s top in root px (`onPlaced`). 0 on an edge-to-edge shell. */
+    /** The bar layout's top in root px (`onPlaced`). 0 on an edge-to-edge shell. */
     internal var layoutTopInRoot by mutableFloatStateOf(0f)
 
-    /** Window-space chrome top in dp, from 28's `onRects` + [layoutTopInRoot]. NaN until first placement. */
+    /** Window-space bar top in dp, from the bar's `onPlaced` + [layoutTopInRoot]. NaN until first placement. */
     internal var chromeTopInRoot by mutableFloatStateOf(Float.NaN)
 
-    /**
-     * 29's IME lift in dp ([SearchTabState.searchImeLift]); 0 when Search
-     * is not selected. Read only inside [publishedChromeTop] (a
-     * `snapshotFlow`), never in composition.
-     */
-    internal var searchImeLift: () -> Float = { 0f }
-
-    /** The selected tab's stack — the one visibility derives from. */
+    /** The Sessions stack — the one visibility derives from. */
     val stack: NavStack
-        get() = tabs.stack(tabs.selected)
+        get() = tabs.sessions
 
     /**
      * The value for ticket 14's [sh.zeron.android.design.BottomChromeTopState.top],
-     * in dp; `NaN` = no chrome on screen ("[Dp.Unspecified]"). While Search
-     * is selected with the IME up, 29's row rides the keyboard through
-     * `Modifier.offset`, which 28's `onRects` cannot see — so the lift past
-     * the accessory (48 + 8 dp) is subtracted here: below 56 the (fading)
-     * accessory is still the top, past it the raised row is.
+     * in dp; `NaN` = no bar on screen ("[Dp.Unspecified]"). The bar rides
+     * on the IME through its own padding, so its placed top already
+     * includes the lift.
      */
-    fun publishedChromeTop(): Float {
-        if (!frame().placed || chromeTopInRoot.isNaN()) return Float.NaN
-        return chromeTopInRoot - maxOf(0f, searchImeLift() - (TabChromeMetrics.AccessoryHeight + TabChromeMetrics.Gap))
-    }
+    fun publishedChromeTop(): Float =
+        if (!frame().placed || chromeTopInRoot.isNaN()) Float.NaN else chromeTopInRoot
 
     /** Snapshot read of the current frame. Call from layout/draw lambdas or `snapshotFlow`. */
     fun frame(): ChromeFrame {
@@ -206,55 +157,10 @@ class ChromeVisibilityController internal constructor(
         return chromeFrame(layer, x, widthPx, rtl, reduceMotion)
     }
 
-    /** 27's `contentAlpha` hook: `searchReturn × popReveal`. Draw-phase read. */
-    fun accessoryContentAlpha(): Float {
-        val t = stack.transition
-        val reveal = if (t == null) 1f else accessoryRevealAlpha(
-            fromShows = !stack.hidesChrome(t.from),
-            toShows = !stack.hidesChrome(t.to),
-            progress = t.progress,
-            reduceMotion = reduceMotion,
-        )
-        return searchReturn.value * reveal
-    }
-
     /**
-     * The after-Search fade (iOS `tabBarController(didSelect:)`): fired on
-     * every selection change that leaves Search for a tab whose top shows
-     * chrome, with Reduce Motion off. The snap to 0 happens in the same
-     * frame; the 120 ms delay is the tween's, so the alpha is already 0
-     * while it runs.
-     */
-    internal fun onTabChanged(previous: TabId, now: TabId) {
-        if (previous == TabId.Search && now != TabId.Search &&
-            !tabs.stack(now).let { it.hidesChrome(it.top) } && !reduceMotion
-        ) {
-            fadeJob?.cancel()
-            fadeJob = scope.launch {
-                searchReturn.snapTo(0f)
-                searchReturn.animateTo(1f, Motion.accessoryContentReturn())
-            }
-        }
-    }
-
-    /** iOS `prepareAccessoryForReveal()` — expanded, final layout from frame 1. */
-    internal fun onTransitionStarted(t: NavTransition) {
-        if (stack.hidesChrome(t.from) && !stack.hidesChrome(t.to)) {
-            minimize?.expand(animate = false)
-        }
-    }
-
-    /** iOS completion `setAccessoryContentAlpha(1)`: end any search fade, snap to 1. */
-    internal fun onTransitionEnded() {
-        fadeJob?.cancel()
-        fadeJob = null
-        scope.launch { searchReturn.snapTo(1f) }
-    }
-
-    /**
-     * From 28's `onRects` (dp, shell-relative): writes
+     * From the bar's `onPlaced` (dp, shell-relative): writes
      * `layoutTopInRoot.toDp() + chromeTopDp` into [chromeTopInRoot] when it
-     * moved ≥ 0.5 px — the minimize spring moves it every frame, and the
+     * moved ≥ 0.5 px — the IME ride moves it every frame, and the
      * publication (`snapshotFlow`) re-emits from the state write alone.
      */
     internal fun updateChromeTop(chromeTopDp: Float, density: Density) {
@@ -265,52 +171,20 @@ class ChromeVisibilityController internal constructor(
     }
 }
 
-/**
- * [ChromeVisibilityController] in composition. Observes the tab selection
- * (the search fade trigger — every route into a change goes through
- * `MainTabState.select`, taps, back, Close, router) and each transition of
- * the selected stack (`onEnd` fires the completion once, or at once if the
- * transition already ended).
- */
+/** [ChromeVisibilityController] in composition, over the shell's [MainTabState]. */
 @Composable
-fun rememberChromeVisibilityController(
-    tabs: MainTabState,
-    minimize: TabBarMinimizeState?,
-): ChromeVisibilityController {
-    val scope = rememberCoroutineScope()
-    val controller = remember(tabs, minimize) { ChromeVisibilityController(tabs, minimize, scope) }
-
-    // The selection observer: no suspension between the reads (the change
-    // is dispatched the same frame; the snap-to-0 runs immediately after).
-    LaunchedEffect(controller) {
-        var prev = tabs.selected
-        snapshotFlow { tabs.selected }.collect { now ->
-            if (now != prev) {
-                controller.onTabChanged(prev, now)
-                prev = now
-            }
-        }
-    }
-
-    // Transition start/end of the selected stack. Reading `transition`
-    // here recomposes only this small scope, at start and end.
-    val transition = controller.stack.transition
-    LaunchedEffect(transition) {
-        val t = transition ?: return@LaunchedEffect
-        controller.onTransitionStarted(t)
-        t.onEnd { controller.onTransitionEnded() }
-    }
-    return controller
-}
+fun rememberChromeVisibilityController(tabs: MainTabState): ChromeVisibilityController =
+    remember(tabs) { ChromeVisibilityController(tabs) }
 
 /**
- * Placement + ride + cover + dim for the whole chrome group (apply to 28's
- * [TabChromeLayout], which fills the shell so the local coordinates are
- * the window's). The chain, outermost first:
+ * Placement + ride + cover + dim for the bottom bar (apply to the shell's
+ * bar layout, which fills the shell so the local coordinates are the
+ * window's). The chain, outermost first:
  *
  * 1. `onSizeChanged` — feeds the controller the window width;
  * 2. `layout` — the group is **always measured** (composition, measured
- *    size and inner state survive, #577) and placed only when
+ *    size and inner state, the field's text and focus included, survive)
+ *    and placed only when
  *    [ChromeFrame.placed]: unplaced = not drawn, not hit-tested, not in
  *    the a11y tree;
  * 3. `drawWithContent` — the cover by the incoming screen, a window-px
@@ -328,7 +202,7 @@ fun rememberChromeVisibilityController(
 fun Modifier.chromeVisibility(controller: ChromeVisibilityController): Modifier = this
     .onSizeChanged { controller.widthPx = it.width.toFloat() }
     .layout { measurable, constraints ->
-        // ALWAYS measured: the group stays composed and sized (#577).
+        // ALWAYS measured: the bar stays composed and sized.
         val p = measurable.measure(constraints)
         layout(p.width, p.height) {
             // Not placed = not drawn, not hit-tested, not in semantics.
@@ -371,7 +245,7 @@ fun Modifier.chromeVisibility(controller: ChromeVisibilityController): Modifier 
     .testTag("bottom-chrome")
 
 /**
- * Consumes all pointer input over the window while the selected stack is
+ * Consumes all pointer input over the window while the Sessions stack is
  * transitioning — UIKit disables interaction during transitions, and 24
  * blocks its own host the same way. Reads `transition` in composition, so
  * it recomposes only at start and end. Back gestures are not pointer

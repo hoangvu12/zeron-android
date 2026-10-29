@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -59,9 +58,7 @@ import sh.zeron.android.shell.LocalNavEntry
 import sh.zeron.android.shell.LocalNavStack
 import sh.zeron.android.shell.NavStack
 import sh.zeron.android.shell.NavStackHost
-import sh.zeron.android.shell.RegisterScrollToTop
-import sh.zeron.android.shell.TabId
-import sh.zeron.android.shell.TabRootRoute
+import sh.zeron.android.shell.SessionsRootRoute
 import sh.zeron.android.shell.TitleMode
 
 /**
@@ -273,9 +270,6 @@ internal fun SessionsScreenContent(
         }
     }
 
-    // 26: re-tap the tab → item 0 (the fade returns to 1).
-    RegisterScrollToTop(listState)
-
     // 105: the free area below the expanded large title and the pinned
     // accessory (the results-mode overlays' safe padding).
     val freeAreaTop = topInset + LargeTitleDefaults.NavRowHeight +
@@ -320,12 +314,8 @@ internal fun SessionsScreenContent(
                 status = if (resultsContent != null) resultsModel.status else model.status,
                 safePadding = PaddingValues(top = freeAreaTop, bottom = bottomPadding),
             )
-            // 105: the query's no-results view (49's, above the hero);
-            // a whitespace-only query never reaches here — it is the
-            // front page.
-            if (resultsContent != null && resultsContent.results.showsNoResults) {
-                SearchNoResults(Modifier.fillMaxSize().padding(top = freeAreaTop, bottom = bottomPadding))
-            }
+            // No results: a blank list, as on iOS (J3; D11 drops the
+            // Android-only "No Results" copy with the old Search tab).
         },
     ) {
         if (resultsContent != null) {
@@ -407,9 +397,9 @@ private fun SessionsScreenPreview(appearance: Appearance) {
     ZeronTheme(appearance) {
         ContextMenuHost {
             GlassMenuHost {
-                val stack = remember { NavStack(TabRootRoute(TabId.Sessions)) }
+                val stack = remember { NavStack(SessionsRootRoute) }
                 NavStackHost(stack = stack, active = true) { entry ->
-                    if (entry.route is TabRootRoute) {
+                    if (entry.route is SessionsRootRoute) {
                         SessionsScreenContent(
                             sections = SessionsScreenFixtures.sections(),
                             collapsedIds = emptySet(),
