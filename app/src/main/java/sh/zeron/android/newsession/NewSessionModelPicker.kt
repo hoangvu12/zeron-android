@@ -71,7 +71,7 @@ fun newSessionModelPicker(
     tabs = newSessionPickerTabs(models, draft.harness),
     harness = draft.harness,
     model = draft.model,
-    // TODO(#53): "Cloud" (cloud symbol) when the draft runs on Cloud.
+    // TODO(#53): hostName "Cloud" with hostSymbol "cloud" when the draft runs on Cloud.
     hostName = hostName,
     load = { h -> newSessionPickerRows(models, h) },
     onPick = { h, row -> update { applyNewSessionModelPick(it, h, row.id) } },
