@@ -5,6 +5,7 @@ import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import sh.zeron.android.background.DeliveryHold
 import sh.zeron.android.composer.StagedImage
 import sh.zeron.android.design.AlertButton
 import sh.zeron.android.design.AlertButtonRole
@@ -70,6 +71,8 @@ class CoreNewSessionCore(private val client: () -> CoreClient?) : NewSessionCore
         // the pending echo of the first message) for the router's open
         // (ticket 76); a `closeSession` here would drop the pending row.
         c.openSession(chatId).send(request)
+        // #58: iOS `createSession`'s `noteDeliveryActivity()`.
+        DeliveryHold.noteActivity()
     }
 }
 
