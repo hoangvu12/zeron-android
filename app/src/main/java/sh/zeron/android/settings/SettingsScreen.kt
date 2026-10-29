@@ -230,7 +230,8 @@ fun SettingsScreen(
         devicesSection(devices)
         // TODO(#61): the "Voice" section, only while voice is available
         // (`MoreViewController.swift:213-216`).
-        // TODO(#57): the notification settings follow-ups.
+        // #57: master + Run finished / Waiting on your input / Run failed
+        // (`MoreViewController.swift:126-178`); D8 dropped "Stay connected".
         notificationSection(notifications)
         appearanceSection(appearance)
         wallpaperSection(wallpaper)

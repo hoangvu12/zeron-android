@@ -16,9 +16,6 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 import sh.zeron.android.composer.SendResult
 import sh.zeron.android.design.AlertButtonRole
 import sh.zeron.android.design.Alerts
@@ -37,13 +34,10 @@ import uniffi.zeron_core.SendRequest
  * the success test asserts the exact call order.
  *
  * `runTest` with a [StandardTestDispatcher] as main (the handler's
- * caller) and a second one as IO, both on the test scheduler. Robolectric
- * because the fakes construct `uniffi.zeron_core` records
- * (android-app#13's rule).
+ * caller) and a second one as IO, both on the test scheduler. Plain JVM:
+ * the generated `uniffi.zeron_core` records construct without JNA.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(RobolectricTestRunner::class)
-@Config(sdk = [36])
 class NewSessionSendHandlerTest {
 
     /** The FFI fake: records the call order, the lane each ran on; can throw or hold the create. */
@@ -90,6 +84,7 @@ class NewSessionSendHandlerTest {
     /** 18's alerts fake: records every shown alert. */
     private class RecordingAlerts : Alerts {
         val shown = mutableListOf<ZeronAlert>()
+        override val isShowing: Boolean get() = shown.isNotEmpty()
         override fun show(alert: ZeronAlert) {
             shown += alert
         }

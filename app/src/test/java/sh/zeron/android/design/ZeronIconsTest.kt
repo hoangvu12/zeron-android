@@ -321,6 +321,9 @@ class ZeronIconsTest {
             ZeronIcons.Cpu to R.drawable.zi_cpu, // #49
             ZeronIcons.Cloud to R.drawable.zi_cloud, // #49
             ZeronIcons.CreditCard to R.drawable.zi_creditcard, // #49
+            ZeronIcons.Keyboard to R.drawable.zi_keyboard, // #44
+            ZeronIcons.ArrowLeft to R.drawable.zi_arrow_left, // #44
+            ZeronIcons.ArrowRight to R.drawable.zi_arrow_right, // #44
             ZeronIcons.Refresh to R.drawable.zi_refresh, // android-next#04
             ZeronIcons.PersonCropCircle to R.drawable.zi_user_circle, // #18
             ZeronIcons.RectanglePortraitAndArrowRight to R.drawable.zi_logout_2, // #18

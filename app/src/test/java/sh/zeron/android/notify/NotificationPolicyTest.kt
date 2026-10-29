@@ -52,10 +52,6 @@ class NotificationPolicyTest {
                 ),
             )
         }
-        // LinkLost too.
-        assertFalse(
-            NotificationPolicy.linkLostAllowed(allOn, NotificationStatus.Granted, true),
-        )
     }
 
     @Test
@@ -117,14 +113,6 @@ class NotificationPolicyTest {
                 )
                 assertTrue("$kind with $off off should post=$expected", expected == actual)
             }
-            // LinkLost rides the failed pref.
-            val linkLostAllowed = NotificationPolicy.linkLostAllowed(
-                snapshot,
-                NotificationStatus.Granted,
-                appInForeground = false,
-            )
-            assertTrue("LinkLost with $off off should post=${off != NotificationKind.Failed}",
-                (off != NotificationKind.Failed) == linkLostAllowed)
         }
     }
 }

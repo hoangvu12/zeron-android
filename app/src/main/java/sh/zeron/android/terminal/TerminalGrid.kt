@@ -40,7 +40,8 @@ fun TerminalGrid(
     val accent = palette.accent.toArgb()
     AndroidView(
         // The grid's own semantics (a direct-interaction region, E32); the
-        // platform view also reports the visible text to TalkBack.
+        // platform view reports the visible text to TalkBack while a screen
+        // reader runs (#63, `TerminalView.onInitializeAccessibilityNodeInfo`).
         modifier = modifier.semantics { contentDescription = "Terminal" },
         factory = { context -> TerminalView(context, tab).also(configure) },
         update = { view ->

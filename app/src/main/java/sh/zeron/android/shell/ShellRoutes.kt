@@ -15,6 +15,7 @@ import sh.zeron.android.sessions.FolderRoute
 import sh.zeron.android.sessions.FolderRouteContent
 import sh.zeron.android.sessions.SessionsScreen
 import sh.zeron.android.sidechats.SubagentRoute
+import sh.zeron.android.terminal.TerminalRoute
 
 /**
  * The phone shell's root route: the Sessions list, the first entry of
@@ -64,6 +65,9 @@ fun ShellRouteContent(route: NavRoute) {
         // android-next #06: a subagent's read-only transcript, pushed from
         // a spawn card or the Side Chats & Agents sheet.
         is SubagentRoute -> route.Content()
+        // #44: a chat's terminal, pushed from the session (the panel's
+        // terminal rows and New terminal, the ⋯ Terminal row, Ctrl+J).
+        is TerminalRoute -> route.Content()
         // android-next #05: the Accounts & Usage page — an error card's
         // "Log in" and (until #50) Settings → Agents → Providers push it.
         is AgentAccountsRoute -> AgentAccountsScreen(route)

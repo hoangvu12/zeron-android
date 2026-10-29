@@ -155,6 +155,18 @@ class DeepLinkHubTest {
     }
 
     @Test
+    fun debugScreensTheAppShowsNeverReachTheRouter() {
+        val router = FakeRouter()
+        val shown = mutableListOf<DebugRoute>()
+        val hub = DeepLinkHub(debugScreens = { route -> (route == DebugRoute.Welcome).also { if (it) shown += route } })
+        hub.attachRouter(router)
+        hub.submit(DeepLink.Debug(DebugRoute.Welcome))
+        hub.submit(DeepLink.Debug(DebugRoute.Billing))
+        assertEquals(listOf<DebugRoute>(DebugRoute.Welcome), shown)
+        assertEquals(listOf("debug(Billing)"), router.calls)
+    }
+
+    @Test
     fun theDefaultDebugRouteOnlyLogs() {
         val hub = DeepLinkHub()
         hub.attachRouter(AppRouter.Noop)

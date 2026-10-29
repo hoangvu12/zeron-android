@@ -1,8 +1,11 @@
 package sh.zeron.android.design.glass
 
+import sh.zeron.android.design.onEscape
+import sh.zeron.android.design.modalBackground
+import sh.zeron.android.design.modalBackScale
+import sh.zeron.android.design.ModalBackHandler
 import android.util.Log
 import android.view.accessibility.AccessibilityManager
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Animatable
@@ -47,6 +50,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -360,9 +364,20 @@ fun GlassMenuHost(
 ) {
     val host = remember { GlassMenuHostState() }
     CompositionLocalProvider(LocalGlassMenuHost provides host) {
-        Box(Modifier.fillMaxSize()) {
-            // 1. The app content: the only haze source of this window.
-            Box(Modifier.fillMaxSize().hazeSource(hazeState)) { content() }
+        val up = host.presentation != null
+        Box(
+            Modifier
+                .fillMaxSize()
+                // #63: Escape closes the menu. On the host, not the panel:
+                // the panel never takes focus (the composer's field keeps
+                // it, and the keyboard with it), and the host sees the key
+                // on its way to whichever node holds focus.
+                .then(if (up) Modifier.onEscape { host.close() } else Modifier),
+        ) {
+            // 1. The app content: the only haze source of this window,
+            //    hidden from TalkBack while a menu is up (#63).
+            val background = modalBackground(overlayUp = up)
+            Box(Modifier.fillMaxSize().hazeSource(hazeState).then(background)) { content() }
             // 2. The overlay: a sibling above the source, keyed by the
             //    presentation id so a replacement leaves composition the
             //    same frame (instant, like the toaster).
@@ -804,7 +819,18 @@ fun GlassMenuContent(
         if (stack.size > 1) stack.removeAt(stack.lastIndex) else onDismissRequest()
     }
 
-    BackHandler(enabled = open) { pop() }
+    // #63: predictive — the panel shrinks with the gesture; the commit pops
+    // a drilled level (the panel back to full size) or closes at the root.
+    var backProgress by remember { mutableFloatStateOf(0f) }
+    ModalBackHandler(
+        enabled = open,
+        onProgress = { backProgress = it },
+        onBack = {
+            val closing = stack.size == 1
+            pop()
+            if (!closing) backProgress = 0f
+        },
+    )
 
     // Accessibility: move focus to the first enabled row, but only while a
     // screen reader (touch exploration) is on — a programmatic requestFocus
@@ -840,8 +866,8 @@ fun GlassMenuContent(
 
     Box(
         modifier.graphicsLayer {
-            scaleX = scale.value
-            scaleY = scale.value
+            scaleX = scale.value * modalBackScale(backProgress)
+            scaleY = scale.value * modalBackScale(backProgress)
             this.alpha = alpha.value.coerceIn(0f, 1f) // the spring may overshoot
             transformOrigin = origin
         },

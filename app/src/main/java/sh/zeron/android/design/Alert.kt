@@ -3,12 +3,12 @@ package sh.zeron.android.design
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,6 +22,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -31,6 +32,7 @@ import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
@@ -38,7 +40,6 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.dismiss
-import androidx.compose.ui.semantics.hideFromAccessibility
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -287,13 +288,14 @@ fun AlertHost(state: AlertHostState = remember { AlertHostState() }, content: @C
     CompositionLocalProvider(LocalAlerts provides state) {
         Box(Modifier.fillMaxSize()) {
             // 1. The wrapped content: the window-level haze source, hidden
-            //    from TalkBack while an alert is up so it stays inside the alert.
-            val hideContent = state.current != null
+            //    from TalkBack while an alert is up so it stays inside the
+            //    alert, its focus restored when the alert closes (#63).
+            val background = modalBackground(overlayUp = state.current != null)
             Box(
                 Modifier
                     .fillMaxSize()
                     .hazeSource(hostHaze)
-                    .let { m -> if (hideContent) m.semantics { hideFromAccessibility() } else m },
+                    .then(background),
             ) {
                 content()
             }
@@ -345,6 +347,10 @@ private fun PresentedAlert(
     val alpha = remember { Animatable(0f) }
     val scale = remember { Animatable(if (reduce) 1f else 1.1f) }
     val focusRequester = remember { FocusRequester() }
+    // #63: the alert root takes focus when there is no field, so a hardware
+    // Escape reaches it; the field holds it otherwise (Escape bubbles up).
+    val rootFocus = remember { FocusRequester() }
+    var backProgress by remember { mutableFloatStateOf(0f) }
     val focusManager = LocalFocusManager.current
     val keyboard = LocalSoftwareKeyboardController.current
     val scope = rememberCoroutineScope()
@@ -358,6 +364,9 @@ private fun PresentedAlert(
             withFrameNanos { }
             focusRequester.requestFocus()
             keyboard?.show()
+        } else {
+            withFrameNanos { }
+            runCatching { rootFocus.requestFocus() }
         }
     }
 
@@ -390,12 +399,22 @@ private fun PresentedAlert(
     }
 
     // Composed after the screens' handlers, so it wins while the alert is up.
-    BackHandler(enabled = !resolved) {
-        // The back rule: the cancel action, or a plain dismiss when there is none.
-        resolve(cancelActionIndex(alert.buttons))
-    }
+    // #63: predictive — the card shrinks with the gesture; the commit runs
+    // the back rule: the cancel action, or a plain dismiss when there is none.
+    ModalBackHandler(
+        enabled = !resolved,
+        onProgress = { backProgress = it },
+        onBack = { resolve(cancelActionIndex(alert.buttons)) },
+    )
 
-    Box(Modifier.fillMaxSize()) {
+    Box(
+        Modifier
+            .fillMaxSize()
+            .focusRequester(rootFocus)
+            .focusable()
+            // #63: hardware Escape is the back rule too.
+            .onEscape { if (!resolved) resolve(cancelActionIndex(alert.buttons)) },
+    ) {
         // The scrim: full window, fixed black @0.20, fading with the card.
         Scrim(alpha) {
             // Outside-tap rule: run the cancel action; no cancel action → the
@@ -429,8 +448,8 @@ private fun PresentedAlert(
                 modifier = Modifier
                     .graphicsLayer {
                         this.alpha = alpha.value
-                        scaleX = scale.value
-                        scaleY = scale.value
+                        scaleX = scale.value * modalBackScale(backProgress)
+                        scaleY = scale.value * modalBackScale(backProgress)
                     }
                     // Taps on the card's own background must not reach the
                     // scrim below it (children process the Main pass first).

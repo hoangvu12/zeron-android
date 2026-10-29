@@ -20,8 +20,8 @@ data class OngoingInput(
     val working: List<WorkingRun>,
     /** Top-level chats in AwaitingInput (never side chats). */
     val awaiting: Int,
-    /** Paired engines; ≥ 2 shows the engine name as subText. */
-    val engineCount: Int,
+    /** The account's execution devices; ≥ 2 shows the run's device name as subText. */
+    val deviceCount: Int,
     /** The user dismissed the Live Update: no promotion until the working set changes. */
     val liveUpdateDismissed: Boolean,
 )
@@ -42,7 +42,7 @@ data class OngoingContent(
     val chip: String,
     /** `setWhen(min(startedAtMs))`; `null` skips the chronometer. */
     val whenMs: Long?,
-    /** The engine name when n = 1 and ≥ 2 engines are paired; else null. */
+    /** The device name when n = 1 and the account has ≥ 2 devices; else null. */
     val subText: String?,
     /** The chat to open on tap (null = the app root, the Sessions tab). */
     val tapChatId: String?,
@@ -50,18 +50,17 @@ data class OngoingContent(
     val promoteLiveUpdate: Boolean,
     /**
      * True while runs are Working (the indeterminate progress bar and
-     * `CATEGORY_PROGRESS`); false for the idle "Staying connected" content.
+     * `CATEGORY_PROGRESS`); false for the idle content of the linger.
      */
     val working: Boolean = true,
 )
 
-/** The idle content's copy (ADR 0010; new copy, no iOS/web source). */
+/** The idle content's copy (the linger after the last run; new copy, no iOS/web source). */
 object OngoingCopy {
     const val IdleTitle = "Staying connected"
 
-    /** "Keeping 1 engine connected" / "Keeping 2 engines connected". */
-    fun idleText(engineCount: Int): String =
-        if (engineCount == 1) "Keeping 1 engine connected" else "Keeping $engineCount engines connected"
+    /** The linger's line: the sessions stay live for a tap on the notification. */
+    const val IdleText = "Keeping your sessions up to date"
 }
 
 /**
@@ -75,10 +74,10 @@ fun ongoingContent(input: OngoingInput, nowMs: Long, apiPromotionPossible: Boole
     val working = input.working
     if (working.isEmpty()) {
         // The service is up with nothing Working: the linger after the
-        // last run, or Stay connected (ADR 0010). A quiet status line, no
-        // chronometer, no progress, never promoted; the tap opens the app.
+        // last run. A quiet status line, no chronometer, no progress, never
+        // promoted; the tap opens the app.
         val text = buildString {
-            append(OngoingCopy.idleText(input.engineCount))
+            append(OngoingCopy.IdleText)
             if (input.awaiting > 0) {
                 append(" · ")
                 append(input.awaiting)
@@ -103,7 +102,7 @@ fun ongoingContent(input: OngoingInput, nowMs: Long, apiPromotionPossible: Boole
             text = "Working",
             chip = "Working",
             whenMs = run.startedAtMs ?: nowMs,
-            subText = if (input.engineCount >= 2) run.engineName else null,
+            subText = if (input.deviceCount >= 2) run.engineName.ifBlank { null } else null,
             tapChatId = run.chatId,
             promoteLiveUpdate = apiPromotionPossible && !input.liveUpdateDismissed && run.fromThisDevice,
         )

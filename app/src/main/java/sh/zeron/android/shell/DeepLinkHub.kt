@@ -38,8 +38,14 @@ internal var deepLinksLog: (String) -> Unit = { message -> Log.i("DeepLinks", me
  * Fed by notification taps (#19, the `chatId` extra) and the `route`
  * extra; Zeron's chat ids are plain, so an `OpenChat` id goes to the
  * router as it came.
+ *
+ * [debugScreens] takes the debug routes the app shows itself (#63: the
+ * Welcome page over the shell); it returns false for the rest, which go
+ * to [AppRouter.showDebugRoute].
  */
-class DeepLinkHub {
+class DeepLinkHub(
+    private val debugScreens: (DebugRoute) -> Boolean = { false },
+) {
 
     private var router: AppRouter? = null
     private var welcomeRoot: Boolean = false
@@ -94,7 +100,7 @@ class DeepLinkHub {
 
             DeepLink.Search -> router.showSearch()
 
-            is DeepLink.Debug -> router.showDebugRoute(link.route)
+            is DeepLink.Debug -> if (!debugScreens(link.route)) router.showDebugRoute(link.route)
         }
     }
 }

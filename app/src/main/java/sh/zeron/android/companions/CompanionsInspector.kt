@@ -43,6 +43,10 @@ import sh.zeron.android.sidechats.SideChatsModel
 import sh.zeron.android.sidechats.SideChatsSource
 import sh.zeron.android.sidechats.SubagentOpenRequest
 import sh.zeron.android.sidechats.rememberSubagentOpener
+import sh.zeron.android.terminal.TerminalRoute
+import sh.zeron.android.terminal.deviceName
+import sh.zeron.android.terminal.panelRow
+import sh.zeron.android.terminal.rememberChatTerminals
 import uniffi.zeron_core.CoreClient
 
 /**
@@ -155,6 +159,12 @@ private fun CompanionsInspectorScreen(route: CompanionsInspectorRoute) {
             }
         }
     }
+    // #44: the chat's terminals, each opening over the panel (iOS
+    // `TerminalViewController(tab:)` through `presentCompanion`).
+    val terminals = rememberChatTerminals(chatId)
+    val openTerminal: (String?) -> Unit = { id ->
+        if (isTop()) nav.push(TerminalRoute(chatId, id), animated = true)
+    }
 
     Column(
         Modifier
@@ -203,8 +213,7 @@ private fun CompanionsInspectorScreen(route: CompanionsInspectorRoute) {
                             model.invalidate()
                             openSideChat(id)
                         }
-                        // TODO(#43): a new terminal over the panel (iOS `TerminalViewController(tab: nil)`).
-                        CompanionAction.NewTerminal -> Unit
+                        CompanionAction.NewTerminal -> openTerminal(null)
                     }
                 },
                 onArchive = { id, onAccepted ->
@@ -213,6 +222,9 @@ private fun CompanionsInspectorScreen(route: CompanionsInspectorRoute) {
                         model.invalidate()
                     }
                 },
+                terminals = terminals.map { it.panelRow(app.deviceName(it.ref.deviceId)) },
+                onOpenTerminal = { id -> openTerminal(id) },
+                onCloseTerminal = { id -> terminals.firstOrNull { it.ref.id == id }?.let(app.terminals::close) },
             )
         }
     }

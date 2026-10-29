@@ -35,8 +35,8 @@ interface AppRouter {
             // TODO(#50): the Providers page; a computer's or a Cloud agent's
             // accounts pushed from it (AgentAccountsRoute exists, Providers doesn't).
             is DebugRoute.Providers, is DebugRoute.Accounts, is DebugRoute.CloudAgent -> Unit
-            // TODO: no owning ticket yet — the Welcome page (#16's screen)
-            // presented full-screen over the shell, without signing out.
+            // #63: the app shows it itself (`DeepLinkHub`'s debug screens,
+            // `ZeronApplication.debugWelcome`); never reaches a router.
             DebugRoute.Welcome -> Unit
         }
         deepLinksLog("debug route $route: no screen yet")

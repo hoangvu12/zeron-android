@@ -19,17 +19,17 @@ import sh.zeron.android.notify.Notifier
 import sh.zeron.android.notify.WorkingRun
 
 /**
- * The run-watching foreground service's lifecycle (android-app#28):
- * start (foreground + working + notifications on), keep while working,
- * the 2 min linger (ADR 0010), the immediate stops (notifications off,
- * last engine forgotten), the dataSync timeout latch, the foreground
- * restart, and the opt-in Stay connected mode (ADR 0010). Robolectric for
- * the `Intent`s, virtual time for the linger — the controller's clock is
- * the scheduler's clock.
+ * The run-watching foreground service's lifecycle (android-app#28, #57):
+ * start (foreground + working + notifications on + signed in), keep while
+ * working, the 2 min linger, the immediate stops (notifications off,
+ * signed out), the dataSync timeout latch and the foreground restart. D8
+ * dropped "Stay connected". Robolectric for the `Intent`s (a plain
+ * [Application], so `ZeronApplication.onCreate` never runs), virtual time
+ * for the linger — the controller's clock is the scheduler's clock.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [31])
+@Config(sdk = [31], application = Application::class)
 class RunWatchControllerTest {
 
     private val context: Application
@@ -48,10 +48,10 @@ class RunWatchControllerTest {
     fun startingNeedsForegroundWorkingAndNotificationsOn() = runTest {
         val starts = mutableListOf<Intent>()
         val controller = controller(starts)
-        // Background, no run, no engines: nothing.
+        // Background, no run: nothing.
         controller.onRunActivity(emptyList(), 0)
         controller.onNotificationsOn(true)
-        controller.onEngineCount(1)
+        controller.onSignedIn(true)
         assertEquals(0, controller.starts)
         assertFalse(controller.state.value.active)
         // Foreground + one working run: the service starts, exactly once.
@@ -71,9 +71,9 @@ class RunWatchControllerTest {
         val starts = mutableListOf<Intent>()
         val controller = controller(starts)
         controller.onNotificationsOn(true)
-        controller.onEngineCount(1)
+        controller.onSignedIn(true)
         controller.onForeground(false)
-        // A run starts on the engine while the app is backgrounded: the
+        // A run starts on the desktop while the app is backgrounded: the
         // start is caught and dropped (API 31+), retried on the next
         // foreground.
         controller.onRunActivity(listOf(workingRun()), 0)
@@ -87,11 +87,11 @@ class RunWatchControllerTest {
     }
 
     @Test
-    fun notificationsOffOrNoEnginesStopsAtOnce() = runTest {
+    fun notificationsOffOrSignedOutStopsAtOnce() = runTest {
         val starts = mutableListOf<Intent>()
         val controller = controller(starts)
         controller.onNotificationsOn(true)
-        controller.onEngineCount(1)
+        controller.onSignedIn(true)
         controller.onForeground(true)
         controller.onRunActivity(listOf(workingRun()), 0)
         controller.onServiceStarted()
@@ -99,10 +99,10 @@ class RunWatchControllerTest {
         // Notifications off: stop now.
         controller.onNotificationsOn(false)
         assertFalse(controller.state.value.active)
-        // Back on, then the last engine forgotten: stop now.
+        // Back on, then signed out: stop now.
         controller.onNotificationsOn(true)
         assertTrue(controller.state.value.active)
-        controller.onEngineCount(0)
+        controller.onSignedIn(false)
         assertFalse(controller.state.value.active)
     }
 
@@ -111,7 +111,7 @@ class RunWatchControllerTest {
         val starts = mutableListOf<Intent>()
         val controller = controller(starts)
         controller.onNotificationsOn(true)
-        controller.onEngineCount(1)
+        controller.onSignedIn(true)
         controller.onForeground(true)
         controller.onRunActivity(listOf(workingRun()), 0)
         controller.onServiceStarted()
@@ -120,7 +120,6 @@ class RunWatchControllerTest {
         controller.onForeground(false)
         controller.onRunActivity(emptyList(), 0)
         assertTrue("the linger holds the service", controller.state.value.active)
-        assertFalse("the linger is not Stay connected", controller.state.value.persistent)
         // 10 s in, a queue handoff flickers Working again: the window
         // resets.
         advanceTimeBy(10_000)
@@ -144,7 +143,7 @@ class RunWatchControllerTest {
         val starts = mutableListOf<Intent>()
         val controller = controller(starts)
         controller.onNotificationsOn(true)
-        controller.onEngineCount(1)
+        controller.onSignedIn(true)
         controller.onForeground(true)
         controller.onRunActivity(listOf(workingRun()), 0)
         controller.onServiceStarted()
@@ -166,131 +165,12 @@ class RunWatchControllerTest {
         assertFalse(controller.state.value.active)
     }
 
-    // ── Stay connected (ADR 0010) ────────────────────────────────────────
-
-    @Test
-    fun stayConnectedStartsTheServiceWithNoRunAndHoldsItInTheBackground() = runTest {
-        val starts = mutableListOf<Intent>()
-        val controller = controller(starts)
-        controller.onNotificationsOn(true)
-        controller.onEngineCount(1)
-        controller.onForeground(true)
-        assertFalse(controller.state.value.active)
-        // The Settings toggle (the app is visible): the service starts at
-        // once, persistent (specialUse), with nothing Working.
-        controller.onStayConnected(true)
-        assertEquals(1, controller.starts)
-        assertTrue(controller.state.value.active)
-        assertTrue(controller.state.value.persistent)
-        controller.onServiceStarted()
-        // Backgrounded for an hour: still up, never restarted.
-        controller.onForeground(false)
-        advanceTimeBy(3_600_000)
-        runCurrent()
-        assertTrue(controller.state.value.active)
-        assertEquals(1, controller.starts)
-        // A run starting and ending while backgrounded changes nothing.
-        controller.onRunActivity(listOf(workingRun()), 0)
-        controller.onRunActivity(emptyList(), 0)
-        advanceTimeBy(RunWatchController.LINGER_MS + 100)
-        runCurrent()
-        assertTrue(controller.state.value.active)
-        assertTrue(controller.state.value.persistent)
-    }
-
-    @Test
-    fun stayConnectedIgnoresTheNotificationsGateButNotTheEngineCount() = runTest {
-        val starts = mutableListOf<Intent>()
-        val controller = controller(starts)
-        controller.onForeground(true)
-        controller.onNotificationsOn(false)
-        controller.onStayConnected(true)
-        // No engine paired: nothing to stay connected to.
-        assertFalse(controller.state.value.active)
-        assertEquals(0, controller.starts)
-        controller.onEngineCount(1)
-        assertTrue("notifications off does not stop Stay connected", controller.state.value.active)
-        assertEquals(1, controller.starts)
-        controller.onServiceStarted()
-        // The last engine forgotten: stop at once.
-        controller.onEngineCount(0)
-        assertFalse(controller.state.value.active)
-        assertFalse(controller.state.value.persistent)
-    }
-
-    @Test
-    fun stayConnectedOnlyStartsWhileForeground() = runTest {
-        val starts = mutableListOf<Intent>()
-        val controller = controller(starts)
-        controller.onEngineCount(1)
-        controller.onForeground(false)
-        // The stored preference loads while the process runs in the
-        // background (Android forbids a background FGS start): no start.
-        controller.onStayConnected(true)
-        assertEquals(0, controller.starts)
-        assertTrue("the service should run", controller.state.value.active)
-        // The next app open starts it.
-        controller.onForeground(true)
-        assertEquals(1, controller.starts)
-    }
-
-    @Test
-    fun turningStayConnectedOffRestoresTheRunOnlyRules() = runTest {
-        val starts = mutableListOf<Intent>()
-        val controller = controller(starts)
-        controller.onNotificationsOn(true)
-        controller.onEngineCount(1)
-        controller.onForeground(true)
-        controller.onStayConnected(true)
-        controller.onServiceStarted()
-        // Off with nothing Working and no linger open: stop at once.
-        controller.onStayConnected(false)
-        assertFalse(controller.state.value.active)
-        controller.onServiceStopped()
-
-        // On again, a run comes and goes, then off mid-linger: the service
-        // falls back to dataSync and the linger still runs out on time.
-        controller.onStayConnected(true)
-        assertEquals(2, controller.starts)
-        controller.onServiceStarted()
-        controller.onRunActivity(listOf(workingRun()), 0)
-        controller.onRunActivity(emptyList(), 0)
-        advanceTimeBy(30_000)
-        runCurrent()
-        controller.onStayConnected(false)
-        assertTrue("the linger still holds it", controller.state.value.active)
-        assertFalse("now dataSync", controller.state.value.persistent)
-        advanceTimeBy(RunWatchController.LINGER_MS - 30_000 + 100)
-        runCurrent()
-        assertFalse(controller.state.value.active)
-    }
-
-    @Test
-    fun stayConnectedIsImmuneToTheDataSyncBudgetLatch() = runTest {
-        val starts = mutableListOf<Intent>()
-        val controller = controller(starts)
-        controller.onNotificationsOn(true)
-        controller.onEngineCount(1)
-        controller.onForeground(true)
-        controller.onRunActivity(listOf(workingRun()), 0)
-        controller.onServiceStarted()
-        // A dataSync timeout latched the budget...
-        controller.onServiceTimeout(Notifier(context))
-        assertFalse(controller.state.value.active)
-        controller.onServiceStopped()
-        // ...Stay connected (specialUse, no time limit) still runs.
-        controller.onStayConnected(true)
-        assertTrue(controller.state.value.active)
-        assertTrue(controller.state.value.persistent)
-        assertEquals(2, controller.starts)
-    }
-
     @Test
     fun theTimeoutLatchesAndTheForegroundRestartsTheService() = runTest {
         val starts = mutableListOf<Intent>()
         val controller = controller(starts)
         controller.onNotificationsOn(true)
-        controller.onEngineCount(1)
+        controller.onSignedIn(true)
         controller.onForeground(true)
         controller.onRunActivity(listOf(workingRun()), 0)
         assertEquals(1, controller.starts)
@@ -320,7 +200,7 @@ class RunWatchControllerTest {
         val starts = mutableListOf<Intent>()
         val controller = controller(starts)
         controller.onNotificationsOn(true)
-        controller.onEngineCount(1)
+        controller.onSignedIn(true)
         controller.onForeground(true)
         controller.onRunActivity(listOf(workingRun()), 0)
         assertFalse(controller.state.value.liveUpdateDismissed)
@@ -333,6 +213,31 @@ class RunWatchControllerTest {
         // The working set changes: promotion may be requested again.
         controller.onRunActivity(listOf(workingRun("engine:v1:b")), 0)
         assertFalse(controller.state.value.liveUpdateDismissed)
+    }
+
+    @Test
+    fun signingOutStopsAtOnceWithNoLinger() = runTest {
+        val starts = mutableListOf<Intent>()
+        val controller = controller(starts)
+        controller.onNotificationsOn(true)
+        controller.onSignedIn(true)
+        controller.onForeground(true)
+        controller.onRunActivity(listOf(workingRun()), 1)
+        controller.onServiceStarted()
+        controller.onDeviceCount(2)
+        assertEquals(2, controller.state.value.deviceCount)
+
+        controller.signOut()
+
+        assertFalse("nobody is left to tap a Done notification", controller.state.value.active)
+        assertTrue(controller.state.value.working.isEmpty())
+        assertEquals(0, controller.state.value.awaiting)
+        assertEquals(0, controller.state.value.deviceCount)
+        // The next account's run starts it again.
+        controller.onServiceStopped()
+        controller.onSignedIn(true)
+        controller.onRunActivity(listOf(workingRun("b")), 0)
+        assertEquals(2, controller.starts)
     }
 
     /** A controller under test: starts recorded, never executed, clock = the scheduler. */

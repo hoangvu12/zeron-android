@@ -2,6 +2,7 @@ package sh.zeron.android.session
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -34,6 +35,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
@@ -196,6 +198,13 @@ fun SessionHeader(
     /** #42: the trailing circle's glyph and label (the subagent screen's Copy). */
     moreIcon: ZeronIcon = ZeronIcons.Ellipsis,
     moreLabel: String = "More",
+    /**
+     * #44: a tap on the title opens a title menu (iOS `titleMenuProvider`,
+     * the terminal's tab switcher); [Rect] is the title's `boundsInWindow()`.
+     * `null` (the default): the title is not tappable.
+     */
+    onTitle: ((anchorInWindow: Rect) -> Unit)? = null,
+    titleActionLabel: String? = null,
 ) {
     val density = LocalDensity.current
     val layoutDirection = LocalLayoutDirection.current
@@ -219,6 +228,7 @@ fun SessionHeader(
     // The ⋯ menu anchor: written during layout, read only inside the click
     // lambda — layout changes never recompose this header (step 4's rule).
     var moreBounds by remember { mutableStateOf(Rect.Zero) }
+    var titleBounds by remember { mutableStateOf(Rect.Zero) }
 
     Box(modifier.fillMaxWidth().height(edgeHeight)) {
         // 1. The soft top edge (ticket 09): over the transcript, under the
@@ -317,7 +327,18 @@ fun SessionHeader(
                         title = title,
                         subtitle = subtitle,
                         maxWidth = titleMaxWidth,
-                        modifier = Modifier.align(Alignment.Center),
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .then(
+                                if (onTitle != null) {
+                                    Modifier
+                                        .onGloballyPositioned { titleBounds = it.boundsInWindow() }
+                                        .clickable(onClickLabel = titleActionLabel, role = Role.Button) { onTitle(titleBounds) }
+                                        .testTag("session-title-menu")
+                                } else {
+                                    Modifier
+                                },
+                            ),
                     )
                 }
             }
