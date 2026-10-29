@@ -38,7 +38,7 @@ import sh.zeron.android.design.uiStyle
  * A framed [AppRoot] with the fake roots (the fills differ so the fade is
  * visible), plus the ticket's three levers:
  *
- * - **"Signed in"** toggles `Ready(hasEngines)` — the Welcome ↔ Shell swap,
+ * - **"Signed in"** toggles `Ready(signedIn)` — the Welcome ↔ Shell swap,
  *   the 350 ms cross-fade, and the instant dismissal: the fake sheet
  *   below vanishes in the same frame the swap starts (it is registered
  *   with [RegisterRootPresentation]);
@@ -116,7 +116,7 @@ private fun FramedAppRoot(
             },
     ) {
         AppRoot(
-            input = RootInput.Ready(hasEngines = signedIn),
+            input = RootInput.Ready(signedIn = signedIn),
             state = remember { AppRootState() },
             presentations = presentations,
             welcome = { FakeRoot("Welcome", palette.accent, palette.text) },

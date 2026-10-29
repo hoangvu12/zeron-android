@@ -41,7 +41,7 @@ private fun choice(h: HarnessInfo, m: ModelInfo): ModelChoice =
 /**
  * The live [ModelCatalogSource] over the process's client, resolved at
  * call time (ticket 71's `ZeronApplication.clientOrNull()`): `null`
- * before `CoreStartState.Ready` reads as an empty catalog.
+ * while signed out reads as an empty catalog.
  *
  * The FFI never throws by contract — `CoreClient.listHarnesses` /
  * `listModels` fall back live → disk cache → static inside the core

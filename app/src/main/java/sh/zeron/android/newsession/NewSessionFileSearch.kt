@@ -32,8 +32,8 @@ fun interface NewSessionFileSearch {
 }
 
 /**
- * The production [NewSessionFileSearch] over the live client: `null` before
- * `CoreStartState.Ready` reads as no matches (AppModel's `guard let client`,
+ * The production [NewSessionFileSearch] over the live client: `null` while
+ * signed out reads as no matches (AppModel's `guard let client`,
  * `:608`), the FFI call runs on `Dispatchers.IO`, and every error except
  * cancellation — which 86 uses to drop stale queries — returns `[]`.
  */
