@@ -10,7 +10,8 @@ import androidx.compose.runtime.staticCompositionLocalOf
  *
  * The moments map 1:1 to the iOS generator call sites listed in the ticket:
  * `Select` (UISelectionFeedbackGenerator), `Confirm` (impact .medium),
- * `Stop` (impact .rigid), `Light` (impact .light), plus the ones UIKit plays
+ * `Stop` (impact .rigid), `Light` (impact .light), `Soft` (impact .soft at
+ * 0.6, the terminal bell), plus the ones UIKit plays
  * for free: `LongPress` (context-menu lift), `Threshold` (full swipe /
  * pull-to-refresh commit) and `ToggleOn`/`ToggleOff` (UISwitch).
  * `Success`/`Attention`/`Error` cover UINotificationFeedbackGenerator
@@ -21,6 +22,7 @@ enum class Haptic {
     Confirm,
     Stop,
     Light,
+    Soft,
     LongPress,
     Threshold,
     ToggleOn,

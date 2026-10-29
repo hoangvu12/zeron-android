@@ -32,7 +32,7 @@ data class Step(val primitive: Int, val scale: Float, val delayMs: Int = 0)
  *    feels native) when [preferView].
  * 2. The first [compositions] alternative whose primitives are all supported.
  * 3. A view constant for the moments that do not prefer one (the iOS-fallback
- *    rung: `Stop`, `Light`, `Success`, `Attention`, `Error`).
+ *    rung: `Stop`, `Light`, `Soft`, `Success`, `Attention`, `Error`).
  * 4. The [predefined] effect.
  */
 data class HapticSpec(
@@ -53,7 +53,7 @@ data class HapticSpec(
 
 /**
  * The rendering table. Every value here is the ticket's port of upstream PR
- * #699's design, trimmed to the 11 moments the iOS app plays.
+ * #699's design, trimmed to the 12 moments the iOS app plays.
  */
 object HapticTable {
     fun spec(haptic: Haptic): HapticSpec = all[haptic.ordinal]
@@ -66,6 +66,7 @@ object HapticTable {
         Haptic.Confirm -> "impact .medium · ComposerBar.swift:653"
         Haptic.Stop -> "impact .rigid · ComposerBar.swift:642"
         Haptic.Light -> "impact .light · RowView.swift:335"
+        Haptic.Soft -> "impact .soft ×0.6 · TerminalStore.swift:87"
         Haptic.LongPress -> "UIKit context menu"
         Haptic.Threshold -> "UIKit full swipe / refresh"
         Haptic.ToggleOn -> "UISwitch on"
@@ -106,6 +107,14 @@ object HapticTable {
             listOf(listOf(Step(C.PRIMITIVE_CLICK, 0.4f)), listOf(Step(C.PRIMITIVE_TICK, 0.6f))),
             VibrationEffect.EFFECT_TICK, priority = 1, minGapMs = 80,
         )
+        // iOS impact .soft at 0.6 (the terminal bell): a dull, quiet tap under
+        // Light. CLOCK_TICK, the subtlest view constant, is the fallback rung
+        // only (KEYBOARD_TAP follows the keyboard-vibration toggle).
+        Haptic.Soft -> HapticSpec(
+            haptic, false, api(0, H.CLOCK_TICK),
+            listOf(listOf(Step(C.PRIMITIVE_LOW_TICK, 0.6f)), listOf(Step(C.PRIMITIVE_TICK, 0.4f))),
+            VibrationEffect.EFFECT_TICK, priority = 0, minGapMs = 120,
+        )
         // A context menu lifts on long press (UIKit plays it for free).
         Haptic.LongPress -> HapticSpec(
             haptic, true, api(0, H.LONG_PRESS),
@@ -136,8 +145,8 @@ object HapticTable {
             ),
             VibrationEffect.EFFECT_TICK, priority = 1, minGapMs = 80,
         )
-        // Soft rise, then a small settle: a turn completed, a transfer arrived.
-        // Reserved (android-app#28); CONFIRM is the fallback rung only.
+        // Soft rise, then a small settle: a fork landed, a sign-in finished.
+        // CONFIRM is the fallback rung only.
         Haptic.Success -> HapticSpec(
             haptic, false, api(30, H.CONFIRM),
             listOf(
@@ -146,7 +155,7 @@ object HapticTable {
             ),
             VibrationEffect.EFFECT_CLICK, priority = 2, minGapMs = 400,
         )
-        // Two crisp taps: something needs you. Reserved (android-app#28).
+        // Two crisp taps: something needs you (out of Cloud credits).
         Haptic.Attention -> HapticSpec(
             haptic, false, api(30, H.REJECT),
             listOf(
@@ -155,7 +164,7 @@ object HapticTable {
             ),
             VibrationEffect.EFFECT_DOUBLE_CLICK, priority = 2, minGapMs = 400,
         )
-        // A short, heavy double: failed or refused. Reserved (android-app#28).
+        // A short, heavy double: failed or refused (a voice call ended in error).
         Haptic.Error -> HapticSpec(
             haptic, false, api(30, H.REJECT),
             listOf(
@@ -195,7 +204,7 @@ object HapticPlanner {
         }
         spec.compositions.firstOrNull { steps -> steps.all { it.primitive in caps.primitives } }
             ?.let { return HapticPlan.Composition(it) }
-        // The fallback rung for Stop, Light, Success, Attention and Error.
+        // The fallback rung for Stop, Light, Soft, Success, Attention and Error.
         if (caps.hasView) {
             spec.view(caps.sdk)?.let { return HapticPlan.ViewConstant(it) }
         }
@@ -238,6 +247,7 @@ object HapticPlanner {
         H.CONFIRM -> "CONFIRM"
         H.REJECT -> "REJECT"
         H.KEYBOARD_TAP -> "KEYBOARD_TAP"
+        H.CLOCK_TICK -> "CLOCK_TICK"
         H.LONG_PRESS -> "LONG_PRESS"
         H.GESTURE_THRESHOLD_ACTIVATE -> "GESTURE_THRESHOLD_ACTIVATE"
         H.TOGGLE_ON -> "TOGGLE_ON"
