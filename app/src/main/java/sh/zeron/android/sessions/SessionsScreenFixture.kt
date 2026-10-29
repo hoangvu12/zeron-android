@@ -158,6 +158,21 @@ internal object SessionsScreenFixtures {
         ListSection(id = "project:blog", header = "blog", rows = listOf(launchPost)),
     )
 
+    /**
+     * The Group by Device set (#131): Recent is replaced by "MacBook Pro",
+     * "Studio · Offline" and "Cloud". The ids are [FrontPageSections.deviceGroups]'
+     * (`device:<id>` / `cloud`), so the header-menu classification sees
+     * them as groups → no menu.
+     */
+    fun deviceSections(): List<ListSection> = listOf(
+        ListSection(id = FrontPageSections.PINNED, header = FrontPageSections.PINNED_TITLE, rows = listOf(veil, models)),
+        ListSection(id = "sec-p0", header = "P0", rows = listOf(toolColors, hibernation)),
+        ListSection(id = "sec-mobile", header = "Mobile", rows = listOf(scrollPinning, keyboard)),
+        ListSection(id = "device:device-A", header = "MacBook Pro", rows = listOf(i18n, downloads)),
+        ListSection(id = "device:device-B", header = "Studio · Offline", rows = listOf(deploy)),
+        ListSection(id = "cloud", header = "Cloud", rows = listOf(launchPost)),
+    )
+
     /** Recent in reference order (the 1-off set's fourth section). */
     val recentRows: List<SessionRow> = listOf(i18n, downloads, deploy, launchPost)
 

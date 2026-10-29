@@ -42,8 +42,14 @@ object PrefKeys {
      */
     val APPEARANCE = intPreferencesKey("appearance")
 
-    /** `AppModel.groupByProject` — phone-local, never sent to an engine. */
+    /**
+     * `AppModel.groupByProject` — phone-local, never sent to an engine.
+     * Superseded by [SESSION_GROUPING] (#131): read once to migrate, then removed.
+     */
     val GROUP_BY_PROJECT = booleanPreferencesKey("groupByProject")
+
+    /** The Sessions-tab grouping mode (#131): a [SessionGrouping.stored] key; absent = migrate or None. */
+    val SESSION_GROUPING = stringPreferencesKey("sessionGrouping")
 
     /** Phone-local fold set: Pinned, Recent and `project:*`/`home:*` groups. */
     val COLLAPSED_SECTIONS = stringSetPreferencesKey("collapsedSections")
@@ -59,6 +65,27 @@ object PrefKeys {
 
     /** iOS `MathSettings.size` (`mathSize`): percent of the surrounding text; absent = 100. */
     val MATH_SIZE = intPreferencesKey("mathSize")
+}
+
+/**
+ * How the Sessions tab groups Recent (#131): not at all, by project
+ * (iOS's Group by Project, #21) or by device (Zeron's addition, modelled
+ * on it). The two groupings are mutually exclusive, so one mode replaces
+ * iOS's boolean.
+ */
+enum class SessionGrouping(val stored: String) {
+    None("none"),
+    Project("project"),
+    Device("device"),
+    ;
+
+    companion object {
+        /** The stored key's mode; null for an absent or unknown key (then the old flag decides). */
+        fun fromStored(key: String?): SessionGrouping? = entries.firstOrNull { it.stored == key }
+
+        /** The pre-#131 `groupByProject` flag's mode. */
+        fun fromLegacy(groupByProject: Boolean?): SessionGrouping = if (groupByProject == true) Project else None
+    }
 }
 
 /**
@@ -91,6 +118,12 @@ val Context.zeronPrefsStore: DataStore<Preferences> by preferencesDataStore(
  * absent key reads `Appearance.System` (iOS `integer(forKey:)` returns 0),
  * an unknown stored value normalises to `System` (`?? .unspecified`), and
  * [setAppearance] mirrors `setGroupByProject`'s no-op/flip/persist shape.
+ *
+ * Ticket 131 replaces the flag with a [SessionGrouping] mode under
+ * `"sessionGrouping"`: the first load migrates a stored `"groupByProject"`
+ * (true = Project, else None) and removes the old key. [groupByProject]
+ * stays as the Project half of the mode, so the Settings switch keeps
+ * working: on picks Project, off picks None.
  */
 class Prefs(
     private val store: DataStore<Preferences>,
@@ -98,7 +131,14 @@ class Prefs(
     private val io: CoroutineDispatcher = Dispatchers.IO,
 ) {
 
+    private val _grouping = MutableStateFlow(SessionGrouping.None)
+
+    /** The Sessions-tab grouping mode (#131) — None until the disk read lands. */
+    val grouping: StateFlow<SessionGrouping> = _grouping.asStateFlow()
+
     private val _group = MutableStateFlow(false)
+
+    /** Whether [grouping] is Project — the Settings switch and the iOS flag's reading. */
     val groupByProject: StateFlow<Boolean> = _group.asStateFlow()
 
     private val _appearance = MutableStateFlow(Appearance.System)
@@ -121,7 +161,7 @@ class Prefs(
 
     private val loaded = CompletableDeferred<Unit>()
 
-    /** Set by the first [setGroupByProject]: the user's choice beats a later-arriving first read. */
+    /** Set by the first [setGrouping]: the user's choice beats a later-arriving first read. */
     private val written = AtomicBoolean(false)
 
     /** Same rule for [setAppearance] (ticket 96): a tap before the load wins. */
@@ -131,7 +171,10 @@ class Prefs(
     init {
         scope.launch(io) {
             val preferences = store.data.catch { emit(emptyPreferences()) }.first()
-            if (!written.get()) _group.value = preferences[PrefKeys.GROUP_BY_PROJECT] ?: false
+            val stored = SessionGrouping.fromStored(preferences[PrefKeys.SESSION_GROUPING])
+            if (!written.get()) {
+                publish(stored ?: SessionGrouping.fromLegacy(preferences[PrefKeys.GROUP_BY_PROJECT]))
+            }
             // Only when untouched: a setAppearance before the read finishes
             // wins over whatever the disk holds.
             if (!appearanceTouched) {
@@ -145,6 +188,14 @@ class Prefs(
                 )
             }
             loaded.complete(Unit)
+            if (preferences.contains(PrefKeys.GROUP_BY_PROJECT)) {
+                // #131: the old flag becomes the mode once, then goes away
+                // (after the load, so a failed write never blocks the list).
+                store.edit {
+                    if (it[PrefKeys.SESSION_GROUPING] == null) it[PrefKeys.SESSION_GROUPING] = _grouping.value.stored
+                    it.remove(PrefKeys.GROUP_BY_PROJECT)
+                }
+            }
         }
     }
 
@@ -154,21 +205,46 @@ class Prefs(
     }
 
     /**
-     * Flip the grouping flag: no-op when unchanged; otherwise the StateFlow
-     * is set immediately and the write lands in the background. The edit
-     * writes the **current** `_group.value`, so out-of-order writes are
-     * harmless (the last value wins whatever the interleaving).
+     * Pick the grouping mode (#131): no-op when unchanged; otherwise the
+     * StateFlows are set immediately and the write lands in the background.
+     * The edit writes the **current** `_grouping.value`, so out-of-order
+     * writes are harmless (the last value wins whatever the interleaving).
      */
-    fun setGroupByProject(on: Boolean) {
-        if (on == _group.value) return
+    fun setGrouping(mode: SessionGrouping) {
+        if (mode == _grouping.value) return
         written.set(true)
-        _group.value = on
+        publish(mode)
         scope.launch(io) {
-            store.edit { it[PrefKeys.GROUP_BY_PROJECT] = _group.value }
+            store.edit {
+                it[PrefKeys.SESSION_GROUPING] = _grouping.value.stored
+                it.remove(PrefKeys.GROUP_BY_PROJECT)
+            }
         }
     }
 
+    /**
+     * The ⋯ menu's Group by Project / Group by Device: picking a mode turns
+     * the other off, and picking the current one turns grouping off.
+     */
+    fun toggleGrouping(mode: SessionGrouping) =
+        setGrouping(if (_grouping.value == mode) SessionGrouping.None else mode)
+
+    /**
+     * The Settings switch (iOS `AppModel.groupByProject`): on picks Project,
+     * off picks None; no-op when the switch already reads [on], so turning
+     * it off while grouping by device changes nothing.
+     */
+    fun setGroupByProject(on: Boolean) {
+        if (on == _group.value) return
+        setGrouping(if (on) SessionGrouping.Project else SessionGrouping.None)
+    }
+
     fun toggleGroupByProject() = setGroupByProject(!_group.value)
+
+    private fun publish(mode: SessionGrouping) {
+        _grouping.value = mode
+        _group.value = mode == SessionGrouping.Project
+    }
 
     /**
      * Pick the appearance (ticket 96): no-op when unchanged (iOS rewrites

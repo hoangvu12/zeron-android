@@ -13,6 +13,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Test
 import sh.zeron.android.core.Prefs
+import sh.zeron.android.core.SessionGrouping
 import sh.zeron.android.core.WorkspaceCore
 import sh.zeron.android.core.WorkspaceFeed
 import sh.zeron.android.design.Cue
@@ -25,7 +26,8 @@ import uniffi.zeron_core.WorkspaceSnapshot
 /**
  * [FrontPageModel] (#21) over a real [WorkspaceFeed] (fake core), real
  * [Prefs] and a real [FoldState] on an in-memory store: the null-until-
- * loaded rule, Group by Project, local folds, Collapse All, and the
+ * loaded rule, Group by Project and by Device (#131), local folds,
+ * Collapse All, and the
  * rebuild on a same-revision snapshot whose time labels moved (#20's
  * 30 s clock).
  */
@@ -62,6 +64,7 @@ class FrontPageModelTest {
         sections = listOf(backend),
         recent = listOf(api.copy(timeLabel = label), home),
         projects = listOf(testProject("api-mac", groupKey = "github.com/acme/api", groupName = "api")),
+        devices = listOf(testDevice("mac", online = false, name = "MacBook")),
     )
 
     private fun TestScope.harness(): Harness {
@@ -99,6 +102,53 @@ class FrontPageModelTest {
         advanceUntilIdle()
         assertEquals(listOf("pinned", "backend", "project:github.com/acme/api", "home:mac"), h.ids())
         assertEquals(listOf("Pinned", "Backend", "api", "Home · MacBook"), h.model.ui.value!!.sections.map { it.header })
+        h.scope.cancel()
+    }
+
+    @Test
+    fun groupByDeviceReplacesRecentWithTheDeviceGroups() = runTest {
+        val h = harness()
+        h.feed.refresh()
+        advanceUntilIdle()
+        h.prefs.setGrouping(SessionGrouping.Device)
+        advanceUntilIdle()
+        // The api row's device ("device") is unnamed and unlisted → Other.
+        assertEquals(listOf("pinned", "backend", "other", "device:mac"), h.ids())
+        assertEquals(
+            listOf("Pinned", "Backend", "Other", "MacBook · Offline"),
+            h.model.ui.value!!.sections.map { it.header },
+        )
+        assertEquals(FrontSectionKind.DeviceGroup, h.model.ui.value!!.meta["device:mac"]?.kind)
+        h.scope.cancel()
+    }
+
+    @Test
+    fun theTwoGroupingsAreExclusiveAndPickingTheCurrentOneTurnsGroupingOff() = runTest {
+        val h = harness()
+        h.feed.refresh()
+        advanceUntilIdle()
+        h.prefs.toggleGrouping(SessionGrouping.Project)
+        advanceUntilIdle()
+        assertEquals("project:github.com/acme/api", h.ids()[2])
+        h.prefs.toggleGrouping(SessionGrouping.Device)
+        advanceUntilIdle()
+        assertEquals("other", h.ids()[2])
+        assertEquals(false, h.prefs.groupByProject.value)
+        h.prefs.toggleGrouping(SessionGrouping.Device)
+        advanceUntilIdle()
+        assertEquals(listOf("pinned", "backend", "recent"), h.ids())
+        h.scope.cancel()
+    }
+
+    @Test
+    fun collapseAllFoldsTheDeviceGroupsWhileGroupingByDevice() = runTest {
+        val h = harness()
+        h.feed.refresh()
+        h.prefs.setGrouping(SessionGrouping.Device)
+        advanceUntilIdle()
+        h.model.collapseAll(NoFeedback)
+        advanceUntilIdle()
+        assertEquals(setOf("pinned", "backend", "other", "device:mac"), h.model.ui.value!!.collapsedIds)
         h.scope.cancel()
     }
 

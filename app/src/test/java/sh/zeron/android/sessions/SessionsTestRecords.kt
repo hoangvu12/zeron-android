@@ -29,6 +29,8 @@ internal fun testRow(
     project: ProjectRef? = null,
     deviceId: String = "device",
     deviceName: String? = null,
+    deviceOnline: Boolean = true,
+    isCloud: Boolean = false,
 ): SessionRow = SessionRow(
     id = id,
     revision = 1uL,
@@ -38,8 +40,8 @@ internal fun testRow(
     project = project,
     deviceId = deviceId,
     deviceName = deviceName,
-    deviceOnline = true,
-    isCloud = false,
+    deviceOnline = deviceOnline,
+    isCloud = isCloud,
     harness = null,
     harnessLabel = null,
     model = null,
@@ -66,9 +68,9 @@ internal fun testRow(
 internal fun testSection(id: String, name: String = id, rows: List<SessionRow> = emptyList()) =
     SectionView(id = id, name = name, collapsed = false, sessions = rows)
 
-internal fun testDevice(id: String, online: Boolean = true) = DeviceView(
+internal fun testDevice(id: String, online: Boolean = true, name: String = id) = DeviceView(
     id = id,
-    name = id,
+    name = name,
     platform = "macos",
     online = online,
     lastSeenMs = null,

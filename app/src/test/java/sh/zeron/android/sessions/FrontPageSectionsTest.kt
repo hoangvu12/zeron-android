@@ -2,13 +2,17 @@ package sh.zeron.android.sessions
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
+import sh.zeron.android.core.SessionGrouping
+import uniffi.zeron_core.FrontPage
 
 /**
  * [FrontPageSections] (#21): the section order of iOS `buildSections`
  * (`SessionListController.swift:509-525`), the client-side project groups
  * of `AppModel.projectGroups` (`App/AppModel.swift:442-468`), the metadata
- * kinds, the headed-only `collapsedIds` and Collapse All's ids. Zeron has
+ * kinds, the headed-only `collapsedIds` and Collapse All's ids, plus
+ * #131's device groups (`device:<id>`, `cloud`, `other`). Zeron has
  * no engines, so no header ever carries an engine suffix.
  */
 class FrontPageSectionsTest {
@@ -28,7 +32,8 @@ class FrontPageSectionsTest {
         val built = FrontPageSections.build(
             testFront(pinned = listOf(p1), sections = listOf(backend), recent = listOf(r1)),
             projects = emptyList(),
-            groupByProject = false,
+            devices = emptyList(),
+            grouping = SessionGrouping.None,
         )
         assertEquals(listOf("pinned", "backend", "recent"), ids(built))
         assertEquals(listOf("Pinned", "Backend", "Recent"), headers(built))
@@ -37,7 +42,7 @@ class FrontPageSectionsTest {
 
     @Test
     fun noPinsAndNoSectionsLeaveAHeaderlessRecent() {
-        val built = FrontPageSections.build(testFront(recent = listOf(r1)), emptyList(), groupByProject = false)
+        val built = FrontPageSections.build(testFront(recent = listOf(r1)), emptyList(), emptyList(), SessionGrouping.None)
         assertEquals(listOf("recent"), ids(built))
         assertNull(built.sections.single().header)
     }
@@ -47,7 +52,8 @@ class FrontPageSectionsTest {
         val built = FrontPageSections.build(
             testFront(sections = listOf(testSection("empty", "Empty")), recent = listOf(r1)),
             emptyList(),
-            groupByProject = false,
+            devices = emptyList(),
+            grouping = SessionGrouping.None,
         )
         assertEquals(listOf("Empty", "Recent"), headers(built))
     }
@@ -67,7 +73,8 @@ class FrontPageSectionsTest {
                 testProject("api-linux", groupKey = "github.com/acme/api", groupName = "api"),
                 testProject("web", groupKey = "github.com/acme/web", groupName = "Web app"),
             ),
-            groupByProject = true,
+            devices = emptyList(),
+            grouping = SessionGrouping.Project,
         )
         assertEquals(
             listOf("pinned", "backend", "project:github.com/acme/api", "home:mac", "project:github.com/acme/web"),
@@ -106,8 +113,72 @@ class FrontPageSectionsTest {
 
     @Test
     fun groupingWithNoRecentRowsEmitsNothingAfterTheSections() {
-        val built = FrontPageSections.build(testFront(sections = listOf(backend)), emptyList(), groupByProject = true)
-        assertEquals(listOf("backend"), ids(built))
+        val front = testFront(sections = listOf(backend))
+        for (mode in listOf(SessionGrouping.Project, SessionGrouping.Device)) {
+            assertEquals(listOf("backend"), ids(FrontPageSections.build(front, emptyList(), emptyList(), mode)))
+        }
+    }
+
+    // ------------------------------------------------------------ device groups (#131)
+
+    @Test
+    fun groupingByDeviceReplacesRecentWithTheDeviceGroupsInRecencyOrder() {
+        val m1 = testRow("m1", deviceId = "mac", project = testRef("api-mac", "api"))
+        val c1 = testRow("c1", deviceId = "vm-1", isCloud = true)
+        val l1 = testRow("l1", deviceId = "linux")
+        val m2 = testRow("m2", deviceId = "mac")
+        val c2 = testRow("c2", deviceId = "vm-2", isCloud = true)
+        val built = FrontPageSections.build(
+            testFront(pinned = listOf(p1), sections = listOf(backend), recent = listOf(m1, c1, l1, m2, c2)),
+            projects = emptyList(),
+            devices = listOf(testDevice("mac", name = "MacBook"), testDevice("linux", online = false, name = "Studio")),
+            grouping = SessionGrouping.Device,
+        )
+        assertEquals(listOf("pinned", "backend", "device:mac", "cloud", "device:linux"), ids(built))
+        assertEquals(listOf("Pinned", "Backend", "MacBook", "Cloud", "Studio · Offline"), headers(built))
+        // A device's rows keep recency order, project or not; every Cloud machine shares one group.
+        assertEquals(listOf(m1, m2), built.sections[2].rows)
+        assertEquals(listOf(c1, c2), built.sections[3].rows)
+        assertEquals(FrontSectionMeta(FrontSectionKind.DeviceGroup, null), built.meta["device:mac"])
+        assertEquals(FrontSectionKind.DeviceGroup, built.meta["cloud"]?.kind)
+    }
+
+    @Test
+    fun anUnlistedDeviceFallsBackToTheRowAndANamelessOneToOther() {
+        val groups = FrontPageSections.deviceGroups(
+            listOf(
+                testRow("a", deviceId = "pc", deviceName = "PC", deviceOnline = false),
+                testRow("b", deviceId = ""),
+                testRow("c", deviceId = "ghost"),
+            ),
+            devices = emptyList(),
+        )
+        assertEquals(listOf("device:pc", "other"), groups.map { it.id })
+        assertEquals(listOf("PC · Offline", "Other"), groups.map { it.title })
+        assertEquals(listOf("b", "c"), groups[1].rows.map { it.id })
+    }
+
+    @Test
+    fun theDeviceListWinsOverTheRowForNameAndOnlineState() {
+        val group = FrontPageSections.deviceGroups(
+            listOf(testRow("a", deviceId = "mac", deviceName = "Old name", deviceOnline = false)),
+            devices = listOf(testDevice("mac", online = true, name = "MacBook")),
+        ).single()
+        assertEquals("MacBook", group.title)
+        assertTrue(group.online)
+    }
+
+    @Test
+    fun projectGroupingIgnoresTheDevicesAndDeviceGroupingIgnoresTheProjects() {
+        val row = testRow("a", deviceId = "mac", project = testRef("web", "web"))
+        val projects = listOf(testProject("web", groupKey = "github.com/acme/web", groupName = "Web"))
+        val devices = listOf(testDevice("mac", name = "MacBook"))
+        val front = testFront(recent = listOf(row))
+        assertEquals(
+            listOf("project:github.com/acme/web"),
+            ids(FrontPageSections.build(front, projects, devices, SessionGrouping.Project)),
+        )
+        assertEquals(listOf("device:mac"), ids(FrontPageSections.build(front, projects, devices, SessionGrouping.Device)))
     }
 
     // ------------------------------------------------------------ meta and folds
@@ -117,7 +188,8 @@ class FrontPageSectionsTest {
         val built = FrontPageSections.build(
             testFront(pinned = listOf(p1), sections = listOf(backend), recent = listOf(r1)),
             emptyList(),
-            groupByProject = false,
+            devices = emptyList(),
+            grouping = SessionGrouping.None,
         )
         assertEquals(FrontSectionMeta(FrontSectionKind.Pinned, null), built.meta["pinned"])
         assertEquals(FrontSectionMeta(FrontSectionKind.User, "Backend"), built.meta["backend"])
@@ -140,11 +212,11 @@ class FrontPageSectionsTest {
             sections = listOf(backend),
             recent = listOf(testRow("h", deviceId = "mac")),
         )
-        assertEquals(listOf("pinned", "backend"), FrontPageSections.collapsibleIds(front, emptyList(), false))
-        assertEquals(
-            listOf("pinned", "backend", "home:mac"),
-            FrontPageSections.collapsibleIds(front, emptyList(), true),
-        )
-        assertEquals(emptyList<String>(), FrontPageSections.collapsibleIds(testFront(recent = listOf(r1)), emptyList(), false))
+        fun collapsible(f: FrontPage, mode: SessionGrouping) =
+            FrontPageSections.collapsibleIds(f, emptyList(), listOf(testDevice("mac", name = "Mac")), mode)
+        assertEquals(listOf("pinned", "backend"), collapsible(front, SessionGrouping.None))
+        assertEquals(listOf("pinned", "backend", "home:mac"), collapsible(front, SessionGrouping.Project))
+        assertEquals(listOf("pinned", "backend", "device:mac"), collapsible(front, SessionGrouping.Device))
+        assertEquals(emptyList<String>(), collapsible(testFront(recent = listOf(r1)), SessionGrouping.None))
     }
 }
