@@ -1,5 +1,7 @@
 package sh.zeron.android.terminal
 
+import android.view.accessibility.AccessibilityNodeInfo
+import android.view.accessibility.AccessibilityManager
 import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -150,8 +152,28 @@ class TerminalView(context: Context, val tab: TerminalTab) : View(context) {
             // The core's position wins (typing follows the live bottom).
             back = if (frame.altScreen) 0f else (frame.displayOffset.toFloat() + frame.scrollFrac) * metrics.lineHeight
         }
+        // E32 (#63): the visible text for TalkBack, read only while a
+        // screen reader runs (iOS sets `accessibilityValue` the same way,
+        // and like it never announces a change on its own).
+        screenText = if (screenReader()) session.text(false) else null
         restartBlink()
         invalidate()
+    }
+
+    /** The grid's plain text while a screen reader runs (E32). */
+    private var screenText: String? = null
+
+    private fun screenReader(): Boolean =
+        context.getSystemService(AccessibilityManager::class.java)?.isTouchExplorationEnabled == true
+
+    /**
+     * E32 (#63): TalkBack reads "Terminal" and the visible rows — the text
+     * a sighted user sees — instead of an empty label; the node stays a
+     * text editor, so typing still goes through [onCreateInputConnection].
+     */
+    override fun onInitializeAccessibilityNodeInfo(info: AccessibilityNodeInfo) {
+        super.onInitializeAccessibilityNodeInfo(info)
+        screenText?.let { info.text = it }
     }
 
     val hasContent: Boolean get() = hadContent

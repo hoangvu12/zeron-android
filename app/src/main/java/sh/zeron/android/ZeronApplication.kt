@@ -1,5 +1,6 @@
 package sh.zeron.android
 
+import sh.zeron.android.shell.DebugRoute
 import android.app.Application
 import android.content.pm.ApplicationInfo
 import android.os.SystemClock
@@ -153,7 +154,29 @@ class ZeronApplication : Application() {
      * is on screen. App-lifetime on purpose: a link held while the splash
      * is up survives activity recreation.
      */
-    val deepLinks: DeepLinkHub by lazy { DeepLinkHub() }
+    val deepLinks: DeepLinkHub by lazy {
+        DeepLinkHub(debugScreens = { route ->
+            if (route == DebugRoute.Welcome) {
+                _debugWelcome.value = true
+                true
+            } else {
+                false
+            }
+        })
+    }
+
+    private val _debugWelcome = MutableStateFlow(false)
+
+    /**
+     * The debug `welcome` route (#63, iOS `openCloudRoute`'s `welcome`): the
+     * signed-out Welcome page over the shell, without signing out
+     * (screenshots, tests). [closeDebugWelcome] puts it away.
+     */
+    val debugWelcome: StateFlow<Boolean> = _debugWelcome.asStateFlow()
+
+    fun closeDebugWelcome() {
+        _debugWelcome.value = false
+    }
 
     /**
      * The appearance preference (ticket 96): the DataStore-backed

@@ -1,5 +1,11 @@
 package sh.zeron.android.shell
 
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.activity.compose.BackHandler
+import sh.zeron.android.design.modalLayerBackground
+import sh.zeron.android.design.ModalLayer
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -99,6 +105,9 @@ fun ZeronAppContent(app: ZeronApplication, rootState: AppRootState) {
                                 // signing in, the shell after); the root swap
                                 // under it never shows.
                                 OnboardingHost(app)
+                                // #63: the debug `welcome` route's page.
+                                val debugWelcome by app.debugWelcome.collectAsState()
+                                if (debugWelcome) DebugWelcomeOverlay(onClose = app::closeDebugWelcome)
                             }
                         }
                     }
@@ -155,15 +164,20 @@ private fun AppRootContent(
                 // 106's `tabPresence`, and the slot keeps the router for the
                 // tablet router's collapsed delegation.
                 var phoneRouter by remember { mutableStateOf<AppRouter?>(null) }
+                // #63: the folded inspector's sheet hides the tab shell
+                // from TalkBack while it is up.
+                ModalLayer {
                 Box(Modifier.fillMaxSize()) {
                     MainTabShell(
                         state = s.tabs,
+                        modifier = modalLayerBackground(),
                         presence = s.presence,
                         onRouter = { router -> phoneRouter = router; s.phoneSlot.attach(router) },
                     )
                     // #45: folded with the inspector open, it rides along as a
                     // sheet over the tab shell (with a Close).
                     InspectorSheet(s.inspector, s.tablet, phoneRouter ?: AppRouter.Noop)
+                }
                 }
                 phoneRouter?.let { DeepLinkRouterEffect(app.deepLinks, it) }
                 // 106: the slot drops the phone router when this shell leaves
@@ -235,5 +249,22 @@ private fun AppRootContent(
                 }
             }
         },
+    )
+}
+
+/**
+ * The debug `welcome` route (#63, iOS presents `SignInViewController`
+ * full screen over the root): the Welcome page over the shell, signed in
+ * all along. It takes every touch; Back or "Get started" closes it — the
+ * real flow (onboarding, sign-in) belongs to the signed-out root.
+ */
+@Composable
+private fun DebugWelcomeOverlay(onClose: () -> Unit) {
+    BackHandler(onBack = onClose)
+    WelcomeScreen(
+        onGetStarted = onClose,
+        modifier = Modifier
+            .testTag("debug-welcome")
+            .pointerInput(Unit) { detectTapGestures { } },
     )
 }

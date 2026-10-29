@@ -1,6 +1,7 @@
 package sh.zeron.android.design
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.awaitHorizontalTouchSlopOrCancellation
@@ -27,12 +28,18 @@ import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.changedToUp
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
@@ -115,6 +122,9 @@ object ZeronSwitchTokens {
      */
     val OffTrack: Color = rgba(0x787880, 0.42)
 }
+
+/** The keys that flip a focused switch (#63). */
+private val ToggleKeys = setOf(Key.Spacebar, Key.Enter, Key.NumPadEnter, Key.DirectionCenter)
 
 /**
  * `accessibilityIdentifier = "toggle-\(row.id)"`
@@ -296,7 +306,21 @@ fun ZeronSwitch(
                 role = Role.Switch
                 toggleableState = ToggleableState(checked)
                 onClick { commit(!latestChecked); true }
+                // #63: TalkBack says "disabled" for a locked switch.
+                if (!enabled) disabled()
             }
+            // #63: reachable with a keyboard or D-pad (Tab moves focus here,
+            // Space or Enter flips it, like a focused `UISwitch` under Full
+            // Keyboard Access); a disabled switch takes no focus.
+            .onPreviewKeyEvent { event ->
+                if (event.type == KeyEventType.KeyUp && event.key in ToggleKeys) {
+                    commit(!latestChecked)
+                    true
+                } else {
+                    event.key in ToggleKeys
+                }
+            }
+            .focusable(enabled)
             .pointerInput(rtl) {
                 val travelPx = ZeronSwitchTokens.Travel.toPx()
                 awaitEachGesture {

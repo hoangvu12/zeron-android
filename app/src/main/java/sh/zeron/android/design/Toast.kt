@@ -4,7 +4,6 @@ import android.content.res.Configuration
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.view.View
 import android.view.accessibility.AccessibilityManager
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
@@ -52,10 +51,11 @@ import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsPropertyKey
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -106,11 +106,6 @@ import kotlin.math.min
 // ---------------------------------------------------------------------------
 // The toaster API
 // ---------------------------------------------------------------------------
-
-/** Posts the label text as a live-region announcement, once per toast (`UIAccessibility.post(.announcement)`, `Toast.swift:99`). */
-fun interface ToastAnnouncer {
-    fun announce(text: String)
-}
 
 /** Shows toasts: `show(text, action?, onAction?)`. Callers own the copy. */
 interface Toaster {
@@ -179,22 +174,6 @@ class ToasterState : Toaster {
 val LocalToaster = staticCompositionLocalOf<Toaster> { Toaster.Noop }
 
 /**
- * The default announcer: `View.announceForAccessibility`, the direct
- * equivalent of `UIAccessibility.post(.announcement, label)` — TalkBack
- * speaks the label text without moving focus to the toast.
- */
-@Composable
-fun rememberViewAnnouncer(): ToastAnnouncer {
-    val view = LocalView.current
-    return remember(view) { ToastAnnouncer { text -> view.announceForToast(text) } }
-}
-
-@Suppress("DEPRECATION") // deprecated on newer APIs, but the only announcement API that works on minSdk 31; the toast announces on present only (Toast.swift:99)
-private fun View.announceForToast(text: String) {
-    announceForAccessibility(text)
-}
-
-/**
  * Test-only: the capsule's current translationY in dp (16 → 0 on present,
  * → 12 on dismiss), exposed for UI tests. Set on an invisible child of the
  * capsule; production code never reads it.
@@ -224,15 +203,9 @@ val ToastSlideKey = SemanticsPropertyKey<Float>("ToastSlide")
 @Composable
 fun ToastHost(
     state: ToasterState? = null,
-    announcer: ToastAnnouncer? = null,
     content: @Composable () -> Unit,
 ) {
-    // Both defaults are remembered unconditionally (an `x ?: remember {}` elvis
-    // would call the composable only sometimes and skew the slot table the
-    // first time the argument flips).
     val toastState = remember(state) { state ?: ToasterState() }
-    val viewAnnouncer = rememberViewAnnouncer()
-    val toastAnnouncer = announcer ?: viewAnnouncer
     val rootHaze = rememberHazeState()
     val chromeTopState = remember { BottomChromeTopState() }
     CompositionLocalProvider(
@@ -258,7 +231,6 @@ fun ToastHost(
                             )
                             ToastCapsule(
                                 model = model,
-                                announcer = toastAnnouncer,
                                 holdMs = rememberHoldMs(model),
                                 anchorTop = anchorTop,
                                 onRemoved = toastState::remove,
@@ -311,8 +283,9 @@ private class HoldJobHolder {
  *
  *  - present: `slide` starts at 16 dp and springs to 0 with
  *    [Motion.ToastRise]; the glass materializes 0→1 over 350 ms
- *    (`materializeOnEnter = true`, inside `GlassSurface`); the label is
- *    announced; the hold job starts (4000 ms).
+ *    (`materializeOnEnter = true`, inside `GlassSurface`); the label, a
+ *    polite live region, is spoken as it appears; the hold job starts
+ *    (4000 ms).
  *  - dismiss (hold fired, action tapped): once only — `visible` flips to
  *    `false` (250 ms dematerialize + touch swallowing, inside
  *    `GlassSurface`) while the slide tweens to +12 dp over 250 ms
@@ -326,7 +299,6 @@ private class HoldJobHolder {
 @Composable
 private fun ToastCapsule(
     model: ToastModel,
-    announcer: ToastAnnouncer,
     holdMs: Long,
     anchorTop: Float,
     onRemoved: (Long) -> Unit,
@@ -358,7 +330,6 @@ private fun ToastCapsule(
 
     LaunchedEffect(Unit) {
         launch { slide.animateTo(0f, Motion.ToastRise.spec()) }
-        announcer.announce(model.text)
         holdHolder.job = launch { delay(holdMs); dismiss() }
     }
 
@@ -450,7 +421,13 @@ private fun ToastCapsuleBody(
         ) {
             BasicText(
                 model.text,
-                Modifier.weight(1f, fill = false), // the label wraps (two lines), never the action
+                Modifier
+                    .weight(1f, fill = false) // the label wraps (two lines), never the action
+                    // #63: TalkBack speaks the label as the toast appears,
+                    // without moving focus (`UIAccessibility.post(.announcement)`,
+                    // `Toast.swift:99`) — a polite live region, not the
+                    // deprecated `announceForAccessibility`.
+                    .semantics { liveRegion = LiveRegionMode.Polite },
                 style = labelStyle,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,

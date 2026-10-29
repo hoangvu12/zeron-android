@@ -28,7 +28,10 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -483,8 +486,11 @@ fun rememberPullToRefreshState(onRefresh: suspend () -> Unit): PullToRefreshStat
  *   gap is at the hold, fades out with the closing gap;
  * - composed only while the gap is open or the spinner runs/closes —
  *   otherwise nothing subscribes to the glyph clock;
- * - decorative: cleared semantics carrying only the `pull-to-refresh`
- *   test tag (iOS's `accessibilityIdentifier`), no TalkBack focus. The
+ * - cleared semantics carrying the `pull-to-refresh` test tag (iOS's
+ *   `accessibilityIdentifier`); decorative while pulling or closing, and
+ *   while a refresh runs a polite live region reading [RefreshingLabel]
+ *   (#63), so TalkBack says "Refreshing" whether the pull or the list's
+ *   Refresh action started it. The
  *   overlay itself paints nothing — the gap stays transparent so the
  *   scaffold background / wallpaper shows through — and swallows no
  *   touches (a plain Box has no pointer input).
@@ -492,6 +498,9 @@ fun rememberPullToRefreshState(onRefresh: suspend () -> Unit): PullToRefreshStat
  * `offsetPx` is read only inside the `offset {}` / `graphicsLayer {}`
  * lambdas (plus a derived boolean), so a pull frame never recomposes.
  */
+/** What TalkBack says while a refresh runs (#63). */
+const val RefreshingLabel = "Refreshing"
+
 @Composable
 fun PullToRefreshIndicator(state: PullToRefreshState, navBottom: Dp, modifier: Modifier = Modifier) {
     val show by remember { derivedStateOf { state.indicatorVisible } }
@@ -517,7 +526,13 @@ fun PullToRefreshIndicator(state: PullToRefreshState, navBottom: Dp, modifier: M
                         state.holdPx,
                     )
                 }
-                .clearAndSetSemantics { testTag = "pull-to-refresh" },
+                .clearAndSetSemantics {
+                    testTag = "pull-to-refresh"
+                    if (state.isRefreshing) {
+                        contentDescription = RefreshingLabel
+                        liveRegion = LiveRegionMode.Polite
+                    }
+                },
         )
     }
 }

@@ -1,5 +1,6 @@
 package sh.zeron.android.newsession
 
+import android.app.Application
 import androidx.compose.ui.graphics.ImageBitmap
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
@@ -16,14 +17,15 @@ import uniffi.zeron_core.SandboxLevel
 import uniffi.zeron_core.SessionTarget
 
 /**
- * [NewSessionRequests] and [newSessionCanWrite] (android-ui-parity #94)
- * — the Request mapping and Offline gate tables, field by field. Runs
- * under Robolectric because it constructs `uniffi.zeron_core` records
- * (android-app#13's rule; the `StagedImage` thumb needs a platform
- * `ImageBitmap`).
+ * [NewSessionRequests] (android-ui-parity #94) — the Request mapping
+ * table, field by field. Runs under Robolectric for the `StagedImage`
+ * thumb (a platform `ImageBitmap`), on a plain [Application] so the core
+ * never loads. (#37 dropped the offline Send gate, `newSessionCanWrite`,
+ * and its table with it: the core queues the first message for an offline
+ * host, as on iOS.)
  */
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [36])
+@Config(sdk = [36], application = Application::class)
 class NewSessionRequestsTest {
 
     // ------------------------------------------------------------- fixtures
@@ -41,8 +43,6 @@ class NewSessionRequestsTest {
         groupName = "g-$id",
         colorIndex = 0,
     )
-
-    private fun host(id: String, online: Boolean = true) = HostOption(id = id, name = "Host $id", online = online)
 
     private fun image(id: String, vararg bytes: Int) =
         StagedImage(id, "$id.jpg", bytes.map { it.toByte() }.toByteArray(), ImageBitmap(1, 1))
@@ -177,60 +177,5 @@ class NewSessionRequestsTest {
         val d = NewSessionDraft(projectId = "gone", worktree = true)
         val r = NewSessionRequests.sendRequest(d, "body", emptyList(), listOf(project("p1")))
         assertNull(r.worktree)
-    }
-
-    // ── newSessionCanWrite (the offline gate, 94's table) ────────────────
-
-    @Test
-    fun anOnlineProjectEngineAllowsWrites() {
-        assertTrue(
-            newSessionCanWrite(
-                NewSessionDraft(projectId = "p1"),
-                listOf(project("p1", online = true)),
-                emptyList(),
-            )
-        )
-    }
-
-    @Test
-    fun anOfflineProjectEngineRefusesWrites() {
-        assertEquals(
-            false,
-            newSessionCanWrite(
-                NewSessionDraft(projectId = "p1"),
-                listOf(project("p1", online = false)),
-                emptyList(),
-            )
-        )
-    }
-
-    @Test
-    fun anOnlineHostAllowsWritesAndAnOfflineHostRefuses() {
-        val d = NewSessionDraft(hostId = "h1")
-        assertTrue(newSessionCanWrite(d, emptyList(), listOf(host("h1", online = true))))
-        assertEquals(false, newSessionCanWrite(d, emptyList(), listOf(host("h1", online = false))))
-    }
-
-    @Test
-    fun noTargetOrAnUnknownIdCountsAsWritable() {
-        // No target: the send runs and the alert explains.
-        assertTrue(newSessionCanWrite(NewSessionDraft(), emptyList(), emptyList()))
-        // A stale id is not in the options: keep Send enabled (the alert
-        // explains), never a silently disabled button.
-        assertTrue(newSessionCanWrite(NewSessionDraft(projectId = "gone"), listOf(project("p1")), emptyList()))
-        assertTrue(newSessionCanWrite(NewSessionDraft(hostId = "gone"), emptyList(), listOf(host("h1"))))
-    }
-
-    @Test
-    fun theProjectWinsOverTheHostInTheGateToo() {
-        // An offline project engine gates even when a host is also set.
-        assertEquals(
-            false,
-            newSessionCanWrite(
-                NewSessionDraft(projectId = "p1", hostId = "h1"),
-                listOf(project("p1", online = false)),
-                listOf(host("h1", online = true)),
-            )
-        )
     }
 }

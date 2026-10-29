@@ -36,7 +36,9 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.isTraversalGroup
+import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -279,7 +281,9 @@ private fun AlertProgressSection(
 ) {
     val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
-    Column(modifier) {
+    // #63: one TalkBack stop — a progress bar ("40 percent") read with
+    // its label, rather than an unlabelled box and a stray line of text.
+    Column(modifier.semantics(mergeDescendants = true) { }) {
         val fraction = progress.fraction.coerceIn(0f, 1f)
         Box(
             Modifier
@@ -287,7 +291,10 @@ private fun AlertProgressSection(
                 .height(AlertMetrics.ProgressHeightDp.dp)
                 .clip(CapsuleShape)
                 .background(AlertTokens.controlFill())
-                .semantics { this[AlertProgressKey] = fraction },
+                .semantics {
+                    this[AlertProgressKey] = fraction
+                    progressBarRangeInfo = ProgressBarRangeInfo(fraction, 0f..1f)
+                },
         ) {
             Box(
                 Modifier
