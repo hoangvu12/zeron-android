@@ -4,6 +4,7 @@ import sh.zeron.android.design.onEscape
 import sh.zeron.android.design.modalBackground
 import sh.zeron.android.design.modalBackScale
 import sh.zeron.android.design.ModalBackHandler
+import sh.zeron.android.design.bottomChrome
 import android.util.Log
 import android.view.accessibility.AccessibilityManager
 import androidx.compose.animation.Crossfade
@@ -399,7 +400,7 @@ private fun GlassMenuOverlay(host: GlassMenuHostState, presentation: GlassMenuPr
     // Window insets, read in composition so an IME change re-places the menu.
     val insetsTop = WindowInsets.statusBars.getTop(density)
     val insetsBottom = max(
-        WindowInsets.navigationBars.getBottom(density),
+        WindowInsets.bottomChrome.getBottom(density),
         WindowInsets.ime.getBottom(density),
     )
     // The overlay's own origin in the window (usually 0,0: the host fills

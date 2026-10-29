@@ -1,5 +1,6 @@
 package sh.zeron.android.shell
 
+import sh.zeron.android.design.bottomChrome
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.ime
@@ -56,7 +57,9 @@ fun oneRowBarContentPadding(barBottom: Dp, imeAboveNav: Dp = 0.dp): Dp =
 @Composable
 fun rememberBottomChromeInsets(): BottomChromeInsets {
     val density = LocalDensity.current
-    val nav = with(density) { WindowInsets.navigationBars.getBottom(density).toDp() }
+    // #72: the navigation bar and the mandatory home-gesture area, so the
+    // bar never has a strip inside the home gesture on gesture navigation.
+    val nav = with(density) { WindowInsets.bottomChrome.getBottom(density).toDp() }
     val tap = with(density) { WindowInsets.tappableElement.getBottom(density).toDp() }
     val ime = with(density) { WindowInsets.ime.exclude(WindowInsets.navigationBars).getBottom(density).toDp() }
     return remember(nav, tap, ime) {

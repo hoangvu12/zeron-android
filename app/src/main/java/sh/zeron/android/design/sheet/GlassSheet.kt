@@ -6,6 +6,7 @@ import androidx.compose.foundation.focusable
 import androidx.compose.runtime.withFrameNanos
 import sh.zeron.android.design.onEscape
 import sh.zeron.android.design.RegisterModalOverlay
+import sh.zeron.android.design.bottomChrome
 import android.content.res.Configuration
 import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.animation.core.AnimationSpec
@@ -496,7 +497,7 @@ fun GlassSheet(
                             .hazeSource(LocalHazeState.current!!),
                     ) {
                         val bottomInset = with(density) {
-                            WindowInsets.navigationBars.exclude(WindowInsets.ime).getBottom(density).toDp()
+                            WindowInsets.bottomChrome.exclude(WindowInsets.ime).getBottom(density).toDp()
                         }
                         content(sheetScope, bottomInset)
                     }

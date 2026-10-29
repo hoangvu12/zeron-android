@@ -1,5 +1,6 @@
 package sh.zeron.android.newsession
 
+import sh.zeron.android.design.bottomChrome
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -156,7 +157,8 @@ internal fun NewSessionCanvas(
         // without recomposing.
         var consumed by remember { mutableStateOf(WindowInsets(0, 0, 0, 0)) }
         val imeInsets = WindowInsets.ime
-        val navInsets = WindowInsets.navigationBars
+        // #72: the navigation bar and the mandatory home-gesture area.
+        val navInsets = WindowInsets.bottomChrome
         val statusInsets = WindowInsets.statusBars
         val safeInsets = WindowInsets.safeDrawing
 

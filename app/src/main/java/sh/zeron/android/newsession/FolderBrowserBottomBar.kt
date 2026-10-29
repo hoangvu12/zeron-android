@@ -1,5 +1,6 @@
 package sh.zeron.android.newsession
 
+import sh.zeron.android.design.bottomChrome
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -82,7 +83,7 @@ fun FolderBrowserBottomBar(
         modifier
             .fillMaxWidth()
             .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal))
-            .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom))
+            .windowInsetsPadding(WindowInsets.bottomChrome.only(WindowInsetsSides.Bottom))
             .padding(
                 start = FolderBottomBarTokens.SideInset,
                 end = FolderBottomBarTokens.SideInset,

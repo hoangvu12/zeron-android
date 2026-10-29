@@ -1,5 +1,6 @@
 package sh.zeron.android.session
 
+import sh.zeron.android.design.bottomChrome
 import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -201,7 +202,8 @@ fun SessionBottomStack(
     // here in composition; their values are snapshot reads taken in the
     // measure block below (an IME frame re-measures, never recomposes).
     val imeInsets = WindowInsets.ime
-    val navInsets = WindowInsets.navigationBars
+    // #72: the navigation bar and the mandatory home-gesture area.
+    val navInsets = WindowInsets.bottomChrome
     // Wave-10 42 (#1014): beside the tablet sidebar, its toolbar's middle.
     val toolbarMid = LocalSidebarToolbarMid.current
     val safeInsets = WindowInsets.safeDrawing
@@ -233,6 +235,7 @@ fun SessionBottomStack(
                 windowHeight, imePx, toolbarMid.toPx(),
                 restHeight = BottomStackMetrics.ComposerRestHeight.toPx(),
                 gap = BottomStackMetrics.KeyboardGap.toPx(),
+                floor = navPx,
             )
         } else {
             BottomStackMetrics.stackBottom(

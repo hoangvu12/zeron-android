@@ -1,5 +1,10 @@
 package sh.zeron.android.transcript.widgets
 
+import sh.zeron.android.design.inSystemGestureEdge
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.foundation.layout.systemGestures
+import androidx.compose.foundation.layout.WindowInsets
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Paint
@@ -41,6 +46,7 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.findRootCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -216,6 +222,10 @@ private fun rememberRowOnScreen(ctx: RowContext): Boolean {
  * - `horizontalDrag`: only mostly-horizontal drags scrub (vertical ones
  *   reach the transcript's scroll); a tap shows the chart's readout for
  *   2.5 s (down now, up later).
+ *
+ * #72: a drag that starts in the system's left/right back-gesture edge
+ * (gesture navigation; none on 3-button) is left to the system and never
+ * reaches the visual, so one swipe can't both go back and scrub.
  */
 @Composable
 private fun Modifier.surfaceInput(session: VisualSession, id: ULong, gesture: SurfaceGesture): Modifier {
@@ -223,6 +233,23 @@ private fun Modifier.surfaceInput(session: VisualSession, id: ULong, gesture: Su
     val scope = rememberCoroutineScope()
     val readout = remember { arrayOfNulls<Job>(1) }
     fun send(phase: PointerPhase, p: Offset) = session.pointer(id, phase, p.x / density, p.y / density)
+    val gestureEdges = WindowInsets.systemGestures
+    val layoutDirection = LocalLayoutDirection.current
+    val surface = remember { arrayOfNulls<LayoutCoordinates>(1) }
+    fun Density.inBackEdge(p: Offset): Boolean {
+        val coords = surface[0]?.takeIf { it.isAttached } ?: return false
+        return inSystemGestureEdge(
+            x = coords.localToWindow(p).x,
+            windowWidth = coords.findRootCoordinates().size.width.toFloat(),
+            leftEdge = gestureEdges.getLeft(this, layoutDirection).toFloat(),
+            rightEdge = gestureEdges.getRight(this, layoutDirection).toFloat(),
+        )
+    }
+    val positioned = if (gesture == SurfaceGesture.DRAG || gesture == SurfaceGesture.HORIZONTAL_DRAG) {
+        this.onGloballyPositioned { surface[0] = it }
+    } else {
+        this
+    }
     return when (gesture) {
         SurfaceGesture.NONE -> this
         SurfaceGesture.TAP -> pointerInput(session, id) {
@@ -231,9 +258,10 @@ private fun Modifier.surfaceInput(session: VisualSession, id: ULong, gesture: Su
                 send(PointerPhase.UP, p)
             }
         }
-        SurfaceGesture.DRAG -> pointerInput(session, id) {
+        SurfaceGesture.DRAG -> positioned.pointerInput(session, id) {
             awaitEachGesture {
                 val down = awaitFirstDown()
+                if (inBackEdge(down.position)) return@awaitEachGesture
                 down.consume()
                 send(PointerPhase.DOWN, down.position)
                 var last = down.position
@@ -259,7 +287,7 @@ private fun Modifier.surfaceInput(session: VisualSession, id: ULong, gesture: Su
                 }
             }
         }
-        SurfaceGesture.HORIZONTAL_DRAG -> this
+        SurfaceGesture.HORIZONTAL_DRAG -> positioned
             .pointerInput(session, id) {
                 detectTapGestures { p ->
                     readout[0]?.cancel()
@@ -272,18 +300,24 @@ private fun Modifier.surfaceInput(session: VisualSession, id: ULong, gesture: Su
             }
             .pointerInput(session, id) {
                 var last = Offset.Zero
+                var ignored = false
                 detectHorizontalDragGestures(
                     onDragStart = { p ->
-                        readout[0]?.cancel()
-                        last = p
-                        send(PointerPhase.DOWN, p)
+                        ignored = inBackEdge(p)
+                        if (!ignored) {
+                            readout[0]?.cancel()
+                            last = p
+                            send(PointerPhase.DOWN, p)
+                        }
                     },
-                    onDragEnd = { send(PointerPhase.UP, last) },
-                    onDragCancel = { send(PointerPhase.CANCEL, last) },
+                    onDragEnd = { if (!ignored) send(PointerPhase.UP, last) },
+                    onDragCancel = { if (!ignored) send(PointerPhase.CANCEL, last) },
                     onHorizontalDrag = { change, _ ->
-                        change.consume()
-                        last = change.position
-                        send(PointerPhase.MOVE, last)
+                        if (!ignored) {
+                            change.consume()
+                            last = change.position
+                            send(PointerPhase.MOVE, last)
+                        }
                     },
                 )
             }

@@ -284,8 +284,9 @@ private fun ActionSheetOverlay(
     onGone: () -> Unit,
 ) {
     val density = LocalDensity.current
-    // navBottom = navigationBars ∪ displayCutout bottom; statusTop = statusBars ∪ displayCutout top.
-    val navBottomPx = WindowInsets.navigationBars.union(WindowInsets.displayCutout).getBottom(density)
+    // navBottom = the bottom chrome inset (navigation bar ∪ the mandatory
+    // home-gesture area, #72) ∪ displayCutout; statusTop = statusBars ∪ displayCutout top.
+    val navBottomPx = WindowInsets.bottomChrome.union(WindowInsets.displayCutout).getBottom(density)
     val statusTopPx = WindowInsets.statusBars.union(WindowInsets.displayCutout).getTop(density)
     val navBottom = with(density) { navBottomPx.toDp().value }
     val statusTop = with(density) { statusTopPx.toDp().value }
