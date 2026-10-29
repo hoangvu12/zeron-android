@@ -83,7 +83,7 @@ val WidgetKind.isTranscriptControl: Boolean
         is WidgetKind.Image, is WidgetKind.Chevron, is WidgetKind.Icon, is WidgetKind.ToolStatus,
         WidgetKind.Spinner, is WidgetKind.Working, is WidgetKind.ToolRail, WidgetKind.Shimmer,
         // iOS's `VisualView` is a plain view (a tap on its paint dismisses);
-        // TODO(#47): its control targets claim the tap, like UIControls.
+        // its control targets mark themselves (#47), like UIControls.
         is WidgetKind.Visual -> false
     }
 

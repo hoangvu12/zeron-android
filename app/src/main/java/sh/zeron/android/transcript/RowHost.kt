@@ -187,7 +187,11 @@ internal fun RowHost(
             .contextMenu(LiftHighlight.TranscriptRow, semanticsLongClick = false) {
                 val m = row.model ?: return@contextMenu null
                 val x = down[0]
-                if (!x.isNaN() && isOverControl(m.display, x / d, down[1] / d, row::scrollerOffsetDp)) {
+                // #47: a visual's controls and drag surfaces count too.
+                if (!x.isNaN() &&
+                    (isOverControl(m.display, x / d, down[1] / d, row::scrollerOffsetDp) ||
+                        state.visuals.isOverTouchTarget(m.display, x / d, down[1] / d))
+                ) {
                     return@contextMenu null
                 }
                 state.rowMenuActions(row.key).toMenu(performer::perform)

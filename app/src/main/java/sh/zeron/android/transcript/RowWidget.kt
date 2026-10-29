@@ -71,8 +71,8 @@ internal fun RowWidget(ctx: RowContext, w: Widget) {
             onOpen = k.docId?.let { docId -> { ctx.actions().openSubagent(docId, k.title, !k.running) } },
         )
         // #46 (agent visuals): the transcript's live visual for the id,
-        // kept across row reuse; the model is the lookup's retry token.
-        is WidgetKind.Visual -> VisualWidget(ctx.state, ctx.model, k.id)
+        // kept across row reuse; #47 adds its touches, controls and gating.
+        is WidgetKind.Visual -> VisualWidget(ctx, k.id)
         // ticket 123 (status glyphs): running beats failed; the Working /
         // Writing flip reuses this slot (same `#working` row key), so the
         // ticker's remember survives and the clock never restarts — no
