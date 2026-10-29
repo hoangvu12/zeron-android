@@ -31,3 +31,9 @@
 -keepclasseswithmembernames,includedescriptorclasses class * {
     native <methods>;
 }
+
+# WebRTC (#60, the voice call's peer): libjingle_peerconnection_so calls
+# back into org.webrtc by name over JNI (observers, stats, audio device
+# module callbacks) and @CalledByNative members are reached reflectively.
+-keep class org.webrtc.** { *; }
+-dontwarn org.webrtc.**

@@ -331,6 +331,9 @@ class ZeronIconsTest {
             ZeronIcons.Home to R.drawable.zi_home,
             ZeronIcons.HardDrive to R.drawable.zi_hard_drive,
             ZeronIcons.Laptop to R.drawable.zi_laptop,
+            ZeronIcons.Function to R.drawable.zi_function, // #36
+            ZeronIcons.Textformat to R.drawable.zi_textformat, // #36
+            ZeronIcons.TextformatSize to R.drawable.zi_textformat_size, // #36
         )
         assertEquals("every registry constant is covered", ZeronIcons.entries.size, expected.size)
         assertEquals(

@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import java.util.concurrent.atomic.AtomicBoolean
@@ -22,6 +23,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import sh.zeron.android.design.Appearance
+import sh.zeron.android.transcript.MathSettings
 
 /**
  * The keys of the phone-local `zeron_prefs` store (ticket 40). The names
@@ -56,6 +58,15 @@ object PrefKeys {
      * Phone-local, never sent to an engine.
      */
     val STAY_CONNECTED = booleanPreferencesKey("stayConnectedInBackground")
+
+    /** iOS `MathSettings.render` (`mathRender`): absent = on. */
+    val MATH_RENDER = booleanPreferencesKey("mathRender")
+
+    /** iOS `MathSettings.face` (`mathFont`): the face's key; absent or unknown = Fira Math. */
+    val MATH_FONT = stringPreferencesKey("mathFont")
+
+    /** iOS `MathSettings.size` (`mathSize`): percent of the surrounding text; absent = 100. */
+    val MATH_SIZE = intPreferencesKey("mathSize")
 }
 
 /**
@@ -111,6 +122,19 @@ class Prefs(
      */
     val stayConnected: StateFlow<Boolean> = _stayConnected.asStateFlow()
 
+    private val _math = MutableStateFlow(MathSettings.Values())
+
+    /**
+     * How transcripts show math (#36, iOS `MathSettings`) — the defaults
+     * until the disk read lands. The app publishes every value to
+     * [MathSettings.update], so open transcripts reflow at once.
+     */
+    val math: StateFlow<MathSettings.Values> = _math.asStateFlow()
+
+    /** Same rule as [setStayConnected]: a change before the load wins. */
+    @Volatile
+    private var mathTouched = false
+
     private val loaded = CompletableDeferred<Unit>()
 
     /** Set by the first [setGroupByProject]: the user's choice beats a later-arriving first read. */
@@ -135,6 +159,13 @@ class Prefs(
             }
             if (!stayConnectedTouched) {
                 _stayConnected.value = preferences[PrefKeys.STAY_CONNECTED] ?: false
+            }
+            if (!mathTouched) {
+                _math.value = MathSettings.Values(
+                    render = preferences[PrefKeys.MATH_RENDER] ?: true,
+                    face = MathSettings.faceOf(preferences[PrefKeys.MATH_FONT]),
+                    sizePercent = preferences[PrefKeys.MATH_SIZE] ?: 100,
+                )
             }
             loaded.complete(Unit)
         }
@@ -191,6 +222,25 @@ class Prefs(
         _stayConnected.value = on
         scope.launch(io) {
             store.edit { it[PrefKeys.STAY_CONNECTED] = _stayConnected.value }
+        }
+    }
+
+    /**
+     * Set the math settings (#36), the [setStayConnected] shape: no-op when
+     * unchanged, the StateFlow at once, all three keys written in the
+     * background from the current value.
+     */
+    fun setMath(values: MathSettings.Values) {
+        if (values == _math.value) return
+        mathTouched = true
+        _math.value = values
+        scope.launch(io) {
+            store.edit {
+                val v = _math.value
+                it[PrefKeys.MATH_RENDER] = v.render
+                it[PrefKeys.MATH_FONT] = MathSettings.key(v.face)
+                it[PrefKeys.MATH_SIZE] = v.sizePercent
+            }
         }
     }
 }

@@ -22,6 +22,7 @@ import sh.zeron.android.design.ProvideFeedback
 import sh.zeron.android.design.ZeronTheme
 import sh.zeron.android.sessions.LocalRowActions
 import sh.zeron.android.shell.tablet.Sidebar
+import sh.zeron.android.voice.VoiceHost
 
 /**
  * The real app content wiring (android-ui-parity #35) — the only place
@@ -86,6 +87,8 @@ fun ZeronAppContent(app: ZeronApplication, rootState: AppRootState) {
                         CompositionLocalProvider(LocalRowActions provides app.rowActions) {
                             // #15: "Choose an organization" over whatever started the sign-in.
                             OrgPicker(app.authSession)
+                            // #60: the call's prompt, screen wake, haptics and failure toast.
+                            VoiceHost(app.voice, app.appToaster)
                             Box(Modifier.fillMaxSize()) {
                                 AppRootContent(
                                     app = app,

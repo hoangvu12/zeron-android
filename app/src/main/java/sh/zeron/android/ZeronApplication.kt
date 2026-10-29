@@ -57,6 +57,7 @@ import sh.zeron.android.core.zeronPrefsStore
 import sh.zeron.android.design.Appearance
 import sh.zeron.android.design.AlertHostState
 import sh.zeron.android.design.ToasterState
+import sh.zeron.android.voice.VoiceController
 import sh.zeron.android.notify.NotificationCenter
 import sh.zeron.android.notify.NotificationPermission
 import sh.zeron.android.notify.NotificationPolicy
@@ -391,6 +392,15 @@ class ZeronApplication : Application() {
     val appToaster: ToasterState by lazy { ToasterState() }
 
     /**
+     * The voice call (#60, iOS `AppModel.voice`): app-lifetime, so a call
+     * outlives activity recreation and keeps running with the screen off
+     * (its microphone service holds the process). Main thread only.
+     */
+    val voice: VoiceController by lazy {
+        VoiceController(this, sessionHolder.client, workspaceFeed.devices, applicationScope)
+    }
+
+    /**
      * The app-scoped alert state (the [appToaster] precedent): an
      * app-lifetime service, not a screen, can show its alerts through it,
      * so a prompt raised while no activity is composed (or after a
@@ -649,14 +659,21 @@ class ZeronApplication : Application() {
         applicationScope.launch {
             prefs.stayConnected.collect { runWatch.onStayConnected(it) }
         }
+        // #36: the stored math settings (and every Settings change) reach
+        // every live transcript, which reflows at once (iOS `didChange`).
+        applicationScope.launch {
+            prefs.math.collect { sh.zeron.android.transcript.MathSettings.update(it) }
+        }
         // #18: everything a sign-out clears beyond the holder's own
         // (client, credentials and profile, and — asked for — the core
         // dir): the notifications (iOS `push.signingOut`), the run watch,
         // and the new-session draft (iOS `lastDraft` / `newSessionText` /
         // `newSessionImages`). Per-chat drafts stay ("Local drafts stay on
         // this device."). An expiry clears the same, keeping the store.
-        // TODO(#60): `voice.stop()`.
         sessionHolder.addSignOutListener {
+            // #60: a call never outlives its account. The listener runs
+            // off main; the controller is main-thread only.
+            applicationScope.launch(Dispatchers.Main.immediate) { voice.stop() }
             // #56: the watcher forgets the account, then everything it posted goes.
             notifications.signedOut()
             runWatch.signOut()

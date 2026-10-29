@@ -543,6 +543,8 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     // The AAR carries arm64/x86_64 libjnidispatch.so (16 KB aligned).
     implementation("${libs.jna.get()}@aar")
+    // #60: the voice call's WebRTC peer (org.webrtc, native libjingle per ABI).
+    implementation(libs.webrtc)
 
     debugImplementation(libs.compose.ui.tooling)
     // JankStats, the lab bench's cross-check (ui-parity #136): debug only —
