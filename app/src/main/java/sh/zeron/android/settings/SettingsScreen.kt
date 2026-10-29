@@ -35,7 +35,7 @@ import sh.zeron.android.shell.TitleMode
  * **Account · Agents · Devices · Voice · Notifications · Appearance ·
  * Wallpaper · Math · Sessions · (untitled) Sign Out**
  *
- * Agents, Voice and Math are later tickets' (see the `TODO`s in
+ * Agents and Voice are later tickets' (see the `TODO`s in
  * [SettingsScreen]); Roboco's Background ("Stay connected", D8) and
  * About/updater/Licences (D10) sections are gone, as on iOS.
  *
@@ -78,8 +78,8 @@ object SettingsScreenTokens {
  * The sections, in display order = declaration order — iOS's
  * (`MoreViewController.swift:185-248`). The [key]s are the
  * `groupedSection` keys; they must stay unique across the screen (70
- * prefixes them `grouped:<key>:…`). Voice and Math have no rows yet
- * (#61, #36), so they emit nothing.
+ * prefixes them `grouped:<key>:…`). Voice has no rows yet (#61), so it
+ * emits nothing.
  */
 enum class SettingsSection(val key: String) {
     Account("account"),
@@ -116,7 +116,7 @@ private val SettingsDeviceIdPrefix = DevicesRowIds.device("")
  * for an unknown id. The prefixes are the section tickets' row ids:
  * `agent-account:`/`agent-accounts:` (android-next#05),
  * `engine:`/`device:` rows (102), `notify:` (99),
- * `appearance:` (96), `wallpaper:` (97), `math:` (#36), 100's two rows;
+ * `appearance:` (96), `wallpaper:` (97), `math:` (#36's rows), 100's two rows;
  * `account` and `signout` are #18's rows, `voice` #61's.
  */
 fun settingsSectionFor(id: String): SettingsSection? = when {
@@ -187,6 +187,7 @@ fun SettingsScreen(
     notifications: NotificationSectionState = rememberNotificationSectionState(),
     appearance: AppearanceSectionState = rememberAppearanceSectionState(),
     wallpaper: WallpaperSectionState = rememberWallpaperSectionState(),
+    math: MathSectionState = rememberMathSectionState(),
     groupByProject: StateFlow<Boolean> =
         (LocalContext.current.applicationContext as ZeronApplication).prefs.groupByProject,
     onGroupByProjectChange: (Boolean) -> Unit =
@@ -223,8 +224,7 @@ fun SettingsScreen(
         notificationSection(notifications)
         appearanceSection(appearance)
         wallpaperSection(wallpaper)
-        // TODO(#36): the "Math" section — Render Math, Math Font, Math Size
-        // (`MoreViewController.swift:233-241`).
+        mathSection(math)
         sessionsSettingsSection(
             sessionsStrings,
             // The value is read inside the row item (100's rule: the lazy

@@ -365,6 +365,15 @@ object ZeronIcons {
     /** Engine-row icon (ticket 102, per android-app#26). */
     val Laptop = ZeronIcon.Vector(R.drawable.zi_laptop)
 
+    /** SF `function` — Settings "Render Math" (#36). */
+    val Function = ZeronIcon.Vector(R.drawable.zi_function)
+
+    /** SF `textformat` — Settings "Math Font" (#36). */
+    val Textformat = ZeronIcon.Vector(R.drawable.zi_textformat)
+
+    /** SF `textformat.size` — Settings "Math Size" (#36). */
+    val TextformatSize = ZeronIcon.Vector(R.drawable.zi_textformat_size)
+
     /**
      * Every registry row, in mapping-table order — the single source
      * [bySfName], the design-gallery grid and the registry tests read.
@@ -487,6 +496,9 @@ object ZeronIcons {
         RegistryEntry("Home", emptyList(), Home),
         RegistryEntry("HardDrive", emptyList(), HardDrive),
         RegistryEntry("Laptop", emptyList(), Laptop),
+        RegistryEntry("Function", listOf("function"), Function),
+        RegistryEntry("Textformat", listOf("textformat"), Textformat),
+        RegistryEntry("TextformatSize", listOf("textformat.size"), TextformatSize),
     )
 
     /** SF name → icon, for strings that arrive at runtime (core widgets, row VMs). */
