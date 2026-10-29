@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -29,64 +31,84 @@ import sh.zeron.android.transcript.isTranscriptControl
 import uniffi.zeron_core.WidgetKind
 
 /**
- * The subagent spawn card's tap target (android-next #06, upstream #899's
- * `subagentLink` — a `ToolToggleControl` over the whole card): it opens
- * the subagent once per tap, says "Open subagent: <title>" as a button,
- * claims its down from the composer-dismiss tap like every transcript
- * control, and keeps the row menu away (a control kind); the default
- * actions leave a card inert.
+ * The subagent spawn card's control (#31, iOS `SubagentCardControl` and
+ * `RowView.swift:323-337`): it opens the subagent once per tap, is a
+ * button labelled "Subagent: <title>" with a Working / Failed / Done
+ * state, is disabled until the host binds a doc, claims its down from the
+ * composer-dismiss tap like every transcript control, and keeps the row
+ * menu away (a control kind); the default actions leave a card inert.
  */
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "w360dp-h300dp-mdpi")
-class SubagentLinkTest {
+class SubagentCardTest {
 
     @get:Rule
     val compose = createAndroidComposeRule<ComponentActivity>()
 
-    private val link = WidgetKind.SubagentLink(
+    private val card = WidgetKind.Subagent(
         docId = "engine:v1:k:chat--sub--toolu_1",
         title = "Audit the reduced-motion fallback",
-        frozen = false,
+        running = true,
+        failed = false,
     )
 
-    @Test
-    fun aTapOpensTheSubagentOnceAndSpeaksAsAButton() {
-        val opened = mutableListOf<String>()
+    private fun host(onOpen: (() -> Unit)?, running: Boolean = true, failed: Boolean = false) {
         compose.setContent {
             ZeronTheme(Appearance.Light) {
                 Box(Modifier.fillMaxSize()) {
                     // The Rust rect of a 30 pt card in its 38 pt row (T = 1.125).
                     Box(Modifier.absoluteOffset(18.dp, 4.dp).size(324.dp, 33.75.dp)) {
-                        SubagentLinkTarget(title = link.title, onOpen = { opened += link.docId })
+                        SubagentCard(title = card.title, running = running, failed = failed, onOpen = onOpen)
                     }
                 }
             }
         }
         compose.waitForIdle()
-        val node = compose.onNodeWithTag("subagent-link")
-        val config = node.fetchSemanticsNode().config
-        assertEquals(listOf("Open subagent: Audit the reduced-motion fallback"), config[SemanticsProperties.ContentDescription])
-        assertEquals(Role.Button, config[SemanticsProperties.Role])
-        node.performClick()
-        compose.waitForIdle()
-        assertEquals(listOf(link.docId), opened)
     }
 
     @Test
-    fun theLinkIsATranscriptControl() {
-        assertTrue("its down never dismisses the composer", link.isTranscriptControl)
-        assertTrue("a long press over it opens no row menu", link.isControl())
+    fun aTapOpensTheSubagentOnceAndSpeaksAsAButton() {
+        val opened = mutableListOf<String>()
+        host(onOpen = { opened += card.docId!! })
+        val node = compose.onNodeWithTag("subagent-card")
+        val config = node.fetchSemanticsNode().config
+        assertEquals(listOf("Subagent: Audit the reduced-motion fallback"), config[SemanticsProperties.ContentDescription])
+        assertEquals("Working", config[SemanticsProperties.StateDescription])
+        assertEquals(Role.Button, config[SemanticsProperties.Role])
+        node.assertIsEnabled()
+        node.performClick()
+        compose.waitForIdle()
+        assertEquals(listOf(card.docId), opened)
+    }
+
+    @Test
+    fun withoutADocTheCardIsDisabled() {
+        host(onOpen = null)
+        compose.onNodeWithTag("subagent-card").assertIsNotEnabled()
+    }
+
+    @Test
+    fun theStateIsWorkingThenFailedOrDone() {
+        assertEquals("Working", subagentStatus(running = true, failed = true))
+        assertEquals("Failed", subagentStatus(running = false, failed = true))
+        assertEquals("Done", subagentStatus(running = false, failed = false))
+    }
+
+    @Test
+    fun theCardIsATranscriptControl() {
+        assertTrue("its down never dismisses the composer", card.isTranscriptControl)
+        assertTrue("a long press over it opens no row menu", card.isControl())
         assertFalse(WidgetKind.Spinner.isTranscriptControl)
     }
 
     @Test
     fun theDefaultActionsLeaveTheCardInert() {
         // No crash, no effect: tests and previews build actions without it.
-        TranscriptActions().openSubagent(link.docId, link.title, link.frozen)
+        TranscriptActions().openSubagent(card.docId!!, card.title, false)
         var seen: Triple<String, String, Boolean>? = null
         TranscriptActions(openSubagent = { d, t, f -> seen = Triple(d, t, f) })
-            .openSubagent(link.docId, link.title, true)
-        assertEquals(Triple(link.docId, link.title, true), seen)
+            .openSubagent(card.docId!!, card.title, true)
+        assertEquals(Triple(card.docId, card.title, true), seen)
     }
 }
