@@ -503,6 +503,9 @@ object ZeronIcons {
         RegistryEntry("Cpu", listOf("cpu"), Cpu),
         RegistryEntry("Cloud", listOf("cloud"), Cloud),
         RegistryEntry("CreditCard", listOf("creditcard"), CreditCard),
+        RegistryEntry("Keyboard", listOf("keyboard"), Keyboard),
+        RegistryEntry("ArrowLeft", listOf("arrow.left"), ArrowLeft),
+        RegistryEntry("ArrowRight", listOf("arrow.right"), ArrowRight),
         RegistryEntry("PersonCropCircle", listOf("person.crop.circle"), PersonCropCircle),
         RegistryEntry(
             "RectanglePortraitAndArrowRight",
