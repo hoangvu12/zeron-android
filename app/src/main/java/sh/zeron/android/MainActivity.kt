@@ -14,6 +14,9 @@ import java.io.File
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import sh.zeron.android.auth.LocalSignIn
 import sh.zeron.android.auth.SignInBrowser
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import sh.zeron.android.core.ActivityBrowserTabs
 import sh.zeron.android.core.WallpaperStore
 import sh.zeron.android.composer.LocalDrafts
 import sh.zeron.android.design.GalleryLaunch
@@ -98,6 +101,21 @@ class MainActivity : ComponentActivity() {
         // #15: the Auth Tab result launcher is registered on every create
         // (before STARTED), so a result delivered after a recreation lands.
         signIn = SignInBrowser(this, app.authSession)
+        // #48: Cloud sign-ins' tabs (an Auth Tab launcher, registered on
+        // every create like #15's) and the Custom Tab fallback's resumes.
+        val tabs = ActivityBrowserTabs(this)
+        app.browserReturns.tabs = tabs
+        lifecycle.addObserver(
+            object : DefaultLifecycleObserver {
+                override fun onResume(owner: LifecycleOwner) {
+                    app.browserReturns.resumes.tryEmit(Unit)
+                }
+
+                override fun onDestroy(owner: LifecycleOwner) {
+                    if (app.browserReturns.tabs === tabs) app.browserReturns.tabs = null
+                }
+            },
+        )
         // Ticket 36: the launch extras, on every `onCreate` (after a
         // recreation the restored intent still carries them). The debug
         // gate is the manifest's FLAG_DEBUGGABLE — the installed APK's
@@ -193,9 +211,9 @@ class MainActivity : ComponentActivity() {
                 // Tab returns its result to SignInBrowser instead).
                 ZeronUrl.Callback -> app.authSession.onCallback(intent.dataString!!)
                 // A provider or device login's done page: `singleTask`
-                // already cleared the Custom Tab, and the waiting sign-in
-                // finishes on its own poll.
-                ZeronUrl.SignedIn -> Unit
+                // already cleared the Custom Tab; a waiting Cloud sign-in
+                // (#48) hears it, a device sign-in finishes on its own poll.
+                ZeronUrl.SignedIn -> app.browserReturns.links.tryEmit(ZeronUrl.SignedIn)
                 // TODO(#61): back to the voice stage while a call is live.
                 ZeronUrl.Voice -> Unit
                 // Unknown link: ignored, logged.

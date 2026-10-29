@@ -38,6 +38,8 @@ import sh.zeron.android.composer.QueueChromeFiller
 import sh.zeron.android.composer.SessionChipMenus
 import sh.zeron.android.core.AppLifecycleHooks
 import sh.zeron.android.core.AppearanceController
+import sh.zeron.android.core.BrowserReturns
+import sh.zeron.android.core.CloudStore
 import sh.zeron.android.core.CoreClientWorkspace
 import sh.zeron.android.core.CoreLoader
 import sh.zeron.android.core.CoreLifecycleSink
@@ -323,6 +325,22 @@ class ZeronApplication : Application() {
         sessionHolder.addEventSink { event -> feed.onEvent(event) }
         feed
     }
+
+    /**
+     * #48: Cloud for the signed-in account (iOS `AppModel.cloud`): its
+     * status, credits, GitHub, the agents' logins and billing, read on
+     * demand by the screens and forgotten on sign-out.
+     */
+    val cloud: CloudStore by lazy {
+        CloudStore(applicationScope, client = ::clientOrNull, workspaceChanged = { workspaceFeed.refresh() })
+    }
+
+    /**
+     * #48: pages in the browser that hand back through `zeron://signed-in`
+     * (Cloud sign-ins); `MainActivity` attaches its tabs and feeds the
+     * links and resumes.
+     */
+    val browserReturns: BrowserReturns by lazy { BrowserReturns() }
 
     /**
      * The fold state (#21): every fold phone-local under
@@ -637,7 +655,7 @@ class ZeronApplication : Application() {
         // and the new-session draft (iOS `lastDraft` / `newSessionText` /
         // `newSessionImages`). Per-chat drafts stay ("Local drafts stay on
         // this device."). An expiry clears the same, keeping the store.
-        // TODO(#60): `voice.stop()`. TODO(#48): `cloud.reset()`.
+        // TODO(#60): `voice.stop()`.
         sessionHolder.addSignOutListener {
             // #56: the watcher forgets the account, then everything it posted goes.
             notifications.signedOut()
@@ -647,6 +665,8 @@ class ZeronApplication : Application() {
             // `terminals.signOut()`, `AppModel.swift:253`). The store is
             // main-thread state.
             applicationScope.launch(Dispatchers.Main.immediate) { terminals.signOut() }
+            // #48: Cloud's main-thread state (iOS `cloud.reset()`).
+            applicationScope.launch(Dispatchers.Main.immediate) { cloud.reset() }
             // The draft store's mirror is main-thread state; the last-engine
             // forget is its full reset.
             applicationScope.launch {
