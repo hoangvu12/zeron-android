@@ -12,6 +12,8 @@ import androidx.activity.compose.setContent
 import androidx.compose.runtime.CompositionLocalProvider
 import java.io.File
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import sh.zeron.android.auth.LocalSignIn
+import sh.zeron.android.auth.SignInBrowser
 import sh.zeron.android.core.WallpaperStore
 import sh.zeron.android.composer.LocalDrafts
 import sh.zeron.android.design.GalleryLaunch
@@ -79,6 +81,9 @@ class MainActivity : ComponentActivity() {
     /** One per activity: the bridge from the framework to the mounted shell. */
     private val shortcutSink = ShortcutSink()
 
+    /** #15: the browser half of sign-in (Auth Tab launcher, Custom Tab fallback). */
+    private lateinit var signIn: SignInBrowser
+
     override fun onCreate(savedInstanceState: Bundle?) {
         // Before the first frame (the androidx edge-to-edge template):
         // transparent bars, icons following the effective night mode.
@@ -88,6 +93,9 @@ class MainActivity : ComponentActivity() {
         applyZeronEdgeToEdge(isDark = resources.configuration.isNightModeActive)
         super.onCreate(savedInstanceState)
         val app = application as ZeronApplication
+        // #15: the Auth Tab result launcher is registered on every create
+        // (before STARTED), so a result delivered after a recreation lands.
+        signIn = SignInBrowser(this, app.authSession)
         // Ticket 36: the launch extras, on every `onCreate` (after a
         // recreation the restored intent still carries them). The debug
         // gate is the manifest's FLAG_DEBUGGABLE — the installed APK's
@@ -113,6 +121,8 @@ class MainActivity : ComponentActivity() {
                 // composer reads; previews and hosts without the app use
                 // the in-memory default.
                 LocalDrafts provides app.drafts,
+                // #15: what the Welcome / Sync screens call to sign in.
+                LocalSignIn provides signIn,
             ) {
                 ZeronAppContent(app, rootState)
             }
@@ -169,8 +179,17 @@ class MainActivity : ComponentActivity() {
      * one, the route.
      */
     private fun handleIntent(intent: Intent) {
-        val hub = (application as ZeronApplication).deepLinks
-        if (intent.action == Intent.ACTION_VIEW) {
+        val app = application as ZeronApplication
+        val hub = app.deepLinks
+        val data = intent.data
+        if (intent.action == Intent.ACTION_VIEW &&
+            data?.scheme == SignInBrowser.CALLBACK_SCHEME &&
+            data.host == SignInBrowser.CALLBACK_HOST
+        ) {
+            // #15: the Custom Tab fallback's WorkOS redirect (the Auth Tab
+            // returns its result to SignInBrowser instead).
+            app.authSession.onCallback(data.toString())
+        } else if (intent.action == Intent.ACTION_VIEW) {
             val link = DeepLinks.parse(intent.dataString)
             if (link == null) {
                 // Unknown link: ignored, logged.
