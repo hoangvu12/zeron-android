@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
@@ -196,11 +197,16 @@ fun SettingsScreen(
         (LocalContext.current.applicationContext as ZeronApplication).account,
     onSignOut: () -> Unit =
         (LocalContext.current.applicationContext as ZeronApplication)::signOut,
+    /** #48: iOS `viewDidLoad`'s `app.cloud.refresh()` — Cloud's status for the "Agents" rows (#49). */
+    refreshCloud: () -> Unit =
+        (LocalContext.current.applicationContext as ZeronApplication).cloud::refresh,
 ) {
     val listState = rememberLazyListState()
     val identity by account.collectAsState()
     val signOut by rememberUpdatedState(onSignOut)
     val sheets = LocalActionSheet.current
+    val cloudRefresh by rememberUpdatedState(refreshCloud)
+    LaunchedEffect(Unit) { cloudRefresh() }
     // The ONE ON_RESUME re-read (99's contract): returning from system
     // settings, from the permission dialog, from the background, plus the
     // lifecycle catch-up when the effect enters composition in a resumed

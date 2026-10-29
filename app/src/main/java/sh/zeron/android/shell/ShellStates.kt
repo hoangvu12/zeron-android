@@ -11,6 +11,7 @@ import androidx.compose.runtime.saveable.SaveableStateHolder
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.withFrameNanos
+import sh.zeron.android.companions.CompanionsInspectorRoute
 import sh.zeron.android.session.SessionDetachFence
 import sh.zeron.android.shell.tablet.SidebarState
 
@@ -90,6 +91,9 @@ class ShellStates internal constructor(
 
     /** This ticket's transition runner. */
     val carryOver: CarryOver,
+
+    /** #45: the split's inspector column (a sheet over the phone shell while folded). */
+    val inspector: InspectorState,
 ) {
     /** The tab-shell presence listener forwarded by 32's phone router — 106's `tabPresence` (= [CarryOverPresence]). */
     val presence: SessionPresenceListener
@@ -207,6 +211,8 @@ internal fun ShellStateScope(
     val phoneSlot = remember { PhoneRouterSlot() }
     val settingsSlot = remember { SettingsPresenterSlot() }
     val tabletRouter = rememberTabletAppRouter(tablet, phoneSlot, sidebar, settingsSlot)
+    // #45: one inspector per window, like the split's (not saved, as iOS).
+    val inspector = remember { InspectorState(rootFor = { CompanionsInspectorRoute(it) }) }
     val states = remember(tabletRouter) {
         val carryOver = CarryOver(
             selection = tablet.carryOverSelection(),
@@ -218,8 +224,9 @@ internal fun ShellStateScope(
                     android.util.Log.w("CarryOver", "detach fence timeout $id")
                 }
             },
+            onCollapse = { inspector.onCollapse(tablet) },
         )
-        ShellStates(tabs, tablet, sidebar, saveable, phoneSlot, settingsSlot, tabletRouter, carryOver)
+        ShellStates(tabs, tablet, sidebar, saveable, phoneSlot, settingsSlot, tabletRouter, carryOver, inspector)
     }
     // Declared BEFORE content(): forgotten AFTER the shells, so their
     // NavStack hosts are gone when it runs and the pops are hostless —

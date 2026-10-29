@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.Saver
@@ -165,6 +166,10 @@ class TabletShellState internal constructor(
      * `preferredDisplayMode`, a silent no-op when collapsed).
      */
     var isCollapsed: Boolean by mutableStateOf(true)
+
+    /** #45: the split's width (dp), written by [SplitRoot]'s layout; 0 until laid out. */
+    var windowWidthDp: Float by mutableFloatStateOf(0f)
+        internal set
 
     /** The animated sidebar position, 0 hidden … 1 shown. Layout-internal. */
     internal val sidebarProgress = Animatable(if (initialSidebarVisible) 1f else 0f)

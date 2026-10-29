@@ -38,6 +38,8 @@ import sh.zeron.android.composer.QueueChromeFiller
 import sh.zeron.android.composer.SessionChipMenus
 import sh.zeron.android.core.AppLifecycleHooks
 import sh.zeron.android.core.AppearanceController
+import sh.zeron.android.core.BrowserReturns
+import sh.zeron.android.core.CloudStore
 import sh.zeron.android.core.CoreClientWorkspace
 import sh.zeron.android.core.CoreLoader
 import sh.zeron.android.core.CoreLifecycleSink
@@ -78,6 +80,7 @@ import sh.zeron.android.shell.LaunchOptions
 import sh.zeron.android.shell.RootInput
 import sh.zeron.android.shell.RouterHooks
 import sh.zeron.android.shell.SearchTabState
+import sh.zeron.android.terminal.TerminalStore
 import uniffi.zeron_core.ClientEvent
 import uniffi.zeron_core.CoreClient
 
@@ -322,6 +325,22 @@ class ZeronApplication : Application() {
         sessionHolder.addEventSink { event -> feed.onEvent(event) }
         feed
     }
+
+    /**
+     * #48: Cloud for the signed-in account (iOS `AppModel.cloud`): its
+     * status, credits, GitHub, the agents' logins and billing, read on
+     * demand by the screens and forgotten on sign-out.
+     */
+    val cloud: CloudStore by lazy {
+        CloudStore(applicationScope, client = ::clientOrNull, workspaceChanged = { workspaceFeed.refresh() })
+    }
+
+    /**
+     * #48: pages in the browser that hand back through `zeron://signed-in`
+     * (Cloud sign-ins); `MainActivity` attaches its tabs and feeds the
+     * links and resumes.
+     */
+    val browserReturns: BrowserReturns by lazy { BrowserReturns() }
 
     /**
      * The fold state (#21): every fold phone-local under
@@ -611,6 +630,11 @@ class ZeronApplication : Application() {
                 }
             },
         )
+        // #56 (D6): every workspace snapshot goes through the SessionWatcher
+        // (done / needs input / failed); null while signed out resets it.
+        applicationScope.launch {
+            workspaceFeed.snapshot.collect { notifications.onSnapshot(it) }
+        }
         applicationScope.launch {
             workspaceFeed.devices.collect { devices ->
                 runWatch.onEngineCount(devices.size)
@@ -636,11 +660,18 @@ class ZeronApplication : Application() {
         // and the new-session draft (iOS `lastDraft` / `newSessionText` /
         // `newSessionImages`). Per-chat drafts stay ("Local drafts stay on
         // this device."). An expiry clears the same, keeping the store.
-        // TODO(#60): `voice.stop()`. TODO(#48): `cloud.reset()`.
-        // TODO(#43): `terminals.signOut()`.
+        // TODO(#60): `voice.stop()`.
         sessionHolder.addSignOutListener {
-            notifier.cancelAll()
+            // #56: the watcher forgets the account, then everything it posted goes.
+            notifications.signedOut()
             runWatch.signOut()
+            // #43: every terminal let go of (the shells keep running on
+            // their hosts) and the saved refs cleared (iOS
+            // `terminals.signOut()`, `AppModel.swift:253`). The store is
+            // main-thread state.
+            applicationScope.launch(Dispatchers.Main.immediate) { terminals.signOut() }
+            // #48: Cloud's main-thread state (iOS `cloud.reset()`).
+            applicationScope.launch(Dispatchers.Main.immediate) { cloud.reset() }
             // The draft store's mirror is main-thread state; the last-engine
             // forget is its full reset.
             applicationScope.launch {
@@ -701,6 +732,14 @@ class ZeronApplication : Application() {
 
     /** The live client; null while signed out (or before the stored account started). */
     fun clientOrNull(): CoreClient? = sessionHolder.clientOrNull()
+
+    /**
+     * #43: every chat's terminals (`ios:Companions/TerminalStore.swift`):
+     * their refs persist per chat, so after a relaunch the first look at a
+     * chat's terminals reattaches to the shells still running on its host.
+     * Main thread only.
+     */
+    val terminals: TerminalStore by lazy { TerminalStore(this, ::clientOrNull) }
 
     /**
      * Settings → Sign Out, confirmed (#18, iOS `AppModel.signOut`): this

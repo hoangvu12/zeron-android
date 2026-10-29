@@ -5,16 +5,18 @@ import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import sh.zeron.android.background.RunWatchController
+import uniffi.zeron_core.WorkspaceSnapshot
 
 /**
  * The Kotlin delivery half of the notifications (android-app#28), plus
  * the glue the app feeds it with.
  *
- * TODO(#56): Zeron's core has no notification sink (no `SessionEvent`,
- * `RunActivity` or `setNotificationSink`). D6's Kotlin `SessionWatcher`
- * derives done / needs-input / failed from workspace snapshots and feeds
- * [notifier] and the [RunWatchController] (#57); until then nothing is
- * posted.
+ * Zeron's core has no notification sink (no `SessionEvent`, `RunActivity`
+ * or `setNotificationSink`), and the edge pushes only to APNs (D6): the
+ * app feeds every workspace snapshot to [onSnapshot], where the
+ * [SessionWatcher] applies the edge's done / needs-input / failed rule and
+ * the gates decide what posts. TODO(#57): the [RunWatchController]'s
+ * inputs from the same snapshots.
  *
  * Threading: every callback hops to [scope] (Dispatchers.Default —
  * `NotificationManagerCompat.notify` is thread-safe) and is fully
@@ -63,13 +65,61 @@ class NotificationCenter(
 
     // ── the app-side seams ───────────────────────────────────────────────
 
+    /** Driven only from [scope]'s single lane, so it needs no lock. */
+    private val watcher = SessionWatcher()
+
     /**
      * Called with every client the session holder publishes (each
-     * sign-in). TODO(#56): start the `SessionWatcher` here, replacing
-     * the previous account's.
+     * sign-in, and a launch with a stored account): the new account's
+     * first snapshot only seeds, so nothing from before replays.
      */
     @Suppress("UNUSED_PARAMETER")
-    fun attachTo(client: uniffi.zeron_core.CoreClient) = Unit
+    fun attachTo(client: uniffi.zeron_core.CoreClient) {
+        scope.launch { watcher.reset() }
+    }
+
+    /**
+     * Every workspace snapshot the feed publishes (null while signed out):
+     * the transitions it holds against the last one post, unless a gate
+     * says no — the app is in front (iOS shows nothing there), the master
+     * switch or the permission is off, or the kind is off. Baselines move
+     * on regardless, so coming back from the front never replays.
+     */
+    fun onSnapshot(snapshot: WorkspaceSnapshot?) {
+        scope.launch {
+            try {
+                if (snapshot == null) {
+                    watcher.reset()
+                    return@launch
+                }
+                val notices = watcher.update(SessionWatcher.rows(snapshot))
+                if (notices.isEmpty()) return@launch
+                val current = prefs.state.value
+                val permission = status()
+                for (notice in notices) {
+                    if (!NotificationPolicy.sessionEventAllowed(notice.kind, current, permission, foreground)) continue
+                    notifier.postSessionEvent(notice.chatId, notice.title, notice.kind, notice.whenMs)
+                }
+            } catch (error: Throwable) {
+                log("session notifications failed", error)
+            }
+        }
+    }
+
+    /**
+     * Signed out (#18's listener; docs/port/05 K6): nothing of the account
+     * is remembered, and every notification it raised goes.
+     */
+    fun signedOut() {
+        scope.launch {
+            try {
+                watcher.reset()
+                notifier.cancelAll()
+            } catch (error: Throwable) {
+                log("sign-out cancel failed", error)
+            }
+        }
+    }
 
     /** A chat was opened in the app: cancel its notification. */
     fun cancelChatFor(chatId: String) {
