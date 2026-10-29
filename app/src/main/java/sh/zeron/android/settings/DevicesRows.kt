@@ -22,10 +22,11 @@ import sh.zeron.android.design.settingsTag
 import uniffi.zeron_core.DeviceView
 
 /**
- * The Settings "Devices" section (android-ui-parity #102): the port of
- * `MoreViewController.swift:189-190` — one informational row per device
- * in Zeron's `devices()`. Rows don't open anything, as on iOS.
- * TODO(#35): the iOS Settings restructure (which devices it lists).
+ * The Settings "Devices" section: the port of
+ * `MoreViewController.swift:211-212` — one informational row per
+ * **execution device** (iOS `hostOptions` = `executionDevices()`: the
+ * devices that can run sessions, never phones). Rows don't open anything
+ * (`didSelectItemAt` → `default: break`).
  *
  * Every visual — geometry, fonts, colours, the 8 dp dot, the chevron,
  * separators, the pressed highlight — comes from ticket 70's
@@ -44,10 +45,10 @@ object DevicesCopy {
     /** `MoreViewController.swift:189`. */
     const val Header = "Devices"
 
-    /** `settings-engine.ts:77`. */
-    const val Connected = "Connected"
+    /** `MoreViewController.swift:212`. */
+    const val Online = "Online"
 
-    /** `MoreViewController.swift:190`. */
+    /** `MoreViewController.swift:212`. */
     const val Offline = "Offline"
 }
 
@@ -84,17 +85,18 @@ sealed interface DevicesRowSpec {
 
 /** The row's label: Zeron reports presence only (`DeviceView.online`). */
 fun deviceConnectionLabel(online: Boolean): String =
-    if (online) DevicesCopy.Connected else DevicesCopy.Offline
+    if (online) DevicesCopy.Online else DevicesCopy.Offline
 
 /**
- * The section's rows, `MoreViewController.swift:189-190` adapted: one
- * [DevicesRowSpec.Device] per device **in `devices()` order** (never
- * sorted). `null` (no client yet) is an empty list. The title guard
+ * The section's rows (`MoreViewController.swift:211-212`): one
+ * [DevicesRowSpec.Device] per execution device (`isExecutionHost`, the
+ * core's `executionDevices()` filter over the same list), **in `devices()`
+ * order** (never sorted). `null` (no client yet) is an empty list. The title guard
  * `name.trim().ifEmpty { id }` only stops an empty title line if
  * Rust's non-blank name guarantee ever breaks.
  */
 fun devicesRows(devices: List<DeviceView>?): List<DevicesRowSpec> =
-    devices.orEmpty().map { d ->
+    devices.orEmpty().filter { it.isExecutionHost }.map { d ->
         DevicesRowSpec.Device(
             deviceId = d.id,
             title = d.name.trim().ifEmpty { d.id },

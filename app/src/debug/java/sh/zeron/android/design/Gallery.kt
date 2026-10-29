@@ -66,7 +66,6 @@ import sh.zeron.android.sessions.SessionsScreenGallerySection
 import sh.zeron.android.sessions.SectionHeaderGallerySection
 import sh.zeron.android.sessions.SwipeRowGallerySection
 import sh.zeron.android.settings.WallpaperRowsGallerySection
-import sh.zeron.android.settings.AboutGallerySection
 import sh.zeron.android.settings.DevicesRowsGallerySection
 import sh.zeron.android.settings.AppearanceGallerySection
 import sh.zeron.android.settings.NotificationRowsGallerySection
@@ -303,10 +302,6 @@ object Gallery {
         GallerySection("New Project browser", GalleryLayout.Fill, screenshotHeightDp = 874) {
             FolderBrowserGallerySection()
         },
-        // Ticket 101 (About & Licenses): the Settings About card — the
-        // Version/Licenses rows and the long-press copy — plus the Licenses
-        // list and the licence-text page sheet in a fixed-height host.
-        GallerySection("About & Licenses", screenshotHeightDp = 1200) { AboutGallerySection() },
         // Ticket 45 (folder screens): the section page with ⋯ Rename/Delete,
         // Archived and Pinned — pushed inside a NavStackHost over the
         // fixture workspaces, with the kind picker and the "Fail writes"
