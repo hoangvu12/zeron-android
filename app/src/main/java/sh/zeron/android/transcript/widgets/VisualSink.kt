@@ -232,15 +232,20 @@ object VisualPainter {
         val bytes = frame.bgra
         val n = w * h * 4
         if (w <= 0 || h <= 0 || bytes.size < n) return null
+        swapRedBlue(bytes, n)
+        return Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888).apply {
+            copyPixelsFromBuffer(ByteBuffer.wrap(bytes, 0, n))
+        }
+    }
+
+    /** BGRA ↔ RGBA over the first [n] bytes, in place. */
+    internal fun swapRedBlue(bytes: ByteArray, n: Int) {
         var i = 0
         while (i < n) {
             val b = bytes[i]
             bytes[i] = bytes[i + 2]
             bytes[i + 2] = b
             i += 4
-        }
-        return Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888).apply {
-            copyPixelsFromBuffer(ByteBuffer.wrap(bytes, 0, n))
         }
     }
 

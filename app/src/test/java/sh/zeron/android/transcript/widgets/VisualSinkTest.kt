@@ -1,6 +1,7 @@
 package sh.zeron.android.transcript.widgets
 
 import android.graphics.Color
+import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNotSame
@@ -131,11 +132,16 @@ class VisualSinkTest {
     // ------------------------------------------------ painter
 
     @Test
-    fun frameImageSwapsBgraIntoTheBitmapsChannels() {
-        // One opaque pixel: B=0x10, G=0x20, R=0x30.
-        val frame = FrameImage(1u, 1u, byteArrayOf(0x10, 0x20, 0x30, 0xFF.toByte()))
+    fun frameBytesSwapFromBgraToRgba() {
+        // Byte-level: a device's ARGB_8888 stores RGBA, but Robolectric's
+        // host Skia stores BGRA, so a pixel read here can't check the swap.
+        val bytes = byteArrayOf(0x10, 0x20, 0x30, 0xFF.toByte(), 0x01, 0x02, 0x03, 0x04)
+        VisualPainter.swapRedBlue(bytes, bytes.size)
+        assertArrayEquals(byteArrayOf(0x30, 0x20, 0x10, 0xFF.toByte(), 0x03, 0x02, 0x01, 0x04), bytes)
+        val frame = FrameImage(2u, 1u, ByteArray(8))
         val bitmap = VisualPainter.image(frame)!!
-        assertEquals(Color.rgb(0x30, 0x20, 0x10), bitmap.getPixel(0, 0))
+        assertEquals(2, bitmap.width)
+        assertEquals(1, bitmap.height)
     }
 
     @Test
