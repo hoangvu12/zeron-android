@@ -59,14 +59,6 @@ internal class PhoneShellAdapter(
         stack.push(SettingsRoute, animated = true)
     }
 
-    override fun pushSettingsPage(route: NavRoute) {
-        val stack = tabs.sessions
-        if (stack.top.route == route) return
-        stack.popToRoot(animated = false)
-        stack.push(SettingsRoute, animated = false)
-        stack.push(route, animated = true)
-    }
-
     override fun pushPages(routes: List<NavRoute>) {
         val stack = tabs.sessions
         stack.popToRoot(animated = false)

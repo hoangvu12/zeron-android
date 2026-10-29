@@ -35,19 +35,23 @@ import sh.zeron.android.design.groupedSection
 import sh.zeron.android.design.rememberPullToRefreshState
 import sh.zeron.android.design.uiStyle
 import sh.zeron.android.shell.LargeTitleScaffold
+import sh.zeron.android.shell.LocalNavStack
 import sh.zeron.android.shell.NavRoute
 import sh.zeron.android.shell.TitleMode
 import uniffi.zeron_core.GithubRepoInfo
+
+/** A sheet Settings → Cloud opens over itself. */
+enum class CloudSheet { GitHub, Repos }
 
 /**
  * Settings → Cloud (#51; iOS `Cloud/CloudSettingsViewController.swift`):
  * GitHub and the repositories Cloud sessions can open. Agents' accounts
  * are under Providers (#50); plans and credits under Billing (#52).
  *
- * [connectGitHub] opens the page with Connect GitHub already up (the
- * `cloud:github` debug route).
+ * [open] opens the page with a sheet already up (the `cloud:github` and
+ * `cloud:repos` debug routes).
  */
-data class CloudSettingsRoute(val connectGitHub: Boolean = false) : NavRoute {
+data class CloudSettingsRoute(val open: CloudSheet? = null) : NavRoute {
     override val hidesBottomChrome: Boolean get() = true
     override val paneTitle: String get() = CloudSettingsCopy.Title
 }
@@ -219,7 +223,8 @@ fun CloudSettingsScreen(route: CloudSettingsRoute, modifier: Modifier = Modifier
     val dark = ZeronTheme.isDark
     val sheets = LocalActionSheet.current
     val chrome = LocalBottomChrome.current
-    var connecting by remember { mutableStateOf(route.connectGitHub) }
+    val nav = LocalNavStack.current
+    var sheet by remember { mutableStateOf(route.open) }
     LaunchedEffect(cloud) { cloud.refresh() }
 
     val sections = cloudSettingsSections(
@@ -237,12 +242,11 @@ fun CloudSettingsScreen(route: CloudSettingsRoute, modifier: Modifier = Modifier
     val onRow: (CloudRow) -> Unit = { row ->
         when (row.id) {
             CloudRowIds.GitHub -> if (cloud.githubConnected) {
-                sheets.show(githubActions(cloud.githubAccount, openInstall) { connecting = true })
+                sheets.show(githubActions(cloud.githubAccount, openInstall) { sheet = CloudSheet.GitHub })
             } else {
-                connecting = true
+                sheet = CloudSheet.GitHub
             }
-            // TODO(#52): push Billing.
-            CloudRowIds.StatusBilling -> Unit
+            CloudRowIds.StatusBilling -> if (nav.top.route != BillingRoute) nav.push(BillingRoute, animated = true)
             CloudRowIds.ReposChoose -> openInstall?.invoke()
             else -> Unit
         }
@@ -285,8 +289,10 @@ fun CloudSettingsScreen(route: CloudSettingsRoute, modifier: Modifier = Modifier
             }
         },
     )
-    if (connecting) {
-        GitHubConnectSheet(onDismissed = { connecting = false })
+    when (sheet) {
+        CloudSheet.GitHub -> GitHubConnectSheet(onDismissed = { sheet = null })
+        CloudSheet.Repos -> CloudRepoPickerSheet(onDismissed = { sheet = null })
+        null -> Unit
     }
 }
 

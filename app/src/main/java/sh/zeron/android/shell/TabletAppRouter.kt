@@ -343,13 +343,6 @@ class TabletAppRouter(
         }
     }
 
-    override fun showDebugRoute(route: DebugRoute) {
-        // #51: collapsed, the phone router opens Cloud's pages; expanded,
-        // Settings is a dialog that takes no pushed debug page yet (logs).
-        if (shell.isCollapsed) return phone.run { it.showDebugRoute(route) }
-        super.showDebugRoute(route)
-    }
-
     override fun showDebugPages(routes: List<NavRoute>) {
         if (shell.isCollapsed) return phone.run { it.showDebugPages(routes) }
         routes.forEachIndexed { i, route -> detailStack.push(route, animated = i == routes.lastIndex) }
