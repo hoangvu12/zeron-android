@@ -15,10 +15,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -62,7 +60,9 @@ import sh.zeron.android.design.AlertButton
 import sh.zeron.android.design.AlertButtonRole
 import sh.zeron.android.design.Icon
 import sh.zeron.android.design.LocalAlerts
+import sh.zeron.android.design.BottomChromeInsets
 import sh.zeron.android.design.LocalBottomChrome
+import sh.zeron.android.design.scrollEndPadding
 import sh.zeron.android.design.LocalTypeScale
 import sh.zeron.android.design.SymbolWeight
 import sh.zeron.android.design.ZeronAlert
@@ -274,7 +274,8 @@ fun BillingScreen(
             start = 16.dp,
             end = 16.dp,
             top = 8.dp,
-            bottom = (if (onDone != null) WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() else chrome.contentPadding) + 32.dp,
+            // #133: the sheet clears the 3-button bar and the gesture area too.
+            bottom = scrollEndPadding(if (onDone != null) BottomChromeInsets.None else chrome) + 32.dp,
         ),
         showBack = if (onDone != null) false else LocalNavStack.current.entries.firstOrNull()?.id != LocalNavEntry.current.id,
         onBack = if (onDone != null) ({}) else LocalNavStack.current.let { stack -> { stack.pop() } },

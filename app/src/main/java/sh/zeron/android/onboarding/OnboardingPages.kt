@@ -355,6 +355,8 @@ internal fun AgentsPage(modifier: Modifier = Modifier) {
             NavStackHost(
                 stack = stack,
                 active = true,
+                // iOS `providers.view.backgroundColor = .clear`: the wallpaper shows through.
+                background = Color.Transparent,
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()

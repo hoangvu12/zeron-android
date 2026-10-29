@@ -3,7 +3,9 @@ package sh.zeron.android.companions
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -46,7 +48,9 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import sh.zeron.android.design.sheet.SheetMaterial
 import kotlinx.coroutines.delay
 import sh.zeron.android.core.Face
 import sh.zeron.android.design.FadingText
@@ -73,7 +77,6 @@ import sh.zeron.android.design.sheet.GlassSheetDefaults
 import sh.zeron.android.design.sheet.SheetDetent
 import sh.zeron.android.design.sheet.rememberGlassSheetState
 import sh.zeron.android.design.uiStyle
-import sh.zeron.android.session.SessionTitleView
 import sh.zeron.android.sessions.SessionRow
 import sh.zeron.android.sessions.SwipeAction
 import sh.zeron.android.sessions.SwipeRow
@@ -84,6 +87,12 @@ import sh.zeron.android.sidechats.SideChatsAgent
 import sh.zeron.android.sidechats.SideChatsUi
 import uniffi.zeron_core.ColorRole
 import uniffi.zeron_core.modelLabel
+
+/** The companions sheet's measures (#133). */
+internal object CompanionsSheetMetrics {
+    /** The bar's top inset in the sheet: clear of the grabber (5 + 5 dp) with a 2 dp gap. */
+    val BarTop = 12.dp
+}
 
 /** The side chats header's + menu (iOS `headerButton(.sideChats)`). Pure. */
 fun sideChatsAddMenu(onNew: () -> Unit, onFork: () -> Unit): Menu = Menu(
@@ -149,11 +158,15 @@ fun CompanionsOverlay(
         state = rememberGlassSheetState(detents),
         grabber = true,
         title = chatTitle.ifEmpty { "Session" },
+        // iOS: `view.backgroundColor = .clear` on the system sheet's glass.
+        material = SheetMaterial.Glass,
+        headerHeight = GlassSheetDefaults.HeaderHeight + CompanionsSheetMetrics.BarTop,
         header = {
             CompanionsHeader(
                 title = chatTitle.ifEmpty { "Session" },
                 subtitle = CompanionsCopy.subtitle(ui.running.size),
                 onClose = { dismiss() },
+                top = CompanionsSheetMetrics.BarTop,
             )
         },
     ) { bottomInset ->
@@ -182,16 +195,38 @@ fun CompanionsOverlay(
     }
 }
 
-/** The sheet's bar: the chat's title over the subtitle, centred; Close trailing (iOS `.close`) when [onClose] is set. */
+/**
+ * The sheet's bar (iOS's nav bar in the sheet): the chat's title (Semibold
+ * 17, `titleTextAttributes`) over the subtitle (13, secondary — UIKit's
+ * `navigationItem.subtitle`), centred and fading 8 dp before the bar items;
+ * Close trailing (iOS `.close`) when [onClose] is set. In the sheet the bar
+ * starts below the grabber ([CompanionsSheetMetrics.BarTop]), so the two
+ * lines never touch it.
+ */
 @Composable
-internal fun CompanionsHeader(title: String, subtitle: String, onClose: (() -> Unit)?) {
-    Box(Modifier.fillMaxWidth().height(GlassSheetDefaults.HeaderHeight)) {
-        SessionTitleView(
-            title = title,
-            subtitle = subtitle,
-            maxWidth = 240.dp,
-            modifier = Modifier.align(Alignment.Center).semantics { heading() },
-        )
+internal fun CompanionsHeader(title: String, subtitle: String, onClose: (() -> Unit)?, top: Dp = 0.dp) {
+    val palette = ZeronTheme.palette
+    val ts = LocalTypeScale.current
+    Box(Modifier.fillMaxWidth().padding(top = top).height(GlassSheetDefaults.HeaderHeight)) {
+        Column(
+            Modifier
+                .align(Alignment.Center)
+                .padding(horizontal = GlassSheetDefaults.TitleClearance / 2)
+                .semantics(mergeDescendants = true) { heading() },
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(1.dp),
+        ) {
+            FadingText(
+                title,
+                uiStyle(Face.SansSemibold, ts.fixed(17f), palette.text),
+                fitsAlignment = Alignment.CenterHorizontally,
+            )
+            FadingText(
+                subtitle,
+                uiStyle(Face.Sans, ts.fixed(13f), palette.secondary),
+                fitsAlignment = Alignment.CenterHorizontally,
+            )
+        }
         // #45: the inspector column has none (its nav item toggles it).
         if (onClose != null) {
             GlassCircleButton(
@@ -441,20 +476,33 @@ private fun CompanionRow(
             }
         }
         Spacer(Modifier.width(12.dp))
+        val detailStyle = uiStyle(Face.Sans, ts.scaled(13.5f), palette.secondary)
+        val hasDetail = text.detail.isNotEmpty()
         Column(Modifier.weight(1f)) {
             FadingText(title, uiStyle(Face.SansMedium, ts.scaled(16f), palette.text))
-            Spacer(Modifier.height(3.dp))
-            FadingText(text.detail, uiStyle(Face.Sans, ts.scaled(13.5f), palette.secondary))
+            if (hasDetail) {
+                Spacer(Modifier.height(3.dp))
+                FadingText(text.detail, detailStyle)
+            }
         }
         val trailing = text.trailing
         if (trailing != null) {
             Spacer(Modifier.width(10.dp))
-            BasicText(
-                trailing,
-                style = uiStyle(Face.SansMedium, ts.scaled(13f), trailingColor).copy(textAlign = TextAlign.End),
-                maxLines = 1,
-                softWrap = false,
-            )
+            // On the title's line (iOS `trailing.frame.y = top`, the title's
+            // height): the same two-line column as the text, its second line
+            // an empty placeholder of the detail's height.
+            Column(horizontalAlignment = Alignment.End) {
+                BasicText(
+                    trailing,
+                    style = uiStyle(Face.SansMedium, ts.scaled(13f), trailingColor).copy(textAlign = TextAlign.End),
+                    maxLines = 1,
+                    softWrap = false,
+                )
+                if (hasDetail) {
+                    Spacer(Modifier.height(3.dp))
+                    BasicText(" ", style = detailStyle, maxLines = 1)
+                }
+            }
         }
         if (chevron) {
             Spacer(Modifier.width(6.dp))
@@ -508,14 +556,17 @@ private fun EmptyRow(section: CompanionSection) {
         CompanionSection.SideChats -> CompanionsCopy.SideChatsEmpty
         CompanionSection.Terminals -> CompanionsCopy.TerminalsEmpty
     }
-    BasicText(
-        text,
+    // A list cell: at least 44 dp, the text centred inside the 2/8 margins.
+    Box(
         Modifier
             .fillMaxWidth()
+            .heightIn(min = 44.dp)
             .padding(start = 20.dp, end = 20.dp, top = 2.dp, bottom = 8.dp)
             .testTag("companion-empty-$section"),
-        style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(14f), palette.tertiary),
-    )
+        contentAlignment = Alignment.CenterStart,
+    ) {
+        BasicText(text, style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(14f), palette.tertiary))
+    }
 }
 
 /**
@@ -530,15 +581,21 @@ private fun CompanionHeaderRow(section: CompanionSection, onAction: (CompanionAc
     val menuState = rememberGlassMenuState()
     var plusBounds by remember { mutableStateOf(Rect.Zero) }
     Box(Modifier.fillMaxWidth().height(46.dp)) {
-        BasicText(
-            CompanionsCopy.title(section),
+        // iOS `title.frame`: a 22 dp line 6 dp above the bottom, text centred in it.
+        Box(
             Modifier
                 .align(Alignment.BottomStart)
                 .padding(start = 20.dp, bottom = 6.dp)
-                .semantics { heading() },
-            style = uiStyle(Face.SansSemibold, LocalTypeScale.current.fixed(13f), palette.secondary),
-            maxLines = 1,
-        )
+                .height(22.dp),
+            contentAlignment = Alignment.CenterStart,
+        ) {
+            BasicText(
+                CompanionsCopy.title(section),
+                Modifier.semantics { heading() },
+                style = uiStyle(Face.SansSemibold, LocalTypeScale.current.fixed(13f), palette.secondary),
+                maxLines = 1,
+            )
+        }
         if (section != CompanionSection.Agents) {
             GlassCircleButton(
                 icon = ZeronIcons.Plus,

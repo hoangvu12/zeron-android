@@ -87,3 +87,18 @@ fun rememberSafeBottom(windowHeight: Dp): Dp {
     val insetPx = max(bars, ime)
     return windowHeight - with(density) { insetPx.toDp() }
 }
+
+/**
+ * A scrolling page's end padding before its own gap (#133): the shell's
+ * [BottomChromeInsets.contentPadding] where a bottom bar is mounted, and
+ * never less than the system's bottom chrome (#72's [bottomChrome]: the
+ * 3-button bar, or the gesture area) — so a page hosted without the bar
+ * (the Settings card, onboarding, a sheet) still ends above the
+ * navigation buttons. Read in composition (an inset change recomposes).
+ */
+@Composable
+fun scrollEndPadding(chrome: BottomChromeInsets = LocalBottomChrome.current): Dp {
+    val density = LocalDensity.current
+    val system = with(density) { WindowInsets.bottomChrome.getBottom(density).toDp() }
+    return maxOf(chrome.contentPadding, system)
+}

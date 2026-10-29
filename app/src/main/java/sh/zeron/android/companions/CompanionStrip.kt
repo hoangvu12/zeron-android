@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -185,8 +186,11 @@ private fun CompanionChip(
         interactionSource = interactions,
         contentAlignment = Alignment.Center,
     ) {
+        // The full 30 dp: GlassSurface's content box hands its children no
+        // minimum, so a hugging row sat at the capsule's top (iOS centres
+        // the row: `row.centerYAnchor == contentView.centerYAnchor`).
         Row(
-            Modifier.padding(horizontal = 11.dp),
+            Modifier.fillMaxHeight().padding(horizontal = 11.dp),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {

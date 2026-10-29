@@ -46,6 +46,7 @@ import sh.zeron.android.design.Haptic
 import sh.zeron.android.design.HarnessMark
 import sh.zeron.android.design.LocalAlerts
 import sh.zeron.android.design.LocalBottomChrome
+import sh.zeron.android.design.scrollEndPadding
 import sh.zeron.android.design.LocalFeedback
 import sh.zeron.android.design.LocalTypeScale
 import sh.zeron.android.design.StatusGlyph
@@ -316,7 +317,7 @@ fun ProvidersScreen(route: ProvidersRoute, modifier: Modifier = Modifier) {
             modifier = modifier.testTag("providers"),
             mode = TitleMode.InlineOnly,
             listState = rememberLazyListState(),
-            contentPadding = PaddingValues(bottom = chrome.contentPadding + 16.dp),
+            contentPadding = PaddingValues(bottom = scrollEndPadding(chrome) + 16.dp),
             pullToRefresh = rememberPullToRefreshState(onRefresh = { load() }),
             content = sections,
         )

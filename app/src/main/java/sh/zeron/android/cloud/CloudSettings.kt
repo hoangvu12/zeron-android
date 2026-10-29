@@ -31,6 +31,7 @@ import sh.zeron.android.design.GroupedAccessory
 import sh.zeron.android.design.GroupedRow
 import sh.zeron.android.design.LocalActionSheet
 import sh.zeron.android.design.LocalBottomChrome
+import sh.zeron.android.design.scrollEndPadding
 import sh.zeron.android.design.LocalTypeScale
 import sh.zeron.android.design.ZeronIcon
 import sh.zeron.android.design.ZeronIcons
@@ -266,7 +267,7 @@ fun CloudSettingsScreen(route: CloudSettingsRoute, modifier: Modifier = Modifier
         modifier = modifier.testTag("cloud-settings").then(modalLayerBackground()),
         mode = TitleMode.InlineOnly,
         listState = rememberLazyListState(),
-        contentPadding = PaddingValues(bottom = chrome.contentPadding + 16.dp),
+        contentPadding = PaddingValues(bottom = scrollEndPadding(chrome) + 16.dp),
         pullToRefresh = rememberPullToRefreshState(onRefresh = {
             cloud.refresh()
             snapshotFlow { cloud.loading }.first { !it }

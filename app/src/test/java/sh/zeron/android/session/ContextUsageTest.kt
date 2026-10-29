@@ -8,8 +8,8 @@ import sh.zeron.android.composer.ChipTint
 /**
  * [contextChip] (#34, docs/port/02 C16) — `ios:Session/CoreSessionSource.
  * swift:117-127` on the plain JVM: the chip needs a token count and a
- * window `> 0`, shows from 50 % and warns from 85 % of the **unrounded**
- * fraction.
+ * window `> 0`, always shows (#133, the owner's decision against iOS's
+ * 50 % gate) and warns from 85 % of the **unrounded** fraction.
  */
 class ContextUsageTest {
 
@@ -22,9 +22,11 @@ class ContextUsageTest {
     }
 
     @Test
-    fun theHalfThresholdUsesTheUnroundedFraction() {
-        assertNull("49.9 % rounds to 50 but stays hidden", contextChip(499uL, 1000uL))
-        assertEquals("50% context", contextChip(500uL, 1000uL)?.title)
+    fun theChipShowsBelowHalfToo() {
+        assertEquals("0% context", contextChip(0uL, 200_000uL)?.title)
+        assertEquals("3% context", contextChip(6_000uL, 200_000uL)?.title)
+        assertEquals("50% context", contextChip(499uL, 1000uL)?.title)
+        assertNull("calm below 85 %", contextChip(499uL, 1000uL)?.tint)
     }
 
     @Test

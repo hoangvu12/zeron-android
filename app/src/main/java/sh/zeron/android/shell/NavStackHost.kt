@@ -95,12 +95,17 @@ private const val BlockerZ = 10f
  * layer shows it (`hidesBottomBarWhenPushed` + the tab bar travelling with
  * the transition). The phone tab shell does not use it (ticket 30 emulates
  * the z-order outside the host); the gallery, previews and goldens do.
+ *
+ * [background] fills the host behind the entries; onboarding's Agents step
+ * passes `Color.Transparent` so its wallpaper shows through (iOS
+ * `providers.view.backgroundColor = .clear`).
  */
 @Composable
 fun NavStackHost(
     stack: NavStack,
     active: Boolean,
     modifier: Modifier = Modifier,
+    background: Color = ZeronTheme.palette.background,
     bottomChrome: (@Composable () -> Unit)? = null,
     content: @Composable (NavEntry) -> Unit,
 ) {
@@ -247,7 +252,7 @@ fun NavStackHost(
     Layout(
         modifier = modifier
             .clipToBounds()
-            .background(ZeronTheme.palette.background)
+            .background(background)
             .then(swipeBack),
         content = {
             // entries + leaving in one keyed sequence, so an entry that moves

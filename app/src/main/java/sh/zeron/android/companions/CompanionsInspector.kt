@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -23,6 +21,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import sh.zeron.android.ZeronApplication
+import sh.zeron.android.design.BottomChromeInsets
+import sh.zeron.android.design.scrollEndPadding
 import sh.zeron.android.design.Haptic
 import sh.zeron.android.design.LocalFeedback
 import sh.zeron.android.design.LocalToaster
@@ -187,7 +187,7 @@ private fun CompanionsInspectorScreen(route: CompanionsInspectorRoute) {
                 forking = fork.forking,
                 initialSection = route.initialSection,
                 onScrolledToInitial = { route.initialSection = null },
-                bottomInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding().value,
+                bottomInset = scrollEndPadding(BottomChromeInsets.None).value,
                 onOpenChat = openSideChat,
                 onOpenAgent = { agent ->
                     agent.docId?.let { doc ->

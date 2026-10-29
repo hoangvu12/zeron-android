@@ -25,6 +25,7 @@ import sh.zeron.android.core.Endpoints
 import sh.zeron.android.shell.LaunchOptions
 import sh.zeron.android.design.LocalActionSheet
 import sh.zeron.android.design.LocalBottomChrome
+import sh.zeron.android.design.scrollEndPadding
 import sh.zeron.android.shell.LargeTitleScaffold
 import sh.zeron.android.shell.LocalNavStack
 import sh.zeron.android.shell.TitleMode
@@ -288,7 +289,7 @@ internal fun SettingsScreenContent(
     sections: LazyListScope.() -> Unit,
 ) {
     val chrome = LocalBottomChrome.current
-    val padding = PaddingValues(bottom = settingsBottomPadding(chrome.contentPadding))
+    val padding = PaddingValues(bottom = settingsBottomPadding(scrollEndPadding(chrome)))
     val tagged = modifier.testTag("settings-screen")
     if (topInset.isSpecified) {
         LargeTitleScaffold(

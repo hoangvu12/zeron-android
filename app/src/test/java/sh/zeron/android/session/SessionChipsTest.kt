@@ -16,7 +16,7 @@ import uniffi.zeron_core.PullRequestState
 /**
  * The chip derivation (android-ui-parity #78, #34's context rule): every
  * row of the context-usage table (`ios:Session/CoreSessionSource.swift:
- * 117-127` — shown from 50 %, warning from 85 %, no menu), the fixed
+ * 117-127` — always shown since #133, warning from 85 %, no menu), the fixed
  * order (model, effort, pr **or** branch, context), the
  * PR-replaces-branch rule, the `claude-code` default mark, the
  * empty-harness rule and the filler's output feeding
@@ -48,8 +48,10 @@ class SessionChipsTest {
     // ── the context-usage worked examples (#34, C16) ──────────────────
 
     @Test
-    fun belowHalfShowsNoContextChip() {
-        assertEquals(emptyList<ComposerChip>(), chips(contextSource(499uL, 1000uL)))
+    fun belowHalfStillShowsTheContextChip() {
+        // #133: the owner's decision, deliberately unlike iOS's 50 % gate.
+        assertEquals("50% context", chips(contextSource(499uL, 1000uL)).single().title)
+        assertEquals("3% context", chips(contextSource(6_000uL, 200_000uL)).single().title)
     }
 
     @Test
@@ -122,9 +124,9 @@ class SessionChipsTest {
         val table = listOf(
             Row(null, null, null, false), // no usage reported
             Row(null, 200_000uL, null, false), // a window but no count yet
-            Row(0uL, 200_000uL, null, false),
-            Row(6_000uL, 200_000uL, null, false), // 3 %
-            Row(490uL, 1000uL, null, false), // 49 %
+            Row(0uL, 200_000uL, "0% context", false),
+            Row(6_000uL, 200_000uL, "3% context", false), // 3 %
+            Row(490uL, 1000uL, "49% context", false), // 49 %
             Row(500uL, 1000uL, "50% context", false),
             Row(620uL, 1000uL, "62% context", false),
             Row(850uL, 1000uL, "85% context", true),

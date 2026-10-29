@@ -11,7 +11,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -29,7 +28,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.constrainHeight
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
@@ -64,6 +68,7 @@ import sh.zeron.android.design.HarnessMark
 import sh.zeron.android.design.Icon
 import sh.zeron.android.design.LocalAlerts
 import sh.zeron.android.design.LocalBottomChrome
+import sh.zeron.android.design.scrollEndPadding
 import sh.zeron.android.design.LocalFeedback
 import sh.zeron.android.design.LocalTypeScale
 import sh.zeron.android.design.StatusGlyph
@@ -315,7 +320,7 @@ fun AgentAccountsPage(
         mode = TitleMode.InlineOnly,
         listState = rememberLazyListState(),
         topInset = if (onDone != null) 0.dp else sh.zeron.android.shell.largeTitleDefaultTopInset(),
-        contentPadding = PaddingValues(bottom = (bottomInset ?: chrome.contentPadding) + 16.dp),
+        contentPadding = PaddingValues(bottom = (bottomInset ?: scrollEndPadding(chrome)) + 16.dp),
         showBack = if (onDone != null) false else sh.zeron.android.shell.LocalNavStack.current.entries.firstOrNull()?.id != sh.zeron.android.shell.LocalNavEntry.current.id,
         trailing = {
             if (onDone != null) {
@@ -497,9 +502,8 @@ private fun AccountRow(
         }
     }
     if (actionable) {
-        SwipeRow(
+        FittedSwipeRow(
             id = item.id,
-            leading = null,
             trailing = listOf(
                 SwipeAction(
                     title = AccountsCopy.Remove,
@@ -513,11 +517,42 @@ private fun AccountRow(
                     },
                 ),
             ),
-            // SwipeRow fills its parent's height: size it to the row.
-            modifier = Modifier.height(IntrinsicSize.Min),
         ) { content() }
     } else {
         content()
+    }
+}
+
+/**
+ * A [SwipeRow] at its content's natural height (#133). SwipeRow fills its
+ * parent's height and lays its content out `matchParentSize`, so it has
+ * no intrinsic height of its own: the `height(IntrinsicSize.Min)` this
+ * replaced resolved to 0, and every switchable account (Claude Code's)
+ * vanished while Providers still counted it. The content measures itself
+ * unbounded and the row takes that height (one frame at 0 first).
+ */
+@Composable
+internal fun FittedSwipeRow(
+    id: String,
+    trailing: List<SwipeAction>,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    var naturalPx by remember { mutableIntStateOf(0) }
+    val density = LocalDensity.current
+    SwipeRow(
+        id = id,
+        leading = null,
+        trailing = trailing,
+        modifier = modifier.height(with(density) { naturalPx.toDp() }),
+    ) {
+        Box(
+            Modifier.layout { measurable, constraints ->
+                val placeable = measurable.measure(constraints.copy(minHeight = 0, maxHeight = Constraints.Infinity))
+                if (placeable.height != naturalPx) naturalPx = placeable.height
+                layout(placeable.width, constraints.constrainHeight(placeable.height)) { placeable.place(0, 0) }
+            },
+        ) { content() }
     }
 }
 
