@@ -6,42 +6,32 @@ import org.junit.Test
 import sh.zeron.android.composer.ChipIcon
 import sh.zeron.android.composer.ChipTint
 import sh.zeron.android.composer.ComposerChip
+import sh.zeron.android.composer.chipMenuComposerState
+import sh.zeron.android.composer.chipMenuPullRequest
+import sh.zeron.android.composer.chipMenuSessionRow
+import sh.zeron.android.composer.kotlinReasoningLabel
 import uniffi.zeron_core.ContextUsage
 import uniffi.zeron_core.PullRequestState
-import java.util.Locale
 
 /**
- * The chip derivation (android-ui-parity #78, with android-next #01's
- * always-visible context chip): every row of the ticket's
- * two worked-example tables (context usage and rows), the fixed order
- * (model, effort, pr **or** branch, context), the PR-replaces-branch
- * rule, the `claude-code` default mark, the empty-harness rule and the
- * filler's output feeding [SessionChrome.chips].
+ * The chip derivation (android-ui-parity #78, #34's context rule): every
+ * row of the context-usage table (`ios:Session/CoreSessionSource.swift:
+ * 117-127` — shown from 50 %, warning from 85 %, no menu), the fixed
+ * order (model, effort, pr **or** branch, context), the
+ * PR-replaces-branch rule, the `claude-code` default mark, the
+ * empty-harness rule and the filler's output feeding
+ * [SessionChrome.chips].
  *
  * Plain JUnit 4, no Robolectric: `sessionChips` is pure and the injected
- * `reasoningLabel` is a Kotlin lambda (the FFI free function is exercised
- * under Robolectric in [SessionComposerBindingTest]).
+ * `reasoningLabel` is a Kotlin lambda. The records come from the composer
+ * tests' `ChipMenuFixtures` (they construct without JNA).
  */
 class SessionChipsTest {
 
-    /** The injected label fn (the FFI table, for the tests that need real titles). */
-    private fun label(level: String): String = when (level) {
-        "minimal" -> "Minimal"
-        "low" -> "Low"
-        "medium" -> "Medium"
-        "high" -> "High"
-        "xhigh" -> "X-High"
-        "max" -> "Max"
-        "ultra" -> "Ultra"
-        "ultracode" -> "Ultracode"
-        "ultrathink" -> "Ultrathink"
-        else -> level.replaceFirstChar(Char::uppercase)
-    }
-
     private fun chips(
         source: ChipSource,
-        reasoningLabel: (String) -> String = ::label,
-    ): List<ComposerChip> = sessionChips(source, Locale.US, reasoningLabel)
+        reasoningLabel: (String) -> String = ::kotlinReasoningLabel,
+    ): List<ComposerChip> = sessionChips(source, reasoningLabel)
 
     private fun contextSource(tokens: ULong?, window: ULong?): ChipSource = ChipSource(
         harness = null,
@@ -55,19 +45,11 @@ class SessionChipsTest {
         window = window,
     )
 
-    // ── the context-usage worked examples ─────────────────────────────
+    // ── the context-usage worked examples (#34, C16) ──────────────────
 
     @Test
     fun belowHalfShowsNoContextChip() {
-        // android-next #01 (user decision 2026-10-15) supersedes ticket
-        // 78's `fraction >= 0.5` gate: the chip is always shown once usage
-        // is reported, so 49.9 % now shows `50% context` (calm). The name
-        // is kept for history; the body pins the new rule.
-        val chip = chips(contextSource(499uL, 1000uL)).single()
-        assertEquals(SessionChipIds.Context, chip.id)
-        assertEquals("50% context", chip.title)
-        assertEquals("circle.lefthalf.filled", chip.symbol)
-        assertEquals(null, chip.tint)
+        assertEquals(emptyList<ComposerChip>(), chips(contextSource(499uL, 1000uL)))
     }
 
     @Test
@@ -78,6 +60,7 @@ class SessionChipsTest {
         assertEquals("circle.lefthalf.filled", chip.symbol)
         assertEquals(null, chip.tint)
         assertEquals(null, chip.icon)
+        assertEquals("iOS reads the title: no separate label", null, chip.contentDescription)
     }
 
     @Test
@@ -125,36 +108,27 @@ class SessionChipsTest {
     }
 
     @Test
-    fun aZeroWindowShowsNoChip() {
-        // android-next #01: a zero (unknown) window with tokens > 0 now
-        // shows the bare count instead of hiding; only a zero count with
-        // no window still hides. Name kept, body pins the new rule.
-        assertEquals("5 tokens", chips(contextSource(5uL, 0uL)).single().title)
-        assertEquals(emptyList<ComposerChip>(), chips(contextSource(0uL, 0uL)))
-    }
-
-    @Test
-    fun missingTokensShowNoChip() {
+    fun noWindowOrNoTokensShowNoChip() {
+        assertEquals(emptyList<ComposerChip>(), chips(contextSource(48_210uL, null)))
+        assertEquals(emptyList<ComposerChip>(), chips(contextSource(48_210uL, 0uL)))
         assertEquals(emptyList<ComposerChip>(), chips(contextSource(null, 1000uL)))
+        assertEquals(emptyList<ComposerChip>(), chips(contextSource(null, null)))
     }
 
-    /**
-     * android-next #01's visibility table: none / 0 % / 3 % / 49 % / 50 % /
-     * 85 % / unknown window — the title, glyph and tint of each row.
-     */
+    /** The visibility table: the title and warning of each row, `null` for no chip. */
     @Test
     fun theContextChipVisibilityTable() {
         data class Row(val tokens: ULong?, val window: ULong?, val title: String?, val warn: Boolean)
         val table = listOf(
             Row(null, null, null, false), // no usage reported
             Row(null, 200_000uL, null, false), // a window but no count yet
-            Row(0uL, 200_000uL, "0% context", false),
-            Row(6_000uL, 200_000uL, "3% context", false),
-            Row(490uL, 1000uL, "49% context", false),
+            Row(0uL, 200_000uL, null, false),
+            Row(6_000uL, 200_000uL, null, false), // 3 %
+            Row(490uL, 1000uL, null, false), // 49 %
             Row(500uL, 1000uL, "50% context", false),
+            Row(620uL, 1000uL, "62% context", false),
             Row(850uL, 1000uL, "85% context", true),
-            Row(48_210uL, null, "48,210 tokens", false), // unknown window
-            Row(48_210uL, 0uL, "48,210 tokens", false), // a zero window is unknown
+            Row(48_210uL, null, null, false), // unknown window
         )
         for (r in table) {
             val chip = chips(contextSource(r.tokens, r.window)).singleOrNull()
@@ -164,18 +138,6 @@ class SessionChipsTest {
             assertEquals(if (r.warn) "exclamationmark.circle" else "circle.lefthalf.filled", chip.symbol)
             assertEquals(if (r.warn) ChipTint.Warning else null, chip.tint)
         }
-    }
-
-    @Test
-    fun theContextChipSpellsTheNumbersOutForTalkBack() {
-        assertEquals(
-            "Context 3 percent used, 6,000 of 200,000 tokens",
-            chips(contextSource(6_000uL, 200_000uL)).single().contentDescription,
-        )
-        assertEquals(
-            "Context 48,210 tokens used",
-            chips(contextSource(48_210uL, null)).single().contentDescription,
-        )
     }
 
     // ── the row worked examples ───────────────────────────────────────
@@ -213,8 +175,6 @@ class SessionChipsTest {
 
     @Test
     fun aNullHarnessWithNoModelLabelStillShowsTheDefaultMark() {
-        // The ticket's row: harness=null, modelLabel=null,
-        // harnessLabel="Codex" → model "Codex" over Brand("claude-code").
         val out = chips(labRow.copy(harness = null, harnessLabel = "Codex", modelLabel = null))
         assertEquals("Codex", out[0].title)
         assertEquals(ChipIcon.Brand("claude-code"), out[0].icon)
@@ -223,12 +183,13 @@ class SessionChipsTest {
     @Test
     fun anEmptyHarnessHasNoIcon() {
         val out = chips(labRow.copy(harness = ""))
-        assertEquals("model title falls back to harnessLabel", "Opus 4.5", out[0].title)
+        assertEquals("Opus 4.5", out[0].title)
         assertEquals(null, out[0].icon)
     }
 
     @Test
     fun aMissingModelFallsBackToTheHarnessLabel() {
+        // SessionChipMenus then renames it to the host's default model.
         val out = chips(labRow.copy(modelLabel = null))
         assertEquals("Claude Code", out[0].title)
         assertEquals(ChipIcon.Brand("claude-code"), out[0].icon)
@@ -283,18 +244,9 @@ class SessionChipsTest {
 
     @Test
     fun aNullRowStillShowsTheContextChip() {
-        val out = chips(contextSource(620uL, 1000uL))
-        // android-next #01 added the TalkBack label to the context chip.
         assertEquals(
-            listOf(
-                ComposerChip(
-                    SessionChipIds.Context,
-                    "62% context",
-                    symbol = "circle.lefthalf.filled",
-                    contentDescription = "Context 62 percent used, 620 of 1,000 tokens",
-                ),
-            ),
-            out,
+            listOf(ComposerChip(SessionChipIds.Context, "62% context", symbol = "circle.lefthalf.filled")),
+            chips(contextSource(620uL, 1000uL)),
         )
     }
 
@@ -315,13 +267,12 @@ class SessionChipsTest {
 
     @Test
     fun theFillerFeedsChromeChipsFromTheRowAndComposer() {
-        val filler = SessionChipsFiller(::label, locale = { Locale.US })
+        val filler = SessionChipsFiller(::kotlinReasoningLabel)
         val input = ChromeInput(
             chatId = "chat-a",
-            composer = composerState(contextUsage = ContextUsage(tokens = 620uL, window = 1000uL)),
-            row = sessionRow(
+            composer = chipMenuComposerState(contextUsage = ContextUsage(tokens = 620uL, window = 1000uL)),
+            row = chipMenuSessionRow(
                 harness = "claude-code",
-                harnessLabel = "Claude Code",
                 modelLabel = "Opus 4.5",
                 reasoning = "high",
                 branch = "ios-rewrite",
@@ -334,13 +285,7 @@ class SessionChipsTest {
                 ComposerChip(SessionChipIds.Model, "Opus 4.5", icon = ChipIcon.Brand("claude-code")),
                 ComposerChip(SessionChipIds.Effort, "High", symbol = "gauge.with.dots.needle.67percent"),
                 ComposerChip(SessionChipIds.Branch, "ios-rewrite", icon = ChipIcon.Branch),
-                // android-next #01: the context chip carries its TalkBack label.
-                ComposerChip(
-                    SessionChipIds.Context,
-                    "62% context",
-                    symbol = "circle.lefthalf.filled",
-                    contentDescription = "Context 62 percent used, 620 of 1,000 tokens",
-                ),
+                ComposerChip(SessionChipIds.Context, "62% context", symbol = "circle.lefthalf.filled"),
             ),
             filled.chips,
         )
@@ -348,11 +293,11 @@ class SessionChipsTest {
 
     @Test
     fun twoRefreshesWithTheSameInputsProduceEqualChromes() {
-        val filler = SessionChipsFiller(::label)
+        val filler = SessionChipsFiller(::kotlinReasoningLabel)
         val input = ChromeInput(
             chatId = "chat-a",
-            composer = composerState(),
-            row = sessionRow(harness = "claude-code", reasoning = "high", branch = "main"),
+            composer = chipMenuComposerState(),
+            row = chipMenuSessionRow(reasoning = "high", branch = "main"),
             engine = null,
         )
         val once = filler.fill(SessionChrome(), input)
@@ -363,9 +308,9 @@ class SessionChipsTest {
 
     @Test
     fun theFillerLeavesEveryOtherFieldAlone() {
-        val filler = SessionChipsFiller(::label)
+        val filler = SessionChipsFiller(::kotlinReasoningLabel)
         val base = SessionChrome(title = "T", running = true)
-        val out = filler.fill(base, ChromeInput(chatId = "chat-a", composer = composerState(), row = null, engine = null))
+        val out = filler.fill(base, ChromeInput(chatId = "chat-a", composer = chipMenuComposerState(), row = null, engine = null))
         assertEquals(base.copy(chips = emptyList()), out)
     }
 
@@ -373,7 +318,7 @@ class SessionChipsTest {
 
     private fun prTintFor(state: PullRequestState): ChipTint? =
         ChipSource.from(
-            sessionRow(pullRequest = pullRequest(1234, state)),
-            composerState(),
+            chipMenuSessionRow(pullRequest = chipMenuPullRequest(state = state)),
+            chipMenuComposerState(),
         ).prTint
 }

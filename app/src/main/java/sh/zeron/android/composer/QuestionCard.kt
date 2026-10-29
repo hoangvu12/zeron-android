@@ -50,6 +50,7 @@ import sh.zeron.android.design.ZeronIcon
 import sh.zeron.android.design.ZeronIcons
 import sh.zeron.android.design.ZeronTheme
 import sh.zeron.android.design.SymbolWeight
+import sh.zeron.android.design.glass.GlassCircleButton
 import sh.zeron.android.design.glass.GlassSurface
 import sh.zeron.android.design.glass.ProminentGlassButton
 import sh.zeron.android.design.glass.ProminentGlassButtonDefaults
@@ -97,9 +98,16 @@ private const val MaxNumberedOption = 50
  * `QuestionCardGlass(visible, animate, modifier) { AnimatedContent(…) { QuestionPageContent(…) } }`,
  * so the 0.2 s page cross-fade runs inside the glass. Not interactive as a
  * surface: the option rows and buttons own their own click areas.
+ *
+ * The corner close (#32, `QuestionPanel.swift:71-80, 105-121`) is pinned
+ * here, over the page content, 8 dp in from the top and trailing edges
+ * (concentric with the 26 dp radius): it belongs to the card, so a page
+ * move never cross-fades it. The header and question wrap 36 dp short of
+ * it ([QuestionPageContent]).
  */
 @Composable
 fun QuestionCardGlass(
+    onClose: () -> Unit,
     visible: Boolean = true,
     animate: Boolean = true,
     modifier: Modifier = Modifier,
@@ -118,7 +126,38 @@ fun QuestionCardGlass(
         materializeOnEnter = materializeOnEnter,
     ) {
         content()
+        QuestionCloseButton(
+            onClose = onClose,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(top = CloseInset, end = CloseInset),
+        )
     }
+}
+
+/** The corner close's frame (`QuestionPanel.swift:119-120`). */
+private val CloseSize = 36.dp
+
+/** The corner close's inset from the card's top and trailing edges (`:117-118`). */
+private val CloseInset = 8.dp
+
+/**
+ * The corner close (`QuestionPanel.swift:71-80`): the model picker's
+ * close — a 36 dp glass circle, `xmark` 13 pt Semibold in `secondary`,
+ * labelled "Close without answering". No haptic (iOS plays none).
+ */
+@Composable
+private fun QuestionCloseButton(onClose: () -> Unit, modifier: Modifier = Modifier) {
+    GlassCircleButton(
+        icon = ZeronIcons.Xmark,
+        contentDescription = QuestionCardText.CLOSE,
+        onClick = onClose,
+        modifier = modifier.testTag(QuestionCardTags.CLOSE),
+        size = CloseSize,
+        iconPt = 13f,
+        weight = SymbolWeight.Semibold,
+        ink = ZeronTheme.palette.secondary,
+    )
 }
 
 /**
@@ -134,7 +173,12 @@ fun QuestionCard(
     glassVisible: Boolean = true,
     animateGlass: Boolean = true,
 ) {
-    QuestionCardGlass(visible = glassVisible, animate = animateGlass, modifier = modifier) {
+    QuestionCardGlass(
+        onClose = actions.onClose,
+        visible = glassVisible,
+        animate = animateGlass,
+        modifier = modifier,
+    ) {
         QuestionPageContent(model, actions)
     }
 }
@@ -169,16 +213,23 @@ fun QuestionPageContent(
             .fillMaxWidth()
             .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 12.dp),
     ) {
-        // One line, tail-… (UILabel numberOfLines = 1).
+        // One line, tail-… (UILabel numberOfLines = 1), clear of the
+        // corner close (`clearOfClose`, `:84-96`).
         BasicText(
             model.headerText,
+            modifier = Modifier.padding(end = CloseSize),
             style = uiStyle(Face.SansMedium, typeScale.fixed(12.5f), palette.secondary),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
         Spacer(Modifier.height(10.dp))
-        // The question wraps without limit (numberOfLines = 0).
-        BasicText(model.question, style = uiStyle(Face.SansSemibold, typeScale.fixed(17f), palette.text))
+        // The question wraps without limit (numberOfLines = 0), also clear
+        // of the close.
+        BasicText(
+            model.question,
+            modifier = Modifier.padding(end = CloseSize),
+            style = uiStyle(Face.SansSemibold, typeScale.fixed(17f), palette.text),
+        )
         Spacer(Modifier.height(14.dp))
         // The options column: 6 dp apart, kept when empty (0 height, both
         // neighbouring gaps still applied).
