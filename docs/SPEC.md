@@ -121,17 +121,17 @@ docs/port/      the five iOS → Android gap audits (row IDs referenced by ticke
 | D1 | applicationId and package `sh.zeron.android`; replaces the official app on a device (uninstall it first: different signing key) | decided (owner) |
 | D2 | Repo = standalone app + `zeron/` submodule pinned to release tags | decided (owner) |
 | D3 | CI-only builds; no local Android SDK | decided (owner) |
-| D4 | Sign-in: `workosAuthorizeUrl` → Auth Tab (fallback Custom Tab) → `zeron://callback` → `parseAuthCallback` (state check) → `authExchangeCode` → `authListOrgs` (picker if >1) → `authRefresh` → `CoreClient(Credentials.WorkOs)` | proposed |
-| D5 | Credentials: Roboco's `KeystoreSecretCipher` (AES-GCM, non-exportable) under a small `CredentialStore` with **synchronous** writes (Zeron Android's async `apply()` can lose a rotated refresh token) | proposed |
-| D6 | Notifications: no push (the edge is APNs-only). A Kotlin `SessionWatcher` applies the edge's done / needs-input / failed rule to workspace snapshots; Roboco's `Notifier` + `RunWatchService` deliver; Zeron's `DeliveryService` holds the process after a send | proposed |
+| D4 | Sign-in: `workosAuthorizeUrl` → Auth Tab (fallback Custom Tab) → `zeron://callback` → `parseAuthCallback` (state check) → `authExchangeCode` → `authListOrgs` (picker if >1) → `authRefresh` → `CoreClient(Credentials.WorkOs)` | decided (owner) |
+| D5 | Credentials: Roboco's `KeystoreSecretCipher` (AES-GCM, non-exportable) under a small `CredentialStore` with **synchronous** writes (Zeron Android's async `apply()` can lose a rotated refresh token) | decided (owner) |
+| D6 | Notifications: no push (the edge is APNs-only). A Kotlin `SessionWatcher` applies the edge's done / needs-input / failed rule to workspace snapshots; Roboco's `Notifier` + `RunWatchService` deliver; Zeron's `DeliveryService` holds the process after a send | decided (owner) |
 | D7 (#1) | Components: our look on headless, accessible primitives (Compose Foundation, Compose Unstyled), each with an accessibility contract (role, label, state, focus, keyboard, predictive back, IME). Glass surfaces stay in-window (separate-window Dialog/Popup can't blur behind). Per-component choices after the component lab renders | direction decided (owner); per component pending |
-| D8 (#2) | "Stay connected in background": **dropped** (iOS has none). Without push, desktop-started runs notify only once the app is opened | decided (owner) |
+| D8 (#2) | "Stay connected in background": **dropped** (iOS has none), and no background catch-up worker. RunWatch notifies for any run working when the app was last opened (Roboco's behaviour); runs started on the desktop while the app hasn't been opened notify only once it is | decided (owner) |
 | D9 (#3) | Real Android push upstream: **not planned** | decided (owner) |
 | D10 (#4) | Licences page: **none** (iOS has none); licence texts ship inside the APK assets | decided (owner) |
 | D11 (#5) | Keep iOS scroll physics (rubber band, iOS fling). Drop Android-only extras: launcher shortcuts, empty/no-results/loading copy, the "● N" running-agents pill on session rows | decided (owner) |
-| D12 | Demo, dev credentials and routes are debug launch extras only, as on iOS (no "Explore the demo" button) | proposed |
-| D13 | Voice in scope: WebRTC (`io.github.webrtc-sdk:android`), microphone foreground service + CallStyle notification as the Live Activity stand-in | proposed |
-| D14 | Visual shaders/3D need Vulkan; devices without it get the core's software fallback / error state | proposed |
+| D12 | Demo, dev credentials and routes are debug launch extras only, as on iOS (no "Explore the demo" button) | decided (owner) |
+| D13 | Voice in scope: WebRTC (`io.github.webrtc-sdk:android`), microphone foreground service + CallStyle notification as the Live Activity stand-in | decided (owner) |
+| D14 | Visual shaders/3D need Vulkan; devices without it get the core's software fallback / error state | decided (owner) |
 
 ## 6. Milestones
 
