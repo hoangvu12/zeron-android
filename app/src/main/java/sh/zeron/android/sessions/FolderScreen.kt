@@ -340,7 +340,6 @@ private object PreviewRowActions : RowActions {
     override fun renameSection(sectionId: String, name: String, onResult: (ActionOutcome) -> Unit) = ok(onResult)
     override fun deleteSection(sectionId: String, onResult: (ActionOutcome) -> Unit) = ok(onResult)
     override fun sections(): List<SectionView> = emptyList()
-    override fun report(error: Throwable) {}
 }
 
 /**

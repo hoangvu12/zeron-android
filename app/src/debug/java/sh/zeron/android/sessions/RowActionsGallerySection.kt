@@ -75,11 +75,9 @@ private class FakeSessionWrites(var mode: WriteMode = WriteMode.Ok) : SessionWri
 /**
  * The "Row actions" page of the debug design gallery (android-ui-parity
  * #42): the write surface over a fake — a mode switch for the scripted
- * failures and the Archive/Pin/Move/Rename buttons. Every toast comes
- * from the ticket's
- * failure table; the Undo of a successful Archive drives the real
- * unarchive path (switch to offline after an OK archive and tap Undo:
- * "Engine not connected").
+ * failures and the Archive/Pin/Move/Rename buttons. A failure is only
+ * logged (iOS `attempt`); the one toast is "Archived · Undo", whose Undo
+ * drives the real unarchive path.
  *
  * Registered in `design/Gallery.kt` (ticket 22) as
  * `GallerySection("Row actions") { RowActionsGallerySection() }`; the
@@ -117,7 +115,7 @@ fun RowActionsGallerySection() {
         )
         GalleryLabel(
             "The mode scripts the fake's failure; the buttons run through " +
-                "CoreRowActions (toast, onResult and the serial IO lane).",
+                "CoreRowActions (onResult and the serial IO lane).",
             uiStyle(Face.Sans, typeScale.fixed(13f), palette.secondary),
         )
         for (candidate in WriteMode.entries) {

@@ -54,12 +54,12 @@ object DevicesCopy {
 /**
  * The row ids: the iOS `device:` prefix is kept on engine rows
  * (`Row(id: "device:\($0.id)")`, `MoreViewController.swift:189`) so the
- * tag is `settings-device:<engineId>` — ticket 103's `settingsSectionFor`
+ * tag is `settings-device:<deviceId>` — ticket 103's `settingsSectionFor`
  * matches the prefix. The tags are [settingsTag] of these.
  */
 object DevicesRowIds {
-    /** `device:<engineId>` — the iOS id prefix over Zeron's engine id. */
-    fun engine(engineId: String) = "device:$engineId"
+    /** `device:<deviceId>` — the iOS id prefix over Zeron's device id. */
+    fun device(deviceId: String) = "device:$deviceId"
 }
 
 /**
@@ -72,13 +72,13 @@ sealed interface DevicesRowSpec {
     val id: String
 
     /** One device: name, connection label and the dot's state. */
-    data class Engine(
-        val engineId: String,
+    data class Device(
+        val deviceId: String,
         val title: String,
         val label: String,
         val connected: Boolean,
     ) : DevicesRowSpec {
-        override val id: String get() = DevicesRowIds.engine(engineId)
+        override val id: String get() = DevicesRowIds.device(deviceId)
     }
 }
 
@@ -88,15 +88,15 @@ fun deviceConnectionLabel(online: Boolean): String =
 
 /**
  * The section's rows, `MoreViewController.swift:189-190` adapted: one
- * [DevicesRowSpec.Engine] per device **in `devices()` order** (never
+ * [DevicesRowSpec.Device] per device **in `devices()` order** (never
  * sorted). `null` (no client yet) is an empty list. The title guard
  * `name.trim().ifEmpty { id }` only stops an empty title line if
  * Rust's non-blank name guarantee ever breaks.
  */
 fun devicesRows(devices: List<DeviceView>?): List<DevicesRowSpec> =
     devices.orEmpty().map { d ->
-        DevicesRowSpec.Engine(
-            engineId = d.id,
+        DevicesRowSpec.Device(
+            deviceId = d.id,
             title = d.name.trim().ifEmpty { d.id },
             label = deviceConnectionLabel(d.online),
             connected = d.online,
@@ -104,7 +104,7 @@ fun devicesRows(devices: List<DeviceView>?): List<DevicesRowSpec> =
     }
 
 /**
- * The section's rows as a pure function of the collected engine list
+ * The section's rows as a pure function of the collected device list
  * ([rows] is a snapshot read, so the list re-derives on the next frame
  * with no animation). Built only by [rememberDevicesSectionState].
  */
@@ -112,7 +112,7 @@ fun devicesRows(devices: List<DeviceView>?): List<DevicesRowSpec> =
 class DevicesSectionState internal constructor(
     private val current: State<List<DeviceView>?>,
 ) {
-    /** The rows for the current engine list — a snapshot read. */
+    /** The rows for the current device list — a snapshot read. */
     val rows: List<DevicesRowSpec> by derivedStateOf { devicesRows(current.value) }
 }
 
@@ -137,7 +137,7 @@ fun rememberDevicesSectionState(
 
 /**
  * One row of the section: ticket 70's [GroupedRow] with the spec's data.
- * Engine rows carry the `desktopcomputer` icon (ticket 06), the
+ * Device rows carry the `desktopcomputer` icon (ticket 06), the
  * connection label as the subtitle, then the `Dot` accessory. No tap and
  * no chevron: iOS device rows don't open anything. `iconTint` keeps its
  * `secondary` default and `destructive` is false. The dot is decorative
@@ -150,7 +150,7 @@ fun DevicesRow(
     modifier: Modifier = Modifier,
 ) {
     when (spec) {
-        is DevicesRowSpec.Engine -> GroupedRow(
+        is DevicesRowSpec.Device -> GroupedRow(
             title = spec.title,
             position = position,
             modifier = modifier,
@@ -165,7 +165,7 @@ fun DevicesRow(
 /**
  * Emits the section into ticket 103's `LargeTitleScaffold` content (or
  * any `LazyColumn`): the "Devices" header and the rows, one lazy item
- * per row, keyed `grouped:devices:row:device:<engineId>`, so a state
+ * per row, keyed `grouped:devices:row:device:<deviceId>`, so a state
  * change keeps the item identity. [DevicesSectionState.rows] is read
  * inside this builder, so the items re-derive on the next frame when the
  * flow changes. **No `Modifier.animateItem()`**: iOS reloads with
