@@ -35,6 +35,7 @@ import sh.zeron.android.design.GroupedAccessory
 import sh.zeron.android.design.GroupedRow
 import sh.zeron.android.design.Haptic
 import sh.zeron.android.design.LocalBottomChrome
+import sh.zeron.android.design.scrollEndPadding
 import sh.zeron.android.design.LocalFeedback
 import sh.zeron.android.design.LocalTypeScale
 import sh.zeron.android.design.ZeronIcon
@@ -165,7 +166,7 @@ fun VoiceSettingsScreen(modifier: Modifier = Modifier) {
         title = VoiceSettingsCopy.Title,
         modifier = modifier.testTag("voice-settings"),
         mode = TitleMode.InlineOnly,
-        contentPadding = PaddingValues(bottom = chrome.contentPadding + 16.dp),
+        contentPadding = PaddingValues(bottom = scrollEndPadding(chrome) + 16.dp),
     ) {
         item(key = "voice-hero") { VoiceHero() }
         groupedSection(

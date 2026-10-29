@@ -4,7 +4,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Modifier
+import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
+import sh.zeron.android.design.sheet.LocalSheetBackdrop
 import sh.zeron.android.design.ActionSheetHost
 import sh.zeron.android.design.ActionSheetHostState
 import sh.zeron.android.design.AlertHost
@@ -76,6 +81,7 @@ fun RootHosts(
     val actionSheets = remember { ActionSheetHostState() } // 19
     val sheets = rememberSheetHostState() // 31
     val menuHaze = rememberHazeState() // 07 / 15
+    val sheetHaze = rememberHazeState() // #133: glass sheets
     CompositionLocalProvider(LocalRootPresentations provides presentations) {
         ZeronModalHost { // #62: alerts and the context menu portal here
         ContextMenuHost { // 16: outermost inside ZeronTheme
@@ -94,8 +100,15 @@ fun RootHosts(
                                 HandoffOverlayHost { // 95: above the app root and the (hidden) sheet,
                                     // below menus, alerts and toasts — the handoff overlays
                                     ZeronModalHost { // #62: glass sheets, below all of the above
+                                    // #133: what a glass sheet blurs. The sheets
+                                    // portal into this host's layer, drawn after
+                                    // the source, never inside it.
+                                    CompositionLocalProvider(LocalSheetBackdrop provides sheetHaze) {
+                                    Box(Modifier.fillMaxSize().hazeSource(sheetHaze)) {
                                     SheetHost(sheets) { // 31: recession scales the roots
                                         content()
+                                    }
+                                    }
                                     }
                                     }
                                 }

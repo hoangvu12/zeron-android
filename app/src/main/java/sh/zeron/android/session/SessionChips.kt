@@ -29,7 +29,7 @@ object SessionChipIds {
     /** `row.branch` — shown only when there is no PR. */
     const val Branch = "branch"
 
-    /** `composer.contextUsage` — shown from 50 % of the window, no menu (#34). */
+    /** `composer.contextUsage` — always shown when known (#133; iOS gates at 50 %), no menu (#34). */
     const val Context = "context"
 }
 

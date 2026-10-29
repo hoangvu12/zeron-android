@@ -85,7 +85,7 @@ internal fun chipFixturePrStrips(): List<List<ComposerChip>> = listOf(
 )
 
 /**
- * C — context usage (#34: shown from 50 %, `warning` from 85 %), built by
+ * C — context usage (#34; #133: always shown, `warning` from 85 %), built by
  * the real rule so the gallery cannot drift from it. Below half the
  * window there is no chip, so only the two visible cases are drawn.
  */

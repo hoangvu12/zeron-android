@@ -78,7 +78,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
+import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
+import sh.zeron.android.design.glass.GlassSurface
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.round
@@ -105,6 +110,33 @@ import sh.zeron.android.design.uiStyle
  * half height, [Large] full height (status bar + 10).
  */
 enum class SheetDetent { Hidden, Medium, Large }
+
+/**
+ * A [GlassSheet]'s fill (#133). [Opaque] is `Palette.background`, the
+ * default. [Glass] is the iOS 26 system sheet a clear view sits on (the
+ * companions panel): the window behind blurred through [LocalSheetBackdrop],
+ * turning opaque as the sheet rises from Medium to Large.
+ */
+enum class SheetMaterial { Opaque, Glass }
+
+/**
+ * The window-level source a [SheetMaterial.Glass] sheet blurs: `RootHosts`
+ * wraps the app root in it, inside the sheets' modal host, so the sheet
+ * layer is drawn after it and never samples itself. `null` (gallery,
+ * tests): the flat glass fallback.
+ */
+val LocalSheetBackdrop = staticCompositionLocalOf<HazeState?> { null }
+
+/** 0 at or below Medium, 1 at Large (no Medium detent: always 1). */
+private fun opaqueFraction(state: GlassSheetState): Float {
+    val medium = state.anchors.positionOf(SheetDetent.Medium)
+    val large = state.anchors.positionOf(SheetDetent.Large)
+    val offset = state.offset
+    if (medium.isNaN() || large.isNaN() || offset.isNaN()) return 1f
+    val span = medium - large
+    if (span <= 0f) return 1f
+    return ((medium - offset) / span).coerceIn(0f, 1f)
+}
 
 /**
  * The state of one [GlassSheet]: the detents it offers, the current
@@ -273,6 +305,10 @@ fun GlassSheet(
     cornerRadius: Dp = GlassSheetDefaults.CornerRadius,
     scrim: Boolean = true,
     title: String? = null,
+    /** #133: [SheetMaterial.Glass] for a sheet whose iOS content is clear over the system sheet's glass. */
+    material: SheetMaterial = SheetMaterial.Opaque,
+    /** The header slot's height (and the content's top inset); a two-line bar clears the grabber with more. */
+    headerHeight: Dp = GlassSheetDefaults.HeaderHeight,
     header: (@Composable GlassSheetScope.() -> Unit)? = null,
     glass: (@Composable GlassSheetScope.() -> Unit)? = null,
     content: @Composable GlassSheetScope.(bottomInset: Dp) -> Unit,
@@ -462,6 +498,8 @@ fun GlassSheet(
                 }
             }
             val shape = remember(cornerRadius) { SmoothTopRoundedShape(cornerRadius) }
+            val glassy = material == SheetMaterial.Glass
+            val backdrop = LocalSheetBackdrop.current
             Box(
                 Modifier
                     .offset {
@@ -471,7 +509,7 @@ fun GlassSheet(
                     .fillMaxWidth()
                     .sheetHeight { sheetHeightPx.value }
                     .clip(shape)
-                    .background(palette.background)
+                    .then(if (glassy) Modifier else Modifier.background(palette.background))
                     .consumeWindowInsets(WindowInsets.statusBars)
                     .anchoredDraggable(state.draggable, Orientation.Vertical, flingBehavior = fling)
                     // Taps on the sheet itself never reach the scrim (this
@@ -490,6 +528,20 @@ fun GlassSheet(
                     .focusable()
                     .onEscape { dismissal.dismiss() },
             ) {
+                if (glassy) {
+                    // The window behind, blurred (the source `RootHosts`
+                    // mounts around `SheetHost`; none: the flat fallback).
+                    CompositionLocalProvider(LocalHazeState provides backdrop) {
+                        GlassSurface(Modifier.matchParentSize(), shape = shape)
+                    }
+                    // iOS 26: the glass turns opaque as the sheet rises from
+                    // Medium to Large. A draw-phase read of the live offset.
+                    Spacer(
+                        Modifier.matchParentSize().drawBehind {
+                            drawRect(palette.background, alpha = opaqueFraction(state))
+                        },
+                    )
+                }
                 ProvideHazeState {
                     // The sheet's children. The content slot below is the sheet's
                     // own haze source, and the header's glass circles and the
@@ -499,7 +551,7 @@ fun GlassSheet(
                         Box(
                             Modifier
                                 .fillMaxSize()
-                                .padding(top = if (header != null) GlassSheetDefaults.HeaderHeight else 0.dp)
+                                .padding(top = if (header != null) headerHeight else 0.dp)
                                 .nestedScroll(nestedScrollConnection)
                                 .imePadding()
                                 .hazeSource(LocalHazeState.current!!),
@@ -510,7 +562,7 @@ fun GlassSheet(
                             content(sheetScope, bottomInset)
                         }
                         if (header != null) {
-                            Box(Modifier.fillMaxWidth().height(GlassSheetDefaults.HeaderHeight)) {
+                            Box(Modifier.fillMaxWidth().height(headerHeight)) {
                                 header(sheetScope)
                             }
                         }
