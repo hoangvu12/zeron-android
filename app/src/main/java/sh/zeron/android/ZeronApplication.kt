@@ -271,7 +271,10 @@ class ZeronApplication : Application() {
      * Welcome's Get started, carried across sign-in, finished once per user
      * on this phone. `ZeronAppContent` draws it over the root.
      */
-    val onboarding: OnboardingModel by lazy { OnboardingModel(SharedOnboardingPrefs(this)) }
+    val onboarding: OnboardingModel by lazy {
+        // #54: Cloud's status withheld (answered, not offered) skips GitHub.
+        OnboardingModel(SharedOnboardingPrefs(this), cloudWithheld = { cloud.info != null && !cloud.available })
+    }
 
     val authSession: AuthSession by lazy {
         AuthSession(

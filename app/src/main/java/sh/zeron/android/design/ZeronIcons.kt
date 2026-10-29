@@ -306,6 +306,9 @@ object ZeronIcons {
     /** SF `arrow.left.arrow.right` — the core's provider-switch seam (#30). */
     val ArrowLeftArrowRight = ZeronIcon.Vector(R.drawable.zi_arrow_left_arrow_right)
 
+    /** SF `iphone.and.arrow.forward` — onboarding's "On every device" (#54). */
+    val IphoneAndArrowForward = ZeronIcon.Vector(R.drawable.zi_iphone_arrow_forward)
+
     /** SF `exclamationmark.circle` — context-usage chip. */
     val ExclamationmarkCircle = ZeronIcon.Vector(R.drawable.zi_exclamation_circle)
 
@@ -502,6 +505,7 @@ object ZeronIcons {
         ),
         RegistryEntry("BubbleLeft", listOf("bubble.left"), BubbleLeft),
         RegistryEntry("ArrowLeftArrowRight", listOf("arrow.left.arrow.right"), ArrowLeftArrowRight),
+        RegistryEntry("IphoneAndArrowForward", listOf("iphone.and.arrow.forward"), IphoneAndArrowForward),
         RegistryEntry("ExclamationmarkCircle", listOf("exclamationmark.circle"), ExclamationmarkCircle),
         RegistryEntry("InfoCircle", listOf("info.circle"), InfoCircle),
         RegistryEntry("ArrowTriangleBranch", listOf("arrow.triangle.branch"), ArrowTriangleBranch),

@@ -9,8 +9,8 @@ import org.junit.Test
 /**
  * The onboarding flow (#17, `OnboardingViewController` navigation and
  * `showOnboardingIfNeeded`) on the plain JVM: the first step from Welcome,
- * appearanceSeen, Back, the hand-over at sign-in, onboarded:<userId>, and
- * the step numbering while the Cloud steps (#54) are out.
+ * appearanceSeen, Back, the hand-over at sign-in, onboarded:<userId>, the
+ * five numbered steps, and the Cloud-withheld skips of GitHub (#54, J2).
  */
 class OnboardingModelTest {
 
@@ -26,7 +26,8 @@ class OnboardingModelTest {
     }
 
     private val prefs = MemoryPrefs()
-    private val model = OnboardingModel(prefs)
+    private var withheld = false
+    private val model = OnboardingModel(prefs, cloudWithheld = { withheld })
 
     private val step get() = model.screen.value?.step
 
@@ -75,13 +76,13 @@ class OnboardingModelTest {
 
         model.onAccount("user_1", demo = false)
 
-        assertEquals(OnboardingScreen(OnboardingStep.Notifications, animated = false), model.screen.value)
+        assertEquals(OnboardingScreen(OnboardingStep.GitHub, animated = false), model.screen.value)
     }
 
     @Test
     fun aLaunchWithAnAccountThatHasNotFinishedShowsIt() {
         model.onAccount("user_1", demo = false)
-        assertEquals(OnboardingStep.Notifications, step)
+        assertEquals(OnboardingStep.GitHub, step)
     }
 
     @Test
@@ -118,7 +119,7 @@ class OnboardingModelTest {
         assertNull(model.screen.value)
         assertEquals(setOf("user_1"), prefs.done)
         model.onAccount("user_2", demo = false)
-        assertEquals(OnboardingStep.Notifications, step)
+        assertEquals(OnboardingStep.GitHub, step)
     }
 
     @Test
@@ -130,15 +131,91 @@ class OnboardingModelTest {
     }
 
     @Test
-    fun theShownStepsAreNumberedWithoutTheCloudOnes() {
+    fun theFiveStepsAreNumberedAsOnIos() {
         assertEquals(1, OnboardingStep.Appearance.number())
         assertEquals(2, OnboardingStep.Sync.number())
-        assertEquals(3, OnboardingStep.Notifications.number())
+        assertEquals(3, OnboardingStep.GitHub.number())
+        assertEquals(4, OnboardingStep.Agents.number())
+        assertEquals(5, OnboardingStep.Notifications.number())
         assertNull(OnboardingStep.Done.number())
-        assertEquals(3, NumberedSteps.size)
-        assertEquals(OnboardingStep.Notifications, OnboardingStep.Sync.next)
-        assertEquals(OnboardingStep.Sync, OnboardingStep.Notifications.previous)
-        assertNull(OnboardingStep.Appearance.previous)
+        assertEquals(5, NumberedSteps.size)
+        assertEquals(OnboardingStep.GitHub, OnboardingStep.Sync.next)
+        assertEquals(OnboardingStep.Agents, OnboardingStep.GitHub.next)
+        assertEquals(OnboardingStep.Notifications, OnboardingStep.Agents.next)
         assertEquals(OnboardingStep.Done, OnboardingStep.Notifications.next)
+        assertEquals(OnboardingStep.Agents, OnboardingStep.Notifications.previous)
+    }
+
+    // ── Cloud withheld (J2) ──────────────────────────────────────────────
+
+    @Test
+    fun withheldSigningInLandsOnAgents() {
+        withheld = true
+        model.onAccount("user_1", demo = false)
+        assertEquals(OnboardingStep.Agents, step)
+    }
+
+    @Test
+    fun withheldContinueFromSyncSkipsGitHubAndBackFromAgentsReturnsToSync() {
+        withheld = true
+        prefs.appearanceSeen = true
+        model.getStarted()
+        model.go(OnboardingStep.Sync.next)
+        assertEquals(OnboardingStep.Agents, step)
+        model.back(signedIn = true)
+        assertEquals(OnboardingStep.Sync, step)
+    }
+
+    @Test
+    fun aStatusLandingOnGitHubMovesOnOnlyWhenWithheld() {
+        model.onAccount("user_1", demo = false)
+        model.onCloudStatus()
+        assertEquals("offered (or unknown): stay", OnboardingStep.GitHub, step)
+        withheld = true
+        model.onCloudStatus()
+        assertEquals(OnboardingStep.Agents, step)
+        // Anywhere else, a status changes nothing.
+        model.go(OnboardingStep.Notifications)
+        model.onCloudStatus()
+        assertEquals(OnboardingStep.Notifications, step)
+    }
+
+    @Test
+    fun offeredBackFromAgentsIsGitHub() {
+        model.onAccount("user_1", demo = false)
+        model.go(OnboardingStep.Agents)
+        model.back(signedIn = true)
+        assertEquals(OnboardingStep.GitHub, step)
+    }
+
+    // ── The Agents heading (`onSummary`) ─────────────────────────────────
+
+    @Test
+    fun theAgentsHeadingFollowsWhatProvidersFound() {
+        assertEquals("Looking for coding agents on Studio\u2026", agentsDetail("Studio", cloud = false, names = null))
+        assertEquals(
+            "Cloud runs Claude Code and Codex with your own subscriptions. Sign in to any you'd like to use.",
+            agentsDetail("Cloud", cloud = true, names = listOf("Claude Code", "Codex")),
+        )
+        assertEquals(
+            "Zeron runs the coding agents you already use, and none are on Studio yet.",
+            agentsDetail("Studio", cloud = false, names = emptyList()),
+        )
+        assertEquals(
+            "Found Claude Code on Studio. Turn on the ones you'd like to use.",
+            agentsDetail("Studio", cloud = false, names = listOf("Claude Code")),
+        )
+        assertEquals(
+            "Found 4 agents on Studio. Turn on the ones you'd like to use.",
+            agentsDetail("Studio", cloud = false, names = listOf("A", "B", "C", "D")),
+        )
+    }
+
+    @Test
+    fun namesJoinTheIosWay() {
+        assertEquals("", joinNames(emptyList()))
+        assertEquals("A", joinNames(listOf("A")))
+        assertEquals("A and B", joinNames(listOf("A", "B")))
+        assertEquals("A, B and C", joinNames(listOf("A", "B", "C")))
     }
 }

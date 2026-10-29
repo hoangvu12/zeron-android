@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
@@ -19,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Rect
@@ -67,11 +70,26 @@ import uniffi.zeron_core.HarnessInfo
  * Settings → Providers (#50, iOS `ProvidersViewController`): pick a device
  * — a computer or Cloud — then turn its agents on or off and choose the
  * account each runs on. [target] is a computer's id or [CloudTarget];
- * `null` picks as iOS does ([initialProvidersTarget]).
+ * `null` picks as iOS does ([initialProvidersTarget]). [embedded] is
+ * onboarding's Agents step (#54): the list alone, under the step's own
+ * heading, with no title bar and no pull to refresh.
  */
-data class ProvidersRoute(val target: String? = null) : NavRoute {
+data class ProvidersRoute(val target: String? = null, val embedded: Boolean = false) : NavRoute {
     override val paneTitle: String get() = ProvidersCopy.Title
 }
+
+/**
+ * iOS `ProvidersViewController.onSummary`: what the page found — [place]
+ * (the device's name, "Cloud" or "a computer"), whether it is Cloud, and
+ * the agents there (null while they load). Onboarding's Agents step words
+ * its heading from it.
+ */
+fun interface ProvidersSummary {
+    fun summary(place: String, cloud: Boolean, names: List<String>?)
+}
+
+/** The summary's listener, provided by onboarding (#54); none in Settings. */
+val LocalProvidersSummary = staticCompositionLocalOf<ProvidersSummary?> { null }
 
 /**
  * Each computer's saved logins and the last failure reading them, shared by
@@ -209,6 +227,19 @@ fun ProvidersScreen(route: ProvidersRoute, modifier: Modifier = Modifier) {
             core::rules,
         )
     }
+    // iOS `reload()` → `onSummary` (only onboarding listens).
+    val summary = LocalProvidersSummary.current
+    if (summary != null) {
+        val names: List<String>? = if (onCloud) {
+            CloudStore.agents.map { it.name }
+        } else {
+            harnesses[target]?.filter { it.installed }?.map { it.label }
+        }
+        LaunchedEffect(summary, targetName, onCloud, offered, names) {
+            if (onCloud && !offered) summary.summary("a computer", false, emptyList())
+            else summary.summary(targetName, onCloud, names)
+        }
+    }
     val menuState = rememberGlassMenuState()
     var deviceBounds by remember { mutableStateOf(Rect.Zero) }
     val deviceMenu = Menu(
@@ -237,14 +268,7 @@ fun ProvidersScreen(route: ProvidersRoute, modifier: Modifier = Modifier) {
         },
     )
     val chrome = LocalBottomChrome.current
-    LargeTitleScaffold(
-        title = ProvidersCopy.Title,
-        modifier = modifier.testTag("providers"),
-        mode = TitleMode.InlineOnly,
-        listState = rememberLazyListState(),
-        contentPadding = PaddingValues(bottom = chrome.contentPadding + 16.dp),
-        pullToRefresh = rememberPullToRefreshState(onRefresh = { load() }),
-    ) {
+    val sections: LazyListScope.() -> Unit = {
         groupedSection(key = "device", header = null, items = listOf(target), itemKey = { "device" }) { _, position ->
             GroupedRow(
                 title = ProvidersCopy.Device,
@@ -272,6 +296,26 @@ fun ProvidersScreen(route: ProvidersRoute, modifier: Modifier = Modifier) {
                 onOpen = { open(row) },
             )
         }
+    }
+    if (route.embedded) {
+        // Onboarding's Agents step: the page's backdrop shows through, the
+        // step's heading stands above, and the list fades out over its
+        // bottom edge (the host draws the fade).
+        LazyColumn(
+            modifier = modifier.testTag("providers"),
+            contentPadding = PaddingValues(bottom = 28.dp),
+            content = sections,
+        )
+    } else {
+        LargeTitleScaffold(
+            title = ProvidersCopy.Title,
+            modifier = modifier.testTag("providers"),
+            mode = TitleMode.InlineOnly,
+            listState = rememberLazyListState(),
+            contentPadding = PaddingValues(bottom = chrome.contentPadding + 16.dp),
+            pullToRefresh = rememberPullToRefreshState(onRefresh = { load() }),
+            content = sections,
+        )
     }
 }
 
