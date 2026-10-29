@@ -26,8 +26,7 @@ import sh.zeron.android.core.CoreClientWorkspace
 import sh.zeron.android.core.CoreLoader
 import sh.zeron.android.core.CoreLifecycleSink
 import sh.zeron.android.core.CoreStatus
-import sh.zeron.android.core.CredentialPersistence
-import sh.zeron.android.core.InMemoryCredentialStore
+import sh.zeron.android.core.CredentialStore
 import sh.zeron.android.core.FontGate
 import sh.zeron.android.core.Prefs
 import sh.zeron.android.core.SessionHolder
@@ -204,11 +203,11 @@ class ZeronApplication : Application() {
     }
 
     /**
-     * Where the signed-in account is kept between launches (D5).
-     * TODO(#14): the Keystore-sealed `CredentialStore`; until then
-     * nothing persists and every launch starts signed out.
+     * Where the signed-in account and its profile are kept between
+     * launches (D5, #14): Keystore-sealed files in `noBackupFilesDir`,
+     * written synchronously. Read and written off the main thread.
      */
-    val credentials: CredentialPersistence by lazy { InMemoryCredentialStore() }
+    val credentials: CredentialStore by lazy { CredentialStore.create(this) }
 
     /**
      * The session holder (#13, SPEC §4.3 — the port of iOS's `AppModel`
