@@ -60,8 +60,8 @@ fun DevicesRowsGallerySection() {
  * reports presence only, so a row reads Connected or Offline.
  */
 private val devicesGalleryFixture = listOf(
-    DevicesRowSpec.Engine("e1", "MacBook Pro", DevicesCopy.Connected, connected = true),
-    DevicesRowSpec.Engine("e2", "Studio", DevicesCopy.Offline, connected = false),
+    DevicesRowSpec.Device("e1", "MacBook Pro", DevicesCopy.Connected, connected = true),
+    DevicesRowSpec.Device("e2", "Studio", DevicesCopy.Offline, connected = false),
 )
 
 /** The block caption: Geist 12 fixed, secondary, at the header's inset. */

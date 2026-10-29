@@ -62,8 +62,8 @@ import uniffi.zeron_core.TranscriptView
  *   with the slash icon (the menu is rebuilt on every open);
  * - **Mode** switches the fake [RowActions] between **Ok** (Archive
  *   shows "Archived · Undo" through the real toaster, then the fake
- *   leave logs "pop") and **Offline** (the write is refused with
- *   "Engine not connected");
+ *   leave logs "pop") and **Offline** (the write is refused: no toast,
+ *   only the log, as iOS's `attempt`);
  * - **Copy Transcript** copies the fake transcript's frame —
  *   "hi", a `---` separator, "Hello! How can I help?" — to the real
  *   clipboard (API 31–32 toasts "Copied", 33+ shows the system overlay);
@@ -95,14 +95,13 @@ fun SessionMenuGallerySection() {
         object : RowActions {
             override fun setPinned(chatId: String, pinned: Boolean, onResult: (ActionOutcome) -> Unit) {
                 log += "pin $chatId $pinned"
-                onResult(if (offline) ActionOutcome.EngineOffline else ActionOutcome.Ok)
+                onResult(if (offline) ActionOutcome.Failed else ActionOutcome.Ok)
             }
 
             override fun archive(chatId: String, onResult: (ActionOutcome) -> Unit) {
                 if (offline) {
-                    log += "archive $chatId → EngineOffline"
-                    toaster.show("Engine not connected")
-                    onResult(ActionOutcome.EngineOffline)
+                    log += "archive $chatId → Failed"
+                    onResult(ActionOutcome.Failed)
                 } else {
                     log += "archive $chatId → Ok"
                     toaster.show("Archived", "Undo") { unarchive(chatId) { log += "unarchive $chatId" } }
@@ -128,7 +127,6 @@ fun SessionMenuGallerySection() {
             override fun renameSection(sectionId: String, name: String, onResult: (ActionOutcome) -> Unit) {}
             override fun deleteSection(sectionId: String, onResult: (ActionOutcome) -> Unit) {}
             override fun sections(): List<SectionView> = emptyList()
-            override fun report(error: Throwable) {}
         }
     }
 
