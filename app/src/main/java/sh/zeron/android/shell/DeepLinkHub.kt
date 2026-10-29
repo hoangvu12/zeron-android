@@ -35,13 +35,11 @@ internal var deepLinksLog: (String) -> Unit = { message -> Log.i("DeepLinks", me
  *   composition must not clear a newer router (the one-frame overlap of
  *   the phone/split switch).
  *
- * [knownChatIds] must return an in-memory list (`ZeronApplication`'s
- * `workspaceFeed.snapshot`), never a blocking FFI call on the main
- * thread — and it is only ever read for an `OpenChat` with a raw id.
+ * Fed by notification taps (#19, the `chatId` extra) and the `route`
+ * extra; Zeron's chat ids are plain, so an `OpenChat` id goes to the
+ * router as it came.
  */
-class DeepLinkHub(
-    private val knownChatIds: () -> Collection<String>,
-) {
+class DeepLinkHub {
 
     private var router: AppRouter? = null
     private var welcomeRoot: Boolean = false
@@ -88,11 +86,7 @@ class DeepLinkHub(
     /** `DeepLink` → `AppRouter` call, per the ticket's dispatch table. */
     private fun dispatch(router: AppRouter, link: DeepLink) {
         when (link) {
-            is DeepLink.OpenChat -> router.openSession(
-                // The known-id lookup runs only for a raw engine id.
-                if (ScopedIds.isScoped(link.chatId)) link.chatId
-                else ChatIds.resolve(link.chatId, knownChatIds()),
-            )
+            is DeepLink.OpenChat -> router.openSession(link.chatId)
 
             is DeepLink.NewSession -> router.presentNewSession(link.prompt)
 

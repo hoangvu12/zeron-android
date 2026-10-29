@@ -28,6 +28,7 @@ import sh.zeron.android.shell.ZeronAppContent
 import sh.zeron.android.shell.ShellShortcuts
 import sh.zeron.android.shell.ShortcutSink
 import sh.zeron.android.shell.WallpaperTarget
+import sh.zeron.android.shell.ZeronUrl
 import sh.zeron.android.shell.applyZeronEdgeToEdge
 import sh.zeron.android.shell.holdFirstFrame
 import sh.zeron.android.shell.toExtrasMap
@@ -56,8 +57,9 @@ import sh.zeron.android.shell.toExtrasMap
  *
  * Launch extras and deep links (android-ui-parity #36): `launchMode` is
  * `singleTask`, so every warm link arrives through [onNewIntent] with no
- * second activity instance. The `route` extra and any
- * `zeron://…` VIEW data go to the app-wide
+ * second activity instance. `zeron://` return URLs (#19: `callback`,
+ * `signed-in`, `voice`) are handled in [handleIntent]; the `route` extra
+ * and a notification tap's `chatId` extra go to the app-wide
  * [sh.zeron.android.shell.DeepLinkHub] (never straight to a router —
  * the shell is not composed yet at cold start), which dispatches after
  * the shell's first frame and drops links while the welcome root is on
@@ -175,32 +177,32 @@ class MainActivity : ComponentActivity() {
     }
 
     /**
-     * Ticket 36: a VIEW deep link and/or the `route` extra go to the
-     * app-wide [sh.zeron.android.shell.DeepLinkHub] — never straight to
-     * a router (the shell is not composed yet at cold start). An intent
-     * carrying both submits both; the hub's single slot keeps the last
-     * one, the route.
+     * #19: a `zeron://` return URL is handled here; a notification tap
+     * (the `chatId` extra) and/or the `route` extra go to the app-wide
+     * [sh.zeron.android.shell.DeepLinkHub] — never straight to a router
+     * (the shell is not composed yet at cold start). An intent carrying
+     * both submits both; the hub's single slot keeps the last one, the
+     * route.
      */
     private fun handleIntent(intent: Intent) {
         val app = application as ZeronApplication
         val hub = app.deepLinks
-        val data = intent.data
-        if (intent.action == Intent.ACTION_VIEW &&
-            data?.scheme == SignInBrowser.CALLBACK_SCHEME &&
-            data.host == SignInBrowser.CALLBACK_HOST
-        ) {
-            // #15: the Custom Tab fallback's WorkOS redirect (the Auth Tab
-            // returns its result to SignInBrowser instead).
-            app.authSession.onCallback(data.toString())
-        } else if (intent.action == Intent.ACTION_VIEW) {
-            val link = DeepLinks.parse(intent.dataString)
-            if (link == null) {
+        if (intent.action == Intent.ACTION_VIEW) {
+            when (DeepLinks.parse(intent.dataString)) {
+                // #15: the Custom Tab fallback's WorkOS redirect (the Auth
+                // Tab returns its result to SignInBrowser instead).
+                ZeronUrl.Callback -> app.authSession.onCallback(intent.dataString!!)
+                // A provider or device login's done page: `singleTask`
+                // already cleared the Custom Tab, and the waiting sign-in
+                // finishes on its own poll.
+                ZeronUrl.SignedIn -> Unit
+                // TODO(#61): back to the voice stage while a call is live.
+                ZeronUrl.Voice -> Unit
                 // Unknown link: ignored, logged.
-                Log.i("DeepLinks", "ignored ${intent.dataString}")
-            } else {
-                hub.submit(link)
+                null -> Log.i("DeepLinks", "ignored ${intent.dataString}")
             }
         }
+        DeepLinks.notificationTap(intent.getStringExtra(DeepLinks.EXTRA_CHAT_ID))?.let(hub::submit)
         LaunchOptions.route(intent.extras.toExtrasMap())?.let(hub::submit)
     }
 
