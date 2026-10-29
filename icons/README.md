@@ -30,5 +30,9 @@ Icons](https://www.figma.com/community/file/1166834396438034778) by 480
 Design (CC BY 4.0,
 https://creativecommons.org/licenses/by/4.0/), unmodified except for
 removing `width`/`height`. `pin-fill`, `pin-slash`, `square`, `circle-half`,
-`text-cursor`, `arrow-turn-down-right`, `arrow-turn-left-up` are drawn for
-Zeron in the Solar Linear style (24 grid, stroke 1.5, round caps).
+`text-cursor`, `arrow-turn-down-right`, `arrow-turn-left-up`,
+`arrow-left-arrow-right` are drawn for Zeron in the Solar Linear style (24
+grid, stroke 1.5, round caps). `bubble-left` is Solar's `chat-round-line`
+without its two text lines; `danger-triangle-fill` is Solar's
+`danger-triangle` outline filled, with the exclamation mark knocked out
+(both modified, CC BY 4.0).

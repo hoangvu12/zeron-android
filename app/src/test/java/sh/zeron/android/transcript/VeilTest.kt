@@ -14,7 +14,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
+import sh.zeron.android.core.Face
 import sh.zeron.android.core.Fonts
+import sh.zeron.android.core.assetPath
 import sh.zeron.android.design.TranscriptPalette
 import uniffi.zeron_core.BoxStyle
 import uniffi.zeron_core.ColorRole
@@ -54,6 +56,7 @@ class VeilTest {
     @After
     fun resetFonts() {
         Fonts.resetForTest()
+        MathFonts.resetForTest()
     }
 
     private fun newFonts(): StyleFonts = StyleFonts().apply {
@@ -380,6 +383,45 @@ class VeilTest {
         assertEquals(175f, layer[4], 1f)
         assertTrue("left ${layer[0]} is a whole-clip layer", layer[0] > 0f)
         assertTrue("right ${layer[2]} is a whole-clip layer", layer[2] < 1e5f)
+    }
+
+    // ------------------------------------------------------------ math (#29)
+
+    @Test
+    fun aFormulaChunkFadesItsFillsAndGlyphsWholeInItsOwnLayer() {
+        // "Area is " then a formula placeholder (U+FFFC) at 8: its rule and
+        // glyph carry start = 8, so the chunk [8, 9) takes them whole even
+        // though no text run covers the placeholder. Geist stands in for
+        // the math face.
+        MathFonts.bytes = { context.assets.open(Face.Sans.assetPath).use { it.readBytes() } }
+        val fonts = newFonts()
+        val formula = "Area is " + Char(0xFFFC)
+        val new = RowModel(
+            RowFixtures.rowOf(
+                runs = listOf(RowFixtures.run(0u, 8u, 16f, 28f)),
+                boxes = listOf(
+                    RowFixtures.box(80f, 20f, 12f, 1f, 0f, BoxStyle.FILL, ColorRole.TEXT, start = 8u),
+                ),
+                glyphs = listOf(RowFixtures.glyph(8u, x = 80f, y = 28f, glyph = 36u)),
+            ).copy(text = formula, version = 2uL, copyText = formula),
+        )
+        val veil = Veil()
+        veil.grow(modelOf(formula.substring(0, 8)), animate = true)
+        veil.grow(new, animate = true) // chunk [8, 9)
+        veil.tick(0L)
+        val canvas = veilCanvas()
+        veil.draw(canvas, new, density, TranscriptPalette(false), fonts, now = 110_000_000L)
+
+        // Chrome has no settled box; the settled text; then the formula in
+        // the chunk's layer.
+        assertEquals(
+            listOf("text:0", "layer:175", "box", "glyph", "restore"),
+            canvas.ops.filter { it == "box" || it == "glyph" || it.startsWith("text:") || it.startsWith("layer:") || it == "restore" },
+        )
+        // The layer covers the rule (80..92 dp, padded 2 dp).
+        val layer = canvas.layers.single()
+        assertTrue(layer[0] <= 78f * density + 0.01f)
+        assertTrue(layer[2] >= 94f * density - 0.01f)
     }
 }
 

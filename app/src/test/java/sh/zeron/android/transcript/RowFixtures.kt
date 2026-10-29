@@ -7,6 +7,7 @@ import uniffi.zeron_core.Decoration
 import uniffi.zeron_core.Fade
 import uniffi.zeron_core.FadeEdge
 import uniffi.zeron_core.FaceRole
+import uniffi.zeron_core.GlyphPrim
 import uniffi.zeron_core.RowDisplay
 import uniffi.zeron_core.Scroller
 import uniffi.zeron_core.StyleDesc
@@ -64,7 +65,20 @@ internal object RowFixtures {
         style: BoxStyle,
         color: ColorRole,
         scroller: UInt? = null,
-    ): BoxPrim = BoxPrim(x, y, w, h, radius, style, color, scroller)
+        start: UInt? = null,
+    ): BoxPrim = BoxPrim(x, y, w, h, radius, style, color, scroller, start)
+
+    /** A math glyph (#29) of font [font] at baseline origin (x, y), for the formula placeholder at [start]. */
+    fun glyph(
+        start: UInt,
+        x: Float = 16f,
+        y: Float = 28f,
+        font: UByte = 0u,
+        glyph: UShort = 1u,
+        size: Float = 16.5f,
+        scroller: UInt? = null,
+        color: ColorRole = ColorRole.TEXT,
+    ): GlyphPrim = GlyphPrim(font, glyph, x, y, size, color, scroller, start)
 
     /** A row over the given primitives; links and widgets are empty (tickets 126/67). */
     fun rowOf(
@@ -72,6 +86,7 @@ internal object RowFixtures {
         boxes: List<BoxPrim> = emptyList(),
         scrollers: List<Scroller> = emptyList(),
         fades: List<Fade> = emptyList(),
+        glyphs: List<GlyphPrim> = emptyList(),
     ): RowDisplay =
         RowDisplay(
             key = 1uL,
@@ -80,6 +95,7 @@ internal object RowFixtures {
             height = 112f,
             text = T,
             runs = runs,
+            glyphs = glyphs,
             boxes = boxes,
             links = emptyList(),
             scrollers = scrollers,

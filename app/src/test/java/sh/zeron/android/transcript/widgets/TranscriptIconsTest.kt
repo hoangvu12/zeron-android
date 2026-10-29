@@ -358,6 +358,38 @@ class TranscriptIconsTest {
         assertDpIsWithin(8f, bounds.centerYDp, 0.5f, "chip centre y")
     }
 
+    // ------------------------------------------------------ brand marks (#30)
+
+    @Test
+    fun brandNamesResolveToTheirHarnessMark() {
+        assertEquals(TranscriptIconSource.Brand("codex"), TranscriptIcons.source("brand:codex"))
+        assertEquals(TranscriptIconSource.Brand("claude-code"), TranscriptIcons.source("brand:claude-code"))
+        // The sender caption without a harness and the switch seam use SF names.
+        assertEquals(TranscriptIconSource.Symbol(ZeronIcons.BubbleLeft), TranscriptIcons.source("bubble.left"))
+        assertEquals(
+            TranscriptIconSource.Symbol(ZeronIcons.ArrowLeftArrowRight),
+            TranscriptIcons.source("arrow.left.arrow.right"),
+        )
+        assertEquals(
+            TranscriptIconSource.Symbol(ZeronIcons.ExclamationmarkTriangleFill),
+            TranscriptIcons.source("exclamationmark.triangle.fill"),
+        )
+        assertTrue("brand and new SF names are never logged", logged.isEmpty())
+    }
+
+    @Test
+    fun aMonochromeBrandMarkTakesTheWidgetColour() {
+        hostCells(Appearance.Light, ProbeCell("mark", "brand:codex", ColorRole.TEXT_SECONDARY, 16f))
+        assertGlyphInk("codex mark", cellPixels("mark"), Color.White, Palette.Light.secondary)
+    }
+
+    @Test
+    fun claudesBrandMarkKeepsItsOrange() {
+        // DANGER is passed on purpose: the mark must not take it.
+        hostCells(Appearance.Light, ProbeCell("mark", "brand:claude-code", ColorRole.DANGER, 16f))
+        assertGlyphInk("claude mark", cellPixels("mark"), Color.White, Color(0xFFD97757))
+    }
+
     // ------------------------------------------------------------ the file art
 
     @Test

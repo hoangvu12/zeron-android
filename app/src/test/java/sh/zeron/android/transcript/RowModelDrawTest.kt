@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.RectF
+import android.graphics.fonts.Font
 import androidx.test.core.app.ApplicationProvider
 import org.junit.After
 import org.junit.Assert.assertArrayEquals
@@ -17,15 +18,20 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import org.robolectric.shadows.ShadowLog
+import sh.zeron.android.core.Face
 import sh.zeron.android.core.Fonts
+import sh.zeron.android.core.assetPath
 import sh.zeron.android.design.TranscriptPalette
+import uniffi.zeron_core.BoxStyle
+import uniffi.zeron_core.ColorRole
 import uniffi.zeron_core.FadeEdge
 import uniffi.zeron_core.Scroller
 
 /**
  * [RowModel.draw]'s orchestration over a recording [Canvas] (native
- * graphics so text really draws): the boxes → runs → fades order per
- * layer, the pass semantics, the Range glyph-edge clip, and the guards.
+ * graphics so text really draws): the boxes → runs → glyphs → fades order
+ * per layer, the pass semantics (a formula's fills and glyphs veil whole
+ * with its placeholder, #29), the Range glyph-edge clip, and the guards.
  * Only the `box` and `text:*` events are compared as lists — `clip:*`
  * events are asserted in the `Range(4, 10)` case only, because ticket
  * 64's trailing fade adds its own clips. These expectations hold for the
@@ -51,6 +57,7 @@ class RowModelDrawTest {
     @After
     fun resetFonts() {
         Fonts.resetForTest()
+        MathFonts.resetForTest()
     }
 
     private fun newFonts(): StyleFonts = StyleFonts().apply { update(RowFixtures.styles) }
@@ -129,6 +136,79 @@ class RowModelDrawTest {
         // Run 0 ends at 19 (not > 19), run 2 starts at 40 (not < 40).
         val (canvas, _) = drawFixture(0, RowModel.Pass.Range(19, 40))
         assertEquals(emptyList<String>(), canvas.ops.paintEvents())
+    }
+
+    // ------------------------------------------------------ math (#29)
+
+    /**
+     * A row with a settled box, a formula at placeholder 5 (one fill, one
+     * glyph) and a plain run. Geist stands in for the math face: any font
+     * the core names draws the same way.
+     */
+    private fun formulaRow(): RowModel {
+        MathFonts.bytes = { context.assets.open(Face.Sans.assetPath).use { it.readBytes() } }
+        return RowModel(
+            RowFixtures.rowOf(
+                runs = listOf(RowFixtures.run(0u, 19u, 16f, 28f)),
+                boxes = listOf(
+                    RowFixtures.box(0f, 0f, 40f, 40f, 0f, BoxStyle.FILL, ColorRole.CODE_BACKGROUND),
+                    RowFixtures.box(16f, 20f, 20f, 1f, 0f, BoxStyle.FILL, ColorRole.TEXT, start = 5u),
+                ),
+                glyphs = listOf(RowFixtures.glyph(5u, x = 20f, y = 28f, glyph = 36u)),
+            ),
+        )
+    }
+
+    private fun drawFormula(pass: RowModel.Pass): List<String> {
+        val canvas = newCanvas()
+        formulaRow().draw(0, canvas, density, TranscriptPalette(false), newFonts(), pass)
+        return canvas.ops.filter { it == "box" || it == "glyph" || it.startsWith("text:") }
+    }
+
+    @Test
+    fun allPaintsBoxesThenRunsThenGlyphs() {
+        assertEquals(listOf("box", "box", "text:0", "glyph"), drawFormula(RowModel.Pass.All))
+    }
+
+    @Test
+    fun chromeLeavesTheFormulaToTheTextPasses() {
+        assertEquals(listOf("box"), drawFormula(RowModel.Pass.Chrome))
+    }
+
+    @Test
+    fun theRangeHoldingThePlaceholderPaintsTheWholeFormula() {
+        // Range(5, 6) splits run 0 but paints the formula whole.
+        assertEquals(listOf("box", "text:0", "glyph"), drawFormula(RowModel.Pass.Range(5, 6)))
+        // The settled side of a veil at 5 has no formula.
+        assertEquals(listOf("text:0"), drawFormula(RowModel.Pass.Range(0, 5)))
+        assertEquals(emptyList<String>(), drawFormula(RowModel.Pass.Range(19, Int.MAX_VALUE)))
+    }
+
+    @Test
+    fun glyphsDrawAtTheirBaselineOriginAndSize() {
+        val canvas = newCanvas()
+        formulaRow().draw(0, canvas, density, TranscriptPalette(false), newFonts(), RowModel.Pass.All)
+        assertEquals(listOf("glyph@36:${20f * density}:${28f * density}:${16.5f * density}"), canvas.glyphs)
+    }
+
+    @Test
+    fun formulaBoundsCoverTheFillAndTheGlyphOfThatPlaceholderOnly() {
+        val model = formulaRow()
+        val out = RectF()
+        assertTrue(model.formulaBounds(5, 6, density, out))
+        // The fill's left edge, padded 2 dp.
+        assertEquals(16f * density - 2f * density, out.left, 0.01f)
+        assertTrue("the glyph reaches above the fill", out.top < 20f * density)
+        assertTrue(!model.formulaBounds(0, 5, density, RectF()))
+    }
+
+    @Test
+    fun aMissingMathFontDrawsNoGlyphs() {
+        MathFonts.bytes = { ByteArray(0) }
+        val model = RowModel(RowFixtures.rowOf(runs = emptyList(), glyphs = listOf(RowFixtures.glyph(0u))))
+        val canvas = newCanvas()
+        model.draw(0, canvas, density, TranscriptPalette(false), newFonts())
+        assertTrue(canvas.glyphs.isEmpty())
     }
 
     // ---------------------------------------------------------- guards
@@ -223,6 +303,26 @@ class RowModelDrawTest {
 internal open class RecordingCanvas(bitmap: Bitmap) : Canvas(bitmap) {
 
     val ops = ArrayList<String>()
+
+    /** `glyph@<id>:<x>:<y>:<textSize>` per math glyph (#29). */
+    val glyphs = ArrayList<String>()
+
+    override fun drawGlyphs(
+        glyphIds: IntArray,
+        glyphIdOffset: Int,
+        positions: FloatArray,
+        positionOffset: Int,
+        glyphCount: Int,
+        font: Font,
+        paint: Paint,
+    ) {
+        ops.add("glyph")
+        for (k in 0 until glyphCount) {
+            val p = positionOffset + 2 * k
+            glyphs.add("glyph@${glyphIds[glyphIdOffset + k]}:${positions[p]}:${positions[p + 1]}:${paint.textSize}")
+        }
+        super.drawGlyphs(glyphIds, glyphIdOffset, positions, positionOffset, glyphCount, font, paint)
+    }
 
     override fun drawRoundRect(rect: RectF, rx: Float, ry: Float, paint: Paint) {
         ops.add("box")
