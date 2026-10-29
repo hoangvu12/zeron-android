@@ -7,7 +7,6 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Configurator
 import androidx.test.uiautomator.UiDevice
 import java.util.regex.Pattern
-import sh.zeron.android.shell.ScopedIds
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -116,15 +115,10 @@ class TransitionTourTest {
         device.findObject(androidx.test.uiautomator.By.res(appPackage, tag))?.click()
     }
 
-    /**
-     * Taps a session row by the engine's raw chat id: the row's tag is
-     * `session-<scoped id>` (`engine:v1:…`) on a paired phone, never
-     * `session-chat-cjk` — see [FlowSemantics.sessionRow].
-     */
-    private fun tapSession(rawChatId: String) {
+    /** Taps a session row by its chat id (the row's tag is `session-<id>`; ids are plain). */
+    private fun tapSession(chatId: String) {
         device.findObjects(By.res(Pattern.compile(".*session-.*"))).firstOrNull { row ->
-            val id = row.resourceName?.substringAfter("session-")
-            id != null && (id == rawChatId || ScopedIds.rawId(id) == rawChatId)
+            row.resourceName?.substringAfter("session-") == chatId
         }?.click()
     }
 

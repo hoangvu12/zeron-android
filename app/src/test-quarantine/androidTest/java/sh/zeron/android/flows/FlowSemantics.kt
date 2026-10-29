@@ -10,7 +10,6 @@ import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.test.platform.app.InstrumentationRegistry
-import sh.zeron.android.shell.ScopedIds
 
 /**
  * Shared semantics matchers and artefact helpers for the instrumented
@@ -37,22 +36,13 @@ object FlowSemantics {
     fun userEcho(): SemanticsMatcher = startsWith("You: ")
 
     /**
-     * A session row by the engine's **raw** chat id. `SessionRow` tags
-     * `session-<vm.id>`, and on a paired phone `vm.id` is the scoped id
-     * (`engine:v1:…`, `merge_engine` in `crates/mobile-client/src/workspace/view.rs`)
-     * — so `onNodeWithTag("session-chat-veil")` never matches a live
-     * engine's row (the Robolectric fixtures hand-build raw ids, which is
-     * why they do). This decodes the tag's id with [ScopedIds.rawId].
+     * A session row by its chat id. `SessionRow` tags `session-<vm.id>`;
+     * Zeron's chat ids are plain (the demo's `chat-veil`, …), so this is
+     * the exact tag.
      */
-    fun sessionRow(rawChatId: String): SemanticsMatcher =
-        SemanticsMatcher("session row for raw chat id '$rawChatId'") { node ->
-            val tag = node.config.getOrNull(SemanticsProperties.TestTag)
-            if (tag == null || !tag.startsWith("session-")) {
-                false
-            } else {
-                val id = tag.removePrefix("session-")
-                id == rawChatId || ScopedIds.rawId(id) == rawChatId
-            }
+    fun sessionRow(chatId: String): SemanticsMatcher =
+        SemanticsMatcher("session row for chat id '$chatId'") { node ->
+            node.config.getOrNull(SemanticsProperties.TestTag) == "session-$chatId"
         }
 
     /**
@@ -78,8 +68,8 @@ object FlowSemantics {
 /**
  * Waits for [matcher] in the transcript, paging toward OLDER rows through
  * the host's accessibility `scrollBy` (TranscriptSemantics: a negative y
- * moves toward the top) while it is not composed. The `main` engine
- * streams its ~20-row reply at once, so a just-sent prompt can leave the
+ * moves toward the top) while it is not composed. The demo (`fast`)
+ * streams its multi-row reply almost at once, so a just-sent prompt can leave the
  * realized band (viewport + 700 dp overscan) before a plain wait polls it
  * (run 38552405016). The page (300 dp) is below the overscan, so no row
  * is skipped.

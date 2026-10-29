@@ -1,5 +1,8 @@
 package sh.zeron.android.flows
 
+import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -24,14 +27,14 @@ import sh.zeron.android.notify.NotificationPrefs
  * local — the edge and APNs are gone, so the notification comes from the
  * phone's own driver:
  *
- * 1. the **slow** fixture engine is paired through the rig
- *    ([FixtureRule] mints a fresh pairing URL; `chat-long` streams a
- *    paced reply — long enough to background the app first);
+ * 1. the offline demo ([FixtureRule]) on `chat-deploy`, with a paced,
+ *    long reply ([SlowReply]: `fast` off, `longreply`) — long enough to
+ *    background the app first;
  * 2. notifications are on (the pref) and the permission granted
  *    (`pm grant`);
- * 3. a run is started from the engine side (the fixture's `/run` — the
- *    core never notifies Done for the phone's own send), then
- *    `pressHome()`;
+ * 3. a prompt is sent, then `pressHome()`: #56's `SessionWatcher` posts
+ *    "Run finished" for the Working → Completed transition (the phone's
+ *    own send included);
  * 4. `openNotification()`, wait for "Run finished", tap it, and the chat
  *    is open again (the `transcript` root on top).
  *
@@ -41,10 +44,10 @@ import sh.zeron.android.notify.NotificationPrefs
 @RunWith(AndroidJUnit4::class)
 class NotificationFlowTest {
 
-    /** The slow engine (a paced run that outlives the trip to the home screen). */
+    /** A paced demo run that outlives the trip to the home screen. */
     private val launch = FixtureRule(
-        routeFor = { "chat:chat-long" },
-        enginesFor = { setOf(FixtureEngine.Slow) },
+        routeFor = { "chat:chat-deploy" },
+        extrasFor = { SlowReply },
     )
 
     @Suppress("DEPRECATION")
@@ -61,12 +64,6 @@ class NotificationFlowTest {
 
     @Before
     fun setUp() {
-        // The rig mints and pairs the slow engine before this runs; a
-        // missing engine means the rig itself broke — fail loudly.
-        assertTrue(
-            "the flow rig's redeemed engine never appeared (start the android_fixture engines)",
-            app.clientOrNull()?.engines().orEmpty().isNotEmpty(),
-        )
         // Notifications on: the master + every kind.
         val prefs = NotificationPrefs.get(app)
         prefs.enabled = true
@@ -88,14 +85,12 @@ class NotificationFlowTest {
         )
         assertTrue("POST_NOTIFICATIONS was not granted", granted())
 
-        // The run comes from the ENGINE side (the fixture's `/run`), not a
-        // phone send: by design the core never posts "Run finished" for the
-        // phone's own send (crates/mobile-client/src/notify.rs
-        // `send_pending`, ticket 28's acceptance rule) — the old phone-send
-        // version could never pass (run 38552405016). Started while the app
+        // A phone send: #56's SessionWatcher notifies on the snapshot's
+        // Working → Completed, whoever started the run. Sent while the app
         // is front, so the run watch picks it up before Home.
-        val control = checkNotNull(launch.controlUrl(FixtureEngine.Slow)) { "the slow engine's control URL" }
-        assertTrue("the fixture's /run failed", launch.run(control, "chat-long"))
+        compose.onNodeWithTag("composer-input").performClick()
+            .performTextInput("Write a long reply please.")
+        compose.onNodeWithTag("composer-send").performClick()
         compose.waitUntil(timeoutMillis = 10_000) {
             compose.onAllNodesWithContentDescription("Stop response").fetchSemanticsNodes().isNotEmpty()
         }
@@ -103,7 +98,7 @@ class NotificationFlowTest {
         // Then leave the app: no banner while the app is front (the
         // foreground gate).
         device.pressHome()
-        // The slow run finishes; the notification appears.
+        // The paced run finishes; the notification appears.
         device.openNotification()
         // `wait(hasObject)` yields false (not null) on timeout.
         val appeared = device.wait(

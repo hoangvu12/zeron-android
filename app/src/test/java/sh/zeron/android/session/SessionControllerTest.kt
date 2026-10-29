@@ -14,8 +14,8 @@ import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import uniffi.zeron_core.AuthTokens
 import uniffi.zeron_core.ClientEvent
-import uniffi.zeron_core.EngineState
 
 /** Fills nothing; distinguishes filler types for [SessionController.filler]. */
 private class NoopFiller : ChromeFiller {
@@ -156,7 +156,7 @@ class SessionControllerTest {
     }
 
     @Test
-    fun workspaceConnectivityAndEnginesChangedRefreshEveryController() = runTest {
+    fun workspaceAndConnectivityChangedRefreshEveryController() = runTest {
         val hub = syncHub()
         val coreA = FakeSessionCore("chat-a")
         val coreB = FakeSessionCore("chat-b")
@@ -174,23 +174,18 @@ class SessionControllerTest {
         advanceUntilIdle()
         assertEquals(3, coreA.composerCalls)
         assertEquals(3, coreB.composerCalls)
-
-        hub.onClientEvent(ClientEvent.EnginesChanged)
-        advanceUntilIdle()
-        assertEquals(4, coreA.composerCalls)
-        assertEquals(4, coreB.composerCalls)
     }
 
     @Test
-    fun noticeAndEngineIdentityPinnedRefreshNothing() = runTest {
+    fun authEventsRefreshNothing() = runTest {
         val hub = syncHub()
         val coreA = FakeSessionCore("chat-a")
         val coreB = FakeSessionCore("chat-b")
         newController(coreA, hub = hub)
         newController(coreB, hub = hub)
 
-        hub.onClientEvent(ClientEvent.Notice("reverted an overlay write"))
-        hub.onClientEvent(ClientEvent.EngineIdentityPinned(engineId = "e", deviceId = "d", name = "n"))
+        hub.onClientEvent(ClientEvent.AuthRefreshed(AuthTokens(accessToken = "a", refreshToken = "r")))
+        hub.onClientEvent(ClientEvent.AuthExpired("expired"))
         advanceUntilIdle()
 
         assertEquals(1, coreA.composerCalls)
@@ -356,97 +351,6 @@ class SessionControllerTest {
         assertEquals(logAfterClose, core.callLog.toList())
     }
 
-    // ── offline read-only (79) ───────────────────────────────────────────
-
-    /**
-     * The engine is not `Connected`: `markSeen()` makes no `markSeen`
-     * FFI call and `close()` makes only `setViewAttached(false)` — the
-     * skip is silent (no failure logged) and the notification cancel
-     * still happens (it is local, never engine state).
-     */
-    @Test
-    fun markSeenAndCloseMakeNoMarkSeenCallWhileNotWritable() = runTest {
-        val core = FakeSessionCore()
-        core.engineResult = engineView(state = EngineState.Reconnecting)
-        val controller = newController(core, fillers = listOf(CanWriteFiller))
-
-        // The first frame already carries the derived flag: the initial
-        // refresh ran synchronously at create (a Reconnecting engine
-        // gives canWrite == false on the first frame).
-        assertEquals(false, controller.chrome.value.canWrite)
-
-        controller.markSeen()
-        advanceUntilIdle()
-        // No markSeen FFI call: only the create-time refresh pulls ran.
-        assertTrue(core.callLog.none { it == "markSeen" })
-
-        controller.close()
-        advanceUntilIdle()
-        // Only the detach ran on the way out; setViewAttached is never
-        // gated (a local subscription switch, 85's rule).
-        assertEquals(listOf("setViewAttached(false)"), core.callLog.drop(4))
-
-        // Silent: no toast, no banner and no Log.w — the skip is not an
-        // error, so the failures list stays empty.
-        assertTrue(loggedFailures.isEmpty())
-    }
-
-    /** With the engine `Connected`, both behave exactly as in ticket 51. */
-    @Test
-    fun markSeenAndCloseMarkAsBeforeWhileConnected() = runTest {
-        val core = FakeSessionCore()
-        core.engineResult = engineView(state = EngineState.Connected)
-        val controller = newController(core, fillers = listOf(CanWriteFiller))
-        assertEquals(true, controller.chrome.value.canWrite)
-
-        controller.markSeen()
-        advanceUntilIdle()
-        assertEquals(listOf("markSeen"), core.callLog.drop(4))
-
-        controller.close()
-        advanceUntilIdle()
-        // Exactly ticket 51's order on the way out.
-        assertEquals(
-            listOf("markSeen", "setViewAttached(false)", "markSeen"),
-            core.callLog.drop(4),
-        )
-    }
-
-    /**
-     * `EnginesChanged` after a state flip updates `chrome.canWrite`
-     * within one refresh, both ways — no grace, no debounce — and the
-     * gate sees the latest refresh at execution time.
-     */
-    @Test
-    fun enginesChangedAfterAStateFlipUpdatesCanWriteBothWays() = runTest {
-        val hub = syncHub()
-        val core = FakeSessionCore()
-        core.engineResult = engineView(state = EngineState.Reconnecting)
-        val controller = newController(core, hub = hub, fillers = listOf(CanWriteFiller))
-        assertEquals(false, controller.chrome.value.canWrite)
-
-        // The engine comes back: one refresh (one event) is enough.
-        core.engineResult = engineView(state = EngineState.Connected)
-        hub.onClientEvent(ClientEvent.EnginesChanged)
-        advanceUntilIdle()
-        assertEquals(true, controller.chrome.value.canWrite)
-
-        // A following markSeen goes through again.
-        controller.markSeen()
-        advanceUntilIdle()
-        assertTrue(core.callLog.contains("markSeen"))
-
-        // And back the other way: offline again skips it.
-        core.engineResult = engineView(state = EngineState.Offline)
-        hub.onClientEvent(ClientEvent.EnginesChanged)
-        advanceUntilIdle()
-        assertEquals(false, controller.chrome.value.canWrite)
-        val marksSoFar = core.callLog.count { it == "markSeen" }
-        controller.markSeen()
-        advanceUntilIdle()
-        assertEquals(marksSoFar, core.callLog.count { it == "markSeen" })
-    }
-
     @Test
     fun disposeMakesNoFfiCallAndUnregisters() = runTest {
         val core = FakeSessionCore()
@@ -464,6 +368,79 @@ class SessionControllerTest {
         hub.onClientEvent(ClientEvent.ComposerChanged("chat-a", 2uL))
         advanceUntilIdle()
         assertEquals(1, core.composerCalls)
+    }
+
+    // ── visuals (#46) ───────────────────────────────────────────────────
+
+    /** iOS `connectVisuals`: the attached view learns the host after the transcript attach. */
+    @Test
+    fun attachPointsTheVisualsAtTheHost() = runTest {
+        val core = FakeSessionCore()
+        core.composerResult = composerState(deviceId = "mac-1")
+        val controller = newController(core)
+        val view = fakeTranscriptView()
+        // Nothing attached yet: the create-time refresh sends no source.
+        assertTrue(core.visualSources.isEmpty())
+
+        controller.attach(view, visualScale = 3f)
+        advanceUntilIdle()
+
+        assertEquals(1, core.visualSources.size)
+        val (sent, host, scale) = core.visualSources.single()
+        assertSame(view, sent)
+        assertEquals("mac-1", host)
+        assertEquals(3f, scale)
+        // The source is set between the attach and setViewAttached(true).
+        assertEquals(listOf("attachTranscript", "setViewAttached(true)"), core.callLog.drop(4))
+    }
+
+    /** A host change (iOS `hostDevice` didSet) re-points the visuals; an unchanged host does not. */
+    @Test
+    fun aHostChangeRepointsTheVisualsOnce() = runTest {
+        val core = FakeSessionCore()
+        core.composerResult = composerState(deviceId = "mac-1")
+        val hub = syncHub()
+        val controller = newController(core, hub = hub)
+        val view = fakeTranscriptView()
+        controller.attach(view)
+        advanceUntilIdle()
+        assertEquals(listOf("mac-1"), core.visualSources.map { it.second })
+
+        // The same host again: no repeat.
+        hub.onClientEvent(ClientEvent.WorkspaceChanged(2uL))
+        advanceUntilIdle()
+        assertEquals(listOf("mac-1"), core.visualSources.map { it.second })
+
+        // The chat moved hosts: the same view is re-pointed at the new one.
+        core.composerResult = composerState(deviceId = "mac-2")
+        hub.onClientEvent(ClientEvent.ComposerChanged("chat-a", 3uL))
+        advanceUntilIdle()
+        assertEquals(listOf("mac-1", "mac-2"), core.visualSources.map { it.second })
+        assertSame(view, core.visualSources.last().first)
+        assertEquals("mac-2", controller.hostDeviceId)
+    }
+
+    /** An unknown host (empty device id) sends nothing; a failed send is logged and retried on the next refresh. */
+    @Test
+    fun anUnknownHostSendsNothingAndAFailureRetries() = runTest {
+        val core = FakeSessionCore()
+        core.composerResult = composerState(deviceId = "")
+        val hub = syncHub()
+        val controller = newController(core, hub = hub)
+        controller.attach(fakeTranscriptView())
+        advanceUntilIdle()
+        assertTrue(core.visualSources.isEmpty())
+
+        core.composerResult = composerState(deviceId = "mac-1")
+        core.visualSourceFailures = 1
+        hub.onClientEvent(ClientEvent.WorkspaceChanged(2uL))
+        advanceUntilIdle()
+        assertTrue(core.visualSources.isEmpty())
+        assertEquals("setVisualSource failed", loggedFailures.single().first)
+
+        hub.onClientEvent(ClientEvent.WorkspaceChanged(3uL))
+        advanceUntilIdle()
+        assertEquals(listOf("mac-1"), core.visualSources.map { it.second })
     }
 
     // ── failures ────────────────────────────────────────────────────────
@@ -502,7 +479,7 @@ class SessionControllerTest {
         val core = FakeSessionCore()
         core.composerResult = composerState(hostName = "Vu-PC")
         core.sessionRowResult = sessionRow(projectName = "zeron", harnessLabel = "Claude Code")
-        core.engineResult = engineView()
+        core.engineResult = deviceView()
         val first = RecordingFiller("a")
         val second = RecordingFiller("b")
         val controller = newController(core, fillers = listOf(first, second))
@@ -520,7 +497,7 @@ class SessionControllerTest {
         assertEquals("chat-a", input.chatId)
         assertEquals("zeron", input.row?.project?.name)
         assertEquals("Vu-PC", input.composer.host.name)
-        assertEquals("engine:v1:alpha", input.engine?.engineId)
+        assertEquals("dev", input.engine?.id)
     }
 
     @Test

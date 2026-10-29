@@ -39,11 +39,9 @@ import sh.zeron.android.flows.mountedActivity
  * debug-only, ticket 36). CI-only: no emulator runs in the worker slots
  * or locally.
  *
- * android-app#30: the launch goes through the flow rig's [FixtureRule]
- * (the `main` engine paired via the debug `pair` extra — the Settings
- * tab only exists behind a shell, and the shell only with a paired
- * engine), carrying the wallpaper extras through [FixtureRule]'s
- * `extrasFor`.
+ * The launch goes through [FixtureRule] (#63: the offline demo — the
+ * Settings tab only exists behind the signed-in shell), carrying the
+ * wallpaper extras through [FixtureRule]'s `extrasFor`.
  *
  * The compose rule wraps the [FixtureRule] (the public,
  * deprecated-but-supported [AndroidComposeTestRule] constructor — the

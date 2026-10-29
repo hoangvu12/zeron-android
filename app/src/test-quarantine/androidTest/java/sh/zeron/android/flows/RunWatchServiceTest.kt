@@ -24,10 +24,10 @@ import sh.zeron.android.notify.NotificationPrefs
  * The run-watching foreground service's presence (android-app#28,
  * CI-only — no emulator in the worker slots), the acceptance's
  * `adb shell dumpsys activity services sh.zeron.android` check, run
- * through UiDevice's shell — now both sides of it, on ticket 30's rig
- * (the pre-rig version could only verify the absent state):
+ * through UiDevice's shell — both sides of it, on the offline demo
+ * ([FixtureRule]):
  *
- * - while a run is Working on the **slow** fixture engine the service is
+ * - while a paced demo run ([SlowReply]) is Working the service is
  *   present;
  * - after the last run leaves Working and the 2 min linger (ADR 0010)
  *   runs out, it is gone.
@@ -35,10 +35,10 @@ import sh.zeron.android.notify.NotificationPrefs
 @RunWith(AndroidJUnit4::class)
 class RunWatchServiceTest {
 
-    /** The slow engine: a paced run that holds Working for seconds. */
+    /** A paced demo run that holds Working for seconds. */
     private val launch = FixtureRule(
-        routeFor = { "chat:chat-long" },
-        enginesFor = { setOf(FixtureEngine.Slow) },
+        routeFor = { "chat:chat-deploy" },
+        extrasFor = { SlowReply },
     )
 
     @Suppress("DEPRECATION")
@@ -55,7 +55,7 @@ class RunWatchServiceTest {
 
     @Test
     fun theServiceIsAbsentWhenNothingIsWorking() {
-        // The fixture is idle; a run from an earlier test in this process
+        // The demo is idle; a run from an earlier test in this process
         // may still hold the 2 min linger (ADR 0010), so wait it out.
         app.prefs.setStayConnected(false)
         compose.waitUntil(timeoutMillis = RunWatchController.LINGER_MS + 20_000) { !servicePresent() }
@@ -64,12 +64,8 @@ class RunWatchServiceTest {
 
     @Test
     fun theServiceIsPresentWhileWorkingAndGoneAfter() {
-        // The rig's engine is paired; notifications must be on (the
-        // controller's gate) — grant the permission directly.
-        assertTrue(
-            "the flow rig's redeemed engine never appeared (start the android_fixture engines)",
-            app.clientOrNull()?.engines().orEmpty().isNotEmpty(),
-        )
+        // Notifications must be on (the controller's gate) — grant the
+        // permission directly.
         val prefs = NotificationPrefs.get(app)
         prefs.enabled = true
         device.executeShellCommand(
@@ -84,8 +80,8 @@ class RunWatchServiceTest {
             .performTextInput("Write a long reply please.")
         compose.onNodeWithTag("composer-send").performClick()
 
-        // While the run is Working the service is up (the run is paced at
-        // 150 ms per event — several seconds; poll for the service).
+        // While the run is Working the service is up (`fast` off: the demo
+        // streams a word every 30–140 ms — several seconds; poll for it).
         compose.waitUntil(timeoutMillis = 15_000) { servicePresent() }
         assertTrue("the service must be present while a run is Working", servicePresent())
 

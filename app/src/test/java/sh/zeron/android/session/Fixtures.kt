@@ -1,32 +1,29 @@
 package sh.zeron.android.session
 
-import uniffi.zeron_core.ChatIndicator
 import uniffi.zeron_core.ChatConfig
+import uniffi.zeron_core.ChatIndicator
 import uniffi.zeron_core.ComposerState
 import uniffi.zeron_core.Connectivity
 import uniffi.zeron_core.ConnectivityState
 import uniffi.zeron_core.ContextUsage
-import uniffi.zeron_core.EngineDiagnostics
-import uniffi.zeron_core.EngineState
-import uniffi.zeron_core.EngineView
+import uniffi.zeron_core.DeviceView
 import uniffi.zeron_core.HostCapabilities
 import uniffi.zeron_core.HostInfo
 import uniffi.zeron_core.LiveStatus
+import uniffi.zeron_core.NoHandle
 import uniffi.zeron_core.ProjectRef
 import uniffi.zeron_core.PullRequest
 import uniffi.zeron_core.PullRequestState
 import uniffi.zeron_core.RoomState
 import uniffi.zeron_core.SessionRow
-import uniffi.zeron_core.SessionLimit
 import uniffi.zeron_core.TranscriptView
-import uniffi.zeron_core.NoHandle
 
 /**
- * Fixture builders for the session tests (android-ui-parity #51):
- * the generated UniFFI records with neutral defaults for every field
- * the ticket does not exercise. The records are plain Kotlin data
- * classes whose initialisation touches no JNA, so these tests run on
- * the plain JVM (the same property `LiveCountsTest` relies on).
+ * Fixture builders for the session tests (android-ui-parity #51, revived
+ * for Zeron's records in #63): the generated UniFFI records with neutral
+ * defaults for every field the tests do not exercise. The records are
+ * plain Kotlin data classes whose initialisation touches no JNA, so
+ * these tests run on the plain JVM.
  */
 
 /** A composer state with only the fields [baseChrome] reads set apart. */
@@ -40,8 +37,6 @@ internal fun composerState(
     queueError: String? = null,
     chatId: String = "chat-a",
     contextUsage: ContextUsage? = null,
-    limit: SessionLimit? = null,
-    scheduledResumeFireAtMs: Long? = null,
 ): ComposerState = ComposerState(
     chatId = chatId,
     revision = 1uL,
@@ -58,6 +53,7 @@ internal fun composerState(
             queueEditLease = true,
             queuedAttachments = true,
             midTurnSteering = midTurnSteering,
+            providerSwitch = false,
         ),
     ),
     live = LiveStatus(
@@ -77,8 +73,6 @@ internal fun composerState(
     queueError = queueError,
     lastSubmittedMessageId = null,
     contextUsage = contextUsage,
-    limit = limit,
-    scheduledResumeFireAtMs = scheduledResumeFireAtMs,
 )
 
 /** A session row with only the fields [baseChrome] and the chips read set apart. */
@@ -92,9 +86,9 @@ internal fun sessionRow(
     reasoning: String? = null,
     branch: String? = null,
     pullRequest: PullRequest? = null,
+    parentChatId: String? = null,
 ): SessionRow = SessionRow(
     id = id,
-    engineId = "engine:v1:alpha",
     revision = 1uL,
     title = "Session",
     hasTitle = true,
@@ -103,7 +97,7 @@ internal fun sessionRow(
     deviceId = "device",
     deviceName = null,
     deviceOnline = true,
-    engineOnline = true,
+    isCloud = false,
     harness = harness,
     harnessLabel = harnessLabel,
     model = null,
@@ -123,7 +117,8 @@ internal fun sessionRow(
     sectionId = null,
     pullRequest = pullRequest,
     sendState = null,
-    parentChatId = null,
+    parentChatId = parentChatId,
+    roomGen = 2u,
 )
 
 /** A PR fixture for the chip tests (78). */
@@ -140,35 +135,23 @@ internal fun pullRequest(
     headRef = "feature",
 )
 
-/** An engine view (73/79 read its state and device id); the state defaults to `Connected`. */
-internal fun engineView(
-    engineId: String = "engine:v1:alpha",
-    deviceId: String? = "dev",
-    state: EngineState = EngineState.Connected,
-): EngineView =
-    EngineView(
-        engineId = engineId,
-        name = "Vu-PC",
-        host = "Vu-PC",
-        baseUrl = "https://engine.invalid",
-        deviceId = deviceId,
-        platform = "android",
-        version = "1.0.0",
-        state = state,
-        lastError = null,
-        retryAtMs = null,
-        lastConnectedMs = null,
-        capabilities = emptyList(),
-        notice = null,
-        fromCache = false,
-        diagnostics = EngineDiagnostics(
-            repairedRows = 0u,
-            skippedRows = 0u,
-            lastDecodeError = null,
-            missingStreams = emptyList(),
-            generation = 0uL,
-        ),
-    )
+/** The host device (`CoreClient.devices()`'s entry for the chat's host). */
+internal fun deviceView(
+    id: String = "dev",
+    name: String = "Vu-PC",
+    version: String? = "1.0.0",
+): DeviceView = DeviceView(
+    id = id,
+    name = name,
+    platform = "macos",
+    online = true,
+    lastSeenMs = null,
+    version = version,
+    capabilities = emptyList(),
+    isExecutionHost = true,
+    isSelf = false,
+    sessionCount = 0u,
+)
 
 /** The payload of a `ConnectivityChanged` event. */
 internal fun connectivity(state: ConnectivityState = ConnectivityState.CONNECTED): Connectivity =
@@ -179,25 +162,34 @@ internal fun connectivity(state: ConnectivityState = ConnectivityState.CONNECTED
  * `composerCalls` counter. `composerFailures` makes the next N
  * `composer()` calls throw *after being counted*, so the failure paths
  * are observable. `attachTranscriptResult` exercises the logged
- * `false` branch of [SessionController.attach].
+ * `false` branch of [SessionController.attach]. #46's
+ * `setVisualSource` calls go to [visualSources] (not [callLog]), so the
+ * lifecycle-order assertions stay about the lifecycle.
  */
 internal class FakeSessionCore(
     override val chatId: String = "chat-a",
-    /** 84's draft key reads this; a UUID-shaped engine id, like the real `PairedEngine.engineId`. */
-    override val engineId: String = "11111111-1111-4111-8111-111111111111",
+    /** 84's draft key reads this: the host device id. */
+    override val engineId: String = "dev",
 ) : SessionCore {
     var composerResult: ComposerState = composerState(chatId = chatId)
     var sessionRowResult: SessionRow? = null
 
     /** Ticket 89: the chat's local config; `null` = no config yet. */
     var sessionConfigResult: ChatConfig? = null
-    var engineResult: EngineView? = null
+    var engineResult: DeviceView? = null
     var attachTranscriptResult: Boolean = true
     var composerFailures: Int = 0
+
     /** When > 0, the next that many attachTranscript() calls throw. */
     var attachTranscriptFailures: Int = 0
 
+    /** When > 0, the next that many setVisualSource() calls throw. */
+    var visualSourceFailures: Int = 0
+
     val callLog = mutableListOf<String>()
+
+    /** Every `setVisualSource(view, deviceId, pixelScale)`, in call order. */
+    val visualSources = mutableListOf<Triple<TranscriptView, String, Float>>()
 
     var composerCalls: Int = 0
         private set
@@ -222,7 +214,7 @@ internal class FakeSessionCore(
         return sessionConfigResult
     }
 
-    override fun engine(): EngineView? {
+    override fun engine(): DeviceView? {
         callLog += "engine"
         return engineResult
     }
@@ -236,6 +228,14 @@ internal class FakeSessionCore(
         return attachTranscriptResult
     }
 
+    override fun setVisualSource(view: TranscriptView, deviceId: String, pixelScale: Float) {
+        if (visualSourceFailures > 0) {
+            visualSourceFailures--
+            throw RuntimeException("visual source boom")
+        }
+        visualSources += Triple(view, deviceId, pixelScale)
+    }
+
     override fun setViewAttached(attached: Boolean) {
         callLog += "setViewAttached($attached)"
     }
@@ -245,5 +245,5 @@ internal class FakeSessionCore(
     }
 }
 
-/** Two identity-distinct transcript views without a Rust engine behind them. */
+/** Identity-distinct transcript views without a Rust engine behind them. */
 internal fun fakeTranscriptView(): TranscriptView = TranscriptView(NoHandle)

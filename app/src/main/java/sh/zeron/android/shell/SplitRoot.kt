@@ -1,5 +1,19 @@
 package sh.zeron.android.shell
 
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.ui.Alignment
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Box
@@ -87,7 +101,7 @@ import sh.zeron.android.design.ZeronTheme
  * @param router the shell's router; defaults to [LocalAppRouter] (the
  *   tablet implementation is ticket 106).
  * @param inspector #45: the companions column at the trailing edge (iOS
- *   `.inspector`, 400 dp), sliding in and out with [InspectorState.shown];
+ *   `.inspector`, 400 dp, 340–480 by its resize handle), sliding in and out with [InspectorState.shown];
  *   `null` = none
  * @param inspectorContent the column's content (the inspector stack),
  *   composed only while it shows or slides
@@ -224,7 +238,8 @@ fun SplitRoot(
             gapPx = columns.detailGap.dp.roundToPx(),
         )
         // #45: the inspector takes its width off the detail's trailing side.
-        val inspectorPx = if (inspector != null) min(InspectorWidth.roundToPx(), width / 2) else 0
+        // #63: the user's width (the resize handle), still never past half the window.
+        val inspectorPx = if (inspector != null) min(inspector.widthDp.dp.roundToPx(), width / 2) else 0
         val inspectorShownPx = if (inspector != null) (inspector.progress.value.coerceIn(0f, 1f) * inspectorPx).toInt() else 0
         val inspectorTargetPx = if (inspector?.shown == true) inspectorPx else 0
         val sidebarChild = measurables[0].measure(Constraints.fixed(min(sidebarPx, width), height))
@@ -300,8 +315,50 @@ fun SplitRoot(
                         },
                 ) {
                     if (inspectorComposed) inspectorContent()
+                    // #63: drag the leading edge to resize (iOS 26 resizable columns).
+                    InspectorResizeHandle(inspector, Modifier.align(Alignment.CenterStart))
                 }
             }
         },
     )
 }
+
+/**
+ * The inspector column's resize handle (#63, iOS 26's resizable split
+ * columns, 340 … 480 dp): an invisible 12 dp strip on the column's leading
+ * edge, over the hairline. Dragging it moves the edge; a mouse shows the
+ * horizontal resize cursor; TalkBack gets "Wider" and "Narrower" actions
+ * in 20 dp steps.
+ */
+@Composable
+private fun InspectorResizeHandle(inspector: InspectorState, modifier: Modifier = Modifier) {
+    val density = LocalDensity.current
+    val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val drag = rememberDraggableState { deltaPx ->
+        val dragDp = with(density) { deltaPx.toDp().value }
+        inspector.resize(InspectorColumn.widthAfterDrag(inspector.widthDp, dragDp, rtl))
+    }
+    Box(
+        modifier
+            .testTag("split-inspector-resize")
+            .width(12.dp)
+            .fillMaxHeight()
+            .pointerHoverIcon(PointerIcon(android.view.PointerIcon.TYPE_HORIZONTAL_DOUBLE_ARROW))
+            .draggable(drag, Orientation.Horizontal)
+            .semantics {
+                contentDescription = "Resize companions"
+                stateDescription = "${inspector.widthDp.toInt()} dp"
+                customActions = listOf(
+                    CustomAccessibilityAction("Wider") {
+                        inspector.resize(inspector.widthDp + InspectorColumn.StepDp)
+                        true
+                    },
+                    CustomAccessibilityAction("Narrower") {
+                        inspector.resize(inspector.widthDp - InspectorColumn.StepDp)
+                        true
+                    },
+                )
+            },
+    )
+}
+
