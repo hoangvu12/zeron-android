@@ -26,6 +26,7 @@ import sh.zeron.android.design.Appearance
 import sh.zeron.android.design.ZeronIcons
 import sh.zeron.android.design.ZeronTheme
 import sh.zeron.android.design.glass.Glass
+import sh.zeron.android.design.glass.GlassMenuHost
 import sh.zeron.android.design.glass.MenuIcon
 import sh.zeron.android.design.glass.MenuItem
 import sh.zeron.android.sessions.SessionRowVM
@@ -192,6 +193,8 @@ class CompanionsPanelTest {
     private fun mount(ui: SideChatsUi, forking: Boolean = false) {
         compose.setContent {
             ZeronTheme(Appearance.Light) {
+                // The session screen's menu host (the header + opens a GlassMenu).
+                GlassMenuHost {
                 Box(Modifier.fillMaxSize()) {
                     CompanionsList(
                         ui = ui,
@@ -204,6 +207,7 @@ class CompanionsPanelTest {
                         onAction = { actions += it },
                         onArchive = { _, done -> done(false) },
                     )
+                }
                 }
             }
         }
