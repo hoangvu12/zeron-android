@@ -27,6 +27,9 @@ import sh.zeron.android.design.LocalBottomChrome
 import sh.zeron.android.shell.LargeTitleScaffold
 import sh.zeron.android.shell.LocalNavStack
 import sh.zeron.android.shell.TitleMode
+import sh.zeron.android.voice.LocalVoiceController
+import sh.zeron.android.voice.openVoiceSettings
+import sh.zeron.android.voice.rememberVoiceVisible
 
 /**
  * The Settings screen: the Compose port of `MoreViewController` — a thin
@@ -37,7 +40,7 @@ import sh.zeron.android.shell.TitleMode
  * **Account · Agents · Devices · Voice · Notifications · Appearance ·
  * Wallpaper · Math · Sessions · (untitled) Sign Out**
  *
- * Agents and Voice are later tickets' (see the `TODO`s in
+ * Agents is a later ticket's (see the `TODO` in
  * [SettingsScreen]); Roboco's Background ("Stay connected", D8) and
  * About/updater/Licences (D10) sections are gone, as on iOS.
  *
@@ -80,8 +83,8 @@ object SettingsScreenTokens {
  * The sections, in display order = declaration order — iOS's
  * (`MoreViewController.swift:185-248`). The [key]s are the
  * `groupedSection` keys; they must stay unique across the screen (70
- * prefixes them `grouped:<key>:…`). Voice has no rows yet (#61), so it
- * emits nothing.
+ * prefixes them `grouped:<key>:…`). Voice's one row is
+ * #61's (`voiceSettingsRow`).
  */
 enum class SettingsSection(val key: String) {
     Account("account"),
@@ -223,13 +226,17 @@ fun SettingsScreen(
     LaunchedEffect(cloud) { cloud.refresh() }
     val agents = agentsRows(AgentsCloud.of(cloud), demo, demoCloud)
     val sessionsStrings = sessionsSettingsStrings()
+    val voice = LocalVoiceController.current
+    val voiceShown = voice != null && rememberVoiceVisible(voice)
+    val voiceStyle = voice?.selectedStyle?.collectAsState()?.value
     SettingsScreenContent(listState, modifier, topInset, trailing) {
         accountSection(identity)
         // #49: Providers, then Cloud and Billing when Cloud is offered.
         agentsSection(agents) { id -> openAgentsRow(nav, id) }
         devicesSection(devices)
-        // TODO(#61): the "Voice" section, only while voice is available
+        // #61: the "Voice" section, only while voice is offered
         // (`MoreViewController.swift:213-216`).
+        if (voiceShown) voiceSettingsRow(voiceStyle) { openVoiceSettings(nav) }
         // #57: master + Run finished / Waiting on your input / Run failed
         // (`MoreViewController.swift:126-178`); D8 dropped "Stay connected".
         notificationSection(notifications)

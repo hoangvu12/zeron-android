@@ -43,6 +43,9 @@ import sh.zeron.android.design.ZeronIcons
 import sh.zeron.android.design.ZeronTheme
 import sh.zeron.android.design.glass.GlassButtonGroup
 import sh.zeron.android.design.glass.GlassCircleButton
+import sh.zeron.android.voice.LocalOpenVoiceSettings
+import sh.zeron.android.voice.VoiceBarItem
+import sh.zeron.android.voice.openVoiceSettings
 import sh.zeron.android.design.glass.GlassGroupItem
 import sh.zeron.android.design.glass.LocalHazeState
 import sh.zeron.android.design.glass.Menu
@@ -74,6 +77,9 @@ object SidebarToolbarDefaults {
 
     /** The row's side margins inside the 360 dp sidebar pane (16 ★). */
     val SideMargin = 16.dp
+
+    /** #61: the gap between the voice item and compose (UIKit's 8 pt item gap). */
+    val VoiceGap = 8.dp
 }
 
 /**
@@ -140,6 +146,12 @@ fun SidebarToolbar(
         onOptions = { anchor -> menu.open(anchor, optionsMenu()) },
         onNewSession = { router.presentNewSession(null) },
         modifier = modifier,
+        // #61: its menu's Voice Settings pushes in the sidebar's own stack.
+        voice = {
+            CompositionLocalProvider(LocalOpenVoiceSettings provides { openVoiceSettings(sidebarStack) }) {
+                VoiceBarItem(Modifier.padding(end = SidebarToolbarDefaults.VoiceGap))
+            }
+        },
     )
 }
 
@@ -167,6 +179,7 @@ internal fun SidebarToolbarContent(
     onNewSession: () -> Unit,
     modifier: Modifier = Modifier,
     optionsSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    voice: (@Composable () -> Unit)? = null,
 ) {
     // Only the 0 / partial / 1 thresholds may recompose (the gate and the
     // group's enabled flag); the continuous fade is the graphicsLayer read.
@@ -207,6 +220,9 @@ internal fun SidebarToolbarContent(
             enabled = vis == 1f,
         )
         Spacer(Modifier.weight(1f))
+        // #61: voice beside compose, once a host can run it (iOS
+        // `SplitRootController.swift:429-441`); it draws nothing otherwise.
+        voice?.invoke()
         // The + keeps `enabled = true` (08 would ink a disabled glyph
         // tertiary; UIKit keeps the item's look during the fade), so taps
         // are blocked by this wrapper instead: while fading it consumes

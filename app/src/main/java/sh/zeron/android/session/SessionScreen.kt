@@ -2,6 +2,11 @@ package sh.zeron.android.session
 
 import sh.zeron.android.design.modalLayerBackground
 import sh.zeron.android.design.ModalLayer
+import sh.zeron.android.voice.rememberVoiceVisible
+import sh.zeron.android.voice.VoiceBarItem
+import sh.zeron.android.voice.LocalVoiceController
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -505,7 +510,20 @@ fun SessionScreen(
             // #33: no bar title — the title and "project @ device" head the
             // ⋯ menu instead; a side chat reads "Side chat" over its
             // parent's title (iOS :50-53, 319-324).
-            // TODO(#61): the voice call bar item.
+            // #61: the voice item, left of the companions button (iOS's
+            // right items `[menu, companions, voice]`, SVC:61-81).
+            val voice = LocalVoiceController.current
+            val voiceShown = voice != null && rememberVoiceVisible(voice)
+            val accessory: (@Composable () -> Unit)? = if (!voiceShown) {
+                headerAccessory
+            } else {
+                @Composable {
+                    Row(horizontalArrangement = Arrangement.spacedBy(SessionHeaderDefaults.TitleItemGap)) {
+                        VoiceBarItem()
+                        headerAccessory?.invoke()
+                    }
+                }
+            }
             val sideParent = chrome.sideChatParent
             SessionHeader(
                 title = if (sideParent != null) "Side chat" else "",
@@ -513,7 +531,7 @@ fun SessionScreen(
                 edgeEngaged = edgeEngaged,
                 onMore = onMore,
                 statusBarTop = statusBarTop,
-                accessory = headerAccessory,
+                accessory = accessory,
             )
         },
         modifier = modifier.then(modalLayerBackground()),

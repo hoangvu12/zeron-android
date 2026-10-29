@@ -99,7 +99,7 @@ class VoiceController(
     /**
      * Navigate to the call stage (the call notification's tap,
      * `zeron://voice`, a Retry). Held until the stage's host collects it.
-     * TODO(#61): the stage collects this.
+     * #61's [VoiceStageHost] collects it.
      */
     val stageRequests: Flow<Unit> = _stageRequests.receiveAsFlow()
 

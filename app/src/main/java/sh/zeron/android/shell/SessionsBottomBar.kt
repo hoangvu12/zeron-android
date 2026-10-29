@@ -88,9 +88,9 @@ import sh.zeron.android.design.uiStyle
  * Close (or system Back) clears the query and returns the rest layout.
  * The field never hides on scroll (`hidesSearchBarWhenScrolling = false`).
  *
- * TODO(#61): the voice item (`waveform`, between Search and New session,
- * when a host can run voice or a call is live) lands with the voice entry
- * points.
+ * #61: the voice item (`waveform`, between Search and New session, when a
+ * host can run voice or a call is live) — its own glass circle, leaving
+ * with New session while the search is active.
  */
 object SessionsBottomBarMetrics {
     /** The row's height, the circles' side and the field's height. */
@@ -153,12 +153,20 @@ object SessionsBottomBarGeometry {
     /** The field's x: one step in at rest, the row's leading edge when active. */
     fun fieldX(p: Float): Float = Step * (1f - p)
 
-    /** The field's width: the row minus the trailing circle and gap, minus [fieldX]. */
-    fun fieldWidth(rowWidth: Float, p: Float): Float =
-        (rowWidth - Step - fieldX(p)).coerceAtLeast(SessionsBottomBarMetrics.Height)
+    /**
+     * The field's width: the row minus the trailing circle and gap, minus
+     * [fieldX] — and, at rest, minus the voice circle and gap when [voice]
+     * shows (#61; the field grows over its slot as it leaves).
+     */
+    fun fieldWidth(rowWidth: Float, p: Float, voice: Boolean = false): Float =
+        (rowWidth - Step - fieldX(p) - if (voice) Step * (1f - p).coerceIn(0f, 1f) else 0f)
+            .coerceAtLeast(SessionsBottomBarMetrics.Height)
 
     /** The trailing circle's x (New session at rest, Close when active). */
     fun trailingX(rowWidth: Float): Float = rowWidth - SessionsBottomBarMetrics.Height
+
+    /** #61: the voice circle's x, one step before the trailing circle. */
+    fun voiceX(rowWidth: Float): Float = trailingX(rowWidth) - Step
 
     /** Settings and New session: gone by p = 0.5. */
     fun restAlpha(p: Float): Float = 1f - (p / 0.5f).coerceIn(0f, 1f)
@@ -207,6 +215,7 @@ fun SessionsBottomBar(
     onNewSession: () -> Unit,
     modifier: Modifier = Modifier,
     onFrontPage: Boolean = true,
+    voice: (@Composable () -> Unit)? = null,
 ) {
     val palette = ZeronTheme.palette
     val active = searchState.active
@@ -258,6 +267,13 @@ fun SessionsBottomBar(
                     iconPt = SessionsBottomBarMetrics.IconPt,
                 )
             }
+            // #61: the voice circle (it renders nothing while voice isn't
+            // offered, so the slot measures 0 and the field keeps its width).
+            if (voice != null) {
+                Box(Modifier.graphicsLayer { alpha = SessionsBottomBarGeometry.restAlpha(progress.value) }.inert(active)) {
+                    voice()
+                }
+            }
         },
     ) { measurables, constraints ->
         // The expansion is read here and in the layers only: the spring
@@ -267,13 +283,16 @@ fun SessionsBottomBar(
         val circlePx = circle.roundToPx()
         val fixed = Constraints.fixed(circlePx, circlePx)
         val settings = measurables[0].measure(fixed)
-        val fieldPx = SessionsBottomBarGeometry.fieldWidth(rowWidth, p).dp.roundToPx()
+        val voice = measurables.getOrNull(4)?.measure(Constraints(maxWidth = circlePx, maxHeight = circlePx))
+        val hasVoice = voice != null && voice.width > 0
+        val fieldPx = SessionsBottomBarGeometry.fieldWidth(rowWidth, p, hasVoice).dp.roundToPx()
         val field = measurables[1].measure(Constraints.fixed(fieldPx, circlePx))
         val compose = measurables[2].measure(fixed)
         val close = measurables[3].measure(fixed)
         val settingsX = SessionsBottomBarGeometry.leadingX(p).dp.roundToPx()
         val fieldX = SessionsBottomBarGeometry.fieldX(p).dp.roundToPx()
         val trailingX = SessionsBottomBarGeometry.trailingX(rowWidth).dp.roundToPx()
+        val voiceX = SessionsBottomBarGeometry.voiceX(rowWidth).dp.roundToPx()
         val rest = SessionsBottomBarGeometry.restAlpha(p) > 0f
         val closing = SessionsBottomBarGeometry.closeAlpha(p) > 0f
         layout(constraints.maxWidth, circlePx) {
@@ -281,6 +300,7 @@ fun SessionsBottomBar(
             // not in the accessibility tree. placeRelative mirrors in RTL.
             if (rest) settings.placeRelative(settingsX, 0)
             field.placeRelative(fieldX, 0)
+            if (rest && hasVoice) voice?.placeRelative(voiceX, 0)
             if (rest) compose.placeRelative(trailingX, 0)
             if (closing) close.placeRelative(trailingX, 0)
         }

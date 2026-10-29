@@ -357,6 +357,40 @@ object ZeronIcons {
     /** SF `rectangle.portrait.and.arrow.right` — Settings' Sign Out row (#18). */
     val RectanglePortraitAndArrowRight = ZeronIcon.Vector(R.drawable.zi_logout_2)
 
+    /** SF `waveform` — the voice entry points and the Settings Voice row (#61). */
+    val Waveform = ZeronIcon.Vector(R.drawable.zi_waveform)
+
+    /** SF `mic.fill` — the call's mute control (#61). */
+    val MicFill = ZeronIcon.Vector(R.drawable.zi_microphone)
+
+    /** SF `mic.slash.fill` — the call's mute control while muted (#61). */
+    val MicSlashFill = ZeronIcon.Vector(R.drawable.zi_microphone_off)
+
+    /** SF `phone.down.fill` — hang up (#61). */
+    val PhoneDownFill = ZeronIcon.Vector(R.drawable.zi_phone_hang_up)
+
+    /** SF `text.bubble` — the stage's transcript button (#61). */
+    val TextBubble = ZeronIcon.Vector(R.drawable.zi_chat_round_line)
+
+    /** SF `person.wave.2` — the voice style row and submenu (#61). */
+    val PersonWave2 = ZeronIcon.Vector(R.drawable.zi_person_wave)
+
+    /** SF `speaker.wave.2.fill` — the call's loudspeaker route (#61). */
+    val SpeakerWave2Fill = ZeronIcon.Vector(R.drawable.zi_volume_loud)
+
+    /** SF `iphone` — the call's earpiece route (#61). */
+    val Iphone = ZeronIcon.Vector(R.drawable.zi_smartphone)
+
+    /** SF `ear` — Voice settings' "Hold it to your ear" tip (#61). */
+    val Ear = ZeronIcon.Vector(R.drawable.zi_ear)
+
+
+    /** SF `laptopcomputer` — a Mac or Windows voice host (#61). */
+    val Laptopcomputer = ZeronIcon.Vector(R.drawable.zi_laptop)
+
+    /** SF `server.rack` — any other voice host (#61). */
+    val ServerRack = ZeronIcon.Vector(R.drawable.zi_remote_server)
+
     // -----------------------------------------------------------------
     // Zeron / Android extras: no SF name, so [bySfName] omits them.
     // -----------------------------------------------------------------
@@ -532,6 +566,18 @@ object ZeronIcons {
         RegistryEntry("Lock", listOf("lock"), Lock),
         RegistryEntry("BookClosed", listOf("book.closed"), BookClosed),
         RegistryEntry("ArrowUpRightSquare", listOf("arrow.up.right.square"), ArrowUpRightSquare),
+        // #61: voice.
+        RegistryEntry("Waveform", listOf("waveform"), Waveform),
+        RegistryEntry("MicFill", listOf("mic.fill"), MicFill),
+        RegistryEntry("MicSlashFill", listOf("mic.slash.fill"), MicSlashFill),
+        RegistryEntry("PhoneDownFill", listOf("phone.down.fill"), PhoneDownFill),
+        RegistryEntry("TextBubble", listOf("text.bubble"), TextBubble),
+        RegistryEntry("PersonWave2", listOf("person.wave.2"), PersonWave2),
+        RegistryEntry("SpeakerWave2Fill", listOf("speaker.wave.2.fill"), SpeakerWave2Fill),
+        RegistryEntry("Iphone", listOf("iphone"), Iphone),
+        RegistryEntry("Ear", listOf("ear"), Ear),
+        RegistryEntry("Laptopcomputer", listOf("laptopcomputer", "pc"), Laptopcomputer),
+        RegistryEntry("ServerRack", listOf("server.rack"), ServerRack),
         // Zeron extras.
         RegistryEntry("TabChat", emptyList(), TabChat),
         RegistryEntry("TabSettings", emptyList(), TabSettings),
