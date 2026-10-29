@@ -546,6 +546,11 @@ dependencies {
     // JankStats, the lab bench's cross-check (ui-parity #136): debug only —
     // the lab code that imports it lives in src/debug.
     debugImplementation(libs.androidx.metrics.performance)
+    // The component lab (#12, decision D7): Compose Unstyled's headless
+    // primitives and stock Material 3 as the behaviour reference. Debug
+    // only — the lab lives in src/debug and release merges neither.
+    debugImplementation(libs.composeunstyled)
+    debugImplementation(libs.compose.material3)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

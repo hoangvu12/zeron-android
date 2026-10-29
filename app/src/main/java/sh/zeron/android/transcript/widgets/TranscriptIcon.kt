@@ -6,6 +6,7 @@ import android.os.Looper
 import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.annotation.VisibleForTesting
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,11 +18,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.drawscope.inset
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import java.io.IOException
 import java.io.InputStream
+import kotlin.math.min
 import sh.zeron.android.BuildConfig
 import sh.zeron.android.R
 import sh.zeron.android.design.Icon
@@ -31,6 +34,8 @@ import sh.zeron.android.design.ZeronIcons
 import sh.zeron.android.design.SymbolWeight
 import sh.zeron.android.design.TranscriptPalette
 import sh.zeron.android.design.color
+import sh.zeron.android.design.drawBrandMark
+import sh.zeron.android.design.resolveHarnessMark
 import uniffi.zeron_core.ColorRole
 
 /**
@@ -57,6 +62,14 @@ internal sealed interface TranscriptIconSource {
      * decode time, per appearance.
      */
     data class FileIcon(val name: String) : TranscriptIconSource
+
+    /**
+     * `brand:<harness>` (#30): the harness's [sh.zeron.android.design.BrandMark]
+     * (a sender caption's or a switch seam's), aspect-fit in the rect;
+     * monochrome marks take the widget's colour, Claude keeps its orange
+     * (iOS `RowView.asset`, `BrandMarks.image(for:side:)`).
+     */
+    data class Brand(val harness: String) : TranscriptIconSource
 
     /** An SF Symbol name resolved through [ZeronIcons.forSfName]. */
     data class Symbol(val icon: ZeronIcon) : TranscriptIconSource
@@ -102,6 +115,9 @@ internal object TranscriptIcons {
         "tool-arrow-up-right" to R.drawable.zi_arrow_up_right,
         "tool-git-branch" to R.drawable.zi_git_branch,
     )
+
+    /** The core's brand-mark icon names: `brand:<harness>`. */
+    private const val BRAND_PREFIX = "brand:"
 
     /** Name → classification; misses are cached as [TranscriptIconSource.Unknown]. */
     private val sources = HashMap<String, TranscriptIconSource>()
@@ -166,6 +182,7 @@ internal object TranscriptIcons {
      */
     private fun resolve(name: String): TranscriptIconSource {
         val resolved = when {
+            name.startsWith(BRAND_PREFIX) -> TranscriptIconSource.Brand(name.removePrefix(BRAND_PREFIX))
             name.startsWith("tool-") -> toolDrawables[name]?.let { TranscriptIconSource.Tool(it) }
             name.startsWith("fileicon-") -> TranscriptIconSource.FileIcon(name)
             else -> ZeronIcons.forSfName(name)?.let { TranscriptIconSource.Symbol(it) }
@@ -281,6 +298,14 @@ fun TranscriptIcon(
                 modifier = modifier.fillMaxSize(),
                 contentScale = ContentScale.Fit,
             )
+        }
+
+        // Brand mark: iOS renders it into a square and aspect-fits that
+        // into the rect, so the mark fits the centred min(w, h) square.
+        is TranscriptIconSource.Brand -> Canvas(modifier.fillMaxSize()) {
+            val (mark, ink) = resolveHarnessMark(source.harness, tint) ?: return@Canvas
+            val side = min(size.width, size.height)
+            inset((size.width - side) / 2f, (size.height - side) / 2f) { drawBrandMark(mark, ink) }
         }
 
         // SF Symbol stand-in: drawn at its natural point size and centred,

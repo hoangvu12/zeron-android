@@ -242,10 +242,6 @@ class ShellStateScopeTest {
             log += "tabs.popToFrontPage"
         }
 
-        override fun popSearchSessions() {
-            log += "tabs.popSearchSessions"
-        }
-
         override fun popAllToRoot() {
             log += "tabs.popAll"
         }
