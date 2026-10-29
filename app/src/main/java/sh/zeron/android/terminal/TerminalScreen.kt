@@ -354,10 +354,8 @@ internal fun TerminalScreen(route: TerminalRoute) {
                     scale = 1.75f,
                 )
             }
-            AnimatedVisibility(
+            RiseIn(
                 visible = status != null,
-                enter = fadeIn() + slideInVertically { it / 2 },
-                exit = fadeOut() + slideOutVertically { it / 2 },
                 modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 12.dp),
             ) {
                 status?.let { s ->
@@ -443,6 +441,20 @@ internal fun TerminalScreen(route: TerminalRoute) {
         }
         Spacer(Modifier.imePadding().navigationBarsPadding())
     }
+}
+
+/**
+ * The pill's fade-and-rise, outside any layout scope so it never picks up
+ * the page column's `ColumnScope.AnimatedVisibility`.
+ */
+@Composable
+private fun RiseIn(visible: Boolean, modifier: Modifier, content: @Composable () -> Unit) {
+    AnimatedVisibility(
+        visible = visible,
+        modifier = modifier,
+        enter = fadeIn() + slideInVertically { it / 2 },
+        exit = fadeOut() + slideOutVertically { it / 2 },
+    ) { content() }
 }
 
 /** What the status pill shows (iOS `TerminalStatusPill.State`) and its action. */
