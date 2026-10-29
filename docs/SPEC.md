@@ -51,7 +51,7 @@ tablet/foldable layouts, notifications.
    Radix/shadcn model: our look on headless, accessible primitives (Compose
    Foundation, Compose Unstyled), each meeting an accessibility contract (D7).
 4. **No core patches.** Adapt in Kotlin.
-5. **Nothing builds locally.** All compilation, tests and screenshot renders
+5. **Nothing builds locally.** All compilation and tests
    run on GitHub Actions; the owner's machine needs only git + gh.
 6. **Small, reviewable PRs**, one ticket each, with CI green. The owner tests
    CI-built APKs on their own phone; there are no CI screenshot renders.
