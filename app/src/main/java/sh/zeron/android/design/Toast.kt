@@ -4,7 +4,6 @@ import android.content.res.Configuration
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.view.accessibility.AccessibilityManager
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.foundation.background
@@ -49,7 +48,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalAccessibilityManager
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.LiveRegionMode
@@ -101,6 +100,12 @@ import kotlin.math.min
  * time); the keyboard counts as a bottom edge; the hold uses Android's
  * recommended a11y timeout (4000 ms unless "Time to take action" is set);
  * the action is once-only per toast.
+ *
+ * #62 (decision D7, "variant 2"): no headless library has a toast, so this
+ * stays Foundation only — our glass capsule; the label a polite live
+ * region (#63, not the deprecated `announceForAccessibility`); the hold
+ * from [LocalAccessibilityManager]; the action a `Role.Button`; placement
+ * above `max(system bars, IME)` ([rememberSafeBottom]).
  */
 
 // ---------------------------------------------------------------------------
@@ -244,27 +249,33 @@ fun ToastHost(
 }
 
 /**
- * The hold, adapted for accessibility (ticket 14):
- * `accessibilityManager.getRecommendedTimeoutMillis(4000, FLAG_CONTENT_TEXT
- * [or FLAG_CONTENT_CONTROLS])` — exactly 4000 ms unless the user set
+ * The hold, adapted for accessibility (ticket 14): the recommended timeout
+ * for 4000 ms of text [and controls] — exactly 4000 ms unless the user set
  * Android's "Time to take action", which only ever *lengthens* the hold
  * (TalkBack users need time to reach "Undo"). Read once per toast.
  *
+ * #62 (D7, variant 2): read through Compose's [LocalAccessibilityManager]
+ * (`calculateRecommendedTimeoutMillis`, the call Material's snackbar host
+ * makes) instead of the platform service from the context — same platform
+ * value underneath, and no `Context` reach-through in the design layer.
+ *
  * The floor at [Motion.ToastHoldMs] mirrors the platform's own guarantee
  * (the recommended value is always ≥ the original) and keeps Robolectric's
- * unshadowed real-code path from zeroing the hold.
+ * unshadowed real-code path (or a missing manager) from zeroing the hold.
  */
 @Composable
 private fun rememberHoldMs(model: ToastModel): Long {
-    val context = LocalContext.current
+    val accessibility = LocalAccessibilityManager.current
     return remember(model.id) {
-        val flags = AccessibilityManager.FLAG_CONTENT_TEXT or
-            (if (model.action != null) AccessibilityManager.FLAG_CONTENT_CONTROLS else 0)
         val recommended = runCatching {
-            context.getSystemService(AccessibilityManager::class.java)
-                ?.getRecommendedTimeoutMillis(Motion.ToastHoldMs.toInt(), flags)
+            accessibility?.calculateRecommendedTimeoutMillis(
+                originalTimeoutMillis = Motion.ToastHoldMs,
+                containsIcons = false,
+                containsText = true,
+                containsControls = model.action != null,
+            )
         }.getOrNull()
-        maxOf(recommended ?: 0, Motion.ToastHoldMs.toInt()).toLong()
+        maxOf(recommended ?: 0L, Motion.ToastHoldMs)
     }
 }
 

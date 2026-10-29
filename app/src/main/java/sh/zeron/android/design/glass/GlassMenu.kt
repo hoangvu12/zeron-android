@@ -1,5 +1,7 @@
 package sh.zeron.android.design.glass
 
+import sh.zeron.android.design.EnsureModalHost
+import sh.zeron.android.design.InWindowModal
 import sh.zeron.android.design.onEscape
 import sh.zeron.android.design.modalBackground
 import sh.zeron.android.design.modalBackScale
@@ -20,6 +22,7 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,6 +49,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -66,6 +70,7 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
@@ -74,6 +79,13 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.InputMode
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.boundsInWindow
@@ -82,6 +94,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
@@ -93,6 +106,7 @@ import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.onLongClick
 import androidx.compose.ui.semantics.paneTitle
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -143,6 +157,14 @@ import kotlin.math.roundToInt
  * window-less [GlassMenuContent], and the in-window [GlassMenuHost] with
  * its triggers. Ticket 16 embeds [GlassMenuContent] inside its own
  * context-menu overlay (it does **not** use the host or `placeGlassMenu`).
+ *
+ * #62 (decision D7): the open menu is presented through Compose Unstyled's
+ * `Modal` ([InWindowModal]: the `dialog()` root, in-window through the
+ * modal host's Portal) and follows its `UnstyledDropdownMenu` keyboard
+ * contract ([MenuKeyboard]). The primitive's own anchored panel is not
+ * used: its items must be direct children of a flat panel (no drill-in
+ * levels, deferred sections or iOS placement), and it takes focus on every
+ * open, which would close the IME under the composer's menus.
  */
 internal object GlassMenuTokens {
     /** Panel width: `max(250, intrinsic content width)`. */
@@ -296,6 +318,9 @@ internal class GlassMenuHostState {
     var isClosing: Boolean by mutableStateOf(false)
         private set
 
+    /** The open panel's keyboard targets (#62); one menu at a time, so one model. */
+    val keyboard = MenuKeyboard()
+
     /**
      * Presents [menu] anchored at [anchor]. Returns the presentation id, or
      * `null` when the menu has no content (nothing opens — no haptic).
@@ -357,6 +382,10 @@ internal val LocalGlassMenuHost = staticCompositionLocalOf<GlassMenuHostState?> 
  *
  * Must be inside `ZeronTheme` (the panel needs the palette and the type
  * scale).
+ *
+ * #62: the overlay portals into the nearest modal host's layer (the one
+ * `RootHosts` mounts inside `ToastHost`; [EnsureModalHost] mounts a local
+ * one in the gallery and tests), still a sibling drawn after the source.
  */
 @Composable
 fun GlassMenuHost(
@@ -365,27 +394,42 @@ fun GlassMenuHost(
 ) {
     val host = remember { GlassMenuHostState() }
     CompositionLocalProvider(LocalGlassMenuHost provides host) {
-        val up = host.presentation != null
-        Box(
-            Modifier
-                .fillMaxSize()
-                // #63: Escape closes the menu. On the host, not the panel:
-                // the panel never takes focus (the composer's field keeps
-                // it, and the keyboard with it), and the host sees the key
-                // on its way to whichever node holds focus.
-                .then(if (up) Modifier.onEscape { host.close() } else Modifier),
-        ) {
-            // 1. The app content: the only haze source of this window,
-            //    hidden from TalkBack while a menu is up (#63).
-            val background = modalBackground(overlayUp = up)
-            Box(Modifier.fillMaxSize().hazeSource(hazeState).then(background)) { content() }
-            // 2. The overlay: a sibling above the source, keyed by the
-            //    presentation id so a replacement leaves composition the
-            //    same frame (instant, like the toaster).
-            host.presentation?.let { presenting ->
-                key(presenting.id) {
-                    CompositionLocalProvider(LocalHazeState provides hazeState) {
-                        GlassMenuOverlay(host, presenting)
+        EnsureModalHost {
+            val up = host.presentation != null
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    // #63: Escape closes the menu; #62: ↓ / ↑ move into it
+                    // (the first / last row). On the host while focus is
+                    // still in the content: a menu opened by touch never
+                    // takes focus (the composer's field keeps it, and the
+                    // keyboard with it), and the host sees the key on its
+                    // way to whichever node holds focus. Inside the panel
+                    // [GlassMenuContent] handles the keys itself.
+                    .then(
+                        if (up) {
+                            Modifier
+                                .onEscape { host.close() }
+                                .onPreviewKeyEvent { event ->
+                                    event.type == KeyEventType.KeyDown && host.keyboard.enter(event.key)
+                                }
+                        } else {
+                            Modifier
+                        },
+                    ),
+            ) {
+                // 1. The app content: the only haze source of this window,
+                //    hidden from TalkBack while a menu is up (#63).
+                val background = modalBackground(overlayUp = up)
+                Box(Modifier.fillMaxSize().hazeSource(hazeState).then(background)) { content() }
+                // 2. The overlay: a sibling above the source, keyed by the
+                //    presentation id so a replacement leaves composition the
+                //    same frame (instant, like the toaster).
+                host.presentation?.let { presenting ->
+                    key(presenting.id) {
+                        CompositionLocalProvider(LocalHazeState provides hazeState) {
+                            InWindowModal { GlassMenuOverlay(host, presenting) }
+                        }
                     }
                 }
             }
@@ -449,6 +493,7 @@ private fun GlassMenuOverlay(host: GlassMenuHostState, presentation: GlassMenuPr
                     origin = origin,
                     onDismissRequest = { host.close() },
                     onClosed = { host.finished(presentation.id) },
+                    keyboard = host.keyboard,
                 )
             },
             modifier = Modifier
@@ -542,6 +587,10 @@ fun GlassMenuPopup(
  *
  * `enabled = false` does nothing (iOS `b.menu != nil`).
  *
+ * #62: the trigger is a focusable button (`UnstyledDropdownMenu`'s anchor
+ * contract): Enter, Space and ↓ open a [MenuTrigger.Tap] menu from a
+ * hardware keyboard, and the menu then takes focus at its first row.
+ *
  * When the element already has its own `clickable` (a ticket 08 glass
  * button), use [rememberGlassMenuState] and `state.open(anchor, menu())`
  * from its `onClick` instead.
@@ -605,12 +654,23 @@ fun Modifier.glassMenu(
         .semantics {
             if (enabled) {
                 when (trigger) {
-                    MenuTrigger.Tap -> this.onClick(label = null) { openNow(); true }
+                    MenuTrigger.Tap -> {
+                        role = Role.Button
+                        this.onClick(label = null) { openNow(); true }
+                    }
                     MenuTrigger.LongPress ->
                         this.onLongClick(label = "Show menu") { openLongPress(); true }
                 }
             }
         }
+        .onKeyEvent { event ->
+            val opens = event.key == Key.Enter || event.key == Key.NumPadEnter ||
+                event.key == Key.Spacebar || event.key == Key.DirectionDown
+            if (!enabled || trigger != MenuTrigger.Tap || !opens) return@onKeyEvent false
+            if (event.type == KeyEventType.KeyDown) openNow()
+            true
+        }
+        .focusable(enabled = enabled && trigger == MenuTrigger.Tap)
     // If the trigger leaves composition, the menu it opened closes (the
     // presentation table's "trigger leaves" rule; the anchor itself is
     // frozen at open, like iOS).
@@ -698,6 +758,12 @@ private fun backLabelFor(menu: Menu, levels: List<MenuLevel>): String? {
  * alert the action opens appears while the menu fades. Under Reduce
  * Motion there is no scale, the fade is 150 ms, and drill-ins resize
  * instantly.
+ *
+ * Keyboard (#62, `UnstyledDropdownMenu`'s contract through [keyboard]): a
+ * menu opened from a hardware keyboard takes focus at its first row (one
+ * opened by touch leaves focus where it was — the IME stays up); inside,
+ * ↓ / ↑ move between the rows, Home / End jump to the ends, Tab leaves
+ * (closes, focus back to the trigger) and Escape closes.
  */
 @Composable
 fun GlassMenuContent(
@@ -708,6 +774,7 @@ fun GlassMenuContent(
     onClosed: () -> Unit,
     modifier: Modifier = Modifier,
     maxHeight: Dp = Dp.Unspecified,
+    keyboard: MenuKeyboard = remember { MenuKeyboard() },
 ) {
     val scope = rememberCoroutineScope()
     val reduceMotion = LocalReduceMotion.current
@@ -833,17 +900,25 @@ fun GlassMenuContent(
         },
     )
 
-    // Accessibility: move focus to the first enabled row, but only while a
-    // screen reader (touch exploration) is on — a programmatic requestFocus
-    // without a focus target would otherwise fight the composer's field.
+    // Move focus to the first enabled row when the menu was opened from a
+    // hardware keyboard (#62) or while a screen reader (touch exploration)
+    // is on — otherwise a requestFocus would fight the composer's field.
+    // A drill-in or back moves it to the new level's first row as well.
     val context = LocalContext.current
     val a11yFocus = remember(context) {
         runCatching {
             context.getSystemService(AccessibilityManager::class.java)?.isTouchExplorationEnabled
         }.getOrDefault(false) == true
     }
-    val firstRowFocus = remember { FocusRequester() }
-    LaunchedEffect(Unit) { if (a11yFocus) firstRowFocus.requestFocus() }
+    val inputMode = LocalInputModeManager.current.inputMode
+    val takesFocus = remember { a11yFocus || inputMode == InputMode.Keyboard }
+    LaunchedEffect(stack.size) {
+        if (takesFocus) {
+            // One frame: the level's rows are placed and bound.
+            withFrameNanos { }
+            keyboard.move(MenuMove.First)
+        }
+    }
 
     // --------------------------------------------------------- the panel
 
@@ -863,15 +938,27 @@ fun GlassMenuContent(
         }
     }
     val panelModifier = resize.then(swallowTaps)
-    val focusRequester = if (a11yFocus) firstRowFocus else null
 
     Box(
-        modifier.graphicsLayer {
-            scaleX = scale.value * modalBackScale(backProgress)
-            scaleY = scale.value * modalBackScale(backProgress)
-            this.alpha = alpha.value.coerceIn(0f, 1f) // the spring may overshoot
-            transformOrigin = origin
-        },
+        modifier
+            .graphicsLayer {
+                scaleX = scale.value * modalBackScale(backProgress)
+                scaleY = scale.value * modalBackScale(backProgress)
+                this.alpha = alpha.value.coerceIn(0f, 1f) // the spring may overshoot
+                transformOrigin = origin
+            }
+            // #62: the keys while a row holds focus (the menu sits in the
+            // modal layer, outside the host's content).
+            .onEscape { onDismissRequest() }
+            .onPreviewKeyEvent { event ->
+                if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
+                if (event.key == Key.Tab) {
+                    onDismissRequest()
+                    true
+                } else {
+                    keyboard.onKey(event.key)
+                }
+            },
     ) {
         // Test-only progress key, isolated so its per-frame recomposition
         // never touches the panel content (the GlassSurface convention).
@@ -886,7 +973,7 @@ fun GlassMenuContent(
                 onBack = ::pop,
                 modifier = panelModifier,
                 maxHeight = maxHeight,
-                focusRequester = focusRequester,
+                keyboard = keyboard,
             )
         } else {
             Crossfade(
@@ -902,7 +989,9 @@ fun GlassMenuContent(
                     onBack = ::pop,
                     modifier = panelModifier,
                     maxHeight = maxHeight,
-                    focusRequester = focusRequester,
+                    // Only the level on screen binds the keys; the one
+                    // cross-fading out keeps its rows to itself.
+                    keyboard = if (levelStack == levels) keyboard else null,
                 )
             }
         }
@@ -927,7 +1016,7 @@ private fun GlassMenuLevelPanel(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     maxHeight: Dp = Dp.Unspecified,
-    focusRequester: FocusRequester? = null,
+    keyboard: MenuKeyboard? = null,
 ) {
     val lines = flattenLevel(
         level.title,
@@ -948,7 +1037,7 @@ private fun GlassMenuLevelPanel(
         onBack = onBack,
         modifier = modifier,
         maxHeight = maxHeight,
-        focusRequester = focusRequester,
+        keyboard = keyboard,
     )
 }
 
@@ -969,8 +1058,9 @@ private fun GlassMenuLevelPanel(
  * content, capped by [maxHeight] / the incoming constraints, scrolling
  * past that.
  *
- * @param focusRequester attached (with `focusable()`) to the first enabled
- *   row — accessibility focus on open. `null` normally.
+ * @param keyboard the open menu's keyboard model (#62): every focusable
+ *   line (the back row, enabled rows, submenu rows) registers with it, in
+ *   order. `null` for static panels (previews, the gallery).
  */
 @Composable
 fun GlassMenuPanel(
@@ -980,17 +1070,23 @@ fun GlassMenuPanel(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     maxHeight: Dp = Dp.Unspecified,
-    focusRequester: FocusRequester? = null,
+    keyboard: MenuKeyboard? = null,
 ) {
     val palette = ZeronTheme.palette
     val slotReserved = reservesLeadingSlot(lines)
     val paneTitleText = (lines.firstNotNullOfOrNull { it as? MenuLine.Title })?.text ?: "Menu"
-    val focusIndex = focusRequester?.let {
-        lines.indexOfFirst { line ->
-            (line is MenuLine.Row && !line.item.disabled && !line.item.informational) || line is MenuLine.Back
-        }.takeIf { index -> index >= 0 }
-    } ?: -1
+    // The focusable lines, in order, and one requester each.
+    val targets = lines.indices.filter { lines[it].isFocusTarget() }
+    val requesters = remember(targets.size) { List(targets.size) { FocusRequester() } }
+    if (keyboard != null) SideEffect { keyboard.bind(requesters) }
     val shape = rememberSmoothRoundedShape(GlassMenuTokens.Radius)
+    fun focusModifierAt(index: Int): Modifier {
+        val slot = targets.indexOf(index)
+        if (keyboard == null || slot < 0) return Modifier
+        return Modifier
+            .focusRequester(requesters[slot])
+            .onFocusChanged { keyboard.focusChanged(slot, it.hasFocus) }
+    }
 
     GlassSurface(
         modifier = modifier
@@ -1019,7 +1115,7 @@ fun GlassMenuPanel(
                     is MenuLine.Back -> MenuBackLine(
                         line = line,
                         onBack = onBack,
-                        focusModifier = focusModifierAt(index, focusIndex, focusRequester),
+                        focusModifier = focusModifierAt(index),
                     )
                     is MenuLine.Header -> MenuHeaderLine(line, slotReserved)
                     MenuLine.Separator -> MenuSeparatorLine(palette.isDark)
@@ -1027,13 +1123,13 @@ fun GlassMenuPanel(
                         line = line,
                         slotReserved = slotReserved,
                         onRow = onRow,
-                        focusModifier = focusModifierAt(index, focusIndex, focusRequester),
+                        focusModifier = focusModifierAt(index),
                     )
                     is MenuLine.Submenu -> MenuSubmenuLine(
                         line = line,
                         slotReserved = slotReserved,
                         onSubmenu = onSubmenu,
-                        focusModifier = focusModifierAt(index, focusIndex, focusRequester),
+                        focusModifier = focusModifierAt(index),
                     )
                     is MenuLine.Loading -> MenuLoadingLine(slotReserved)
                 }
@@ -1042,17 +1138,12 @@ fun GlassMenuPanel(
     }
 }
 
-/** The first-enabled-row focus modifier, empty when this line is not the target. */
-private fun focusModifierAt(
-    index: Int,
-    focusIndex: Int,
-    focusRequester: FocusRequester?,
-): Modifier =
-    if (focusRequester != null && index == focusIndex) {
-        Modifier.focusRequester(focusRequester).focusable()
-    } else {
-        Modifier
-    }
+/** A line a keyboard can focus: the back row, an enabled tappable row, a submenu row. */
+private fun MenuLine.isFocusTarget(): Boolean = when (this) {
+    is MenuLine.Back, is MenuLine.Submenu -> true
+    is MenuLine.Row -> !item.disabled && !item.informational
+    else -> false
+}
 
 /**
  * The panel's "capped by the incoming constraints" in a parent with no
@@ -1119,7 +1210,7 @@ private fun MenuBackLine(
     val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     val interaction = remember { MutableInteractionSource() }
-    val pressed by interaction.collectIsPressedAsState()
+    val highlighted = interaction.highlighted()
     Box(
         focusModifier
             .fillMaxWidth()
@@ -1130,7 +1221,7 @@ private fun MenuBackLine(
                 role = Role.Button,
                 onClick = onBack,
             )
-            .pressHighlight(palette, pressed)
+            .pressHighlight(palette, highlighted)
             .testTag("glass-menu-back")
             .semantics { contentDescription = "Back to ${line.backTo ?: "menu"}" },
     ) {
@@ -1337,7 +1428,7 @@ private fun MenuRowLayout(
     }
     val subtitleInk = if (disabled) palette.secondary.copy(alpha = 0.6f) else palette.secondary
     val interaction = remember { MutableInteractionSource() }
-    val pressed by interaction.collectIsPressedAsState()
+    val highlighted = interaction.highlighted()
 
     Box(
         focusModifier
@@ -1357,7 +1448,7 @@ private fun MenuRowLayout(
                             role = Role.Button,
                             onClick = onClick,
                         )
-                        .pressHighlight(palette, pressed)
+                        .pressHighlight(palette, highlighted)
                 },
             )
             .testTag(testTag)
@@ -1441,6 +1532,20 @@ private fun LeadingContent(icon: MenuIcon?, checked: Boolean, ink: Color) {
         icon is MenuIcon.Brand -> HarnessMark(icon.harness, GlassMenuTokens.BrandSide, ink)
         icon is MenuIcon.Custom -> icon.content(ink)
     }
+}
+
+/**
+ * Whether a row shows its highlight: while a finger is down, or (#62)
+ * while it holds keyboard focus in keyboard mode — the focused menu item
+ * iOS Full Keyboard Access draws. A row focused for TalkBack draws none
+ * (the screen reader draws its own).
+ */
+@Composable
+private fun MutableInteractionSource.highlighted(): Boolean {
+    val pressed by collectIsPressedAsState()
+    val focused by collectIsFocusedAsState()
+    val keyboardMode = LocalInputModeManager.current.inputMode == InputMode.Keyboard
+    return pressed || (focused && keyboardMode)
 }
 
 /**

@@ -129,9 +129,6 @@ class MotionTest {
             "bottomStackReflow" to 446.80,
             "accessoryRelayout" to 480.90,
             "sectionChevron" to 733.83,
-            // ui-parity#28: the tab bar minimize morph (system
-            // `tabBarMinimizeBehavior`, values from android-app#19).
-            "tabBarMinimize" to 412.78,
             // ui-parity#133: the interactive IME dismiss settle (iOS's
             // 0.25 s keyboard duration, critically damped).
             "imeSettle" to 1364.09,
@@ -139,16 +136,6 @@ class MotionTest {
         for (spring in Motion.allSprings) {
             assertEquals("${spring.name}: table stiffness", expected.getValue(spring.name), spring.stiffness.toDouble(), 0.01)
         }
-    }
-
-    @Test
-    fun tabBarMinimizeMatchesTheSystemMinimizeSpec() {
-        // ios:Shell/MainTabController.swift:22 sets the behaviour; the numbers
-        // are android-app#19's: 0.40 s total, ζ 0.85 — the same settle-matched
-        // stiffness as ToastRise (a different iOS site, so a different token).
-        assertEquals(0.85f, Motion.TabBarMinimize.damping, 0f)
-        assertEquals(0.40, Motion.TabBarMinimize.durationSec, 0.0)
-        assertEquals(412.78, Motion.TabBarMinimize.stiffness.toDouble(), 0.01)
     }
 
     @Test
@@ -180,7 +167,7 @@ class MotionTest {
 
     @Test
     fun allSpringsListsEveryNamedToken() {
-        assertEquals(11, Motion.allSprings.size)
+        assertEquals(10, Motion.allSprings.size)
         assertEquals(
             listOf(
                 Motion.ComposerMorph, Motion.ActionButton, Motion.ToastRise, Motion.HandoffBubble,

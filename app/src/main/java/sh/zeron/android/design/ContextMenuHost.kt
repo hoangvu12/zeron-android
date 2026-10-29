@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -37,6 +38,10 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.layer.drawLayer
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.LayoutCoordinates
@@ -62,6 +67,7 @@ import kotlinx.coroutines.launch
 import sh.zeron.android.design.glass.GlassMenuContent
 import sh.zeron.android.design.glass.LocalHazeState
 import sh.zeron.android.design.glass.Menu
+import sh.zeron.android.design.glass.MenuKeyboard
 import sh.zeron.android.design.glass.MenuPlacement
 import kotlin.math.max
 import kotlin.math.roundToInt
@@ -84,6 +90,12 @@ import kotlin.math.roundToInt
  * outside the alert, toast, action-sheet, glass-menu and sheet hosts
  * (ticket 35's `RootHosts` order). Until then the gallery
  * (`GalleryProviders`) and the tests wrap content in it.
+ *
+ * #62 (decision D7): the overlay is presented through Compose Unstyled's
+ * `Modal` ([InWindowModal]), portalled into the root modal host — still in
+ * this window, so the preview layer, the geometry and the blur hold. The
+ * host and the root modal layer both fill the window, so the overlay's
+ * host-relative geometry is the layer's too.
  */
 val LocalContextMenuHost = staticCompositionLocalOf<ContextMenuHostState?> { null }
 
@@ -103,36 +115,50 @@ fun ContextMenuHost(content: @Composable () -> Unit) {
     val state = remember { ContextMenuHostState() }
     val ctxHaze = rememberHazeState()
     CompositionLocalProvider(LocalContextMenuHost provides state) {
-        val up = state.active != null
-        Box(
-            Modifier
-                .fillMaxSize()
-                .onPlaced { state.hostCoords = it }
-                // #63: Escape closes the menu (the host sees the key on its
-                // way to whichever node holds focus).
-                .then(if (up) Modifier.onEscape { state.dismiss() } else Modifier),
-        ) {
-            // 1. The app content: the one haze source of this window's
-            //    context-menu glass, blurred as the lift rises (the draw-phase
-            //    read below animates without recomposition).
-            // #63: hidden from TalkBack while the menu is up, focus restored after.
-            val background = modalBackground(overlayUp = up)
+        EnsureModalHost {
+            val up = state.active != null
             Box(
                 Modifier
                     .fillMaxSize()
-                    .then(background)
-                    .hazeSource(ctxHaze)
-                    .graphicsLayer {
-                        val lift = state.active?.lift?.value ?: 0f
-                        val radius = ContextMenuTokens.BlurRadius.toPx() * lift
-                        renderEffect = if (radius > 0.5f) BlurEffect(radius, radius, TileMode.Clamp) else null
-                    },
-            ) { content() }
-            // 2. The overlay: a sibling above the source, blurring the
-            //    content below it through ctxHaze.
-            state.active?.let { active ->
-                CompositionLocalProvider(LocalHazeState provides ctxHaze) {
-                    ContextMenuOverlay(active, state, state.hostCoords)
+                    .onPlaced { state.hostCoords = it }
+                    // #63: Escape closes the menu (the host sees the key on its
+                    // way to whichever node holds focus); #62: ↓ / ↑ move into
+                    // the panel.
+                    .then(
+                        if (up) {
+                            Modifier
+                                .onEscape { state.dismiss() }
+                                .onPreviewKeyEvent { event ->
+                                    event.type == KeyEventType.KeyDown &&
+                                        state.active?.keyboard?.enter(event.key) == true
+                                }
+                        } else {
+                            Modifier
+                        },
+                    ),
+            ) {
+                // 1. The app content: the one haze source of this window's
+                //    context-menu glass, blurred as the lift rises (the draw-phase
+                //    read below animates without recomposition).
+                // #63: hidden from TalkBack while the menu is up, focus restored after.
+                val background = modalBackground(overlayUp = up)
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .then(background)
+                        .hazeSource(ctxHaze)
+                        .graphicsLayer {
+                            val lift = state.active?.lift?.value ?: 0f
+                            val radius = ContextMenuTokens.BlurRadius.toPx() * lift
+                            renderEffect = if (radius > 0.5f) BlurEffect(radius, radius, TileMode.Clamp) else null
+                        },
+                ) { content() }
+                // 2. The overlay: above the source in the modal layer,
+                //    blurring the content below it through ctxHaze.
+                state.active?.let { active ->
+                    CompositionLocalProvider(LocalHazeState provides ctxHaze) {
+                        InWindowModal { ContextMenuOverlay(active, state, state.hostCoords) }
+                    }
                 }
             }
         }
@@ -192,8 +218,9 @@ class ContextMenuHostState internal constructor() {
         val host = hostCoords ?: return false
         if (!coords.isAttached || !host.isAttached) return false
         val touchInHost = host.localPositionOf(coords, posInRow)
-        source.lifted = true
-        source.liftState?.isLifted = true
+        // The row hides itself (`lifted`) only once the overlay draws its
+        // preview: the overlay composes through the modal Portal a frame
+        // or two later (#62), and the row must not blank meanwhile.
         active = ActiveLift(source, menu, touchInHost)
         return true
     }
@@ -243,6 +270,9 @@ internal class ActiveLift(
 
     /** Set by the panel's `onClosed`, after the 150 ms close fade. */
     var menuGone by mutableStateOf(false)
+
+    /** The panel's keyboard targets (#62). */
+    val keyboard = MenuKeyboard()
 }
 
 /**
@@ -327,6 +357,15 @@ private fun ContextMenuOverlay(
     val source = active.source
     val highlight = source.highlight
     val dim = if (dark) ContextMenuTokens.DimDark else ContextMenuTokens.DimLight
+
+    // The overlay is composed: the row hands its drawing to the preview
+    // (see `open`). Never after a release (`active` moved on).
+    SideEffect {
+        if (host.active === active && !source.lifted) {
+            source.lifted = true
+            source.liftState?.isLifted = true
+        }
+    }
 
     // Back is registered outside the menu presentation, so ticket 15's
     // submenu Back handler — composed later, deeper — wins while a submenu
@@ -489,6 +528,7 @@ private fun ContextMenuOverlay(
                     onDismissRequest = { host.dismiss() },
                     onClosed = { active.menuGone = true },
                     maxHeight = menuMaxHeight,
+                    keyboard = active.keyboard,
                 )
             },
             modifier = Modifier.fillMaxSize(),

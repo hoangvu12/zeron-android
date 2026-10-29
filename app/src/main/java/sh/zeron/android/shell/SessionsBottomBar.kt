@@ -14,12 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.text.BasicText
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.input.KeyboardActionHandler
-import androidx.compose.foundation.text.input.TextFieldDecorator
-import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.placeCursorAtEnd
 import androidx.compose.runtime.Composable
@@ -38,7 +32,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
@@ -50,11 +43,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import sh.zeron.android.core.Face
@@ -63,6 +51,8 @@ import sh.zeron.android.design.Icon
 import sh.zeron.android.design.IosSpring
 import sh.zeron.android.design.LocalReduceMotion
 import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.SearchClearLabel
+import sh.zeron.android.design.SearchTextField
 import sh.zeron.android.design.SymbolWeight
 import sh.zeron.android.design.ZeronIcons
 import sh.zeron.android.design.ZeronTheme
@@ -350,9 +340,11 @@ private fun Modifier.inert(inert: Boolean): Modifier =
 
 /**
  * The search field: a 48 dp glass capsule — the magnifier (17 pt,
- * `secondary`) at 14, the text from 40 in Geist Regular 17 `fixed` over the
- * state-based `BasicTextField` (IME action Search, no autocorrect: session
- * titles hold identifiers), the placeholder "Search" in `tertiary`, the
+ * `secondary`) at 14, the text from 40 in Geist Regular 17 `fixed` over
+ * Compose Unstyled's headless `UnstyledTextField` (#62, D7 variant 2: the
+ * shared [SearchTextField] — IME action Search, no autocorrect: session
+ * titles hold identifiers; hardware Escape clears, then drops the focus),
+ * the placeholder "Search" in `tertiary`, the
  * caret `accent`, and the clear button (17 pt `XmarkCircleFill`,
  * `tertiary`) while there is text. A tap anywhere on the capsule focuses
  * the field and raises the IME; focus makes the search active.
@@ -362,7 +354,9 @@ private fun Modifier.inert(inert: Boolean): Modifier =
  * "Search" key hides the IME and drops the focus (the text and the active
  * search stay). The IME hidden **while focused** (system back) drops the
  * focus too — no orphan caret — but only once the IME has been seen up.
- * [held] `false` (a page pushed over the list) lets go of the focus.
+ * [held] `false` (a page pushed over the list) lets go of the focus. No
+ * result-count announcement here: the results (and their count) are the
+ * Sessions list's, not the bar's.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -440,7 +434,6 @@ internal fun BottomBarSearchField(
         )
         SearchFieldText(
             state = state,
-            hasText = hasText,
             focusRequester = focusRequester,
             interactionSource = source,
             modifier = Modifier
@@ -466,7 +459,6 @@ internal fun BottomBarSearchField(
 @Composable
 private fun SearchFieldText(
     state: SearchTabState,
-    hasText: Boolean,
     focusRequester: FocusRequester,
     interactionSource: MutableInteractionSource,
     modifier: Modifier,
@@ -477,44 +469,27 @@ private fun SearchFieldText(
     val focusManager = LocalFocusManager.current
     val style = uiStyle(Face.Sans, typeScale.fixed(SessionsBottomBarMetrics.FieldPt), palette.text)
 
-    BasicTextField(
+    // The IME "Search" key (and #62's Escape on an empty field): the IME
+    // down, the focus dropped; the text and the active search stay.
+    val dropFocus = {
+        keyboard?.hide()
+        focusManager.clearFocus()
+    }
+    // #62 (D7 variant 2): the headless UnstyledTextField through the shared
+    // SearchTextField — "Search" label, search keyboard, Escape clears then
+    // blurs; the glass press still reads [interactionSource].
+    SearchTextField(
         state = state.text,
+        placeholder = BottomBarSearchPlaceholder,
+        textStyle = style,
+        onSearch = dropFocus,
+        onBlur = dropFocus,
         modifier = modifier
             .focusRequester(focusRequester)
-            .testTag("search-field")
-            .semantics { contentDescription = BottomBarSearchPlaceholder },
-        textStyle = style,
-        keyboardOptions = KeyboardOptions(
-            capitalization = KeyboardCapitalization.None,
-            autoCorrectEnabled = false,
-            keyboardType = KeyboardType.Text,
-            imeAction = ImeAction.Search,
-        ),
-        onKeyboardAction = object : KeyboardActionHandler {
-            override fun onKeyboardAction(performKeyboardAction: () -> Unit) {
-                // The IME "Search" key: the IME down, the focus dropped; the
-                // text and the active search stay.
-                keyboard?.hide()
-                focusManager.clearFocus()
-            }
-        },
-        lineLimits = TextFieldLineLimits.SingleLine,
+            .testTag("search-field"),
+        accessibilityLabel = BottomBarSearchPlaceholder,
         interactionSource = interactionSource,
-        cursorBrush = SolidColor(palette.accent),
-        decorator = TextFieldDecorator { innerTextField ->
-            Box(Modifier.fillMaxHeight(), contentAlignment = Alignment.CenterStart) {
-                if (!hasText) {
-                    BasicText(
-                        BottomBarSearchPlaceholder,
-                        style = style.copy(color = palette.tertiary),
-                        maxLines = 1,
-                        softWrap = false,
-                        overflow = TextOverflow.Clip,
-                    )
-                }
-                innerTextField()
-            }
-        },
+        decorationModifier = Modifier.fillMaxHeight(),
     )
 }
 
@@ -550,7 +525,7 @@ private fun SearchClearButton(
                 }
             }
             .clearAndSetSemantics {
-                contentDescription = "Clear text"
+                contentDescription = SearchClearLabel
                 role = Role.Button
             },
         contentAlignment = Alignment.Center,

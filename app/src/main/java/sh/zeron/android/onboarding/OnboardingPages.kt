@@ -74,6 +74,7 @@ import sh.zeron.android.design.LocalIsDark
 import sh.zeron.android.design.LocalTypeScale
 import sh.zeron.android.design.SymbolWeight
 import sh.zeron.android.design.ZeronIcons
+import sh.zeron.android.design.ZeronSegmentedControl
 import sh.zeron.android.design.ZeronTheme
 import sh.zeron.android.design.uiStyle
 import sh.zeron.android.notify.rememberNotificationPermissionRequester
@@ -98,38 +99,22 @@ internal fun AppearancePage(app: ZeronApplication) {
     }
 }
 
-/** `UISegmentedControl(["System", "Light", "Dark"])`: the stored look, switched instantly. */
+/**
+ * `UISegmentedControl(["System", "Light", "Dark"])`: the stored look,
+ * switched instantly. #62 / D7: the design system's [ZeronSegmentedControl]
+ * (a radio group named "Color scheme", the thumb sliding to the pick)
+ * replaces this page's hand-made `Role.Tab` segments.
+ */
 @Composable
 private fun SchemePicker(current: Appearance, onPick: (Appearance) -> Unit) {
-    val palette = ZeronTheme.palette
-    val typeScale = LocalTypeScale.current
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .height(32.dp)
-            .clip(RoundedCornerShape(9.dp))
-            .background(palette.controlFill)
-            .padding(2.dp)
-            .testTag("onboarding-scheme"),
-    ) {
-        for (option in Appearance.entries) {
-            val selected = option == current
-            Box(
-                Modifier
-                    .weight(1f)
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(7.dp))
-                    .background(if (selected) palette.elevated else palette.controlFill.copy(alpha = 0f))
-                    .clickable(role = Role.Tab) { onPick(option) },
-                contentAlignment = Alignment.Center,
-            ) {
-                BasicText(
-                    option.name,
-                    style = uiStyle(if (selected) Face.SansSemibold else Face.SansMedium, typeScale.fixed(13f), palette.text),
-                )
-            }
-        }
-    }
+    ZeronSegmentedControl(
+        options = Appearance.entries,
+        selected = current,
+        onSelect = onPick,
+        label = { it.name },
+        modifier = Modifier.testTag("onboarding-scheme"),
+        accessibilityLabel = "Color scheme",
+    )
 }
 
 /**

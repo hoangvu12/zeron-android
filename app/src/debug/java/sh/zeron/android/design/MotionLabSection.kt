@@ -129,7 +129,6 @@ object MotionLab {
         TweenEntry("wallpaperFadeIn", Motion.wallpaperFadeIn()),
         TweenEntry("imageTileCrossfade", Motion.imageTileCrossfade()),
         TweenEntry("sessionReveal", Motion.sessionReveal()),
-        TweenEntry("accessoryContentReturn", Motion.accessoryContentReturn()),
         TweenEntry("sidebarToggle", Motion.sidebarToggle()),
         TweenEntry("veil", Motion.veil()),
         TweenEntry("rowFadeIn", Motion.rowFadeIn()),

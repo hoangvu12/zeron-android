@@ -13,12 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.text.BasicText
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.input.KeyboardActionHandler
-import androidx.compose.foundation.text.input.TextFieldDecorator
-import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.placeCursorAtEnd
@@ -36,7 +30,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -44,10 +37,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -57,6 +46,9 @@ import sh.zeron.android.design.Appearance
 import sh.zeron.android.design.CapsuleShape
 import sh.zeron.android.design.Icon
 import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.SearchClearLabel
+import sh.zeron.android.design.SearchFieldLabel
+import sh.zeron.android.design.SearchTextField
 import sh.zeron.android.design.ZeronIcons
 import sh.zeron.android.design.ZeronTheme
 import sh.zeron.android.design.glass.GlassSurface
@@ -129,6 +121,11 @@ object SidebarSearchMetrics {
  * - the IME "Search" action hides the IME and clears the focus, keeping
  *   the text and results; the IME hidden **while focused** (system back)
  *   drops the caret — no orphan (29's guard);
+ * - #62 (D7 variant 2): the text field is the headless `UnstyledTextField`
+ *   via the shared [SearchTextField] (label "Search", the search keyboard,
+ *   hardware Escape clears, then drops the focus like the IME action).
+ *   No result-count announcement here: the count lives with the front
+ *   page's results (`sessions/SessionsScreen.kt`), not with this band;
  * - `focusSearch()`/`showSessions()` requests arrive as one-shot flags on
  *   [SidebarState] and are consumed here: focus waits for the stack's
  *   transition to end plus one frame (a `requestFocus()` on a node that
@@ -155,6 +152,11 @@ fun SidebarSearchField(
     fun requestFocusAndShowIme() {
         runCatching { focusRequester.requestFocus() }
         keyboard?.show()
+    }
+
+    fun dropFocus() {
+        keyboard?.hide()
+        focus.clearFocus(force = true)
     }
 
     // ------------------------------------------------- SidebarState requests
@@ -244,48 +246,25 @@ fun SidebarSearchField(
                 } else {
                     SidebarSearchMetrics.TrailingInset
                 }
-                BasicTextField(
+                // #62 (D7 variant 2): the headless UnstyledTextField
+                // through the shared SearchTextField — "Search" label,
+                // search keyboard, Escape clears then blurs.
+                SearchTextField(
                     state = state.search,
+                    placeholder = SearchFieldLabel,
+                    textStyle = uiStyle(Face.Sans, typeScale.fixed(17f), palette.text),
+                    // The IME "Search" key (and Escape on an empty field):
+                    // hide the IME, clear the focus; the text and the
+                    // results stay (the iOS UI test's typeText("\n")).
+                    onSearch = { dropFocus() },
+                    onBlur = { dropFocus() },
                     modifier = Modifier
                         .align(Alignment.CenterStart)
                         .padding(start = SidebarSearchMetrics.TextStart, end = endPad)
                         .fillMaxWidth()
                         .focusRequester(focusRequester)
                         .onFocusChanged { focused = it.isFocused }
-                        .semantics { contentDescription = "Search" }
                         .testTag("sidebar-search"),
-                    lineLimits = TextFieldLineLimits.SingleLine,
-                    textStyle = uiStyle(Face.Sans, typeScale.fixed(17f), palette.text),
-                    cursorBrush = SolidColor(palette.accent),
-                    keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.None,
-                        autoCorrectEnabled = false,
-                        keyboardType = KeyboardType.Text,
-                        imeAction = ImeAction.Search,
-                    ),
-                    onKeyboardAction = object : KeyboardActionHandler {
-                        override fun onKeyboardAction(performKeyboardAction: () -> Unit) {
-                            // The IME "Search" key: hide the IME, clear the
-                            // focus; the text and the results stay (the iOS
-                            // UI test's typeText("\n")).
-                            keyboard?.hide()
-                            focus.clearFocus(force = true)
-                        }
-                    },
-                    decorator = TextFieldDecorator { innerTextField ->
-                        Box(contentAlignment = Alignment.CenterStart) {
-                            if (!hasText) {
-                                BasicText(
-                                    "Search",
-                                    style = uiStyle(Face.Sans, typeScale.fixed(17f), palette.tertiary),
-                                    maxLines = 1,
-                                    softWrap = false,
-                                    overflow = TextOverflow.Clip,
-                                )
-                            }
-                            innerTextField()
-                        }
-                    },
                 )
                 // The clear button: only while non-empty, no animation (UIKit
                 // swaps it instantly). The 44-wide touch target is centred on
@@ -308,7 +287,7 @@ fun SidebarSearchField(
                                 state.search.clearText()
                                 if (!focused) requestFocusAndShowIme()
                             }
-                            .semantics { contentDescription = "Clear text" }
+                            .semantics { contentDescription = SearchClearLabel }
                             .testTag("sidebar-search-clear"),
                         contentAlignment = Alignment.Center,
                     ) {

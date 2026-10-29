@@ -28,10 +28,14 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.LiveRegionMode
-import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.progressBarRangeInfo
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -67,9 +71,20 @@ import sh.zeron.android.core.Face
  *    `PullToRefreshTimingTest`;
  *  - [PullToRefreshState] — the gesture (a [NestedScrollConnection] with
  *    rubber-band resistance), the phase machine and the refresh job;
- *  - [rememberPullToRefreshState] / [PullToRefreshIndicator] — the
- *    composition API; `sessions/Refresher.kt`'s
+ *  - [rememberPullToRefreshState] / [PullToRefreshIndicator] /
+ *    [pullToRefreshSemantics] — the composition API; `sessions/Refresher.kt`'s
  *    `rememberSessionsPullToRefresh` is the sessions-side wrapper.
+ *
+ * #62 (decision D7, "variant 2"): neither Compose Foundation nor Compose
+ * Unstyled has a headless pull-to-refresh, and material3's behaviour-only
+ * `Modifier.pullToRefresh` is off limits (no Material in `src/main`), so
+ * the gesture stays this file's own [NestedScrollConnection] (#23: the iOS
+ * rubber band, the 60 dp hold, the 0.6/3 s window). What variant 2 adds is
+ * the contract, here in the shared control so every scaffold gets it: the
+ * list's "Refresh" custom action (the non-gesture path,
+ * [pullToRefreshSemantics]) and an indicator that exposes its state — an
+ * indeterminate progress node reading [RefreshingLabel], a polite live
+ * region — instead of clearing its semantics.
  *
  * No reduce-motion branch of its own (ticket 04's rule: only the 13 iOS
  * sites branch, and the refresh control is not one). The system "Remove
@@ -337,9 +352,9 @@ class PullToRefreshState internal constructor(
 
     /**
      * A refresh without the gesture — the list's "Refresh" accessibility
-     * action (#23; the full pull-to-refresh accessibility pass is #63):
-     * behaves like a release past the threshold, the gap snapped to the
-     * hold. Does nothing while a refresh already runs.
+     * action ([pullToRefreshSemantics]; #23, #63, #62): behaves like a
+     * release past the threshold, the gap snapped to the hold. Does nothing
+     * while a refresh already runs.
      */
     fun refresh() {
         if (phase == PullPhase.Refreshing) return
@@ -472,6 +487,37 @@ fun rememberPullToRefreshState(onRefresh: suspend () -> Unit): PullToRefreshStat
 }
 
 // ---------------------------------------------------------------------------
+// Accessibility: the non-gesture path
+// ---------------------------------------------------------------------------
+
+/** The list's accessibility action that runs a pull to refresh (#23; shared by every scaffold since #62). */
+const val PullToRefreshActionLabel = "Refresh"
+
+/** What TalkBack says while a refresh runs (#63). */
+const val RefreshingLabel = "Refreshing"
+
+/**
+ * The pull's accessibility path (#62, D7 variant 2; the action itself is
+ * #23's): a "Refresh" custom action — TalkBack's actions menu, Switch
+ * Access — that runs [PullToRefreshState.refresh], a release past the
+ * threshold without the gesture. Put it on the **scrolling list** (the
+ * node a screen-reader user is on when they want a refresh), not on the
+ * box carrying [PullToRefreshState.nestedScrollConnection]; the
+ * announcement is the indicator's ([PullToRefreshIndicator]). The action
+ * stays offered while a refresh runs and is a no-op then, so the actions
+ * menu never reshuffles mid-refresh.
+ */
+fun Modifier.pullToRefreshSemantics(state: PullToRefreshState): Modifier =
+    semantics {
+        customActions = listOf(
+            CustomAccessibilityAction(PullToRefreshActionLabel) {
+                state.refresh()
+                true
+            },
+        )
+    }
+
+// ---------------------------------------------------------------------------
 // The indicator
 // ---------------------------------------------------------------------------
 
@@ -486,25 +532,29 @@ fun rememberPullToRefreshState(onRefresh: suspend () -> Unit): PullToRefreshStat
  *   gap is at the hold, fades out with the closing gap;
  * - composed only while the gap is open or the spinner runs/closes —
  *   otherwise nothing subscribes to the glyph clock;
- * - cleared semantics carrying the `pull-to-refresh` test tag (iOS's
- *   `accessibilityIdentifier`); decorative while pulling or closing, and
- *   while a refresh runs a polite live region reading [RefreshingLabel]
- *   (#63), so TalkBack says "Refreshing" whether the pull or the list's
- *   Refresh action started it. The
- *   overlay itself paints nothing — the gap stays transparent so the
+ * - semantics (#62, D7 variant 2 — no longer cleared): the
+ *   `pull-to-refresh` test tag (iOS's `accessibilityIdentifier`) and a
+ *   polite live region throughout; while a refresh runs the node is an
+ *   indeterminate progress reading [RefreshingLabel] (#63's announcement),
+ *   so TalkBack says "Refreshing" whether the pull or the list's Refresh
+ *   action started it, and the spinner can be found by touch while it
+ *   spins. Pulling and closing have nothing to say (no label, no
+ *   progress), so the node is skipped then. The glyph itself has no
+ *   semantics ([StatusGlyph]), so there is nothing to clear.
+ * - the overlay itself paints nothing — the gap stays transparent so the
  *   scaffold background / wallpaper shows through — and swallows no
  *   touches (a plain Box has no pointer input).
  *
  * `offsetPx` is read only inside the `offset {}` / `graphicsLayer {}`
- * lambdas (plus a derived boolean), so a pull frame never recomposes.
+ * lambdas (plus a derived boolean), so a pull frame never recomposes; the
+ * phase is read in composition (three changes per refresh), so the
+ * semantics follow it without depending on lambda read tracking.
  */
-/** What TalkBack says while a refresh runs (#63). */
-const val RefreshingLabel = "Refreshing"
-
 @Composable
 fun PullToRefreshIndicator(state: PullToRefreshState, navBottom: Dp, modifier: Modifier = Modifier) {
     val show by remember { derivedStateOf { state.indicatorVisible } }
     if (!show) return
+    val refreshing = state.isRefreshing
     val density = LocalDensity.current
     val navBottomPx = with(density) { navBottom.toPx() }
     val halfBoxPx = with(density) { (6.dp * PullToRefreshDefaults.SpinnerScale).toPx() }
@@ -526,11 +576,12 @@ fun PullToRefreshIndicator(state: PullToRefreshState, navBottom: Dp, modifier: M
                         state.holdPx,
                     )
                 }
-                .clearAndSetSemantics {
+                .semantics {
                     testTag = "pull-to-refresh"
-                    if (state.isRefreshing) {
+                    liveRegion = LiveRegionMode.Polite
+                    if (refreshing) {
                         contentDescription = RefreshingLabel
-                        liveRegion = LiveRegionMode.Polite
+                        progressBarRangeInfo = ProgressBarRangeInfo.Indeterminate
                     }
                 },
         )

@@ -47,6 +47,7 @@ import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import com.composeunstyled.UnstyledSwitch
 import kotlinx.coroutines.launch
 
 /**
@@ -233,14 +234,33 @@ fun ZeronSwitchVisual(fraction: () -> Float, lift: () -> Float, modifier: Modifi
  * via `.valueChanged`; here the caller owns the value, so it can refuse a
  * change and the thumb springs back (ticket 99's denied-permission path).
  *
- * Semantics are set by hand — `Modifier.toggleable` would add its own
- * click gesture and compete with the drag. TalkBack reads
- * "Switch, On/Off"; inside a ticket 70 row the merged node reads the row
- * title and subtitle first, and a double-tap triggers this `onClick`.
+ * #62 / D7: the switch is hosted on Compose Unstyled's `UnstyledSwitch`
+ * (the headless primitive the Component Lab's variant 2 used); our
+ * [ZeronSwitchVisual], press lift and thumb drag are its content. The
+ * primitive's interaction contract depends on how the switch is labelled:
+ *
+ *  - **Labelled** ([accessibilityLabel] set; a switch that stands alone):
+ *    `UnstyledSwitch` owns the interaction. Its `toggleable(role = Switch)`
+ *    gives the switch its own focus stop, Enter/Space/D-pad toggling,
+ *    `disabled()` and the TalkBack click; the label is its content
+ *    description. The drag here only consumes past the touch slop, which
+ *    cancels the primitive's tap, so a drag never also clicks.
+ *  - **Row-labelled** (no [accessibilityLabel]; every ticket 70
+ *    [GroupedRow] use): `UnstyledSwitch` gets `onCheckedChange = null` (its
+ *    "another control owns the interaction" mode) and the semantics are set
+ *    by hand, because `toggleable` is a *merging* node: the row's
+ *    `mergeDescendants` would stop at it, and TalkBack would get the row's
+ *    text and an unlabelled "Switch, Off" as two stops. With hand semantics
+ *    the row merges the switch's state and click into one stop that reads
+ *    the title, subtitle and On/Off (the iOS cell + accessory `UISwitch`
+ *    is one VoiceOver element), and a double-tap on it flips the switch.
+ *    Focus, keys and `disabled()` mirror what `toggleable` gives (#63).
  *
  * @param testTag the caller's [toggleTag]; `null` for untagged uses
  * @param enabled `false` refuses every flip silently — no haptic, no
  *   callback, the thumb springs back (wave-10 40's locked agent rows)
+ * @param accessibilityLabel the switch's own spoken name, for a switch with
+ *   no row text to merge into (#62); `null` inside a [GroupedRow]
  */
 @Composable
 fun ZeronSwitch(
@@ -249,7 +269,11 @@ fun ZeronSwitch(
     modifier: Modifier = Modifier,
     testTag: String? = null,
     enabled: Boolean = true,
+    accessibilityLabel: String? = null,
 ) {
+    // #62: a labelled switch is its own toggleable stop (the primitive's
+    // contract); an unlabelled one merges into its row (see the KDoc).
+    val standalone = accessibilityLabel != null
     val reduce = LocalReduceMotion.current
     val feedback = LocalFeedback.current
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
@@ -297,31 +321,52 @@ fun ZeronSwitch(
         if (reduce) lift.snapTo(target) else lift.animateTo(target, ZeronSwitchTokens.Lift.spec())
     }
 
-    ZeronSwitchVisual(
-        fraction = { if (dragging) dragFraction else fraction.value },
-        lift = { lift.value },
-        modifier = modifier
-            .then(if (testTag != null) Modifier.testTag(testTag) else Modifier)
-            .semantics {
-                role = Role.Switch
-                toggleableState = ToggleableState(checked)
-                onClick { commit(!latestChecked); true }
-                // #63: TalkBack says "disabled" for a locked switch.
-                if (!enabled) disabled()
-            }
-            // #63: reachable with a keyboard or D-pad (Tab moves focus here,
-            // Space or Enter flips it, like a focused `UISwitch` under Full
-            // Keyboard Access); a disabled switch takes no focus.
-            .onPreviewKeyEvent { event ->
-                if (event.type == KeyEventType.KeyUp && event.key in ToggleKeys) {
-                    commit(!latestChecked)
-                    true
-                } else {
-                    event.key in ToggleKeys
+    // The tag sits on the primitive's node, the one that carries the
+    // switch's semantics (both modes), so `toggle-<id>` lookups and their
+    // 63 × 28 bounds are unchanged.
+    val tagged = modifier.then(if (testTag != null) Modifier.testTag(testTag) else Modifier)
+    UnstyledSwitch(
+        checked = checked,
+        // Labelled: the primitive's toggleable (tap, keys, TalkBack) commits
+        // through the same haptic-first path as the drag.
+        onCheckedChange = if (standalone) ({ value: Boolean -> commit(value) }) else null,
+        modifier = if (standalone) {
+            tagged
+        } else {
+            tagged
+                .semantics {
+                    role = Role.Switch
+                    toggleableState = ToggleableState(checked)
+                    onClick { commit(!latestChecked); true }
+                    // #63: TalkBack says "disabled" for a locked switch.
+                    if (!enabled) disabled()
                 }
-            }
-            .focusable(enabled)
-            .pointerInput(rtl) {
+                // #63: reachable with a keyboard or D-pad (Tab moves focus
+                // here, Space or Enter flips it, like a focused `UISwitch`
+                // under Full Keyboard Access); a disabled switch takes no
+                // focus.
+                .onPreviewKeyEvent { event ->
+                    if (event.type == KeyEventType.KeyUp && event.key in ToggleKeys) {
+                        commit(!latestChecked)
+                        true
+                    } else {
+                        event.key in ToggleKeys
+                    }
+                }
+                .focusable(enabled)
+        },
+        enabled = enabled,
+        accessibilityLabel = accessibilityLabel,
+    ) {
+        // The visual is the primitive's only child (its Layout sizes to it,
+        // 63 × 28). The gesture lives on the child, so it sees each pointer
+        // event before the primitive's toggleable on the parent: the down
+        // stays unconsumed for both, and a drag's consumed moves cancel the
+        // primitive's tap.
+        ZeronSwitchVisual(
+            fraction = { if (dragging) dragFraction else fraction.value },
+            lift = { lift.value },
+            modifier = Modifier.pointerInput(rtl, standalone) {
                 val travelPx = ZeronSwitchTokens.Travel.toPx()
                 awaitEachGesture {
                     val down = awaitFirstDown()
@@ -338,8 +383,10 @@ fun ZeronSwitch(
                             // No horizontal drag: either an up (a tap, if it
                             // was not consumed by a parent) or a cancel (the
                             // parent scroll took the gesture) — nothing else.
+                            // A labelled switch leaves the up to the
+                            // primitive's toggleable, which flips it once.
                             val up = currentEvent.changes.firstOrNull { it.id == down.id }
-                            if (up != null && up.changedToUp()) {
+                            if (!standalone && up != null && up.changedToUp()) {
                                 up.consume()
                                 commit(!latestChecked)
                             }
@@ -372,5 +419,6 @@ fun ZeronSwitch(
                     }
                 }
             },
-    )
+        )
+    }
 }
