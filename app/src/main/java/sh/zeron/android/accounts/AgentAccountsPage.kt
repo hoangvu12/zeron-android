@@ -98,7 +98,18 @@ private data class SignInState(val option: String, val message: String? = null)
  * which also takes an API key.
  */
 @Composable
-fun AgentAccountsPage(route: AgentAccountsRoute, modifier: Modifier = Modifier) {
+fun AgentAccountsPage(
+    route: AgentAccountsRoute,
+    modifier: Modifier = Modifier,
+    /**
+     * #55: shown on its own in a sheet (an error card's "Log in"): no back,
+     * no status-bar inset, and a Done circle that calls this (iOS's Done
+     * when the page is the root of a presented sheet).
+     */
+    onDone: (() -> Unit)? = null,
+    /** The bottom inset the host reserves (the sheet's); default: the bottom chrome's. */
+    bottomInset: androidx.compose.ui.unit.Dp? = null,
+) {
     val context = LocalContext.current
     val app = context.applicationContext as? ZeronApplication ?: return
     val core = remember(app) { CoreProvidersCore { app.clientOrNull() } }
@@ -299,7 +310,21 @@ fun AgentAccountsPage(route: AgentAccountsRoute, modifier: Modifier = Modifier) 
         modifier = modifier.testTag("agent-accounts"),
         mode = TitleMode.InlineOnly,
         listState = rememberLazyListState(),
-        contentPadding = PaddingValues(bottom = chrome.contentPadding + 16.dp),
+        topInset = if (onDone != null) 0.dp else sh.zeron.android.shell.largeTitleDefaultTopInset(),
+        contentPadding = PaddingValues(bottom = (bottomInset ?: chrome.contentPadding) + 16.dp),
+        showBack = if (onDone != null) false else sh.zeron.android.shell.LocalNavStack.current.entries.firstOrNull()?.id != sh.zeron.android.shell.LocalNavEntry.current.id,
+        trailing = {
+            if (onDone != null) {
+                sh.zeron.android.design.glass.GlassCircleButton(
+                    icon = ZeronIcons.Checkmark,
+                    contentDescription = "Done",
+                    onClick = onDone,
+                    modifier = Modifier.testTag("accounts-done"),
+                    filled = ZeronTheme.palette.text,
+                    ink = ZeronTheme.palette.background,
+                )
+            }
+        },
         pullToRefresh = rememberPullToRefreshState(onRefresh = { load() }),
     ) {
         groupedSection(
