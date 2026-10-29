@@ -4,7 +4,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
-import org.junit.Assert.assertTrue
 import org.junit.Test
 import sh.zeron.android.composer.ChipIcon
 import sh.zeron.android.composer.ChipMenuProvider
@@ -19,9 +18,7 @@ import sh.zeron.android.composer.ComposerChip
  * pin which clause of the model-title chain ran (no native library, no
  * Compose UI — the chip records are plain data).
  *
- * The visual row (capsule sizes, tone washes, fades) is 59's; the binding
- * ([NewSessionChipsEffect]) is the Robolectric test in
- * [NewSessionChipsScreenshotTest].
+ * The visual row (capsule sizes, tone washes, fades) is 59's.
  */
 class NewSessionChipsTest {
 
@@ -129,10 +126,11 @@ class NewSessionChipsTest {
     }
 
     @Test
-    fun anOfflineProjectTintsOnlyTheHostChip() {
+    fun anOfflineProjectTintsNoChip() {
+        // #37: iOS sends to an offline host and the core queues the work.
         val out = chips(NewSessionDraft(), project = p.copy(online = false))
-        assertEquals(ChipTint.Warning, out[1].tint)
-        assertEquals(listOf<ChipTint?>(null, ChipTint.Warning, null, null, null), out.map { it.tint })
+        assertEquals("Workstation", out[1].title)
+        assertEquals(listOf<ChipTint?>(null, null, null, null, null), out.map { it.tint })
     }
 
     // ── the projectless pair ───────────────────────────────────────────
@@ -153,8 +151,8 @@ class NewSessionChipsTest {
         assertFalse(online.any { it.id == "branch" })
 
         assertEquals("Old", chips(NewSessionDraft(hostId = "h2"), project = null, hosts = hosts)[1].title)
-        assertEquals(
-            ChipTint.Warning,
+        assertNull(
+            "an offline host is not tinted (#37)",
             chips(NewSessionDraft(hostId = "h2"), project = null, hosts = hosts)[1].tint,
         )
         for (id in listOf(null, "gone")) {
@@ -191,19 +189,27 @@ class NewSessionChipsTest {
     }
 
     @Test
-    fun anUnlistedModelIdStillNamesTheFirstListedModelOfTheHarness() {
-        // The host lists X1 for codex but not gpt-9: clause 1 wins over the
-        // draft's id, and the label chain's modelLabel never runs.
-        val labels = RecordingLabels()
+    fun anUnlistedModelIdNamesItselfNeverTheFirstListedModel() {
+        // iOS `draftModel` (#37): the host lists X1 for codex but not gpt-9.
+        // gpt-9 is what gets sent, so the chip names it through the catalog
+        // label and offers no ladder of another model.
+        val labels = RecordingLabels(modelLabelResult = "GPT-9")
         val out = chips(
             NewSessionDraft(harness = "codex", model = "gpt-9"),
             models = listOf(c1, x1),
             labels = labels,
         )
+        assertEquals("GPT-9", out.first { it.id == "model" }.title)
+        assertFalse(out.any { it.id == "effort" })
+        assertEquals(listOf("modelLabel(codex, gpt-9)"), labels.calls)
+    }
+
+    @Test
+    fun withoutADraftModelTheFirstListedModelAndItsLadderStand() {
+        val out = chips(NewSessionDraft(harness = "codex"), models = listOf(c1, x1))
         assertEquals("GPT-5.5", out.first { it.id == "model" }.title)
         // 4 levels → index 4 / 2 = 2 → "high" → "High".
         assertEquals("High", out.first { it.id == "effort" }.title)
-        assertTrue("modelLabel must not run: ${labels.calls}", labels.calls.isEmpty())
     }
 
     @Test
@@ -217,7 +223,7 @@ class NewSessionChipsTest {
     }
 
     @Test
-    fun withoutADraftModelTheFallbackCatalogNamesTheDefault() {
+    fun withoutADraftModelOrAListedOneTheFallbackCatalogNamesTheDefault() {
         val labels = RecordingLabels()
         val out = chips(NewSessionDraft(harness = "codex"), models = listOf(c1), labels = labels)
         assertEquals("FFI-fallback", out.first { it.id == "model" }.title)

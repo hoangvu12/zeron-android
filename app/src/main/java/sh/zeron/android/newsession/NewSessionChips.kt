@@ -8,7 +8,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import sh.zeron.android.composer.ChipIcon
 import sh.zeron.android.composer.ChipMenuProvider
-import sh.zeron.android.composer.ChipTint
 import sh.zeron.android.composer.ComposerChip
 import sh.zeron.android.composer.ComposerController
 
@@ -76,8 +75,7 @@ object CoreChipLabels : ChipLabels {
 /**
  * iOS `refreshChips()` (`ios:Session/NewSessionViewController.swift:247-278`),
  * as a pure function over ticket 92's page state (the ticket's Spec table):
- * `project` (group name + tile) · `host` (device name, warning-tinted while
- * its engine is offline) · `branch` (only for a git project: "New worktree"
+ * `project` (group name + tile) · `host` (device name) · `branch` (only for a git project: "New worktree"
  * / the branch / "Current branch") · `model` (always) · `effort` (only for
  * a model with a non-empty ladder).
  *
@@ -89,10 +87,12 @@ object CoreChipLabels : ChipLabels {
  * - without a project there is never a branch chip, the project chip reads
  *   `No project` with the `tray` symbol, and the host chip reads the host
  *   matching `draft.hostId`, else `Choose host`;
- * - the model title is the lazy chain `selected.label` → (only with a
+ * - the model is iOS's [draftModel] (#37): the draft's own model when it
+ *   names one, the harness's first listed model only when it names none;
+ * - the model title is the lazy chain `model.label` → (only with a
  *   `draft.model`) `modelLabel` → `firstFallbackModelLabel` →
- *   `harnessLabel`, so a harness that lists models names the **first**
- *   listed model even when the draft holds an unlisted id;
+ *   `harnessLabel`, so an unlisted id still gets its catalog label, never
+ *   another model's name;
  * - the brand icon is dropped when `draft.harness` is empty
  *   (`BrandMarks.image(for:)` returns nil, ticket 78's rule);
  * - `draft.effort` shows as-is even outside the ladder, and the default is
@@ -100,11 +100,8 @@ object CoreChipLabels : ChipLabels {
  * - the effort title goes through [swiftCapitalized] (Foundation's
  *   `capitalized`: `Xhigh`, not the core's `X-High`).
  *
- * The Zeron addition: the `host` chip's [ChipTint.Warning] while the
- * resolved engine is offline (`!project.online`, or the hostless pick's
- * `!host.online`) — Zeron web's `DeviceChip` rule, carried over by
- * android-app#25. Only the host chip is tinted, and it stays tappable (94
- * keeps the strip live while it gates Send).
+ * No chip is tinted for an offline host (#37): iOS sends anyway and the
+ * core queues the work for the host.
  */
 fun newSessionChips(
     draft: NewSessionDraft,
@@ -125,7 +122,6 @@ fun newSessionChips(
             id = NewSessionChipIds.Host,
             title = project.deviceName,
             symbol = "desktopcomputer",
-            tint = if (project.online) null else ChipTint.Warning,
         )
         if (project.git) {
             chips += ComposerChip(
@@ -142,13 +138,10 @@ fun newSessionChips(
             id = NewSessionChipIds.Host,
             title = host?.name ?: "Choose host",
             symbol = "desktopcomputer",
-            tint = if (host != null && !host.online) ChipTint.Warning else null,
         )
     }
-    // The model: the draft's pick within its harness, else the harness's
-    // first listed model — the same lookup as ticket 92's selectedModel.
-    val selected = models.firstOrNull { it.harness == draft.harness && it.id == draft.model }
-        ?: models.firstOrNull { it.harness == draft.harness }
+    // The model: the same lookup as the page's selectedModel.
+    val selected = draftModel(models, draft)
     // Never the harness name in place of a model: a model this host hasn't
     // listed still gets its catalog label.
     val modelTitle = selected?.label
@@ -171,7 +164,11 @@ fun newSessionChips(
     return chips
 }
 
-/** The chips a side chat's draft keeps (iOS `refreshChips` with `sideOf`). */
+/**
+ * The chips a side chat's draft keeps: its parent's model and effort, for
+ * reading only — `createSideChat` takes the parent's config, so the page
+ * offers no picker or menu there (#37; the draft itself goes with #39).
+ */
 private val SideChatChipIds = setOf(NewSessionChipIds.Model, NewSessionChipIds.Effort)
 
 /**
@@ -273,7 +270,7 @@ fun NewSessionChipsEffect(
                 labels,
             )
             // android-next #06: a side chat runs in its parent's checkout
-            // on its parent's host — only the model and effort are picked.
+            // on its parent's host, with its parent's model and effort.
             if (model.side == null) all else all.filter { it.id in SideChatChipIds }
         }
     }

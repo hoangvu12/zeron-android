@@ -61,9 +61,7 @@ import sh.zeron.android.design.uiStyle
  * ([flattenLevel]), so the panel chrome, the checkmarks, the separators
  * and the "Loading…" row are exactly what the real menus show: K1
  * Checkout while the refs load (nothing reserved, titles at 20 dp), K2
- * loaded with the worktree on, K3 with a picked branch, M the Model
- * menu (harness sections sorted by id, 16 dp brand marks, Opus 5.5
- * checked), E1 the effort ladder with nothing picked (titles at 20 dp)
+ * loaded with the worktree on, K3 with a picked branch, E1 the effort ladder with nothing picked (titles at 20 dp)
  * and E2 with `low` picked (titles at 61 dp). The live demo under them
  * drives the real [CheckoutModelEffortMenus] over an in-memory draft.
  */
@@ -146,11 +144,7 @@ internal class NewSessionMenusDemoPage(refSource: RefSource) {
     val menus = CheckoutModelEffortMenus(
         draft = { draft },
         project = { NewSessionMenusProject },
-        models = { NewSessionMenusModels },
-        selectedModel = {
-            NewSessionMenusModels.firstOrNull { m -> m.harness == draft.harness && m.id == draft.model }
-                ?: NewSessionMenusModels.firstOrNull { m -> m.harness == draft.harness }
-        },
+        selectedModel = { draftModel(NewSessionMenusModels, draft) },
         update = { t -> draft = t(draft) },
         refSource = refSource,
     )
@@ -166,7 +160,7 @@ internal class NewSessionMenusDemoPage(refSource: RefSource) {
 }
 
 // ---------------------------------------------------------------------------
-// The static panels' lines (K1–K3, M, E1, E2) — pure, shared with the
+// The static panels' lines (K1–K3, E1, E2) — pure, shared with the
 // Roborazzi goldens (CheckoutModelEffortMenusScreenshotTest).
 // ---------------------------------------------------------------------------
 
@@ -183,15 +177,6 @@ internal fun checkoutLoadedLines(worktree: Boolean, branch: String?): List<MenuL
     val deferred = MenuElement.Deferred(cached = true) { rows }
     val menu = checkoutMenu(worktree, deferred) {}
     return flattenLevel(menu.title, menu.children, resolved = { rows }, isRoot = true, backTitle = null)
-}
-
-/** M — the Model menu over the demo fixture: Claude Code before Codex, Opus 5.5 checked. */
-internal fun modelMenuLines(
-    draft: NewSessionDraft = NewSessionDraft(harness = "claude-code", model = "claude-opus-5-5"),
-    models: List<ModelChoice> = NewSessionMenusModels,
-): List<MenuLine> {
-    val menu = modelMenu(models, draft) {}
-    return flattenLevel(menu.title, menu.children, resolved = { null }, isRoot = true, backTitle = null)
 }
 
 /** E1/E2 — the Reasoning effort menu over Fable 5.1's ladder. */
@@ -226,7 +211,8 @@ fun CheckoutModelEffortMenusGallerySection() {
                     style = uiStyle(Face.SansSemibold, LocalTypeScale.current.fixed(17f), ZeronTheme.palette.text),
                 )
                 SectionLabel(
-                    "Checkout / Model / Reasoning effort — ticket 15 draws, 114 builds the content. " +
+                    "Checkout / Reasoning effort — ticket 15 draws, 114 builds the content " +
+                        "(the model chip opens the model picker, #37). " +
                         "The live demo at the bottom drives the real menus.",
                     style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(13f), ZeronTheme.palette.secondary),
                 )
@@ -236,7 +222,6 @@ fun CheckoutModelEffortMenusGallerySection() {
                     "K3 · Checkout, loaded, branch picked",
                     checkoutLoadedLines(worktree = false, branch = "fix/ws-reconnect"),
                 )
-                StaticPanel("M · Model", modelMenuLines())
                 StaticPanel("E1 · Reasoning effort, nothing picked", effortMenuLines(NewSessionMenusFable51, null))
                 StaticPanel("E2 · Reasoning effort, picked", effortMenuLines(NewSessionMenusFable51, "low"))
                 LiveDemo()
@@ -316,7 +301,7 @@ private fun SectionLabel(text: String, style: TextStyle) {
 }
 
 // ---------------------------------------------------------------------------
-// Previews (the BRIEF's component-ticket convention): K2, M and E2 side
+// Previews (the BRIEF's component-ticket convention): K2 and E2 side
 // by side, light and dark. The goldens themselves come from
 // CheckoutModelEffortMenusScreenshotTest.
 // ---------------------------------------------------------------------------
@@ -338,7 +323,6 @@ private fun NewSessionMenusPreviewBody() {
     Box(Modifier.background(ZeronTheme.palette.background).padding(16.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
             StaticPanel("K2 · Checkout, worktree on", checkoutLoadedLines(worktree = true, branch = null))
-            StaticPanel("M · Model", modelMenuLines())
             StaticPanel("E2 · Reasoning effort, picked", effortMenuLines(NewSessionMenusFable51, "low"))
         }
     }

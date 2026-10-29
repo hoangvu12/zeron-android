@@ -1,6 +1,7 @@
 package sh.zeron.android.newsession
 
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -20,6 +21,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 import sh.zeron.android.ZeronApplication
 import sh.zeron.android.composer.ComposerBar
 import sh.zeron.android.composer.ComposerController
+import sh.zeron.android.composer.ModelPickerController
+import sh.zeron.android.composer.ModelPickerOverlay
 import sh.zeron.android.composer.SendResult
 import sh.zeron.android.composer.StagedImage
 import sh.zeron.android.composer.rememberComposerController
@@ -91,7 +94,7 @@ internal fun NewSessionScreenBody(
 ) {
     val composer = rememberComposerController(initialText = ns.initialText)
 
-    // ── 94: the handoff capture, the offline gate, the send handler ─────
+    // ── 94: the handoff capture and the send handler ───────────────────
 
     // The capture state: the page root records the scene, the composer
     // root records the composer. The sheet's own shape (31's 38 dp top
@@ -126,10 +129,31 @@ internal fun NewSessionScreenBody(
         )
     }
 
+    // #37: the shared tabbed picker the model chip opens (iOS
+    // `composer.onChipTap` → `modelPicker()`), hosted over the canvas.
+    val modelPicker = remember { ModelPickerController() }
     remember(composer) {
         // Runs once, before the first frame (iOS sets these in `init` and
         // `viewDidLoad`).
         bindNewSessionComposer(composer, project = { ns.project }, ns.initialImages, fileSearch)
+        // The model chip has no menu, so its tap lands here. A side chat
+        // takes its parent's config: no picker there (#39 owns its flow).
+        composer.onChipTap = { id ->
+            if (id == NewSessionChipIds.Model && ns.side == null) {
+                modelPicker.present(
+                    newSessionModelPicker(
+                        models = ns.models,
+                        draft = ns.draft,
+                        hostName = newSessionPickerHostName(
+                            ns.project,
+                            ns.currentOptions?.hosts.orEmpty(),
+                            ns.draft.hostId,
+                        ),
+                        update = ns::update,
+                    ),
+                )
+            }
+        }
         // android-next #06: a side chat searches its parent's project (iOS
         // `sideOf`: the parent's device and space; none when projectless).
         ns.side?.let { side -> composer.mentionSearch = sideChatMentionSearch(side, fileSearch) }
@@ -155,14 +179,19 @@ internal fun NewSessionScreenBody(
         CheckoutModelEffortMenus(
             draft = { ns.draft },
             project = { ns.project },
-            models = { ns.models },
             selectedModel = { ns.selectedModel },
             update = ns::update,
             refSource = refSource,
         )
     }
     val chipMenus = remember(projectMenus, checkoutMenus) {
-        newSessionChipMenus(projectMenus.providers(), checkoutMenus.providers())
+        // A side chat's model and effort chips only read its parent's
+        // config (`createSideChat` takes it): no menus there.
+        if (ns.side != null) {
+            newSessionChipMenus()
+        } else {
+            newSessionChipMenus(projectMenus.providers(), checkoutMenus.providers())
+        }
     }
     NewSessionChipsEffect(ns, composer, chipMenus, labels)
     val morph = rememberComposerMorphState(
@@ -173,31 +202,34 @@ internal fun NewSessionScreenBody(
     val keyboard = LocalSoftwareKeyboardController.current
     val canvasState = remember { NewSessionCanvasState() }
     NewSessionFocusOnAppear(focusOnAppear, embedded, canvasState) { morph.focus() }
-    NewSessionCanvas(
-        harness = ns.draft.harness,
-        embedded = embedded,
-        onClose = onClose,
-        onBackgroundTap = { morph.blur(); keyboard?.hide() },
-        composer = {
-            ComposerBar(
-                composer,
-                morph,
-                Modifier
-                    .testTag("new-session-composer")
-                    .handoffComposer(capture),
-                textHidden = capture.textHidden,
-                onTextRect = capture::onTextRect,
-            )
-        },
-        state = canvasState,
-        // 94: the page root records the scene (its Layout holds the
-        // backdrop, the nav bar and the composer; 31's grabber stays
-        // outside). Chained after the caller's modifier so the recording
-        // covers everything the sheet-sized node draws.
-        modifier = modifier.handoffScene(capture),
-        headline = headline,
-        navBar = navBar,
-    )
+    Box(modifier) {
+        NewSessionCanvas(
+            harness = ns.draft.harness,
+            embedded = embedded,
+            onClose = onClose,
+            onBackgroundTap = { morph.blur(); keyboard?.hide() },
+            composer = {
+                ComposerBar(
+                    composer,
+                    morph,
+                    Modifier
+                        .testTag("new-session-composer")
+                        .handoffComposer(capture),
+                    textHidden = capture.textHidden,
+                    onTextRect = capture::onTextRect,
+                )
+            },
+            state = canvasState,
+            // 94: the page root records the scene (its Layout holds the
+            // backdrop, the nav bar and the composer; 31's grabber stays
+            // outside). The caller's modifier sits on the Box around it, which
+            // also hosts the model picker over the page (#37).
+            modifier = Modifier.handoffScene(capture),
+            headline = headline,
+            navBar = navBar,
+        )
+        ModelPickerOverlay(modelPicker)
+    }
 }
 
 /**
@@ -208,6 +240,7 @@ internal fun NewSessionScreenBody(
  * - `chipsAlwaysVisible` (always a card here), the placeholder, the seed
  *   images;
  * - `onChipTap = { _, _ in }`: chips open their own menus (109/113/114);
+ *   the screen then routes the menu-less `model` chip to the picker (#37);
  * - `attachMenu` stays **null**: 87's `ComposerAttachMenuButton` inside the
  *   shared `ComposerBar` already builds the menu per open with
  *   `limit = 8 − images.size`;

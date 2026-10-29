@@ -7,7 +7,6 @@ import kotlinx.coroutines.withContext
 import sh.zeron.android.composer.ChipMenuProvider
 import sh.zeron.android.design.glass.Menu
 import sh.zeron.android.design.glass.MenuElement
-import sh.zeron.android.design.glass.MenuIcon
 import sh.zeron.android.design.glass.MenuItem
 import sh.zeron.android.design.glass.MenuSection
 import uniffi.zeron_core.CoreClientInterface
@@ -69,10 +68,12 @@ class CoreRefSource(
 }
 
 /**
- * Menu content for the New Session chips `branch`, `model` and `effort`
+ * Menu content for the New Session chips `branch` and `effort`
  * (android-ui-parity #114) — the port of `NewSessionViewController`'s
- * `branchMenu()`, `modelMenu()` and `effortMenu()`
- * (`ios:Session/NewSessionViewController.swift:361-404`). This class owns
+ * `branchMenu()` and `effortMenu()`
+ * (`ios:Session/NewSessionViewController.swift:475-533`). The `model`
+ * chip has no menu: it opens the shared model picker
+ * ([newSessionModelPicker], #37). This class owns
  * **the content and the actions only**: ticket 15 draws the panel, ticket
  * 59 anchors it to the chip at tap time, ticket 109 decides which chips
  * exist, ticket 92 owns the draft.
@@ -90,16 +91,14 @@ class CoreRefSource(
  * chip refresh"): the `UIDeferredMenuElement` instance is hoisted under
  * [BranchKey] — the draft plus the project's device and path — and kept
  * while the key is unchanged, so reopening Checkout without any pick in
- * between shows the branches at once, while any pick (in any of the five
- * menus) or a device change makes the next open load again.
+ * between shows the branches at once, while any pick (in any chip's menu or
+ * the model picker) or a device change makes the next open load again.
  */
 class CheckoutModelEffortMenus(
     /** `NewSessionModel.draft` — read at build time and at pick time. */
     private val draft: () -> NewSessionDraft,
     /** `NewSessionModel.project` — no project, no branch rows. */
     private val project: () -> ProjectOption?,
-    /** `NewSessionModel.models` — the page's current catalog. */
-    private val models: () -> List<ModelChoice>,
     /** `NewSessionModel.selectedModel` — the effort ladder's owner. */
     private val selectedModel: () -> ModelChoice?,
     /** `NewSessionModel.update` — the only mutation path (ticket 92). */
@@ -144,17 +143,6 @@ class CheckoutModelEffortMenus(
     }
 
     /**
-     * The `model` chip's menu (iOS `modelMenu()`, `:382-394`): title
-     * `Model`, one inline section per harness, sections sorted by harness
-     * id, rows in catalog order, the check on `draft.harness` +
-     * `draft.model` only. A pick sets the harness and the model and
-     * clears the effort, so the effort chip falls back to the new model's
-     * middle level (109).
-     */
-    fun model(): Menu =
-        modelMenu(models(), draft()) { m -> update { it.copy(harness = m.harness, model = m.id, effort = null) } }
-
-    /**
      * The `effort` chip's menu (iOS `effortMenu()`, `:396-404`): title
      * `Reasoning effort`, the resolved model's ladder through
      * [effortTitle], the check on `draft.effort` only — nothing checked
@@ -166,19 +154,19 @@ class CheckoutModelEffortMenus(
     /**
      * This ticket's share of the `composer.chipMenus` map — the same
      * shape as ticket 113's `ProjectRunOnMenus.providers()`, handed to
-     * [newSessionChipMenus] as one more `vararg` part (keys `branch`,
-     * `model`, `effort`; the two other ids stay 113's).
+     * [newSessionChipMenus] as one more `vararg` part (keys `branch` and
+     * `effort`; `project` and `host` stay 113's, and `model` has no menu
+     * so its tap reaches the composer's `onChipTap`).
      */
     fun providers(): Map<String, ChipMenuProvider> = mapOf(
         NewSessionChipIds.Branch to { checkout() },
-        NewSessionChipIds.Model to { model() },
         NewSessionChipIds.Effort to { effort() },
     )
 }
 
 /**
- * The branch deferred's cache key: the whole draft (any pick, in any of
- * the five menus, changes it) plus the project's device and path (the
+ * The branch deferred's cache key: the whole draft (any pick, in any chip's
+ * menu or the model picker, changes it) plus the project's device and path (the
  * refs' source). The provider map is rebuilt on every chip refresh, so a
  * key equal to the hoisted one means no pick and no project change
  * happened since — the instance survives, exactly a cached
@@ -230,41 +218,6 @@ internal fun branchRows(refs: List<String>, branch: String?, onPick: (String) ->
             testTag = "new-session-menu-branch-$ref",
         ) { onPick(ref) }
     }
-}
-
-/**
- * The Model menu (ticket 15's model): one inline section per harness,
- * sections sorted by harness id in plain string order (Swift's
- * `keys.sorted()`), each headed by the **first** model's `harnessLabel`
- * and a 16 dp brand mark, rows in the catalog's order within the
- * harness. The check is the draft's `(harness, id)` pair only — never
- * the resolved model (`pr609`'s trap) — so with no model picked no row
- * is checked, even though the chip already names one.
- */
-internal fun modelMenu(
-    models: List<ModelChoice>,
-    draft: NewSessionDraft,
-    onPick: (ModelChoice) -> Unit,
-): Menu {
-    val byHarness = models.groupBy { it.harness } // keeps the list order inside each group
-    return Menu(
-        title = "Model",
-        children = byHarness.keys.sorted().map { h ->
-            val list = byHarness.getValue(h)
-            MenuSection(
-                title = list.first().harnessLabel,
-                icon = MenuIcon.Brand(h),
-                inline = true,
-                children = list.map { m ->
-                    MenuItem(
-                        title = m.label,
-                        checked = m.harness == draft.harness && m.id == draft.model,
-                        testTag = "new-session-menu-model-${m.harness}-${m.id}",
-                    ) { onPick(m) }
-                },
-            )
-        },
-    )
 }
 
 /**

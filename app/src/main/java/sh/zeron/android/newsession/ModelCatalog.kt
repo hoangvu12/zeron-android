@@ -35,8 +35,14 @@ interface ModelCatalogSource {
 }
 
 /** One `HarnessInfo` × `ModelInfo` row of the pickers. */
-private fun choice(h: HarnessInfo, m: ModelInfo): ModelChoice =
-    ModelChoice(harness = h.id, harnessLabel = h.label, id = m.id, label = m.label, efforts = m.reasoningLevels)
+private fun choice(h: HarnessInfo, m: ModelInfo): ModelChoice = ModelChoice(
+    harness = h.id,
+    harnessLabel = h.label,
+    id = m.id,
+    label = m.label,
+    efforts = m.reasoningLevels,
+    detail = m.description?.takeIf { it.isNotBlank() },
+)
 
 /**
  * The live [ModelCatalogSource] over the process's client, resolved at

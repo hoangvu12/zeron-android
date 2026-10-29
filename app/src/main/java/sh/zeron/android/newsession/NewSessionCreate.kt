@@ -169,8 +169,9 @@ internal object NewSessionRequests {
  *
  * Returns the scoped chat id, or `null` on any failure: no target
  * (no core call), no client, or `createSession` / `openSession` /
- * `send` threw (an offline engine refuses the write — `HostUnavailable`
- * — never queues). A failure after the create can leave an empty chat
+ * `send` threw. An offline host is not a failure: the chat row is a
+ * workspace write and the core queues the first message for the host, as
+ * on iOS (no Send gate, #37). A failure after the create can leave an empty chat
  * in the list; that partial failure is iOS parity (see the ticket's
  * Comments).
  */
@@ -220,8 +221,8 @@ class NewSessionCreator(
 /**
  * The failure alert (`NewSessionViewController.swift:410-413`, copy
  * verbatim): no field, one default `OK` with no handler. Shown for a
- * missing target, a missing client, or any core failure (offline
- * engine, `HostUnavailable`, RPC error) — the composer stays `Kept`.
+ * missing target, a missing client, or any core failure (an unknown
+ * target, RPC error) — the composer stays `Kept`.
  */
 val StartFailedAlert = ZeronAlert(
     title = "Couldn't start the session",

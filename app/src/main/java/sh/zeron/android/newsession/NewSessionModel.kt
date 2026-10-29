@@ -185,12 +185,11 @@ class NewSessionModel(
         }
 
     /**
-     * The model the model chip names (iOS `:261`, `:397`, identical):
-     * the draft's pick within its harness, else the harness's first.
+     * The model the model chip names and whose ladder the effort chip
+     * offers (iOS `draftModel`, #37): see [draftModel].
      */
     val selectedModel: ModelChoice?
-        get() = models.firstOrNull { it.harness == draft.harness && it.id == draft.model }
-            ?: models.firstOrNull { it.harness == draft.harness }
+        get() = draftModel(models, draft)
 
     /**
      * Every menu pick (113/114) goes through here: `draft = transform(draft)`,
