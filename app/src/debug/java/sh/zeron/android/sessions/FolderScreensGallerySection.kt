@@ -111,10 +111,9 @@ private class FolderGalleryRowActions(
 
     override fun createSection(
         name: String,
-        engineId: String?,
         onResult: (ActionOutcome) -> Unit,
         onCreated: (sectionId: String) -> Unit,
-    ) = sectionWrite("createSection($name, $engineId)", onResult) { onCreated("gallery:s1") }
+    ) = sectionWrite("createSection($name)", onResult) { onCreated("gallery:s1") }
 
     override fun renameSection(sectionId: String, name: String, onResult: (ActionOutcome) -> Unit) =
         sectionWrite("renameSection($sectionId, $name)", onResult) { onRenamed(name) }
@@ -122,7 +121,7 @@ private class FolderGalleryRowActions(
     override fun deleteSection(sectionId: String, onResult: (ActionOutcome) -> Unit) =
         sectionWrite("deleteSection($sectionId)", onResult)
 
-    override fun sectionsFor(engineId: String) = emptyList<uniffi.zeron_core.SectionView>()
+    override fun sections() = emptyList<uniffi.zeron_core.SectionView>()
 
     override fun report(error: Throwable) {
         log("report($error)")

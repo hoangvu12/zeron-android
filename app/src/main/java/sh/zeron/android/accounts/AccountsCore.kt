@@ -1,8 +1,8 @@
 package sh.zeron.android.accounts
 
+import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import uniffi.zeron_core.AgentAccountsSnapshot
 import uniffi.zeron_core.CoreClient
 
 /**
@@ -16,29 +16,30 @@ import uniffi.zeron_core.CoreClient
 interface AccountsCore {
 
     /**
-     * `CoreClient.listAgentAccounts(deviceId, forceUsage)` — the host's
-     * last probe when `forceUsage` is false; a forced list re-probes
-     * (throttled host-side per account; 45 s deadline in the core).
+     * `CoreClient.deviceAgentAccounts(deviceId)` — the host's last usage
+     * probe. Zeron has no forced re-probe, so [forceUsage] is ignored
+     * (TODO(#50): drop it with the iOS single-read load).
      */
     suspend fun list(deviceId: String, forceUsage: Boolean): AgentAccountsSnapshot
 
     /**
-     * `CoreClient.activateAgentAccount(deviceId, harness, accountId)` —
+     * `CoreClient.deviceActivateAccount(deviceId, harness, accountId)` —
      * make the login the one in use; replies with the updated accounts.
      */
     suspend fun activate(deviceId: String, harness: String, accountId: String): AgentAccountsSnapshot
 
     /**
-     * `CoreClient.forgetAgentAccount(deviceId, harness, accountId)` —
+     * `CoreClient.deviceForgetAccount(deviceId, harness, accountId)` —
      * remove a saved login; replies with the updated accounts.
      */
     suspend fun forget(deviceId: String, harness: String, accountId: String): AgentAccountsSnapshot
 
     /**
-     * `CoreClient.cachedAgentAccounts(deviceId)` — the newest snapshot
-     * the core holds (every successful list/activate/forget refreshes
-     * it), so a screen paints at once and refreshes behind it. `null`
-     * before the first success.
+     * The newest snapshot this process saw for [deviceId] (every
+     * successful list/activate/forget refreshes it), so a screen paints at
+     * once and refreshes behind it. `null` before the first success. Zeron's
+     * core keeps no account cache, so this one is Kotlin-side, as iOS
+     * Providers keeps `accounts[deviceId]`.
      */
     fun cached(deviceId: String): AgentAccountsSnapshot?
 }
@@ -46,31 +47,34 @@ interface AccountsCore {
 /**
  * The live [AccountsCore] over the process's single [CoreClient].
  * `deviceId` is the id shape the platform holds (the session's host
- * device id, a workspace `DeviceView` id); the core resolves every shape
- * to the same engine — and the same cache entry.
+ * device id, a workspace `DeviceView` id).
  */
 class CoreAccountsCore(
     private val client: () -> CoreClient?,
 ) : AccountsCore {
+    private val cache = ConcurrentHashMap<String, AgentAccountsSnapshot>()
+
     override suspend fun list(deviceId: String, forceUsage: Boolean): AgentAccountsSnapshot =
-        withContext(Dispatchers.IO) { live().listAgentAccounts(deviceId, forceUsage) }
+        remember(deviceId, withContext(Dispatchers.IO) { live().deviceAgentAccounts(deviceId) })
 
     override suspend fun activate(
         deviceId: String,
         harness: String,
         accountId: String,
     ): AgentAccountsSnapshot =
-        withContext(Dispatchers.IO) { live().activateAgentAccount(deviceId, harness, accountId) }
+        remember(deviceId, withContext(Dispatchers.IO) { live().deviceActivateAccount(deviceId, harness, accountId) })
 
     override suspend fun forget(
         deviceId: String,
         harness: String,
         accountId: String,
     ): AgentAccountsSnapshot =
-        withContext(Dispatchers.IO) { live().forgetAgentAccount(deviceId, harness, accountId) }
+        remember(deviceId, withContext(Dispatchers.IO) { live().deviceForgetAccount(deviceId, harness, accountId) })
 
-    override fun cached(deviceId: String): AgentAccountsSnapshot? =
-        client()?.cachedAgentAccounts(deviceId)
+    override fun cached(deviceId: String): AgentAccountsSnapshot? = cache[deviceId]
+
+    private fun remember(deviceId: String, accounts: List<AgentAccount>): AgentAccountsSnapshot =
+        AgentAccountsSnapshot(accounts).also { cache[deviceId] = it }
 
     /** The live client, or a `Closed` error when the core is not ready. */
     private fun live(): CoreClient = client() ?: throw uniffi.zeron_core.CoreException.Closed()

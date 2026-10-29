@@ -79,9 +79,11 @@ fun Modifier.transcriptControl(): Modifier = this then TranscriptControlElement
 val WidgetKind.isTranscriptControl: Boolean
     get() = when (this) {
         WidgetKind.CopyCode, is WidgetKind.Disclosure, is WidgetKind.ToolToggle, is WidgetKind.Detail,
-        is WidgetKind.SubagentLink, is WidgetKind.Action -> true
+        is WidgetKind.Subagent, is WidgetKind.Action -> true
         is WidgetKind.Image, is WidgetKind.Chevron, is WidgetKind.Icon, is WidgetKind.ToolStatus,
-        WidgetKind.Spinner, is WidgetKind.Working, is WidgetKind.ToolRail, WidgetKind.Shimmer -> false
+        WidgetKind.Spinner, is WidgetKind.Working, is WidgetKind.ToolRail, WidgetKind.Shimmer,
+        // TODO(#46): a visual's controls route through its own host.
+        is WidgetKind.Visual -> false
     }
 
 /**

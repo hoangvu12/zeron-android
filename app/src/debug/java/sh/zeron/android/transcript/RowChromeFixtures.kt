@@ -337,7 +337,7 @@ internal class FixtureRow(
         color: ColorRole,
         scroller: UInt? = null,
     ) {
-        boxes.add(BoxPrim(x, y, w, h, radius, style, color, scroller))
+        boxes.add(BoxPrim(x, y, w, h, radius, style, color, scroller, null))
     }
 
     /** Appends one link hit, optionally inside a scroller (markdown table cells). */
@@ -366,6 +366,7 @@ internal class FixtureRow(
             height = height,
             text = text,
             runs = runs.toList(),
+            glyphs = emptyList(),
             boxes = boxes.toList(),
             links = links.toList(),
             scrollers = scrollers.toList(),

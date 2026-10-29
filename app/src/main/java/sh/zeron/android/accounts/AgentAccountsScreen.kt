@@ -81,9 +81,6 @@ import sh.zeron.android.design.glass.MenuIcon
 import sh.zeron.android.design.glass.MenuItem
 import sh.zeron.android.design.glass.rememberGlassMenuState
 import sh.zeron.android.shell.LargeTitleScaffold
-import uniffi.zeron_core.AgentAccount
-import uniffi.zeron_core.AgentAccountsSnapshot
-import uniffi.zeron_core.AgentUsageWindow
 import uniffi.zeron_core.DeviceView
 import uniffi.zeron_core.WorkspaceSnapshot
 
@@ -272,7 +269,7 @@ private fun DevicePicker(devices: List<DeviceView>, model: AgentAccountsModel) {
                             title = device.name,
                             subtitle = if (device.online) "Online" else "Offline",
                             checked = device.id == selected,
-                            testTag = "accounts-device-${device.engineId}",
+                            testTag = "accounts-device-${device.id}",
                         ) { model.open(device.id) }
                     },
                 ),
@@ -405,14 +402,8 @@ internal fun LazyListScope.agentAccountsPage(
         }
     }
     item(key = "grouped:accounts:about", contentType = "grouped-footer") {
-        val updated = model.updatedText
+        // Zeron reports no probe time, so there is no "Usage updated …" line.
         Column {
-            updated?.let {
-                GroupedFooter(
-                    if (model.refreshing) AccountsCopy.UpdatingUsage else "$it.",
-                    Modifier.testTag("accounts-updated"),
-                )
-            }
             GroupedFooter(
                 if (model.canAddAccounts) {
                     SignInCopy.about(model.nameOfSelected())

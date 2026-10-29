@@ -55,6 +55,9 @@ internal object FolderWriteCopy {
 
     /** The generic prefix every other engine error follows. */
     const val FailedPrefix = "Couldn't create the folder. "
+
+    /** Zeron's core has no folder create (TODO(#27)). */
+    const val Unsupported = FailedPrefix + "This device can't create folders from here."
 }
 
 /**
@@ -239,33 +242,13 @@ class FolderBrowserActions(
         // The world may have moved while the alert was up: same engine,
         // same folder, nothing in flight — else the tap dies silently.
         if (!canAct || c.engine?.id != engine.id || c.listing?.path != path) return
-        setSubmitting(true)
-        c.status = FolderWriteCopy.CreatingFolder
-        // Always a child of the listed folder, never the raw typed name:
-        // the engine would treat `~x` or `C:x` differently.
-        val target = paths.join(path, name)
-        scope.launch {
-            try {
-                val probe = api.prepareSpacePath(engine.id, target, createIfMissing = false)
-                if (probe.exists) {
-                    setSubmitting(false)
-                    c.status = path
-                    promptForFolder(name, FolderWriteCopy.AlreadyExists)
-                    return@launch
-                }
-                val made = api.prepareSpacePath(engine.id, target, createIfMissing = true)
-                setSubmitting(false)
-                // Browse into it: 110's load shows Loading…, then the new
-                // folder with the row's own git hint for a later Use.
-                c.load(made.path, isRepoHint = made.gitDetected)
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                setSubmitting(false)
-                c.status = path
-                promptForFolder(name, folderError(e))
-            }
-        }
+        // TODO(#27): Zeron's core has no folder create (Roboco's
+        // `prepareSpacePath(createIfMissing)` is gone) and iOS has no New
+        // Folder; #27 ports the page to iOS and drops this action. Until
+        // then a name the listing already holds keeps its copy, and any
+        // other name re-prompts with the unsupported text.
+        val exists = c.listing?.entries?.any { it.name == name } == true
+        promptForFolder(name, if (exists) FolderWriteCopy.AlreadyExists else FolderWriteCopy.Unsupported)
     }
 
     /**

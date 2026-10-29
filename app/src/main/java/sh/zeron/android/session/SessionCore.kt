@@ -2,8 +2,8 @@ package sh.zeron.android.session
 
 import uniffi.zeron_core.ChatConfig
 import uniffi.zeron_core.CoreClient
-import uniffi.zeron_core.EngineView
 import uniffi.zeron_core.ComposerState
+import uniffi.zeron_core.DeviceView
 import uniffi.zeron_core.SessionHandle
 import uniffi.zeron_core.SessionRow
 import uniffi.zeron_core.TranscriptView
@@ -16,7 +16,7 @@ import uniffi.zeron_core.TranscriptView
  * serial IO lane, never on main.
  *
  * Names follow the UniFFI output of `crates/mobile/src/client_ffi`
- * (`chatId()`, `composer()`, `sessionRow(chatId)`, `engine(engineId)`,
+ * (`chatId()`, `composer()`, `sessionRow(chatId)`, `devices()`,
  * `markSeen(chatId)`, `setViewAttached(attached)`,
  * `TranscriptView.attach(client, chatId)`).
  */
@@ -25,11 +25,9 @@ interface SessionCore {
     val chatId: String
 
     /**
-     * The owning engine's id (`SessionHandle.engineId()`), read once —
-     * it never changes. The engine half of the per-chat draft key
-     * (ticket 84: `DraftKey.Chat(engineId, chatId)`); exposed on the
-     * seam rather than parsing the `engine:v1:…` scoped id in Kotlin,
-     * which belongs to Rust.
+     * The host device's id (`ComposerState.host.deviceId`; Roboco's
+     * `SessionHandle.engineId()`), read once. The device half of the
+     * per-chat draft key (ticket 84: `DraftKey.Chat(engineId, chatId)`).
      */
     val engineId: String
 
@@ -46,8 +44,8 @@ interface SessionCore {
      */
     fun sessionConfig(): ChatConfig?
 
-    /** `CoreClient.engine(handle.engineId())` — the owning engine's view. */
-    fun engine(): EngineView?
+    /** The host's [DeviceView] from `CoreClient.devices()`, or null when unknown. */
+    fun engine(): DeviceView?
 
     /**
      * `TranscriptView.attach(client, chatId)` (android-app#08's layout
@@ -78,7 +76,7 @@ class CoreSessionCore(
 ) : SessionCore {
     override val chatId: String = handle.chatId()
 
-    override val engineId: String = handle.engineId()
+    override val engineId: String = handle.composer().host.deviceId
 
     override fun composer(): ComposerState = handle.composer()
 
@@ -86,7 +84,7 @@ class CoreSessionCore(
 
     override fun sessionConfig(): ChatConfig? = client.sessionConfig(chatId)
 
-    override fun engine(): EngineView? = client.engine(engineId)
+    override fun engine(): DeviceView? = client.devices().firstOrNull { it.id == engineId }
 
     override fun attachTranscript(view: TranscriptView): Boolean = view.attach(client, chatId)
 

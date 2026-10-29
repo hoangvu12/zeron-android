@@ -73,14 +73,10 @@ enum class FrontSectionKind { Pinned, User, Recent, ProjectGroup }
 
 /**
  * What the front page knows about one emitted section: its [kind], its
- * `rawName` (the unsuffixed `SectionView`/`SessionGroup` name, for 46's
- * Rename prefill; null for Pinned/Recent) and its `engineId`
- * (`SectionView.engineId` for `User`; the single engine shared by a
- * group's rows, null when they span engines — ticket 50's offline
- * `home:*` rule).
+ * `rawName` (the `SectionView` name, for 46's Rename prefill; null for
+ * Pinned/Recent).
  */
 data class FrontSectionMeta(
     val kind: FrontSectionKind,
     val rawName: String?,
-    val engineId: String?,
 )

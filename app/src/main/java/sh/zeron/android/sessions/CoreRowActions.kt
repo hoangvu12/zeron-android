@@ -5,15 +5,9 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import sh.zeron.android.design.Toaster
-import uniffi.zeron_core.ClientEvent
 import uniffi.zeron_core.CoreClient
 import uniffi.zeron_core.CoreException
 import uniffi.zeron_core.SectionView
@@ -37,7 +31,7 @@ interface SessionWrites {
     fun pinSessionAt(chatId: String, after: String?, before: String?)
     fun placeSession(chatId: String, sectionId: String?, after: String?, before: String?)
     fun renameSession(chatId: String, title: String)
-    fun createSection(name: String, engineId: String?): String
+    fun createSection(name: String): String
     fun renameSection(sectionId: String, name: String)
     fun deleteSection(sectionId: String)
 }
@@ -63,8 +57,8 @@ fun CoreClient.asSessionWrites(): SessionWrites = object : SessionWrites {
         this@asSessionWrites.placeSession(chatId, sectionId, after, before)
     override fun renameSession(chatId: String, title: String) =
         this@asSessionWrites.renameSession(chatId, title)
-    override fun createSection(name: String, engineId: String?): String =
-        this@asSessionWrites.createSection(name, engineId)
+    override fun createSection(name: String): String =
+        this@asSessionWrites.createSection(name)
     override fun renameSection(sectionId: String, name: String) =
         this@asSessionWrites.renameSection(sectionId, name)
     override fun deleteSection(sectionId: String) = this@asSessionWrites.deleteSection(sectionId)
@@ -134,14 +128,6 @@ private val CoreException.reasonOrNull: String?
     }
 
 /**
- * For the owner's event flow: the notice texts of a `ClientEvent` stream —
- * `ClientEvent.Notice{message}` trimmed, blank ones dropped, every other
- * event filtered out. `CoreRowActions.startNoticeToasts` consumes it.
- */
-fun Flow<ClientEvent>.notices(): Flow<String> =
-    filterIsInstance<ClientEvent.Notice>().map { it.message.trim() }.filter { it.isNotEmpty() }
-
-/**
  * The [RowActions] over the real FFI (android-ui-parity #42). One
  * instance for the whole app, app-lifetime scope — a toast's Undo must
  * outlive the screen that raised it (iOS holds `[weak self]` on the
@@ -152,8 +138,7 @@ fun Flow<ClientEvent>.notices(): Flow<String> =
  *  - the FFI call runs on [io] — `Dispatchers.IO.limitedParallelism(1)`,
  *    **one queue for every write**, so the user's order survives (an
  *    archive followed by an instant Undo, or a run of `movePin` calls);
- *  - toasts, `onResult` and `onCreated` run on [main];
- *  - notice collection runs on [main] in [scope].
+ *  - toasts, `onResult` and `onCreated` run on [main].
  *
  * Never call the FFI on main: `CoreClient` goes through JNA and
  * android-app#06 warns about re-entrant listener callbacks. `writes` is
@@ -165,7 +150,7 @@ fun Flow<ClientEvent>.notices(): Flow<String> =
  */
 class CoreRowActions(
     private val writes: () -> SessionWrites?,
-    private val sections: () -> List<SectionView>,
+    sections: () -> List<SectionView>,
     private val toaster: Toaster,
     private val scope: CoroutineScope,
     private val io: CoroutineDispatcher = Dispatchers.IO.limitedParallelism(1),
@@ -173,24 +158,7 @@ class CoreRowActions(
     private val log: (String) -> Unit = { Log.w("Zeron", it) },
 ) : RowActions {
 
-    private var noticeJob: Job? = null
-
-    /**
-     * Toasts every notice (a background write that failed after its
-     * optimistic overlay was applied — android-app#07 reverts the overlay
-     * and emits `ClientEvent.Notice{message}`). Blank messages are
-     * skipped; the message is shown verbatim. App-scoped: call once at
-     * app start; a later call while the collector is alive is ignored, so
-     * a notice is never shown twice.
-     */
-    fun startNoticeToasts(notices: Flow<String>) {
-        if (noticeJob?.isActive == true) return
-        noticeJob = scope.launch(main) {
-            notices.collect { message ->
-                if (message.isNotBlank()) toaster.show(message)
-            }
-        }
-    }
+    private val readSections = sections
 
     // ------------------------------------------------------------------ writes
 
@@ -250,7 +218,6 @@ class CoreRowActions(
 
     override fun createSection(
         name: String,
-        engineId: String?,
         onResult: (ActionOutcome) -> Unit,
         onCreated: (sectionId: String) -> Unit,
     ) {
@@ -260,7 +227,7 @@ class CoreRowActions(
             return
         }
         dispatch("section", OpKind.Sidebar, onResult, onOk = onCreated) {
-            it.createSection(trimmed, engineId)
+            it.createSection(trimmed)
         }
     }
 
@@ -279,8 +246,7 @@ class CoreRowActions(
 
     // ------------------------------------------------------------------ reads and reports
 
-    override fun sectionsFor(engineId: String): List<SectionView> =
-        sections().filter { it.engineId == engineId }
+    override fun sections(): List<SectionView> = readSections()
 
     override fun report(error: Throwable) {
         if (error is CancellationException) return

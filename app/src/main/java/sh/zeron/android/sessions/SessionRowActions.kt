@@ -74,14 +74,11 @@ interface SessionRowCommands {
     /** The menu's "Delete": 43's "Delete session?" confirm, then 42's delete (upstream #967). */
     fun deleteSession(row: SessionRow)
 
-    /** The menu's "New Section…" on the chat's engine: creates only. */
-    fun newSection(engineId: String?)
+    /** The menu's "New Section…": creates only. */
+    fun newSection()
 
-    /**
-     * The user sections of one engine, in snapshot order, empty ones
-     * included (42's `sectionsFor`); the pickers keep the chat's engine.
-     */
-    fun sectionsFor(engineId: String): List<SectionView>
+    /** The user sections, in snapshot order, empty ones included (42's `sections`). */
+    fun sections(): List<SectionView>
 }
 
 /**
@@ -127,11 +124,11 @@ fun SessionRowCommands(
             prompts.confirmDeleteSession(row.id, if (row.hasTitle) row.title else "") { onDeleted(row.id) }
         }
 
-        override fun newSection(engineId: String?) {
-            prompts.newSection(engineId)
+        override fun newSection() {
+            prompts.newSection()
         }
 
-        override fun sectionsFor(engineId: String): List<SectionView> = actions.sectionsFor(engineId)
+        override fun sections(): List<SectionView> = actions.sections()
     }
 
 /**
@@ -226,7 +223,7 @@ fun sessionSwipeActions(
  * — never stale. Pure: invokes nothing until a menu item is picked.
  *
  *  - normal: Pin/Unpin, "Move to Section ▸" (drill-in; every section of
- *    the chat's engine in stored order, empty ones included, then "No
+ *    stored order, empty ones included, then "No
  *    Section", then "New Section…"), "Rename…", "Archive", "Delete"
  *    (destructive — upstream #967 moved the red from Archive to Delete);
  *  - archived: "Unarchive", "Rename…", "Delete".
@@ -279,13 +276,12 @@ fun sessionRowMenu(
                 icon = MenuIcon.Symbol(ZeronIcons.Tray),
                 testTag = "row-menu-no-section",
             ) { cmd.move(row.id, null) },
-            // Creates the section only — never moves the chat (`:292-294`);
-            // scoped to the chat's engine (android-app#20:239).
+            // Creates the section only — never moves the chat (`:292-294`).
             MenuItem(
                 title = strings(R.string.menu_new_section),
                 icon = MenuIcon.Symbol(ZeronIcons.FolderBadgePlus),
                 testTag = "row-menu-new-section",
-            ) { cmd.newSection(row.engineId) },
+            ) { cmd.newSection() },
         ),
     )
     return Menu(
@@ -405,7 +401,7 @@ internal fun sessionRowWrapper(coordinator: SwipeCoordinator, cmd: SessionRowCom
                         // At long-press time: close any swipe, then build
                         // the menu from the current row/vm/sections.
                         coordinator.closeAll()
-                        sessionRowMenu(rec, vm, ctx.archived, cmd.sectionsFor(rec.engineId), cmd, strings)
+                        sessionRowMenu(rec, vm, ctx.archived, cmd.sections(), cmd, strings)
                     },
                 ) {
                     CompositionLocalProvider(LocalRowLiftState provides liftState) {

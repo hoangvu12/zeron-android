@@ -97,13 +97,12 @@ interface RowActions {
     fun rename(chatId: String, title: String, onResult: (ActionOutcome) -> Unit = {})
 
     /**
-     * Create a section on one engine (`null` = the first `Connected`
-     * engine); a blank trimmed name is skipped. [onCreated] receives the
-     * scoped section id, on the main thread, only on [ActionOutcome.Ok].
+     * Create a section (Zeron's sections are workspace-wide); a blank
+     * trimmed name is skipped. [onCreated] receives the section id, on
+     * the main thread, only on [ActionOutcome.Ok].
      */
     fun createSection(
         name: String,
-        engineId: String?,
         onResult: (ActionOutcome) -> Unit = {},
         onCreated: (sectionId: String) -> Unit = {},
     )
@@ -115,14 +114,12 @@ interface RowActions {
     fun deleteSection(sectionId: String, onResult: (ActionOutcome) -> Unit = {})
 
     /**
-     * The user sections of one engine, in snapshot order, empty ones
-     * included (iOS `folders`, `AppModel.swift:382-386`); Pinned never —
-     * it is not a `SectionView`. Section pickers use this because an
-     * assign across engines is refused. Runs on the caller's thread and
-     * never touches the FFI — the list comes from the snapshot the app
-     * already holds.
+     * The user sections, in snapshot order, empty ones included (iOS
+     * `folders`, `AppModel.swift:382-386`); Pinned never — it is not a
+     * `SectionView`. Runs on the caller's thread and never touches the
+     * FFI — the list comes from the snapshot the app already holds.
      */
-    fun sectionsFor(engineId: String): List<SectionView>
+    fun sections(): List<SectionView>
 
     /**
      * Log + toast a write error a caller caught itself (ticket 43's
@@ -135,7 +132,7 @@ interface RowActions {
     companion object {
         /**
          * Previews and tests of neighbouring tickets: every write is a
-         * no-op ([onResult] is never called), `sectionsFor` lists
+         * no-op ([onResult] is never called), `sections` lists
          * nothing, `report` does nothing.
          */
         val Noop: RowActions = object : RowActions {
@@ -146,10 +143,10 @@ interface RowActions {
             override fun move(chatId: String, toSection: String?, onResult: (ActionOutcome) -> Unit) {}
             override fun movePin(chatId: String, after: String?, before: String?, onResult: (ActionOutcome) -> Unit) {}
             override fun rename(chatId: String, title: String, onResult: (ActionOutcome) -> Unit) {}
-            override fun createSection(name: String, engineId: String?, onResult: (ActionOutcome) -> Unit, onCreated: (sectionId: String) -> Unit) {}
+            override fun createSection(name: String, onResult: (ActionOutcome) -> Unit, onCreated: (sectionId: String) -> Unit) {}
             override fun renameSection(sectionId: String, name: String, onResult: (ActionOutcome) -> Unit) {}
             override fun deleteSection(sectionId: String, onResult: (ActionOutcome) -> Unit) {}
-            override fun sectionsFor(engineId: String): List<SectionView> = emptyList()
+            override fun sections(): List<SectionView> = emptyList()
             override fun report(error: Throwable) {}
         }
     }

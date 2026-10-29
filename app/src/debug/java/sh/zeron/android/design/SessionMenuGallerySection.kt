@@ -121,13 +121,12 @@ fun SessionMenuGallerySection() {
             override fun rename(chatId: String, title: String, onResult: (ActionOutcome) -> Unit) {}
             override fun createSection(
                 name: String,
-                engineId: String?,
                 onResult: (ActionOutcome) -> Unit,
                 onCreated: (String) -> Unit,
             ) {}
             override fun renameSection(sectionId: String, name: String, onResult: (ActionOutcome) -> Unit) {}
             override fun deleteSection(sectionId: String, onResult: (ActionOutcome) -> Unit) {}
-            override fun sectionsFor(engineId: String): List<SectionView> = emptyList()
+            override fun sections(): List<SectionView> = emptyList()
             override fun report(error: Throwable) {}
         }
     }

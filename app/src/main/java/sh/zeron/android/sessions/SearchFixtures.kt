@@ -73,7 +73,6 @@ internal object SearchFixtures {
         archived: Boolean = false,
     ): SessionRow = SessionRow(
         id = id,
-        engineId = "eng1",
         revision = 1uL,
         title = title,
         hasTitle = true,
@@ -82,7 +81,7 @@ internal object SearchFixtures {
         deviceId = "device-eng1",
         deviceName = null,
         deviceOnline = true,
-        engineOnline = true,
+        isCloud = false,
         harness = "claude-code",
         harnessLabel = null,
         model = null,
@@ -103,5 +102,6 @@ internal object SearchFixtures {
         pullRequest = null,
         sendState = null,
         parentChatId = null,
+        roomGen = 0u,
     )
 }

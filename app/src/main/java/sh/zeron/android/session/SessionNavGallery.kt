@@ -58,7 +58,7 @@ import sh.zeron.android.transcript.TranscriptState
 import uniffi.zeron_core.ChatConfig
 import uniffi.zeron_core.ChatIndicator
 import uniffi.zeron_core.ComposerState
-import uniffi.zeron_core.EngineView
+import uniffi.zeron_core.DeviceView
 import uniffi.zeron_core.HostCapabilities
 import uniffi.zeron_core.HostInfo
 import uniffi.zeron_core.LayoutFrame
@@ -338,6 +338,7 @@ private class GallerySessionCore(private val onLog: (String) -> Unit) : SessionC
                 queueEditLease = true,
                 queuedAttachments = true,
                 midTurnSteering = null,
+                providerSwitch = false,
             ),
         ),
         live = LiveStatus(
@@ -361,7 +362,7 @@ private class GallerySessionCore(private val onLog: (String) -> Unit) : SessionC
 
     override fun sessionRow(): SessionRow? = null
     override fun sessionConfig(): ChatConfig? = null
-    override fun engine(): EngineView? = null
+    override fun engine(): DeviceView? = null
     override fun attachTranscript(view: TranscriptView): Boolean = true
 
     override fun setViewAttached(attached: Boolean) {

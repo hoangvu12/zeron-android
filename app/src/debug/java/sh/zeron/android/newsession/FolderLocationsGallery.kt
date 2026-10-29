@@ -23,8 +23,6 @@ import sh.zeron.android.design.Appearance
 import sh.zeron.android.design.LocalTypeScale
 import sh.zeron.android.design.ZeronTheme
 import sh.zeron.android.design.uiStyle
-import uniffi.zeron_core.DriveEntry
-import uniffi.zeron_core.PreparedPath
 
 /**
  * The "Folder browser locations" section of the debug design gallery
@@ -101,53 +99,13 @@ fun folderLocationsFixtures(): List<Pair<String, FolderLocationsSpec>> = listOf(
 
 /**
  * Debug-only fake of the calls seam (112's gallery, previews and 110's
- * screen test — like [FakeProjectWriteApi] stands in for 111's write api).
- * `listDrives` answers the fixture map; `prepareSpacePath` answers
- * `exists = createIfMissing` (a probe misses, a create succeeds), like
- * 111's fake; `join` rides [FakeHostPaths]. Every call is recorded.
+ * screen test): `join` rides [FakeHostPaths]. Zeron has no drives listing
+ * or path probe (TODO(#27)), so the join is the whole seam.
  */
 class FakeFolderCalls(
-    private val drivesByDevice: Map<String, List<DriveEntry>> = emptyMap(),
     private val paths: HostPathOps = FakeHostPaths,
 ) : FolderBrowserCalls {
-
-    /** One line per FFI call, in order. */
-    val calls = mutableListOf<String>()
-
-    override suspend fun listDrives(deviceId: String): List<DriveEntry> {
-        calls += "listDrives $deviceId"
-        return drivesByDevice[deviceId] ?: emptyList()
-    }
-
-    override suspend fun prepareSpacePath(
-        deviceId: String,
-        path: String,
-        createIfMissing: Boolean,
-    ): PreparedPath {
-        calls += "prepare $deviceId create=$createIfMissing $path"
-        return PreparedPath(path = path, exists = createIfMissing, gitDetected = false)
-    }
-
     override fun join(base: String, name: String): String = paths.join(base, name)
-}
-
-/**
- * The fixture drives each gallery engine reports — POSIX volumes for the
- * macOS fixtures, drive letters for the Windows one, nothing for the rest
- * (offline / loading / no engines: the Home-only rail, like a silent
- * `ListDrives` failure).
- */
-fun fixtureDrives(fixture: FolderBrowserFixtureId): List<DriveEntry> = when (fixture) {
-    FolderBrowserFixtureId.POSIX_HOME -> listOf(
-        DriveEntry(name = "Macintosh HD", path = "/"),
-        DriveEntry(name = "Seagate", path = "/Volumes/Seagate"),
-    )
-    FolderBrowserFixtureId.ROOT -> listOf(DriveEntry(name = "Macintosh HD", path = "/"))
-    FolderBrowserFixtureId.WINDOWS -> listOf(
-        DriveEntry(name = "C:", path = "C:\\"),
-        DriveEntry(name = "D:", path = "D:\\"),
-    )
-    else -> emptyList()
 }
 
 // ---------------------------------------------------------------------------

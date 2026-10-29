@@ -7,9 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import uniffi.zeron_core.CoreException
-import uniffi.zeron_core.EngineState
-import uniffi.zeron_core.EngineView
-import uniffi.zeron_core.ParkReason
+import uniffi.zeron_core.HostInfo
 import uniffi.zeron_core.SendState
 
 /** The lite copy of the FFI `SendState` (android-ui-parity #73): no UniFFI types in the pure derivation. */
@@ -362,24 +360,16 @@ private fun SendState.toSendLite(): SendLite = when (this) {
     SendState.FAILED -> SendLite.Failed
 }
 
-/** The FFI `EngineView?` → [EngineLink] (exhaustive over `EngineState`; `null` → [EngineLink.Missing]). */
-private fun EngineView?.toEngineLink(): EngineLink {
-    val engine = this ?: return EngineLink.Missing
-    return when (val state = engine.state) {
-        EngineState.Connected -> EngineLink.Connected
-        EngineState.Connecting -> EngineLink.Connecting
-        EngineState.Reconnecting -> EngineLink.Reconnecting
-        EngineState.Offline -> EngineLink.NoNetwork
-        is EngineState.Parked -> EngineLink.Parked(
-            reason = when (state.reason) {
-                ParkReason.REVOKED -> SessionChrome.ParkedReason.Revoked
-                ParkReason.IDENTITY_CHANGED -> SessionChrome.ParkedReason.IdentityChanged
-                ParkReason.INCOMPATIBLE -> SessionChrome.ParkedReason.Incompatible
-            },
-            engineId = engine.engineId,
-        )
-    }
-}
+/**
+ * The chat's host (`ComposerState.host`) → [EngineLink]. Zeron has no
+ * per-engine connection state or park reasons: an online host is
+ * `Connected`, an offline one `Reconnecting`.
+ *
+ * TODO(#28): re-derive the pill from `connectivity()` + `room.retryAtMs`
+ * (CSS:129-145) and drop [EngineLink.Parked] / [EngineLink.Missing].
+ */
+private fun HostInfo.toEngineLink(): EngineLink =
+    if (online) EngineLink.Connected else EngineLink.Reconnecting
 
 /**
  * Maps a [ChromeInput] (uniffi records) plus the filler's sticky failures
@@ -393,7 +383,7 @@ internal fun bannerInputs(input: ChromeInput, sendFailure: String?, settingFailu
         sendFailure = sendFailure,
         settingFailure = settingFailure,
         sendState = composer.sendState?.toSendLite(),
-        link = input.engine.toEngineLink(),
+        link = composer.host.toEngineLink(),
         pendingSends = composer.pendingSends.map { PendingLite(sentAtMs = it.sentAtMs, state = it.state.toSendLite()) },
         workingSinceMs = composer.live.workingSinceMs,
     )

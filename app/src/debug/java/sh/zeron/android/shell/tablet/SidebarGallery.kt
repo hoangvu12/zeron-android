@@ -210,7 +210,6 @@ internal fun sidebarGalleryFixtures(search: SessionSearch): SidebarFixtures {
         .map { s ->
             SectionView(
                 id = s.id,
-                engineId = "A",
                 name = s.header ?: s.id,
                 collapsed = false,
                 sessions = s.rows,
@@ -227,7 +226,6 @@ internal fun sidebarGalleryFixtures(search: SessionSearch): SidebarFixtures {
             pinned = longPinned,
             sections = userSections,
             recent = recent,
-            groups = emptyList(),
         ),
         projects = emptyList(),
         projectless = emptyList(),
@@ -263,7 +261,6 @@ internal fun settledEmptySessionsFixtures(): SidebarFixtures = SidebarFixtures(
             pinned = emptyList(),
             sections = emptyList(),
             recent = emptyList(),
-            groups = emptyList(),
         ),
         projects = emptyList(),
         projectless = emptyList(),

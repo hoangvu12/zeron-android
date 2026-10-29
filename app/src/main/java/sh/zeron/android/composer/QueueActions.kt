@@ -5,6 +5,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import uniffi.zeron_core.SessionHandle
 
 /**
@@ -36,7 +37,9 @@ class CoreQueuePort(private val handle: SessionHandle) : QueuePort {
 
     override suspend fun removeQueued(id: String): Boolean = handle.removeQueued(id)
 
-    override suspend fun moveQueuedBy(id: String, delta: Int): Boolean = handle.moveQueuedBy(id, delta)
+    // Zeron's `moveQueuedBy` is synchronous: keep it off main.
+    override suspend fun moveQueuedBy(id: String, delta: Int): Boolean =
+        withContext(Dispatchers.IO) { handle.moveQueuedBy(id, delta) }
 }
 
 /**

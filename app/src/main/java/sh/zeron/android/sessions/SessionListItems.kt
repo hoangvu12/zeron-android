@@ -2,9 +2,8 @@ package sh.zeron.android.sessions
 
 import android.util.Log
 import androidx.compose.runtime.Immutable
-import uniffi.zeron_core.EngineState
-import uniffi.zeron_core.EngineView
 import uniffi.zeron_core.SessionRow
+import uniffi.zeron_core.WorkspaceSnapshot
 
 /**
  * The warning sink for the duplicate-section-id skip in
@@ -196,14 +195,10 @@ fun sessionListStatus(items: List<SessionListItem>, loading: Boolean, empty: Ses
     }
 
 /**
- * "An engine has delivered no live feed frame yet in this process and is
- * still trying" (android-app#06 `EngineView.from_cache` / `state`):
- * from-cache **and** Connecting or Reconnecting. `Connected`, `Offline`
- * and `Parked` engines are not loading — an unreachable engine with no
- * cache keeps the spinner up while it retries, by design (ticket 50
- * explains why).
+ * The workspace has not finished its first sync this process (Zeron's
+ * `WorkspaceSnapshot.synced`; Roboco read per-engine `from_cache` and
+ * connection state). Rows already on screen still win over the spinner.
+ * TODO(#25): the iOS loading/empty states.
  */
-fun sessionsLoading(engines: List<EngineView>): Boolean =
-    engines.any {
-        it.fromCache && (it.state is EngineState.Connecting || it.state is EngineState.Reconnecting)
-    }
+fun sessionsLoading(workspace: WorkspaceSnapshot?): Boolean =
+    workspace == null || !workspace.synced

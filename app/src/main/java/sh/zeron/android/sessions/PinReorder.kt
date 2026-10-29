@@ -30,6 +30,13 @@ private const val SessionItemKeyPrefix = "s:"
 data class PinKey(val id: String, val engineId: String)
 
 /**
+ * The one block every Zeron pin belongs to: pins are workspace-wide
+ * (`movePin` takes any two anchors), so the whole Pinned list is one
+ * [PinKey.engineId] block and the clamp never bites.
+ */
+const val WORKSPACE_PIN_BLOCK = "workspace"
+
+/**
  * One `movePin` write (the port of iOS `pinsReordered`'s per-insertion
  * call, `SessionListController.swift:477-488`): the dragged id plus its
  * new neighbours in the **final** order — `after` is the row now above

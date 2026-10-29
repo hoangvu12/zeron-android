@@ -69,9 +69,8 @@ internal fun countLive(rows: Sequence<Pair<String, ChatIndicator>>): LiveCounts 
  * occurrence wins). Collapsed sections still count — `SectionView.sessions`
  * is filled whether `collapsed` is true or not.
  *
- * Never counted: `archived`, `projects[].sessions`, `projectless` and
- * `front.groups` (groups are only a regrouping of `recent` — counting them
- * would double count). The rows' `indicator` (the staleness-gated display
+ * Never counted: `archived`, `projects[].sessions` and `projectless`
+ * (regroupings of the same chats — counting them would double count). The rows' `indicator` (the staleness-gated display
  * status) is read, never `host_indicator`.
  */
 fun liveCountsOf(front: FrontPage): LiveCounts = countLive(

@@ -215,13 +215,13 @@ private class SwipeGalleryCommands(
         onLog("delete ${row.id}")
     }
 
-    override fun newSection(engineId: String?) {
-        onLog("newSection engine=${engineId ?: "none"}")
+    override fun newSection() {
+        onLog("newSection")
     }
 
-    override fun sectionsFor(engineId: String): List<SectionView> = listOf(
-        SectionView(id = "work", engineId = engineId, name = "Work", collapsed = false, sessions = emptyList()),
-        SectionView(id = "home", engineId = engineId, name = "Home", collapsed = false, sessions = emptyList()),
+    override fun sections(): List<SectionView> = listOf(
+        SectionView(id = "work", name = "Work", collapsed = false, sessions = emptyList()),
+        SectionView(id = "home", name = "Home", collapsed = false, sessions = emptyList()),
     )
 }
 
@@ -261,10 +261,8 @@ private fun ffRow(
     id: String,
     title: String,
     pinned: Boolean = false,
-    engineId: String = "eng-A",
 ): CoreSessionRow = CoreSessionRow(
     id = id,
-    engineId = engineId,
     revision = 1uL,
     title = title,
     hasTitle = true,
@@ -273,7 +271,7 @@ private fun ffRow(
     deviceId = "device-A",
     deviceName = "MacBook Pro",
     deviceOnline = true,
-    engineOnline = true,
+    isCloud = false,
     harness = "codex",
     harnessLabel = null,
     model = null,
@@ -294,6 +292,7 @@ private fun ffRow(
     pullRequest = null,
     sendState = null,
     parentChatId = null,
+    roomGen = 0u,
 )
 
 // ---------------------------------------------------------------------------

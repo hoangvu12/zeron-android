@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import uniffi.zeron_core.ChatConfig
 import uniffi.zeron_core.ComposerState
-import uniffi.zeron_core.EngineView
+import uniffi.zeron_core.DeviceView
 import uniffi.zeron_core.SessionRow
 import uniffi.zeron_core.TranscriptView
 
@@ -29,8 +29,8 @@ data class ChromeInput(
     val chatId: String,
     val composer: ComposerState,
     val row: SessionRow?,
-    /** The owning engine's view — for 73 (banner). */
-    val engine: EngineView?,
+    /** The host device's view (`devices()`), or null when unknown. */
+    val engine: DeviceView?,
     // Ticket 89 (chip menus): the chat's local config — the #664
     // config-first selection the menus' deferred loads re-read. Read once
     // per refresh next to the row, so the provider never calls FFI.

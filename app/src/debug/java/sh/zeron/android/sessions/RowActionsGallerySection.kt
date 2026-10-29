@@ -16,7 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.flow.MutableSharedFlow
 import sh.zeron.android.core.Face
 import sh.zeron.android.design.Appearance
 import sh.zeron.android.design.LocalToaster
@@ -65,7 +64,7 @@ private class FakeSessionWrites(var mode: WriteMode = WriteMode.Ok) : SessionWri
     override fun assignSection(chatId: String, sectionId: String?) = fail()
     override fun movePin(chatId: String, after: String?, before: String?) = fail()
     override fun renameSession(chatId: String, title: String) = fail()
-    override fun createSection(name: String, engineId: String?): String {
+    override fun createSection(name: String): String {
         fail()
         return "gallery:s1"
     }
@@ -76,8 +75,8 @@ private class FakeSessionWrites(var mode: WriteMode = WriteMode.Ok) : SessionWri
 /**
  * The "Row actions" page of the debug design gallery (android-ui-parity
  * #42): the write surface over a fake — a mode switch for the scripted
- * failures, the Archive/Pin/Move/Rename buttons, and "Emit notice" for
- * the `ClientEvent.Notice` toast. Every toast comes from the ticket's
+ * failures and the Archive/Pin/Move/Rename buttons. Every toast comes
+ * from the ticket's
  * failure table; the Undo of a successful Archive drives the real
  * unarchive path (switch to offline after an OK archive and tap Undo:
  * "Engine not connected").
@@ -101,17 +100,14 @@ fun RowActionsGallerySection() {
     val scope = rememberCoroutineScope()
     var mode by remember { mutableStateOf(WriteMode.Ok) }
     val fake = remember { FakeSessionWrites() }
-    val (actions, notices) = remember {
-        val flow = MutableSharedFlow<String>(extraBufferCapacity = 64)
-        val a = CoreRowActions(
+    val actions = remember {
+        CoreRowActions(
             writes = { fake },
             sections = { emptyList() },
             toaster = toaster,
             scope = scope,
             log = {},
         )
-        a.startNoticeToasts(flow)
-        a to flow
     }
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -143,11 +139,6 @@ fun RowActionsGallerySection() {
         GalleryLabel("Pin", actionStyle, Modifier.clickable { actions.setPinned("gallery-chat", true) })
         GalleryLabel("Move", actionStyle, Modifier.clickable { actions.move("gallery-chat", null) })
         GalleryLabel("Rename", actionStyle, Modifier.clickable { actions.rename("gallery-chat", "Gallery rename") })
-        GalleryLabel(
-            "Emit notice",
-            actionStyle,
-            Modifier.clickable { notices.tryEmit("Couldn't save pins: connection reset") },
-        )
     }
 }
 

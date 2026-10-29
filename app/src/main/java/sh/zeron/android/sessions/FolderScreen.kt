@@ -86,7 +86,7 @@ import uniffi.zeron_core.WorkspaceSnapshot
  *
  * @param workspace null = not loaded yet (41's spinner through `loading`);
  *   the rows follow it live while the screen is open
- * @param loading `workspace == null || sessionsLoading(engines)` — 41's rule
+ * @param loading `sessionsLoading(workspace)` — 41's rule
  * @param topInset 25's convention ([largeTitleDefaultTopInset] — 0 inside
  *   104's Settings card); passed explicitly (24 dp) by the goldens
  *   and previews because Robolectric reports no insets
@@ -142,8 +142,8 @@ fun FolderScreen(
     // is in flight, and every snapshot is adopted through it.
     var editing by rememberSaveable(route.folderId) { mutableStateOf(initialEditing) }
     val reorder: SessionListReorder? = if (kind == FolderKind.Pinned) {
-        val engineById = remember(rows) { rows.associate { r -> r.id to r.engineId } }
-        val keys = remember(rows) { rows.map { r -> PinKey(r.id, r.engineId) } }
+        val engineById = remember(rows) { rows.associate { r -> r.id to WORKSPACE_PIN_BLOCK } }
+        val keys = remember(rows) { rows.map { r -> PinKey(r.id, WORKSPACE_PIN_BLOCK) } }
         val state = remember { PinReorderState(keys) }
         LaunchedEffect(keys) { state.adopt(keys) }
         // The auto-scroll starts at the visible edges, not under the glass
@@ -295,7 +295,7 @@ private fun sectionMenu(onRename: () -> Unit, onDelete: () -> Unit): Menu = Menu
  * `ShellRouteContent`): the app's single [WorkspaceFeed] (the same source
  * tickets 40/46 read — never a second listener) provides the snapshot and
  * the engine list, and `loading` follows 41's rule
- * (`workspace == null || sessionsLoading(engines)`).
+ * (`sessionsLoading(workspace)`).
  *
  * The tablet sidebar (105) renders pushed routes through the same
  * `ShellRouteContent`, so this one branch serves both hosts — and reads
@@ -309,11 +309,10 @@ fun FolderRouteContent(route: FolderRoute) {
     val app = LocalContext.current.applicationContext as ZeronApplication
     val fixture = LocalSidebarFixtures.current
     val liveWorkspace by app.workspaceFeed.snapshot.collectAsState()
-    val liveEngines by app.workspaceFeed.engines.collectAsState()
     FolderScreen(
         route = route,
         workspace = if (fixture != null) fixture.workspace else liveWorkspace,
-        loading = fixture == null && (liveWorkspace == null || sessionsLoading(liveEngines)),
+        loading = fixture == null && sessionsLoading(liveWorkspace),
     )
 }
 
@@ -336,13 +335,12 @@ private object PreviewRowActions : RowActions {
     override fun rename(chatId: String, title: String, onResult: (ActionOutcome) -> Unit) = ok(onResult)
     override fun createSection(
         name: String,
-        engineId: String?,
         onResult: (ActionOutcome) -> Unit,
         onCreated: (sectionId: String) -> Unit,
     ) = ok(onResult)
     override fun renameSection(sectionId: String, name: String, onResult: (ActionOutcome) -> Unit) = ok(onResult)
     override fun deleteSection(sectionId: String, onResult: (ActionOutcome) -> Unit) = ok(onResult)
-    override fun sectionsFor(engineId: String): List<SectionView> = emptyList()
+    override fun sections(): List<SectionView> = emptyList()
     override fun report(error: Throwable) {}
 }
 
@@ -361,7 +359,6 @@ private object FolderPreviewFixtures {
         deviceName: String? = null,
     ): SessionRow = SessionRow(
         id = id,
-        engineId = "eng1",
         revision = 1uL,
         title = title,
         hasTitle = true,
@@ -370,7 +367,7 @@ private object FolderPreviewFixtures {
         deviceId = "device-eng1",
         deviceName = deviceName,
         deviceOnline = true,
-        engineOnline = true,
+        isCloud = false,
         harness = "claude-code",
         harnessLabel = null,
         model = null,
@@ -391,6 +388,7 @@ private object FolderPreviewFixtures {
         pullRequest = null,
         sendState = null,
         parentChatId = null,
+        roomGen = 0u,
     )
 
     private val veil = row("chat-veil", "Streaming veil on transcript rows")
@@ -422,10 +420,9 @@ private object FolderPreviewFixtures {
         front = FrontPage(
             pinned = emptyList(),
             sections = listOf(
-                SectionView(id = "eng1:sec-p0", engineId = "eng1", name = "P0", collapsed = false, sessions = listOf(veil, models, launchPost)),
+                SectionView(id = "eng1:sec-p0", name = "P0", collapsed = false, sessions = listOf(veil, models, launchPost)),
             ),
             recent = emptyList(),
-            groups = emptyList(),
         ),
         archived = emptyList(),
     )
@@ -435,13 +432,12 @@ private object FolderPreviewFixtures {
             pinned = listOf(hibernation.copy(pinned = true), scrollPinning.copy(pinned = true)),
             sections = emptyList(),
             recent = emptyList(),
-            groups = emptyList(),
         ),
         archived = emptyList(),
     )
 
     val archivedWorkspace: WorkspaceSnapshot = workspace(
-        front = FrontPage(pinned = emptyList(), sections = emptyList(), recent = emptyList(), groups = emptyList()),
+        front = FrontPage(pinned = emptyList(), sections = emptyList(), recent = emptyList()),
         archived = listOf(deploy, downloads),
     )
 }

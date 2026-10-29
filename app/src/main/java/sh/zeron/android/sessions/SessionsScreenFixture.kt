@@ -204,7 +204,6 @@ internal object SessionsScreenFixtures {
         timeLabel: String = "now",
     ): SessionRow = SessionRow(
         id = id,
-        engineId = "A",
         revision = 1uL,
         title = title,
         hasTitle = true,
@@ -213,7 +212,7 @@ internal object SessionsScreenFixtures {
         deviceId = "device-A",
         deviceName = deviceName,
         deviceOnline = true,
-        engineOnline = true,
+        isCloud = false,
         harness = harness,
         harnessLabel = null,
         model = null,
@@ -234,6 +233,7 @@ internal object SessionsScreenFixtures {
         pullRequest = pullRequest,
         sendState = null,
         parentChatId = null,
+        roomGen = 0u,
     )
 
     /**

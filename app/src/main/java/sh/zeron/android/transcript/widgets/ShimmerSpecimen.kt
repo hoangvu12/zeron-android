@@ -114,6 +114,7 @@ internal object ShimmerSpecimen {
                 height = ROW_HEIGHT,
                 text = TEXT,
                 runs = listOf(run),
+                glyphs = emptyList(),
                 boxes = emptyList(),
                 links = emptyList(),
                 scrollers = emptyList(),

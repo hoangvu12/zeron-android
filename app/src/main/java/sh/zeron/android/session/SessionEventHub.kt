@@ -34,11 +34,11 @@ fun interface SessionEventListener {
  * - `SessionChanged(chatId, revision)` / `ComposerChanged(chatId, revision)`:
  *   only controllers registered for that `chatId` (plain string
  *   compare — ids are scoped on both sides);
- * - `WorkspaceChanged`, `ConnectivityChanged`, `EnginesChanged`: every
+ * - `WorkspaceChanged`, `ConnectivityChanged`: every
  *   registered controller (the row's project/harness label, the
  *   connectivity posture and the engine device name all feed the
  *   chrome and the fillers 73/79);
- * - anything else (`Notice`, `EngineIdentityPinned`, …): nothing.
+ * - anything else (`AuthRefreshed`, `AuthExpired`): nothing.
  */
 class SessionEventHub(private val post: (Runnable) -> Unit = MainPoster) {
 
@@ -76,8 +76,7 @@ class SessionEventHub(private val post: (Runnable) -> Unit = MainPoster) {
             is ClientEvent.ComposerChanged -> refreshChat(event.chatId)
             is ClientEvent.WorkspaceChanged -> all.forEach { it.requestRefresh() }
             is ClientEvent.ConnectivityChanged -> all.forEach { it.requestRefresh() }
-            ClientEvent.EnginesChanged -> all.forEach { it.requestRefresh() }
-            else -> Unit // Notice, EngineIdentityPinned — no chrome impact
+            else -> Unit // AuthRefreshed, AuthExpired — no chrome impact
         }
     }
 

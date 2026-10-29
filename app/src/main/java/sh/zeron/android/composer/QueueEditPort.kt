@@ -136,7 +136,6 @@ class CoreQueueEditPort(
                     lease = core,
                     action = if (commit) QueueEditAction.COMMIT else QueueEditAction.CANCEL,
                     text = text,
-                    attachments = null,
                 )
             ) {
                 QueueEditFinish.FINISHED -> EditFinish.Finished

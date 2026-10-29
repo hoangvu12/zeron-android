@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
@@ -58,7 +58,6 @@ import sh.zeron.android.sessions.CoreRowActions
 import sh.zeron.android.sessions.FoldState
 import sh.zeron.android.sessions.FrontPageModel
 import sh.zeron.android.sessions.asSessionWrites
-import sh.zeron.android.sessions.notices
 import sh.zeron.android.shell.DeepLinkHub
 import sh.zeron.android.shell.RootInput
 import sh.zeron.android.shell.RouterHooks
@@ -264,7 +263,7 @@ class ZeronApplication : Application() {
     /**
      * The single Kotlin `StateFlow<WorkspaceSnapshot?>` owner (ticket 40,
      * the settled feed of this set — 27, 42, 49, 92 and 110 read it as
-     * `app.workspaceFeed.snapshot` / `.engines`). Its event sink is
+     * `app.workspaceFeed.snapshot` / `.devices`). Its event sink is
      * registered lazily, but `onCreate` forces this property above
      * `coreStartup.start()` so no event is ever missed, and the first
      * read waits for `CoreStartState.Ready` — before that there is no
@@ -329,8 +328,7 @@ class ZeronApplication : Application() {
      * 42) — the [sh.zeron.android.sessions.RowActions] instance ticket
      * 35 provides as `LocalRowActions` inside the root `ToastHost`.
      * Writes run on the serial IO lane, errors toast, a successful
-     * archive shows "Archived · Undo", and the `ClientEvent.Notice`
-     * collector is started once here. App lifetime: a toast's Undo must
+     * archive shows "Archived · Undo". App lifetime: a toast's Undo must
      * outlive the screen that raised it (iOS's `[weak self]` on
      * `AppModel`).
      */
@@ -363,7 +361,7 @@ class ZeronApplication : Application() {
             prefs = notificationPrefs,
             notifier = notifier,
         )
-        center.setEngineCountSource { coreStartup.engines.value?.size ?: 0 }
+        center.setEngineCountSource { workspaceFeed.devices.value.size }
         center
     }
 
@@ -388,18 +386,6 @@ class ZeronApplication : Application() {
      */
     val runWatch: RunWatchController by lazy {
         RunWatchController(this, applicationScope, notifier = notifier)
-    }
-
-    /**
-     * Wave-10 43 (#626): the system is short of memory — shrink the core's
-     * warm sessions ([sh.zeron.android.background.trimIsCritical]). Off
-     * main: an eviction sizes transcripts.
-     */
-    override fun onTrimMemory(level: Int) {
-        super.onTrimMemory(level)
-        val critical = sh.zeron.android.background.trimIsCritical(level) ?: return
-        val client = clientOrNull() ?: return
-        appScope.launch(Dispatchers.IO) { client.trimMemory(critical) }
     }
 
     override fun onCreate() {
@@ -443,14 +429,12 @@ class ZeronApplication : Application() {
         // known, so a signed-in user never sees the welcome root flash.
         rootInput = when (val c = core) {
             is CoreStatus.Failed -> MutableStateFlow(RootInput.CoreFailed(c.reason))
-            is CoreStatus.Loaded -> combine(coreStartup.state, coreStartup.engines) { s, engines ->
+            // TODO(#13): signed in = the session holder has a client.
+            is CoreStatus.Loaded -> coreStartup.state.map { s ->
                 when (s) {
                     CoreStartState.Loading -> RootInput.Loading
                     is CoreStartState.Failed -> RootInput.CoreFailed(s.reason)
-                    CoreStartState.Ready -> when {
-                        engines == null -> RootInput.Loading
-                        else -> RootInput.Ready(hasEngines = engines.isNotEmpty())
-                    }
+                    CoreStartState.Ready -> RootInput.Ready(hasEngines = coreStartup.clientOrNull() != null)
                 }
             }.distinctUntilChanged()
                 .stateIn(applicationScope, SharingStarted.Eagerly, RootInput.Loading)
@@ -524,9 +508,6 @@ class ZeronApplication : Application() {
         // start() call below only arms its drains (they skip until the
         // client exists), and the feed's own collector re-triggers once
         // CoreStartup leaves Loading.
-        // #42: forcing `rowActions`'s lazy init registers the appEvents
-        // sink, and startNoticeToasts arms the app-wide Notice collector
-        // before the first event can flow.
         // #96: arming the appearance controller pushes the stored choice
         // to the platform's per-app night mode (async: it first waits for
         // the DataStore read, so the platform's own persisted mode already
@@ -557,8 +538,8 @@ class ZeronApplication : Application() {
             },
         )
         applicationScope.launch {
-            coreStartup.engines.collect { engines ->
-                runWatch.onEngineCount(engines?.size ?: 0)
+            workspaceFeed.devices.collect { devices ->
+                runWatch.onEngineCount(devices.size)
             }
         }
         applicationScope.launch {
@@ -572,7 +553,6 @@ class ZeronApplication : Application() {
         }
         if (core is CoreStatus.Loaded) {
             workspaceFeed.start()
-            rowActions.startNoticeToasts(appEvents.notices())
             coreStartup.start()
         }
     }
@@ -597,10 +577,10 @@ class ZeronApplication : Application() {
 
 /**
  * Every session id the workspace snapshot carries (ticket 36's
- * `knownChatIds`): pinned, sections, recent, groups, projects,
+ * `knownChatIds`): pinned, sections, recent, projects,
  * projectless, pull requests and archived — all **scoped** ids
  * (`engine:v1:…`), all already in memory (`emptyList()` while the
- * snapshot is null). Deduplicated: `recent`, `groups`, `projects` and
+ * snapshot is null). Deduplicated: `recent`, `projects` and
  * `projectless` deliberately overlap, and the hub's raw-id resolution
  * counts **distinct** matching scoped ids.
  */
@@ -610,7 +590,6 @@ private fun WorkspaceSnapshot?.allSessionIds(): List<String> {
         front.pinned.forEach { add(it.id) }
         front.sections.forEach { section -> section.sessions.forEach { add(it.id) } }
         front.recent.forEach { add(it.id) }
-        front.groups.forEach { group -> group.sessions.forEach { add(it.id) } }
         projects.forEach { project -> project.sessions.forEach { add(it.id) } }
         addAll(projectless.map { it.id })
         addAll(pullRequests.open.map { it.id })

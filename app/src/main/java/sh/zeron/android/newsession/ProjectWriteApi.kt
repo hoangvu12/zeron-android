@@ -4,12 +4,12 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import uniffi.zeron_core.CoreClient
-import uniffi.zeron_core.PreparedPath
 
 /**
- * The New Project write seam (android-ui-parity #111): the two FFI calls
- * the bottom bar's actions need — `create_project` and
- * `prepare_space_path` (android-app#09). A seam, not the client itself,
+ * The New Project write seam (android-ui-parity #111): the FFI call the
+ * bottom bar's Use action needs — `createProject` (Zeron has no
+ * `prepareSpacePath`; the folder picked from `listFolders` is used as is,
+ * as on iOS). A seam, not the client itself,
  * so the plain-JVM tests script it without the native core, exactly as
  * 110's [FolderBrowserSource] splits browsing off.
  */
@@ -22,14 +22,6 @@ interface ProjectWriteApi {
      * HostUnavailable when the engine is offline).
      */
     suspend fun createProject(deviceId: String, path: String, gitDetected: Boolean): String
-
-    /**
-     * android-app#09 `prepareSpacePath`: interprets [path] on the engine —
-     * `~` expands there, `createIfMissing` runs `create_dir_all` there.
-     * Error strings ("the path is a file, not a folder", io texts) arrive
-     * as `CoreException.HostException` with the engine's text as `reason`.
-     */
-    suspend fun prepareSpacePath(deviceId: String, path: String, createIfMissing: Boolean): PreparedPath
 }
 
 /**
@@ -50,14 +42,5 @@ class CoreProjectWriteApi(
     override suspend fun createProject(deviceId: String, path: String, gitDetected: Boolean): String {
         val c = client() ?: throw IllegalStateException("Zeron is disconnected.")
         return withContext(io) { c.createProject(deviceId, path, gitDetected) }
-    }
-
-    override suspend fun prepareSpacePath(
-        deviceId: String,
-        path: String,
-        createIfMissing: Boolean,
-    ): PreparedPath {
-        val c = client() ?: throw IllegalStateException("Zeron is disconnected.")
-        return withContext(io) { c.prepareSpacePath(deviceId, path, createIfMissing) }
     }
 }

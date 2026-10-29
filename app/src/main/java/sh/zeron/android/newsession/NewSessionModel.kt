@@ -291,7 +291,7 @@ class NewSessionModel(
 /**
  * The chat a side-chat draft hangs off (android-next #06, upstream #899's
  * `NewSessionViewController(sideOf:)`), read from its workspace row when
- * the page opens. The create sends `parentChatId` and the core takes the
+ * the page opens. The create calls `createSideChat(parentId)` and the core takes the
  * host, the checkout and the sandbox from the parent; this record only
  * names the parent and seeds the page.
  */

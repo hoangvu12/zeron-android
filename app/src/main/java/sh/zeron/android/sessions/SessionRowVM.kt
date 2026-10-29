@@ -80,7 +80,8 @@ data class SessionRowVM(
                 unseen = r.unseen,
                 pinned = r.pinned,
                 sendFailed = r.sendState == SendState.FAILED,
-                runningSubagents = r.runningSubagents.toInt(),
+                // Zeron's SessionRow has no running-subagent count; D11
+                // drops the "● N" pill, so it stays 0.
             )
     }
 }

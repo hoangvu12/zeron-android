@@ -196,12 +196,7 @@ internal fun rememberSessionsActions(navStack: NavStack): SessionsScreenActions 
     val frontPage = app.frontPage
     val prefs = app.prefs
     val feed = app.workspaceFeed
-    // The prompts' engine list comes from the live client, resolved at
-    // call time (43's CoreSessionPromptBackend rule). Passed explicitly,
-    // not through the ambient, so this also works outside the sessions
-    // tab (the tablet toolbar, 107).
-    val backend = remember(app) { CoreSessionPromptBackend(app::clientOrNull) }
-    val prompts = rememberSessionPrompts(backend = backend)
+    val prompts = rememberSessionPrompts()
     val rowActions = LocalRowActions.current
     val feedback = LocalFeedback.current
     return remember(navStack, frontPage, prefs, feed, prompts, rowActions, feedback) {
@@ -211,7 +206,7 @@ internal fun rememberSessionsActions(navStack: NavStack): SessionsScreenActions 
 
             override fun setGroupByProject(on: Boolean) = prefs.setGroupByProject(on)
 
-            override fun newSection() = prompts.newSection(engineId = null)
+            override fun newSection() = prompts.newSection()
 
             override fun collapseAll() = frontPage.collapseAll(feedback)
 

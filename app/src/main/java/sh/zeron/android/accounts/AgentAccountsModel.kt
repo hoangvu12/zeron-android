@@ -26,8 +26,6 @@ import sh.zeron.android.design.AlertField
 import sh.zeron.android.design.Alerts
 import sh.zeron.android.design.ZeronAlert
 import sh.zeron.android.design.Toaster
-import uniffi.zeron_core.AgentAccount
-import uniffi.zeron_core.AgentAccountsSnapshot
 
 /**
  * The Accounts & Usage page's copy (android-next#05, PR #578's wording
@@ -225,10 +223,6 @@ class AgentAccountsModel(
     /** Whether this page can add accounts (a sign-in seam is wired). */
     val canAddAccounts: Boolean
         get() = signIn != null
-
-    /** The newest probe's wording, for the page's about footer. */
-    val updatedText: String?
-        get() = snapshot?.let { sh.zeron.android.accounts.updatedText(it, nowMs()) }
 
     /**
      * Opens the page on `device`: the core's cached snapshot paints at

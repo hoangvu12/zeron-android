@@ -59,13 +59,17 @@ internal fun RowWidget(ctx: RowContext, w: Widget) {
             onToggle = { ctx.state.toggleDetail(ctx.model.display.key, k.detail, k.open) },
         )
         is WidgetKind.Chevron -> ToolChevron(rowKey = ctx.model.display.key, expanded = k.expanded)
-        // android-next #06 (upstream #899's `subagentLink`): the whole spawn
-        // card opens the subagent's transcript; the actions are read at
+        // android-next #06 (upstream #899's `subagentLink`; Zeron's
+        // `Subagent`): the whole spawn card opens the subagent's
+        // transcript, a no-op until it has a doc; the actions are read at
         // click time so a rebuilt TranscriptActions is honoured.
-        is WidgetKind.SubagentLink -> SubagentLinkTarget(
+        // TODO(#31): the card's pressed wash, a11y value and disabled state.
+        is WidgetKind.Subagent -> SubagentLinkTarget(
             title = k.title,
-            onOpen = { ctx.actions().openSubagent(k.docId, k.title, k.frozen) },
+            onOpen = { k.docId?.let { docId -> ctx.actions().openSubagent(docId, k.title, !k.running) } },
         )
+        // TODO(#46): the agent visual host.
+        is WidgetKind.Visual -> Unit
         // ticket 123 (status glyphs): running beats failed; the Working /
         // Writing flip reuses this slot (same `#working` row key), so the
         // ticker's remember survives and the clock never restarts — no

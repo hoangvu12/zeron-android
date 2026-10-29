@@ -75,7 +75,6 @@ import sh.zeron.android.transcript.rememberLinkRouter
 import sh.zeron.android.transcript.transcriptBottomInset
 import sh.zeron.android.transcript.widgets.imageTileRadius
 import uniffi.zeron_core.CoreClient
-import uniffi.zeron_core.SessionHandle
 import uniffi.zeron_core.TextSystem
 
 /** The viewer's copy, verbatim from upstream #899's `SubagentViewController`. */
@@ -139,7 +138,6 @@ class SubagentRoute internal constructor(
     /** The engine device that serves attachments (`composer.host.deviceId`). */
     val hostDeviceId: String,
     private val client: CoreClient,
-    private val handle: SessionHandle,
     private val hub: SessionEventHub,
     /** The app-lifetime scope teardown and state reads ride on (never the entry's). */
     private val appScope: CoroutineScope,
@@ -168,20 +166,23 @@ class SubagentRoute internal constructor(
     private var unregister: (() -> Unit)? = null
 
     /**
-     * First composition (main): bind the layout engine to the read-only
-     * session and mark it on screen — on the serial lane, attach first
-     * (iOS `setViewAttached` then `engine.attach`; the order is not
-     * observable, the frames come from the same handle) — then follow the
-     * spawn chip's state.
+     * First composition (main): bind the layout engine to the subagent's
+     * doc read-only (`TranscriptView.attachSubagent`, iOS
+     * `SubagentViewController.swift:86`) on the serial lane, then follow
+     * the spawn chip's state.
+     *
+     * TODO(#42): the unavailable state when the attach returns false.
      */
     internal fun start() {
         if (started || released) return
         started = true
         val view = transcript.engine
+        val frozen = state != AgentState.Running
         appScope.launch(io) {
             try {
-                if (!view.attach(client, docId)) Log.w(TAG, "subagent transcript attach returned false")
-                handle.setViewAttached(true)
+                if (!view.attachSubagent(client, spawnerId, docId, frozen)) {
+                    Log.w(TAG, "subagent transcript attach returned false")
+                }
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (t: Throwable) {
@@ -220,9 +221,8 @@ class SubagentRoute internal constructor(
 
     /**
      * The committed pop (the entry's close safety net): stop following the
-     * chip, close the layout engine (main), then detach and close the
-     * session on the lane — the doc stays warm in the core for a re-open.
-     * Idempotent.
+     * chip and close the layout engine (main), which drops the subagent
+     * follow. Idempotent.
      */
     fun release() {
         if (released) return
@@ -230,26 +230,12 @@ class SubagentRoute internal constructor(
         unregister?.invoke()
         unregister = null
         transcriptImpl?.close()
-        appScope.launch(io) {
-            try {
-                handle.setViewAttached(false)
-                client.closeSession(docId)
-            } catch (cancelled: CancellationException) {
-                throw cancelled
-            } catch (t: Throwable) {
-                Log.w(TAG, "subagent release failed", t)
-            }
-        }
     }
 
-    /**
-     * The image reader for the transcript (the host engine's `readImage`).
-     * Relative references resolve against the root chat's cwd
-     * ([rootChatId]), however deep the spawn.
-     */
+    /** The image reader for the transcript (the host's `readAttachment`). */
     internal val attachments: AttachmentReader = object : AttachmentReader {
         override suspend fun read(engineDeviceId: String, reference: String): ByteArray =
-            client.readImage(engineDeviceId, reference, rootChatId)
+            client.readAttachment(engineDeviceId, reference)
     }
 
     @Composable
@@ -292,9 +278,8 @@ data class SubagentOpenRequest(
 )
 
 /**
- * Off main: open the subagent's doc read-only (`CoreClient.openSubagent` —
- * the cache seed and the subscription start, no round trip) and build its
- * route. `null` when there is no client or the core refused the id.
+ * Off main: build the subagent's route (the transcript attaches to the
+ * doc on first composition). `null` when there is no client.
  */
 suspend fun buildSubagentRoute(
     app: ZeronApplication,
@@ -303,9 +288,8 @@ suspend fun buildSubagentRoute(
 ): SubagentRoute? = withContext(io) {
     try {
         val client = app.clientOrNull() ?: return@withContext null
-        val handle = client.openSubagent(request.docId)
         val host = try {
-            handle.composer().host.deviceId
+            client.sessionRow(request.rootChatId)?.deviceId.orEmpty()
         } catch (cancelled: CancellationException) {
             throw cancelled
         } catch (_: Throwable) {
@@ -319,7 +303,6 @@ suspend fun buildSubagentRoute(
             parentTitle = request.parentTitle,
             hostDeviceId = host,
             client = client,
-            handle = handle,
             hub = app.coreStartup.sessionEvents,
             appScope = app.appScope,
             text = TextEngine.shared,
