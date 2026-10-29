@@ -1,25 +1,27 @@
 package sh.zeron.android.shell
 
 /**
- * The collapse / expand carry-over across the 840 dp breakpoint
- * (android-ui-parity #108) — the Android port of
- * `ios:Shell/SplitRootController.swift:156-191`. Pure Kotlin + coroutines:
+ * The collapse / expand carry-over across the split breakpoint
+ * (android-ui-parity #108, #26) — the Android port of
+ * `ios:Shell/SplitRootController.swift:290-348`. Pure Kotlin + coroutines:
  * no Compose UI, no `android.*` — production wires it from
  * [ShellStateScope] in `shell/ShellStates.kt`.
  *
  * The carry-over owns **what happens to the open session** when the window
- * crosses the split breakpoint (ticket 35's [RootKind] switch, which is
- * instant):
+ * crosses the split breakpoint (fold/unfold, rotation, multi-window — the
+ * [RootKind] switch, which is instant):
  *
- * - **Narrowing** (Split → Phone) captures [CarryOverSelection.currentChatId]
- *   synchronously (iOS `:161`), then, on the next frame, empties the detail
- *   column (only when its root is a session; a draft stays) and pushes the
- *   captured chat on the phone Sessions tab — through the fence, so the
- *   outgoing copy detaches before the incoming one attaches.
- * - **Widening** (Phone → Split) pops the phone Sessions stack (and the
- *   Search stack, the Zeron adaptation) and brings the last open session
- *   into the detail column, or shows the draft when none was open and the
- *   column is empty.
+ * - **The page itself moves** (iOS #981, `adoptSession` / `releaseSession`):
+ *   narrowing hands the detail column's session [NavEntry] to the phone
+ *   stack, widening hands the phone's back to the column — same entry,
+ *   same live session, retained state (transcript, draft, queued edit)
+ *   and no reload, so nothing flashes under the fold animation.
+ * - **Only without a page** does it fall back to the pre-#981 path:
+ *   narrowing captures [CarryOverSelection.currentChatId] synchronously
+ *   (iOS `:309`), then on the next frame opens it on the phone (through
+ *   the detach fence); widening pops the phone stack and opens the last
+ *   open session in the column, or shows the draft when none was open and
+ *   the column is empty.
  *
  * [CarryOverPresence] is the single implementation of the presence rules
  * (iOS `:141-154`); the routers forward both shell's `sessionDidAppear` /
@@ -67,6 +69,15 @@ interface SplitDetailColumn {
 
     /** iOS `showDraft(prompt: nil, focus: false)` (`:186-188`). */
     fun showDraft()
+
+    /**
+     * iOS `:302-305`: the column's session page, taken out without closing
+     * it (the column goes Empty); null when its root is not a session.
+     */
+    fun releaseSession(): NavEntry?
+
+    /** iOS `:324-328`: a page the phone released becomes the column's root, highlighted. */
+    fun adoptSession(entry: NavEntry)
 }
 
 /**
@@ -85,6 +96,16 @@ interface TabsColumn {
 
     /** The Sessions stack → root, not animated (shell teardown). */
     fun popAllToRoot()
+
+    /**
+     * iOS `MainTabController.releaseSession()`: the pushed session page —
+     * the session itself, not a side chat above it — taken off without
+     * closing it, the stack popped to the list. Null when none is pushed.
+     */
+    fun releaseSession(): NavEntry?
+
+    /** iOS `adoptSession(_:)`: pop to the list, then push the released page as it is, unanimated. */
+    fun adoptSession(entry: NavEntry)
 }
 
 /** One step of a carry-over run, in order. Pure: [CarryOverPlan] builds them, [CarryOver] runs them. */
@@ -180,17 +201,30 @@ class CarryOver(
     suspend fun onShellKindChanged(from: RootKind?, to: RootKind) {
         when {
             from == RootKind.Split && to == RootKind.Phone -> {
-                // iOS `:161`: captured synchronously, before the deferral —
+                // iOS `:309`: captured synchronously, before the deferral —
                 // an appear landing in between changes nothing.
                 val captured = selection.currentChatId
+                // One frame: the split has left composition, so the page
+                // moves between two stacks with no host attached to the old.
                 awaitFrame()
+                // TODO(#45): the companions panel rides along — folded,
+                // iOS shows the inspector as a sheet over the tab shell.
+                // iOS `:302-307`: the page itself moves; nothing to open.
+                val page = detail.releaseSession()
+                if (page != null) return tabs.adoptSession(page)
                 run(CarryOverPlan.collapse(captured, detail.shownChatId))
             }
 
             from == RootKind.Phone && to == RootKind.Split -> {
-                // iOS `:174-175`: the id is read INSIDE the deferred block —
-                // an appear landing before the frame is the one carried.
                 awaitFrame()
+                // iOS `:324-329`: the phone's page moves back as it is.
+                val page = tabs.releaseSession()
+                if (page != null) {
+                    (page.route as? SessionRoute)?.let { selection.currentChatId = it.chatId }
+                    return detail.adoptSession(page)
+                }
+                // iOS `:332`: the id is read INSIDE the deferred block — an
+                // appear landing before the frame is the one carried.
                 run(CarryOverPlan.expand(selection.currentChatId, detail.shownChatId, detail.isEmpty))
             }
 

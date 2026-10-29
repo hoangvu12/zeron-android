@@ -122,6 +122,23 @@ internal class MainTabsColumn(
     override fun popAllToRoot() {
         tabs.sessions.popToRoot(animated = false)
     }
+
+    override fun releaseSession(): NavEntry? {
+        val stack = tabs.sessions
+        // The session itself — the first one above the list — not a side
+        // chat pushed over it (those close with the release).
+        val page = stack.entries.drop(1).firstOrNull { it.route is SessionRoute } ?: return null
+        slot.clearPending()
+        stack.release(page)
+        stack.popToRoot(animated = false)
+        return page
+    }
+
+    override fun adoptSession(entry: NavEntry) {
+        slot.clearPending()
+        tabs.sessions.popToRoot(animated = false)
+        tabs.sessions.adopt(entry)
+    }
 }
 
 /**
@@ -146,6 +163,10 @@ internal class TabletDetailColumn(
     override fun showSession(chatId: String) = router.showSessionInDetail(chatId)
 
     override fun showDraft() = router.showDraft(prompt = null, focus = false)
+
+    override fun releaseSession(): NavEntry? = router.releaseDetailSession()
+
+    override fun adoptSession(entry: NavEntry) = router.adoptDetailSession(entry)
 }
 
 /**

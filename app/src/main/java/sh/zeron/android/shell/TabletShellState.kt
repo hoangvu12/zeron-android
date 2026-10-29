@@ -24,8 +24,8 @@ import kotlinx.coroutines.flow.first
  * (Ctrl+B) hiding the sidebar. This file owns the shared shell state and
  * the pane geometry; [SplitRoot] owns the layout and animation.
  *
- * The 840 dp breakpoint that decides *when* the split shows is ticket 35's
- * `SplitBreakpoint` (in `shell/RootKind.kt`), deliberately not defined here.
+ * The breakpoint that decides *when* the split shows is `SplitBreakpoint`
+ * (in `shell/RootKind.kt`), deliberately not defined here.
  */
 
 /**
@@ -40,6 +40,59 @@ internal val SidebarMinWidth = 320.dp
 
 /** `maximumPrimaryColumnWidth` (`SplitRootController.swift:42`). */
 internal val SidebarMaxWidth = 400.dp
+
+/**
+ * The minimum in windows under 700 dp (`SplitRootController.swift:89-97`):
+ * the unfolded Duo (669 pt) goes lower so the session column keeps a
+ * phone's width for the transcript and composer.
+ */
+internal val SidebarMinWidthNarrow = 280.dp
+
+/** Below this window width the sidebar minimum is [SidebarMinWidthNarrow]. */
+internal val NarrowSplitWidth = 700.dp
+
+/**
+ * What UIKit's column sizing leaves the session column before the sidebar
+ * drops from its preferred width toward the minimum: narrow windows "hold
+ * the sidebar at its minimum (an iPad mini in portrait gets 320)" — 744 −
+ * 320 — and the unfolded Duo goes to 280.
+ */
+internal val DetailPreferredMinWidth = 424.dp
+
+/**
+ * The sidebar's width and the session column's leading gap in one window,
+ * in dp. [detailGap] is the hinge's width when the columns sit either side
+ * of a separating hinge, else 0.
+ */
+internal data class SidebarLayout(val sidebarWidth: Float, val detailGap: Float)
+
+/**
+ * Pure: the sidebar column for a window [windowWidth] dp wide.
+ *
+ * - The minimum is 280 under 700 dp, else 320; the width is the preferred
+ *   360, lowered toward the minimum so the session column keeps
+ *   [DetailPreferredMinWidth] (iPad mini portrait → 320, the unfolded Duo
+ *   → 280), never above 400.
+ * - A separating vertical [hinge] (#942's uneven panes) puts the sidebar
+ *   on the leading pane and starts the session column past the hinge,
+ *   when that pane is at least the minimum and leaves the session column
+ *   at least as much; otherwise the hinge is ignored. [rtl] mirrors the
+ *   hinge (its bounds are from the window's left edge).
+ */
+internal fun sidebarLayout(windowWidth: Float, hinge: VerticalHinge? = null, rtl: Boolean = false): SidebarLayout {
+    val min = (if (windowWidth < NarrowSplitWidth.value) SidebarMinWidthNarrow else SidebarMinWidth).value
+    if (hinge != null) {
+        val leadingPane = if (rtl) windowWidth - hinge.end.value else hinge.start.value
+        val gap = hinge.end.value - hinge.start.value
+        val trailingPane = windowWidth - leadingPane - gap
+        if (gap >= 0f && leadingPane >= min && trailingPane >= min) {
+            return SidebarLayout(leadingPane, gap)
+        }
+    }
+    val width = minOf(SidebarPreferredWidth.value, windowWidth - DetailPreferredMinWidth.value)
+        .coerceIn(min, SidebarMaxWidth.value)
+    return SidebarLayout(width, 0f)
+}
 
 /**
  * A saved description of what the detail column shows — the tablet
@@ -206,15 +259,19 @@ fun rememberTabletShellState(): TabletShellState =
  *  - `paneX`/`paneWidth`: the detail pane's visible window — the only part
  *    that resizes per animation frame (the pane background).
  *  - `contentWidth`: the width the detail **content** was measured at —
- *    the *target* width (W − S shown, W hidden), never per-frame: the
- *    content is measured once per toggle and slid, like Core Animation
- *    interpolating the final frames.
+ *    the *target* width (W − S − gap shown, W hidden), never per-frame:
+ *    the content is measured once per toggle and slid, like Core
+ *    Animation interpolating the final frames.
+ *  - `contentX`: where the content sits — `paneX` plus the hinge gap
+ *    scaled by the fraction (the column clears the hinge while the sidebar
+ *    shows).
  */
 internal data class SplitGeometry(
     val sidebarX: Int,
     val paneX: Int,
     val paneWidth: Int,
     val contentWidth: Int,
+    val contentX: Int = paneX,
 )
 
 /**
@@ -228,13 +285,17 @@ internal fun splitGeometry(
     sidebarPx: Int,
     fraction: Float,
     targetVisible: Boolean,
+    gapPx: Int = 0,
 ): SplitGeometry {
     val sidebar = min(sidebarPx, totalPx)
-    val shown = (fraction.coerceIn(0f, 1f) * sidebar).roundToInt()
+    val f = fraction.coerceIn(0f, 1f)
+    val shown = (f * sidebar).roundToInt()
+    val gap = min(gapPx, totalPx - sidebar).coerceAtLeast(0)
     return SplitGeometry(
         sidebarX = shown - sidebar,
         paneX = shown,
         paneWidth = totalPx - shown,
-        contentWidth = if (targetVisible) totalPx - sidebar else totalPx,
+        contentWidth = if (targetVisible) totalPx - sidebar - gap else totalPx,
+        contentX = shown + (f * gap).roundToInt(),
     )
 }

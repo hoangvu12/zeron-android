@@ -2,6 +2,8 @@ package sh.zeron.android.shell
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.window.core.layout.WindowHeightSizeClass
+import androidx.window.core.layout.WindowSizeClass
 
 /**
  * The three window roots (android-ui-parity #35): which one is on screen
@@ -36,36 +38,62 @@ sealed interface RootInput {
 
 /**
  * The single owner of the split breakpoint, measured on the real root
- * width. Tickets 33, 104, 105 and 108 reference this constant. Inclusive;
- * no hysteresis.
+ * width. Inclusive; no hysteresis.
  *
- * Wave-10 42 (user decision 2026-10-28): a tablet held upright follows the
- * iPad — split when wide enough. The narrowest iPad that splits in
- * portrait is the iPad mini at 744 pt, so the breakpoint is 744 dp (it was
- * Material's 840 dp "expanded" class, which kept every portrait tablet on
- * the phone layout).
+ * iOS splits whenever the window is regular in both directions
+ * (`SplitRootController.swift:12-18`): every iPad, and the unfolded iPhone
+ * Duo, which is only 669 pt wide in portrait — hence its 280 pt sidebar
+ * minimum below 700 ([SidebarMinWidthNarrow]). Android has no size
+ * classes of its own, so this is ~700 dp (Zeron Android's `TabletShell`
+ * uses the same): a window that wide is a tablet or an unfolded foldable.
  */
-val SplitBreakpoint: Dp = 744.dp
+val SplitBreakpoint: Dp = 700.dp
 
 /**
- * Wave-10 42 (I1): below this height the window is a phone held sideways
- * (a Pixel 7 in landscape is ~915 × 400 dp), which keeps the phone layout
- * however wide it is — iOS's compact height class.
+ * An unfolded foldable splits from here (WindowSizeClass's medium width):
+ * the Duo's case — a book foldable's inner screen is ~670 dp wide in
+ * portrait (a Galaxy Z Fold), under [SplitBreakpoint], and must still
+ * split like the unfolded Duo. "Foldable" is a window that reports a
+ * `FoldingFeature` ([WindowPosture.hasFold]); a plain 600 dp tablet or a
+ * multi-window slice of that width keeps the phone layout.
+ */
+val FoldableSplitBreakpoint: Dp = 600.dp
+
+/**
+ * Below this height the window is a phone held sideways (a Pixel 7 in
+ * landscape is ~915 × 400 dp), which keeps the phone layout however wide
+ * it is — iOS's compact height class, Android's compact
+ * `WindowHeightSizeClass` (the same 480 dp bound).
  */
 val CompactHeight: Dp = 480.dp
 
 /**
  * The root on screen. Signed out wins over the size: the welcome root
- * never splits. A compact-height window (a landscape
- * phone) stays on the phone layout; otherwise the width decides. Both are
- * re-evaluated live (fold, multi-window resize, rotation) — a change never
- * goes through the cross-fade.
+ * never splits. A compact-height window (a landscape phone) stays on the
+ * phone layout; otherwise the width decides — [SplitBreakpoint], or
+ * [FoldableSplitBreakpoint] when the window has a fold ([foldable]). All
+ * of it is re-evaluated live (fold/unfold, multi-window resize, rotation)
+ * — a change never goes through the cross-fade.
  */
-fun chooseRoot(signedIn: Boolean, width: Dp, height: Dp = Dp.Infinity): RootKind = when {
+fun chooseRoot(
+    signedIn: Boolean,
+    width: Dp,
+    height: Dp = Dp.Infinity,
+    foldable: Boolean = false,
+): RootKind = when {
     !signedIn -> RootKind.Welcome
-    height < CompactHeight -> RootKind.Phone
+    isCompactHeight(width, height) -> RootKind.Phone
     width >= SplitBreakpoint -> RootKind.Split
+    foldable && width >= FoldableSplitBreakpoint -> RootKind.Split
     else -> RootKind.Phone
+}
+
+/** WindowSizeClass's compact height (< 480 dp); an unbounded height never is. */
+internal fun isCompactHeight(width: Dp, height: Dp): Boolean {
+    if (height == Dp.Infinity) return false
+    if (height < 0.dp || width < 0.dp) return true
+    return WindowSizeClass.compute(width.value.coerceAtMost(1e6f), height.value).windowHeightSizeClass ==
+        WindowHeightSizeClass.COMPACT
 }
 
 /**

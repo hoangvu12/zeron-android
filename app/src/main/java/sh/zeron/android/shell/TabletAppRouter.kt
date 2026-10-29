@@ -55,6 +55,16 @@ interface TabletShell {
     fun setDetailEmpty()
 
     /**
+     * #26 (iOS #981): the detail's session page itself, taken off the
+     * column without closing it ([NavStack.release]) — the column shows
+     * Empty. Null when the column's root is not a session.
+     */
+    fun releaseDetailSession(): NavEntry?
+
+    /** #26: a session page released by the phone stack becomes the column's root ([NavStack.adopt]). */
+    fun adoptDetailSession(entry: NavEntry)
+
+    /**
      * iOS `dismiss(animated:)`: 18's alerts, 19's action sheet, then every
      * [SheetHost] entry (31) — which includes 104's Settings card, so no
      * separate presenter dismiss (a second `sheetHost.dismiss` while the
@@ -426,5 +436,26 @@ class TabletAppRouter(
     fun clearDetail() {
         invalidate()
         if (shell.detailRoot != DetailRoot.Empty) shell.setDetailEmpty()
+    }
+
+    /**
+     * #26's `SplitDetailColumn.releaseSession` (iOS `:302-305`): pending
+     * opens discarded, the session page itself handed over (not closed),
+     * the column Empty. [TabletShell.currentChatId] untouched.
+     */
+    fun releaseDetailSession(): NavEntry? {
+        invalidate()
+        return shell.releaseDetailSession()
+    }
+
+    /**
+     * #26's `SplitDetailColumn.adoptSession` (iOS `:324-328`): the phone's
+     * session page becomes the column's root as it is, highlighted.
+     */
+    fun adoptDetailSession(entry: NavEntry) {
+        invalidate()
+        phone.clearPending()
+        (entry.route as? SessionRoute)?.let { shell.currentChatId = it.chatId }
+        shell.adoptDetailSession(entry)
     }
 }
