@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -86,6 +87,9 @@ fun AppRoot(
     coreFailed: @Composable (String) -> Unit = { CoreUnavailableScreen(it) },
     shellScope: @Composable (kind: RootKind, content: @Composable () -> Unit) -> Unit = { _, c -> c() },
 ) {
+    // #26: the window's folds (an unfolded foldable splits from 600 dp;
+    // the split aligns its columns to a separating hinge).
+    val posture = rememberWindowPosture()
     BoxWithConstraints(
         modifier
             .fillMaxSize()
@@ -115,7 +119,7 @@ fun AppRoot(
             }
 
             is RootInput.Ready -> {
-                val kind = chooseRoot(input.signedIn, maxWidth, maxHeight)
+                val kind = chooseRoot(input.signedIn, maxWidth, maxHeight, posture.hasFold)
                 SideEffect { state.kind = kind }
                 RootCrossfade(
                     target = kind.group,
@@ -136,20 +140,22 @@ fun AppRoot(
                             // shell group, with no fade (108 owns the
                             // carry-over). The shell scope wraps the switch,
                             // so the hoisted shell state survives it.
-                            val shellKind = chooseRoot(signedIn = true, width = maxWidth, height = maxHeight)
-                            shellScope(shellKind) {
-                                if (shellKind == RootKind.Split) {
-                                    Box(
-                                        Modifier
-                                            .fillMaxSize()
-                                            .testTag("root-split"),
-                                    ) { split() }
-                                } else {
-                                    Box(
-                                        Modifier
-                                            .fillMaxSize()
-                                            .testTag("root-phone"),
-                                    ) { phone() }
+                            val shellKind = chooseRoot(signedIn = true, width = maxWidth, height = maxHeight, foldable = posture.hasFold)
+                            CompositionLocalProvider(LocalWindowPosture provides posture) {
+                                shellScope(shellKind) {
+                                    if (shellKind == RootKind.Split) {
+                                        Box(
+                                            Modifier
+                                                .fillMaxSize()
+                                                .testTag("root-split"),
+                                        ) { split() }
+                                    } else {
+                                        Box(
+                                            Modifier
+                                                .fillMaxSize()
+                                                .testTag("root-phone"),
+                                        ) { phone() }
+                                    }
                                 }
                             }
                         }

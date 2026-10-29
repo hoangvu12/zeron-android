@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import kotlin.math.min
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop
@@ -42,7 +43,8 @@ import sh.zeron.android.design.ZeronTheme
  * The tablet split shell (android-ui-parity #33): the port of
  * `ios:Shell/SplitRootController.swift`'s `UISplitViewController`
  * (`.doubleColumn`, `.oneBesideSecondary`, `.tile`) as one custom
- * [Layout] — a 360 dp sidebar **beside** the detail column, nothing
+ * [Layout] — a sidebar **beside** the detail column (360 dp, lower in
+ * narrow windows, or the leading pane beside a hinge — [sidebarLayout]), nothing
  * overlaying, the detail narrower by the sidebar width:
  *
  *  - a 1-px hairline over the sidebar's **trailing** pixel column (inside
@@ -181,12 +183,23 @@ fun SplitRoot(
     // the detail content get target-only constraints — `fixed(sPx, h)` and
     // `fixed(contentWidth, h)` — so they are never re-measured mid-slide;
     // only the trivial pane-background box is.
+    // #26: the window's separating hinge, if any (the columns sit either
+    // side of it).
+    val hinge = LocalWindowPosture.current.verticalHinge
     val measurePolicy = MeasurePolicy { measurables, constraints ->
         val width = constraints.maxWidth
         val height = constraints.maxHeight
-        val sidebarPx = SidebarPreferredWidth.coerceIn(SidebarMinWidth, SidebarMaxWidth).roundToPx()
-        val geometry =
-            splitGeometry(width, sidebarPx, shell.sidebarFraction, shell.sidebarVisible)
+        // #26: 360 preferred, lowered toward the minimum (280 under 700 dp,
+        // else 320) in narrow windows, or the leading pane beside a hinge.
+        val columns = sidebarLayout(width.toDp().value, hinge, layoutDirection == LayoutDirection.Rtl)
+        val sidebarPx = columns.sidebarWidth.dp.roundToPx()
+        val geometry = splitGeometry(
+            width,
+            sidebarPx,
+            shell.sidebarFraction,
+            shell.sidebarVisible,
+            gapPx = columns.detailGap.dp.roundToPx(),
+        )
         val sidebarChild = measurables[0].measure(Constraints.fixed(min(sidebarPx, width), height))
         val paneBackground = measurables[1].measure(Constraints.fixed(geometry.paneWidth, height))
         val detailChild = measurables[2].measure(Constraints.fixed(geometry.contentWidth, height))
@@ -198,7 +211,7 @@ fun SplitRoot(
                 alpha = if (shell.sidebarFraction == 0f) 0f else 1f
             }
             paneBackground.placeRelative(geometry.paneX, 0)
-            detailChild.placeRelative(geometry.paneX, 0)
+            detailChild.placeRelative(geometry.contentX, 0)
         }
     }
 
