@@ -134,6 +134,10 @@ fun CompanionsOverlay(
     onNewTerminal: () -> Unit,
     onArchive: (chatId: String, onAccepted: (Boolean) -> Unit) -> Unit,
     onAppear: () -> Unit = {},
+    /** #44: the chat's terminals (iOS `app.terminals.tabs(for:)`), a row each. */
+    terminals: List<PanelTerminal> = emptyList(),
+    onOpenTerminal: (terminalId: String) -> Unit = {},
+    onCloseTerminal: (terminalId: String) -> Unit = {},
 ) {
     if (!controller.showing) return
     val detents = remember { listOf(SheetDetent.Medium, SheetDetent.Large) }
@@ -171,6 +175,9 @@ fun CompanionsOverlay(
                 }
             },
             onArchive = onArchive,
+            terminals = terminals,
+            onOpenTerminal = { id -> pick { onOpenTerminal(id) } },
+            onCloseTerminal = onCloseTerminal,
         )
     }
 }
@@ -219,8 +226,13 @@ internal fun CompanionsList(
     onAction: (CompanionAction) -> Unit,
     onArchive: (chatId: String, onAccepted: (Boolean) -> Unit) -> Unit,
     modifier: Modifier = Modifier,
+    terminals: List<PanelTerminal> = emptyList(),
+    onOpenTerminal: (String) -> Unit = {},
+    onCloseTerminal: (String) -> Unit = {},
 ) {
-    val rows = remember(ui) { panelItems(ui) }
+    val rows = remember(ui, terminals) { panelItems(ui, terminals) }
+    val openTerminal by rememberUpdatedState(onOpenTerminal)
+    val closeTerminal by rememberUpdatedState(onCloseTerminal)
     val listState = rememberLazyListState()
     val feedback = LocalFeedback.current
     val openChat by rememberUpdatedState(onOpenChat)
@@ -304,6 +316,44 @@ internal fun CompanionsList(
                     select { act(item.action) }
                 }
                 is PanelItem.Empty -> EmptyRow(item.section)
+                // #44: a terminal (iOS `configure(terminal:host:)`), closed
+                // with a trailing swipe (iOS `trailingSwipe`, "Close").
+                is PanelItem.Terminal -> {
+                    val t = item.terminal
+                    SwipeRow(
+                        id = t.id,
+                        modifier = Modifier.height(LocalTypeScale.current.scaledDp(62f)),
+                        leading = null,
+                        trailing = listOf(
+                            SwipeAction(
+                                title = CompanionsCopy.CloseTerminal,
+                                icon = ZeronIcons.Xmark,
+                                background = palette.danger,
+                                destructive = true,
+                                testTag = "companion-terminal-close",
+                                perform = { onAccepted ->
+                                    closeTerminal(t.id)
+                                    onAccepted(true)
+                                },
+                            ),
+                        ),
+                        coordinator = coordinator,
+                    ) {
+                        CompanionRow(
+                            art = Art.Glyph(ZeronIcons.Terminal, palette.secondary, palette.chip),
+                            title = t.name,
+                            text = AgentRowText(t.detail, t.trailing, t.a11y),
+                            trailingColor = when (t.state) {
+                                TerminalRowState.Live -> palette.status.done
+                                TerminalRowState.Reconnecting -> palette.secondary
+                                TerminalRowState.Ended -> palette.tertiary
+                            },
+                            chevron = true,
+                            testTag = "companion-terminal",
+                            onClick = { select { openTerminal(t.id) } },
+                        )
+                    }
+                }
             }
         }
     }

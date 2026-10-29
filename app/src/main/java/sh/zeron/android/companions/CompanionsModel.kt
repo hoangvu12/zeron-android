@@ -13,6 +13,9 @@ import sh.zeron.android.sidechats.SubagentFormat
 
 /** The panel's copy (iOS `CompanionsViewController`). */
 object CompanionsCopy {
+    /** A terminal row's swipe (iOS `trailingSwipe`). */
+    const val CloseTerminal = "Close"
+
     const val Subtitle = "Agents, side chats & terminals"
     const val Close = "Close"
     const val AddSideChat = "Add side chat"
@@ -61,16 +64,38 @@ sealed interface PanelItem {
     data class Empty(val section: CompanionSection) : PanelItem {
         override val key: String get() = "empty:$section"
     }
+
+    data class Terminal(val terminal: PanelTerminal) : PanelItem {
+        override val key: String get() = "terminal:${terminal.id}"
+    }
+}
+
+/** A terminal row's state word (iOS `CompanionCell.configure(terminal:)`). */
+enum class TerminalRowState { Live, Reconnecting, Ended }
+
+/**
+ * One terminal row (#44), pure so the panel model stays testable: the
+ * tab's name, "folder · host", and its state word.
+ */
+data class PanelTerminal(val id: String, val name: String, val detail: String, val state: TerminalRowState) {
+    /** "Live" / "Reconnecting" / "Ended". */
+    val trailing: String
+        get() = when (state) {
+            TerminalRowState.Live -> "Live"
+            TerminalRowState.Reconnecting -> "Reconnecting"
+            TerminalRowState.Ended -> "Ended"
+        }
+
+    val a11y: String get() = "$name, $trailing"
 }
 
 /**
  * The panel's rows (iOS `reload`): Agents only when there are any, live
  * first then newest; Side chats always — its rows, or the empty line with
- * New side chat and Fork this chat; Terminals always — for now the empty
- * line and New terminal (TODO(#44): the terminal store's tabs, `app.terminals`, with
- * the terminal screen that opens them). Pure.
+ * New side chat and Fork this chat; Terminals always — the chat's
+ * [terminals], or the empty line and New terminal (#44). Pure.
  */
-fun panelItems(ui: SideChatsUi): List<PanelItem> = buildList {
+fun panelItems(ui: SideChatsUi, terminals: List<PanelTerminal> = emptyList()): List<PanelItem> = buildList {
     val agents = ui.running + ui.finished
     if (agents.isNotEmpty()) {
         add(PanelItem.Header(CompanionSection.Agents))
@@ -85,8 +110,12 @@ fun panelItems(ui: SideChatsUi): List<PanelItem> = buildList {
         ui.chats.forEach { add(PanelItem.SideChat(it)) }
     }
     add(PanelItem.Header(CompanionSection.Terminals))
-    add(PanelItem.Empty(CompanionSection.Terminals))
-    add(PanelItem.Action(CompanionAction.NewTerminal))
+    if (terminals.isEmpty()) {
+        add(PanelItem.Empty(CompanionSection.Terminals))
+        add(PanelItem.Action(CompanionAction.NewTerminal))
+    } else {
+        terminals.forEach { add(PanelItem.Terminal(it)) }
+    }
 }
 
 /** What an agent row shows (iOS `CompanionCell.configure(agent:)`). Pure. */

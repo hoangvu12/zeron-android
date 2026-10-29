@@ -2,8 +2,11 @@ package sh.zeron.android.session
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -14,6 +17,7 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import sh.zeron.android.ZeronApplication
@@ -47,10 +51,19 @@ import sh.zeron.android.sidechats.SideChatsModel
 import sh.zeron.android.sidechats.SideChatsUi
 import sh.zeron.android.sidechats.SubagentOpenRequest
 import sh.zeron.android.sidechats.rememberSubagentOpener
+import sh.zeron.android.shell.LaunchOptions
 import sh.zeron.android.shell.LocalNavEntry
 import sh.zeron.android.shell.LocalNavStack
 import sh.zeron.android.shell.NavRoute
 import sh.zeron.android.shell.SessionRoute
+import sh.zeron.android.terminal.LiveComposers
+import sh.zeron.android.terminal.TerminalDemoScript
+import sh.zeron.android.terminal.TerminalRoute
+import sh.zeron.android.terminal.appendBlock
+import sh.zeron.android.terminal.deviceName
+import sh.zeron.android.terminal.liveTerminalId
+import sh.zeron.android.terminal.panelRow
+import sh.zeron.android.terminal.rememberChatTerminals
 import sh.zeron.android.transcript.AttachmentReader
 import sh.zeron.android.transcript.TranscriptState
 import uniffi.zeron_core.TextSystem
@@ -394,9 +407,54 @@ class SessionScreenRoute internal constructor(
                 }
             }
         }
+        // #44: the chat's terminals (the panel rows and the strip count),
+        // and the terminal page over this session (iOS `openTerminal` /
+        // `TerminalViewController(tab:)`); null opens a new shell. Beside
+        // the sidebar it opens in the inspector (#45, `presentCompanion`).
+        val chatTerminals = rememberChatTerminals(controller.chatId)
+        // iOS `SessionViewController.live` / `appendToComposer`: while this
+        // screen is up, a terminal's Add Output to Message lands in its
+        // composer (else in the saved draft).
+        DisposableEffect(entry) {
+            val registration = LiveComposers.register(controller.chatId) { block ->
+                val composer = entry.sessionComposerController(controller.chatId)
+                if (composer != null) {
+                    composer.text = appendBlock(composer.text, block)
+                } else {
+                    val key = DraftKey.Chat(core.engineId, controller.chatId)
+                    drafts.save(key, appendBlock(drafts.peek(key), block))
+                }
+            }
+            onDispose { registration.close() }
+        }
+        val openTerminal: (String?, List<String>) -> Unit = { terminalId, script ->
+            val route = TerminalRoute(controller.chatId, terminalId, script)
+            val companions = presenter
+            when {
+                companions != null -> companions.show(route, controller.chatId)
+                isTopAndIdle() -> stack.push(route)
+            }
+        }
+        val openLiveTerminal: () -> Unit = {
+            openTerminal(chatTerminals.liveTerminalId(), emptyList())
+        }
+        // iOS `debugOpenCompanion` (`-terminal` / `-terminal-demo`): the
+        // first session opened shows its terminal once the push landed.
+        val launchOptions = LaunchOptions.current
+        if (launchOptions.terminal) {
+            LaunchedEffect(entry) {
+                if (debugTerminalShown) return@LaunchedEffect
+                snapshotFlow { isTopAndIdle() }.first { it }
+                debugTerminalShown = true
+                openTerminal(null, if (launchOptions.terminalDemo) TerminalDemoScript else emptyList())
+            }
+        }
         // #40: the companions item, always shown, badged while agents run;
         // it opens the panel, a strip chip opens it at its section (#41).
-        val companions = sideUi.companions
+        val companions = sideUi.companions.copy(
+            terminals = chatTerminals.size,
+            liveTerminals = chatTerminals.count { it.isLive },
+        )
         val companionsButton: @Composable () -> Unit = {
             CompanionsButton(companions.runningAgents, onClick = { toggleCompanions(null) })
         }
@@ -420,9 +478,13 @@ class SessionScreenRoute internal constructor(
                 onOpenAgent = { agent -> agent.docId?.let { openSubagent(it, agent.title, !agent.running) } },
                 onNewSideChat = { newSideChat(true) },
                 onFork = panelFork,
-                // TODO(#44): open a new terminal (iOS `TerminalViewController(tab: nil)`)
-                // on the terminal screen, over #43's `app.terminals`.
-                onNewTerminal = {},
+                // #44 (iOS `TerminalViewController(tab: nil)`): a new shell.
+                onNewTerminal = { openTerminal(null, emptyList()) },
+                terminals = chatTerminals.map { it.panelRow(app?.deviceName(it.ref.deviceId) ?: "Computer") },
+                onOpenTerminal = { id -> openTerminal(id, emptyList()) },
+                onCloseTerminal = { id ->
+                    chatTerminals.firstOrNull { it.ref.id == id }?.let { app?.terminals?.close(it) }
+                },
                 onArchive = { id, onAccepted ->
                     val actions = app?.rowActions
                     if (actions == null) {
@@ -450,8 +512,8 @@ class SessionScreenRoute internal constructor(
             CompanionMenuRows(
                 onNewSideChat = { newSideChat(false) },
                 onForkSideChat = forkSideChat,
-                // TODO(#44): open the chat's live terminal tab (iOS `openTerminal`).
-                onTerminal = {},
+                // #44 (iOS `openTerminal`): the chat's live tab, else a new shell.
+                onTerminal = openLiveTerminal,
             )
         }
         // Ticket 85: the push/pop choreography (the stack and jump
@@ -483,14 +545,20 @@ class SessionScreenRoute internal constructor(
                 companions = companions,
                 onCompanionTap = { section -> toggleCompanions(section) },
                 overlay = sideChatsOverlay,
-                // #41 (iOS ⌘⌥0, Ctrl on Android): the companions panel.
-                // TODO(#44): Ctrl+J, the chat's terminal.
+                // #41 (iOS ⌘⌥0, Ctrl on Android): the companions panel;
+                // #44 (iOS ⌘J): Ctrl+J, the chat's terminal.
                 modifier = Modifier.onPreviewKeyEvent { e ->
-                    if (e.type == KeyEventType.KeyDown && e.isCtrlPressed && e.isAltPressed && e.key == Key.Zero) {
-                        toggleCompanions(null)
-                        true
-                    } else {
-                        false
+                    when {
+                        e.type != KeyEventType.KeyDown || !e.isCtrlPressed -> false
+                        e.isAltPressed && e.key == Key.Zero -> {
+                            toggleCompanions(null)
+                            true
+                        }
+                        !e.isAltPressed && e.key == Key.J -> {
+                            openLiveTerminal()
+                            true
+                        }
+                        else -> false
                     }
                 },
             )
@@ -544,3 +612,6 @@ class SessionScreenRoute internal constructor(
     /** 91's question-port retention key. */
     private object QuestionsKey
 }
+
+/** iOS `debugCompanionShown`: the `terminal` launch extra opens one terminal per process. */
+private var debugTerminalShown = false

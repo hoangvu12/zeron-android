@@ -410,6 +410,14 @@ internal fun NavEntry.sessionQueueEditGate(chatId: String): QueuedEditGate? =
     retainedOrNull<SessionComposerBinding>(sessionComposerBindingKey(chatId))?.queueEdit
 
 /**
+ * #44's seam into the same binding: the live composer of [chatId] on this
+ * entry (iOS `SessionViewController.live(chatId)`), for the terminal's
+ * Add to Message; null before the screen's first composition.
+ */
+internal fun NavEntry.sessionComposerController(chatId: String): ComposerController? =
+    retainedOrNull<SessionComposerBinding>(sessionComposerBindingKey(chatId))?.composer
+
+/**
  * Ticket 83's [QueueEditController] in composition — the construction and
  * wiring step of the ticket (its step 5), built where 78 builds its
  * binding, with the **same lifetime**: the host and the controller are

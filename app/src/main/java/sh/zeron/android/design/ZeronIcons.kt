@@ -333,6 +333,15 @@ object ZeronIcons {
     /** SF `apple.terminal` — the session ⋯ "Terminal". */
     val Terminal = ZeronIcon.Vector(R.drawable.zi_terminal)
 
+    /** SF `keyboard` — the terminal's Show keyboard circle (#44). */
+    val Keyboard = ZeronIcon.Vector(R.drawable.zi_keyboard)
+
+    /** SF `arrow.left` — the terminal key bar's left arrow (#44). */
+    val ArrowLeft = ZeronIcon.Vector(R.drawable.zi_arrow_left, autoMirror = false)
+
+    /** SF `arrow.right` — the terminal key bar's right arrow (#44). */
+    val ArrowRight = ZeronIcon.Vector(R.drawable.zi_arrow_right, autoMirror = false)
+
     /** SF `command` — core slash-command chip. */
     val Command = ZeronIcon.Vector(R.drawable.zi_command)
 
