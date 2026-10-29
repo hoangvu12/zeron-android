@@ -360,6 +360,7 @@ class ZeronIconsTest {
             ZeronIcons.Function to R.drawable.zi_function, // #36
             ZeronIcons.Textformat to R.drawable.zi_textformat, // #36
             ZeronIcons.TextformatSize to R.drawable.zi_textformat_size, // #36
+            ZeronIcons.Minus to R.drawable.zi_minus, // #52
             ZeronIcons.Lock to R.drawable.zi_lock, // #51
             ZeronIcons.BookClosed to R.drawable.zi_book_closed, // #51
             ZeronIcons.ArrowUpRightSquare to R.drawable.zi_arrow_up_right_square, // #51

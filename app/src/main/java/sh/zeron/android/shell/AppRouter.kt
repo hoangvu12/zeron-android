@@ -1,6 +1,9 @@
 package sh.zeron.android.shell
 
 import androidx.compose.runtime.staticCompositionLocalOf
+import sh.zeron.android.cloud.BillingRoute
+import sh.zeron.android.cloud.CloudSettingsRoute
+import sh.zeron.android.cloud.CloudSheet
 
 /** `Couldn't open session. Try again.` — the open-error toast, verbatim (`MainTabController.swift:206`). */
 const val OPEN_ERROR_TOAST = "Couldn't open session. Try again."
@@ -21,17 +24,19 @@ interface AppRouter {
 
     /**
      * A debug `route` screen (#19, iOS `SceneDelegate.openCloudRoute`).
-     * The phone router opens the screens that exist (#51: Cloud settings
-     * and Connect GitHub); this default logs and stays put for the rest
-     * until each owner wires its destination.
+     * The Cloud and accounts routes push their pages ([showDebugPages]);
+     * the rest log and stay put until each owner wires its destination.
      */
     fun showDebugRoute(route: DebugRoute) {
         when (route) {
-            // #51: the phone router's (PhoneAppRouter); the tablet split
+            // #51/#52: the phone router's (PhoneAppRouter); the tablet split
             // logs until Settings' dialog takes pushed pages.
-            DebugRoute.CloudSettings, DebugRoute.GitHubConnect -> Unit
-            // TODO(#52): Billing (alone or pushed on Cloud settings); the Cloud repo picker.
-            DebugRoute.CloudBilling, DebugRoute.Billing, DebugRoute.CloudRepos -> Unit
+            DebugRoute.CloudSettings, DebugRoute.GitHubConnect, DebugRoute.CloudBilling,
+            DebugRoute.Billing, DebugRoute.CloudRepos,
+            -> {
+                showDebugPages(debugCloudPages(route))
+                return
+            }
             // #50 (iOS `openCloudRoute`): Providers; a computer's accounts
             // pushed from it; a Cloud agent's accounts.
             is DebugRoute.Providers, is DebugRoute.Accounts, is DebugRoute.CloudAgent -> {
@@ -137,4 +142,17 @@ internal fun debugAccountsPages(route: DebugRoute): List<NavRoute> = when (route
         sh.zeron.android.accounts.AgentAccountsRoute(sh.zeron.android.accounts.AccountsTarget.Cloud(route.harness)),
     )
     else -> emptyList()
+}
+
+/**
+ * #51/#52: a Cloud debug route's pages (iOS `openCloudRoute`): Cloud
+ * settings as the root (`cloud:github` / `cloud:repos` with that sheet up),
+ * `cloud:billing` with Billing over it, `billing` alone.
+ */
+internal fun debugCloudPages(route: DebugRoute): List<NavRoute> = when (route) {
+    DebugRoute.GitHubConnect -> listOf(CloudSettingsRoute(open = CloudSheet.GitHub))
+    DebugRoute.CloudRepos -> listOf(CloudSettingsRoute(open = CloudSheet.Repos))
+    DebugRoute.CloudBilling -> listOf(CloudSettingsRoute(), BillingRoute)
+    DebugRoute.Billing -> listOf(BillingRoute)
+    else -> listOf(CloudSettingsRoute())
 }

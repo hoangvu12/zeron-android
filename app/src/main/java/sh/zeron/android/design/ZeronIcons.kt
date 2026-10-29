@@ -433,6 +433,9 @@ object ZeronIcons {
     val GithubMark = ZeronIcon.Vector(R.drawable.zi_github_mark)
 
 
+    /** #52: Billing's pack stepper. */
+    val Minus = ZeronIcon.Vector(R.drawable.zi_minus)
+
     /** #51: a private repository. */
     val Lock = ZeronIcon.Vector(R.drawable.zi_lock)
 
@@ -563,6 +566,7 @@ object ZeronIcons {
             listOf("rectangle.portrait.and.arrow.right"),
             RectanglePortraitAndArrowRight,
         ),
+        RegistryEntry("Minus", listOf("minus"), Minus),
         RegistryEntry("Lock", listOf("lock"), Lock),
         RegistryEntry("BookClosed", listOf("book.closed"), BookClosed),
         RegistryEntry("ArrowUpRightSquare", listOf("arrow.up.right.square"), ArrowUpRightSquare),

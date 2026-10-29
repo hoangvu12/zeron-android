@@ -9,6 +9,8 @@ import sh.zeron.android.accounts.AgentAccountsRoute
 import sh.zeron.android.accounts.AgentAccountsPage
 import sh.zeron.android.accounts.ProvidersRoute
 import sh.zeron.android.accounts.ProvidersScreen
+import sh.zeron.android.cloud.BillingRoute
+import sh.zeron.android.cloud.BillingScreen
 import sh.zeron.android.cloud.CloudSettingsRoute
 import sh.zeron.android.cloud.CloudSettingsScreen
 import sh.zeron.android.session.SessionScreenRoute
@@ -81,6 +83,8 @@ fun ShellRouteContent(route: NavRoute) {
         // #61: Voice settings — Settings' Voice row and a voice control's
         // menu or host picker push it.
         is VoiceSettingsRoute -> VoiceSettingsScreen()
+        // #52: Settings → Billing.
+        is BillingRoute -> BillingScreen()
         else -> Unit
     }
 }
