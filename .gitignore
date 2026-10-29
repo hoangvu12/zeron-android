@@ -6,6 +6,6 @@ local.properties
 *.iml
 .idea/
 /core-out/
-/benchmark/build/
+/tools/android-assets/target/
 /buildSrc/build/
 /buildSrc/.gradle/

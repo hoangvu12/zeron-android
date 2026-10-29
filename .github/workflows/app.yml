@@ -1,0 +1,120 @@
+name: App
+
+# Builds the debug APK on the prebuilt Zeron core. The core comes from the
+# Core workflow (called below): its cache is keyed by the zeron/ submodule
+# commit, so after a submodule bump has been built once this is a restore.
+# The Rust asset tool (tools/android-assets) runs inside Gradle.
+#
+# Every APK is signed with the shared test key so consecutive builds install
+# over each other on a phone:
+#   ZERON_DEBUG_KEYSTORE_BASE64    base64 of the PKCS12 keystore
+#   ZERON_DEBUG_KEYSTORE_PASSWORD  ZERON_DEBUG_KEY_ALIAS
+# Without them (fork pull requests) the default debug key signs it.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: app-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  NDK_VERSION: 29.0.14206865
+  ZERON_ANDROID_ABIS: arm64-v8a
+
+jobs:
+  core:
+    uses: ./.github/workflows/core.yml
+
+  apk:
+    needs: core
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          submodules: true
+
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: zeron-core
+          path: core-out
+
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
+
+      - name: Android SDK packages
+        run: sdkmanager --install "platforms;android-37.0" "build-tools;37.0.0" "ndk;$NDK_VERSION"
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          workspaces: tools/android-assets
+          key: android-assets
+
+      - uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+
+      - name: Debug signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ZERON_DEBUG_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ZERON_DEBUG_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ZERON_DEBUG_KEY_ALIAS }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ] || [ -z "$KEYSTORE_PASSWORD" ] || [ -z "$KEY_ALIAS" ]; then
+            echo "No shared debug key (fork pull request): signing with the default debug key."
+            exit 0
+          fi
+          keystore="$RUNNER_TEMP/zeron-debug.p12"
+          # Tolerate a UTF-8 BOM (a secret set from a PowerShell-written file),
+          # line wrapping / CRLF, URL-safe and unpadded base64. keytool below
+          # catches anything this lets through that is not the keystore.
+          b64=$(printf '%s' "$KEYSTORE_BASE64" | LC_ALL=C tr -cd 'A-Za-z0-9+/=_-' | tr '_-' '/+')
+          while [ $(( ${#b64} % 4 )) -ne 0 ]; do b64="$b64="; done
+          if ! printf '%s' "$b64" | base64 -d > "$keystore"; then
+            # Shape only, never content.
+            bad=$(printf '%s' "$KEYSTORE_BASE64" | tr -d 'A-Za-z0-9+/=_\r\n\t -' | wc -c)
+            echo "::error::ZERON_DEBUG_KEYSTORE_BASE64 is not base64 (length ${#KEYSTORE_BASE64}, $bad characters outside the base64 alphabet)."
+            exit 1
+          fi
+          chmod 600 "$keystore"
+          # The same BOM / line-ending damage on the text secrets.
+          clean() { printf '%s' "$1" | LC_ALL=C sed '1s/^\xEF\xBB\xBF//' | tr -d '\r\n'; }
+          KEYSTORE_PASSWORD=$(clean "$KEYSTORE_PASSWORD")
+          KEY_ALIAS=$(clean "$KEY_ALIAS")
+          echo "::add-mask::$KEYSTORE_PASSWORD"
+          if ! out=$(keytool -list -storetype PKCS12 -keystore "$keystore" -storepass "$KEYSTORE_PASSWORD" -alias "$KEY_ALIAS" 2>&1); then
+            echo "$out"
+            echo "decoded $(wc -c < "$keystore") bytes, first byte $(head -c1 "$keystore" | od -An -tx1) (PKCS12 starts with 30)"
+            echo "::error::ZERON_DEBUG_KEYSTORE_* secrets do not open a PKCS12 keystore with that alias."
+            exit 1
+          fi
+          {
+            echo "ZERON_DEBUG_KEYSTORE=$keystore"
+            echo "ZERON_DEBUG_KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD"
+            echo "ZERON_DEBUG_KEY_ALIAS=$KEY_ALIAS"
+          } >> "$GITHUB_ENV"
+
+      - name: Assemble debug APK
+        run: ./gradlew --stacktrace :app:assembleDebug -PzeronCoreDir="$GITHUB_WORKSPACE/core-out"
+
+      - name: Remove signing key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/zeron-debug.p12"
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: zeron-android-debug
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          retention-days: 14

@@ -19,8 +19,8 @@ import java.io.File
  * licenses `syncZeronFonts` stages.
  *
  * TODO: the Rust core's crate licences (`licenses/rust-crates.json`, once
- * written by Roboco's `cargo xtask android-licenses`) are not generated for
- * the Zeron core yet; the Licenses screen skips its "Rust core" section
+ * written by an xtask in the app's old monorepo) are not generated for the
+ * prebuilt Zeron core; the Licenses screen skips its "Rust core" section
  * while that asset is absent.
  *
  * A dedicated task (rather than a bare `Sync`) so AGP's

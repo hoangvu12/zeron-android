@@ -4,18 +4,33 @@ name: Core
 # host build of it for JVM tests (Robolectric loads it through JNA), and its
 # Kotlin bindings. The outputs only change when the zeron/ submodule moves, so
 # they are cached under its commit and later jobs reuse them.
+#
+# Runs on its own only when zeron/ or this file changes, so app-only pushes
+# never start or cancel it. The App workflow calls it (workflow_call) to get
+# the `zeron-core` artifact: a cache hit makes that a restore and an upload.
 
 on:
   push:
     branches: [main]
+    paths:
+      - 'zeron'
+      - 'zeron/**'
+      - '.github/workflows/core.yml'
   pull_request:
+    paths:
+      - 'zeron'
+      - 'zeron/**'
+      - '.github/workflows/core.yml'
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
 
+# github.workflow is the caller's name under workflow_call, so the App
+# workflow's call never cancels (or is cancelled by) a standalone run.
 concurrency:
-  group: core-${{ github.ref }}
+  group: core-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
@@ -37,7 +52,7 @@ jobs:
         run: echo "sha=$(git -C zeron rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - id: cache
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: core-out
           key: core-${{ steps.pin.outputs.sha }}-${{ env.ZERON_ANDROID_ABIS }}-${{ env.ZERON_ANDROID_PROFILE }}
