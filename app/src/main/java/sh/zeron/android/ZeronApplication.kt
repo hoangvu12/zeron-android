@@ -18,6 +18,9 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import sh.zeron.android.auth.AuthSession
+import sh.zeron.android.auth.CoreAuthApi
+import sh.zeron.android.auth.PrefsPendingAuthState
 import sh.zeron.android.background.DeliveryHold
 import sh.zeron.android.background.DeliveryService
 import sh.zeron.android.background.RunWatchController
@@ -224,6 +227,22 @@ class ZeronApplication : Application() {
      */
     val sessionHolder: SessionHolder<CoreClient> by lazy {
         SessionHolder.create(this, credentials)
+    }
+
+    /**
+     * WorkOS sign-in (#15, D4): app-scoped, so the flow survives the
+     * activity being recreated (or the process dying) while the browser is
+     * up. Screens start it through `LocalSignIn` and read `state`; the
+     * client it starts is what swaps the root to the shell.
+     */
+    val authSession: AuthSession by lazy {
+        AuthSession(
+            scope = applicationScope,
+            api = CoreAuthApi,
+            pending = PrefsPendingAuthState(this),
+            saveProfile = { credentials.profile = it },
+            startClient = sessionHolder::start,
+        )
     }
 
     /**
