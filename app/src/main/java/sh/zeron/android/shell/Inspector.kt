@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import sh.zeron.android.companions.CompanionSection
 
@@ -205,6 +206,40 @@ fun InspectorHost(inspector: InspectorState, shell: TabletShellState, router: Ap
     ) {
         NavStackHost(stack = inspector.stack, active = inspector.shown, modifier = modifier) { entry ->
             InspectorContent(entry.route)
+        }
+    }
+}
+
+/** The split's [CompanionsPresenter]: everything goes to the inspector column. */
+class InspectorPresenter(
+    private val inspector: InspectorState,
+    private val shell: TabletShellState,
+) : CompanionsPresenter {
+    override fun toggle(chatId: String, section: CompanionSection?) = inspector.toggle(chatId, section, shell)
+
+    override fun show(route: NavRoute, chatId: String) = inspector.showCompanion(route, chatId, shell)
+}
+
+/**
+ * The inspector while the window is folded (iOS: UIKit presents the
+ * collapsed inspector as a sheet over the tab shell, `:295-301`): the same
+ * stack in a `GlassSheet` at [Medium, Large], its panel carrying a Close.
+ * Dismissing it puts the inspector away.
+ */
+@Composable
+fun InspectorSheet(inspector: InspectorState, shell: TabletShellState, router: AppRouter) {
+    if (!inspector.shown) return
+    val detents = androidx.compose.runtime.remember {
+        listOf(sh.zeron.android.design.sheet.SheetDetent.Medium, sh.zeron.android.design.sheet.SheetDetent.Large)
+    }
+    sh.zeron.android.design.sheet.GlassSheet(
+        onDismiss = { inspector.hide(shell) },
+        modifier = Modifier.testTag("inspector-sheet"),
+        state = sh.zeron.android.design.sheet.rememberGlassSheetState(detents),
+        grabber = true,
+    ) { _ ->
+        CompositionLocalProvider(LocalInspectorClose provides { dismiss() }) {
+            InspectorHost(inspector, shell, router)
         }
     }
 }

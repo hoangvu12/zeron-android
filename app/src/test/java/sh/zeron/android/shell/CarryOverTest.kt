@@ -47,6 +47,7 @@ class CarryOverTest {
         val frameGate = CompletableDeferred<Unit>()
         val detachGate = CompletableDeferred<Unit>()
         var gateFence = false
+        var collapses = 0
 
         val carryOver = CarryOver(
             selection = selection,
@@ -60,6 +61,7 @@ class CarryOverTest {
                 log += "fence($chatId)"
                 if (gateFence) detachGate.await()
             },
+            onCollapse = { collapses++ },
         )
     }
 
@@ -161,6 +163,21 @@ class CarryOverTest {
     private fun page(chatId: String) = NavEntry(1L, PageRoute(chatId))
 
     // ------------------------------------------------ #26: the page moves
+
+    @Test
+    fun collapse_handsTheInspectorOverAndExpandDoesNot() = runTest {
+        val r = Rig(currentChatId = "c1", isCollapsed = true, shownChatId = "c1")
+        r.detail.page = page("c1")
+        r.frameGate.complete(Unit)
+        r.carryOver.onShellKindChanged(RootKind.Split, RootKind.Phone)
+        assertEquals(listOf("frame", "detail.release(c1)", "tabs.adopt(c1)"), r.log)
+        assertEquals(1, r.collapses)
+
+        val e = Rig(currentChatId = "c0", isCollapsed = false, detailIsEmpty = true)
+        e.frameGate.complete(Unit)
+        e.carryOver.onShellKindChanged(RootKind.Phone, RootKind.Split)
+        assertEquals(0, e.collapses)
+    }
 
     @Test
     fun collapse_movesTheDetailsPageIntoTheTabs() = runTest {

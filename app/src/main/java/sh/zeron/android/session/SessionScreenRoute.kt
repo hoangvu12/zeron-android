@@ -33,6 +33,13 @@ import sh.zeron.android.sidechats.FreshSideChats
 import sh.zeron.android.sidechats.SideChatCopy
 import sh.zeron.android.sidechats.SideChatFork
 import sh.zeron.android.companions.CompanionsButton
+import sh.zeron.android.companions.CompanionSection
+import sh.zeron.android.shell.LocalCompanionsPresenter
+import sh.zeron.android.shell.LocalRouterHooks
+import sh.zeron.android.shell.OPEN_ERROR_TOAST
+import sh.zeron.android.shell.openSessionRoute
+import sh.zeron.android.sidechats.SubagentCopy
+import sh.zeron.android.sidechats.buildSubagentRoute
 import sh.zeron.android.companions.CompanionsOverlay
 import sh.zeron.android.companions.CompanionsPanelController
 import sh.zeron.android.sessions.ActionOutcome
@@ -318,6 +325,26 @@ class SessionScreenRoute internal constructor(
             }
         }
         val isTopAndIdle: () -> Boolean = { stack.top === entry && stack.transition == null }
+        // #45 (iOS `presentCompanion` / `openSideChat`): beside the sidebar,
+        // companions open in the inspector column over this session's
+        // panel; anywhere else a side chat is pushed and the panel is a sheet.
+        val presenter = LocalCompanionsPresenter.current
+        val hooks = LocalRouterHooks.current
+        val openSideChat: (String) -> Unit = { id ->
+            val companions = presenter
+            if (companions == null) {
+                openChat(id)
+            } else {
+                app?.appScope?.launch {
+                    val route = hooks.openSessionRoute(id)
+                    if (route == null) toaster.show(OPEN_ERROR_TOAST) else companions.show(route as NavRoute, controller.chatId)
+                }
+            }
+        }
+        val toggleCompanions: (CompanionSection?) -> Unit = { section ->
+            val companions = presenter
+            if (companions != null) companions.toggle(controller.chatId, section) else sheet.open(section)
+        }
         // #39 (iOS `createSideChat`): the side chat is made at once under
         // the root (from a side chat, a sibling), recorded as fresh, and
         // opened while this screen is still shown. The panel says when it
@@ -333,7 +360,7 @@ class SessionScreenRoute internal constructor(
                         id == null -> if (toastOnFailure) toaster.show(SideChatCopy.StartFailed)
                         else -> {
                             sideChatsModel?.invalidate()
-                            if (isTopAndIdle()) openChat(id)
+                            if (isTopAndIdle()) openSideChat(id)
                         }
                     }
                 }
@@ -346,25 +373,32 @@ class SessionScreenRoute internal constructor(
             fork?.start(controller.chatId) { forkId ->
                 sideChatsModel?.invalidate()
                 // iOS opens the fork only while this screen is still shown.
-                if (isTopAndIdle()) openChat(forkId)
+                if (isTopAndIdle()) openSideChat(forkId)
             }
         }
         val openSubagent: (String, String, Boolean) -> Unit = { docId, title, frozen ->
-            subagentOpener?.open(
-                SubagentOpenRequest(
-                    docId = docId,
-                    title = title,
-                    frozen = frozen,
-                    spawnerId = controller.chatId,
-                    parentTitle = controller.chrome.value.title,
-                ),
+            val request = SubagentOpenRequest(
+                docId = docId,
+                title = title,
+                frozen = frozen,
+                spawnerId = controller.chatId,
+                parentTitle = controller.chrome.value.title,
             )
+            val companions = presenter
+            if (companions == null || app == null) {
+                subagentOpener?.open(request)
+            } else {
+                app.appScope.launch {
+                    val route = buildSubagentRoute(app, request)
+                    if (route == null) toaster.show(SubagentCopy.OpenFailed) else companions.show(route, controller.chatId)
+                }
+            }
         }
         // #40: the companions item, always shown, badged while agents run;
         // it opens the panel, a strip chip opens it at its section (#41).
         val companions = sideUi.companions
         val companionsButton: @Composable () -> Unit = {
-            CompanionsButton(companions.runningAgents, onClick = { sheet.open() })
+            CompanionsButton(companions.runningAgents, onClick = { toggleCompanions(null) })
         }
         // #41: the panel's fork keeps the sheet up ("Forking…" on its row),
         // then puts it away and opens the fork (iOS `perform(.fork)`).
@@ -446,13 +480,13 @@ class SessionScreenRoute internal constructor(
                 onOpenSubagent = openSubagent,
                 headerAccessory = companionsButton,
                 companions = companions,
-                onCompanionTap = { section -> sheet.open(section) },
+                onCompanionTap = { section -> toggleCompanions(section) },
                 overlay = sideChatsOverlay,
                 // #41 (iOS ⌘⌥0, Ctrl on Android): the companions panel.
                 // TODO(#44): Ctrl+J, the chat's terminal.
                 modifier = Modifier.onPreviewKeyEvent { e ->
                     if (e.type == KeyEventType.KeyDown && e.isCtrlPressed && e.isAltPressed && e.key == Key.Zero) {
-                        sheet.open()
+                        toggleCompanions(null)
                         true
                     } else {
                         false
