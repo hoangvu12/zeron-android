@@ -118,3 +118,8 @@ jobs:
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           retention-days: 14
+
+      # The smoke suite under app/src/test (SPEC §4.4); quarantined tests are
+      # not compiled. After the upload, so a failing test still ships the APK.
+      - name: Unit tests
+        run: ./gradlew --stacktrace :app:testDebugUnitTest -PzeronCoreDir="$GITHUB_WORKSPACE/core-out"

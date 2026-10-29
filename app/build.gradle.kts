@@ -12,7 +12,6 @@ plugins {
     alias(libs.plugins.android.application)
     // AGP 9 carries built-in Kotlin: org.jetbrains.kotlin.android is NOT applied.
     alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.roborazzi)
     // AboutLibraries (ui-parity#101): the JSON emitter only — no
     // aboutlibraries-compose/-core library artifacts (ticket rule: the
     // plugin's UI is Material, the app's is not).
@@ -299,7 +298,7 @@ androidComponents {
 // and staged as assets/licenses/spdx/); fetchRemote* stays off too. The
 // plugin registers the per-variant export tasks that generate
 // res/raw/aboutlibraries.json from each variant's runtime classpath
-// (includeTestVariants defaults to false, so Robolectric/Roborazzi/JUnit
+// (includeTestVariants defaults to false, so Robolectric/JUnit
 // never appear; debug-only debugImplementation tooling may, which is
 // acceptable). No aboutlibraries-* library artifacts are used.
 // ---------------------------------------------------------------------------
@@ -584,9 +583,6 @@ dependencies {
     // Plain jar: the host libjnidispatch for JVM (Robolectric) tests.
     testImplementation(libs.jna)
     testImplementation(libs.robolectric)
-    testImplementation(libs.roborazzi)
-    testImplementation(libs.roborazzi.compose)
-    testImplementation(libs.roborazzi.junit.rule)
     testImplementation(platform(libs.compose.bom))
     testImplementation(libs.compose.ui.test.junit4)
 

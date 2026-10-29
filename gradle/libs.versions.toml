@@ -35,7 +35,6 @@ junit = "4.13.2"
 # as of 2026-10-12. Multiplatform umbrella; Gradle resolves the -android variant.
 graphicsShapes = "1.1.0"
 robolectric = "4.17"
-roborazzi = "1.76.0"
 # Liquid-glass backdrop blur (ui-parity#07): android-app#14's recipe.
 # The blur module only — haze-blur-materials is not the iOS look.
 haze = "2.0.1"
@@ -102,12 +101,8 @@ androidx-metrics-performance = { group = "androidx.metrics", name = "metrics-per
 jna = { group = "net.java.dev.jna", name = "jna", version.ref = "jna" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
-roborazzi = { group = "io.github.takahirom.roborazzi", name = "roborazzi", version.ref = "roborazzi" }
-roborazzi-compose = { group = "io.github.takahirom.roborazzi", name = "roborazzi-compose", version.ref = "roborazzi" }
-roborazzi-junit-rule = { group = "io.github.takahirom.roborazzi", name = "roborazzi-junit-rule", version.ref = "roborazzi" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-roborazzi = { id = "io.github.takahirom.roborazzi", version.ref = "roborazzi" }
 aboutlibraries-android = { id = "com.mikepenz.aboutlibraries.plugin.android", version.ref = "aboutlibraries" }
