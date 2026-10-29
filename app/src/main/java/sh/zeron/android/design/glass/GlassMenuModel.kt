@@ -99,6 +99,11 @@ data class MenuSection(
     val icon: MenuIcon? = null,
     val inline: Boolean,
     val children: List<MenuElement>,
+    /**
+     * `UIMenu.subtitle` (#63): a drill-in row's second line, e.g. the Voice
+     * submenu's current style. Ignored on inline sections.
+     */
+    val subtitle: String? = null,
 ) : MenuElement
 
 /**

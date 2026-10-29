@@ -43,7 +43,8 @@ internal var launchOptionsLog: (String) -> Unit = { message ->
  *   Cloud tickets); a `route` that parses also runs the demo when nothing
  *   is stored. `edge <url|prod>` / `workos <client|prod>` are the sticky
  *   endpoint overrides (`Endpoints`). `remote-voice` (#60) offers voice
- *   before any host advertises it. `terminal` / `terminal-demo` open the
+ *   before any host advertises it; `voice-preview` plays a scripted call
+ *   (`voice-stage` also shows its stage, G31). `terminal` / `terminal-demo` open the
  *   first session's terminal (#44). Booleans take `--ez x true` or
  *   `--es x true`.
  *
@@ -73,6 +74,12 @@ data class LaunchOptions(
     val workos: String? = null,
     /** iOS `-remote-voice` (#60): offer voice before any host advertises it. */
     val remoteVoice: Boolean = false,
+    /**
+     * iOS `-voice-preview` / `-voice-stage` (G31, #63): a scripted call for
+     * screenshots, and its stage shown at once.
+     */
+    val voicePreview: Boolean = false,
+    val voiceStage: Boolean = false,
     /**
      * #44, iOS `-terminal` / `-terminal-demo`: the first session opened
      * shows its terminal at once; the demo also types a short script for
@@ -182,6 +189,8 @@ data class LaunchOptions(
                 edge = string("edge")?.trim(),
                 workos = string("workos")?.trim(),
                 remoteVoice = flag("remote-voice"),
+                voicePreview = flag("voice-preview"),
+                voiceStage = flag("voice-preview") && flag("voice-stage"),
                 terminal = flag("terminal") || flag("terminal-demo"),
                 terminalDemo = flag("terminal-demo"),
             )

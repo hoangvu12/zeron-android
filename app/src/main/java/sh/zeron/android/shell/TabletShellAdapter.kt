@@ -125,10 +125,10 @@ internal class TabletShellAdapter(
         sheets()?.takeIf { it.isPresenting }?.dismiss(animated)
     }
 
-    override fun presentSettings() {
+    override fun presentSettings(pages: List<NavRoute>) {
         // 104's present() also refuses (with Log.w) while any sheet entry
         // exists — the router's isSettingsPresented check is the first gate.
-        settings.presenter?.present()
+        settings.presenter?.present(pages)
     }
 
     override fun showSidebar() {

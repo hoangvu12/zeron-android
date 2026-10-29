@@ -18,6 +18,7 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.dp
 import sh.zeron.android.cloud.CloudRepoPickerSheet
 import sh.zeron.android.cloud.CloudRoutes
+import sh.zeron.android.cloud.rememberBillingOpener
 import sh.zeron.android.composer.HOST_SYMBOL_COMPUTER
 import sh.zeron.android.core.Face
 import sh.zeron.android.design.CapsuleShape
@@ -27,7 +28,6 @@ import sh.zeron.android.design.LocalTypeScale
 import sh.zeron.android.design.ZeronTheme
 import sh.zeron.android.design.glass.ActivitySpinner
 import sh.zeron.android.design.uiStyle
-import sh.zeron.android.shell.LocalAppRouter
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -143,10 +143,11 @@ internal fun NewSessionScreenBody(
     // is skipped).
     val activity = remember(context) { context.findActivity() as? ComponentActivity }
     val latestOnCreated by rememberUpdatedState(onCreated)
-    // #53: the out-of-credits toast's "Add credits" opens Billing.
+    // #53: the out-of-credits toast's "Add credits" opens Billing — #63: in
+    // a sheet stacked on this one, so the draft stays where it is.
     val toaster = LocalToaster.current
     val feedback = LocalFeedback.current
-    val router = LocalAppRouter.current
+    val openBilling by rememberUpdatedState(rememberBillingOpener())
     val handler = remember {
         val core = CoreNewSessionCore(client = { app.clientOrNull() }, workspaceChanged = { app.workspaceFeed.refresh() })
         NewSessionSendHandler(
@@ -159,7 +160,7 @@ internal fun NewSessionScreenBody(
             capture = capture::capture,
             onCreated = { chatId, handoff -> latestOnCreated(chatId, handoff) },
             cloudCreator = CloudSessionCreator(core),
-            onOutOfCredits = { CloudRoutes.showOutOfCredits(toaster, feedback, router) },
+            onOutOfCredits = { CloudRoutes.showOutOfCredits(toaster, feedback) { openBilling() } },
         )
     }
 

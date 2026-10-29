@@ -8,6 +8,7 @@ import uniffi.zeron_core.VoiceCallState
 import uniffi.zeron_core.VoiceCallWork
 import uniffi.zeron_core.VoiceEndReason
 import uniffi.zeron_core.VoiceOrb
+import uniffi.zeron_core.VoiceSpeaker
 
 /** Where the call's audio plays right now. */
 enum class VoiceRoute { Speaker, Earpiece, External }
@@ -148,4 +149,62 @@ object VoiceHosts {
     /** The remembered host and style belong to one user in one organization. */
     fun preferenceKey(userId: String?, orgId: String?): String =
         "remoteVoice.${userId ?: "none"}.${orgId ?: "none"}"
+}
+
+/**
+ * G31's script (iOS `RemoteVoiceController.preview`): four turns of 4 s
+ * each, ticked every 100 ms — the caption streams in about three words a
+ * second and the active side's level follows a sine. Pure.
+ */
+internal object VoicePreviewScript {
+    const val CHAT_ID = "voice-orchestrator-preview"
+
+    private data class Turn(val orb: VoiceOrb, val work: VoiceCallWork, val caption: String, val speaker: VoiceSpeaker?)
+
+    private val turns = listOf(
+        Turn(VoiceOrb.LISTENING, VoiceCallWork.IDLE, "Open a chat on the Mac and ask Claude to fix the failing sync test", VoiceSpeaker.USER),
+        Turn(VoiceOrb.SPEAKING, VoiceCallWork.IDLE, "On it. I'm starting a Claude session in the comet project to look at the sync test.", null),
+        Turn(VoiceOrb.WORKING, VoiceCallWork.WORKING, "On it. I'm starting a Claude session in the comet project to look at the sync test.", VoiceSpeaker.ASSISTANT),
+        Turn(VoiceOrb.AWAITING_INPUT, VoiceCallWork.AWAITING_INPUT, "Claude wants to know whether to update the fixture or the parser.", VoiceSpeaker.ASSISTANT),
+    )
+
+    fun state(step: Int, muted: Boolean): VoiceCallState {
+        val index = (step / 40) % turns.size
+        val turn = turns[index]
+        val wave = kotlin.math.abs(kotlin.math.sin(step / 2.3)).toFloat()
+        val words = turn.caption.split(" ")
+        val streamed = words.take(1 + (step % 40) / 3).joinToString(" ")
+        return VoiceCallState(
+            phase = VoiceCallPhase.ACTIVE,
+            orb = turn.orb,
+            chatId = CHAT_ID,
+            work = turn.work,
+            muted = muted,
+            speaking = turn.orb == VoiceOrb.SPEAKING,
+            caption = streamed,
+            captionSpeaker = turn.speaker,
+            captionItem = "preview-$index",
+            microphone = if (turn.orb == VoiceOrb.LISTENING) wave else 0f,
+            speaker = if (turn.orb == VoiceOrb.SPEAKING) wave else 0f,
+            voices = emptyList(),
+        )
+    }
+}
+
+/** One output in the stage's audio-route menu (#63). */
+data class VoiceAudioRoute(val id: Int, val name: String, val kind: VoiceRoute, val current: Boolean) {
+    companion object {
+        /** The menu label: the built-ins by role, a device by its product name, else its kind. Pure. */
+        fun name(type: Int, productName: String?, model: String? = android.os.Build.MODEL): String = when (type) {
+            android.media.AudioDeviceInfo.TYPE_BUILTIN_EARPIECE -> "Phone"
+            android.media.AudioDeviceInfo.TYPE_BUILTIN_SPEAKER -> "Speaker"
+            // A wired jack reports the phone's own model as its product name.
+            else -> productName?.trim()?.takeIf { it.isNotEmpty() && it != model } ?: when (type) {
+                android.media.AudioDeviceInfo.TYPE_BLUETOOTH_SCO, android.media.AudioDeviceInfo.TYPE_BLE_HEADSET -> "Bluetooth"
+                android.media.AudioDeviceInfo.TYPE_HEARING_AID -> "Hearing aid"
+                android.media.AudioDeviceInfo.TYPE_USB_HEADSET -> "USB headset"
+                else -> "Headphones"
+            }
+        }
+    }
 }

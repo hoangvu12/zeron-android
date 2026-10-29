@@ -29,8 +29,8 @@ interface AppRouter {
      */
     fun showDebugRoute(route: DebugRoute) {
         when (route) {
-            // #51/#52: the phone router's (PhoneAppRouter); the tablet split
-            // logs until Settings' dialog takes pushed pages.
+            // #51/#52: pushed in the phone's Settings tab; on the split, in a
+            // fresh Settings card (#63).
             DebugRoute.CloudSettings, DebugRoute.GitHubConnect, DebugRoute.CloudBilling,
             DebugRoute.Billing, DebugRoute.CloudRepos,
             -> {

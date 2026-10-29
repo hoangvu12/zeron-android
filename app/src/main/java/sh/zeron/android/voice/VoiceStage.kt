@@ -6,7 +6,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.SystemClock
 import android.provider.Settings
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -54,7 +53,12 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.foundation.focusable
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -62,6 +66,7 @@ import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.dismiss
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.role
@@ -84,6 +89,13 @@ import sh.zeron.android.design.CapsuleShape
 import sh.zeron.android.design.Icon
 import sh.zeron.android.design.IosSpring
 import sh.zeron.android.design.LocalReduceMotion
+import sh.zeron.android.design.ModalBackHandler
+import sh.zeron.android.design.onEscape
+import sh.zeron.android.design.glass.LocalGlassMenuHost
+import sh.zeron.android.design.glass.Menu
+import sh.zeron.android.design.glass.MenuIcon
+import sh.zeron.android.design.glass.MenuItem
+import sh.zeron.android.design.glass.rememberGlassMenuState
 import sh.zeron.android.design.LocalTypeScale
 import sh.zeron.android.design.SymbolWeight
 import sh.zeron.android.design.WallpaperHero
@@ -216,7 +228,17 @@ internal fun VoiceStage(
     LaunchedEffect(s.live, s.endReason) {
         if (!s.live && s.endReason == null) close()
     }
-    BackHandler(onBack = { close() })
+    // #63: predictive back pulls the stage down like the swipe; the commit
+    // minimizes it. Escape does the same.
+    val swipePx = with(density) { SwipeDismiss.toPx() }
+    ModalBackHandler(enabled = true, onProgress = { drag.floatValue = it * swipePx }, onBack = { close() })
+    val stageFocus = remember { FocusRequester() }
+    LaunchedEffect(Unit) {
+        withFrameNanos { }
+        runCatching { stageFocus.requestFocus() }
+    }
+    val menus = if (LocalGlassMenuHost.current != null) rememberGlassMenuState() else null
+    var routeBounds by remember { mutableStateOf<Rect?>(null) }
 
     val now by produceState(SystemClock.elapsedRealtime()) {
         while (true) {
@@ -233,7 +255,17 @@ internal fun VoiceStage(
         Modifier
             .fillMaxSize()
             .background(palette.background)
-            .semantics { paneTitle = "Voice call" }
+            .semantics {
+                paneTitle = "Voice call"
+                // The swipe down's TalkBack twin.
+                dismiss(VoiceStageCopy.Minimize) {
+                    close()
+                    true
+                }
+            }
+            .focusRequester(stageFocus)
+            .onEscape { close() }
+            .focusable()
             .testTag("voice-stage")
             // iOS's swipe down: the stage follows the finger and minimizes
             // past the threshold; a short drag springs back.
@@ -275,7 +307,8 @@ internal fun VoiceStage(
                     weight = SymbolWeight.Semibold,
                 )
                 Row(
-                    Modifier.align(Alignment.Center).padding(horizontal = 56.dp),
+                    // One TalkBack stop: the clock and the host.
+                    Modifier.align(Alignment.Center).padding(horizontal = 56.dp).semantics(mergeDescendants = true) {},
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(7.dp),
                 ) {
@@ -285,7 +318,7 @@ internal fun VoiceStage(
                         s.muted -> palette.tertiary
                         else -> palette.success
                     }
-                    Box(Modifier.size(7.dp).clip(CircleShape).background(dot))
+                    Box(Modifier.size(7.dp).clip(CircleShape).background(dot).clearAndSetSemantics { })
                     BasicText(
                         s.elapsedText(now) ?: VoiceStageCopy.NoClock,
                         style = uiStyle(Face.MonoMedium, ts.fixed(13f), palette.secondary),
@@ -389,7 +422,18 @@ internal fun VoiceStage(
                                 VoiceRoute.Earpiece -> "Phone"
                                 VoiceRoute.External -> "Headset"
                             },
-                        ) { controller.toggleSpeaker() }
+                            modifier = Modifier.onGloballyPositioned { routeBounds = it.boundsInWindow() },
+                        ) {
+                            // #63: the outputs the call can use, like iOS's
+                            // route picker; the speaker toggle without them.
+                            val routes = controller.audioRoutes()
+                            val anchor = routeBounds
+                            if (routes.isNotEmpty() && menus != null && anchor != null) {
+                                menus.open(anchor, voiceRouteMenu(routes) { controller.selectRoute(it) })
+                            } else {
+                                controller.toggleSpeaker()
+                            }
+                        }
                         CallButton(
                             icon = ZeronIcons.PhoneDownFill,
                             label = VoiceStageCopy.EndCall,
@@ -493,11 +537,12 @@ private fun CallButton(
     tag: String,
     width: Dp = 60.dp,
     value: String? = null,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
     val source = remember { MutableInteractionSource() }
     Box(
-        Modifier
+        modifier
             .size(width, 60.dp)
             .clip(CapsuleShape)
             .background(fill)
@@ -538,3 +583,25 @@ internal fun openAppSettings(context: Context) {
     } catch (_: ActivityNotFoundException) {
     }
 }
+
+/**
+ * The audio-output menu (#63; iOS's `AVRoutePickerView` list): each output
+ * the call can use, ✓ the one playing. Pure model.
+ */
+fun voiceRouteMenu(routes: List<VoiceAudioRoute>, onPick: (VoiceAudioRoute) -> Unit): Menu = Menu(
+    title = VoiceStageCopy.AudioOutput,
+    children = routes.map { route ->
+        MenuItem(
+            title = route.name,
+            icon = MenuIcon.Symbol(
+                when (route.kind) {
+                    VoiceRoute.Earpiece -> ZeronIcons.Iphone
+                    VoiceRoute.Speaker -> ZeronIcons.SpeakerWave2Fill
+                    VoiceRoute.External -> ZeronIcons.Ear
+                },
+            ),
+            checked = route.current,
+            testTag = "voice-route-option",
+        ) { onPick(route) }
+    },
+)

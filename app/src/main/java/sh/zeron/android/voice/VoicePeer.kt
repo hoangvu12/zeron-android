@@ -208,6 +208,47 @@ internal class VoicePeer(
         applyRoute()
     }
 
+    /** The route menu's pick (a device id, #63); null follows the automatic rule. */
+    private var picked: Int? = null
+
+    /**
+     * The outputs the call can use right now (#63, iOS's `AVRoutePickerView`
+     * list): the earpiece, the loudspeaker, and each headset, Bluetooth or
+     * hearing-aid device; the one in use is marked. Empty before the call's
+     * audio starts.
+     */
+    fun routes(): List<VoiceAudioRoute> {
+        val audio = audio ?: return emptyList()
+        if (!active || closed) return emptyList()
+        val current = audio.communicationDevice?.id
+        return audio.availableCommunicationDevices
+            .filter { it.type == AudioDeviceInfo.TYPE_BUILTIN_EARPIECE || it.type == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER || it.type in external }
+            .map { device ->
+                VoiceAudioRoute(
+                    id = device.id,
+                    name = VoiceAudioRoute.name(device.type, device.productName?.toString()),
+                    kind = when (device.type) {
+                        AudioDeviceInfo.TYPE_BUILTIN_EARPIECE -> VoiceRoute.Earpiece
+                        AudioDeviceInfo.TYPE_BUILTIN_SPEAKER -> VoiceRoute.Speaker
+                        else -> VoiceRoute.External
+                    },
+                    current = device.id == current,
+                )
+            }
+            .sortedBy { it.kind.ordinal }
+    }
+
+    /**
+     * Plays the call on [route] until it disconnects or another pick: a
+     * built-in pick also beats a connected headset; the earpiece still takes
+     * over at the ear unless a headset was picked.
+     */
+    fun pick(route: VoiceAudioRoute) {
+        picked = route.id
+        if (route.kind != VoiceRoute.External) speakerOn = route.kind == VoiceRoute.Speaker
+        applyRoute()
+    }
+
     private fun activate(peer: PeerConnection) {
         val audio = audio ?: throw Failure(Failure.Kind.Unavailable)
         val request = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
@@ -253,17 +294,24 @@ internal class VoicePeer(
             return
         }
         val available = audio.availableCommunicationDevices
+        val chosen = available.firstOrNull { it.id == picked }
         val headset = available.firstOrNull { it.type in external }
         val builtIn = available.firstOrNull {
             it.type == if (wantsEarpiece) AudioDeviceInfo.TYPE_BUILTIN_EARPIECE else AudioDeviceInfo.TYPE_BUILTIN_SPEAKER
         }
-        val target = headset ?: builtIn
+        // A picked headset wins; a picked built-in beats a connected headset
+        // (and follows the speaker/ear rule); otherwise any headset wins.
+        val target = when {
+            chosen != null && chosen.type in external -> chosen
+            chosen != null -> builtIn
+            else -> headset ?: builtIn
+        }
         if (target != null && audio.communicationDevice?.id != target.id) {
             runCatching { audio.setCommunicationDevice(target) }
         }
         onRoute?.invoke(
             when {
-                headset != null -> VoiceRoute.External
+                target != null && target.type in external -> VoiceRoute.External
                 target?.type == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER -> VoiceRoute.Speaker
                 else -> VoiceRoute.Earpiece
             },

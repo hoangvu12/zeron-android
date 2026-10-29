@@ -72,8 +72,11 @@ interface TabletShell {
      */
     fun dismissPresented(animated: Boolean)
 
-    /** 104's `SettingsDialogPresenter.present()`. */
-    fun presentSettings()
+    /**
+     * 104's `SettingsDialogPresenter.present()`; #63: with [pages] pushed
+     * over its root, unanimated (a debug route into a Settings page).
+     */
+    fun presentSettings(pages: List<NavRoute> = emptyList())
 
     /** `sidebarVisible = true` (33 animates the reveal). */
     fun showSidebar()
@@ -345,7 +348,13 @@ class TabletAppRouter(
 
     override fun showDebugPages(routes: List<NavRoute>) {
         if (shell.isCollapsed) return phone.run { it.showDebugPages(routes) }
-        routes.forEachIndexed { i, route -> detailStack.push(route, animated = i == routes.lastIndex) }
+        // #63: the debug pages are Settings pages (Cloud, Billing, Providers,
+        // accounts), and on the split Settings is the card — so they open in
+        // a fresh card, over anything presented (dismissed unanimated, as the
+        // phone does), the way iOS presents them over the root.
+        phone.clearPending()
+        shell.dismissPresented(animated = false)
+        shell.presentSettings(routes)
     }
 
     override fun showSettings() {
