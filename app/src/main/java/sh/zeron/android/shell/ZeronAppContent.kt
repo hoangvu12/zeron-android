@@ -152,11 +152,16 @@ private fun AppRootContent(
                 // 106's `tabPresence`, and the slot keeps the router for the
                 // tablet router's collapsed delegation.
                 var phoneRouter by remember { mutableStateOf<AppRouter?>(null) }
-                MainTabShell(
-                    state = s.tabs,
-                    presence = s.presence,
-                    onRouter = { router -> phoneRouter = router; s.phoneSlot.attach(router) },
-                )
+                Box(Modifier.fillMaxSize()) {
+                    MainTabShell(
+                        state = s.tabs,
+                        presence = s.presence,
+                        onRouter = { router -> phoneRouter = router; s.phoneSlot.attach(router) },
+                    )
+                    // #45: folded with the inspector open, it rides along as a
+                    // sheet over the tab shell (with a Close).
+                    InspectorSheet(s.inspector, s.tablet, phoneRouter ?: AppRouter.Noop)
+                }
                 phoneRouter?.let { DeepLinkRouterEffect(app.deepLinks, it) }
                 // 106: the slot drops the phone router when this shell leaves
                 // (the 840 dp expand cancels its scope, together with this
@@ -188,6 +193,12 @@ private fun AppRootContent(
                     // 36: the split's router attached after its first frame,
                     // like the phone slot's.
                     DeepLinkRouterEffect(app.deepLinks, s.tabletRouter)
+                    // #45 (iOS `followInspector`): another session came up —
+                    // the open panel follows it.
+                    val inspectorPresenter = remember(s) { InspectorPresenter(s.inspector, s.tablet) }
+                    LaunchedEffect(s) {
+                        snapshotFlow { s.tablet.currentChatId }.collect { id -> id?.let { s.inspector.follow(it) } }
+                    }
                     SplitRoot(
                         shell = s.tablet,
                         sidebar = { shown ->
@@ -207,8 +218,16 @@ private fun AppRootContent(
                         // stack — the slot's DetailRoot argument is ignored on
                         // purpose (the stack is the source of truth; 33 step 5:
                         // no NavStack, no key(detailGeneration) here).
-                        detail = { _ -> TabletDetailHost(s.tabletRouter.detailStack) },
+                        detail = { _ ->
+                            // #45: sessions beside the sidebar present their
+                            // companions in the inspector column.
+                            CompositionLocalProvider(LocalCompanionsPresenter provides inspectorPresenter) {
+                                TabletDetailHost(s.tabletRouter.detailStack)
+                            }
+                        },
                         router = s.tabletRouter,
+                        inspector = s.inspector,
+                        inspectorContent = { InspectorHost(s.inspector, s.tablet, s.tabletRouter) },
                     )
                 }
             }
