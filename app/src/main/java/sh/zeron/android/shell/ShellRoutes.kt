@@ -7,6 +7,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import sh.zeron.android.accounts.AgentAccountsRoute
 import sh.zeron.android.accounts.AgentAccountsScreen
+import sh.zeron.android.cloud.CloudSettingsRoute
+import sh.zeron.android.cloud.CloudSettingsScreen
 import sh.zeron.android.session.SessionScreenRoute
 import sh.zeron.android.settings.SettingsScreen
 import sh.zeron.android.sessions.FolderRoute
@@ -65,6 +67,8 @@ fun ShellRouteContent(route: NavRoute) {
         // android-next #05: the Accounts & Usage page — an error card's
         // "Log in" and (until #50) Settings → Agents → Providers push it.
         is AgentAccountsRoute -> AgentAccountsScreen(route)
+        // #51: Settings → Cloud.
+        is CloudSettingsRoute -> CloudSettingsScreen(route)
         else -> Unit
     }
 }

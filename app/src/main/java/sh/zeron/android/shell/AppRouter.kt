@@ -21,12 +21,14 @@ interface AppRouter {
 
     /**
      * A debug `route` screen (#19, iOS `SceneDelegate.openCloudRoute`).
-     * None of the screens exists yet, so the shells don't override this:
-     * it logs and stays put until each owner wires its destination.
+     * The phone router opens the screens that exist (#51: Cloud settings
+     * and Connect GitHub); this default logs and stays put for the rest
+     * until each owner wires its destination.
      */
     fun showDebugRoute(route: DebugRoute) {
         when (route) {
-            // TODO(#51): Cloud settings; the GitHub connect sheet.
+            // #51: the phone router's (PhoneAppRouter); the tablet split
+            // logs until Settings' dialog takes pushed pages.
             DebugRoute.CloudSettings, DebugRoute.GitHubConnect -> Unit
             // TODO(#52): Billing (alone or pushed on Cloud settings); the Cloud repo picker.
             DebugRoute.CloudBilling, DebugRoute.Billing, DebugRoute.CloudRepos -> Unit

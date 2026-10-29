@@ -8,6 +8,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import sh.zeron.android.cloud.CloudSettingsRoute
 
 /**
  * The shell operations the phone router needs (android-ui-parity #32): the
@@ -44,6 +45,12 @@ interface PhoneShell {
      * else pop to the list without animation and push Settings animated.
      */
     fun pushSettings()
+
+    /**
+     * #51: Settings, then [route] pushed over it (a debug `route` to a
+     * Settings page).
+     */
+    fun pushSettingsPage(route: NavRoute) = pushSettings()
 
     /** `sessionsList.activateSearch()`: the bar's field active and focused. */
     fun activateSearch()
@@ -161,6 +168,19 @@ class PhoneAppRouter(
         generation++
         if (shell.isSheetPresented) shell.dismissSheet(animated = false)
         shell.pushSettings()
+    }
+
+    override fun showDebugRoute(route: DebugRoute) {
+        // #51: Settings → Cloud (`cloud:github` with Connect GitHub up),
+        // over whatever is presented, like `showSettings`.
+        when (route) {
+            DebugRoute.CloudSettings, DebugRoute.GitHubConnect -> {
+                generation++
+                if (shell.isSheetPresented) shell.dismissSheet(animated = false)
+                shell.pushSettingsPage(CloudSettingsRoute(connectGitHub = route == DebugRoute.GitHubConnect))
+            }
+            else -> super.showDebugRoute(route)
+        }
     }
 
     override fun showSearch() {

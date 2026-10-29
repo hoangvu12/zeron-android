@@ -201,7 +201,7 @@ class ZeronIconsTest {
         assertEquals(ZeronIcons.entries.sumOf { it.sfNames.size }, ZeronIcons.bySfName.size)
         assertEquals(
             "the Zeron extras are the only entries without an SF name",
-            listOf("TabChat", "TabSettings", "ZeronBow", "WifiOff", "Home", "HardDrive", "Laptop"),
+            listOf("TabChat", "TabSettings", "ZeronBow", "WifiOff", "Home", "HardDrive", "Laptop", "GithubMark"),
             ZeronIcons.entries.filter { it.sfNames.isEmpty() }.map { it.name },
         )
         assertEquals(

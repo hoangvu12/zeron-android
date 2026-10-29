@@ -383,6 +383,19 @@ object ZeronIcons {
     /** SF `textformat.size` — Settings "Math Size" (#36). */
     val TextformatSize = ZeronIcon.Vector(R.drawable.zi_textformat_size)
 
+    /** GitHub's mark (#51, iOS `CloudUI.githubMark`): Cloud settings and Connect GitHub. */
+    val GithubMark = ZeronIcon.Vector(R.drawable.zi_github_mark)
+
+
+    /** #51: a private repository. */
+    val Lock = ZeronIcon.Vector(R.drawable.zi_lock)
+
+    /** #51: a public repository. */
+    val BookClosed = ZeronIcon.Vector(R.drawable.zi_book_closed)
+
+    /** #51: "Choose on GitHub". */
+    val ArrowUpRightSquare = ZeronIcon.Vector(R.drawable.zi_arrow_up_right_square)
+
     /**
      * Every registry row, in mapping-table order — the single source
      * [bySfName], the design-gallery grid and the registry tests read.
@@ -500,6 +513,9 @@ object ZeronIcons {
             listOf("rectangle.portrait.and.arrow.right"),
             RectanglePortraitAndArrowRight,
         ),
+        RegistryEntry("Lock", listOf("lock"), Lock),
+        RegistryEntry("BookClosed", listOf("book.closed"), BookClosed),
+        RegistryEntry("ArrowUpRightSquare", listOf("arrow.up.right.square"), ArrowUpRightSquare),
         // Zeron extras.
         RegistryEntry("TabChat", emptyList(), TabChat),
         RegistryEntry("TabSettings", emptyList(), TabSettings),
@@ -511,6 +527,7 @@ object ZeronIcons {
         RegistryEntry("Function", listOf("function"), Function),
         RegistryEntry("Textformat", listOf("textformat"), Textformat),
         RegistryEntry("TextformatSize", listOf("textformat.size"), TextformatSize),
+        RegistryEntry("GithubMark", emptyList(), GithubMark),
     )
 
     /** SF name → icon, for strings that arrive at runtime (core widgets, row VMs). */
