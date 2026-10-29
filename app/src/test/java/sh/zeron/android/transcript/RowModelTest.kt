@@ -123,6 +123,58 @@ class RowModelTest {
         assertTrue("no layer-1 runs exist to claim", model.fadesByLayer[1][0].runs.isEmpty())
     }
 
+    // ------------------------------------------------- math (#29)
+
+    @Test
+    fun glyphsGroupByLayerLikeRuns() {
+        // No core in a plain JVM test: every math font misses (logged once).
+        MathFonts.bytes = { ByteArray(0) }
+        try {
+            val model = RowModel(
+                RowFixtures.rowOf(
+                    runs = emptyList(),
+                    scrollers = listOf(Scroller(0f, 0f, 100f, 20f, 100f)),
+                    glyphs = listOf(
+                        RowFixtures.glyph(3u),
+                        RowFixtures.glyph(3u, scroller = 0u),
+                        RowFixtures.glyph(9u),
+                    ),
+                ),
+            )
+            assertArrayEquals(intArrayOf(0, 2), model.glyphsByLayer[0])
+            assertArrayEquals(intArrayOf(1), model.glyphsByLayer[1])
+        } finally {
+            MathFonts.resetForTest()
+        }
+    }
+
+    @Test
+    fun settledBoxesPaintWithTheChromeAndFormulaFillsWithTheirText() {
+        val all = RowModel.Pass.All
+        val chrome = RowModel.Pass.Chrome
+        assertTrue(RowModel.paintsBox(null, all))
+        assertTrue(RowModel.paintsBox(5u, all))
+        assertTrue(RowModel.paintsBox(null, chrome))
+        assertFalse(RowModel.paintsBox(5u, chrome))
+        assertFalse("a settled box never paints in a text pass", RowModel.paintsBox(null, RowModel.Pass.Range(0, 100)))
+        assertTrue(RowModel.paintsBox(5u, RowModel.Pass.Range(5, 6)))
+        assertFalse(RowModel.paintsBox(5u, RowModel.Pass.Range(0, 5)))
+        assertFalse(RowModel.paintsBox(5u, RowModel.Pass.Range(6, Int.MAX_VALUE)))
+    }
+
+    @Test
+    fun aFormulasGlyphsVeilWholeWithThePassHoldingItsPlaceholder() {
+        assertTrue(RowModel.paintsGlyph(5u, RowModel.Pass.All))
+        assertFalse(RowModel.paintsGlyph(5u, RowModel.Pass.Chrome))
+        // iOS .settled(v) = Range(0, v), .fresh(v) = Range(v, ∞).
+        assertTrue(RowModel.paintsGlyph(5u, RowModel.Pass.Range(0, 6)))
+        assertFalse(RowModel.paintsGlyph(5u, RowModel.Pass.Range(0, 5)))
+        assertTrue(RowModel.paintsGlyph(5u, RowModel.Pass.Range(5, Int.MAX_VALUE)))
+        assertFalse(RowModel.paintsGlyph(5u, RowModel.Pass.Range(6, Int.MAX_VALUE)))
+        // A placeholder past Int.MAX_VALUE never overflows into a range.
+        assertFalse(RowModel.paintsGlyph(UInt.MAX_VALUE, RowModel.Pass.Range(0, Int.MAX_VALUE)))
+    }
+
     // ------------------------------------------------------ threading
 
     @Test

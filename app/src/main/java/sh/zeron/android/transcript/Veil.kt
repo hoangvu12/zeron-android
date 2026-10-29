@@ -2,6 +2,7 @@ package sh.zeron.android.transcript
 
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.graphics.RectF
 import sh.zeron.android.design.Motion
 
 /**
@@ -22,9 +23,11 @@ import sh.zeron.android.design.Motion
  * animation start and making the timing deterministic under Compose's
  * test clock.
  *
- * Layer 0 only; scroller layers, boxes, overflow fades, the runs they mask
- * and widgets are never veiled (iOS paints them on the settled canvas and
- * rebuilds widgets per configure). The fade goes through a bounded
+ * Layer 0 only; scroller layers, settled boxes, overflow fades, the runs
+ * they mask and widgets are never veiled (iOS paints them on the settled
+ * canvas and rebuilds widgets per configure). A formula — its glyphs and
+ * its fills, keyed by the placeholder's `start` — veils whole with the
+ * chunk holding its placeholder (#29). The fade goes through a bounded
  * [Canvas.saveLayerAlpha] per chunk, never the run paints' own colour
  * alpha, so alpha-carrying roles and decorations stay right.
  *
@@ -46,6 +49,9 @@ internal class Veil(private val durationNanos: Long = Motion.VeilMs * 1_000_000L
 
     /** Reusable [Paint.FontMetrics] for the chunk layer bounds; main thread only. */
     private val fm = Paint.FontMetrics()
+
+    /** Reusable formula bounds for the chunk layer ([RowModel.formulaBounds]); main thread only. */
+    private val formula = RectF()
 
     /** Live chunks, sorted by `from`, disjoint (tests read this). */
     val chunks: List<Chunk> get() = list
@@ -155,8 +161,8 @@ internal class Veil(private val durationNanos: Long = Motion.VeilMs * 1_000_000L
             return
         }
 
-        // 1. Boxes and fades (Chrome runs `fonts.useDensity`, so the layer
-        //    bounds below can read the runs' paints).
+        // 1. Settled boxes and fades (Chrome runs `fonts.useDensity`, so the
+        //    layer bounds below can read the runs' paints).
         model.draw(0, canvas, density, palette, fonts, RowModel.Pass.Chrome)
 
         // 2. Settled text: the gaps before each live chunk, then the tail.
@@ -216,6 +222,22 @@ internal class Veil(private val durationNanos: Long = Motion.VeilMs * 1_000_000L
                     if (t < top) top = t
                     if (rEdge > right) right = rEdge
                     if (b > bottom) bottom = b
+                }
+            }
+            // #29: a formula in the chunk (glyphs and fills, drawn whole)
+            // widens the layer by its own bounds.
+            if (model.formulaBounds(c.from, c.to, density, formula)) {
+                if (!have) {
+                    have = true
+                    left = formula.left
+                    top = formula.top
+                    right = formula.right
+                    bottom = formula.bottom
+                } else {
+                    if (formula.left < left) left = formula.left
+                    if (formula.top < top) top = formula.top
+                    if (formula.right > right) right = formula.right
+                    if (formula.bottom > bottom) bottom = formula.bottom
                 }
             }
             if (!have) continue

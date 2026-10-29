@@ -12,8 +12,9 @@ import sh.zeron.android.design.AlertButtonRole
  * The pure builders of android-ui-parity #43 (plain JUnit, no Robolectric:
  * the models are data classes over no Android types): every string, role,
  * field option, button order and submit rule of the ticket's Spec tables,
- * the curly-quoted delete title, `trimmedName`'s guard, the sheet action
- * orders and callbacks, and every `newSectionTarget` case.
+ * the curly-quoted delete title, `trimmedName`'s guard, and the sheet
+ * action orders and callbacks. (Roboco's "Create on" engine chooser is
+ * gone: Zeron's sections are workspace-wide.)
  */
 class SessionPromptModelsTest {
 
@@ -29,11 +30,9 @@ class SessionPromptModelsTest {
         assertEquals("No Section", SessionPromptCopy.NoSection)
         assertEquals("Its sessions move back to the main list.", SessionPromptCopy.DeleteSectionMessage)
         assertEquals("Delete Section", SessionPromptCopy.DeleteSectionAction)
-        assertEquals("Create on", SessionPromptCopy.CreateOnMessage)
         assertEquals("Cancel", SessionPromptCopy.Cancel)
         assertEquals("Create", SessionPromptCopy.Create)
         assertEquals("Rename", SessionPromptCopy.Rename)
-        assertEquals("Engine not connected", SessionPromptCopy.EngineNotConnected)
     }
 
     @Test
@@ -213,70 +212,27 @@ class SessionPromptModelsTest {
     }
 
     @Test
-    fun createOnSheetMatchesTheSpec() {
-        val sheet = createOnSheet(
-            listOf(
-                EngineChoice("studio", "Studio Mac", true),
-                EngineChoice("linux", "Linux box", true),
-                EngineChoice("windows", "Windows desktop", false),
-            ),
-        ) { picked += it }
+    fun deleteSessionAlertMatchesUpstream() {
+        var deleted = 0
+        val alert = deleteSessionAlert("Fix flaky test") { deleted++ }
 
-        assertEquals(SessionPromptCopy.NewSectionTitle, sheet.title)
-        assertEquals(SessionPromptCopy.CreateOnMessage, sheet.message)
-        assertEquals("Cancel", sheet.cancelTitle)
-        assertEquals(listOf("Studio Mac", "Linux box", "Windows desktop"), sheet.actions.map { it.title })
-        assertTrue(sheet.actions.all { it.style == ActionSheetStyle.Default })
-        assertTrue("no checked rows", sheet.actions.none { it.checked })
-
-        picked.clear()
-        sheet.actions[1].onSelect()
-        assertEquals(listOf("linux"), picked)
-    }
-
-    // --------------------------------------------------- newSectionTarget
-
-    private fun choice(id: String, connected: Boolean) = EngineChoice(id, id, connected)
-
-    @Test
-    fun oneConnectedEngineGoesStraightToTheAlert() {
-        assertEquals(
-            NewSectionTarget.Engine("A"),
-            newSectionTarget(null, listOf(choice("A", true))),
-        )
+        assertEquals("Delete session?", alert.title)
+        assertEquals("“Fix flaky test” will be permanently deleted. This can’t be undone.", alert.message)
+        assertNull("no field", alert.field)
+        assertEquals(listOf("Cancel", "Delete"), alert.buttons.map { it.title })
+        assertEquals(AlertButtonRole.Cancel, alert.buttons[0].role)
+        assertEquals(AlertButtonRole.Destructive, alert.buttons[1].role)
+        alert.buttons[0].onClick("")
+        assertEquals(0, deleted)
+        alert.buttons[1].onClick("")
+        assertEquals(1, deleted)
     }
 
     @Test
-    fun severalConnectedEnginesOfferTheChooserInListOrder() {
+    fun anUntitledSessionReadsNewSessionInTheDeleteMessage() {
         assertEquals(
-            NewSectionTarget.Choose(listOf(choice("A", true), choice("B", true))),
-            newSectionTarget(null, listOf(choice("A", true), choice("B", true), choice("C", false))),
-        )
-    }
-
-    @Test
-    fun noConnectedEngineToasts() {
-        assertEquals(
-            NewSectionTarget.NoneConnected,
-            newSectionTarget(null, listOf(choice("A", false))),
-        )
-        assertEquals(NewSectionTarget.NoneConnected, newSectionTarget(null, emptyList()))
-    }
-
-    @Test
-    fun anExplicitEngineWinsOnlyWhenConnected() {
-        assertEquals(
-            NewSectionTarget.NoneConnected,
-            newSectionTarget("C", listOf(choice("A", true), choice("C", false))),
-        )
-        assertEquals(
-            NewSectionTarget.Engine("A"),
-            newSectionTarget("A", listOf(choice("A", true), choice("B", true))),
-        )
-        // An unknown id counts as not connected.
-        assertEquals(
-            NewSectionTarget.NoneConnected,
-            newSectionTarget("X", listOf(choice("A", true))),
+            "“New session” will be permanently deleted. This can’t be undone.",
+            SessionPromptCopy.deleteSessionMessage("  "),
         )
     }
 }

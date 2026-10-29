@@ -45,6 +45,14 @@ class LinkRouteTest {
     }
 
     @Test
+    fun senderCaptionsRouteToTheirChat() {
+        assertEquals(LinkRoute.Chat("0f3c-9a"), routeLink("zeron-chat://open?id=0f3c-9a"))
+        assertEquals(LinkRoute.Chat("a b"), routeLink("zeron-chat://open?id=a%20b"))
+        assertEquals(LinkRoute.Ignore, routeLink("zeron-chat://open"))
+        assertEquals(LinkRoute.Ignore, routeLink("zeron-chat://open?id="))
+    }
+
+    @Test
     fun zeronFileLinksOpenImagesAndIgnoreTheRest() {
         assertEquals(LinkRoute.Ignore, routeLink("zeron-invoke:7b7d"))
         assertEquals(LinkRoute.Preview("zeron-file:src/a%20file.png"), routeLink("zeron-file:src/a%20file.png"))

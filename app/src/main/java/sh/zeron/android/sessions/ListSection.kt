@@ -43,12 +43,10 @@ data class ListSection(
 /**
  * The live glyph of a section header — `SectionHeaderCell.State.live`
  * (`ios:Threads/SessionCell.swift:235-241`): a spinner while any session
- * works, else the input dot while any awaits. Ticket 50's `Offline` is
- * the wifi-off glyph on an offline `home:*` group — it **replaces** the
- * spinner/input for that header, because an unreachable engine's
- * "working" status is cached, not live.
+ * works, else the input dot while any awaits. Nothing else: iOS draws no
+ * offline glyph on a header.
  */
-enum class SectionLive { Spinner, Input, Offline }
+enum class SectionLive { Spinner, Input }
 
 /**
  * A header row's state — the port of `SectionHeaderCell.State`

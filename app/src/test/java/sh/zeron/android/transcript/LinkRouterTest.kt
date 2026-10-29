@@ -58,13 +58,30 @@ class LinkRouterTest {
         dark: Boolean = false,
         loadFull: suspend (String) -> ImageBitmap? = { null },
         showImage: (String, Rect, ImageBitmap) -> Unit = { _, _, _ -> },
+        openChat: (String) -> Unit = {},
     ): LinkRouter = LinkRouter(
         CoroutineScope(StandardTestDispatcher(testScheduler)),
         { dark },
         loadFull,
         showImage,
         launcher,
+        openChat,
     )
+
+    // ---------------------------------------------------------------- chat
+
+    @Test
+    fun aSenderCaptionOpensItsChatAndNothingElse() = runTest {
+        val launcher = RecordingLauncher()
+        val opened = mutableListOf<String>()
+        val r = router(launcher, openChat = { opened += it })
+        r.open(tap("zeron-chat://open?id=chat-123"))
+        r.open(tap("zeron-chat://open")) // no id: ignored
+        advanceUntilIdle()
+        assertEquals(listOf("chat-123"), opened)
+        assertTrue(launcher.customTabs.isEmpty())
+        assertTrue(launcher.views.isEmpty())
+    }
 
     // ----------------------------------------------------------------- web
 

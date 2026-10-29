@@ -102,9 +102,7 @@ sealed interface SessionListItem {
  *  - **Header state** (`collapsible` only): `count = rows.size` and the
  *    live glyph are computed over **all** of the section's rows, before
  *    folding and before de-duping — pre-folding here would read a
- *    collapsed header's count as 0. `liveOverrides` replaces the
- *    row-derived value for that header only (ticket 50: `Offline` on
- *    offline `home:*` groups).
+ *    collapsed header's count as 0.
  *  - **Folding** (`collapsible` only): a collapsed section emits its
  *    header and nothing else; its rows are skipped and are **not**
  *    recorded as emitted (`:140-143`), so the same id can still surface
@@ -127,7 +125,6 @@ fun buildSessionListItems(
     sections: List<ListSection>,
     collapsible: Boolean,
     collapsedIds: Set<String> = emptySet(),
-    liveOverrides: Map<String, SectionLive> = emptyMap(),
     toVm: (SessionRow) -> SessionRowVM = { SessionRowVM.from(it) },
 ): List<SessionListItem> {
     val out = ArrayList<SessionListItem>(sections.sumOf { it.rows.size + it.folders.size + 1 })
@@ -148,7 +145,7 @@ fun buildSessionListItems(
                     title = title,
                     count = s.rows.size,
                     collapsed = s.id in collapsedIds,
-                    live = liveOverrides[s.id] ?: sectionLive(vms),
+                    live = sectionLive(vms),
                 )
                 out += SessionListItem.Header(h)
                 // Header only; the rows are NOT added to sessionsSeen

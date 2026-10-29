@@ -133,13 +133,12 @@ fun rememberSessionListModel(
     sections: List<ListSection>,
     collapsible: Boolean = false,
     collapsedIds: Set<String> = emptySet(),
-    liveOverrides: Map<String, SectionLive> = emptyMap(),
     loading: Boolean = false,
     empty: SessionListEmpty = SessionListEmpty.None,
     onScreen: Boolean = true,
 ): SessionListModel {
-    val items = remember(sections, collapsible, collapsedIds, liveOverrides) {
-        buildSessionListItems(sections, collapsible, collapsedIds, liveOverrides)
+    val items = remember(sections, collapsible, collapsedIds) {
+        buildSessionListItems(sections, collapsible, collapsedIds)
     }
     val status = sessionListStatus(items, loading, empty)
     val factor = LocalTypeScale.current.factor

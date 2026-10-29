@@ -79,10 +79,15 @@ import kotlin.math.sign
  * there is none (`URL(string:)?.host()` with Swift's default
  * `percentEncoded: true`, `RowView.swift:69`): `example.com` for
  * `https://example.com/docs`, `image` for a `zeron-preview://image`
- * chip, the full string for `mailto:`/`zeron-file:`/scheme-less URLs.
+ * chip, the full string for `mailto:`/`zeron-file:`/scheme-less URLs. A
+ * caption over a message between chats (`zeron-chat:`) reads "Open chat"
+ * (#30, `RowView.swift:77-79`).
  */
-internal fun linkLabel(url: String): String =
-    encodedHostOf(Uri.parse(url).encodedAuthority)?.takeIf { it.isNotEmpty() } ?: url
+internal fun linkLabel(url: String): String {
+    val uri = Uri.parse(url)
+    if (uri.scheme == "zeron-chat") return "Open chat"
+    return encodedHostOf(uri.encodedAuthority)?.takeIf { it.isNotEmpty() } ?: url
+}
 
 /**
  * The host part of an encoded authority (`user@host:port`): android.net.Uri

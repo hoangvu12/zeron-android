@@ -51,6 +51,7 @@ class ZeronIconsTest {
         "folder.badge.plus",
         "folder.badge.gearshape",
         "pencil",
+        "square.and.pencil",
         "trash",
         "doc",
         "doc.text",
@@ -84,10 +85,15 @@ class ZeronIconsTest {
         "bell",
         "questionmark.bubble",
         "exclamationmark.triangle",
+        "exclamationmark.triangle.fill",
+        "bubble.left",
+        "arrow.left.arrow.right",
         "exclamationmark.circle",
         "info.circle",
         "arrow.triangle.branch",
         "command",
+        "bubble.left.and.text.bubble.right",
+        "apple.terminal",
     )
 
     @Test
@@ -112,6 +118,11 @@ class ZeronIconsTest {
             "square",
             "questionmark.bubble",
             "exclamationmark.triangle",
+            // #30: the error card, the sender caption without a harness,
+            // the provider-switch seam (rows.rs:922, 989, 1070).
+            "exclamationmark.triangle.fill",
+            "bubble.left",
+            "arrow.left.arrow.right",
             "arrow.triangle.branch",
             "command",
             "wand.and.stars",
@@ -173,11 +184,14 @@ class ZeronIconsTest {
                 assertSame("bySfName[\"$name\"] must be ${entry.name}", entry.icon, ZeronIcons.bySfName[name])
             }
         }
-        // 68 SF constants + 1 alias (pin.slash.fill) + 7 Zeron extras.
-        // android-next#04 added Refresh (`arrow.clockwise`, the About
-        // "Check for Updates" row; the approved design allows one new glyph).
-        assertEquals(69, ZeronIcons.bySfName.size)
-        assertEquals(75, ZeronIcons.entries.size)
+        // Derived, not hard-coded: tickets add glyphs in parallel. One SF
+        // name per map key, and every entry is either SF-named or an extra.
+        assertEquals(ZeronIcons.entries.sumOf { it.sfNames.size }, ZeronIcons.bySfName.size)
+        assertEquals(
+            "the Zeron extras are the only entries without an SF name",
+            listOf("TabChat", "TabSettings", "ZeronBow", "WifiOff", "Home", "HardDrive", "Laptop"),
+            ZeronIcons.entries.filter { it.sfNames.isEmpty() }.map { it.name },
+        )
         assertEquals(
             "constant names are unique",
             ZeronIcons.entries.size,
@@ -248,6 +262,7 @@ class ZeronIconsTest {
             ZeronIcons.FolderBadgePlus to R.drawable.zi_folder_badge_plus,
             ZeronIcons.FolderBadgeGearshape to R.drawable.zi_folder_badge_gear,
             ZeronIcons.Pencil to R.drawable.zi_pen,
+            ZeronIcons.SquareAndPencil to R.drawable.zi_pen_new_square, // #22
             ZeronIcons.Trash to R.drawable.zi_trash_bin_minimalistic,
             ZeronIcons.Doc to R.drawable.zi_document,
             ZeronIcons.DocText to R.drawable.zi_document,
@@ -281,10 +296,15 @@ class ZeronIconsTest {
             ZeronIcons.Bell to R.drawable.zi_bell,
             ZeronIcons.QuestionmarkBubble to R.drawable.zi_chat_round_line,
             ZeronIcons.ExclamationmarkTriangle to R.drawable.zi_danger_triangle,
+            ZeronIcons.ExclamationmarkTriangleFill to R.drawable.zi_danger_triangle_fill, // #30
+            ZeronIcons.BubbleLeft to R.drawable.zi_bubble_left, // #30
+            ZeronIcons.ArrowLeftArrowRight to R.drawable.zi_arrow_left_arrow_right, // #30
             ZeronIcons.ExclamationmarkCircle to R.drawable.zi_exclamation_circle,
             ZeronIcons.InfoCircle to R.drawable.zi_info_circle,
             ZeronIcons.ArrowTriangleBranch to R.drawable.zi_git_branch,
             ZeronIcons.Command to R.drawable.zi_command,
+            ZeronIcons.BubbleLeftAndTextBubbleRight to R.drawable.zi_chat_round_line, // #33
+            ZeronIcons.Terminal to R.drawable.zi_terminal, // #33
             ZeronIcons.Refresh to R.drawable.zi_refresh, // android-next#04
             ZeronIcons.TabChat to R.drawable.zi_tab_chat,
             ZeronIcons.TabSettings to R.drawable.zi_tab_settings,

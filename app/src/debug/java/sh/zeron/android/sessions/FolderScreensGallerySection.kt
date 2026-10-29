@@ -47,8 +47,8 @@ private enum class FolderDemo(val label: String) {
 /**
  * The gallery's [RowActions] fake: the section writes log to [log] (the
  * readout line, e.g. `renameSection(eng1:sec-p0, P1)`), and [failWrites]
- * imitates ticket 42's offline row — the "Engine not connected" toast and
- * [ActionOutcome.EngineOffline], so "Fail writes" shows a refused rename
+ * imitates a refused write — [ActionOutcome.Failed] (logged, never
+ * toasted, as iOS's `attempt`), so "Fail writes" shows a refused rename
  * (no retitle) and a refused delete (no pop). A successful rename also
  * hands the trimmed name to [onRenamed] so the gallery's fixture workspace
  * keeps the live prefill.
@@ -65,8 +65,7 @@ private class FolderGalleryRowActions(
     private fun sectionWrite(what: String, onResult: (ActionOutcome) -> Unit, onOk: () -> Unit = {}) {
         log(what)
         if (failWrites()) {
-            toaster.show(SessionPromptCopy.EngineNotConnected)
-            onResult(ActionOutcome.EngineOffline)
+            onResult(ActionOutcome.Failed)
         } else {
             onOk()
             onResult(ActionOutcome.Ok)
@@ -120,10 +119,6 @@ private class FolderGalleryRowActions(
         sectionWrite("deleteSection($sectionId)", onResult)
 
     override fun sections() = emptyList<uniffi.zeron_core.SectionView>()
-
-    override fun report(error: Throwable) {
-        log("report($error)")
-    }
 }
 
 /**
