@@ -24,7 +24,7 @@ import sh.zeron.android.design.ZeronAlert
  * build a model and present it themselves.
  */
 
-/** Every string of the five prompts, verbatim from iOS (plus Zeron's "Create on" and offline toast). */
+/** Every string of the five prompts, verbatim from iOS. */
 object SessionPromptCopy {
     /** `:321`. */
     const val RenameSessionTitle = "Rename Session"
@@ -58,9 +58,6 @@ object SessionPromptCopy {
 
     /** `:324`, `:404`, `:494`. */
     const val Rename = "Rename"
-
-    /** `web/…/notice-chip.ts:32` (`OFFLINE_NOTICE`) — this ticket's one pre-check toast. */
-    const val EngineNotConnected = "Engine not connected"
 
     /** `Delete “<name>”?` — U+201C/U+201D curly quotes, checked byte-wise on `:503`. */
     fun deleteSectionTitle(name: String) = "Delete “$name”?"

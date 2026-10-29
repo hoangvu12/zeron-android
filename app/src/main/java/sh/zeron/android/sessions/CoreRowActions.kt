@@ -17,8 +17,8 @@ import uniffi.zeron_core.SectionView
  * workspace.rs:116-184`, android-app#07) — fakeable, because `CoreClient`
  * is a JNA object. Every method is the one-to-one Kotlin name UniFFI
  * generates from the Rust `snake_case` name; each throws the generated
- * [CoreException] variants fail-fast (offline engine, pins not ready,
- * unknown id, invalid argument) and never blocks on the network.
+ * [CoreException] variants (unknown id, invalid argument, …) and never
+ * blocks on the network.
  */
 interface SessionWrites {
     fun pinSession(chatId: String)
@@ -64,68 +64,22 @@ fun CoreClient.asSessionWrites(): SessionWrites = object : SessionWrites {
     override fun deleteSection(sectionId: String) = this@asSessionWrites.deleteSection(sectionId)
 }
 
-/** The toast copy for a failure whose reason carries nothing usable (`web/packages/app/src/lib/chat-actions.ts:139`). */
-internal const val GENERIC_FAILURE = "The change could not be applied."
-
-/** The offline-engine toast (`web/packages/app/src/lib/notice-chip.ts:32`, `OFFLINE_NOTICE`). */
-internal const val ENGINE_OFFLINE_TOAST = "Engine not connected"
-
-/** The pins-not-synced toast (new copy, android-app#20 §Multi-engine). */
-internal const val PINS_NOT_SYNCED_TOAST = "Pins aren't synced yet. Try again in a moment."
-
-/** The archive toast pair (`ios:App/AppModel.swift:508`). */
+/** The archive toast pair (`ios:App/AppModel.swift:535-539`). */
 internal const val ARCHIVED_TOAST = "Archived"
 internal const val ARCHIVED_TOAST_ACTION = "Undo"
 
 /**
- * The write's kind, which decides what `Unsupported` means: pin and
- * section writes (everything that ends in `SetSidebarPins` /
- * `SetSidebarSections`) raise `Unsupported("pins are not synced yet")`
- * and get the pins copy; chat writes (`archive`, `unarchive`, `rename`)
- * could only see `Unsupported` from an engine error mapping and get the
- * reason text (`move`/`assignSection` counts as Sidebar — it writes
- * `SetSidebarSections`).
+ * Pure: maps a thrown error to its outcome. Nothing toasts — iOS's
+ * `attempt` only logs (`AppModel.swift:527-529`), and Zeron's core emits
+ * no notices; the row simply stays until the snapshot moves it.
+ * Rethrows `CancellationException` (a cancelled call never reports).
  */
-internal enum class OpKind { Chat, Sidebar }
-
-/**
- * Pure: maps a thrown error to an outcome plus its toast text (`null` =
- * no toast) — the ticket's failure table, exactly. Rethrows
- * `CancellationException` (the caller rethrows, so a cancelled call never
- * toasts).
- *
- * Reads the generated `reason` field, not `message`: the UniFFI template
- * this repo generates renders `message` as `"reason=<value>"`
- * (`crates/mobile/uniffi.toml` renames the `message` fields to `reason`
- * so the variants compile; the property then stringifies them).
- */
-internal fun classify(e: Throwable, kind: OpKind): Pair<ActionOutcome, String?> = when (e) {
+internal fun classify(e: Throwable): ActionOutcome = when (e) {
     is CancellationException -> throw e
-    is CoreException.HostUnavailable -> ActionOutcome.EngineOffline to ENGINE_OFFLINE_TOAST
-    is CoreException.Unsupported ->
-        if (kind == OpKind.Sidebar) ActionOutcome.PinsNotSynced to PINS_NOT_SYNCED_TOAST
-        else ActionOutcome.Failed to (e.reason.ifBlank { null } ?: GENERIC_FAILURE)
-    is CoreException.NotFound -> ActionOutcome.Gone to null
-    is CoreException.Closed -> ActionOutcome.NoClient to null
-    is CoreException -> ActionOutcome.Failed to (e.reasonOrNull?.ifBlank { null } ?: GENERIC_FAILURE)
-    else -> ActionOutcome.Failed to GENERIC_FAILURE
+    is CoreException.NotFound -> ActionOutcome.Gone
+    is CoreException.Closed -> ActionOutcome.NoClient
+    else -> ActionOutcome.Failed
 }
-
-/** The reason field of the remaining variants (every one but `Closed` has it). */
-private val CoreException.reasonOrNull: String?
-    get() = when (this) {
-        is CoreException.NotFound -> reason
-        is CoreException.InvalidArgument -> reason
-        is CoreException.HostUnavailable -> reason
-        is CoreException.Unsupported -> reason
-        is CoreException.HostException -> reason
-        is CoreException.Network -> reason
-        is CoreException.Auth -> reason
-        is CoreException.Storage -> reason
-        is CoreException.NotImplemented -> reason
-        is CoreException.Internal -> reason
-        is CoreException.Closed -> null
-    }
 
 /**
  * The [RowActions] over the real FFI (android-ui-parity #42). One
@@ -138,7 +92,10 @@ private val CoreException.reasonOrNull: String?
  *  - the FFI call runs on [io] — `Dispatchers.IO.limitedParallelism(1)`,
  *    **one queue for every write**, so the user's order survives (an
  *    archive followed by an instant Undo, or a run of `movePin` calls);
- *  - toasts, `onResult` and `onCreated` run on [main].
+ *  - the archive toast, `onResult` and `onCreated` run on [main].
+ *
+ * A failed write is logged and reported as an [ActionOutcome], never
+ * toasted (iOS `attempt`).
  *
  * Never call the FFI on main: `CoreClient` goes through JNA and
  * android-app#06 warns about re-entrant listener callbacks. `writes` is
@@ -163,38 +120,37 @@ class CoreRowActions(
     // ------------------------------------------------------------------ writes
 
     override fun setPinned(chatId: String, pinned: Boolean, onResult: (ActionOutcome) -> Unit) {
-        if (pinned) dispatch("pin", OpKind.Sidebar, onResult) { it.pinSession(chatId) }
-        else dispatch("pin", OpKind.Sidebar, onResult) { it.unpinSession(chatId) }
+        if (pinned) dispatch("pin", onResult) { it.pinSession(chatId) }
+        else dispatch("pin", onResult) { it.unpinSession(chatId) }
     }
 
     override fun archive(chatId: String, onResult: (ActionOutcome) -> Unit) {
-        dispatch("archive", OpKind.Chat, onResult, onOk = {
+        dispatch("archive", onResult, onOk = {
             // Gated on Ok: iOS shows this even when the call threw
-            // (AppModel.swift:506-508), but Zeron writes fail fast when
-            // the engine is offline and the row stays — a stale Undo
-            // would promise a restore that never happened.
+            // (AppModel.swift:535-539); the row then stays, and a stale
+            // Undo would promise a restore that never happened.
             toaster.show(ARCHIVED_TOAST, ARCHIVED_TOAST_ACTION) { unarchive(chatId) }
         }) { it.archiveSession(chatId) }
     }
 
     override fun unarchive(chatId: String, onResult: (ActionOutcome) -> Unit) {
-        dispatch("unarchive", OpKind.Chat, onResult) { it.unarchiveSession(chatId) }
+        dispatch("unarchive", onResult) { it.unarchiveSession(chatId) }
     }
 
     override fun delete(chatId: String, onResult: (ActionOutcome) -> Unit) {
-        dispatch("delete", OpKind.Chat, onResult) { it.deleteSession(chatId) }
+        dispatch("delete", onResult) { it.deleteSession(chatId) }
     }
 
     override fun move(chatId: String, toSection: String?, onResult: (ActionOutcome) -> Unit) {
-        dispatch("assign", OpKind.Sidebar, onResult) { it.assignSection(chatId, toSection) }
+        dispatch("assign", onResult) { it.assignSection(chatId, toSection) }
     }
 
     override fun movePin(chatId: String, after: String?, before: String?, onResult: (ActionOutcome) -> Unit) {
-        dispatch("move pin", OpKind.Sidebar, onResult) { it.movePin(chatId, after, before) }
+        dispatch("move pin", onResult) { it.movePin(chatId, after, before) }
     }
 
     override fun pinAt(chatId: String, after: String?, before: String?, onResult: (ActionOutcome) -> Unit) {
-        dispatch("pin", OpKind.Sidebar, onResult) { it.pinSessionAt(chatId, after, before) }
+        dispatch("pin", onResult) { it.pinSessionAt(chatId, after, before) }
     }
 
     override fun place(
@@ -204,7 +160,7 @@ class CoreRowActions(
         before: String?,
         onResult: (ActionOutcome) -> Unit,
     ) {
-        dispatch("assign", OpKind.Sidebar, onResult) { it.placeSession(chatId, sectionId, after, before) }
+        dispatch("assign", onResult) { it.placeSession(chatId, sectionId, after, before) }
     }
 
     override fun rename(chatId: String, title: String, onResult: (ActionOutcome) -> Unit) {
@@ -213,7 +169,7 @@ class CoreRowActions(
             onResult(ActionOutcome.Skipped)
             return
         }
-        dispatch("rename", OpKind.Chat, onResult) { it.renameSession(chatId, trimmed) }
+        dispatch("rename", onResult) { it.renameSession(chatId, trimmed) }
     }
 
     override fun createSection(
@@ -226,7 +182,7 @@ class CoreRowActions(
             onResult(ActionOutcome.Skipped)
             return
         }
-        dispatch("section", OpKind.Sidebar, onResult, onOk = onCreated) {
+        dispatch("section", onResult, onOk = onCreated) {
             it.createSection(trimmed)
         }
     }
@@ -237,23 +193,16 @@ class CoreRowActions(
             onResult(ActionOutcome.Skipped)
             return
         }
-        dispatch("rename section", OpKind.Sidebar, onResult) { it.renameSection(sectionId, trimmed) }
+        dispatch("rename section", onResult) { it.renameSection(sectionId, trimmed) }
     }
 
     override fun deleteSection(sectionId: String, onResult: (ActionOutcome) -> Unit) {
-        dispatch("delete section", OpKind.Sidebar, onResult) { it.deleteSection(sectionId) }
+        dispatch("delete section", onResult) { it.deleteSection(sectionId) }
     }
 
-    // ------------------------------------------------------------------ reads and reports
+    // ------------------------------------------------------------------ reads
 
     override fun sections(): List<SectionView> = readSections()
-
-    override fun report(error: Throwable) {
-        if (error is CancellationException) return
-        val (_, toast) = classify(error, OpKind.Sidebar)
-        log("write failed: $error")
-        toast?.let { toaster.show(it) }
-    }
 
     // ------------------------------------------------------------------ the runner
 
@@ -261,11 +210,10 @@ class CoreRowActions(
      * The one runner every write goes through (named `dispatch`, not
      * `run`, so it never shadows the stdlib `run { }` used in its body):
      * read the client on main, make the call on the serial IO lane, then
-     * toast/log/report on main.
+     * log and report on main.
      */
     private fun <T> dispatch(
         label: String,
-        kind: OpKind,
         onResult: (ActionOutcome) -> Unit,
         onOk: (T) -> Unit = {},
         call: (SessionWrites) -> T,
@@ -283,9 +231,8 @@ class CoreRowActions(
                     onResult(ActionOutcome.Ok)
                 },
                 onFailure = { e ->
-                    val (outcome, toast) = classify(e, kind) // rethrows CancellationException
+                    val outcome = classify(e) // rethrows CancellationException
                     log("$label failed: $e")
-                    toast?.let { toaster.show(it) }
                     onResult(outcome)
                 },
             )

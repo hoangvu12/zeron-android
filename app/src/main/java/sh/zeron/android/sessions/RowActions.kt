@@ -10,15 +10,13 @@ import uniffi.zeron_core.SectionView
  *
  *  - [Ok] — the FFI call returned; android-app#07's overlay will move the row.
  *  - [Skipped] — a blank trimmed name/title; nothing was called.
- *  - [NoClient] — no live client (not paired / torn down / `Closed`).
- *  - [EngineOffline] — the owning engine is not connected; the row stays.
- *  - [PinsNotSynced] — the engine's sidebar was not ready yet (pin and
- *    section writes only); the row stays.
+ *  - [NoClient] — no live client (signed out / torn down / `Closed`).
  *  - [Gone] — the id is unknown; the row is already gone.
- *  - [Failed] — anything else (an invalid argument, an engine error, …);
- *    an error toast was shown.
+ *  - [Failed] — anything else (pins not ready, an invalid argument, a
+ *    host error, …); logged like iOS's `attempt`, never toasted, and the
+ *    row stays.
  */
-enum class ActionOutcome { Ok, Skipped, NoClient, EngineOffline, PinsNotSynced, Gone, Failed }
+enum class ActionOutcome { Ok, Skipped, NoClient, Gone, Failed }
 
 /**
  * Every session/section write the UI makes (android-ui-parity #42) — the
@@ -121,19 +119,10 @@ interface RowActions {
      */
     fun sections(): List<SectionView>
 
-    /**
-     * Log + toast a write error a caller caught itself (ticket 43's
-     * `rowActions.report(e)` contract for its own section writes). Uses
-     * the failure table with Kind = Sidebar. `CancellationException` is
-     * ignored (no toast). Main thread; never calls the FFI.
-     */
-    fun report(error: Throwable)
-
     companion object {
         /**
          * Previews and tests of neighbouring tickets: every write is a
-         * no-op ([onResult] is never called), `sections` lists
-         * nothing, `report` does nothing.
+         * no-op ([onResult] is never called), `sections` lists nothing.
          */
         val Noop: RowActions = object : RowActions {
             override fun setPinned(chatId: String, pinned: Boolean, onResult: (ActionOutcome) -> Unit) {}
@@ -147,7 +136,6 @@ interface RowActions {
             override fun renameSection(sectionId: String, name: String, onResult: (ActionOutcome) -> Unit) {}
             override fun deleteSection(sectionId: String, onResult: (ActionOutcome) -> Unit) {}
             override fun sections(): List<SectionView> = emptyList()
-            override fun report(error: Throwable) {}
         }
     }
 }

@@ -35,6 +35,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import sh.zeron.android.ZeronApplication
@@ -415,6 +416,8 @@ internal fun SubagentScreen(route: SubagentRoute, modifier: Modifier = Modifier)
             loader = TranscriptImageLoader.get(context),
             engineDeviceId = { route.hostDeviceId },
             reader = route.attachments,
+            retries = (context.applicationContext as? ZeronApplication)
+                ?.workspaceFeed?.reconnects ?: emptyFlow(),
             chatId = route.rootChatId,
         )
     }

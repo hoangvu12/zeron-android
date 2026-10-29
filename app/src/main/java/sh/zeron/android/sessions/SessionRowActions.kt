@@ -53,7 +53,7 @@ interface SessionRowCommands {
     /**
      * Archive a chat. [onAccepted] reports, on main, at most once, whether
      * the write went through (`Ok`/`Gone`) or was refused
-     * (`EngineOffline`/`PinsNotSynced`/`NoClient`/`Failed`/`Skipped`) —
+     * (`NoClient`/`Failed`/`Skipped`) —
      * a refused destructive swipe springs the row back. 42 shows the
      * "Archived · Undo" toast only on `Ok`.
      */

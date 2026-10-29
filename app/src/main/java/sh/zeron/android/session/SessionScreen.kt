@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.flow.emptyFlow
 import sh.zeron.android.ZeronApplication
 import sh.zeron.android.composer.QuestionActions
 import sh.zeron.android.composer.DeliveryMode
@@ -243,6 +244,9 @@ fun SessionScreen(
                 loader = TranscriptImageLoader.get(context),
                 engineDeviceId = { controller.hostDeviceId },
                 reader = it,
+                // #20: failed tiles retry when the client reconnects.
+                retries = (context.applicationContext as? ZeronApplication)
+                    ?.workspaceFeed?.reconnects ?: emptyFlow(),
                 chatId = controller.chatId,
             )
         }

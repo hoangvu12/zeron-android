@@ -9,9 +9,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -21,28 +18,25 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Test
 import sh.zeron.android.design.Toaster
-import uniffi.zeron_core.ClientEvent
 import uniffi.zeron_core.CoreException
 import uniffi.zeron_core.SectionView
 
 /**
- * `CoreRowActions` (android-ui-parity #42): every row of the ticket's
- * failure table, the trim/skip rules, the "Archived · Undo" pair, the
- * serial-queue ordering, the notice collector, `sectionsFor`, and the
+ * `CoreRowActions` (#20 over ticket 42's suite): the failure mapping
+ * (logged, never toasted — iOS `attempt`), the trim/skip rules, the
+ * "Archived · Undo" pair, the serial-queue ordering, `sections`, and the
  * no-FFI-on-the-main-thread rule.
  *
  * Plain JUnit 4, no Robolectric: the FFI seam is [FakeWrites] (a plain
  * [SessionWrites] fake), the toaster is [RecordingToaster], `main` and
  * `io` are two [StandardTestDispatcher]s over one scheduler, and
  * `log = {}` keeps `android.util.Log` off the plain JVM. The generated
- * `CoreException` variants and `ClientEvent` records are plain Kotlin
- * classes whose initialisation touches no JNA (the property the
- * #40 fixtures rely on).
+ * `CoreException` variants are plain Kotlin classes whose
+ * initialisation touches no JNA.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class RowActionsTest {
@@ -71,7 +65,7 @@ class RowActionsTest {
         val threads = CopyOnWriteArrayList<Thread>()
         val errors = ArrayDeque<Throwable>()
         var sleepMs = 0L
-        var nextSectionId = "scoped:s1"
+        var nextSectionId = "s1"
 
         private fun go(call: String) {
             calls += call
@@ -94,8 +88,8 @@ class RowActionsTest {
         override fun movePin(chatId: String, after: String?, before: String?) =
             go("movePin $chatId after=${after ?: "none"} before=${before ?: "none"}")
         override fun renameSession(chatId: String, title: String) = go("rename $chatId=$title")
-        override fun createSection(name: String, engineId: String?): String {
-            go("createSection $name engine=${engineId ?: "none"}")
+        override fun createSection(name: String): String {
+            go("createSection $name")
             return nextSectionId
         }
         override fun renameSection(sectionId: String, name: String) = go("renameSection $sectionId=$name")
@@ -163,49 +157,32 @@ class RowActionsTest {
     }
 
     @Test
-    fun undoWhileTheEngineIsOfflineToastsEngineNotConnected() = runTest {
-        val h = newHarness()
-        h.actions.archive("a")
-        advanceUntilIdle()
-        h.fake.errors += CoreException.HostUnavailable("Engine is offline; reconnecting")
-        val undo = h.toaster.shown.single().onAction
-        assertNotNull(undo)
-        undo!!.invoke()
-        advanceUntilIdle()
-        assertEquals(listOf("archive a", "unarchive a"), h.fake.calls)
-        assertEquals(listOf("Archived", "Engine not connected"), h.toaster.texts)
-    }
-
-    @Test
-    fun archiveWithTheEngineOfflineShowsExactlyOneToastAndReportsEngineOffline() = runTest {
-        val h = newHarness()
-        h.fake.errors += CoreException.HostUnavailable("Engine is offline; reconnecting")
+    fun aRefusedArchiveLogsReportsFailedAndShowsNoToast() = runTest {
+        val logged = mutableListOf<String>()
+        val h = newHarness(log = { logged += it })
+        h.fake.errors += CoreException.HostUnavailable("host is offline")
         val outcomes = mutableListOf<ActionOutcome>()
         h.actions.archive("a", outcomes::add)
         advanceUntilIdle()
-        assertEquals(listOf(ActionOutcome.EngineOffline), outcomes)
-        assertEquals(listOf("Engine not connected"), h.toaster.texts)
-        assertEquals(1, h.toaster.shown.size)
-        assertNull(h.toaster.shown[0].action)
-        assertNull(h.toaster.shown[0].onAction)
+        assertEquals(listOf(ActionOutcome.Failed), outcomes)
+        assertTrue("no Undo for an archive that never happened", h.toaster.shown.isEmpty())
         assertEquals(listOf("archive a"), h.fake.calls)
+        assertEquals(1, logged.size)
+        assertTrue(logged[0].startsWith("archive failed: "))
     }
 
     @Test
-    fun deleteRoutesToDeleteSessionWithNoToastAndOfflineToastsOnce() = runTest {
+    fun deleteRoutesToDeleteSessionWithNoToastEvenWhenRefused() = runTest {
         val h = newHarness()
         val outcomes = mutableListOf<ActionOutcome>()
         h.actions.delete("a", outcomes::add)
         advanceUntilIdle()
-        assertEquals(listOf("delete a"), h.fake.calls)
-        assertEquals(listOf(ActionOutcome.Ok), outcomes)
-        assertTrue("a confirmed delete has no toast and no Undo", h.toaster.shown.isEmpty())
-
-        h.fake.errors += CoreException.HostUnavailable("Engine is offline; reconnecting")
+        h.fake.errors += CoreException.HostUnavailable("host is offline")
         h.actions.delete("b", outcomes::add)
         advanceUntilIdle()
-        assertEquals(listOf(ActionOutcome.Ok, ActionOutcome.EngineOffline), outcomes)
-        assertEquals(listOf("Engine not connected"), h.toaster.texts)
+        assertEquals(listOf("delete a", "delete b"), h.fake.calls)
+        assertEquals(listOf(ActionOutcome.Ok, ActionOutcome.Failed), outcomes)
+        assertTrue(h.toaster.shown.isEmpty())
     }
 
     @Test
@@ -239,40 +216,6 @@ class RowActionsTest {
     }
 
     @Test
-    fun pinAndSectionWritesWithUnsupportedToastThePinsCopyAndReportPinsNotSynced() = runTest {
-        val h = newHarness()
-        repeat(3) { h.fake.errors += CoreException.Unsupported("pins are not synced yet") }
-        val outcomes = mutableListOf<ActionOutcome>()
-        h.actions.setPinned("a", true, outcomes::add)
-        h.actions.setPinned("a", false, outcomes::add)
-        h.actions.move("a", "s", outcomes::add)
-        advanceUntilIdle()
-        assertEquals(
-            listOf(ActionOutcome.PinsNotSynced, ActionOutcome.PinsNotSynced, ActionOutcome.PinsNotSynced),
-            outcomes,
-        )
-        assertEquals(listOf(PINS_NOT_SYNCED_TOAST, PINS_NOT_SYNCED_TOAST, PINS_NOT_SYNCED_TOAST), h.toaster.texts)
-    }
-
-    @Test
-    fun chatWritesWithUnsupportedToastTheReasonNeverThePinsCopy() = runTest {
-        val h = newHarness()
-        repeat(3) { h.fake.errors += CoreException.Unsupported("engine unknown method") }
-        h.fake.errors += CoreException.Unsupported("")
-        val outcomes = mutableListOf<ActionOutcome>()
-        h.actions.archive("a", outcomes::add)
-        h.actions.unarchive("a", outcomes::add)
-        h.actions.rename("a", "New", outcomes::add)
-        h.actions.rename("b", "New", outcomes::add)
-        advanceUntilIdle()
-        assertEquals(List(4) { ActionOutcome.Failed }, outcomes)
-        assertEquals(
-            listOf("engine unknown method", "engine unknown method", "engine unknown method", GENERIC_FAILURE),
-            h.toaster.texts,
-        )
-    }
-
-    @Test
     fun notFoundAndClosedReportWithoutToasts() = runTest {
         val h = newHarness()
         h.fake.errors += CoreException.NotFound("chat")
@@ -286,9 +229,9 @@ class RowActionsTest {
     }
 
     @Test
-    fun genericFailuresToastTheReasonOrTheGenericText() = runTest {
+    fun everyOtherFailureIsFailedAndNeverToasts() = runTest {
         val h = newHarness()
-        h.fake.errors += CoreException.InvalidArgument("x")
+        h.fake.errors += CoreException.Unsupported("pins are not synced yet")
         h.fake.errors += CoreException.InvalidArgument("")
         h.fake.errors += IllegalStateException("boom")
         h.fake.errors += CoreException.HostException("bad request")
@@ -298,15 +241,12 @@ class RowActionsTest {
         h.actions.unarchive("a", outcomes::add)
         h.actions.move("a", "s", outcomes::add)
         advanceUntilIdle()
-        assertEquals(List(4) { ActionOutcome.Failed }, outcomes) // HostException included
-        assertEquals(
-            listOf("x", GENERIC_FAILURE, GENERIC_FAILURE, "bad request"),
-            h.toaster.texts,
-        )
+        assertEquals(List(4) { ActionOutcome.Failed }, outcomes)
+        assertTrue(h.toaster.shown.isEmpty())
     }
 
     @Test
-    fun moveAssignsNullAsNoSectionAndTheScopedSectionId() = runTest {
+    fun moveAssignsNullAsNoSectionAndTheSectionId() = runTest {
         val h = newHarness()
         h.actions.move("a", null)
         h.actions.move("a", "s")
@@ -321,13 +261,13 @@ class RowActionsTest {
         val created = mutableListOf<String>()
         h.actions.rename("a", "  New  ", outcomes::add)
         h.actions.rename("b", "   ", outcomes::add)
-        h.actions.createSection("  X  ", "e1", outcomes::add, onCreated = { created += it })
-        h.actions.createSection("   ", "e1", outcomes::add, onCreated = { created += it })
+        h.actions.createSection("  X  ", outcomes::add, onCreated = { created += it })
+        h.actions.createSection("   ", outcomes::add, onCreated = { created += it })
         h.actions.renameSection("s", " N ", outcomes::add)
         h.actions.renameSection("s", " ", outcomes::add)
         advanceUntilIdle()
         assertEquals(
-            listOf("rename a=New", "createSection X engine=e1", "renameSection s=N"),
+            listOf("rename a=New", "createSection X", "renameSection s=N"),
             h.fake.calls,
         )
         assertEquals(1, created.size) // the skipped create never reports an id
@@ -346,15 +286,15 @@ class RowActionsTest {
     }
 
     @Test
-    fun createSectionPassesTheEngineAndReportsTheReturnedId() = runTest {
+    fun createSectionReportsTheReturnedId() = runTest {
         val h = newHarness()
-        h.fake.nextSectionId = "e1:s9"
+        h.fake.nextSectionId = "s9"
         val created = mutableListOf<String>()
         val outcomes = mutableListOf<ActionOutcome>()
-        h.actions.createSection("A", "e1", outcomes::add, onCreated = { created += it })
+        h.actions.createSection("A", outcomes::add, onCreated = { created += it })
         advanceUntilIdle()
-        assertEquals(listOf("createSection A engine=e1"), h.fake.calls)
-        assertEquals(listOf("e1:s9"), created)
+        assertEquals(listOf("createSection A"), h.fake.calls)
+        assertEquals(listOf("s9"), created)
         assertEquals(listOf(ActionOutcome.Ok), outcomes)
     }
 
@@ -416,14 +356,13 @@ class RowActionsTest {
             val createdThreads = CopyOnWriteArrayList<Thread>()
             actions.createSection(
                 "N",
-                null,
                 { outcomes += it to Thread.currentThread() },
                 onCreated = { createdThreads += Thread.currentThread() },
             )
             withTimeout(5_000) {
                 while (outcomes.size < 3 || mainThreads.isEmpty() || createdThreads.isEmpty()) delay(10)
             }
-            assertEquals(listOf("archive a", "pin b", "createSection N engine=none"), fake.calls)
+            assertEquals(listOf("archive a", "pin b", "createSection N"), fake.calls)
             assertEquals(1, toaster.shown.size)
             assertEquals("Archived", toaster.shown[0].text)
             val mainThread = mainThreads[0]
@@ -452,7 +391,7 @@ class RowActionsTest {
         h.actions.move("a", null, outcomes::add)
         h.actions.movePin("a", null, null, outcomes::add)
         h.actions.rename("a", "T", outcomes::add)
-        h.actions.createSection("S", null, outcomes::add, onCreated = { fail("onCreated must not run") })
+        h.actions.createSection("S", outcomes::add, onCreated = { fail("onCreated must not run") })
         h.actions.renameSection("s", "N", outcomes::add)
         h.actions.deleteSection("s", outcomes::add)
         advanceUntilIdle()
@@ -475,61 +414,21 @@ class RowActionsTest {
         )
     }
 
-    // ------------------------------------------------------------ sectionsFor
+    // ------------------------------------------------------------ sections
 
     @Test
-    fun sectionsForReturnsTheEngineSectionsInSnapshotOrderEmptyOnesIncluded() = runTest {
-        val a = section("e1:s1", name = "A", engineId = "e1", rows = listOf(row("r1")))
-        val b = section("e2:s1", name = "B", engineId = "e2")
-        val c = section("e1:s2", name = "C", engineId = "e1")
+    fun sectionsAreEveryUserSectionInSnapshotOrderEmptyOnesIncluded() = runTest {
+        val a = testSection("s1", name = "A", rows = listOf(testRow("r1")))
+        val b = testSection("s2", name = "B")
+        val c = testSection("s3", name = "C")
         val h = newHarness(sections = listOf(a, b, c))
-        assertEquals(listOf(a, c), h.actions.sectionsFor("e1"))
-        assertEquals(listOf(b), h.actions.sectionsFor("e2"))
-        assertEquals(emptyList<SectionView>(), h.actions.sectionsFor("e9"))
+        assertEquals(listOf(a, b, c), h.actions.sections())
     }
 
     @Test
-    fun sectionsForIsEmptyWithoutASnapshot() = runTest {
+    fun sectionsAreEmptyWithoutASnapshot() = runTest {
         val h = newHarness(sections = emptyList())
-        assertEquals(emptyList<SectionView>(), h.actions.sectionsFor("e1"))
-    }
-
-    // ------------------------------------------------------------ notices
-
-    @Test
-    fun noticeToastsShowEachMessageOnceAndSkipBlankOnes() = runTest {
-        val h = newHarness()
-        val notices = MutableSharedFlow<String>(extraBufferCapacity = 64)
-        h.actions.startNoticeToasts(notices)
-        advanceUntilIdle() // the collector subscribes
-        h.actions.startNoticeToasts(notices) // ignored: a collector is already active
-        notices.tryEmit("Couldn't save pins: boom")
-        notices.tryEmit("  ")
-        advanceUntilIdle()
-        assertEquals(listOf("Couldn't save pins: boom"), h.toaster.texts)
-    }
-
-    @Test
-    fun noticeToastsConsumeAFlowOfOnce() = runTest {
-        val h = newHarness()
-        h.actions.startNoticeToasts(flowOf("Couldn't save pins: boom", "  "))
-        advanceUntilIdle()
-        assertEquals(listOf("Couldn't save pins: boom"), h.toaster.texts)
-    }
-
-    @Test
-    fun noticesExtractsTrimmedNonBlankNoticeMessagesOnly() = runTest {
-        val events = MutableSharedFlow<ClientEvent>(extraBufferCapacity = 64)
-        val collected = mutableListOf<String>()
-        val job = launch { events.notices().toList(collected) }
-        advanceUntilIdle()
-        events.tryEmit(ClientEvent.Notice(message = "Couldn't save pins: boom"))
-        events.tryEmit(ClientEvent.WorkspaceChanged(revision = 1uL))
-        events.tryEmit(ClientEvent.Notice(message = "  "))
-        events.tryEmit(ClientEvent.Notice(message = " padded "))
-        advanceUntilIdle()
-        job.cancel()
-        assertEquals(listOf("Couldn't save pins: boom", "padded"), collected)
+        assertEquals(emptyList<SectionView>(), h.actions.sections())
     }
 
     // ------------------------------------------------------------ cancellation
@@ -557,28 +456,6 @@ class RowActionsTest {
         assertTrue(outcomes.isEmpty())
     }
 
-    // ------------------------------------------------------------ report
-
-    @Test
-    fun reportMapsErrorsThroughTheSidebarTableWithoutCallingTheFfi() = runTest {
-        val logged = mutableListOf<String>()
-        val h = newHarness(log = { logged += it })
-        h.actions.report(CoreException.HostUnavailable("x"))
-        h.actions.report(CoreException.Unsupported("pins are not synced yet"))
-        h.actions.report(CoreException.NotFound("x"))
-        h.actions.report(CancellationException())
-        assertEquals(
-            listOf("Engine not connected", PINS_NOT_SYNCED_TOAST),
-            h.toaster.texts,
-        )
-        assertTrue(h.fake.calls.isEmpty())
-        // HostUnavailable, Unsupported and NotFound are all logged (the
-        // failure table's Log column says "yes" for NotFound too — only
-        // the toast is suppressed); CancellationException returns silently.
-        assertEquals(3, logged.size)
-        assertTrue(logged.all { it.startsWith("write failed: ") })
-    }
-
     // ------------------------------------------------------------ Noop
 
     @Test
@@ -592,12 +469,11 @@ class RowActionsTest {
         noop.move("a", null, outcomes::add)
         noop.movePin("a", null, null, outcomes::add)
         noop.rename("a", "T", outcomes::add)
-        noop.createSection("S", null, outcomes::add, onCreated = { created += it })
+        noop.createSection("S", outcomes::add, onCreated = { created += it })
         noop.renameSection("s", "N", outcomes::add)
         noop.deleteSection("s", outcomes::add)
-        noop.report(IllegalStateException("x"))
         assertTrue(outcomes.isEmpty())
         assertTrue(created.isEmpty())
-        assertTrue(noop.sectionsFor("e1").isEmpty())
+        assertTrue(noop.sections().isEmpty())
     }
 }
