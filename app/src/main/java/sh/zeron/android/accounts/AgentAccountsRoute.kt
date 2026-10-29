@@ -33,14 +33,23 @@ data class AgentAccountsRoute(val target: AccountsTarget, val signIn: Boolean = 
 }
 
 /**
- * An error card's "Log in" (wave-9 #14, upstream #967): the chat's agent's
- * accounts on its computer, starting its first sign-in — or Providers for
- * that computer when the chat has no agent.
- * TODO(#55): the accounts sheet over the session instead of a push.
+ * Whose accounts an error card's "Log in" opens (#55, iOS
+ * `CoreSessionSource.signInTarget`, CSS:339-347): the chat's agent
+ * (Claude Code when it names none) — in Cloud for a Cloud chat (only the
+ * agents Cloud runs), else on the chat's computer. `null` when there is
+ * no row yet, or no computer to sign in on. Pure.
  */
-fun errorCardLogInRoute(hostDeviceId: String, harness: String?): NavRoute =
-    if (harness == null) {
-        ProvidersRoute(hostDeviceId)
-    } else {
-        AgentAccountsRoute(AccountsTarget.Device(deviceId = hostDeviceId, harness = harness), signIn = true)
-    }
+fun signInTarget(
+    isCloud: Boolean?,
+    harness: String?,
+    harnessLabel: String?,
+    hostDeviceId: String,
+    deviceName: (String) -> String?,
+    cloudHarnesses: List<String> = sh.zeron.android.core.CloudStore.harnesses,
+): AccountsTarget? {
+    if (isCloud == null) return null
+    val h = harness ?: "claude-code"
+    if (isCloud) return if (h in cloudHarnesses) AccountsTarget.Cloud(h) else null
+    if (hostDeviceId.isEmpty()) return null
+    return AccountsTarget.Device(deviceId = hostDeviceId, harness = h, name = deviceName(hostDeviceId), label = harnessLabel ?: h)
+}

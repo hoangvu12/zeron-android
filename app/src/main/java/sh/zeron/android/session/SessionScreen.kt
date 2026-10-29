@@ -293,22 +293,22 @@ fun SessionScreen(
     val openSubagent: (String, String, Boolean) -> Unit = remember {
         { docId: String, title: String, frozen: Boolean -> currentOpenSubagent?.invoke(docId, title, frozen) }
     }
-    // wave-9 #14 + wave-10 35 (upstream #967): an error card's "Log in"
-    // opens this chat's agent on the Accounts & Usage page and starts its
-    // first login (the desktop's `start_first_login`).
-    val actionStack = LocalNavStack.current
-    val actionEntry = LocalNavEntry.current
-    val performAction: (String) -> Unit = remember(controller, actionStack, actionEntry) {
+    // #55 (iOS SVC:90-99): an error card's "Log in" opens this chat's
+    // agent's accounts in a sheet — in Cloud for a Cloud chat, else on its
+    // computer — and starts its first sign-in at once.
+    val accountsSheet = remember(controller) { sh.zeron.android.accounts.AccountsSheetController() }
+    val devicesForSignIn = (LocalContext.current.applicationContext as? ZeronApplication)?.workspaceFeed?.devices
+    val performAction: (String) -> Unit = remember(controller, accountsSheet, devicesForSignIn) {
         { action: String ->
-            if (action == "sign-in" && actionStack.top.id == actionEntry.id) {
-                actionStack.push(
-                    sh.zeron.android.accounts.errorCardLogInRoute(
-                        hostDeviceId = controller.hostDeviceId,
-                        harness = controller.harness,
-                    ),
-                    animated = true,
-                )
-            }
+            val row = controller.sessionRow
+            val target = sh.zeron.android.accounts.signInTarget(
+                isCloud = row?.isCloud,
+                harness = row?.harness ?: controller.harness,
+                harnessLabel = row?.harnessLabel,
+                hostDeviceId = controller.hostDeviceId,
+                deviceName = { id -> devicesForSignIn?.value?.firstOrNull { it.id == id }?.name },
+            )
+            if (action == "sign-in" && target != null) accountsSheet.open(target)
         }
     }
     val actions = remember(controller, attachments, viewer, router, performAction) {
@@ -628,6 +628,8 @@ fun SessionScreen(
     }
     sh.zeron.android.composer.ModelPickerOverlay(modelPicker)
     overlay()
+    // #55: the error card's accounts sheet, over everything.
+    sh.zeron.android.accounts.AccountsSheet(accountsSheet)
     }
     }
 }
