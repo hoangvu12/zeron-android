@@ -62,22 +62,16 @@ class NoDirectHapticsTest {
         }
     }
 
-    /** `apps/android/app`: `user.dir` under Gradle unit tests, else via `zeron.repoRoot`, else walking up. */
+    /** The `app` module: `user.dir` under Gradle unit tests, else found walking up from it. */
     private fun appRoot(): File {
-        val userDir = File(System.getProperty("user.dir")!!)
-        if (userDir.resolve("src/main/java").isDirectory) return userDir
-        val repoRoot: String? = System.getProperty("zeron.repoRoot")
-        if (repoRoot != null) {
-            val app = File(repoRoot).resolve("apps/android/app")
-            if (app.resolve("src/main/java").isDirectory) return app
-        }
-        var dir: File? = userDir
+        var dir: File? = File(System.getProperty("user.dir")!!)
         while (dir != null) {
-            val app = dir.resolve("apps/android/app")
+            if (dir.resolve("src/main/java").isDirectory) return dir
+            val app = dir.resolve("app")
             if (app.resolve("src/main/java").isDirectory) return app
             dir = dir.parentFile
         }
-        throw IllegalStateException("cannot locate apps/android/app from ${userDir.absolutePath}")
+        throw IllegalStateException("cannot locate the app module from ${System.getProperty("user.dir")}")
     }
 
     private fun kotlinSources(root: File): List<File> =

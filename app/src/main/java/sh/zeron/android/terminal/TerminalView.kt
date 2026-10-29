@@ -123,8 +123,8 @@ class TerminalView(context: Context, val tab: TerminalTab) : View(context) {
         isFocusable = true
         isFocusableInTouchMode = true
         contentDescription = "Terminal"
-        // iOS `TerminalStore.bell`: impact .soft at 0.6, the app's Light.
-        tab.onBell = { feedback.haptic(Haptic.Light) }
+        // iOS `TerminalStore.bell`: impact .soft at 0.6.
+        tab.onBell = { feedback.haptic(Haptic.Soft) }
     }
 
     override fun onAttachedToWindow() {
