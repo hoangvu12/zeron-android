@@ -1,5 +1,7 @@
 package sh.zeron.android.session
 
+import sh.zeron.android.design.modalLayerBackground
+import sh.zeron.android.design.ModalLayer
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -493,6 +495,9 @@ fun SessionScreen(
     //     bottom inset — iOS's `adjustedContentInset.bottom`.
     // android-next #06: the [overlay] (the Side Chats & Agents sheet) is
     //     the root's last child, over the header and the bottom stack.
+    // #63: the sheets over the screen (the model picker, the companions
+    // panel) hide the scaffold from TalkBack while they are up.
+    ModalLayer {
     Box(Modifier.fillMaxSize()) {
     SessionScaffold(
         reveal = state.reveal,
@@ -511,7 +516,7 @@ fun SessionScreen(
                 accessory = headerAccessory,
             )
         },
-        modifier = modifier,
+        modifier = modifier.then(modalLayerBackground()),
     ) {
         SessionBottomStack(
             state = bottomState,
@@ -623,5 +628,6 @@ fun SessionScreen(
     }
     sh.zeron.android.composer.ModelPickerOverlay(modelPicker)
     overlay()
+    }
     }
 }

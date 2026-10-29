@@ -370,13 +370,19 @@ class NewSessionModelTest {
     }
 
     @Test
-    fun selectedModelFallsBackToTheFirstModelOfTheHarness() {
+    fun selectedModelFallsBackToTheFirstModelOfTheHarnessOnlyWhenNoneIsNamed() {
         runTest {
             val f = newStore()
-            f.store.lastDraft = NewSessionDraft(harness = "codex", model = "nope")
+            f.store.lastDraft = NewSessionDraft(harness = "codex", model = null)
             val page = newPage(f, MutableStateFlow(options(hosts = abOptions.hosts)))
             assertEquals(builtIn[1], page.model.selectedModel) // the first codex model
             assertEquals(builtIn, page.model.models) // empty deviceId → built-in, no fetch
+
+            // #37 (iOS `draftModel`): a named model the list lacks is what gets
+            // sent, so it resolves to null instead of a stand-in.
+            f.store.lastDraft = NewSessionDraft(harness = "codex", model = "nope")
+            val unknown = newPage(f, MutableStateFlow(options(hosts = abOptions.hosts)))
+            assertNull(unknown.model.selectedModel)
 
             f.store.lastDraft = NewSessionDraft(harness = "codex", model = "x2")
             val page2 = newPage(f, MutableStateFlow(options(hosts = abOptions.hosts)))

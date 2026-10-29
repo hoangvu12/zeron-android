@@ -103,17 +103,24 @@ fun ContextMenuHost(content: @Composable () -> Unit) {
     val state = remember { ContextMenuHostState() }
     val ctxHaze = rememberHazeState()
     CompositionLocalProvider(LocalContextMenuHost provides state) {
+        val up = state.active != null
         Box(
             Modifier
                 .fillMaxSize()
-                .onPlaced { state.hostCoords = it },
+                .onPlaced { state.hostCoords = it }
+                // #63: Escape closes the menu (the host sees the key on its
+                // way to whichever node holds focus).
+                .then(if (up) Modifier.onEscape { state.dismiss() } else Modifier),
         ) {
             // 1. The app content: the one haze source of this window's
             //    context-menu glass, blurred as the lift rises (the draw-phase
             //    read below animates without recomposition).
+            // #63: hidden from TalkBack while the menu is up, focus restored after.
+            val background = modalBackground(overlayUp = up)
             Box(
                 Modifier
                     .fillMaxSize()
+                    .then(background)
                     .hazeSource(ctxHaze)
                     .graphicsLayer {
                         val lift = state.active?.lift?.value ?: 0f

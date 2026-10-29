@@ -1,5 +1,7 @@
 package sh.zeron.android.newsession
 
+import sh.zeron.android.design.modalLayerBackground
+import sh.zeron.android.design.ModalLayer
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
@@ -188,6 +190,8 @@ internal fun NewSessionScreenBody(
     val keyboard = LocalSoftwareKeyboardController.current
     val canvasState = remember { NewSessionCanvasState() }
     NewSessionFocusOnAppear(focusOnAppear, embedded, canvasState) { morph.focus() }
+    // #63: the model picker over the page hides it from TalkBack while up.
+    ModalLayer {
     Box(modifier) {
         NewSessionCanvas(
             harness = ns.draft.harness,
@@ -210,9 +214,10 @@ internal fun NewSessionScreenBody(
             // backdrop, the nav bar and the composer; 31's grabber stays
             // outside). The caller's modifier sits on the Box around it, which
             // also hosts the model picker over the page (#37).
-            modifier = Modifier.handoffScene(capture),
+            modifier = Modifier.handoffScene(capture).then(modalLayerBackground()),
         )
         ModelPickerOverlay(modelPicker)
+    }
     }
 }
 

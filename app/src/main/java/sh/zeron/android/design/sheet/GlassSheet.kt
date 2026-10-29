@@ -1,5 +1,11 @@
 package sh.zeron.android.design.sheet
 
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.foundation.focusable
+import androidx.compose.runtime.withFrameNanos
+import sh.zeron.android.design.onEscape
+import sh.zeron.android.design.RegisterModalOverlay
 import android.content.res.Configuration
 import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.animation.core.AnimationSpec
@@ -274,6 +280,15 @@ fun GlassSheet(
     val currentOnDismiss by rememberUpdatedState(onDismiss)
     val dismissal = remember(state, scope) { SheetDismissal(state, scope) { currentOnDismiss() } }
     val sheetScope = remember(dismissal, state) { GlassSheetScopeImpl(state, dismissal) }
+    // #63: the screen behind is hidden from TalkBack while the sheet is up
+    // (its `ModalLayer`), and the sheet takes focus so Escape reaches it —
+    // UIKit's presentation resigns the presenter's first responder too.
+    RegisterModalOverlay()
+    val sheetFocus = remember { FocusRequester() }
+    LaunchedEffect(Unit) {
+        withFrameNanos { }
+        runCatching { sheetFocus.requestFocus() }
+    }
 
     BoxWithConstraints(modifier.fillMaxSize()) {
         val parentHeightPx = constraints.maxHeight.toFloat()
@@ -461,7 +476,10 @@ fun GlassSheet(
                         dismissal.dismiss()
                         true
                     }
-                },
+                }
+                .focusRequester(sheetFocus)
+                .focusable()
+                .onEscape { dismissal.dismiss() },
         ) {
             ProvideHazeState {
                 // The sheet's children. The content slot below is the sheet's

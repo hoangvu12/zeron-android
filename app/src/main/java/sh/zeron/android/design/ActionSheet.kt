@@ -3,7 +3,6 @@ package sh.zeron.android.design
 import android.content.res.Configuration
 import android.os.Looper
 import android.util.Log
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.foundation.background
@@ -37,6 +36,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -50,11 +50,6 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onPreviewKeyEvent
-import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -62,7 +57,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.semantics.hideFromAccessibility
+import androidx.compose.ui.semantics.dismiss
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.selected
@@ -237,13 +232,14 @@ fun ActionSheetHost(
     CompositionLocalProvider(LocalActionSheet provides state) {
         Box(Modifier.fillMaxSize()) {
             // 1. The wrapped content: the window-level haze source, hidden
-            //    from TalkBack while a sheet is up.
-            val hideContent = state.current != null
+            //    from TalkBack while a sheet is up, its focus restored when
+            //    the sheet closes (#63).
+            val background = modalBackground(overlayUp = state.current != null)
             Box(
                 Modifier
                     .fillMaxSize()
                     .hazeSource(haze)
-                    .let { m -> if (hideContent) m.semantics { hideFromAccessibility() } else m },
+                    .then(background),
             ) {
                 content()
             }
@@ -300,6 +296,7 @@ private fun ActionSheetOverlay(
     val reduce = LocalReduceMotion.current
     val scope = rememberCoroutineScope()
     val focusRequester = remember { FocusRequester() }
+    var backProgress by remember { mutableFloatStateOf(0f) }
 
     /**
      * The single exit path: ignore everything once started, sink the cards
@@ -325,7 +322,12 @@ private fun ActionSheetOverlay(
     }
 
     // Composed after the screens' handlers, so it wins while the sheet is up.
-    BackHandler(enabled = !finishing) { finish(model.onCancel) }
+    // #63: predictive — the cards sink with the gesture, the commit cancels.
+    ModalBackHandler(
+        enabled = !finishing,
+        onProgress = { backProgress = it },
+        onBack = { finish(model.onCancel) },
+    )
 
     BoxWithConstraints(
         Modifier
@@ -334,17 +336,12 @@ private fun ActionSheetOverlay(
             .semantics {
                 model.title?.let { paneTitle = it }
                 isTraversalGroup = true
+                // #63: TalkBack's dismiss action cancels, like back.
+                dismiss { finish(model.onCancel); true }
             }
             .focusRequester(focusRequester)
             .focusable()
-            .onPreviewKeyEvent { event ->
-                if (event.key == Key.Escape && event.type == KeyEventType.KeyUp) {
-                    finish(model.onCancel)
-                    true
-                } else {
-                    false
-                }
-            },
+            .onEscape { finish(model.onCancel) },
     ) {
         val stackWidth = actionSheetWidth(maxWidth.value, maxHeight.value).dp
         val bottomGap = actionSheetBottomGap(navBottom).dp
@@ -368,7 +365,10 @@ private fun ActionSheetOverlay(
                     if (reduce) {
                         alpha = progress.value
                     } else {
-                        translationY = (1f - progress.value) * (size.height + bottomGapPx)
+                        // #63: a predictive back gesture sinks the cards up
+                        // to a quarter of the way out before it commits.
+                        val shown = progress.value * (1f - 0.25f * backProgress)
+                        translationY = (1f - shown) * (size.height + bottomGapPx)
                     }
                 }
                 // The cards' own background must not fall through to the scrim
