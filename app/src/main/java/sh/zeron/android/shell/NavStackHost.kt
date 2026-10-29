@@ -7,8 +7,12 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.systemGestures
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -24,9 +28,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.util.VelocityTracker
+import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.Measurable
+import androidx.compose.ui.layout.findRootCoordinates
+import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layoutId
@@ -37,6 +47,7 @@ import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import kotlinx.coroutines.CancellationException
 import sh.zeron.android.design.LocalReduceMotion
@@ -64,7 +75,9 @@ private const val BlockerZ = 10f
  * Renders a [NavStack]: the Android port of one tab's `UINavigationController`
  * view. Pushes slide the incoming screen in from the trailing edge while the
  * outgoing screen parallaxes under a scrim; pops reverse it; Android's
- * predictive back gesture drives the pop interactively and can be cancelled.
+ * predictive back gesture — and, in every navigation mode, the in-app
+ * swipe-back ([detectSwipeBack], #135) — drives the pop interactively and
+ * can be cancelled.
  *
  * One `Layout` places at most two entries (idle: `top`; transition: `from`
  * and `to`) with `placeWithLayer`, so the animation re-runs **placement**
@@ -92,7 +105,8 @@ fun NavStackHost(
     content: @Composable (NavEntry) -> Unit,
 ) {
     val transition = stack.transition
-    val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val layoutDir = LocalLayoutDirection.current
+    val rtl = layoutDir == LayoutDirection.Rtl
     val reduce = LocalReduceMotion.current
     val focusManager = LocalFocusManager.current
 
@@ -125,6 +139,40 @@ fun NavStackHost(
             throw e
         }
     }
+
+    // ----------------------------------------------------------- swipe-back
+    // #135: the in-app pan (iOS 26's content pop), so a swipe goes back on
+    // 3-button navigation too. Same transition as predictive back above.
+    val swipeBackEnabled = rememberUpdatedState(active && stack.canPop)
+    val gestureEdges = WindowInsets.systemGestures
+    val hostCoords = remember { arrayOfNulls<LayoutCoordinates>(1) }
+    val swipeBack = Modifier
+        .onPlaced { hostCoords[0] = it }
+        .pointerInput(stack, rtl) {
+            detectSwipeBack(
+                stack = stack,
+                enabled = { swipeBackEnabled.value },
+                rtl = rtl,
+                mayStart = { local ->
+                    val coords = hostCoords[0]?.takeIf { it.isAttached }
+                    if (coords == null) {
+                        false
+                    } else {
+                        val p = coords.localToWindow(local)
+                        val window = coords.findRootCoordinates().size
+                        swipeBackMayStart(
+                            x = p.x,
+                            y = p.y,
+                            windowWidth = window.width.toFloat(),
+                            windowHeight = window.height.toFloat(),
+                            leftEdge = gestureEdges.getLeft(this, layoutDir).toFloat(),
+                            rightEdge = gestureEdges.getRight(this, layoutDir).toFloat(),
+                            bottomEdge = gestureEdges.getBottom(this).toFloat(),
+                        )
+                    }
+                },
+            )
+        }
 
     // -------------------------------------------------------- the driver
     // Delivers the will* pair after the composition that first composed the
@@ -199,7 +247,8 @@ fun NavStackHost(
     Layout(
         modifier = modifier
             .clipToBounds()
-            .background(ZeronTheme.palette.background),
+            .background(ZeronTheme.palette.background)
+            .then(swipeBack),
         content = {
             // entries + leaving in one keyed sequence, so an entry that moves
             // from entries to leaving at commit keeps its composition slot —
@@ -431,6 +480,94 @@ fun NavEntryEffect(
         }
         val remove = entry.addListener(listener)
         onDispose { remove() }
+    }
+}
+
+/**
+ * The in-app swipe-back (#135), iOS 26's `interactiveContentPopGestureRecognizer`:
+ * a pan starting anywhere in the host (but [mayStart]: never in the
+ * system's back-gesture edges) that drives [NavStack.beginInteractivePop]
+ * exactly as the predictive back handler does — `t.progress` follows the
+ * finger, the release sets `t.target` and hands the rest to the driver
+ * (the [NavMotion.Push] spring).
+ *
+ * Arbitration with the content's own gestures — iOS gives them priority:
+ * - this node watches the **Main** pass, which reaches children first, and
+ *   gives the pointer up for good as soon as a move arrives consumed (a
+ *   row swipe, a scroller, a pager, a visual scrub, the switch, the
+ *   terminal, a context-menu lift — every one of them consumes once it
+ *   claims);
+ * - it claims only past [SwipeBackTokens.SlopFactor] × the touch slop,
+ *   later than any child detector, so a child that wants a horizontal drag
+ *   always decides first;
+ * - once claimed it consumes on the **Initial** pass, so no child starts
+ *   (or completes a tap) mid-pop.
+ * A consumed **down** (a button) does not stop it: a swipe that starts on a
+ * control still goes back, as on iOS.
+ */
+private suspend fun PointerInputScope.detectSwipeBack(
+    stack: NavStack,
+    enabled: () -> Boolean,
+    rtl: Boolean,
+    mayStart: Density.(Offset) -> Boolean,
+) {
+    val dir = if (rtl) -1f else 1f
+    awaitEachGesture {
+        val down = awaitFirstDown(requireUnconsumed = false)
+        // At the root, unselected, mid-transition (the blocker's turn) or
+        // in the system's edges: not ours.
+        if (!enabled() || stack.transition != null || !mayStart(down.position)) return@awaitEachGesture
+        val slopPx = viewConfiguration.touchSlop * SwipeBackTokens.SlopFactor
+        val flingPx = SwipeBackTokens.CommitVelocity.toPx()
+        val vt = VelocityTracker()
+        vt.addPosition(down.uptimeMillis, down.position)
+        var t: NavTransition? = null
+        try {
+            while (true) {
+                val claimed = t
+                val event = awaitPointerEvent(if (claimed == null) PointerEventPass.Main else PointerEventPass.Initial)
+                val c = event.changes.firstOrNull { it.id == down.id } ?: break
+                if (claimed == null) {
+                    // A second finger, a release or a child's claim: give up.
+                    if (event.changes.any { it.id != down.id && it.pressed }) return@awaitEachGesture
+                    if (!c.pressed || c.isConsumed) return@awaitEachGesture
+                    vt.addPosition(c.uptimeMillis, c.position)
+                    val d = c.position - down.position
+                    when (swipeBackLock(d.x, d.y, slopPx, rtl)) {
+                        SwipeBackLock.Undecided -> continue
+                        SwipeBackLock.Reject -> return@awaitEachGesture
+                        SwipeBackLock.Pop -> {
+                            if (!enabled()) return@awaitEachGesture
+                            val begun = stack.beginInteractivePop() ?: return@awaitEachGesture
+                            t = begun
+                            c.consume()
+                            begun.progress = swipeBackProgress(d.x, size.width.toFloat(), rtl)
+                        }
+                    }
+                    continue
+                }
+                c.consume()
+                // Overridden by another op (a tap that pushed, system back):
+                // the rest of this gesture is ignored.
+                if (claimed.abandoned) return@awaitEachGesture
+                if (!c.pressed) {
+                    val v = vt.calculateVelocity().x * dir
+                    claimed.target = if (swipeBackCommits(claimed.progress, v, flingPx)) 1f else 0f
+                    claimed.isInteractive = false
+                    return@awaitEachGesture
+                }
+                vt.addPosition(c.uptimeMillis, c.position)
+                claimed.progress = swipeBackProgress(c.position.x - down.position.x, size.width.toFloat(), rtl)
+            }
+        } finally {
+            // The pointer vanished (system cancellation) or the detector was
+            // cancelled mid-pop: spring back.
+            val open = t
+            if (open != null && !open.abandoned && open.isInteractive) {
+                open.target = 0f
+                open.isInteractive = false
+            }
+        }
     }
 }
 
