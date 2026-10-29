@@ -36,10 +36,6 @@ import sh.zeron.android.design.glass.rememberGlassMenuState
  * returns `null` — calls [onChipTap] instead, exactly UIKit's
  * `showsMenuAsPrimaryAction` split (`ComposerBar.swift:460-468`).
  *
- * `canWrite == false` (an offline engine, ticket 79): the chips render
- * disabled (ink `tertiary`, taps consumed but no-ops; the menu providers
- * are not invoked).
- *
  * @param chipMenus id → lazy menu provider; a `null` menu falls back to [onChipTap]
  * @param chipModifier the outermost modifier of **every chip** (56's
  *   `Modifier.composerControl(morph)`); it goes on the chips, not the
@@ -50,7 +46,6 @@ import sh.zeron.android.design.glass.rememberGlassMenuState
 fun ChipStrip(
     chips: List<ComposerChip>,
     chipMenus: Map<String, ChipMenuProvider>,
-    canWrite: Boolean,
     onChipTap: (String) -> Unit,
     modifier: Modifier = Modifier,
     chipModifier: Modifier = Modifier,
@@ -77,10 +72,9 @@ fun ChipStrip(
                 var bounds by remember { mutableStateOf(Rect.Zero) }
                 ContextChip(
                     chip = chip,
-                    enabled = canWrite,
                     // Only the a11y click label knows about the menu; the
                     // provider itself runs at tap time (containsKey only).
-                    hasMenu = canWrite && chipMenus.containsKey(chip.id),
+                    hasMenu = chipMenus.containsKey(chip.id),
                     modifier = chipModifier.onGloballyPositioned { bounds = it.boundsInWindow() },
                     onClick = {
                         val target = chipMenus[chip.id]?.invoke()

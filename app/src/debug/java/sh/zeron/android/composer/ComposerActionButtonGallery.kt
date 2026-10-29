@@ -30,13 +30,13 @@ import sh.zeron.android.design.uiStyle
  * `GallerySection("Composer action button") { ComposerActionButtonGallerySection() }`.
  *
  * Two halves over the busy backdrop:
- *  - the **static** five-state row — send (empty), send, queue, stop,
- *    offline — each labelled underneath, from the main source set's
+ *  - the **static** four-state row — send (empty), send, queue, stop —
+ *    each labelled underneath, from the main source set's
  *    [ActionButtonFixtureStates] (the same states the Roborazzi goldens
  *    shoot);
  *  - a **live** [ComposerActionButton] over the controller overload,
- *    driven by four chips: `running`, `has content`, `canSteer` and
- *    `canWrite`. Toggling `running` with content shows the queue bounce
+ *    driven by three chips: `running`, `has content` and `canSteer`.
+ *    Toggling `running` with content shows the queue bounce
  *    with no colour change; toggling `has content` while idle shows the
  *    grey → accent snap; a long press mid-turn opens the "While the agent
  *    works" menu (its Steer row disappears with `canSteer` off); the mono
@@ -63,7 +63,7 @@ fun ComposerActionButtonGallerySection() {
             )
             Caption(
                 "The trailing send / queue / stop control: the accent arrow, the grey " +
-                    "disabled arrow, the inverted stop square and the offline grey. A visual " +
+                    "disabled arrow, the inverted stop square. A visual " +
                     "action change springs the fill and pops the glyph; typing snaps.",
                 uiStyle(Face.Sans, typeScale.fixed(13f), palette.secondary),
             )
@@ -121,7 +121,6 @@ private fun LiveDemo() {
     var running by remember { mutableStateOf(false) }
     var hasContent by remember { mutableStateOf(false) }
     var canSteer by remember { mutableStateOf(false) }
-    var canWrite by remember { mutableStateOf(true) }
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         GlassStage(height = 120.dp) {
@@ -143,10 +142,6 @@ private fun LiveDemo() {
             DemoChip("canSteer", canSteer) {
                 canSteer = !canSteer
                 controller.canSteer = canSteer
-            }
-            DemoChip("canWrite", canWrite) {
-                canWrite = !canWrite
-                controller.canWrite = canWrite
             }
         }
         BasicText(log, style = uiStyle(Face.Mono, typeScale.fixed(12f), palette.secondary))

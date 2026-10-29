@@ -6,26 +6,15 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import sh.zeron.android.ZeronApplication
-import sh.zeron.android.core.CoreStartState
 import sh.zeron.android.core.FontGate
 import sh.zeron.android.design.FontGateHost
 import sh.zeron.android.design.ProvideFeedback
 import sh.zeron.android.design.ZeronTheme
-import sh.zeron.android.pairing.CoreClientPairingBackend
-import sh.zeron.android.pairing.InboundPairingLinks
-import sh.zeron.android.pairing.LocalPairPage
-import sh.zeron.android.pairing.PairPageLauncher
-import sh.zeron.android.pairing.PairingRoot
-import sh.zeron.android.pairing.ProvidePairPage
-import sh.zeron.android.pairing.StorePairedEngineSink
-import sh.zeron.android.pairing.pairingRootStatus
-import sh.zeron.android.pairing.rememberQrScanRequest
 import sh.zeron.android.sessions.LocalRowActions
 import sh.zeron.android.shell.tablet.Sidebar
 
@@ -45,7 +34,7 @@ import sh.zeron.android.shell.tablet.Sidebar
  *
  * `LocalAppRouter` is **not** provided here: each shell provides its own
  * (32 phone, 106 tablet). Ticket 36's hooks also live here (outside
- * `AppRoot`): the hub's pairing-root tracking over `rootState.kind`, and
+ * `AppRoot`): the hub's welcome-root tracking over `rootState.kind`, and
  * each shell's router attached/detached after its first frame through
  * [DeepLinkRouterEffect]. Ticket 108's [ShellStateScope] (35's
  * `shellScope` inside `AppRoot`) owns the hoisted shell state both shells
@@ -56,12 +45,12 @@ fun ZeronAppContent(app: ZeronApplication, rootState: AppRootState) {
     // 36: the deep-link hub follows the root the cross-fade is heading
     // to (its `kind`), never composition lifetimes — during the 350 ms
     // fade both roots are composed but links are already dropped on the
-    // pairing target. `kind == null` (Loading/CoreFailed) reports `false`
+    // welcome target. `kind == null` (Loading/CoreFailed) reports `false`
     // with no router attached, so cold-start links stay held.
     val hub = app.deepLinks
     LaunchedEffect(rootState) {
         snapshotFlow { rootState.kind }.collect { kind ->
-            hub.showingPairingRoot(kind == RootKind.Pairing)
+            hub.showingWelcomeRoot(kind == RootKind.Welcome)
         }
     }
     // 96's preference flow: the DataStore-backed appearance, `System` until
@@ -90,57 +79,11 @@ fun ZeronAppContent(app: ZeronApplication, rootState: AppRootState) {
                         // ToastHost so every screen can write and the
                         // toasts land in the root host.
                         CompositionLocalProvider(LocalRowActions provides app.rowActions) {
-                            // 72: the Pair page launcher. `client` re-reads
-                            // on `Ready` (the collected startup state);
-                            // while it is null (core loading or failed)
-                            // `LocalPairPage` stays null and callers no-op
-                            // instead of crashing.
-                            val coreState by app.coreStartup.state.collectAsState()
-                            val client =
-                                if (coreState is CoreStartState.Ready) app.clientOrNull() else null
-                            // One movable root for both branches: `Ready`
-                            // moves it under the launcher instead of
-                            // discarding everything remembered below it.
-                            val root = remember(app, rootState, presentations) {
-                                movableContentOf { pairPage: PairPageLauncher? ->
-                                    AppRootWithPairing(
-                                        app = app,
-                                        rootState = rootState,
-                                        presentations = presentations,
-                                        pairPage = pairPage,
-                                    )
-                                }
-                            }
-                            if (client == null) {
-                                root(null)
-                            } else {
-                                // Stable across recompositions, so
-                                // ProvidePairPage keeps its launcher (it must
-                                // not be rebuilt mid-redeem).
-                                val backend = remember(client) {
-                                    // 28: a forgotten engine's notifications go with it.
-                                    CoreClientPairingBackend(client, onForgotten = app.notifier::cancelEngine)
-                                }
-                                val store = remember(app) { StorePairedEngineSink(app.engineStore, app.coreStartup) }
-                                // 138: the real scanner — the Pair page's
-                                // Scan QR row appears (72) whenever a
-                                // camera exists.
-                                val qrScan = rememberQrScanRequest()
-                                ProvidePairPage(
-                                    backend = backend,
-                                    store = store,
-                                    qrScan = qrScan,
-                                ) {
-                                    // 139: the inbound pairing-link handler
-                                    // (deep links and shares). Registered only
-                                    // while the root input is Ready, one frame
-                                    // after the root is drawn; while
-                                    // Loading/CoreFailed the hub holds links.
-                                    val input by app.rootInput.collectAsState()
-                                    InboundPairingLinks(ready = input is RootInput.Ready)
-                                    root(LocalPairPage.current)
-                                }
-                            }
+                            AppRootContent(
+                                app = app,
+                                rootState = rootState,
+                                presentations = presentations,
+                            )
                         }
                     }
                 }
@@ -150,12 +93,7 @@ fun ZeronAppContent(app: ZeronApplication, rootState: AppRootState) {
 }
 
 /**
- * [AppRoot] with the Pair page hook wired (72's step 8): the root
- * content, one body for both the launcher-present and
- * launcher-absent cases, with [pairPage] read **outside** the pairing
- * lambda. 138 wired the real `QrScanRequest` ([rememberQrScanRequest]);
- * 139 derives the root's status line from [pairPage] (its
- * snapshot-backed `current`/`isShowing`) via `pairingRootStatus(pairPage)`.
+ * [AppRoot] with the app's slots wired.
  *
  * 108: [ShellStateScope] wraps both shell slots inside the root (35's
  * `shellScope`), so 106's hoisted block — the split state, the sidebar
@@ -167,23 +105,17 @@ fun ZeronAppContent(app: ZeronApplication, rootState: AppRootState) {
  * itself leaves composition.
  */
 @Composable
-private fun AppRootWithPairing(
+private fun AppRootContent(
     app: ZeronApplication,
     rootState: AppRootState,
     presentations: RootPresentations,
-    pairPage: PairPageLauncher?,
 ) {
     val input by app.rootInput.collectAsState()
     AppRoot(
         input = input,
         state = rootState,
         presentations = presentations,
-        pairing = {
-            PairingRoot(
-                status = pairingRootStatus(pairPage),
-                onPair = { pairPage?.openPairPage() },
-            )
-        },
+        welcome = { WelcomePlaceholder() },
         // 108: the shell-state scope above the Phone ↔ Split switch (35's
         // `shellScope`). Everything the two shells share — 26's tab state,
         // 33's split state, 105's sidebar, 106's slots and tablet router —

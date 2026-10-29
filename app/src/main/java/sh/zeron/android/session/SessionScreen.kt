@@ -36,7 +36,6 @@ import sh.zeron.android.composer.DraftKey
 import sh.zeron.android.composer.LocalDrafts
 import sh.zeron.android.composer.QueueEditPort
 import sh.zeron.android.composer.QueuePanel
-import sh.zeron.android.pairing.LocalPairPage
 import sh.zeron.android.composer.SessionDraftEffect
 import sh.zeron.android.composer.sessionDraftSaver
 import sh.zeron.android.shell.LocalNavEntry
@@ -51,7 +50,6 @@ import sh.zeron.android.transcript.TranscriptImageBinding
 import sh.zeron.android.transcript.TranscriptImageLoader
 import sh.zeron.android.transcript.TranscriptState
 import sh.zeron.android.transcript.TranscriptTapGate
-import sh.zeron.android.transcript.engineReconnects
 import sh.zeron.android.transcript.firstUserBubbleInRoot
 import sh.zeron.android.transcript.rememberLinkRouter
 import sh.zeron.android.transcript.transcriptBottomInset
@@ -246,7 +244,6 @@ fun SessionScreen(
                 loader = TranscriptImageLoader.get(context),
                 engineDeviceId = { controller.hostDeviceId },
                 reader = it,
-                retries = engineReconnects(context, { controller.hostDeviceId }),
                 chatId = controller.chatId,
             )
         }
@@ -278,8 +275,7 @@ fun SessionScreen(
     }
     // wave-9 #14 + wave-10 35 (upstream #967): an error card's "Log in"
     // opens this chat's agent on the Accounts & Usage page and starts its
-    // first login (the desktop's `start_first_login`) — unless the chat is
-    // Limited, whose banner owns the recovery (`errorCardLogInRoute`).
+    // first login (the desktop's `start_first_login`).
     val actionStack = LocalNavStack.current
     val actionEntry = LocalNavEntry.current
     val performAction: (String) -> Unit = remember(controller, actionStack, actionEntry) {
@@ -289,7 +285,6 @@ fun SessionScreen(
                     sh.zeron.android.accounts.errorCardLogInRoute(
                         hostDeviceId = controller.hostDeviceId,
                         harness = controller.harness,
-                        limited = controller.chrome.value.limited != null,
                     ),
                     animated = true,
                 )
@@ -392,31 +387,8 @@ fun SessionScreen(
     val model = BottomStackModel.from(chrome, editing = editing)
 
     // 9.65 Ticket 73: the pill's banner filler (registered by 83 in 76's
-    //     BANNER slot). Its EngineParked tap re-pairs through 72's
-    //     launcher, captured here in composition.
+    //     BANNER slot).
     val statusBanner = controller.filler<StatusBanner>()
-    val pairPage = LocalPairPage.current
-    SideEffect {
-        statusBanner?.openPairPage = pairPage?.let { launcher ->
-            { id: String -> launcher.openPairPage(prefill = null, replaceEngineId = id) }
-        }
-    }
-
-    // 9.7 The failover port: the Limited banner's filler. Its Resume pill
-    //     sends the fixed continue prompt through the composer's normal
-    //     send (the failure pill and the draft survive), so the seam is
-    //     bound here where the binding lives — the desktop's
-    //     `composer.resume_limited` rule. Without commands (tests,
-    //     previews) the seam stays null and Resume is a logged no-op.
-    val limitedBanner = controller.filler<LimitedBanner>()
-    val limitedToaster = LocalToaster.current
-    SideEffect {
-        limitedBanner?.send = composerBinding?.let { binding ->
-            { text -> binding.onSend(text, emptyList(), DeliveryMode.Queue) }
-        }
-        // Arm/cancel failures toast, like the desktop's Mutate errors.
-        limitedBanner?.toaster = limitedToaster
-    }
 
     // 9.65 Ticket 84: bind the entry-retained saver to the live composer
     //     and 83's controller — the late load while the store was not warm
@@ -543,22 +515,6 @@ fun SessionScreen(
         SessionBottomStack(
             state = bottomState,
             model = model,
-            // The failover port: the Limited banner card rides the stack's
-            // Limited slot (above the pill row) while the chat reads
-            // Limited. The filler owns the actions and the picker menu;
-            // the card is pure chrome + the two callbacks.
-            limited = {
-                chrome.limited?.let { limitedState ->
-                    LimitedBannerCard(
-                        limited = limitedState,
-                        onAction = { action -> limitedBanner?.act(action) },
-                        switchMenu = { limitedBanner?.pickerMenu() },
-                        onSwitchMenuOpen = { limitedBanner?.refreshForPicker() },
-                        glassVisible = glassVisible,
-                        animateGlass = animateGlass,
-                    )
-                }
-            },
             transcript = { insets ->
                 OpenRevealLayers(
                     state.reveal,
@@ -620,7 +576,6 @@ fun SessionScreen(
                     items = chrome.queue,
                     glassVisible = glassVisible,
                     animateGlass = animateGlass,
-                    writable = chrome.canWrite,
                     onAction = { id, action ->
                         if (action == QueueAction.Edit) queueEdit?.beginEdit(id)
                         else queueActions?.perform(id, action)

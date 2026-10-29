@@ -24,7 +24,7 @@ import uniffi.zeron_core.SessionRow
  * [canSteer], [placeholder], [uploadProgress], [error]. The rest are
  * declared here but filled by their owners through a `ChromeFiller`
  * (see [SessionController]): 78 chips, 82 queue, 91 questions, 73
- * banner, 79 canWrite.
+ * banner.
  */
 data class SessionChrome(
     /** `composer.title` verbatim (the core already falls back to "New session"). */
@@ -35,8 +35,6 @@ data class SessionChrome(
     val running: Boolean = false,
     /** `composer.host.capabilities.midTurnSteering ?: false`. */
     val canSteer: Boolean = false,
-    /** Zeron ADD (79): `false` while the owning engine is offline — read-only mode. `true` until 79 lands. */
-    val canWrite: Boolean = true,
     /** `"Message <harness label>"` (`CoreSessionSource.swift:49`). */
     val placeholder: String = "Message",
     /** Ticket 78 (type owned by 54, reconciled by 59). */
@@ -51,10 +49,6 @@ data class SessionChrome(
     val uploadProgress: Double? = null,
     /** `composer.queueError`. Derived for iOS parity but never rendered (decision COMPOSER-D2). */
     val error: String? = null,
-    /** The Limited banner (the failover port): non-null while the chat's
-     *  status row reads Limited — errored with a usage-limit record. The
-     *  card rides the bottom stack above the pill row. */
-    val limited: LimitedChrome? = null,
 ) {
     /**
      * Zeron's banner set (android-app#22 §Status pill) instead of iOS's

@@ -18,7 +18,7 @@ import uniffi.zeron_core.FileMatch
  *
  * [rememberCoreFileSearch] resolves the client per call over
  * [ZeronApplication.clientOrNull] (ticket 71's accessor, the same seam 92's
- * catalog uses), so a pairing that completes after the page opened still
+ * catalog uses), so a client that becomes ready after the page opened still
  * works. Tests pass a fake.
  */
 fun interface NewSessionFileSearch {

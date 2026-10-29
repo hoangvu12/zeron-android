@@ -21,23 +21,17 @@ import sh.zeron.android.design.uiStyle
 
 /**
  * The "Devices rows" page of the debug design gallery (android-ui-parity
- * #102): the ticket's step-8 fixture — the "Devices" header plus five
+ * #102): the ticket's step-8 fixture — the "Devices" header plus four
  * rows drawn non-lazily (this gallery page is not a list — [DevicesRow]
  * is the drawing unit, positions from the row count, no clicks):
  *
  *  1. "MacBook Pro", "Connected", a `success` dot (the side-by-side
  *     partner of `2-settings.png`'s "Choose Wallpaper…" row: same 68 dp
- *     two-line row, icon at x 32…56, title at x 72, dot then chevron);
+ *     two-line row, icon at x 32…56, title at x 72, then the dot);
  *  2. "Studio", "Reconnecting…", a `tertiary` dot;
  *  3. "Mac mini", "Session revoked";
  *  4. "Build box", the incompatible sentence as a multi-line subtitle —
- *     titles and subtitles wrap freely, so the row grows taller;
- *  5. "Pair an engine".
- *
- * Below, captioned "pressed", a second copy of row 1 as a `Single` card
- * held pressed (`previewPressed = true`) — ticket 70's `controlFill`
- * highlight. Then, captioned "no engines", the header with the `pair`
- * row alone (`Single`): the shape the section has before the first pair.
+ *     titles and subtitles wrap freely, so the row grows taller.
  *
  * The fixture is built from [DevicesRowSpec]s directly — no `EngineView`
  * (no core, no FFI), so the page renders in any host. Registered in
@@ -45,7 +39,7 @@ import sh.zeron.android.design.uiStyle
  * `GallerySection("Devices rows", screenshotHeightDp = 900)
  * { DevicesRowsGallerySection() }` — the default `Scroll` layout, like
  * ticket 100's "Settings · Sessions": the section needs no in-window
- * host (no sheet host, no menu host — the rows' clicks are no-ops here).
+ * host (no sheet host, no menu host).
  * The column is capped at the reference phone's 402 dp width on wider
  * bodies, so the cards sit at the reference size.
  *
@@ -56,19 +50,11 @@ import sh.zeron.android.design.uiStyle
 @Composable
 fun DevicesRowsGallerySection() {
     Column(Modifier.widthIn(max = 402.dp)) {
-        DevicesRowsCaption("fixture \u00b7 one row per paired engine, then pair")
+        DevicesRowsCaption("fixture \u00b7 one row per device")
         GroupedHeader(DevicesCopy.Header)
         devicesGalleryFixture.forEachIndexed { index, spec ->
-            DevicesRow(spec, GroupedPosition.of(index, devicesGalleryFixture.size), onClick = {})
+            DevicesRow(spec, GroupedPosition.of(index, devicesGalleryFixture.size))
         }
-
-        DevicesRowsCaption("pressed")
-        GroupedHeader(DevicesCopy.Header)
-        DevicesRow(devicesGalleryFixture.first(), GroupedPosition.Single, onClick = {}, previewPressed = true)
-
-        DevicesRowsCaption("no engines")
-        GroupedHeader(DevicesCopy.Header)
-        DevicesRow(DevicesRowSpec.Pair, GroupedPosition.Single, onClick = {})
     }
 }
 
@@ -87,7 +73,6 @@ private val devicesGalleryFixture = listOf(
         "Build box needs a newer Zeron app. Update the app to connect.",
         connected = false,
     ),
-    DevicesRowSpec.Pair,
 )
 
 /** The block caption: Geist 12 fixed, secondary, at the header's inset. */

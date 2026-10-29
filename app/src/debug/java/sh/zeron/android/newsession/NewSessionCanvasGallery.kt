@@ -162,7 +162,6 @@ private fun NewSessionCanvasGalleryBody() {
 private fun configureCanvasGalleryComposer(controller: ComposerController) {
     controller.alwaysCard = true
     controller.placeholder = "Describe the task"
-    controller.canWrite = true
     controller.chips = listOf(
         ComposerChip("project", "zeron", icon = ChipIcon.Project("zeron", 0)),
         ComposerChip("model", "Opus 4.5", icon = ChipIcon.Brand("claude-code")),

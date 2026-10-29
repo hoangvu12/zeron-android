@@ -159,9 +159,8 @@ fun resolveChipTint(palette: Palette, tint: ChipTint): Color = when (tint) {
  * The chip's paint, pure over the palette (`ComposerBar.swift:433-436`):
  * untinted chips are `controlFill` + `text`; tinted ones take the tone
  * wash (fill @ [ChipTokens.TintFillAlpha], ink @
- * [ChipTokens.TintInkAlpha]); a disabled chip (`canWrite == false`, the
- * Zeron offline read-only mode) keeps its fill and turns the ink
- * `tertiary`.
+ * [ChipTokens.TintInkAlpha]); a disabled chip keeps its fill and turns
+ * the ink `tertiary`.
  */
 fun chipColors(palette: Palette, tint: Color?, enabled: Boolean): ChipColors = ChipColors(
     fill = tint?.copy(alpha = ChipTokens.TintFillAlpha) ?: palette.controlFill,

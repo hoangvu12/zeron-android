@@ -69,9 +69,7 @@ import sh.zeron.android.design.glass.rememberGlassMenuState
  * - **queue** — the same arrow-on-accent look while a turn runs with
  *   content (the long-press menu is the only extra affordance);
  * - **stop** — `stop.fill` 11 bold, `background` on `text`, while a turn
- *   runs with an empty composer;
- * - **offline** (Zeron) — `canWrite == false` draws the disabled **send**
- *   look for every action, whatever is running.
+ *   runs with an empty composer.
  *
  * A change of the *visual* action animates the fill and ink with
  * [Motion.ActionButton] (UIKit 0.32 s / ζ 0.8, `:613`), swaps the glyph
@@ -115,8 +113,8 @@ enum class ActionInk { White, Tertiary, Background }
 /**
  * Everything drawn and exposed by the button, a pure function of ticket
  * 54's [ActionState]: the *visual* action ([ComposerAction.Send] whenever
- * `!state.enabled`, so the empty composer and the offline engine render
- * the same disabled-send look), the glyph and its point size, the colour
+ * `!state.enabled`, so the empty composer renders the disabled-send
+ * look), the glyph and its point size, the colour
  * roles, the a11y label and whether the long-press menu exists.
  */
 @Immutable
@@ -125,25 +123,24 @@ data class ActionButtonLook(
     val visual: ComposerAction,
     /** [ZeronIcons.ArrowUp] or [ZeronIcons.StopFill]. */
     val icon: ZeronIcon,
-    /** 15 pt (send/queue/offline) or 11 pt (stop). */
+    /** 15 pt (send/queue) or 11 pt (stop). */
     val iconPt: Float,
     val fill: ActionFill,
     val ink: ActionInk,
     val enabled: Boolean,
     val a11yLabel: String,
-    /** The long-press delivery menu: queue state with `canWrite`. */
+    /** The long-press delivery menu: the queue state. */
     val hasMenu: Boolean,
 )
 
 /**
  * The States table of the ticket, from [ActionState] only — this never
- * re-derives `hasContent` or `canWrite`; 54's
+ * re-derives `hasContent`; 54's
  * [ComposerController.deriveAction] owns the derivation.
  *
  * `visual = if (state.enabled) state.action else Send`: `!enabled` happens
- * in exactly two cases (the empty idle composer and `canWrite == false`),
- * and both render the same disabled-send look with the label
- * `Send message` — the label must match the drawn arrow (79 §Spec).
+ * only for the empty idle composer, which renders the disabled-send look
+ * with the label `Send message` — the label must match the drawn arrow.
  */
 fun actionButtonLook(state: ActionState): ActionButtonLook {
     val visual = if (state.enabled) state.action else ComposerAction.Send
@@ -336,7 +333,7 @@ fun ComposerActionButton(
     var anchor by remember { mutableStateOf(Rect.Zero) } // window coordinates
 
     fun tap() {
-        // Disabled (empty composer, offline engine): consumed, nothing
+        // Disabled (empty composer): consumed, nothing
         // runs — no callback, no haptic, no focus change.
         if (!look.enabled) return
         onPrimaryCurrent()
@@ -472,22 +469,19 @@ private fun ActionInk.color(): Color = when (this) {
 // ---------------------------------------------------------------------------
 
 /**
- * The five visual states (with their gallery captions): send empty, send,
- * queue, stop and the offline engine. `Offline` is the running composer
- * with `canWrite == false` — the grey arrow replaces whatever the action
- * says. The queue state carries `deliveryMenu = true`, so the fixture row
- * can open the delivery menu.
+ * The four visual states (with their gallery captions): send empty, send,
+ * queue and stop. The queue state carries `deliveryMenu = true`, so the
+ * fixture row can open the delivery menu.
  */
 internal val ActionButtonFixtureStates: List<Pair<String, ActionState>> = listOf(
     "Send (empty)" to ActionState(ComposerAction.Send, enabled = false, steering = false, deliveryMenu = false),
     "Send" to ActionState(ComposerAction.Send, enabled = true, steering = false, deliveryMenu = false),
     "Queue" to ActionState(ComposerAction.Queue, enabled = true, steering = false, deliveryMenu = true),
     "Stop" to ActionState(ComposerAction.Stop, enabled = true, steering = false, deliveryMenu = false),
-    "Offline" to ActionState(ComposerAction.Stop, enabled = false, steering = false, deliveryMenu = false),
 )
 
 /**
- * The five-state row — 34 dp buttons 16 dp apart — shared by the previews,
+ * The four-state row — 34 dp buttons 16 dp apart — shared by the previews,
  * the screenshot goldens and (with captions) the gallery section. Purely
  * visual: the callbacks do nothing; the queue button opens the real
  * delivery menu when [canSteer] is true (it is for the goldens).
@@ -509,7 +503,7 @@ internal fun ComposerActionButtonFixtureRow(
 }
 
 // ---------------------------------------------------------------------------
-// Previews (step 7): the five states on the gallery backdrop, light + dark
+// Previews (step 7): the four states on the gallery backdrop, light + dark
 // ---------------------------------------------------------------------------
 
 @Preview(name = "Action button light")

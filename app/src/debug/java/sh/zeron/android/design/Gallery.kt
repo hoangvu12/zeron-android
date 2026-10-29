@@ -50,16 +50,12 @@ import sh.zeron.android.newsession.HandoffCaptureGallerySection
 import sh.zeron.android.newsession.NewSessionCanvasGallerySection
 import sh.zeron.android.newsession.NewSessionChipsGallerySection
 import sh.zeron.android.newsession.ProjectMenusGallerySection
-import sh.zeron.android.sessions.ConnectionLineGallerySection
 import sh.zeron.android.newsession.FolderLocationsGallerySection
 import sh.zeron.android.sessions.FolderScreensGallerySection
 import sh.zeron.android.sessions.LocalSidebarFixtures
 import sh.zeron.android.sessions.PinnedReorderGallerySection
 import sh.zeron.android.shell.ChromeVisibilityGallerySection
 import sh.zeron.android.shell.LargeTitleGallerySection
-import sh.zeron.android.pairing.PairingRootGallerySection
-import sh.zeron.android.pairing.PairPageGallerySection
-import sh.zeron.android.pairing.QrScannerGallerySection
 import sh.zeron.android.session.BottomStackGallerySection
 import sh.zeron.android.session.SessionNavGallerySection
 import sh.zeron.android.session.JumpToLatestGallerySection
@@ -78,7 +74,6 @@ import sh.zeron.android.sessions.SwipeRowGallerySection
 import sh.zeron.android.settings.WallpaperRowsGallerySection
 import sh.zeron.android.settings.AboutGallerySection
 import sh.zeron.android.settings.DevicesRowsGallerySection
-import sh.zeron.android.settings.EngineDetailGallerySection
 import sh.zeron.android.settings.AppearanceGallerySection
 import sh.zeron.android.settings.NotificationRowsGallerySection
 import sh.zeron.android.settings.SettingsScreenGallerySection
@@ -202,11 +197,6 @@ object Gallery {
         // core (ticket 60's LocalGalleryCapture rule).
         GallerySection("Mentions", screenshotHeightDp = 420) {
             if (LocalGalleryCapture.current) MentionStyleDemo() else MentionsGallerySection()
-        },
-        // Ticket 34 (pairing root): Fill — the section scales the whole
-        // 393 × 852 phone frame into the body.
-        GallerySection("Pairing root", layout = GalleryLayout.Fill, screenshotHeightDp = 960) {
-            PairingRootGallerySection()
         },
         // Ticket 29 (search tab morph): the bar-to-field morph, the IME
         // ride and the accessory fade.
@@ -358,7 +348,7 @@ object Gallery {
         GallerySection("Text sheets", GalleryLayout.Fill, screenshotHeightDp = 420) {
             TextSheetsGallerySection()
         },
-        // Ticket 35 (app root): pairing / phone / split selection, the
+        // Ticket 35 (app root): welcome / phone / split selection, the
         // 350 ms cross-fade and the instant sheet dismissal before a swap.
         GallerySection("App root", GalleryLayout.Fill) { AppRootGallerySection() },
         // Ticket 48 (pull to refresh): the scaffold + the 21-dp cell spinner
@@ -381,11 +371,6 @@ object Gallery {
         // card — header, question, option rows, the Other field/editor and
         // Back + Next, one page per question, plus the interactive toy.
         GallerySection("Question card", screenshotHeightDp = 4200) { QuestionCardGallerySection() },
-        // Ticket 72 (Pair page): the link field, Paste, Scan QR row,
-        // footers, error line and capsule in a 393 × 852 frame, plus the
-        // real page presented in a gallery-local sheet host with the
-        // fake backend. Fill: the section owns its SheetHost.
-        GallerySection("Pair page", GalleryLayout.Fill) { PairPageGallerySection() },
         // Ticket 73 (status pill): the Session screen's glass capsule —
         // the fixture column of every banner plus the live ticking Working
         // pill (frozen under capture so the golden stays byte-stable).
@@ -393,10 +378,9 @@ object Gallery {
             StatusPillGallerySection(liveTicker = !LocalGalleryCapture.current)
         },
         // Ticket 102 (Devices rows): the Settings Devices section — one
-        // row per paired engine (dot + disclosure) and the "Pair an
-        // engine" row, from DevicesRowSpec fixtures: connected,
-        // reconnecting, revoked, the wrapped incompatible sentence, plus
-        // the pressed and no-engines blocks.
+        // informational row per device (dot), from DevicesRowSpec
+        // fixtures: connected, reconnecting, revoked and the wrapped
+        // incompatible sentence.
         GallerySection("Devices rows", screenshotHeightDp = 900) { DevicesRowsGallerySection() },
         // Ticket 96 (Settings · Appearance): the System/Light/Dark rows —
         // the checkmark moves locally only; the gallery's own appearance
@@ -518,7 +502,7 @@ object Gallery {
         },
         // Ticket 78 (session composer): the Session screen's composer in
         // 74's stack slot — the chrome→composer binding (chips, running /
-        // canSteer / canWrite, placeholder, upload progress), send / stop /
+        // canSteer, placeholder, upload progress), send / stop /
         // search over the fake commands and the send-failure pill above it,
         // with live toggles and a command log.
         GallerySection("Session composer", screenshotHeightDp = 900) {
@@ -556,12 +540,6 @@ object Gallery {
         // 82's real queue panel and 78's real composer in 74's stack.
         // Fill: the section owns its fixed-height session window.
         GallerySection("Queue edit", GalleryLayout.Fill) { QueueEditGallerySection() },
-        // Ticket 50 (connection line): the multi-engine offline
-        // indication — every examples-table fixture (spinners, dots,
-        // overflow, the long INCOMPATIBLE sentence), the offline Home
-        // header with its wifi-off glyph next to the spinner one, and the
-        // live "Engine down" simulate block with the real 4 s grace.
-        GallerySection("Connection line", screenshotHeightDp = 900) { ConnectionLineGallerySection() },
         // Ticket 91 (question panel behaviour): the panel's live state —
         // configure, picks, the 220 ms auto-advance, the 200 ms paging
         // fade, submit and its re-arm — driving 90's card in 74's slot
@@ -585,12 +563,6 @@ object Gallery {
         GallerySection("Session chip menus", GalleryLayout.Fill) {
             ChipMenuGallerySection()
         },
-        // Ticket 79 (offline read-only): the session's read-only fixture —
-        // 73's Reconnecting pill 8 dp above the offline composer (disabled
-        // send look while a turn runs, tertiary chips, the kept draft, the
-        // attach + still enabled) on the striped backdrop, plus a live
-        // canWrite toggle under the fixture (hidden under capture).
-        GallerySection("Session offline", screenshotHeightDp = 300) { SessionOfflineGallerySection() },
         // Ticket 121 (tool rail): the activity rail's phased draw-in — the
         // static three-row fixture plus the live Replay / Add row / Add 3
         // demo over stand-in row content.
@@ -614,7 +586,7 @@ object Gallery {
         // Ticket 80 (session ⋯ menu): the header's pull-down — the three
         // rows (Pin/Unpin, Copy Transcript, Archive) over the striped
         // backdrop inside the section's own GlassMenuHost and ToastHost,
-        // with live Pinned / Can write toggles, the Ok/Offline mode switch
+        // with a live Pinned toggle, the Ok/Offline mode switch
         // on the fake RowActions and its call log. Fill: the section owns
         // the host pair and its column.
         GallerySection("Session ⋯ menu", screenshotHeightDp = 420) { SessionMenuGallerySection() },
@@ -686,24 +658,6 @@ object Gallery {
         // tile sizes — Loading/Loaded/Failed, compact and full, retry and
         // the unfetchable remote — over the Rust placeholder boxes.
         GallerySection("Image tile states", screenshotHeightDp = 1300) { ImageTileStatesGallerySection() },
-        // Ticket 138 (QR scanner): the forced-dark camera stage over the
-        // fake preview — the reticle, caption and the ✕ in the image
-        // viewer's placement, with the phase/foreign toggles (the real
-        // 2 s foreign timer), the denied state's Open Settings capsule and
-        // a Launch real scanner row that reports only the scan's length
-        // and parse verdict. Fill: the stage owns the full body.
-        GallerySection("QR scanner", GalleryLayout.Fill) {
-            QrScannerGallerySection()
-        },
-        // Ticket 140 (Engine detail page): the pushed page's three cards
-        // for the five fixtures — connected (every row, success dot),
-        // copied, revoked (greyed Rename…, Pair again, error footer,
-        // fading tailnet URL), incompatible (Update required, no Pair
-        // again) and the newer-engine notice — built from EngineDetailUi
-        // directly (no core, no FFI), clicks no-ops.
-        GallerySection("Engine detail", screenshotHeightDp = 3200) {
-            EngineDetailGallerySection()
-        },
         // Ticket 113 (new-session project / run-on menus): the project
         // chip's repository-grouped menu and the host chip's Run on menu
         // — the five static panel fixtures (P1, P2, R1, R2, R3) over

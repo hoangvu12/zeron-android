@@ -102,8 +102,6 @@ private data object SettingsGalleryRoot : NavRoute {
 private fun SettingsScreenGalleryContent(listState: LazyListState, live: Boolean) {
     val devices = rememberDevicesSectionState(
         engines = remember { MutableStateFlow(listOf(galleryEngine())) },
-        onOpenEngine = {},
-        onPair = {},
     )
     val appearance = rememberAppearanceSectionState(
         appearance = remember { MutableStateFlow(Appearance.System) },

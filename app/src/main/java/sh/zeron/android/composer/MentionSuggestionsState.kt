@@ -173,7 +173,7 @@ class MentionSuggestionsState internal constructor(
         hide()
     }
 
-    /** Mentions off (`canWrite == false` or no search): cancel, forget the query, hide. */
+    /** Mentions off (no search): cancel, forget the query, hide. */
     fun disable() {
         job?.cancel()
         job = null
@@ -208,7 +208,7 @@ class MentionSuggestionsState internal constructor(
     }
 
     /**
-     * `updateMentionQuery` (`:336-359`) with Zeron's `canWrite` gate:
+     * `updateMentionQuery` (`:336-359`):
      * recompute the query synchronously, cancel the pending job, and on a
      * query debounce [debounceMs] before searching. The result is applied
      * only when the job was not cancelled, the query string still matches,
@@ -281,7 +281,6 @@ fun rememberMentionSuggestionsState(controller: ComposerController): MentionSugg
  *   edits happen while focused, so a programmatic draft restore does not
  *   open the card over a resting capsule. IME composition-only changes
  *   emit the same pair and are filtered;
- * - `canWrite == false` (offline engine, 79) disables mentions outright;
  * - focus loss runs [MentionSuggestionsState.onBlur] — the port of
  *   `textViewDidEndEditing`'s `setSuggestionsVisible(false)`, whatever
  *   composable created the morph state (56's `hideSuggestions` hook is not
@@ -318,11 +317,6 @@ fun MentionSuggestionsBinding(state: MentionSuggestionsState, isFocused: () -> B
             if (!state.isFocused()) return@collect
             if (textChanged) state.onTextChanged() else state.onSelectionChanged()
         }
-    }
-
-    // Offline observer: a visible card hides the moment the engine dies.
-    LaunchedEffect(state) {
-        snapshotFlow { state.controller.canWrite }.collect { if (!it) state.disable() }
     }
 
     // Blur observer: the first emission (false, before focus) just runs a

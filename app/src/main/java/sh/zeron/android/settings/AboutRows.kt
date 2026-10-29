@@ -9,12 +9,8 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import sh.zeron.android.BuildConfig
 import sh.zeron.android.ZeronApplication
 import sh.zeron.android.core.CoreStatus
@@ -34,10 +30,6 @@ import sh.zeron.android.design.groupedSection
 import sh.zeron.android.design.settingsTag
 import sh.zeron.android.design.uiStyle
 import sh.zeron.android.shell.LocalNavStack
-import sh.zeron.android.update.UpdateCenter
-import sh.zeron.android.update.UpdateUiState
-import sh.zeron.android.update.updateAboutRow
-import sh.zeron.android.update.updateRowStrings
 
 /**
  * The Settings "About" section (android-ui-parity #101): the last section
@@ -58,11 +50,6 @@ import sh.zeron.android.update.updateRowStrings
 object AboutRowIds {
     const val Version = "about:version"
     const val Licenses = "about:licenses"
-
-    /** android-next#04: the Update/Check rows (same `about:` prefix —
-     * [settingsSectionFor] maps the whole prefix to the About section). */
-    const val Update = "about:update"
-    const val Check = "about:check"
 }
 
 /** The section header — "About" (android-app#26), not iOS's blank `" "`. */
@@ -88,9 +75,8 @@ const val ThirdPartyNotices = "Third-party notices"
  * The icons are `SF info.circle`/`doc.text` → `ZeronIcons.InfoCircle` /
  * [ZeronIcons.DocText]; the Version row shows no accessory, the
  * Licenses row the disclosure chevron (the iOS `Row` default).
- * [accent] (android-next#04) draws the title and icon in `Palette.accent`
- * — the "Update to Zeron <ver>" row (panel D) and its GitHub twin (F);
- * the renderer maps it, the spec stays pure.
+ * [accent] draws the title and icon in `Palette.accent`; the renderer
+ * maps it, the spec stays pure.
  */
 @Immutable
 data class AboutRowSpec(
@@ -108,8 +94,8 @@ data class AboutRowSpec(
  * the cached [CoreStatus.Loaded] version, or the literal `unavailable`
  * when the status is [CoreStatus.Failed] (never a second FFI call: #609
  * called `coreVersion()` in composition, which is both an FFI hop on the
- * main thread and not our copy to make). [buildMarker] (android-next#04,
- * panel F) slots the build type in for non-release builds —
+ * main thread and not our copy to make). [buildMarker] slots the build
+ * type in for non-release builds —
  * `"Zeron 0.9.2 (9002) debug · core 0.9.2"`.
  */
 fun versionSubtitle(
@@ -129,12 +115,8 @@ fun versionSubtitle(
     return "$own · core $coreVersion"
 }
 
-/**
- * Pure: the About rows, in order — Version, the optional update row
- * (android-next#04, between Version and Licenses as in the approved
- * panel D), Licenses.
- */
-fun aboutRows(subtitle: String, updateRow: AboutRowSpec? = null): List<AboutRowSpec> =
+/** Pure: the About rows, in order — Version, Licenses. */
+fun aboutRows(subtitle: String): List<AboutRowSpec> =
     buildList {
         add(
             AboutRowSpec(
@@ -145,7 +127,6 @@ fun aboutRows(subtitle: String, updateRow: AboutRowSpec? = null): List<AboutRowS
                 accessories = emptyList(),
             ),
         )
-        updateRow?.let(::add)
         add(
             AboutRowSpec(
                 id = AboutRowIds.Licenses,
@@ -160,8 +141,7 @@ fun aboutRows(subtitle: String, updateRow: AboutRowSpec? = null): List<AboutRowS
 /**
  * The About section's behaviour: the click/long-click dispatch over
  * [rows]. Tapping Licenses pushes [LicensesRoute] (animated); tapping
- * the update row starts the update, tapping the check row checks
- * (android-next#04); tapping Version does nothing; long-pressing
+ * Version does nothing; long-pressing
  * Version copies its subtitle.
  */
 @Stable
@@ -169,16 +149,10 @@ class AboutSectionState internal constructor(
     val rows: List<AboutRowSpec>,
     private val openLicenses: () -> Unit,
     private val copy: (String) -> Unit,
-    private val onUpdate: () -> Unit = {},
-    private val onCheck: () -> Unit = {},
 ) {
-    /** Licenses → [openLicenses]; Update → [onUpdate]; Check → [onCheck]; Version → nothing. */
+    /** Licenses → [openLicenses]; Version → nothing. */
     fun onRowClick(id: String) {
-        when (id) {
-            AboutRowIds.Licenses -> openLicenses()
-            AboutRowIds.Update -> onUpdate()
-            AboutRowIds.Check -> onCheck()
-        }
+        if (id == AboutRowIds.Licenses) openLicenses()
     }
 
     /** Version → `copy(subtitle)`; others → nothing. */
@@ -228,14 +202,7 @@ internal fun copyToClipboard(
  * `VERSION_CODE`) and the app's cached [ZeronApplication.core] — both
  * equal `PackageInfo` / `coreVersion()` without a binder or FFI call.
  * Previews and tests pass [core] (and, when needed, `sdkInt`) explicitly.
- *
- * android-next#04: the middle row comes from the app's
- * [ZeronApplication.updates] [UpdateCenter.state] — the update row when
- * an update is known, the Check row otherwise — with its clicks wired to
- * [UpdateCenter.beginUpdate] / [UpdateCenter.checkNow]. Pass [updates]
- * (or a null [updateState] with own callbacks) to inject fakes; a
- * context without the app (previews) shows the idle Check row. The
- * Version subtitle carries the build type on non-release builds (panel F).
+ * The Version subtitle carries the build type on non-release builds.
  */
 @Composable
 fun rememberAboutSectionState(
@@ -243,23 +210,11 @@ fun rememberAboutSectionState(
     versionCode: Long = BuildConfig.VERSION_CODE.toLong(),
     core: CoreStatus = (LocalContext.current.applicationContext as ZeronApplication).core,
     sdkInt: Int = Build.VERSION.SDK_INT,
-    updateState: StateFlow<UpdateUiState>? = null,
-    onUpdate: (() -> Unit)? = null,
-    onCheck: (() -> Unit)? = null,
-    deviceAbi: String = Build.SUPPORTED_ABIS.firstOrNull() ?: "",
 ): AboutSectionState {
     val nav = LocalNavStack.current
     val toaster = LocalToaster.current
     val feedback = LocalFeedback.current
     val context = LocalContext.current
-    val app = context.applicationContext as? ZeronApplication
-    val center = app?.updates
-    val state: StateFlow<UpdateUiState> = updateState ?: center?.state ?: remember {
-        MutableStateFlow(UpdateUiState.Idle)
-    }
-    val update by state.collectAsState()
-    val updateStrings = updateRowStrings()
-    val now = remember { System.currentTimeMillis() }
     return remember(
         versionName,
         versionCode,
@@ -268,9 +223,6 @@ fun rememberAboutSectionState(
         toaster,
         feedback,
         sdkInt,
-        update,
-        updateStrings,
-        center,
     ) {
         AboutSectionState(
             rows = aboutRows(
@@ -278,22 +230,13 @@ fun rememberAboutSectionState(
                     versionName,
                     versionCode,
                     core,
-                    buildMarker = if (BuildConfig.UPDATE_INSTALLER_ENABLED) null else BuildConfig.BUILD_TYPE,
-                ),
-                updateAboutRow(
-                    update,
-                    updateStrings,
-                    installEnabled = BuildConfig.UPDATE_INSTALLER_ENABLED,
-                    nowMs = now,
-                    deviceAbi = deviceAbi,
+                    buildMarker = if (BuildConfig.BUILD_TYPE == "release") null else BuildConfig.BUILD_TYPE,
                 ),
             ),
             openLicenses = { nav.push(LicensesRoute) },
             copy = { text ->
                 copyToClipboard(context, toaster, feedback, sdkInt, text)
             },
-            onUpdate = onUpdate ?: center?.let { it::beginUpdate } ?: {},
-            onCheck = onCheck ?: center?.let { it::checkNow } ?: {},
         )
     }
 }
@@ -303,9 +246,8 @@ fun rememberAboutSectionState(
  * the last section of a Settings-like `LazyListScope`. No
  * `Modifier.animateItem()`: iOS reloads with `animatingDifferences:
  * false`. The Version row is long-clickable ("Copy") but not clickable;
- * the Licenses row is a plain disclosure row; the update/check row
- * (android-next#04) is clickable, its accent mapped to `Palette.accent`
- * for both the icon and the title (panel D/F).
+ * the Licenses row is a plain disclosure row; an [AboutRowSpec.accent]
+ * row maps to `Palette.accent` for both the icon and the title.
  */
 fun LazyListScope.aboutSection(state: AboutSectionState) {
     groupedSection(
@@ -329,7 +271,7 @@ fun LazyListScope.aboutSection(state: AboutSectionState) {
             accessories = row.accessories,
             testTag = settingsTag(row.id),
             onClick = when (row.id) {
-                AboutRowIds.Licenses, AboutRowIds.Update, AboutRowIds.Check -> ({ state.onRowClick(row.id) })
+                AboutRowIds.Licenses -> ({ state.onRowClick(row.id) })
                 else -> null
             },
             onLongClick = if (row.id == AboutRowIds.Version) ({ state.onRowLongClick(row.id) }) else null,

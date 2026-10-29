@@ -33,7 +33,6 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
@@ -113,9 +112,6 @@ object QueuePanelTokens {
 
     /** UIKit `.plain` dims its foreground while pressed (the ticket 14 convention). */
     const val PressedAlpha = 0.5f
-
-    /** Zeron read-only look (79): both button glyphs at 0.4. */
-    const val DisabledAlpha = 0.4f
 }
 
 /**
@@ -139,7 +135,7 @@ object QueuePanelTokens {
  * ```kotlin
  * // ticket 74's SessionBottomStack(…, queue = { the BottomStackSlotScope →
  * QueuePanel(chrome.queue, glassVisible = glassVisible, animateGlass = animateGlass,
- *     writable = chrome.canWrite, onAction = { id, a ->
+ *     onAction = { id, a ->
  *         if (a == QueueAction.Edit) edit.beginEdit(id)      // ticket 83
  *         else queueActions.perform(id, a)                   // application scope
  *     })
@@ -170,8 +166,6 @@ object QueuePanelTokens {
  *   materialized
  * @param onAction every row action; the screen routes [QueueAction.Edit]
  *   to ticket 83 and the rest to [QueueActions]
- * @param writable `chrome.canWrite` (79): send and ⋯ draw at 0.4 alpha
- *   and are disabled; rows and footer are unchanged
  * @param thumbnail parity slot for the row thumbnail (26 × 26, 6 dp
  *   circular corners). Production passes null — `thumbnailRef` is always
  *   null for live sessions; the code path exists for parity and the
@@ -184,7 +178,6 @@ fun QueuePanel(
     animateGlass: Boolean,
     onAction: (id: String, action: QueueAction) -> Unit,
     modifier: Modifier = Modifier,
-    writable: Boolean = true,
     thumbnail: (@Composable (ref: String) -> Unit)? = null,
 ) {
     Box(modifier.fillMaxWidth().padding(horizontal = QueuePanelTokens.CardInset)) {
@@ -208,7 +201,6 @@ fun QueuePanel(
                             item = item,
                             index = i,
                             count = items.size,
-                            writable = writable,
                             onAction = onAction,
                             thumbnail = thumbnail,
                         )
@@ -233,7 +225,6 @@ private fun QueueRow(
     item: SessionChrome.QueuedItem,
     index: Int,
     count: Int,
-    writable: Boolean,
     onAction: (id: String, action: QueueAction) -> Unit,
     thumbnail: (@Composable (ref: String) -> Unit)?,
 ) {
@@ -287,7 +278,6 @@ private fun QueueRow(
             width = QueuePanelTokens.SendWidth,
             cd = "Send",
             tag = "queue-send-$index",
-            enabled = writable,
             onClick = { onAction(item.id, QueueAction.SendNow) },
         ) {
             Icon(
@@ -301,7 +291,6 @@ private fun QueueRow(
             width = QueuePanelTokens.MoreWidth,
             cd = "More queue actions",
             tag = "queue-more-$index",
-            enabled = writable,
             // A tap opens the menu (UIKit `showsMenuAsPrimaryAction`).
             // The menu is built here, at tap time, never during
             // composition (ticket 15's rule). The anchor is the button's
@@ -354,8 +343,7 @@ private fun QueueFooter(text: String) {
  * The send and more buttons (`QuestionPanel.swift:282-291`): a fixed
  * width, full row height, the glyph centred, no ripple
  * (`indication = null`), the glyph dimming to
- * [QueuePanelTokens.PressedAlpha] while pressed (UIKit `.plain`) and
- * [QueuePanelTokens.DisabledAlpha] when not writable. The `pressed` read
+ * [QueuePanelTokens.PressedAlpha] while pressed (UIKit `.plain`). The `pressed` read
  * lives inside `graphicsLayer` so a press never recomposes.
  */
 @Composable
@@ -363,7 +351,6 @@ private fun QueueIconButton(
     width: Dp,
     cd: String,
     tag: String,
-    enabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
@@ -378,20 +365,14 @@ private fun QueueIconButton(
             .semantics {
                 role = Role.Button
                 contentDescription = cd
-                if (!enabled) disabled()
             }
             .clickable(
                 interactionSource = source,
                 indication = null,
-                enabled = enabled,
                 onClick = onClick,
             )
             .graphicsLayer {
-                alpha = when {
-                    !enabled -> QueuePanelTokens.DisabledAlpha
-                    pressed -> QueuePanelTokens.PressedAlpha
-                    else -> 1f
-                }
+                alpha = if (pressed) QueuePanelTokens.PressedAlpha else 1f
             },
         contentAlignment = Alignment.Center,
     ) {

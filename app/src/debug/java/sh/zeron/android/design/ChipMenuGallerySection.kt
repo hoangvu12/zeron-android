@@ -178,7 +178,6 @@ fun ChipMenuGallerySection() {
                         "pr" to { menus.menu("pr", platform) },
                         "context" to { menus.menu("context", platform) },
                     ),
-                    canWrite = true,
                     onChipTap = {},
                     modifier = Modifier.width(376.dp),
                 )
@@ -365,8 +364,6 @@ private fun galleryComposerState(): ComposerState = ComposerState(
     queueError = null,
     lastSubmittedMessageId = null,
     contextUsage = ContextUsage(tokens = GALLERY_CONTEXT_MEASURED.tokens, window = GALLERY_CONTEXT_MEASURED.window),
-    limit = null,
-    scheduledResumeFireAtMs = null,
 )
 
 internal fun gallerySessionRow(config: ChatConfig, modelLabel: String): SessionRow = SessionRow(

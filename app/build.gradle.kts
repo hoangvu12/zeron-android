@@ -307,13 +307,6 @@ aboutLibraries {
     collect {
         fetchRemoteLicense = false
         fetchRemoteFunding = false
-        // Licence overrides (aboutlibraries/licenses/<id>.json, the plugin's
-        // documented config layout; relative to this module): camera-core's
-        // POM declares a second licence for its bundled libyuv ("BSD License"
-        // -> README.chromium) that the plugin cannot map offline, so it got a
-        // hash id with no SPDX id and no text (AndroidLicenceTextsTest). The
-        // override maps it to BSD-3-Clause with the committed spdx text.
-        configPath = file("aboutlibraries")
     }
     export {
         excludeFields.addAll("developers", "funding")
@@ -394,14 +387,6 @@ android {
             // built unsigned (CI's workflow_dispatch path) — never the
             // debug key.
             releaseKeystore?.let { signingConfig = signingConfigs.getByName("release") }
-            // android-next#04: only release builds install updates — their
-            // signer is the one the release APK must match. Debug builds
-            // still check, but their Update action opens the releases page
-            // and the launch prompt stays off.
-            buildConfigField("boolean", "UPDATE_INSTALLER_ENABLED", "true")
-        }
-        debug {
-            buildConfigField("boolean", "UPDATE_INSTALLER_ENABLED", "false")
         }
     }
 
@@ -430,7 +415,7 @@ android {
 
     testOptions {
         // android-app#30: every instrumented test in its own process with
-        // `clearPackageData` (above), so the flow suite's pairing state
+        // `clearPackageData` (above), so the flow suite's stored state
         // never bleeds between tests.
         execution = "ANDROIDX_TEST_ORCHESTRATOR"
         unitTests {
@@ -549,20 +534,6 @@ dependencies {
     // POM licence automatically.
     implementation(libs.reorderable)
 
-    // The QR scanner (ui-parity#138): CameraX (core + camera2 backend +
-    // lifecycle + view — `LifecycleCameraController`/`PreviewView`) and
-    // ZXing's plain core. Both Apache-2.0, ABI-free and Play-services-free
-    // (android-app#18's decision: ML Kit was rejected), so they land in the
-    // AboutLibraries JSON (101) automatically. Never ZXing's embedded
-    // Android artifact (it brings its own Activity and UI) and never
-    // camera-compose (a Material-free AndroidView hosts the PreviewView
-    // directly).
-    implementation(libs.androidx.camera.core)
-    implementation(libs.androidx.camera.camera2)
-    implementation(libs.androidx.camera.lifecycle)
-    implementation(libs.androidx.camera.view)
-    implementation(libs.zxing.core)
-
     implementation(libs.kotlinx.coroutines.android)
     // Engine-credential storage (ticket 71): no-backup Preferences DataStore.
     // androidx.security:security-crypto is deliberately absent (deprecated
@@ -578,7 +549,7 @@ dependencies {
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
-    // ApplicationProvider for the Robolectric pairing/core tests.
+    // ApplicationProvider for the Robolectric core tests.
     testImplementation(libs.androidx.test.core)
     // Plain jar: the host libjnidispatch for JVM (Robolectric) tests.
     testImplementation(libs.jna)

@@ -62,7 +62,7 @@ fun GlassButtonsGallerySection() {
         )
         PressStage(height = 148.dp) { source -> GlassTextCapsuleVariants(source) }
         BasicText(
-            "Prominent — Next compact · Submit disabled · Use full width · Use busy · pairing",
+            "Prominent — Next compact · Submit disabled · Use full width · Use busy · sign-in",
             style = labelStyle,
         )
         PressStage(height = 372.dp) { source -> GlassProminentVariants(source) }

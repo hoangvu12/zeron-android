@@ -59,8 +59,6 @@ import uniffi.zeron_core.TranscriptView
  * capture):
  * - **Pinned** flips the chat's pin state — the next open shows "Unpin"
  *   with the slash icon (the menu is rebuilt on every open);
- * - **Can write** flips 79's offline flag — Pin and Archive grey out
- *   (inert), Copy Transcript stays live;
  * - **Mode** switches the fake [RowActions] between **Ok** (Archive
  *   shows "Archived · Undo" through the real toaster, then the fake
  *   leave logs "pop") and **Offline** (the write is refused with
@@ -80,7 +78,6 @@ fun SessionMenuGallerySection() {
     val toaster = LocalToaster.current
     val context = LocalContext.current
     var pinned by remember { mutableStateOf(false) }
-    var canWrite by remember { mutableStateOf(true) }
     var offline by remember { mutableStateOf(false) }
     val log = remember { mutableStateListOf<String>() }
 
@@ -154,7 +151,6 @@ fun SessionMenuGallerySection() {
                                     anchor,
                                     sessionMenu(
                                         pinned = pinned,
-                                        canWrite = canWrite,
                                         onSetPinned = { p -> actions.setPinned("c1", p) },
                                         onCopyTranscript = {
                                             scope.launch {
@@ -164,7 +160,6 @@ fun SessionMenuGallerySection() {
                                                 copyTranscript(transcript, clipboard, toaster)
                                             }
                                         },
-                                        onShowPreviews = {},
                                         onShowAccounts = {},
                                         onArchive = {
                                             actions.archive("c1") { outcome ->
@@ -187,10 +182,8 @@ fun SessionMenuGallerySection() {
                     if (!LocalGalleryCapture.current) {
                         SessionMenuControls(
                             pinned = pinned,
-                            canWrite = canWrite,
                             offline = offline,
                             onPinned = { pinned = it },
-                            onCanWrite = { canWrite = it },
                             onOffline = { offline = it },
                             log = log,
                         )
@@ -205,10 +198,8 @@ fun SessionMenuGallerySection() {
 @Composable
 private fun SessionMenuControls(
     pinned: Boolean,
-    canWrite: Boolean,
     offline: Boolean,
     onPinned: (Boolean) -> Unit,
-    onCanWrite: (Boolean) -> Unit,
     onOffline: (Boolean) -> Unit,
     log: List<String>,
 ) {
@@ -219,7 +210,6 @@ private fun SessionMenuControls(
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         SessionMenuToggleRow("Pinned", if (pinned) "on" else "off") { onPinned(!pinned) }
-        SessionMenuToggleRow("Can write", if (canWrite) "on" else "off") { onCanWrite(!canWrite) }
         SessionMenuToggleRow("Mode", if (offline) "Offline" else "Ok") { onOffline(!offline) }
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             BasicText(

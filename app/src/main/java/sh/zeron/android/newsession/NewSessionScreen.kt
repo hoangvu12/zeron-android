@@ -4,8 +4,6 @@ import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -72,8 +70,7 @@ fun NewSessionScreen(
  * frame**, like iOS's `init`), 92's remember-on-close/background effect,
  * the morph pinned to the card (`alwaysCard`), the focus-on-appear wait,
  * the canvas — and 94's create + first send: the handoff capture state
- * on the page and composer roots, the offline `canWrite` gate (Send
- * disabled, chips live) and the `onSend` handler that creates the chat,
+ * on the page and composer roots and the `onSend` handler that creates the chat,
  * captures the handoff and calls `onCreated`.
  */
 @Composable
@@ -128,21 +125,6 @@ internal fun NewSessionScreenBody(
             onCreated = { chatId, handoff -> latestOnCreated(chatId, handoff) },
         )
     }
-
-    // The offline gate: Send disabled while the target engine is offline
-    // (79's rule: no grace, no debounce); the chips stay live — the
-    // canvas passes `chipsCanWrite = true` below, so the user can move
-    // off an offline engine. Reading the value here (not only inside
-    // the SideEffect) makes a flip recompose this scope, so the push
-    // below always sees the fresh value.
-    val canWrite by remember {
-        derivedStateOf {
-            val o = ns.currentOptions
-            newSessionCanWrite(ns.draft, o?.projects ?: emptyList(), o?.hosts ?: emptyList())
-        }
-    }
-    val canWriteNow = canWrite
-    SideEffect { composer.canWrite = canWriteNow }
 
     remember(composer) {
         // Runs once, before the first frame (iOS sets these in `init` and
@@ -205,7 +187,6 @@ internal fun NewSessionScreenBody(
                     .handoffComposer(capture),
                 textHidden = capture.textHidden,
                 onTextRect = capture::onTextRect,
-                chipsCanWrite = true,
             )
         },
         state = canvasState,

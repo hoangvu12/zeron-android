@@ -283,7 +283,6 @@ private fun LiveDemo() {
             ChipStrip(
                 chips = page.chips,
                 chipMenus = page.menus.providers(),
-                canWrite = true,
                 onChipTap = {},
             )
         }

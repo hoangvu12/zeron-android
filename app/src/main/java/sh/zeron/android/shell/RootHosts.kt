@@ -30,12 +30,10 @@ import sh.zeron.android.newsession.HandoffOverlayHost
  * - a toast draws above sheets, action sheets and menus;
  * - a toast shown just before a root swap survives the swap (the toaster
  *   state is hoisted by the caller, app-scoped);
- * - `SheetHost` sits **outside** the root swap: the pairing root's Pair
- *   page (34/72) is presented through the same host, a sheet survives a
+ * - `SheetHost` sits **outside** the root swap: a sheet survives a
  *   width collapse (Phone ↔ Split), and 31's page-sheet recession scales
  *   the whole root, as iOS's window root view recedes. Ticket 95 wraps
- *   the `SheetHost` line in its `HandoffOverlayHost`; ticket 72 wraps
- *   the root content in `ProvidePairPage` inside it.
+ *   the `SheetHost` line in its `HandoffOverlayHost`.
  * - ticket 125's `ImageViewerHost` wraps `SheetHost` (inside
  *   `GlassMenuHost`, outside the sheet): the full-screen image viewer
  *   covers the session screen, the tab chrome and any sheet, while

@@ -114,15 +114,15 @@ fun pillContent(banner: SessionChrome.Banner, nowMs: Long): PillContent = when (
     SessionChrome.Banner.Editing -> PillContent(PillGlyph.DotInput, "Editing queued message · Tap to cancel")
     is SessionChrome.Banner.EngineParked -> when (banner.reason) {
         SessionChrome.ParkedReason.Revoked ->
-            PillContent(PillGlyph.DotDanger, "Session revoked · Tap to pair again")
+            PillContent(PillGlyph.DotDanger, "Session revoked")
         SessionChrome.ParkedReason.IdentityChanged ->
-            PillContent(PillGlyph.DotDanger, "Engine changed · Tap to pair again")
+            PillContent(PillGlyph.DotDanger, "Engine changed")
         // Never derived (Incompatible maps to EngineOff); defensive only.
         SessionChrome.ParkedReason.Incompatible ->
-            PillContent(PillGlyph.DotIdle, "Engine off. Cached history is read-only.")
+            PillContent(PillGlyph.DotIdle, "Engine off")
     }
-    SessionChrome.Banner.EngineOff -> PillContent(PillGlyph.DotIdle, "Engine off. Cached history is read-only.")
-    SessionChrome.Banner.Reconnecting -> PillContent(PillGlyph.DotIdle, "Reconnecting… Cached history is read-only.")
+    SessionChrome.Banner.EngineOff -> PillContent(PillGlyph.DotIdle, "Engine off")
+    SessionChrome.Banner.Reconnecting -> PillContent(PillGlyph.DotIdle, "Reconnecting…")
     SessionChrome.Banner.None -> error("None has no pill content")
 }
 

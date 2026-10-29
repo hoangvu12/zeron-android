@@ -165,7 +165,7 @@ private fun NewSessionChipsGalleryFixture(caption: String, chips: List<ComposerC
                 .width(400.dp)
                 .background(palette.elevated, RoundedCornerShape(26.dp)),
         ) {
-            ChipStrip(chips, emptyMap(), canWrite = true, onChipTap = {})
+            ChipStrip(chips, emptyMap(), onChipTap = {})
         }
     }
 }

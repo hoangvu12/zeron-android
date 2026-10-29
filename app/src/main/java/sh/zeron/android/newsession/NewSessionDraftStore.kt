@@ -195,7 +195,7 @@ class NewSessionDraftStore(
         if (enginesLeft <= 0) {
             // The last engine: the iOS sign-out analogue — a plain reset
             // (the launch harness is re-applied only on debug builds, so a
-            // live test that forgets and re-pairs never starts a real
+            // live test that forgets an engine never starts a real
             // agent; in release this is exactly iOS's `NewSessionDraft()`).
             synchronized(lock) {
                 forgottenIds.addAll(projectIds)

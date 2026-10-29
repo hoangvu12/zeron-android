@@ -220,7 +220,7 @@ private class StatesReader : AttachmentReader {
 }
 
 /**
- * Scales the fixed 393 dp stage into the section body (the pairing-root
+ * Scales the fixed 393 dp stage into the section body (the app-root
  * pattern): the tiles keep their exact dp geometry, the whole stage just
  * shrinks on narrow bodies.
  */

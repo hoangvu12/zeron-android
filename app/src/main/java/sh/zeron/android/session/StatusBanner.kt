@@ -79,7 +79,7 @@ fun sendingBridge(sendStarted: Long?, turnStarted: Long?): Boolean =
  * 3. `Failed(settingFailure)` — the last `setSessionConfig` threw (upstream PR #664);
  * 4. `EngineParked(reason, engineId)` — `Parked(REVOKED)` / `Parked(IDENTITY_CHANGED)`;
  * 5. `EngineOff` — the engine record is missing, or `Parked(INCOMPATIBLE)` (a version
- *    mismatch is not repairable by re-pairing);
+ *    mismatch is not recoverable from the phone);
  * 6. `Reconnecting` — the engine is `Connecting`, `Reconnecting` or `Offline`;
  * 7. `Sending` — (the engine is `Connected` here by construction) the send→turn bridge
  *    over the **first** `SENDING` pending send's `sentAtMs`;
@@ -101,13 +101,13 @@ fun deriveBanner(i: BannerInputs): SessionChrome.Banner {
     i.settingFailure?.let { return SessionChrome.Banner.Failed(it) }
     // 4–6 — the engine link decides.
     when (val l = i.link) {
-        // 4 — parked for a repairable reason: the tap re-pairs this engine.
+        // 4 — parked for a recoverable reason.
         is EngineLink.Parked -> when (l.reason) {
             SessionChrome.ParkedReason.Revoked,
             SessionChrome.ParkedReason.IdentityChanged,
             -> return SessionChrome.Banner.EngineParked(l.reason, l.engineId)
 
-            // 5 — a version mismatch is not repairable by re-pairing.
+            // 5 — a version mismatch is not recoverable from the phone.
             SessionChrome.ParkedReason.Incompatible -> return SessionChrome.Banner.EngineOff
         }
         // 5 — the engine record is missing (forgotten / unknown).
@@ -145,23 +145,20 @@ sealed interface BannerTap {
 
     /** `retryDelivery()` on the IO scope, errors logged and swallowed (iOS `:197-199`). */
     data object RetryDelivery : BannerTap
-
-    /** Open ticket 72's Pair page in re-pair mode with `replaceEngineId = engineId`. */
-    data class Repair(val engineId: String) : BannerTap
 }
 
 /**
  * The tap dispatch table: `Editing` cancels the edit; `NotDelivered`
  * retries — but only when [engineConnected] (the engine state at the last
  * fill; the web skips the retry when the engine is not connected,
- * `chat-page.tsx:1251-1254`); `EngineParked` re-pairs. Every other banner
+ * `chat-page.tsx:1251-1254`). Every other banner
  * consumes the tap without doing anything, like the iOS `UIControl`.
  */
 fun bannerTapAction(banner: SessionChrome.Banner, engineConnected: Boolean): BannerTap =
     when (banner) {
         SessionChrome.Banner.Editing -> BannerTap.CancelEdit
         SessionChrome.Banner.NotDelivered -> if (engineConnected) BannerTap.RetryDelivery else BannerTap.None
-        is SessionChrome.Banner.EngineParked -> BannerTap.Repair(banner.engineId)
+        is SessionChrome.Banner.EngineParked,
         is SessionChrome.Banner.Failed,
         SessionChrome.Banner.EngineOff,
         SessionChrome.Banner.Reconnecting,
@@ -218,10 +215,7 @@ fun errorText(t: Throwable): String = when (t) {
  * - **From the screen (75/76):** `controller.filler<StatusBanner>()` (declared by ticket 51).
  * - **75/74 placement:** `StatusPillRow(shownBanner(chrome.banner, editing),
  *   onTap = banner::onTap, tapEnabled = { b -> bannerTapAction(b, true) != BannerTap.None })`
- *   where `editing` is ticket 83's flag; set
- *   `banner.openPairPage = { id -> LocalPairPage.current?.openPairPage(prefill = null, replaceEngineId = id) }`
- *   (ticket 72's `PairPageLauncher`; capture the launcher in composition) once when the
- *   screen is composed.
+ *   where `editing` is ticket 83's flag.
  * - **78 (send):** after `handle.send(...)` returns → `noteSendSucceeded()`; when it throws
  *   (not `CancellationException`) → `noteSendFailed(t)` — through the [SendReporter]
  *   interface the binding holds.
@@ -241,10 +235,6 @@ class StatusBanner(
     /** Ticket 83: cancels the queued-message edit. Main thread. */
     @Volatile
     var onEditingTap: (() -> Unit)? = null
-
-    /** Ticket 72's Pair page in re-pair mode. Main thread. */
-    @Volatile
-    var openPairPage: ((replaceEngineId: String) -> Unit)? = null
 
     /** The last send's failure text, or null. Sticky until the next successful send. */
     @Volatile
@@ -330,7 +320,6 @@ class StatusBanner(
                 }
                 invalidate()
             }
-            is BannerTap.Repair -> openPairPage?.invoke(action.engineId)
         }
     }
 

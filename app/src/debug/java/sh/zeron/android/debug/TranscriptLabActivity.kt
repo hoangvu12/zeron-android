@@ -30,7 +30,7 @@ import uniffi.zeron_core.DebugEntry
  * `TranscriptLabViewController.swift`): the real transcript host (65/68)
  * fed fixture turns through `setDebugEntries`, a scripted stream, a
  * minimal input row, and the `turns`/`autostream`/`top`/`autoscroll`
- * launch extras. No engine, no pairing, no notifications; the whole
+ * launch extras. No engine, no sign-in, no notifications; the whole
  * class lives in `src/debug`, so release builds never contain it.
  *
  * Reached by

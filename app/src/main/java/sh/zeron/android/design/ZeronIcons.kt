@@ -322,7 +322,7 @@ object ZeronIcons {
     /**
      * The Zeron ribbon bow (android-next #03) — the notification small
      * icon and the themed launcher icon's monochrome layer; listed here for
-     * the icons gallery. The Pair page shows the launcher artwork instead.
+     * the icons gallery.
      */
     val ZeronBow = ZeronIcon.Vector(R.drawable.zi_zeron_bow)
 

@@ -16,7 +16,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import sh.zeron.android.session.SessionEventHub
 import sh.zeron.android.sessions.SessionRowVM
-import sh.zeron.android.update.SemVer
 import uniffi.zeron_core.CoreClient
 import uniffi.zeron_core.SessionHandle
 import uniffi.zeron_core.SubagentInfo
@@ -221,6 +220,12 @@ class SideChatsModel(
  * Pure.
  */
 fun sideChatsSupported(engineVersion: String?): Boolean {
-    val v = SemVer.parse(engineVersion) ?: return true
-    return v.major > 0L || v.minor >= 5L
+    // `major.minor` of a lenient semver: a leading `v`, build metadata and
+    // the pre-release are ignored, a missing minor reads as 0.
+    val parts = engineVersion?.trim()?.removePrefix("v")
+        ?.substringBefore('+')?.substringBefore('-')?.split('.')
+        ?: return true
+    val major = parts[0].toLongOrNull() ?: return true
+    val minor = parts.getOrElse(1) { "0" }.toLongOrNull() ?: return true
+    return major > 0L || minor >= 5L
 }

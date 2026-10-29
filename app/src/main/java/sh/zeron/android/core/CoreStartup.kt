@@ -12,23 +12,18 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import sh.zeron.android.BuildConfig
-import sh.zeron.android.pairing.DeviceLabel
-import sh.zeron.android.pairing.PairedEngineStore
 import sh.zeron.android.session.SessionEventHub
 import uniffi.zeron_core.ClientEvent
 import uniffi.zeron_core.ClientListener
 import uniffi.zeron_core.CoreClient
 import uniffi.zeron_core.CoreConfig
 import uniffi.zeron_core.EngineView
-import uniffi.zeron_core.PairedEngine
-import uniffi.zeron_core.RoomRecord
 
 /** The startup pipeline's state; the splash (ticket 35) holds on `Loading`. */
 sealed interface CoreStartState {
@@ -48,15 +43,12 @@ fun interface ClientEventSink {
 
 /**
  * The app's startup (ticket 71, the port of `AppModel.init`/`start`):
- * load the stored engines from [PairedEngineStore], build the single
- * [CoreClient], publish its engine views, then flip [state] to `Ready`.
+ * build the single [CoreClient], publish its engine views, then flip
+ * [state] to `Ready`. The credentials it starts from arrive with sign-in
+ * (#10 swaps this onto the Zeron core's `CoreClient(config, credentials,
+ * listener)`).
  *
- * Also owns the app's single [ClientListener]: `EngineIdentityPinned`
- * events flow to `store.pin` through a channel, `RoomEngineJoined`
- * (ADR 0011, ticket 04: a heal pass minted a missing member's session)
- * flow to `store.upsert` through their own channel — the heal itself runs
- * in Rust on the existing start/network-change moments, so this is the
- * only persistence seam it needs — and `EnginesChanged`
+ * Also owns the app's single [ClientListener]: `EnginesChanged`
  * refreshes [engines] through a coalescing flow, every event fans
  * out to the [ClientEventSink]s other tickets register (40/42) —
  * register them before [start] to see every event — and every event
@@ -67,17 +59,11 @@ fun interface ClientEventSink {
  */
 class CoreStartup(
     private val context: Context,
-    private val store: PairedEngineStore,
     private val scope: CoroutineScope,
     private val io: CoroutineDispatcher = Dispatchers.IO,
     private val compute: CoroutineDispatcher = Dispatchers.Default,
-    private val newClient: (
-        CoreConfig,
-        List<PairedEngine>,
-        List<RoomRecord>,
-        ClientListener,
-    ) -> CoreClient = { config, engines, rooms, listener ->
-        CoreClient(config, engines, rooms, listener)
+    private val newClient: (CoreConfig, ClientListener) -> CoreClient = { config, listener ->
+        CoreClient(config, emptyList(), emptyList(), listener)
     },
     private val onClientReady: (CoreClient) -> Unit = {},
     /**
@@ -100,8 +86,6 @@ class CoreStartup(
     private val started = AtomicBoolean(false)
     private val sinks = CopyOnWriteArrayList<ClientEventSink>()
 
-    private val pins = Channel<ClientEvent.EngineIdentityPinned>(Channel.UNLIMITED)
-    private val roomJoins = Channel<ClientEvent.RoomEngineJoined>(Channel.UNLIMITED)
     private val enginesDirty = MutableSharedFlow<Unit>(
         extraBufferCapacity = 1,
         onBufferOverflow = BufferOverflow.DROP_OLDEST,
@@ -114,19 +98,6 @@ class CoreStartup(
     }
 
     init {
-        scope.launch(io) {
-            for (pinned in pins) {
-                store.pin(pinned.engineId, pinned.deviceId, pinned.name)
-            }
-        }
-        scope.launch(io) {
-            for (joined in roomJoins) {
-                // The heal minted a credential in Rust; persisting it here
-                // is what keeps the engine across restarts (otherwise the
-                // next start re-presents — correct, just wasteful).
-                store.upsert(joined.engine)
-            }
-        }
         scope.launch(compute) {
             enginesDirty.collect { clientRef.get()?.let { _engines.value = it.engines() } }
         }
@@ -137,14 +108,7 @@ class CoreStartup(
         if (!started.compareAndSet(false, true)) return
         scope.launch(io) {
             try {
-                // 1. Load the stored pairings before anything decides what
-                //    to render — the pairing root must never flash first.
-                //    The joined rooms ride along (ticket 04: their `room:`
-                //    blobs are the heal's fuel — book members without an
-                //    engine entry get one dial each on the same start).
-                val engines = store.load()
-                val rooms = store.loadRooms()
-                // 2. The redeem label is read once per process.
+                // 1. The device label is read once per process.
                 val dataDir = File(context.noBackupFilesDir, "core").apply { mkdirs() }
                 val config = CoreConfig(
                     dataDir = dataDir.path,
@@ -152,26 +116,22 @@ class CoreStartup(
                     platform = "android",
                     appVersion = BuildConfig.VERSION_NAME,
                     showMockHarness = BuildConfig.DEBUG,
-                    // android-next#02: libzeron_tailcat.so, dlopen'ed by
-                    // the core on the first Tailcat dial.
-                    nativeLibDir = context.applicationInfo.nativeLibraryDir,
                 )
-                // 3. Never log `engines` or `rooms` (both carry secrets);
-                //    the constructor never dials.
+                // 2. The constructor never dials.
                 val client = try {
-                    newClient(config, engines, rooms, listener)
+                    newClient(config, listener)
                 } catch (error: Throwable) {
                     if (error is CancellationException) throw error
                     Log.e(TAG, "core start failed", error)
                     _state.value = CoreStartState.Failed(error.message ?: error.javaClass.simpleName)
                     return@launch
                 }
-                // 4. Order matters: engines published before Ready, so
+                // 3. Order matters: engines published before Ready, so
                 //    anyone who sees Ready sees a non-null list.
                 clientRef.set(client)
                 _engines.value = client.engines()
                 _state.value = CoreStartState.Ready
-                // 5.
+                // 4.
                 onClientReady(client)
             } catch (cancelled: CancellationException) {
                 throw cancelled
@@ -193,8 +153,6 @@ class CoreStartup(
         // here would re-post every event forever (#621).
         sessionEvents.onClientEvent(event)
         when (event) {
-            is ClientEvent.EngineIdentityPinned -> pins.trySend(event)
-            is ClientEvent.RoomEngineJoined -> roomJoins.trySend(event)
             ClientEvent.EnginesChanged -> enginesDirty.tryEmit(Unit)
             else -> {}
         }

@@ -69,7 +69,6 @@ import sh.zeron.android.transcript.AttachmentReader
 import sh.zeron.android.transcript.TranscriptActions
 import sh.zeron.android.transcript.TranscriptHost
 import sh.zeron.android.transcript.TranscriptImageBinding
-import sh.zeron.android.transcript.engineReconnects
 import sh.zeron.android.transcript.TranscriptImageLoader
 import sh.zeron.android.transcript.TranscriptState
 import sh.zeron.android.transcript.rememberLinkRouter
@@ -433,7 +432,6 @@ internal fun SubagentScreen(route: SubagentRoute, modifier: Modifier = Modifier)
             loader = TranscriptImageLoader.get(context),
             engineDeviceId = { route.hostDeviceId },
             reader = route.attachments,
-            retries = engineReconnects(context, { route.hostDeviceId }),
             chatId = route.rootChatId,
         )
     }

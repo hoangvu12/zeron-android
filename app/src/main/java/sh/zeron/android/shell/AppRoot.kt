@@ -34,7 +34,7 @@ import sh.zeron.android.design.uiStyle
 /**
  * The observed state of the app root (android-ui-parity #35). [kind] is
  * the root on screen, `null` while `Loading`/`CoreFailed` — ticket 36
- * reads it to drop deep links on the pairing root. Written only from
+ * reads it to drop deep links on the welcome root. Written only from
  * [SideEffect]s (never during composition).
  */
 @Stable
@@ -50,11 +50,11 @@ class AppRootState {
  * - [RootInput.Loading]: nothing drawn; the splash stays ([FirstFrameHold]
  *   holds the first frame, and this box matches the launch background);
  * - [RootInput.CoreFailed]: the diagnostic screen ([CoreUnavailableScreen]);
- * - [RootInput.Ready]: the pairing root (34) with no engines, the phone
+ * - [RootInput.Ready]: the welcome root with no engines, the phone
  *   tab shell (26) under 840 dp, the tablet split (33) at 840 dp and
  *   wider — [chooseRoot] over this composable's real constraints.
  *
- * Pairing ↔ Shell swaps through [RootCrossfade]: the presentations are
+ * Welcome ↔ Shell swaps through [RootCrossfade]: the presentations are
  * dismissed instantly first, then the old root fades out **on top** of
  * the new one over 350 ms. Phone ↔ Split is in place, no fade (108 owns
  * the carry-over). The first root appears without animation —
@@ -71,7 +71,7 @@ class AppRootState {
  *   [ShellStateScope] here, so the hoisted shell state (tabs, tablet,
  *   sidebar, routers) lives exactly as long as the shell group: it
  *   survives every Phone ↔ Split switch (the scope is composed for both
- *   kinds) and is dropped after the 350 ms fade-out to Pairing. The
+ *   kinds) and is dropped after the 350 ms fade-out to Welcome. The
  *   default is the identity scope (previews, tests, the gallery).
  */
 @Composable
@@ -79,7 +79,7 @@ fun AppRoot(
     input: RootInput,
     state: AppRootState,
     presentations: RootPresentations,
-    pairing: @Composable () -> Unit,
+    welcome: @Composable () -> Unit,
     phone: @Composable () -> Unit,
     split: @Composable () -> Unit,
     modifier: Modifier = Modifier,
@@ -122,12 +122,12 @@ fun AppRoot(
                     beforeSwap = presentations::dismissAllInstantly,
                 ) { group ->
                     when (group) {
-                        RootGroup.Pairing -> {
+                        RootGroup.Welcome -> {
                             Box(
                                 Modifier
                                     .fillMaxSize()
-                                    .testTag("root-pairing"),
-                            ) { pairing() }
+                                    .testTag("root-welcome"),
+                            ) { welcome() }
                         }
 
                         RootGroup.Shell -> {
@@ -201,7 +201,7 @@ fun CoreUnavailableScreen(reason: String, modifier: Modifier = Modifier) {
  * The ticket's fake root: a full-size opaque box in [fill] with [label]
  * centred — for the previews, the Roborazzi goldens and the debug
  * gallery. The fills differ per root so the cross-fade and its mid-fade
- * composite are visible: Pairing = `palette.accent`, Phone =
+ * composite are visible: Welcome = `palette.accent`, Phone =
  * `palette.background`, Split = `palette.codeBackground`.
  */
 @Composable
@@ -247,7 +247,7 @@ private fun AppRootPreviewBody(appearance: Appearance) {
             input = RootInput.Ready(hasEngines = true),
             state = remember { AppRootState() },
             presentations = remember { RootPresentations() },
-            pairing = { FakeRoot("Pairing", palette.accent, palette.text) },
+            welcome = { FakeRoot("Welcome", palette.accent, palette.text) },
             phone = { FakeRoot("Phone", palette.background, palette.text) },
             split = { FakeRoot("Split", palette.codeBackground, palette.text) },
         )

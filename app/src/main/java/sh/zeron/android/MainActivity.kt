@@ -10,21 +10,14 @@ import android.view.Menu
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.lifecycle.lifecycleScope
 import java.io.File
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import sh.zeron.android.core.WallpaperStore
 import sh.zeron.android.composer.LocalDrafts
 import sh.zeron.android.design.GalleryLaunch
 import sh.zeron.android.notify.NotificationPermission
 import sh.zeron.android.notify.NotificationPrefs
-import sh.zeron.android.pairing.PairingLinks
-import sh.zeron.android.pairing.ffiAcceptsPairingUrl
 import sh.zeron.android.shell.AppRootState
-import sh.zeron.android.shell.DeepLink
 import sh.zeron.android.shell.DeepLinks
 import sh.zeron.android.shell.LaunchOptions
 import sh.zeron.android.shell.LocalShortcutSink
@@ -41,12 +34,12 @@ import sh.zeron.android.shell.toExtrasMap
  * The single activity (android-ui-parity #35): edge-to-edge with
  * transparent system bars, then the app root — [ZeronAppContent], which
  * mounts `ZeronTheme`, the font gate, the overlay hosts and
- * [sh.zeron.android.shell.AppRoot] (pairing / phone tab shell / tablet
+ * [sh.zeron.android.shell.AppRoot] (welcome / phone tab shell / tablet
  * split, with the 350 ms cross-fade).
  *
  * The platform splash is held ([holdFirstFrame]) until the root input
- * leaves `Loading` (the engine list is known) or 2000 ms pass, so a
- * paired user never sees the pairing root flash.
+ * leaves `Loading` or 2000 ms pass, so a signed-in user never sees the
+ * welcome root flash.
  *
  * Lifecycle observers (ProcessLifecycleOwner hooks) and the network
  * callback are registered in `ZeronApplication`, never here — #609
@@ -65,7 +58,7 @@ import sh.zeron.android.shell.toExtrasMap
  * `zeron://…` VIEW data go to the app-wide
  * [sh.zeron.android.shell.DeepLinkHub] (never straight to a router —
  * the shell is not composed yet at cold start), which dispatches after
- * the shell's first frame and drops links while the pairing root is on
+ * the shell's first frame and drops links while the welcome root is on
  * screen. The four debug extras (`wallpaper`, `wallpaper-effect`,
  * `harness`, `measureopen`) are parsed here **only**, in `onCreate`,
  * gated on the manifest's `FLAG_DEBUGGABLE` — never in `onNewIntent`.
@@ -85,11 +78,6 @@ class MainActivity : ComponentActivity() {
 
     /** One per activity: the bridge from the framework to the mounted shell. */
     private val shortcutSink = ShortcutSink()
-
-    private companion object {
-        /** android-app#30: the `pair` hold's budget (the redeemer's own). */
-        const val PAIR_HOLD_TIMEOUT_MS = 20_000L
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Before the first frame (the androidx edge-to-edge template):
@@ -115,9 +103,6 @@ class MainActivity : ComponentActivity() {
             // applies them before `showRoot`.
             if (debuggable) {
                 LaunchOptions.current.applyWallpaper(wallpaperTarget(WallpaperStore.get(this)))
-                // android-app#30: the flow rig's pairing URLs, redeemed
-                // before the first frame is released (see the hold below).
-                app.redeemLaunchPairs(LaunchOptions.current.pair)
             }
             handleIntent(intent)
         }
@@ -132,19 +117,8 @@ class MainActivity : ComponentActivity() {
                 ZeronAppContent(app, rootState)
             }
         }
-        // The splash stays until the engine list is known (max 2000 ms).
-        // android-app#30: a launch that carried the `pair` extra (debug
-        // only — `LaunchOptions.parse` empties it otherwise) waits for the
-        // redeemed engines instead, so the flow rig never flashes the
-        // pairing root: the hold bounds it at 20 s, the redeemer's own
-        // startup budget, and the pairing root shows on failure (the
-        // test's own waits then name the rig).
-        val awaitingPair = LaunchOptions.current.pair.isNotEmpty()
-        holdFirstFrame(timeoutMs = if (awaitingPair) PAIR_HOLD_TIMEOUT_MS else 2_000) {
-            val root = app.rootInput.value
-            root !is RootInput.Loading &&
-                (!awaitingPair || root is RootInput.Ready && root.hasEngines)
-        }
+        // The splash stays until the root is known (max 2000 ms).
+        holdFirstFrame(timeoutMs = 2_000) { app.rootInput.value !is RootInput.Loading }
         // The debug design gallery (android-ui-parity #22): adb am start with
         // `--es route gallery` opens it on top of the app. Debuggable builds
         // only; the activity does not exist in release.
@@ -192,46 +166,20 @@ class MainActivity : ComponentActivity() {
      * app-wide [sh.zeron.android.shell.DeepLinkHub] — never straight to
      * a router (the shell is not composed yet at cold start). An intent
      * carrying both submits both; the hub's single slot keeps the last
-     * one, the route. Ticket 139 adds its `ACTION_SEND` branch here.
+     * one, the route.
      */
     private fun handleIntent(intent: Intent) {
         val hub = (application as ZeronApplication).deepLinks
         if (intent.action == Intent.ACTION_VIEW) {
             val link = DeepLinks.parse(intent.dataString)
             if (link == null) {
-                // Unknown link: ignored, logged. Never a `pair` link (the
-                // `pair` host always parses), so the pairing token can
-                // never land in a log line.
+                // Unknown link: ignored, logged.
                 Log.i("DeepLinks", "ignored ${intent.dataString}")
             } else {
                 hub.submit(link)
             }
         }
         LaunchOptions.route(intent.extras.toExtrasMap())?.let(hub::submit)
-        // Ticket 139: the share trampoline re-targets its surviving
-        // candidates here as an explicit ACTION_SEND (never the raw
-        // shared text). The FFI validation runs off the main thread; a
-        // share without an accepted link just leaves the app open, with
-        // a fixed-string log. The accepted link is re-wrapped as a pair
-        // deep link so both paths share one handler and one hold queue.
-        if (intent.action == Intent.ACTION_SEND) {
-            // runCatching: a hostile parcel can throw BadParcelableException.
-            val text = runCatching {
-                intent.getCharSequenceExtra(Intent.EXTRA_TEXT)?.toString()
-            }.getOrNull()
-            if (!text.isNullOrBlank()) {
-                lifecycleScope.launch {
-                    val url = withContext(Dispatchers.Default) {
-                        PairingLinks.urlFromSharedText(text, ::ffiAcceptsPairingUrl)
-                    }
-                    if (url == null) {
-                        Log.i("PairingLinks", "share ignored: no pairing link")
-                    } else {
-                        hub.submit(DeepLink.Pair(PairingLinks.deepLinkFor(url)))
-                    }
-                }
-            }
-        }
     }
 
     /**

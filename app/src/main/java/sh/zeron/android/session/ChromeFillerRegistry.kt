@@ -4,7 +4,7 @@ package sh.zeron.android.session
  * The ordered [ChromeFiller] factories (android-ui-parity #76 — ticket
  * 51's "a list composed by ticket 76"). Register at app start, before
  * the first session can open: the filler tickets (73 banner, 78 chips,
- * 79 canWrite, 82 queue, 89 chip menus, 91 questions) call [register]
+ * 82 queue, 89 chip menus, 91 questions) call [register]
  * from `ZeronApplication.onCreate`.
  *
  * [create] runs once per opened route, so each filler is a fresh
@@ -39,12 +39,6 @@ class ChromeFillerRegistry {
         entries.sortedWith(compareBy({ it.slot }, { it.seq })).map { it.factory(core) }
 
     companion object {
-        /**
-         * Ticket 79 (`canWrite`): first, so later fillers can read
-         * `chrome.canWrite`.
-         */
-        const val CAN_WRITE = 10
-
         /** Ticket 78 (chips) — iOS `refresh()` runs the chips first. */
         const val CHIPS = 20
 
@@ -55,11 +49,6 @@ class ChromeFillerRegistry {
          * #01's context chip at the worse of the two readings and feeds the
          * context menu's account half; it owns no chip of its own. */
         const val USAGE_CHIP = 22
-
-        /** The failover port (orchestration v2 ticket 09 + 07's pills):
-         * after the usage chip, before 73's banner — the Limited card's
-         * chrome derivation and its actions. */
-        const val LIMITED = 25
 
         /** Ticket 73 (banner). */
         const val BANNER = 30
