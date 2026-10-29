@@ -152,6 +152,16 @@ class ZeronIconsTest {
     }
 
     @Test
+    fun theAccountGlyphsAreBack() {
+        // #18 restores Settings' Account and Sign Out rows.
+        assertSame(ZeronIcons.PersonCropCircle, ZeronIcons.forSfName("person.crop.circle"))
+        assertSame(
+            ZeronIcons.RectanglePortraitAndArrowRight,
+            ZeronIcons.forSfName("rectangle.portrait.and.arrow.right"),
+        )
+    }
+
+    @Test
     fun droppedAndUnknownAndOutOfRangeNamesReturnNullWithoutThrowing() {
         for (name in listOf(
             "51.circle", // past SF's 0.circle…50.circle
@@ -162,8 +172,6 @@ class ZeronIconsTest {
             "-1.circle",
             "waveform", // dropped: voice
             "mic.fill",
-            "person.crop.circle", // dropped: account
-            "rectangle.portrait.and.arrow.right", // dropped: sign out
             "sparkle", // dropped: sign-in mark
             "tab-chat", // Zeron extras have no SF name
             "WifiOff",
