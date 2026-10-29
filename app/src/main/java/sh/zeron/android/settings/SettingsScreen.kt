@@ -20,7 +20,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import kotlinx.coroutines.flow.StateFlow
 import sh.zeron.android.ZeronApplication
-import sh.zeron.android.accounts.agentAccountsSection
+import sh.zeron.android.core.CloudStore
+import sh.zeron.android.shell.LaunchOptions
 import sh.zeron.android.design.LocalActionSheet
 import sh.zeron.android.design.LocalBottomChrome
 import sh.zeron.android.shell.LargeTitleScaffold
@@ -182,8 +183,9 @@ fun SettingsScreen(
     modifier: Modifier = Modifier,
     topInset: Dp = Dp.Unspecified,
     trailing: @Composable RowScope.() -> Unit = {},
-    accounts: sh.zeron.android.accounts.AgentAccountsSectionState =
-        sh.zeron.android.accounts.rememberAgentAccountsSectionState(),
+    cloud: CloudStore = (LocalContext.current.applicationContext as ZeronApplication).cloud,
+    demo: Boolean = (LocalContext.current.applicationContext as ZeronApplication).sessionHolder.isDemo,
+    demoCloud: Boolean = LaunchOptions.current.cloud,
     devices: DevicesSectionState = rememberDevicesSectionState(),
     notifications: NotificationSectionState = rememberNotificationSectionState(),
     appearance: AppearanceSectionState = rememberAppearanceSectionState(),
@@ -215,13 +217,15 @@ fun SettingsScreen(
     val group by groupByProject.collectAsState()
     val onGroup by rememberUpdatedState(onGroupByProjectChange)
     val nav = LocalNavStack.current
+    // #49 (iOS `cloud.refresh()` on load): the Cloud rows read the store's
+    // snapshot state, so a refresh landing later re-renders them.
+    LaunchedEffect(cloud) { cloud.refresh() }
+    val agents = agentsRows(AgentsCloud.of(cloud), demo, demoCloud)
     val sessionsStrings = sessionsSettingsStrings()
     SettingsScreenContent(listState, modifier, topInset, trailing) {
         accountSection(identity)
-        // TODO(#49): iOS's "Agents" section — Providers, then Cloud and
-        // Billing when the account is offered Cloud (`MoreViewController.swift:197-209`).
-        // Roboco's Agent Accounts summary holds the slot until then.
-        agentAccountsSection(accounts)
+        // #49: Providers, then Cloud and Billing when Cloud is offered.
+        agentsSection(agents) { id -> openAgentsRow(nav, id) }
         devicesSection(devices)
         // TODO(#61): the "Voice" section, only while voice is available
         // (`MoreViewController.swift:213-216`).

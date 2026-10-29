@@ -95,6 +95,9 @@ class ZeronIconsTest {
         "bubble.left.and.text.bubble.right",
         "apple.terminal",
         "bubble.left.and.bubble.right",
+        "cpu",
+        "cloud",
+        "creditcard",
     )
 
     @Test
@@ -315,6 +318,9 @@ class ZeronIconsTest {
             ZeronIcons.BubbleLeftAndTextBubbleRight to R.drawable.zi_chat_round_line, // #33
             ZeronIcons.Terminal to R.drawable.zi_terminal, // #33
             ZeronIcons.BubbleLeftAndBubbleRight to R.drawable.zi_bubble_left_and_bubble_right, // #40
+            ZeronIcons.Cpu to R.drawable.zi_cpu, // #49
+            ZeronIcons.Cloud to R.drawable.zi_cloud, // #49
+            ZeronIcons.CreditCard to R.drawable.zi_creditcard, // #49
             ZeronIcons.Refresh to R.drawable.zi_refresh, // android-next#04
             ZeronIcons.PersonCropCircle to R.drawable.zi_user_circle, // #18
             ZeronIcons.RectanglePortraitAndArrowRight to R.drawable.zi_logout_2, // #18

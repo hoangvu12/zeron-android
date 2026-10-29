@@ -62,9 +62,8 @@ fun ShellRouteContent(route: NavRoute) {
         // android-next #06: a subagent's read-only transcript, pushed from
         // a spawn card or the Side Chats & Agents sheet.
         is SubagentRoute -> route.Content()
-        // android-next #05: the Accounts & Usage page — the Settings →
-        // Agent Accounts row, the usage chip's "Accounts & Usage…" row
-        // and the session ⋯ menu's "Account & Usage" push it.
+        // android-next #05: the Accounts & Usage page — an error card's
+        // "Log in" and (until #50) Settings → Agents → Providers push it.
         is AgentAccountsRoute -> AgentAccountsScreen(route)
         else -> Unit
     }

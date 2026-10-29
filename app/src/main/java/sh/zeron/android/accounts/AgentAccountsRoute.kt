@@ -3,9 +3,10 @@ package sh.zeron.android.accounts
 import sh.zeron.android.shell.NavRoute
 
 /**
- * The route the Settings → Agent Accounts row, the composer usage chip's
- * "Accounts & Usage…" row and the session ⋯ menu's "Account & Usage" push
- * (android-next#05): the Accounts & Usage page.
+ * The Accounts & Usage page's route (android-next#05). Pushed by an
+ * error card's "Log in" and, until the Providers page lands (#50), by
+ * Settings → Agents → Providers (#49). Roboco's usage chip and ⋯ "Account &
+ * Usage" entry points are gone (05 I1/I2).
  *
  * [deviceId] is the computer whose accounts the page shows — the engine
  * device id the opener holds (`null` = the primary device: the page picks
