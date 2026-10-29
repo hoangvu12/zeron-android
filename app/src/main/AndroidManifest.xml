@@ -34,6 +34,14 @@
         android:name="android.hardware.vulkan.version"
         android:version="0x401000"
         android:required="false" />
+    <!-- #60 (SPEC D13): the voice call. RECORD_AUDIO is asked inside the
+         call's Prepare step; MODIFY_AUDIO_SETTINGS for the communication
+         mode and device; the microphone foreground service keeps the call
+         with the screen off; WAKE_LOCK for the proximity screen-off lock. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <application
         android:name=".ZeronApplication"
         android:allowBackup="false"
@@ -57,7 +65,7 @@
                  autoVerify: custom scheme. One filter: scheme × the hosts,
                  any path. `callback` is the WorkOS redirect when the browser
                  has no Auth Tab (#15), `signed-in` the provider/device
-                 login's done page, `voice` the call notification (#61).
+                 login's done page, `voice` the call notification (#60).
                  Notification taps are explicit intents, not links. -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -90,6 +98,13 @@
             android:name=".background.DeliveryService"
             android:exported="false"
             android:foregroundServiceType="shortService|dataSync" />
+        <!-- #60: the voice call's microphone service and its CallStyle
+             notification (the Live Activity stand-in). Started only while
+             the app is visible, after the microphone grant. -->
+        <service
+            android:name=".voice.VoiceCallService"
+            android:exported="false"
+            android:foregroundServiceType="microphone" />
         <!-- android-ui-parity #87: the attach menu's camera capture file. No
              uses-permission CAMERA and no uses-feature camera: the capture
              intent needs neither, and a required feature would hide the app

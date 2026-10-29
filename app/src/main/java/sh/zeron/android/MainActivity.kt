@@ -35,6 +35,7 @@ import sh.zeron.android.shell.ZeronUrl
 import sh.zeron.android.shell.applyZeronEdgeToEdge
 import sh.zeron.android.shell.holdFirstFrame
 import sh.zeron.android.shell.toExtrasMap
+import sh.zeron.android.voice.VoiceCallService
 
 /**
  * The single activity (android-ui-parity #35): edge-to-edge with
@@ -123,6 +124,7 @@ class MainActivity : ComponentActivity() {
         // constant).
         val debuggable = (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
         LaunchOptions.current = LaunchOptions.parse(intent.extras.toExtrasMap(), debuggable)
+        if (LaunchOptions.current.remoteVoice) app.voice.forced = true
         if (savedInstanceState == null && !intent.isFromHistory()) {
             // Fresh launch only: a rotation or a Recents relaunch must not
             // re-import the wallpaper (bumping the store's generation) or
@@ -214,12 +216,15 @@ class MainActivity : ComponentActivity() {
                 // already cleared the Custom Tab; a waiting Cloud sign-in
                 // (#48) hears it, a device sign-in finishes on its own poll.
                 ZeronUrl.SignedIn -> app.browserReturns.links.tryEmit(ZeronUrl.SignedIn)
-                // TODO(#61): back to the voice stage while a call is live.
-                ZeronUrl.Voice -> Unit
+                // #60: back to the voice stage while a call is live (iOS
+                // `openURLContexts`); the stage itself is #61's.
+                ZeronUrl.Voice -> app.voice.requestStage()
                 // Unknown link: ignored, logged.
                 null -> Log.i("DeepLinks", "ignored ${intent.dataString}")
             }
         }
+        // #60: the call notification's tap.
+        if (intent.action == VoiceCallService.ACTION_OPEN_STAGE) app.voice.requestStage()
         DeepLinks.notificationTap(intent.getStringExtra(DeepLinks.EXTRA_CHAT_ID))?.let(hub::submit)
         val debuggable = (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
         LaunchOptions.route(intent.extras.toExtrasMap(), debuggable)?.let(hub::submit)
