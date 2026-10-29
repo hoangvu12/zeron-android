@@ -32,10 +32,12 @@ data class BottomStackModel(
     val bannerShown: Boolean = false,
     /** Ticket 83's edit-lease flag (73's display overlay; never structural). */
     val editing: Boolean = false,
+    /** #40: the companion strip has a chip (iOS `!strip.state.isEmpty`). */
+    val stripShown: Boolean = false,
 ) {
-    /** The pill row shows for a banner **or** an edit (`:502`). */
+    /** The pill row shows for a banner, an edit, or the companion strip (`:502`, `:776`). */
     val pillShown: Boolean
-        get() = bannerShown || editing
+        get() = bannerShown || editing || stripShown
 
     /** The queue shows when non-empty and no questions (`:500`). */
     val queueShown: Boolean
@@ -59,11 +61,12 @@ data class BottomStackModel(
          * isEditing)`, and the pill slot still renders
          * `shownBanner(chrome.banner, editing)` (73).
          */
-        fun from(chrome: SessionChrome, editing: Boolean): BottomStackModel = BottomStackModel(
+        fun from(chrome: SessionChrome, editing: Boolean, stripShown: Boolean = false): BottomStackModel = BottomStackModel(
             questionsShown = chrome.questions != null,
             queueCount = chrome.queue.size,
             bannerShown = chrome.banner != SessionChrome.Banner.None,
             editing = editing,
+            stripShown = stripShown,
         )
     }
 }
@@ -78,7 +81,9 @@ data class BottomStackModel(
 fun isStructural(old: BottomStackModel, new: BottomStackModel): Boolean =
     old.questionsShown != new.questionsShown ||
         old.queueCount != new.queueCount ||
-        old.bannerShown != new.bannerShown
+        old.bannerShown != new.bannerShown ||
+        // #40 (iOS `stripShown != stripWanted`): the row appearing for the strip alone.
+        (old.bannerShown || old.stripShown) != (new.bannerShown || new.stripShown)
 
 /** The four stack slots, top to bottom (`SessionViewController.swift:122`). */
 enum class BottomStackSlot { Pill, Queue, Questions, Composer }

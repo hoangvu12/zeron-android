@@ -8,12 +8,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import sh.zeron.android.companions.CompanionCounts
 import sh.zeron.android.session.SessionEventHub
 import sh.zeron.android.sessions.SessionRowVM
 import uniffi.zeron_core.CoreClient
@@ -31,8 +33,10 @@ enum class AgentState { Running, Done, Failed }
  */
 @Immutable
 data class SideChatsAgent(
-    /** Its transcript doc (`{chatId}--sub--{id}`, scoped): the viewer's id. */
-    val docId: String,
+    /** The spawn's tool part id (stable before a doc is bound). */
+    val id: String,
+    /** Its transcript doc (`{chatId}--sub--{id}`, scoped): the viewer's id; `null` until the host binds one. */
+    val docId: String?,
     /** What the spawn asked for. */
     val title: String,
     val state: AgentState,
@@ -46,21 +50,16 @@ data class SideChatsAgent(
     val running: Boolean get() = state == AgentState.Running
 
     companion object {
-        /**
-         * Null while the subagent has no transcript doc yet (Zeron's
-         * `SubagentRow.docId` is optional): there is nothing to open.
-         * TODO(#40): the companions model lists those too.
-         */
-        fun from(info: SubagentRow): SideChatsAgent? = info.docId?.let { docId ->
-            SideChatsAgent(
-                docId = docId,
-                title = info.title,
-                state = agentState(info.state),
-                tail = info.tail,
-                model = info.model,
-                spawnedAtMs = info.startedAtMs,
-            )
-        }
+        /** Every spawn counts (#40), with or without a doc yet; only one with a doc opens. */
+        fun from(info: SubagentRow): SideChatsAgent = SideChatsAgent(
+            id = info.id,
+            docId = info.docId,
+            title = info.title,
+            state = agentState(info.state),
+            tail = info.tail,
+            model = info.model,
+            spawnedAtMs = info.startedAtMs,
+        )
     }
 }
 
@@ -69,20 +68,6 @@ fun agentState(state: SubagentState): AgentState = when (state) {
     SubagentState.RUNNING -> AgentState.Running
     SubagentState.DONE -> AgentState.Done
     SubagentState.FAILED -> AgentState.Failed
-}
-
-/**
- * The header button's badge (upstream #899's `syncBar`): `● N` on the
- * accent while subagents run, else a quiet count of everything hanging
- * off the chat (the default red would read as unread).
- */
-@Immutable
-data class SideChatsBadge(val running: Int, val total: Int) {
-    val text: String get() = if (running > 0) "● $running" else total.toString()
-    val accent: Boolean get() = running > 0
-
-    /** iOS `accessibilityValue`: "N running" while anything runs. */
-    val a11yValue: String? get() = if (running > 0) "$running running" else null
 }
 
 /** Everything the sheet and the header button render for one chat. */
@@ -94,11 +79,21 @@ data class SideChatsUi(
     val chats: List<SessionRowVM> = emptyList(),
     /** Finished (done or failed) subagents, newest spawn first. */
     val finished: List<SideChatsAgent> = emptyList(),
+    /** The chat is itself a side chat: its siblings live with the parent, so the strip counts none. */
+    val isSideChat: Boolean = false,
 ) {
     val total: Int get() = running.size + chats.size + finished.size
 
-    /** `null` — the button hides — while nothing hangs off the chat (iOS `total > 0`). */
-    val badge: SideChatsBadge? get() = if (total > 0) SideChatsBadge(running.size, total) else null
+    /**
+     * The strip and the nav badge (#40, iOS `syncCompanions`).
+     * TODO(#44): terminals and live terminals from the terminal store.
+     */
+    val companions: CompanionCounts
+        get() = CompanionCounts(
+            agents = running.size + finished.size,
+            runningAgents = running.size,
+            sideChats = if (isSideChat) 0 else chats.size,
+        )
 
     companion object {
         /**
@@ -106,10 +101,11 @@ data class SideChatsUi(
          * each newest first (the chips arrive in spawn order), and the
          * children as the workspace orders them. Pure.
          */
-        fun of(agents: List<SideChatsAgent>, children: List<SessionRowVM>): SideChatsUi = SideChatsUi(
+        fun of(agents: List<SideChatsAgent>, children: List<SessionRowVM>, isSideChat: Boolean = false): SideChatsUi = SideChatsUi(
             running = agents.filter { it.running }.asReversed(),
             chats = children,
             finished = agents.filter { !it.running }.asReversed(),
+            isSideChat = isSideChat,
         )
     }
 }
@@ -128,6 +124,9 @@ interface SideChatsSource {
      * [parentChatId], archived ones left out, as session-row view models.
      */
     fun children(parentChatId: String): List<SessionRowVM>
+
+    /** Whether [chatId] is itself a side chat (its row has a parent). */
+    fun isSideChat(chatId: String): Boolean = false
 }
 
 /**
@@ -139,12 +138,14 @@ class CoreSideChatsSource(
     private val client: () -> CoreClient?,
     private val handle: SessionHandle,
 ) : SideChatsSource {
-    override fun agents(): List<SideChatsAgent> = handle.subagents().mapNotNull { SideChatsAgent.from(it) }
+    override fun agents(): List<SideChatsAgent> = handle.subagents().map { SideChatsAgent.from(it) }
 
     override fun children(parentChatId: String): List<SessionRowVM> =
         client()?.childSessions(parentChatId).orEmpty()
             .filter { !it.archived }
             .map { SessionRowVM.from(it) }
+
+    override fun isSideChat(chatId: String): Boolean = client()?.sessionRow(chatId)?.parentChatId != null
 }
 
 /**
@@ -187,7 +188,12 @@ class SideChatsModel(
         unregister = hub.register(parentChatId) { trigger.trySend(Unit) }
         trigger.trySend(Unit)
         scope.launch {
-            for (token in trigger) refresh()
+            for (token in trigger) {
+                refresh()
+                // Streaming fires a session change per frame; the chips
+                // settle at most four times a second (iOS 0.25 s).
+                delay(SETTLE_MS)
+            }
         }
     }
 
@@ -206,9 +212,15 @@ class SideChatsModel(
         scope.cancel()
     }
 
+    private companion object {
+        const val SETTLE_MS = 250L
+    }
+
     private suspend fun refresh() {
         val next = try {
-            withContext(io) { SideChatsUi.of(source.agents(), source.children(parentChatId)) }
+            withContext(io) {
+                SideChatsUi.of(source.agents(), source.children(parentChatId), source.isSideChat(parentChatId))
+            }
         } catch (cancelled: CancellationException) {
             throw cancelled
         } catch (t: Throwable) {

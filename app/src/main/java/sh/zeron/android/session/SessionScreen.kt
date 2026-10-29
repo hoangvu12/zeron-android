@@ -39,6 +39,9 @@ import sh.zeron.android.composer.QueueEditPort
 import sh.zeron.android.composer.QueuePanel
 import sh.zeron.android.composer.SessionDraftEffect
 import sh.zeron.android.composer.sessionDraftSaver
+import sh.zeron.android.companions.CompanionCounts
+import sh.zeron.android.companions.CompanionSection
+import sh.zeron.android.companions.CompanionStrip
 import sh.zeron.android.sessions.rememberSessionListOpener
 import sh.zeron.android.shell.LocalNavEntry
 import sh.zeron.android.shell.LocalNavStack
@@ -122,8 +125,11 @@ import sh.zeron.android.transcript.widgets.imageTileRadius
  * @param onOpenSubagent android-next #06: a subagent spawn card was tapped
  *   (the doc id, the spawn's title, whether it had finished). `null` —
  *   tests, previews — leaves the cards inert
- * @param headerAccessory android-next #06: the side chats button, the
- *   header's second bar item left of the ⋯; `null` = none
+ * @param headerAccessory #40: the companions button, the header's second
+ *   bar item left of the ⋯; `null` = none
+ * @param companions #40: what's working alongside (the strip's chips)
+ * @param onCompanionTap #40: a strip chip was tapped (its panel section);
+ *   `null` — tests, previews — shows no strip
  * @param overlay android-next #06: composed last, over the whole screen —
  *   the Side Chats & Agents sheet
  */
@@ -141,6 +147,8 @@ fun SessionScreen(
     engineId: String? = null,
     onOpenSubagent: ((docId: String, title: String, frozen: Boolean) -> Unit)? = null,
     headerAccessory: (@Composable () -> Unit)? = null,
+    companions: CompanionCounts = CompanionCounts(),
+    onCompanionTap: ((CompanionSection) -> Unit)? = null,
     overlay: @Composable () -> Unit = {},
 ) {
     // 1. The per-screen state: the same instance the route holds. The
@@ -392,7 +400,11 @@ fun SessionScreen(
         null
     }
     val editing = queueEdit?.isEditing == true
-    val model = BottomStackModel.from(chrome, editing = editing)
+    val model = BottomStackModel.from(
+        chrome,
+        editing = editing,
+        stripShown = onCompanionTap != null && !companions.isEmpty,
+    )
 
     // 9.65 Ticket 73: the pill's banner filler (registered by 83 in 76's
     //     BANNER slot).
@@ -486,7 +498,6 @@ fun SessionScreen(
             // #33: no bar title — the title and "project @ device" head the
             // ⋯ menu instead; a side chat reads "Side chat" over its
             // parent's title (iOS :50-53, 319-324).
-            // TODO(#40): the companions bar item (with its running badge).
             // TODO(#61): the voice call bar item.
             val sideParent = chrome.sideChatParent
             SessionHeader(
@@ -551,6 +562,8 @@ fun SessionScreen(
                     shownBanner(chrome.banner, editing),
                     onTap = { banner -> statusBanner?.onTap(banner) },
                     tapEnabled = { banner -> bannerTapAction(banner) != BannerTap.None },
+                    // #40: the companion strip at the row's trailing end.
+                    trailing = onCompanionTap?.let { tap -> { CompanionStrip(companions, tap) } },
                 )
             },
             queue = {

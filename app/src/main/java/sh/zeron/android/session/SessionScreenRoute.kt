@@ -24,7 +24,7 @@ import sh.zeron.android.sessions.rememberSessionListOpener
 import sh.zeron.android.sidechats.FreshSideChats
 import sh.zeron.android.sidechats.SideChatCopy
 import sh.zeron.android.sidechats.SideChatFork
-import sh.zeron.android.sidechats.SideChatsButton
+import sh.zeron.android.companions.CompanionsButton
 import sh.zeron.android.sidechats.SideChatsModel
 import sh.zeron.android.sidechats.SideChatsOverlay
 import sh.zeron.android.sidechats.SideChatsSheetController
@@ -356,11 +356,12 @@ class SessionScreenRoute internal constructor(
                 ),
             )
         }
-        val badge = sideUi.badge
-        val sideChatsButton: (@Composable () -> Unit)? = if (badge != null) {
-            { SideChatsButton(badge, onClick = { sheet.open() }) }
-        } else {
-            null
+        // #40: the companions item, always shown, badged while agents run;
+        // it and the strip's chips open the panel.
+        // TODO(#41): open the panel at the chip's section.
+        val companions = sideUi.companions
+        val companionsButton: @Composable () -> Unit = {
+            CompanionsButton(companions.runningAgents, onClick = { sheet.open() })
         }
         val sideChatsOverlay: @Composable () -> Unit = {
             SideChatsOverlay(
@@ -368,7 +369,7 @@ class SessionScreenRoute internal constructor(
                 ui = sideUi,
                 canAdd = sideChatsOffered(),
                 onOpenChat = openChat,
-                onOpenAgent = { agent -> openSubagent(agent.docId, agent.title, !agent.running) },
+                onOpenAgent = { agent -> agent.docId?.let { openSubagent(it, agent.title, !agent.running) } },
                 onNew = { newSideChat(true) },
                 onFork = forkSideChat,
             )
@@ -407,7 +408,9 @@ class SessionScreenRoute internal constructor(
                 // it; SessionScreen pairs it with the controller's chatId).
                 engineId = core.engineId,
                 onOpenSubagent = openSubagent,
-                headerAccessory = sideChatsButton,
+                headerAccessory = companionsButton,
+                companions = companions,
+                onCompanionTap = { _ -> sheet.open() },
                 overlay = sideChatsOverlay,
             )
         }
