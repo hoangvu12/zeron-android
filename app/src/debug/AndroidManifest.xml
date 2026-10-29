@@ -26,5 +26,24 @@
             android:label="Transcript Lab"
             android:windowSoftInputMode="adjustResize"
             android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden|uiMode|density|fontScale" />
+        <!-- The debug-only Component Lab (#12, input for decision D7 / #1):
+             each hand-built component three ways (Roboco custom, our look on
+             headless primitives, stock Material 3). Unlike the two above it
+             has a launcher entry, so the owner can open it on a phone while
+             signed out (the app always lands on the Welcome placeholder);
+             its own task affinity keeps it out of the app's task. Release
+             builds merge no such activity: this manifest exists only in
+             src/debug. -->
+        <activity
+            android:name=".design.lab.ComponentLabActivity"
+            android:exported="true"
+            android:label="Component Lab"
+            android:taskAffinity="sh.zeron.android.componentlab"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 </manifest>
