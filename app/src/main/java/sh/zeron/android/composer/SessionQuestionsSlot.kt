@@ -92,8 +92,7 @@ private const val GalleryResolveAfterMs = 600L
  *
  * Submitting routes through [actions] ([QuestionActions], off main); a
  * failed RPC re-arms the panel's double-submit guard and nothing else
- * (decision COMPOSER-D2). [canWrite][QuestionPanelState.canWrite] rides
- * along from the chrome (ticket 79).
+ * (decision COMPOSER-D2).
  */
 @Composable
 fun rememberQuestionPanelState(
@@ -110,13 +109,11 @@ fun rememberQuestionPanelState(
         })
         val chrome = controller.chrome.value
         self.configure(chrome.questions)
-        self.canWrite = chrome.canWrite
         self
     }
     LaunchedEffect(state) {
         controller.chrome.collect { chrome ->
             state.configure(chrome.questions)
-            state.canWrite = chrome.canWrite
         }
     }
     return state
@@ -226,8 +223,7 @@ fun BottomStackSlotScope.SessionQuestionsSlot(
                         multiSelect = q.multiSelect,
                         multiline = q.multiline,
                         customText = state.customText(q.id),
-                        // The live page gates on the full rule (answered plus
-                        // the canWrite gate on Submit); the outgoing page
+                        // The live page gates on the full rule (answered); the outgoing page
                         // greys out instead of showing the new page's state.
                         canContinue = key.page == state.page && state.nextEnabled,
                     ),
@@ -378,8 +374,7 @@ internal object PreviewSlotScope : BottomStackSlotScope {
  * [QuestionPanelState] with a fake `onSubmit` — the answers' `toString()`
  * lands in the caption under the stage and the request "resolves"
  * (`configure(null)`) 600 ms later, like the engine would. The buttons
- * switch the ticket's fixtures; "Offline" toggles [canWrite][QuestionPanelState.canWrite]
- * (Submit disables, the picks survive); "Fail next submit" injects
+ * switch the ticket's fixtures; "Fail next submit" injects
  * [onSubmitFailed][QuestionPanelState.onSubmitFailed], re-arming Submit
  * with nothing shown (decision COMPOSER-D2). Foundation rows only — no
  * Material controls.
@@ -391,7 +386,6 @@ fun QuestionPanelBehaviourGallerySection() {
     val feedback = LocalFeedback.current
 
     var caption by remember { mutableStateOf("Pick a fixture; Submit answers into this line.") }
-    var offline by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
     val state = remember(scope, feedback) {
@@ -406,8 +400,6 @@ fun QuestionPanelBehaviourGallerySection() {
         self.configure(QuestionPanelFixtures.F1)
         self
     }
-    SideEffect { state.canWrite = !offline }
-
     Column(Modifier.fillMaxWidth()) {
         QuestionPanelStage(state, height = 520.dp)
         Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
@@ -415,7 +407,6 @@ fun QuestionPanelBehaviourGallerySection() {
             BehaviourRow("F2") { state.configure(QuestionPanelFixtures.F2) }
             BehaviourRow("F3 (multiline + prefill)") { state.configure(QuestionPanelFixtures.F3) }
             BehaviourRow("Dup ids") { state.configure(QuestionPanelFixtures.Dup) }
-            BehaviourRow("Offline", if (offline) "on" else "off") { offline = !offline }
             BehaviourRow("Fail next submit") {
                 val id = state.requestId
                 if (id == null) {

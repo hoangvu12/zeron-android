@@ -29,7 +29,7 @@ data class ChromeInput(
     val chatId: String,
     val composer: ComposerState,
     val row: SessionRow?,
-    /** The owning engine's view — for 73 (banner) and 79 (canWrite). */
+    /** The owning engine's view — for 73 (banner). */
     val engine: EngineView?,
     // Ticket 89 (chip menus): the chat's local config — the #664
     // config-first selection the menus' deferred loads re-read. Read once
@@ -39,7 +39,7 @@ data class ChromeInput(
 
 /**
  * One field-group of [SessionChrome] owned by another ticket: 78
- * chips, 73 banner, 91 questions, 82 queue, 79 canWrite. The
+ * chips, 73 banner, 91 questions, 82 queue. The
  * controller calls every registered filler in list order during each
  * refresh (the list is composed by ticket 76), so none of those
  * tickets ever edits the controller.
@@ -231,13 +231,7 @@ class SessionController private constructor(
         onSeen?.invoke(core.chatId)
         scope.launch {
             try {
-                // 79: an offline engine would only fail (android-app#06
-                // refuses the RPC within 50 ms), so the mark is skipped
-                // silently — no toast, no banner, no log. The check runs
-                // here, at execution time on this lane, so it sees the
-                // chrome of the latest refresh (which runs on the same
-                // lane). The notification cancel above stays: it is local.
-                if (_chrome.value.canWrite) core.markSeen()
+                core.markSeen()
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (t: Throwable) {
@@ -305,11 +299,7 @@ class SessionController private constructor(
         val closeJob = scope.launch {
             try {
                 core.setViewAttached(false)
-                // 79: the same silent skip as markSeen() on the way out.
-                // Never gate setViewAttached itself — it is a local
-                // subscription switch and must work offline (85's rule);
-                // there is no catch-up mark on a later reconnect either.
-                if (_chrome.value.canWrite) core.markSeen()
+                core.markSeen()
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (t: Throwable) {

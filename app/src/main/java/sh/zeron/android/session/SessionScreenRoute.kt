@@ -354,8 +354,8 @@ class SessionScreenRoute internal constructor(
                 queueActions = queueActions,
                 questionPort = questionPort,
                 // Ticket 80: the ⋯ menu — the header's onMore opens the session
-                // menu built fresh on every tap (pin state and canWrite read
-                // at open time); android-next #06 adds the side-chat rows.
+                // menu built fresh on every tap (pin state read at open
+                // time); android-next #06 adds the side-chat rows.
                 onMore = onMore,
                 // 84: the engine half of the draft key (the route's core has
                 // it; SessionScreen pairs it with the controller's chatId).

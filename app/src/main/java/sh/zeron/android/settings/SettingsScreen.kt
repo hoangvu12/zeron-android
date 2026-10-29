@@ -107,7 +107,7 @@ enum class SettingsSection(val key: String) {
  * to this map — so [SettingsDeviceIdPrefix] (taken from 102's constant,
  * never retyped) is the prefix the real rows carry, and the `engine:`
  * spelling 103's reviewer note expected is accepted alongside it: the map
- * holds whichever 102/140 ship, and 140 may still rename.
+ * holds either.
  */
 private const val SettingsEngineIdPrefix = "engine:"
 
@@ -118,7 +118,7 @@ private val SettingsDeviceIdPrefix = DevicesRowIds.engine("")
  * Pure: maps a row id (the part after `settings-`) to its section; null
  * for an unknown id. The prefixes are the section tickets' row ids:
  * `agent-account:`/`agent-accounts:` (android-next#05),
- * `engine:`/`device:` rows and `DevicesRowIds.Pair` (102), `notify:` (99),
+ * `engine:`/`device:` rows (102), `notify:` (99),
  * `appearance:` (96), `wallpaper:` (97), 100's two rows, `about:` (101).
  * `account`, `voice` and `signout` (the dropped iOS sections) map to null.
  */
@@ -127,8 +127,7 @@ fun settingsSectionFor(id: String): SettingsSection? = when {
         SettingsSection.AgentAccounts
 
     id.startsWith(SettingsEngineIdPrefix) ||
-        id.startsWith(SettingsDeviceIdPrefix) ||
-        id == DevicesRowIds.Pair -> SettingsSection.Devices
+        id.startsWith(SettingsDeviceIdPrefix) -> SettingsSection.Devices
 
     id.startsWith("notify:") -> SettingsSection.Notifications
     id.startsWith("background:") -> SettingsSection.Background

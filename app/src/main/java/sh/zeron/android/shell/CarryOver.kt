@@ -181,7 +181,7 @@ class CarryOver(
 
     /**
      * Called on every shell-kind change (`from = null` on first
-     * composition; Pairing transitions never reach here — the shell scope
+     * composition; Welcome transitions never reach here — the shell scope
      * itself is released then). Cancellable; every step is idempotent.
      */
     suspend fun onShellKindChanged(from: RootKind?, to: RootKind) {

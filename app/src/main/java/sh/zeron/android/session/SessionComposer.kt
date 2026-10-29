@@ -88,7 +88,7 @@ internal object NoopSendReporter : SendReporter {
  * `ios:Session/SessionViewController.swift:84-103, 479-491`:
  *
  * - [apply] pushes every [SessionChrome] into the [ComposerController]
- *   (running, canSteer, placeholder, chips, chip menus, canWrite) and the
+ *   (running, canSteer, placeholder, chips, chip menus) and the
  *   upload progress into the transcript's ring — on every chrome change
  *   and once at creation (iOS `render`, and the placeholder override
  *   while a queued edit is open, which iOS resets by mistake);
@@ -255,7 +255,6 @@ internal fun applyChrome(
     c.placeholder = placeholderOverride ?: chrome.placeholder
     c.chips = chrome.chips
     c.chipMenus = menus
-    c.canWrite = chrome.canWrite
 }
 
 /**

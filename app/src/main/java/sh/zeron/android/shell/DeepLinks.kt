@@ -7,8 +7,7 @@ import java.util.Locale
 /**
  * One inbound link (android-ui-parity #36), parsed from a `zeron://` URI
  * or the `route` launch extra (iOS's `-route`). The four navigation kinds
- * map one-to-one onto [AppRouter] calls; [Pair] goes to the pairing
- * handler ticket 139 registers, never to the router.
+ * map one-to-one onto [AppRouter] calls.
  *
  * Pure Kotlin — no `android.*` — so the grammar is plain-JVM-testable.
  */
@@ -34,17 +33,6 @@ sealed interface DeepLink {
 
     /** `zeron://search` / `route search` — `router.showSearch`. */
     data object Search : DeepLink
-
-    /**
-     * The whole trimmed `zeron://pair…` string; ticket 139 decodes and
-     * validates the `#url=` fragment. **Never log it** — the fragment
-     * carries the pairing token — so the data class's generated
-     * `toString()` is overridden (139): any generic log line that
-     * interpolates a `DeepLink` would otherwise print the token.
-     */
-    data class Pair(val link: String) : DeepLink {
-        override fun toString(): String = "Pair(<redacted>)"
-    }
 }
 
 /**
@@ -77,8 +65,8 @@ object DeepLinks {
         val scheme = s.substring(0, separator)
         if (!scheme.equals(SCHEME, ignoreCase = true)) return null
         val rest = s.substring(separator + 3)
-        // The fragment is split off first (pair links carry it), then the
-        // query — the path is checked against whatever is left.
+        // The fragment is split off first, then the query — the path is
+        // checked against whatever is left.
         val hashAt = rest.indexOf('#')
         val beforeFragment = if (hashAt >= 0) rest.substring(0, hashAt) else rest
         val queryAt = beforeFragment.indexOf('?')
@@ -121,8 +109,6 @@ object DeepLinks {
 
             "search" -> if (pathEmpty) DeepLink.Search else null
 
-            "pair" -> DeepLink.Pair(s)
-
             else -> null
         }
     }
@@ -133,7 +119,7 @@ object DeepLinks {
      * everything after the first 5 chars verbatim (no percent-decoding,
      * like iOS `dropFirst(5)`); `new` / `more` / `search` are exact
      * matches. Everything else — `chat:` (empty id), `settings`, `New`,
-     * `pair`, `""`, non-strings — is null.
+     * `""`, non-strings — is null.
      */
     fun parseRoute(route: String?): DeepLink? {
         if (route == null) return null

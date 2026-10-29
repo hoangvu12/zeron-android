@@ -160,8 +160,8 @@ fun sessionChips(
 
 /**
  * Ticket 51's [ChromeFiller] for [SessionChrome.chips]: runs on the
- * controller's IO lane during every refresh, right after 79's `canWrite`
- * (slot 20 in [ChromeFillerRegistry]). The FFI free function
+ * controller's IO lane during every refresh (slot 20 in
+ * [ChromeFillerRegistry]). The FFI free function
  * `reasoningLabel` is pure and stateless — the one accepted exception to
  * 51's "fillers make no FFI" rule — and injected so tests pass a Kotlin
  * lambda.

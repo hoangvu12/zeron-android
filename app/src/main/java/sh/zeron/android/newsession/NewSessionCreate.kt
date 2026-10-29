@@ -220,17 +220,3 @@ val SideChatStartFailedAlert = ZeronAlert(
     message = "Its session is no longer available.",
     buttons = listOf(AlertButton("OK", AlertButtonRole.Default)),
 )
-
-/**
- * The canvas composer's offline gate (94's Zeron ADD, the parent
- * spec's "Send is disabled while the target engine is offline"): the
- * picked project's or host's engine must be online. An id **not** in
- * the options counts as online (`true`) — a stale id reaches the send
- * and the alert explains it, instead of a silently disabled button.
- * No target → `true` (same reason). No grace, no debounce (79).
- */
-fun newSessionCanWrite(draft: NewSessionDraft, projects: List<ProjectOption>, hosts: List<HostOption>): Boolean = when {
-    draft.projectId != null -> projects.firstOrNull { it.id == draft.projectId }?.online ?: true
-    draft.hostId != null -> hosts.firstOrNull { it.id == draft.hostId }?.online ?: true
-    else -> true
-}

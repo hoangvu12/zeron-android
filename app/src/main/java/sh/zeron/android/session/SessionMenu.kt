@@ -62,9 +62,8 @@ import uniffi.zeron_core.LayoutFrame
  * [Menu] inside the click lambda, so the pin title and the disabled flags
  * are always current, never cached in composition.
  *
- * Zeron adaptations (79/42/22): Pin/Unpin and Archive are disabled while
- * `canWrite == false` (Copy Transcript stays live — it reads only local
- * state); the leave after Archive happens only on `Ok`/`Gone` outcomes;
+ * Zeron adaptations (42/22): the leave after Archive happens only on
+ * `Ok`/`Gone` outcomes;
  * Copy Transcript builds the string off main and handles Binder's
  * transaction limit with a failure toast.
  */
@@ -76,19 +75,14 @@ import uniffi.zeron_core.LayoutFrame
  *
  * - row 1: "Pin" (SF `pin`) / "Unpin" (SF `pin.slash`) by [pinned],
  *   `app.setPinned(chatId, !pinned)`;
- * - row 2: "Copy Transcript" (SF `doc.on.doc`), never disabled — it reads
- *   only the local transcript;
- * - row 3: "Previews" (the app's `Safari` globe glyph — the agent-previews
- *   ticket's panel: this chat's dev servers on the engine, relayed through
- *   the phone's in-app 7332 proxy), never disabled — the panel owns its
- *   own honest states (loading, reconnect, empty);
- * - row 4: "Account & Usage" (android-next#05, PR #578's SF
- *   `gauge.with.dots.needle.33percent` — the app's `Gauge` glyph), never
- *   disabled — it only reads cached state and pushes a page;
- * - row 5: "Archive" (SF `archivebox`), disabled with Pin while the
- *   engine is offline (79's `canWrite`) — no longer destructive (#967);
- * - row 6: "Delete" (SF `trash`), destructive, disabled like Archive —
- *   upstream #967, after the "Delete session?" confirm. `null`
+ * - row 2: "Copy Transcript" (SF `doc.on.doc`) — it reads only the local
+ *   transcript;
+ * - row 3: "Account & Usage" (android-next#05, PR #578's SF
+ *   `gauge.with.dots.needle.33percent` — the app's `Gauge` glyph) — it
+ *   only reads cached state and pushes a page;
+ * - row 4: "Archive" (SF `archivebox`) — no longer destructive (#967);
+ * - row 5: "Delete" (SF `trash`), destructive — upstream #967, after the
+ *   "Delete session?" confirm. `null`
  *   [onDelete] (galleries, older tests) leaves the row out.
  *
  * Upstream #967 also heads the menu with the session's title over
@@ -100,10 +94,8 @@ import uniffi.zeron_core.LayoutFrame
  */
 fun sessionMenu(
     pinned: Boolean,
-    canWrite: Boolean,
     onSetPinned: (Boolean) -> Unit,
     onCopyTranscript: () -> Unit,
-    onShowPreviews: () -> Unit,
     onShowAccounts: () -> Unit,
     onArchive: () -> Unit,
     sideChats: SideChatMenuRows? = null,
@@ -116,7 +108,6 @@ fun sessionMenu(
         MenuItem(
             title = if (pinned) "Unpin" else "Pin",
             icon = MenuIcon.Symbol(if (pinned) ZeronIcons.PinSlash else ZeronIcons.Pin),
-            disabled = !canWrite,
             testTag = "session-menu-pin",
             action = { onSetPinned(!pinned) },
         ),
@@ -126,13 +117,7 @@ fun sessionMenu(
             testTag = "session-menu-copy",
             action = onCopyTranscript,
         ),
-        sideChats?.let { sideChatSection(it, canWrite) },
-        MenuItem(
-            title = sh.zeron.android.browser.PreviewsCopy.SessionMenuRow,
-            icon = MenuIcon.Symbol(ZeronIcons.Safari),
-            testTag = "session-menu-previews",
-            action = onShowPreviews,
-        ),
+        sideChats?.let { sideChatSection(it) },
         MenuItem(
             title = ACCOUNT_USAGE_ROW,
             icon = MenuIcon.Symbol(ZeronIcons.Gauge),
@@ -142,7 +127,6 @@ fun sessionMenu(
         MenuItem(
             title = "Archive",
             icon = MenuIcon.Symbol(ZeronIcons.Archivebox),
-            disabled = !canWrite,
             testTag = "session-menu-archive",
             action = onArchive,
         ),
@@ -151,7 +135,6 @@ fun sessionMenu(
                 title = "Delete",
                 icon = MenuIcon.Symbol(ZeronIcons.Trash),
                 destructive = true,
-                disabled = !canWrite,
                 testTag = "session-menu-delete",
                 action = it,
             )
@@ -184,21 +167,20 @@ class SideChatMenuRows(
     val onFork: () -> Unit,
 )
 
-/** The inline group (hairlines above and below); both rows need a writable engine. */
-private fun sideChatSection(rows: SideChatMenuRows, canWrite: Boolean): MenuSection = MenuSection(
+/** The inline group (hairlines above and below). */
+private fun sideChatSection(rows: SideChatMenuRows): MenuSection = MenuSection(
     inline = true,
     children = listOf(
         MenuItem(
             title = "New Side Chat",
             icon = MenuIcon.Symbol(ZeronIcons.QuestionmarkBubble),
-            disabled = !canWrite,
             testTag = "session-menu-new-side-chat",
             action = rows.onNew,
         ),
         MenuItem(
             title = "Fork into Side Chat",
             icon = MenuIcon.Symbol(ZeronIcons.ArrowTriangleBranch),
-            disabled = !canWrite || rows.forking,
+            disabled = rows.forking,
             testTag = "session-menu-fork-side-chat",
             action = rows.onFork,
         ),
@@ -207,8 +189,8 @@ private fun sideChatSection(rows: SideChatMenuRows, canWrite: Boolean): MenuSect
 
 /**
  * The [SessionHeader] `onMore` handler (80's step 7): returns a lambda
- * that builds a fresh [sessionMenu] from the **current** pin state and
- * `SessionChrome.canWrite`, and opens it on ticket 15's host at the ⋯
+ * that builds a fresh [sessionMenu] from the **current** pin state, and
+ * opens it on ticket 15's host at the ⋯
  * circle's window rect. The values are read inside the click lambda —
  * never during composition — so each open is current (the uncached
  * deferred element) and a pin toggle between opens needs no
@@ -273,24 +255,8 @@ fun rememberSessionMenu(
                     )
                 }
             }
-            // agent-previews ticket 05: the preview panel — this chat's
-            // dev servers on the engine, relayed through the phone's
-            // in-app 7332 proxy. The title is read at open time (the
-            // chrome's, like the uncached pin state above).
-            val showPreviews = {
-                if (nav.top.id == entry.id) {
-                    nav.push(
-                        sh.zeron.android.browser.PreviewPanelRoute(
-                            chatId = chatId,
-                            chatTitle = controller.chrome.value.title,
-                        ),
-                        animated = true,
-                    )
-                }
-            }
             val menu = sessionMenu(
                 pinned = controller.pinned,
-                canWrite = controller.chrome.value.canWrite,
                 onSetPinned = { pinned -> actions.setPinned(chatId, pinned) },
                 onCopyTranscript = {
                     scope.launch {
@@ -299,7 +265,6 @@ fun rememberSessionMenu(
                         copyTranscript(transcript, clipboard, toaster)
                     }
                 },
-                onShowPreviews = showPreviews,
                 onShowAccounts = showAccounts,
                 onArchive = {
                     actions.archive(chatId) { outcome ->
@@ -405,7 +370,7 @@ internal fun leaveAfterArchive(
 
 /** The previews' shared fixture: the ⋯ circle with the menu open below it. */
 @Composable
-private fun SessionMenuOpenPreview(pinned: Boolean, canWrite: Boolean) {
+private fun SessionMenuOpenPreview(pinned: Boolean) {
     Box(Modifier.fillMaxWidth().height(220.dp).background(ZeronTheme.palette.background)) {
         GlassCircleButton(
             icon = ZeronIcons.Ellipsis,
@@ -418,10 +383,8 @@ private fun SessionMenuOpenPreview(pinned: Boolean, canWrite: Boolean) {
                 null,
                 sessionMenu(
                     pinned = pinned,
-                    canWrite = canWrite,
                     onSetPinned = {},
                     onCopyTranscript = {},
-                    onShowPreviews = {},
                     onShowAccounts = {},
                     onArchive = {},
                     onDelete = {},
@@ -441,17 +404,11 @@ private fun SessionMenuOpenPreview(pinned: Boolean, canWrite: Boolean) {
 @Preview(name = "light")
 @Composable
 private fun SessionMenuUnpinnedLightPreview() {
-    ZeronTheme(Appearance.Light) { SessionMenuOpenPreview(pinned = false, canWrite = true) }
+    ZeronTheme(Appearance.Light) { SessionMenuOpenPreview(pinned = false) }
 }
 
 @Preview(name = "dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun SessionMenuPinnedDarkPreview() {
-    ZeronTheme(Appearance.Dark) { SessionMenuOpenPreview(pinned = true, canWrite = true) }
-}
-
-@Preview(name = "read-only light")
-@Composable
-private fun SessionMenuReadOnlyLightPreview() {
-    ZeronTheme(Appearance.Light) { SessionMenuOpenPreview(pinned = false, canWrite = false) }
+    ZeronTheme(Appearance.Dark) { SessionMenuOpenPreview(pinned = true) }
 }

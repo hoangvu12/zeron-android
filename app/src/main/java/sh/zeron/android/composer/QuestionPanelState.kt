@@ -71,9 +71,6 @@ class QuestionPanelState(
     var submitted: Boolean by mutableStateOf(false)
         private set
 
-    /** Copied from `chrome.canWrite` (ticket 79): `false` disables Submit only. */
-    var canWrite: Boolean by mutableStateOf(true)
-
     /** Incremented on every reset; keys the paging fade (a reset never fades). */
     var generation: Int by mutableIntStateOf(0)
         private set
@@ -100,13 +97,9 @@ class QuestionPanelState(
     /** `page > 0` — iOS removes the Back view entirely (`:142`). */
     val backVisible: Boolean get() = page > 0
 
-    /**
-     * `answered(current) && (!isLastPage || canWrite)`: the canWrite gate
-     * applies only to Submit, never to Next (`nextEnabled` feeds 90's
-     * `canContinue`).
-     */
+    /** `answered(current)` (`nextEnabled` feeds 90's `canContinue`). */
     val nextEnabled: Boolean
-        get() = current?.let { answered(it) && (!isLastPage || canWrite) } ?: false
+        get() = current?.let { answered(it) } ?: false
 
     /** The labels picked for [questionId] (empty when none). */
     fun picked(questionId: String): Set<String> = picks[questionId].orEmpty()
@@ -235,8 +228,7 @@ class QuestionPanelState(
      * iOS `advance()` (`:196-214`): nothing while `submitted`, unanswered
      * or pageless; a non-last page pages forward; the last page submits.
      * Submitting returns early with no haptic when `requestId == null`
-     * (a stale timer after the request resolved elsewhere) or
-     * `!canWrite` (Zeron's read-only mode) — then builds every
+     * (a stale timer after the request resolved elsewhere) — then builds every
      * question's answer in option order, sets `submitted`, plays
      * `Haptic.Confirm` and calls [onSubmit] exactly once per set.
      */
@@ -249,7 +241,6 @@ class QuestionPanelState(
             return
         }
         val id = requestId ?: return
-        if (!canWrite) return
         val answers = buildAnswers(items, picks, custom)
         submitted = true
         feedback.haptic(Haptic.Confirm)

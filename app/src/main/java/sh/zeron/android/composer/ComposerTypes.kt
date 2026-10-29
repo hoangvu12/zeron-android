@@ -57,8 +57,7 @@ enum class ComposerAction { Send, Queue, Stop }
  * `ComposerControllerTest`.
  *
  * [action] and [steering] pick the glyph and label; [enabled] gates taps
- * (Stop is always enabled on iOS — only Zeron's `canWrite` can disable
- * it); [deliveryMenu] says whether the long-press "While the agent works"
+ * (Stop is always enabled, as on iOS); [deliveryMenu] says whether the long-press "While the agent works"
  * menu (58) is offered.
  */
 @Immutable

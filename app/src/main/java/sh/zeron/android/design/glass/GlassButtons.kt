@@ -214,8 +214,8 @@ object ProminentGlassButtonDefaults {
     /** Folder browser "Use" (`ios:Threads/NewProjectViewController.swift:65`): 14/20. */
     val Padding = PaddingValues(horizontal = 20.dp, vertical = 14.dp)
 
-    /** Pairing primary (`ios:Shell/SignInViewController.swift:55`): 15/20. */
-    val PairingPadding = PaddingValues(horizontal = 20.dp, vertical = 15.dp)
+    /** Sign-in primary (`ios:Shell/SignInViewController.swift:55`): 15/20. */
+    val SignInPadding = PaddingValues(horizontal = 20.dp, vertical = 15.dp)
 
     /** Question Next/Submit, tuned to land ≈44 dp tall (ticket Comments). */
     val CompactPadding = PaddingValues(horizontal = 20.dp, vertical = 11.dp)
@@ -231,7 +231,7 @@ object ProminentGlassButtonDefaults {
  * The prominent capsule (ticket 08): the one opaque button the three iOS
  * sources render — the question "Next"/"Submit"
  * (`ios:Composer/QuestionPanel.swift:61-68`, `.prominentGlass()`), the
- * pairing primary (`ios:Shell/SignInViewController.swift:50-63`, `.filled()`)
+ * sign-in primary (`ios:Shell/SignInViewController.swift:50-63`, `.filled()`)
  * and the folder browser "Use “…”"
  * (`ios:Threads/NewProjectViewController.swift:61-68`, `.filled()`) — a
  * capsule filled `palette.text`, title in `palette.background`, with the
@@ -459,8 +459,8 @@ internal fun GlassTextCapsuleVariants(press: MutableInteractionSource? = null) {
  * Every prominent variant (ticket 08 step 7): the compact "Next", the
  * disabled "Submit", the full-width `Use “zeron”` (default padding), the
  * busy `Use “zeron”` at intrinsic width (the spinner grows it by 28 dp,
- * like UIKit's image slot), and the full-width pairing "Pair an engine"
- * (pairing padding).
+ * like UIKit's image slot), and the full-width sign-in "Continue"
+ * (sign-in padding).
  */
 @Composable
 internal fun GlassProminentVariants(press: MutableInteractionSource? = null) {
@@ -474,8 +474,8 @@ internal fun GlassProminentVariants(press: MutableInteractionSource? = null) {
         ProminentGlassButton("Use “zeron”", {}, modifier = Modifier.fillMaxWidth(), interactionSource = press)
         ProminentGlassButton("Use “zeron”", {}, busy = true, interactionSource = press)
         ProminentGlassButton(
-            "Pair an engine", {},
-            contentPadding = ProminentGlassButtonDefaults.PairingPadding,
+            "Continue", {},
+            contentPadding = ProminentGlassButtonDefaults.SignInPadding,
             modifier = Modifier.fillMaxWidth(),
             interactionSource = press,
         )

@@ -52,7 +52,7 @@ sealed interface SheetStyle {
      * (`MainTabController.swift:136-148`): full window width (704 dp
      * centred on tablets), top corners 38, and the card-stack recession
      * of the presenting content. [grabber] matches
-     * `prefersGrabberVisible` — New Session and the Pair page show it,
+     * `prefersGrabberVisible` — New Session shows it,
      * New Project does not (`NewSessionViewController.swift:317`).
      */
     data class Page(val grabber: Boolean = true) : SheetStyle
@@ -138,8 +138,7 @@ fun interface SheetHandoff {
  * The sheet host state (android-ui-parity #31): the stack of presented
  * sheets, bottom → top. One sheet at a time from the root ([present]),
  * one more stacked from inside the top sheet (`PageSheetScope.present`) —
- * New Project over New Session, the Pair page over the tablet Settings
- * dialog. Everything is UIKit-faithful:
+ * New Project over New Session. Everything is UIKit-faithful:
  *
  * - `present` from the root while anything is presented (hidden included)
  *   is the UIKit no-op — `Log.w` and `false`;

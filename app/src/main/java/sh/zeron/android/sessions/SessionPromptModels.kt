@@ -194,7 +194,7 @@ fun deleteSessionAlert(title: String, onDelete: () -> Unit): ZeronAlert = ZeronA
 /**
  * The "Create on" engine chooser (Zeron's step before the New Section
  * alert when several engines are connected, android-app#20:237): one
- * default row per **connected** engine in pairing order. Duplicate engine
+ * default row per **connected** engine in registry order. Duplicate engine
  * names list as-is; no source defines a disambiguation.
  */
 fun createOnSheet(engines: List<EngineChoice>, onPick: (engineId: String) -> Unit): ActionSheetModel =
@@ -219,7 +219,7 @@ sealed interface NewSectionTarget {
     /** Exactly one candidate engine: show the New Section alert for it. */
     data class Engine(val engineId: String) : NewSectionTarget
 
-    /** Two or more connected engines, in pairing order: show the "Create on" sheet. */
+    /** Two or more connected engines, in registry order: show the "Create on" sheet. */
     data class Choose(val engines: List<EngineChoice>) : NewSectionTarget
 }
 

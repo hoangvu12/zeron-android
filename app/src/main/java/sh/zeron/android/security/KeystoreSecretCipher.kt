@@ -1,4 +1,4 @@
-package sh.zeron.android.pairing
+package sh.zeron.android.security
 
 import android.content.Context
 import android.content.pm.PackageManager
@@ -23,7 +23,7 @@ import javax.crypto.spec.GCMParameterSpec
  *
  * The key is created lazily on the first **encrypt**, never on decrypt:
  * a missing key on decrypt is a decrypt failure, so a lost key degrades
- * to "pair again" (empty credential → `Parked{Revoked}`) instead of
+ * to "sign in again" instead of
  * rewriting history. No user-auth binding is set — like iOS's
  * `kSecAttrAccessibleAfterFirstUnlock`, credentials stay readable after
  * first unlock, which a background start needs.
@@ -71,7 +71,7 @@ class KeystoreSecretCipher(private val context: Context) : SecretCipher {
         }
     }
 
-    /** Drops the key (the recovery path is re-pairing). Tests only. */
+    /** Drops the key (the recovery path is signing in again). Tests only. */
     @VisibleForTesting
     fun deleteKey() {
         keyStore().deleteEntry(ALIAS)
@@ -124,7 +124,7 @@ class KeystoreSecretCipher(private val context: Context) : SecretCipher {
         try {
             keyStore().deleteEntry(ALIAS)
         } catch (_: Exception) {
-            // A half-registered StrongBox alias is no reason to fail pairing.
+            // A half-registered StrongBox alias is no reason to fail a write.
         }
     }
 }

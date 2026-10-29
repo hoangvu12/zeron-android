@@ -33,7 +33,7 @@ import uniffi.zeron_core.FileMatch
  * It owns the content (text + selection, staged images, the `@file`
  * mention index), the inputs that drive the composer (`running`,
  * `canSteer`, `preferredDelivery`, `placeholder`, `chips`, `chipMenus`,
- * `alwaysCard`, `canWrite`, `attachEnabled`) and the logic: [hasContent],
+ * `alwaysCard`, `attachEnabled`) and the logic: [hasContent],
  * [actionState] (Send / Queue / Stop + enabled + steering + a11y label),
  * primary-action routing and [send] with its [SendResult] outcomes.
  *
@@ -105,9 +105,6 @@ class ComposerController(
     /** Stay in the card state even when idle — iOS `chipsAlwaysVisible` (`:76-77`); 56 reads it as `wantsCard`. */
     var alwaysCard by mutableStateOf(false)
 
-    /** Zeron: `false` while the owning engine is offline (79 derives it). Text and chips stay editable. */
-    var canWrite by mutableStateOf(true)
-
     /** Zeron: `false` while a queued edit is open (83); 55/87 grey out `+`. */
     var attachEnabled by mutableStateOf(true)
 
@@ -137,13 +134,13 @@ class ComposerController(
     val hasContent: Boolean
         get() = value.text.isNotBlank() || images.isNotEmpty()
 
-    /** The action button's derived state — a pure function of the state above (`:579-581`), with Zeron's `canWrite`. */
+    /** The action button's derived state — a pure function of the state above (`:579-581`). */
     val actionState: ActionState
-        get() = deriveAction(running, hasContent, canWrite, canSteer, preferredDelivery)
+        get() = deriveAction(running, hasContent, canSteer, preferredDelivery)
 
-    /** `@` mentions are live only when writable and searchable (`:66-67`, `:339`). */
+    /** `@` mentions are live only when searchable (`:66-67`, `:339`). */
     val mentionsEnabled: Boolean
-        get() = canWrite && mentionSearch != null
+        get() = mentionSearch != null
 
     /** True while a [send] is in flight (plain: main-thread only, not observable). */
     private var sending = false
@@ -181,7 +178,6 @@ class ComposerController(
      * exactly one haptic.
      */
     fun primaryAction() {
-        if (!canWrite) return
         when (actionState.action) {
             ComposerAction.Stop -> {
                 feedback.haptic(Haptic.Stop)
@@ -205,10 +201,10 @@ class ComposerController(
      *
      * Returns the in-flight [Job] (tests join it; a non-suspending
      * handler has already completed), or `null` when nothing was sent: no
-     * content, [canWrite] `false`, or a send already in flight.
+     * content, or a send already in flight.
      */
     fun send(mode: DeliveryMode): Job? {
-        if (!canWrite || !hasContent || sending) return null
+        if (!hasContent || sending) return null
         feedback.haptic(Haptic.Confirm)
         val raw = value.text
         // iOS trims first, then encodes (`:653-654`); #609 does it backwards.
@@ -255,18 +251,15 @@ class ComposerController(
         const val MaxImages = 8
 
         /**
-         * The action derivation, `ios:Composer/ComposerBar.swift:579-581`
-         * plus Zeron's `canWrite`:
+         * The action derivation, `ios:Composer/ComposerBar.swift:579-581`:
          * - action: `running ? (hasContent ? queue : stop) : send`;
-         * - enabled: Stop is always enabled, everything else needs content,
-         *   and `canWrite` gates all of it;
+         * - enabled: Stop is always enabled, everything else needs content;
          * - steering: a queued send would deliver [DeliveryMode.Steer];
          * - deliveryMenu: the long-press menu exists only mid-turn.
          */
         fun deriveAction(
             running: Boolean,
             hasContent: Boolean,
-            canWrite: Boolean,
             canSteer: Boolean,
             preferred: DeliveryMode,
         ): ActionState {
@@ -278,9 +271,9 @@ class ComposerController(
                 }
             return ActionState(
                 action = action,
-                enabled = canWrite && (action == ComposerAction.Stop || hasContent),
+                enabled = action == ComposerAction.Stop || hasContent,
                 steering = action == ComposerAction.Queue && preferred == DeliveryMode.Steer && canSteer,
-                deliveryMenu = action == ComposerAction.Queue && canWrite,
+                deliveryMenu = action == ComposerAction.Queue,
             )
         }
 

@@ -248,8 +248,8 @@ fun newSessionChipMenus(vararg parts: Map<String, ChipMenuProvider>): Map<String
  * very first frame already has them (iOS sets them in `viewDidLoad`) —
  * ticket 93 calls this **before** its composer composable, so the write
  * happens before anything reads `composer.chips` in the same composition
- * (no backwards write). `composer.onChipTap` and `composer.canWrite` are
- * never touched: 93 and 94 own them.
+ * (no backwards write). `composer.onChipTap` is never touched: 93 and
+ * 94 own it.
  *
  * The [labels] default runs the core's static catalog functions on the
  * main thread — allowed, like ticket 92's `builtIn()` — and only on the

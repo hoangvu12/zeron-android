@@ -381,14 +381,12 @@ private fun MentionSuggestionsDarkPreview() {
  *
  * Try it live: type `@lay` — the card rises above the capsule after the
  * 120 ms debounce; pick a row — the token is inserted and the keyboard
- * stays; the **Offline** toggle flips `controller.canWrite` (no card at all
- * while offline); Light/Dark and Force-reduce-motion apply.
+ * stays; Light/Dark and Force-reduce-motion apply.
  */
 @Composable
 fun MentionSuggestionsGallerySection() {
     val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
-    var offline by remember { mutableStateOf(false) }
     var focused by remember { mutableStateOf(false) }
 
     val controller = rememberComposerController()
@@ -450,20 +448,6 @@ fun MentionSuggestionsGallerySection() {
             Modifier.padding(top = 12.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            BasicText(
-                if (offline) "Offline ✓" else "Offline",
-                style = uiStyle(
-                    Face.SansMedium,
-                    typeScale.fixed(14f),
-                    if (offline) palette.accent else palette.secondary,
-                ),
-                modifier = Modifier
-                    .clickable {
-                        offline = !offline
-                        controller.canWrite = !offline
-                    }
-                    .padding(horizontal = 12.dp, vertical = 6.dp),
-            )
             BasicText(
                 "Type @ in the field above; tap a row to insert.",
                 style = uiStyle(Face.Mono, typeScale.fixed(11f), palette.tertiary),

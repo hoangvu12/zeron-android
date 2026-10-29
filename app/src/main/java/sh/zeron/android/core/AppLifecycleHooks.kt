@@ -2,7 +2,6 @@ package sh.zeron.android.core
 
 import android.app.Application
 import android.net.ConnectivityManager
-import android.net.LinkProperties
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.util.Log
@@ -33,14 +32,6 @@ interface LifecycleSink {
     fun onBackground()
 
     fun setNetworkOnline(online: Boolean)
-
-    /**
-     * The default network became a different `Network`, or its addresses
-     * changed (android-next#02): Tailcat engines rebuild their tunnels on
-     * the new interface. Tailscale's netmon only polls every 10 minutes
-     * on Android, so it would not notice in time by itself.
-     */
-    fun setNetworkChanged() {}
 }
 
 /** The production sink: the live [CoreClient]. Logs each call (`adb logcat -s Zeron`). */
@@ -58,11 +49,6 @@ class CoreLifecycleSink(private val client: CoreClient) : LifecycleSink {
     override fun setNetworkOnline(online: Boolean) {
         Log.d(TAG, "setNetworkOnline($online)")
         client.setNetworkOnline(online)
-    }
-
-    override fun setNetworkChanged() {
-        Log.d(TAG, "setNetworkChanged")
-        client.setNetworkChanged()
     }
 
     private companion object {
@@ -91,39 +77,8 @@ class NetworkOnlineTracker(initialNetwork: Long?, initialOnline: Boolean) {
 
     private var current: Long? = initialNetwork
 
-    /** The current default network's addresses, once seen (link changes). */
-    private var addresses: Set<String>? = null
-
-    /**
-     * `onAvailable`, asked BEFORE [available]: true when the default
-     * moved from one network to another (Wi-Fi → cellular). The first
-     * network after none is not a switch.
-     */
-    fun switched(net: Long): Boolean {
-        val previous = current ?: return false
-        return previous != net
-    }
-
-    /**
-     * `onLinkPropertiesChanged`, fed only the **routable** addresses
-     * ([isRoutableAddress]): true when an address the current network had
-     * went away (the old IP on the same Wi-Fi is gone, so sockets bound to
-     * it are dead). Additions alone (a new IPv6 privacy address, a second
-     * prefix) and link-local churn are not a change: the existing sockets
-     * still work, and `setNetworkChanged` would tear down healthy links.
-     * The first reading only records them; a default-network switch is
-     * reported by [switched], not here.
-     */
-    fun linkChanged(net: Long, linkAddresses: Set<String>): Boolean {
-        if (net != current) return false
-        val previous = addresses
-        addresses = linkAddresses
-        return previous != null && !linkAddresses.containsAll(previous)
-    }
-
     /** `onAvailable`: a new (or handover) default network. */
     fun available(net: Long): Boolean? {
-        if (net != current) addresses = null
         val changed = net != current || !online
         current = net
         online = true
@@ -146,15 +101,6 @@ class NetworkOnlineTracker(initialNetwork: Long?, initialOnline: Boolean) {
         return false
     }
 }
-
-/**
- * An address a socket to an engine can be bound to: not link-local
- * (fe80::/10, 169.254/16), loopback, wildcard or multicast. Private LAN
- * ranges and IPv6 ULAs count — LAN engines are reached over them. The
- * filter [NetworkOnlineTracker.linkChanged] is fed through.
- */
-fun java.net.InetAddress.isRoutableAddress(): Boolean =
-    !isLinkLocalAddress && !isLoopbackAddress && !isAnyLocalAddress && !isMulticastAddress
 
 /**
  * The process lifecycle hooks (android-ui-parity #35), registered **once
@@ -208,11 +154,6 @@ class AppLifecycleHooks internal constructor(
     /** Forwards a network change (already deduplicated; `null` = silent). */
     internal fun network(send: Boolean?) {
         if (send != null) executor.execute { sink()?.setNetworkOnline(send) }
-    }
-
-    /** Forwards a switch to another network or new addresses (Tailcat rebuilds). */
-    internal fun networkChanged() {
-        executor.execute { sink()?.setNetworkChanged() }
     }
 
     /**
@@ -295,25 +236,7 @@ class AppLifecycleHooks internal constructor(
                 cm.registerDefaultNetworkCallback(
                     object : ConnectivityManager.NetworkCallback() {
                         override fun onAvailable(network: Network) {
-                            val switched = tracker.switched(network.networkHandle)
                             hooks.network(tracker.available(network.networkHandle))
-                            if (switched) hooks.networkChanged()
-                        }
-
-                        override fun onLinkPropertiesChanged(
-                            network: Network,
-                            linkProperties: LinkProperties,
-                        ) {
-                            // Only routable addresses count: link-local
-                            // (fe80::/10, 169.254/16) churn never warrants
-                            // a rebuild (see NetworkOnlineTracker.linkChanged).
-                            val addresses = linkProperties.linkAddresses
-                                .filter { it.address.isRoutableAddress() }
-                                .map { it.address.hostAddress.orEmpty() }
-                                .toSet()
-                            if (tracker.linkChanged(network.networkHandle, addresses)) {
-                                hooks.networkChanged()
-                            }
                         }
 
                         override fun onCapabilitiesChanged(

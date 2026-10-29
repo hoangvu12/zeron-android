@@ -25,7 +25,7 @@ import sh.zeron.android.shell.tablet.SidebarState
  * Everything the two shells share is remembered **here**, inside the
  * shell group of [AppRoot]'s cross-fade, so it survives every width
  * change and is released only when the shell layer itself leaves
- * composition (Pairing, core failure, activity teardown):
+ * composition (Welcome, core failure, activity teardown):
  *
  * - 26's [MainTabState] (the three tab stacks live in it — the pushed
  *   session survives the collapse exactly as iOS's `tabs` stack does);

@@ -1,17 +1,17 @@
-package sh.zeron.android.pairing
+package sh.zeron.android.core
 
 import android.content.Context
 import android.os.Build
 import android.provider.Settings
 
 /**
- * The redeem label this phone shows the engine (`CoreConfig.deviceName`,
+ * This phone's name for presence and attribution (`CoreConfig.deviceName`,
  * the port of iOS's `UIDevice.current.name`): the user's own device name
  * if set, else the model, else `"Android"` — never blank.
  *
- * Read once per process at startup; existing pairings keep the label the
- * engine stored at redeem time. Label *sanitising* (control characters,
- * the 256-byte cap) is the Rust core's job — Kotlin only picks the name.
+ * Read once per process at startup. Label *sanitising* (control
+ * characters, the byte cap) is the Rust core's job — Kotlin only picks
+ * the name.
  */
 object DeviceLabel {
 

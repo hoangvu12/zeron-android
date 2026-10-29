@@ -8,8 +8,8 @@ import android.view.ViewTreeObserver
 /**
  * Keeps the platform splash up until [ready] returns true or [timeoutMs]
  * passes (android-ui-parity #35; 2000 ms is a Zeron choice — iOS loads
- * credentials synchronously, Android loads engines asynchronously and
- * must not flash the pairing root at a paired user).
+ * credentials synchronously, Android loads asynchronously and
+ * must not flash the welcome root at a signed-in user).
  *
  * Main thread. Call after `setContent` in `MainActivity.onCreate`; the
  * listener removes itself on the first pre-draw it allows through.

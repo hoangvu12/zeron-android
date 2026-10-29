@@ -67,8 +67,8 @@ import sh.zeron.android.core.GeistMetrics
  * of `UICollectionLayoutListConfiguration(appearance: .insetGrouped)` with
  * `subtitleCell()` rows, `listGroupedCell()` backgrounds and
  * `groupedHeader()` section headers (`ios:Shell/MoreViewController.swift`).
- * Settings (103), engine detail (140), Licenses (101), the Pair page card
- * (72) and the folder browser (110) all build on it.
+ * Settings (103), Licenses (101) and the folder browser (110) all build
+ * on it.
  *
  * Everything is Compose foundation: no `ListItem`, no Material `Card`, no
  * ripple. The one animation is the pressed-highlight fade
@@ -427,7 +427,7 @@ fun GroupedFooter(
 ) {
     val horizontal = GroupedListTokens.HeaderHorizontal + GroupedListTokens.CardInset
     val ts = LocalTypeScale.current
-    // The block (and the caller's modifier — the Pair page's test tags) is
+    // The block (and the caller's modifier — its test tags) is
     // a Box, the text its own node inside the padding, like GroupedHeader:
     // a semantics node's bounds come from its outermost semantics
     // modifier, so a tag on the BasicText itself would report the text at
@@ -446,8 +446,7 @@ fun GroupedFooter(
 // ---------------------------------------------------------------------------
 
 /**
- * The card row a custom cell builds in (the Pair page's link field, ticket
- * 72): the elevated fill, the per-position clip, the pressed highlight and
+ * The card row a custom cell builds in: the elevated fill, the per-position clip, the pressed highlight and
  * the bottom hairline, with the caller's [content] laid out as a centered
  * [Row]. [GroupedRow] is the standard [subtitleCell] port on top of it.
  *

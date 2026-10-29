@@ -1,4 +1,4 @@
-package sh.zeron.android.pairing
+package sh.zeron.android.security
 
 /**
  * Authenticated encryption for small secrets, so the production
@@ -6,8 +6,8 @@ package sh.zeron.android.pairing
  * `iv(12) ‖ ciphertext ‖ tag(16)` — exactly what [KeystoreSecretCipher]
  * writes and [decrypt] accepts.
  *
- * The `aad` binds a blob to its engine id, so a `cred:` value copied to
- * another engine fails its tag check instead of decrypting.
+ * The `aad` binds a blob to its owner key, so a value copied to
+ * another key fails its tag check instead of decrypting.
  */
 interface SecretCipher {
 

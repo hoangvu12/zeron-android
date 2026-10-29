@@ -33,12 +33,12 @@ import uniffi.zeron_core.SessionRow
 
 /**
  * The only thing the prompts read that 42 doesn't provide: the engine
- * list (android-app#06). `engines()` is an in-memory read (every paired
- * engine in pairing order), fine on the main thread.
+ * list (android-app#06). `engines()` is an in-memory read (every
+ * engine in registry order), fine on the main thread.
  */
 interface SessionPromptBackend {
 
-    /** Every engine, pairing order, as a chooser row's data. */
+    /** Every engine, registry order, as a chooser row's data. */
     fun engines(): List<EngineChoice>
 }
 
@@ -46,7 +46,7 @@ interface SessionPromptBackend {
  * The [SessionPromptBackend] over the live [CoreClient] —
  * `engines()` maps the [uniffi.zeron_core.EngineView] records to
  * [EngineChoice]s, resolved at call time like 42's `writes` seam so a
- * re-created client (re-pair, forget) is picked up.
+ * re-created client is picked up.
  */
 class CoreSessionPromptBackend(private val client: () -> CoreClient?) : SessionPromptBackend {
 

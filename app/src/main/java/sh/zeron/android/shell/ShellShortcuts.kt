@@ -72,7 +72,7 @@ object ShellShortcuts {
      * entries: the `Zeron` group — "New Session" and "Search" whenever a
      * shell is mounted, plus "Toggle Sidebar" only while the split is up
      * (a compact phone would show a dead entry; iPad lists it even
-     * collapsed, where it is a silent no-op). No shell (the pairing root)
+     * collapsed, where it is a silent no-op). No shell (the welcome root)
      * → no group at all, matching `SignInViewController`, which has no
      * commands.
      */

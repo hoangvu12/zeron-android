@@ -37,10 +37,9 @@ import androidx.compose.ui.geometry.Rect
  * surface's width comes from the caller (74's stack slot, 93's canvas);
  * the placeholder is 57's (it draws `controller.placeholder`).
  *
- * Ticket 94 added three pass-through parameters for the New Session
+ * Ticket 94 added two pass-through parameters for the New Session
  * canvas's handoff capture — `textHidden` and `onTextRect` forward to
- * 57's [ComposerTextField], `chipsCanWrite` overrides the chips' write
- * gate (59's [ChipStrip]) — all defaulted to today's behaviour, so the
+ * 57's [ComposerTextField] — both defaulted to today's behaviour, so the
  * session composer is unchanged.
  */
 @Composable
@@ -52,13 +51,6 @@ fun ComposerBar(
     textHidden: Boolean = false,
     /** 94: the text rect in root px — 57's `onTextRect` (94's capture reads it). */
     onTextRect: ((Rect) -> Unit)? = null,
-    /**
-     * 94: the `canWrite` the chips get (59's param). The session composer
-     * keeps the controller's value; the New Session canvas passes `true`
-     * so the project and host chips stay live while Send is gated on an
-     * offline engine (the user must be able to move off it).
-     */
-    chipsCanWrite: Boolean = controller.canWrite,
 ) {
     // 86: the mention card's state and the screen-side binding (the
     // observers, the host registration and the debounced search over
@@ -93,7 +85,6 @@ fun ComposerBar(
             ChipStrip(
                 chips = controller.chips,
                 chipMenus = controller.chipMenus,
-                canWrite = chipsCanWrite,
                 onChipTap = { controller.onChipTap(it) },
                 chipModifier = Modifier.composerControl(morph),
             )

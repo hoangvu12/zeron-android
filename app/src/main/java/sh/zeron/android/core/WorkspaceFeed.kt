@@ -29,7 +29,7 @@ interface WorkspaceCore {
     /** The whole derived workspace. */
     fun workspace(): WorkspaceSnapshot
 
-    /** Every paired engine, in pairing order. */
+    /** Every engine, in registry order. */
     fun engines(): List<EngineView>
 
     /** The aggregate connectivity posture (ticket 50 reads it). */

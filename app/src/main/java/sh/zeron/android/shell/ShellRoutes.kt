@@ -7,12 +7,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import sh.zeron.android.accounts.AgentAccountsRoute
 import sh.zeron.android.accounts.AgentAccountsScreen
-import sh.zeron.android.browser.BrowserRoute
-import sh.zeron.android.browser.BrowserScreen
-import sh.zeron.android.browser.PreviewPanelRoute
-import sh.zeron.android.browser.PreviewPanelScreen
-import sh.zeron.android.settings.EngineDetailRoute
-import sh.zeron.android.settings.EngineDetailScreen
 import sh.zeron.android.settings.LicensesRoute
 import sh.zeron.android.settings.LicensesScreen
 import sh.zeron.android.session.SessionScreenRoute
@@ -55,8 +49,7 @@ data class PlaceholderDetailRoute(val tab: TabId, val row: Int) : NavRoute
  * can hold. Tickets 46/103/49 add their branches (replacing the
  * `TabRootRoute` branch per tab); 45 registers the folder route; 76
  * registers the Session route; 101 registers the Licenses screen the
- * Settings "About" row pushes; 102 registered the Engine detail
- * route and 140 fills in its page.
+ * Settings "About" row pushes.
  */
 @Composable
 fun ShellRouteContent(route: NavRoute) {
@@ -108,23 +101,10 @@ fun ShellRouteContent(route: NavRoute) {
         // android-next #06: a new side chat's draft, pushed from the ⋯ or
         // the sheet's +; its first send swaps the chat in for it.
         is SideChatDraftRoute -> route.Content()
-        // Ticket 140: the Engine detail page — the status card, the
-        // actions card (Rename…, Pair again) and the Forget confirm the
-        // Devices row's push lands on. 104's tablet Settings dialog routes
-        // pushes through this same table.
-        is EngineDetailRoute -> EngineDetailScreen(route.engineId)
         // android-next #05: the Accounts & Usage page — the Settings →
         // Agent Accounts row, the usage chip's "Accounts & Usage…" row
         // and the session ⋯ menu's "Account & Usage" push it.
         is AgentAccountsRoute -> AgentAccountsScreen(route)
-        // agent-previews ticket 05: the preview panel (the phone's half of
-        // the session relay) — the session ⋯ menu's "Previews" row pushes
-        // it; its rows' Open pushes the in-app browser entry through this
-        // same table.
-        is PreviewPanelRoute -> PreviewPanelScreen(route)
-        // agent-previews ticket 05: the in-app browser entry — the WebView
-        // loading `http://{hostname}:7332` through the in-app client proxy.
-        is BrowserRoute -> BrowserScreen(route)
         else -> Unit
     }
 }

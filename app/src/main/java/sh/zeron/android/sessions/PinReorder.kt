@@ -23,7 +23,7 @@ private const val SessionItemKeyPrefix = "s:"
  * One pin of the merged Pinned list (android-ui-parity #47): the chat id
  * plus the engine that owns it. Pins are engine-local (ADR 0004,
  * android-app#07), so a row may only move **within its own engine's
- * block** — the merged order is engine pairing order, then each engine's
+ * block** — the merged order is engine registry order, then each engine's
  * stored order.
  */
 @Immutable

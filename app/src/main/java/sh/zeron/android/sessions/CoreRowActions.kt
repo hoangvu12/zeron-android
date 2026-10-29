@@ -157,7 +157,7 @@ fun Flow<ClientEvent>.notices(): Flow<String> =
  *
  * Never call the FFI on main: `CoreClient` goes through JNA and
  * android-app#06 warns about re-entrant listener callbacks. `writes` is
- * read on main at call time, so a re-created client (re-pair, forget) is
+ * read on main at call time, so a re-created client is
  * picked up the same way iOS re-reads `client?`.
  *
  * [log] is iOS's `NSLog("<what> failed: <error>")` with the Android tag;

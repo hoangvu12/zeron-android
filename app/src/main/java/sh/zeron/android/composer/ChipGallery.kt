@@ -57,8 +57,7 @@ import java.util.Locale
  * the haze source its menu panels blur) drawn on a 26 dp-radius glass card
  * over the gallery backdrop: A the session row, B the four PR states, C
  * the four context-usage cases (android-next #01), D the new-session
- * row, E the offline (`canWrite = false`) look, F the 240 dp overflow
- * strip at rest / 12 dp in / scrolled to the end, G the locations-rail
+ * row, F the 240 dp overflow strip at rest / 12 dp in / scrolled to the end, G the locations-rail
  * sample on the low-level chip, H the live wiring (tap "model" for the
  * glass menu, "3% context" for the context card, "branch" for the toast).
  */
@@ -147,28 +146,24 @@ fun ChipStripGallerySection() {
                     )
 
                     ChipCard("A — session (model · effort · branch)") {
-                        ChipStrip(chipFixtureSession(), emptyMap(), canWrite = true, onChipTap = {})
+                        ChipStrip(chipFixtureSession(), emptyMap(), onChipTap = {})
                     }
 
                     val prStrips = chipFixturePrStrips()
                     prStrips.forEachIndexed { index, chips ->
                         ChipCard("B — PR ${PR_STATE_NAMES[index]}") {
-                            ChipStrip(chips, emptyMap(), canWrite = true, onChipTap = {})
+                            ChipStrip(chips, emptyMap(), onChipTap = {})
                         }
                     }
 
                     chipFixtureContextStrips().forEachIndexed { index, chips ->
                         ChipCard("C — context usage ${chipFixtureContextReadings[index].first}") {
-                            ChipStrip(chips, emptyMap(), canWrite = true, onChipTap = {})
+                            ChipStrip(chips, emptyMap(), onChipTap = {})
                         }
                     }
 
                     ChipCard("D — new session (project · engine · checkout · model · effort)") {
-                        ChipStrip(chipFixtureNewSession(), emptyMap(), canWrite = true, onChipTap = {})
-                    }
-
-                    ChipCard("E — offline engine (canWrite = false, ink tertiary)") {
-                        ChipStrip(chipFixtureSession(), emptyMap(), canWrite = false, onChipTap = {})
+                        ChipStrip(chipFixtureNewSession(), emptyMap(), onChipTap = {})
                     }
 
                     // F — the same 240 dp overflow strip three times: at
@@ -218,7 +213,6 @@ fun ChipStripGallerySection() {
                                 "model" to { chipModelMenu() },
                                 "context" to { contextUsageCard(low, Locale.US) },
                             ),
-                            canWrite = true,
                             onChipTap = { id -> toaster.show("onChipTap: $id") },
                         )
                     }
@@ -237,7 +231,6 @@ private fun OverflowStrip(chips: List<ComposerChip>, state: ScrollState) {
     ChipStrip(
         chips,
         emptyMap(),
-        canWrite = true,
         onChipTap = {},
         modifier = Modifier.width(240.dp),
         state = state,
@@ -276,7 +269,7 @@ private fun Caption(text: String, style: TextStyle) {
 }
 
 // ---------------------------------------------------------------------------
-// Previews (step 7): fixtures A + B + E, light and dark, each wrapped in
+// Previews (step 7): fixtures A + B, light and dark, each wrapped in
 // the GlassMenuHost every ChipStrip needs.
 // ---------------------------------------------------------------------------
 
@@ -307,14 +300,12 @@ private fun ChipStripPreview(appearance: Appearance) {
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Caption("A — session", uiStyle(Face.Sans, typeScale.fixed(12f), palette.secondary))
-                ChipStrip(chipFixtureSession(), emptyMap(), canWrite = true, onChipTap = {})
+                ChipStrip(chipFixtureSession(), emptyMap(), onChipTap = {})
                 val prNames = PR_STATE_NAMES
                 chipFixturePrStrips().forEachIndexed { index, chips ->
                     Caption("B — PR ${prNames[index]}", uiStyle(Face.Sans, typeScale.fixed(12f), palette.secondary))
-                    ChipStrip(chips, emptyMap(), canWrite = true, onChipTap = {})
+                    ChipStrip(chips, emptyMap(), onChipTap = {})
                 }
-                Caption("E — offline", uiStyle(Face.Sans, typeScale.fixed(12f), palette.secondary))
-                ChipStrip(chipFixtureSession(), emptyMap(), canWrite = false, onChipTap = {})
             }
         }
     }

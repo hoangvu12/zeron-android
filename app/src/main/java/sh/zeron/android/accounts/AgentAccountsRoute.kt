@@ -29,14 +29,11 @@ data class AgentAccountsRoute(
 /**
  * Where an error card's "Log in" goes (wave-10 35, upstream #967's
  * `SessionViewController.swift:89-99`): the chat's agent on its computer,
- * its first login started at once — unless the chat is Limited. Then the
- * Limited banner owns the recovery (Resume, Resume on another account,
- * Resume at reset; orchestration v2), so Log in only shows the accounts
- * and never kicks off a second, competing sign-in. Pure.
+ * its first login started at once. Pure.
  */
-fun errorCardLogInRoute(hostDeviceId: String, harness: String?, limited: Boolean): AgentAccountsRoute =
+fun errorCardLogInRoute(hostDeviceId: String, harness: String?): AgentAccountsRoute =
     AgentAccountsRoute(
         deviceId = hostDeviceId.ifEmpty { null },
         focusHarness = harness,
-        signIn = !limited,
+        signIn = true,
     )

@@ -10,7 +10,7 @@ import androidx.compose.ui.unit.dp
  * cross-fade; Phone ↔ Split is an in-place switch inside the shell group
  * (ticket 108's collapse, `SplitRootController.swift:15-16,49`).
  */
-enum class RootKind { Pairing, Phone, Split }
+enum class RootKind { Welcome, Phone, Split }
 
 /**
  * What the app root needs from the app model (ticket 35, derived in
@@ -18,11 +18,11 @@ enum class RootKind { Pairing, Phone, Split }
  * 71's `CoreStartup`):
  *
  * - [Loading] — nothing is drawn, the platform splash is held
- *   (`FirstFrameHold`); Android loads engines asynchronously, and a
- *   paired user must not see the pairing root flash before the list is
- *   known (iOS reads the Keychain synchronously in `AppModel.init`);
+ *   (`FirstFrameHold`); Android loads asynchronously, and a signed-in
+ *   user must not see the welcome root flash before the state is known
+ *   (iOS reads the Keychain synchronously in `AppModel.init`);
  * - [CoreFailed] — the native core could not be loaded; the diagnostic
- *   screen replaces the app (a pairing root without a core cannot work);
+ *   screen replaces the app;
  * - [Ready] — the engine list is known; [Ready.hasEngines] is
  *   `engines().isNotEmpty()`, parked (revoked) engines included.
  */
@@ -53,27 +53,27 @@ val SplitBreakpoint: Dp = 744.dp
 val CompactHeight: Dp = 480.dp
 
 /**
- * The root on screen. `!hasEngines` wins over the size: a tablet with no
- * engine pairs, it never splits. A compact-height window (a landscape
+ * The root on screen. `!hasEngines` wins over the size: the welcome root
+ * never splits. A compact-height window (a landscape
  * phone) stays on the phone layout; otherwise the width decides. Both are
  * re-evaluated live (fold, multi-window resize, rotation) — a change never
  * goes through the cross-fade.
  */
 fun chooseRoot(hasEngines: Boolean, width: Dp, height: Dp = Dp.Infinity): RootKind = when {
-    !hasEngines -> RootKind.Pairing
+    !hasEngines -> RootKind.Welcome
     height < CompactHeight -> RootKind.Phone
     width >= SplitBreakpoint -> RootKind.Split
     else -> RootKind.Phone
 }
 
 /**
- * Swaps animate only between these two groups (Pairing ↔ Shell); Phone ↔
+ * Swaps animate only between these two groups (Welcome ↔ Shell); Phone ↔
  * Split happens inside the shell group, in place, with no fade
  * (`SceneDelegate.swift:24-33` runs `showRoot` only for auth changes; the
  * iPad split collapses to the tab shell inside `UISplitViewController`).
  */
-internal enum class RootGroup { Pairing, Shell }
+internal enum class RootGroup { Welcome, Shell }
 
-/** The fade group of [RootKind]: Pairing alone, Phone and Split together. */
+/** The fade group of [RootKind]: Welcome alone, Phone and Split together. */
 internal val RootKind.group: RootGroup
-    get() = if (this == RootKind.Pairing) RootGroup.Pairing else RootGroup.Shell
+    get() = if (this == RootKind.Welcome) RootGroup.Welcome else RootGroup.Shell

@@ -71,8 +71,8 @@ import sh.zeron.android.settings.SettingsScreen
  *
  * **How it is hosted:** an entry of ticket 31's `SheetHost` through its
  * `SheetStyle.Custom` extension point — in the app's window, never an
- * Android `Dialog`/`Popup` window, so Haze keeps sampling, the Pair page
- * (72) stacks on it through [LocalEnclosingSheet], and alerts, action
+ * Android `Dialog`/`Popup` window, so Haze keeps sampling, a page sheet
+ * stacks on it through [LocalEnclosingSheet], and alerts, action
  * sheets, menus and toasts draw above it; a root swap dismisses it
  * instantly through 35's `sheets.dismissAll(animated = false)`. The card
  * never registers via `RegisterRootPresentation`.
@@ -183,8 +183,8 @@ internal data object SettingsDialogRootRoute : NavRoute {
 
 /**
  * The [PageSheetScope] of the sheet the caller is composed in — 31's
- * [LocalPageSheetScope] under the name tickets 72 (`openPairPage(over)`)
- * and 140 ("Pair again") use. A read-only getter alias, never a second
+ * [LocalPageSheetScope] under the name a sheet stacked over the card
+ * uses. A read-only getter alias, never a second
  * local: the host provides the value around every entry's content, so the
  * two names can never disagree inside the card.
  */
@@ -281,7 +281,7 @@ internal object SettingsFormSheetStyle : SheetStyle.Custom {
                 // (a) The card's own back handler — composed BEFORE the
                 // content: OnBackPressedDispatcher priority is composition
                 // order, so 24's pop handler inside the content and a
-                // stacked Pair page (31) win while the card stays up. At
+                // stacked page sheet (31) win while the card stays up. At
                 // the root there is no inner handler: back dismisses the
                 // card (commit animates from the scrubbed offset; on
                 // 3-button navigation the flow completes with no progress
@@ -393,8 +393,8 @@ class SettingsDialogPresenter internal constructor(
  *
  * [locals] is captured here because `SheetHost` composes its entries
  * outside the shells, so app-level locals provided inside them
- * ([LocalAppRouter] (32), 41's session route factory, 72's
- * `LocalPairPage`) would resolve to their defaults in the card. The
+ * ([LocalAppRouter] (32), 41's session route factory) would resolve to
+ * their defaults in the card. The
  * capture is re-read at content composition time, so a router attached
  * after the shell's first frame (36) is still the one the card sees. If
  * 35/106 later provide those locals above the `SheetHost`, the capture is

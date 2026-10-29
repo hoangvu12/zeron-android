@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeoutOrNull
 import sh.zeron.android.background.RunWatchController
 import sh.zeron.android.composer.CoreChipMenuCore
 import sh.zeron.android.accounts.CoreAccountsCore
@@ -42,28 +41,20 @@ import sh.zeron.android.core.zeronPrefsStore
 import sh.zeron.android.design.Appearance
 import sh.zeron.android.design.AlertHostState
 import sh.zeron.android.design.ToasterState
-import sh.zeron.android.update.RELEASES_PAGE
 import sh.zeron.android.notify.NotificationCenter
 import sh.zeron.android.notify.NotificationPermission
 import sh.zeron.android.notify.NotificationPolicy
 import sh.zeron.android.notify.NotificationPrefs
 import sh.zeron.android.notify.Notifier
 import sh.zeron.android.newsession.NewSessionDraftStore
-import sh.zeron.android.pairing.KeystoreSecretCipher
-import sh.zeron.android.pairing.LaunchPairRedeemer
-import sh.zeron.android.pairing.PairedEngineStore
-import sh.zeron.android.session.CanWriteFiller
 import sh.zeron.android.session.ChromeFillerRegistry
-import sh.zeron.android.session.CoreLimitedCore
 import sh.zeron.android.session.CoreSessionCore
 import sh.zeron.android.session.CoreSessionOpener
-import sh.zeron.android.session.LimitedBanner
 import sh.zeron.android.session.QuestionsChromeFiller
 import sh.zeron.android.session.SessionChipsFiller
 import sh.zeron.android.session.StatusBanner
 import sh.zeron.android.session.installSessionRoutes
 import sh.zeron.android.sessions.CoreRowActions
-import sh.zeron.android.sessions.EngineHealthModel
 import sh.zeron.android.sessions.FoldState
 import sh.zeron.android.sessions.FrontPageModel
 import sh.zeron.android.sessions.asSessionWrites
@@ -72,18 +63,15 @@ import sh.zeron.android.shell.DeepLinkHub
 import sh.zeron.android.shell.RootInput
 import sh.zeron.android.shell.RouterHooks
 import sh.zeron.android.shell.SearchTabState
-import sh.zeron.android.update.UpdateCenter
-import sh.zeron.android.composer.openInCustomTab
 import uniffi.zeron_core.ClientEvent
 import uniffi.zeron_core.CoreClient
 import uniffi.zeron_core.WorkspaceSnapshot
 
 /**
  * The Zeron app shell: verifies the bundled fonts, loads the Rust mobile
- * core, then starts the client pipeline (ticket 71) — the stored paired
- * engines load on IO, the single `CoreClient` is built from them, and the
- * splash (ticket 35) holds on `CoreStartState.Loading` until the engine
- * list is known.
+ * core, then starts the client pipeline (ticket 71) — the single
+ * `CoreClient` is built on IO, and the splash (ticket 35) holds on
+ * `CoreStartState.Loading` until the root is known.
  *
  * Property names are reserved for the parity tickets (android-ui-parity):
  * `prefs`, `workspaceFeed`, `foldState`, `frontPage` (#40, all landed
@@ -143,9 +131,8 @@ class ZeronApplication : Application() {
     /**
      * The process-wide deep-link hub (ticket 36): holds `zeron://` links
      * and `route` extras until a shell can take them (dispatched after the
-     * shell's first frame), drops everything but `pair` while the pairing
-     * root is on screen, and hands `zeron://pair…` to the handler ticket
-     * 139 registers. App-lifetime on purpose: a link held while the
+     * shell's first frame) and drops them while the welcome root is on
+     * screen. App-lifetime on purpose: a link held while the
      * splash is up survives activity recreation.
      *
      * [knownChatIds] reads the workspace snapshot — an in-memory list of
@@ -178,63 +165,6 @@ class ZeronApplication : Application() {
      */
     private val appearanceController: AppearanceController by lazy {
         AppearanceController(prefs, UiModeNightModeSink(this), applicationScope)
-    }
-
-    /**
-     * Exactly one DataStore per process for the paired-engines file (a
-     * second instance on the same file throws).
-     */
-    val engineDataStore by lazy {
-        PairedEngineStore.createDataStore(this, CoroutineScope(SupervisorJob() + Dispatchers.IO))
-    }
-
-    /** Keystore-encrypted credentials + DataStore metadata (ticket 71). */
-    val engineStore by lazy { PairedEngineStore(engineDataStore, KeystoreSecretCipher(this)) }
-
-    /**
-     * The debug `pair` launch extra's redemption (android-app#30): pairs
-     * the flow rig's minted URLs through the live client before the shell
-     * is drawn. No-op for an empty list (every non-rig launch).
-     */
-    private val launchPairRedeemer by lazy {
-        LaunchPairRedeemer(
-            client = ::clientOrNull,
-            store = engineStore,
-            scope = applicationScope,
-        )
-    }
-
-    /**
-     * android-app#30: true from [redeemLaunchPairs] until the redeemed
-     * engine is in the engine list (or nothing was redeemed). While it is
-     * up, an empty engine list reads as `Loading`, not the pairing root: a
-     * fresh install starts `Ready` with no engines, and the pairing root
-     * would make the deep-link hub drop the held `route` extra
-     * (`DeepLinkHub.showingPairingRoot` clears it) before the redeem lands.
-     */
-    private val launchPairGate = MutableStateFlow(false)
-
-    /** android-app#30: redeem the `pair` extra's URLs (debug builds only —
-     * `LaunchOptions.parse` drops the extra otherwise). */
-    fun redeemLaunchPairs(urls: List<String>) {
-        if (urls.isEmpty()) return
-        launchPairGate.value = true
-        launchPairRedeemer.redeem(urls) { redeemed ->
-            if (redeemed == 0) {
-                launchPairGate.value = false
-            } else {
-                // The engine list refreshes on the core's EnginesChanged
-                // event, which can trail pairEngine's return: keep the gate
-                // until the list shows an engine, bounded by the
-                // first-frame hold's budget.
-                applicationScope.launch {
-                    withTimeoutOrNull(LAUNCH_PAIR_GATE_MS) {
-                        coreStartup.engines.first { !it.isNullOrEmpty() }
-                    }
-                    launchPairGate.value = false
-                }
-            }
-        }
     }
 
     /**
@@ -284,7 +214,6 @@ class ZeronApplication : Application() {
     val coreStartup by lazy {
         CoreStartup(
             context = this,
-            store = engineStore,
             scope = applicationScope,
             onClientReady = { client ->
                 lifecycleHooks.clientReady()
@@ -311,9 +240,7 @@ class ZeronApplication : Application() {
      * The app root's input (ticket 35): `Loading` while 71's pipeline
      * loads, `Ready`/`CoreFailed` after — derived from `coreStartup`'s
      * state and engine list exactly as 71's Implementation states, so the
-     * splash (FirstFrameHold) holds until the engine list is known. The
-     * list includes parked (revoked) engines: they count as paired and
-     * keep the shell up with cached data.
+     * splash (FirstFrameHold) holds until the engine list is known.
      */
     lateinit var rootInput: StateFlow<RootInput>
         private set
@@ -361,18 +288,9 @@ class ZeronApplication : Application() {
      */
     val foldState: FoldState by lazy { FoldState(zeronPrefsStore, liveCore, applicationScope) }
 
-    /**
-     * The multi-engine health model (ticket 50): the 4 s show-slow /
-     * hide-fast grace over the feed's engines and connectivity, feeding
-     * both the Sessions connection line and the offline `home:*` header
-     * glyphs (through [frontPage]'s `liveOverrides`). One instance per
-     * process; the debug gallery builds its own over MutableStateFlows.
-     */
-    val engineHealth: EngineHealthModel by lazy { EngineHealthModel(workspaceFeed, applicationScope) }
-
     /** The Sessions tab's front page model (tickets 40 and 50); 46 hosts it. */
     val frontPage: FrontPageModel by lazy {
-        FrontPageModel(workspaceFeed, prefs, foldState, engineHealth, applicationScope)
+        FrontPageModel(workspaceFeed, prefs, foldState, applicationScope)
     }
 
     /**
@@ -398,45 +316,13 @@ class ZeronApplication : Application() {
     val appToaster: ToasterState by lazy { ToasterState() }
 
     /**
-     * The app-scoped alert state (android-next#04, the [appToaster]
-     * precedent): the update center — an app-lifetime service, not a
-     * screen — shows its alerts through it, so a prompt raised while no
-     * activity is composed (or after a rotation) still lands in the live
-     * root host. `ZeronAppContent` passes it to `RootHosts` (the alert
+     * The app-scoped alert state (the [appToaster] precedent): an
+     * app-lifetime service, not a screen, can show its alerts through it,
+     * so a prompt raised while no activity is composed (or after a
+     * rotation) still lands in the live root host. `ZeronAppContent` passes it to `RootHosts` (the alert
      * host is the root's own; this is only the shared state behind it).
      */
     val appAlerts: AlertHostState by lazy { AlertHostState() }
-
-    /**
-     * The in-app update center (android-next#04): the scheduled manifest
-     * checks, the launch prompt (over [appAlerts], once per process,
-     * deferred until the shell is idle), the download/verify/install
-     * flow, and the state the Settings → About update rows read. Started
-     * in `onCreate` (its 2 s initial delay waits out the first frame);
-     * the foreground observer below feeds it the process's foreground
-     * edges (the hourly cadence and the install resume).
-     */
-    val updates: UpdateCenter by lazy {
-        UpdateCenter(
-            context = this,
-            scope = applicationScope,
-            alerts = appAlerts,
-            engineVersions = { workspaceFeed.engines.value.map { it.version } },
-            rootReady = {
-                val input = rootInput.value
-                input is RootInput.Ready && input.hasEngines
-            },
-            openReleases = {
-                openInCustomTab(
-                    this,
-                    RELEASES_PAGE,
-                    dark = appearance.value != Appearance.Light &&
-                        (appearance.value == Appearance.Dark ||
-                            resources.configuration.isNightModeActive),
-                )
-            },
-        )
-    }
 
     /**
      * The one object every session/section write goes through (ticket
@@ -554,35 +440,24 @@ class ZeronApplication : Application() {
         )
         // Ticket 35: the root input derives from 71's startup state and
         // engine list; Loading holds the splash until the first root is
-        // known, so a paired user never sees the pairing root flash.
+        // known, so a signed-in user never sees the welcome root flash.
         rootInput = when (val c = core) {
             is CoreStatus.Failed -> MutableStateFlow(RootInput.CoreFailed(c.reason))
-            is CoreStatus.Loaded -> combine(coreStartup.state, coreStartup.engines, launchPairGate) { s, engines, pairing ->
+            is CoreStatus.Loaded -> combine(coreStartup.state, coreStartup.engines) { s, engines ->
                 when (s) {
                     CoreStartState.Loading -> RootInput.Loading
                     is CoreStartState.Failed -> RootInput.CoreFailed(s.reason)
                     CoreStartState.Ready -> when {
                         engines == null -> RootInput.Loading
-                        // android-app#30: the launch `pair` extra is still
-                        // being redeemed — no pairing root (see launchPairGate).
-                        engines.isEmpty() && pairing -> RootInput.Loading
                         else -> RootInput.Ready(hasEngines = engines.isNotEmpty())
                     }
                 }
             }.distinctUntilChanged()
                 .stateIn(applicationScope, SharingStarted.Eagerly, RootInput.Loading)
         }
-        // Ticket 79 (offline read-only): `SessionChrome.canWrite`
-        // derived from the owning engine's state — `true` only for
-        // `EngineState.Connected` (writes to anything else are refused
-        // at once by the core, android-app#06). Registered in 76's
-        // CAN_WRITE slot (10), the first filler, so later fillers (73's
-        // banner) can read `chrome.canWrite`; the factory returns the
-        // same stateless object for every open.
-        chromeFillers.register(ChromeFillerRegistry.CAN_WRITE) { CanWriteFiller }
         // Ticket 78 (chips): the session composer's chip derivation,
-        // registered at slot 20 — after 79's CAN_WRITE (10), before 73's
-        // BANNER (30), the iOS `refresh()` order. 73 owns the send-failure
+        // registered at slot 20 — before 73's BANNER (30), the iOS
+        // `refresh()` order. 73 owns the send-failure
         // state, so this registry never gets a second send-failure filler.
         chromeFillers.register(ChromeFillerRegistry.CHIPS) { SessionChipsFiller() }
         // Ticket 73 (status banner): the pill's chrome derivation and its
@@ -612,16 +487,6 @@ class ZeronApplication : Application() {
         // touches no FFI.
         chromeFillers.register(ChromeFillerRegistry.USAGE_CHIP) { _ ->
             SessionAccountUsage(CoreAccountsCore(client = ::clientOrNull))
-        }
-        // The failover port (orchestration v2 ticket 09 + 07's pills): the
-        // Limited banner — derives `SessionChrome.limited` from the
-        // composer's limit record, loads the failover candidates behind
-        // the banner (TTL 30 s), and runs the strip's actions (Resume,
-        // arm/cancel the durable resume, the account switch). Slot 25,
-        // after the usage chip, before 73's banner. The loads and
-        // switches run on the filler's own IO scope; fill touches no FFI.
-        chromeFillers.register(ChromeFillerRegistry.LIMITED) { core ->
-            LimitedBanner(CoreLimitedCore((core as CoreSessionCore).client))
         }
         // Ticket 82 (queue panel): the queue mapping into
         // `SessionChrome.queue` — gate labels, `visibleText`, order —
@@ -683,15 +548,11 @@ class ZeronApplication : Application() {
                     notifications.foreground = true
                     runWatch.onForeground(true)
                     refreshNotificationsOn()
-                    // android-next#04: the update loop's hourly cadence and
-                    // the install resume ride the same foreground edge.
-                    updates.onForeground(true)
                 }
 
                 override fun onStop(owner: LifecycleOwner) {
                     notifications.foreground = false
                     runWatch.onForeground(false)
-                    updates.onForeground(false)
                 }
             },
         )
@@ -714,11 +575,6 @@ class ZeronApplication : Application() {
             rowActions.startNoticeToasts(appEvents.notices())
             coreStartup.start()
         }
-        // android-next#04: the update checks start with the process (the
-        // launch check's 2 s delay waits out the first frame). Debug and
-        // benchmark builds check too — the center's BuildConfig flag only
-        // turns the install path into the releases-page link.
-        updates.start()
     }
 
     /**
@@ -763,9 +619,3 @@ private fun WorkspaceSnapshot?.allSessionIds(): List<String> {
         addAll(archived.map { it.id })
     }.distinct()
 }
-
-/**
- * The launch-pair gate's bound (android-app#30): the first-frame hold's own
- * budget for a `pair` launch (`MainActivity.PAIR_HOLD_TIMEOUT_MS`).
- */
-private const val LAUNCH_PAIR_GATE_MS = 20_000L
