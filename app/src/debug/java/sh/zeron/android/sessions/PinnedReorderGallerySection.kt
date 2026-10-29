@@ -36,11 +36,10 @@ import uniffi.zeron_core.SessionRow
 
 /**
  * The "Pinned reorder" page of the debug design gallery
- * (android-ui-parity #47): a fake **two-engine** pinned list in 41's
- * standalone [SessionList] — engine A carries three of ticket 37's
- * fixture rows, engine B two (the PR-badge row among them) — with the
- * Edit/Done [GlassTextCapsule] exactly as the Pinned folder screen calls
- * it, the drag handles, the engine-block clamp, the auto-scroll and the
+ * (android-ui-parity #47): a fake pinned list in 41's standalone
+ * [SessionList] — five of ticket 37's fixture rows (the PR-badge row
+ * among them) — with the Edit/Done [GlassTextCapsule] exactly as the
+ * Pinned folder screen calls it, the drag handles, the auto-scroll and the
  * lift look. The readout line shows the last dispatched [PinMove]
  * (`move <id> after=<id> before=<id>`); "Fail next" makes the dispatch
  * answer [ActionOutcome.Failed] with the ticket 42 toast, so the
@@ -61,16 +60,11 @@ fun PinnedReorderGallerySection() {
     var failNext by remember { mutableStateOf(false) }
     var result by remember { mutableStateOf("no move yet") }
 
-    // The fixture: ticket 37's rows, two engines. Engine A (the merge
-    // order puts the paired engine first) is 37's first three Recent
-    // rows; engine B is the PR-badge row and the launch post, re-idd to
-    // engine B — the clamp keeps the two blocks apart.
+    // The fixture: ticket 37's rows. Pins are workspace-wide, so any row
+    // moves anywhere in the list (#24 removed the one-engine clamp).
     val rows = remember { pinnedReorderGalleryRows() }
     val listState = rememberLazyListState()
-    // Production puts every pin in WORKSPACE_PIN_BLOCK; the gallery keys
-    // the blocks by device so the clamp still has something to show.
-    val engineById = remember(rows) { rows.associate { r -> r.id to r.deviceId } }
-    val keys = remember(rows) { rows.map { r -> PinKey(r.id, r.deviceId) } }
+    val keys = remember(rows) { rows.map { r -> r.id } }
     val reorderState = remember { PinReorderState(keys) }
     LaunchedEffect(keys) { reorderState.adopt(keys) }
     val lazyState = rememberReorderableLazyListState(
@@ -86,7 +80,6 @@ fun PinnedReorderGallerySection() {
     val reorder = SessionListReorder(
         lazyState = lazyState,
         state = reorderState,
-        engineOf = { id -> engineById.getValue(id) },
         dispatch = { mv, onResult -> actions.movePin(mv.id, mv.after, mv.before, onResult) },
     )
     val model = rememberSessionListModel(

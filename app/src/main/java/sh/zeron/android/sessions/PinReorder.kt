@@ -20,30 +20,12 @@ import androidx.compose.ui.unit.dp
 private const val SessionItemKeyPrefix = "s:"
 
 /**
- * One pin of the merged Pinned list (android-ui-parity #47): the chat id
- * plus the engine that owns it. Pins are engine-local (ADR 0004,
- * android-app#07), so a row may only move **within its own engine's
- * block** — the merged order is engine registry order, then each engine's
- * stored order.
- */
-@Immutable
-data class PinKey(val id: String, val engineId: String)
-
-/**
- * The one block every Zeron pin belongs to: pins are workspace-wide
- * (`movePin` takes any two anchors), so the whole Pinned list is one
- * [PinKey.engineId] block and the clamp never bites.
- */
-const val WORKSPACE_PIN_BLOCK = "workspace"
-
-/**
  * One `movePin` write (the port of iOS `pinsReordered`'s per-insertion
  * call, `SessionListController.swift:477-488`): the dragged id plus its
  * new neighbours in the **final** order — `after` is the row now above
- * it, `before` the row now below it, `null` at either end of the engine
- * block. A neighbour from another engine is never passed (it becomes
- * `null`; the core treats cross-engine anchors as absent, but the UI
- * must not rely on that).
+ * it, `before` the row now below it, `null` at either end. Zeron's pins
+ * are workspace-wide, so any row may move anywhere in Pinned (#24 removed
+ * Roboco's one-engine clamp, docs/port/01 I3).
  */
 @Immutable
 data class PinMove(val id: String, val after: String?, val before: String?) {
@@ -107,76 +89,39 @@ object EditMetrics {
 }
 
 /**
- * The pure reorder rules (47): the engine-block walk, the drop-target
- * clamp, the `movePin` neighbour rule and the accessibility step rule.
- * No state, no Compose — `MovePinNeighboursTest` pins every row of the
- * ticket's case table.
+ * The pure reorder rules (47): the `movePin` neighbour rule and the
+ * accessibility step rule. No state, no Compose.
  */
 object MovePinNeighbours {
-
-    /**
-     * The maximal run of contiguous indices around [index] whose
-     * `engineId` matches `order[index]`'s (android-app#07 delivers each
-     * engine's pins as one block; if it ever interleaved engines, this
-     * still never crosses an engine boundary, which is all the clamp
-     * needs).
-     */
-    fun engineBlock(order: List<PinKey>, index: Int): IntRange {
-        if (index !in order.indices) return index..index
-        val engine = order[index].engineId
-        var start = index
-        var end = index
-        while (start > 0 && order[start - 1].engineId == engine) start--
-        while (end < order.lastIndex && order[end + 1].engineId == engine) end++
-        return start..end
-    }
-
-    /**
-     * The clamp rule: `to` coerced into the engine block of `from` — a
-     * row may only move within its own engine's block, so a drop target
-     * past the block's edge becomes the edge itself.
-     */
-    fun clampTarget(order: List<PinKey>, from: Int, to: Int): Int {
-        val block = engineBlock(order, from)
-        return to.coerceIn(block.first, block.last)
-    }
 
     /**
      * The pure drop rule (the port of iOS `pinsReordered`): the
      * `PinMove` for dropping [draggedId] between [original] (the order at
      * drag start) and [final] (the order at release), or `null` when
-     * nothing moved (no call) or the id vanished.
-     *
-     * `after` / `before` are the dragged row's final neighbours, and only
-     * when they belong to the same engine — a cross-engine neighbour
-     * becomes `null` (a block edge), never an id.
+     * nothing moved (no call) or the id vanished. `after` / `before` are
+     * the dragged row's final neighbours.
      */
-    fun drop(original: List<PinKey>, final: List<PinKey>, draggedId: String): PinMove? {
-        if (final.map { it.id } == original.map { it.id }) return null
-        val i = final.indexOfFirst { it.id == draggedId }
+    fun drop(original: List<String>, final: List<String>, draggedId: String): PinMove? {
+        if (final == original) return null
+        val i = final.indexOf(draggedId)
         if (i < 0) return null
-        val engine = final[i].engineId
-        val after = final.getOrNull(i - 1)?.takeIf { it.engineId == engine }?.id
-        val before = final.getOrNull(i + 1)?.takeIf { it.engineId == engine }?.id
-        return PinMove(draggedId, after, before)
+        return PinMove(draggedId, final.getOrNull(i - 1), final.getOrNull(i + 1))
     }
 
     /**
      * The accessibility step (TalkBack cannot drag): the swap of the row
-     * at [index] one step up (`direction = -1`) or down (`+1`) with its
-     * same-engine neighbour, as `(newOrder, move)`, or `null` when there
-     * is no same-engine neighbour in that direction. The returned move is
+     * at [index] one step up (`direction = -1`) or down (`+1`), as
+     * `(newOrder, move)`, or `null` at either end. The returned move is
      * exactly what the equivalent drag would have dispatched.
      */
-    fun step(order: List<PinKey>, index: Int, direction: Int): Pair<List<PinKey>, PinMove>? {
+    fun step(order: List<String>, index: Int, direction: Int): Pair<List<String>, PinMove>? {
         if (index !in order.indices) return null
         val target = index + direction
         if (target !in order.indices) return null
-        if (order[target].engineId != order[index].engineId) return null
         val newOrder = order.toMutableList()
         val moved = newOrder.removeAt(index)
         newOrder.add(target, moved)
-        val move = drop(order, newOrder, moved.id) ?: return null
+        val move = drop(order, newOrder, moved) ?: return null
         return newOrder.toList() to move
     }
 }
@@ -199,36 +144,32 @@ object MovePinNeighbours {
  * mid-flight echo would snap the list back for a frame.
  */
 @Stable
-class PinReorderState(initial: List<PinKey>) {
+class PinReorderState(initial: List<String>) {
 
     /**
      * The live local order. The drag mutates it in place (the library's
      * `onMove` → [move]); a snapshot replaces it only while idle
-     * ([adopt]). The engine's stored order is the truth — every drop is
+     * ([adopt]). The core's stored order is the truth — every drop is
      * committed when it happens, as on iOS.
      */
-    val order: SnapshotStateList<PinKey> = mutableStateListOf<PinKey>().apply { addAll(initial) }
+    val order: SnapshotStateList<String> = mutableStateListOf<String>().apply { addAll(initial) }
 
     /** The row being dragged, or null (Idle / Committing). */
     var draggedId: String? by mutableStateOf(null)
         private set
-
-    /** The dragged row's engine, or null when idle — the clamp target's block. */
-    val dragEngine: String?
-        get() = draggedId?.let { id -> order.firstOrNull { it.id == id }?.engineId }
 
     /** A dropped move is in flight (handles disabled, snapshots stashed). */
     var committing: Boolean by mutableStateOf(false)
         private set
 
     /** The order at drag start — [MovePinNeighbours.drop]'s `original`. */
-    private var original: List<PinKey>? = null
+    private var original: List<String>? = null
 
     /** A snapshot that arrived while Dragging or Committing (not yet applied). */
-    private var stash: List<PinKey>? = null
+    private var stash: List<String>? = null
 
     /** The most recent snapshot rows seen — the snap-back target on failure. */
-    private var lastRows: List<PinKey> = initial.toList()
+    private var lastRows: List<String> = initial.toList()
 
     /**
      * A workspace snapshot arrived. Idle (and not equal to the current
@@ -237,7 +178,7 @@ class PinReorderState(initial: List<PinKey>) {
      * [end] (no move), by [committed] (a successful write's echo), or
      * never (a failed write snaps back to it).
      */
-    fun adopt(rows: List<PinKey>) {
+    fun adopt(rows: List<String>) {
         if (ids(rows) == ids(order)) {
             // Equal: no order change — but still the latest rows seen, so a
             // later failed write snaps back to them, not to an older frame.
@@ -270,8 +211,7 @@ class PinReorderState(initial: List<PinKey>) {
      * item index (the list may have non-session items before the rows,
      * such as the scaffold's large-title item): resolves both keys
      * against [order] (41's session keys are `"s:<id>"`; anything else —
-     * a header, a folder, a spacer — is refused), clamps the target into
-     * the dragged row's engine block and moves the entry in place.
+     * a header, a folder, a spacer — is refused) and moves the entry in place.
      *
      * @return true if the order changed
      */
@@ -279,9 +219,8 @@ class PinReorderState(initial: List<PinKey>) {
         val from = indexOfKey(fromKey)
         val to = indexOfKey(toKey)
         if (from < 0 || to < 0) return false
-        val target = MovePinNeighbours.clampTarget(order, from, to)
-        if (target == from) return false
-        order.add(target, order.removeAt(from))
+        if (to == from) return false
+        order.add(to, order.removeAt(from))
         return true
     }
 
@@ -311,7 +250,7 @@ class PinReorderState(initial: List<PinKey>) {
      * order to [newOrder] and enters Committing — the dispatch's
      * `onResult` lands in [committed] like any drop.
      */
-    fun applyStep(newOrder: List<PinKey>) {
+    fun applyStep(newOrder: List<String>) {
         order.clear()
         order.addAll(newOrder)
         committing = true
@@ -356,8 +295,8 @@ class PinReorderState(initial: List<PinKey>) {
     private fun indexOfKey(key: Any): Int {
         if (key !is String) return -1
         val id = key.removePrefix(SessionItemKeyPrefix)
-        return order.indexOfFirst { it.id == id }
+        return order.indexOf(id)
     }
 
-    private fun ids(rows: List<PinKey>): List<String> = rows.map { it.id }
+    private fun ids(rows: List<String>): List<String> = rows
 }

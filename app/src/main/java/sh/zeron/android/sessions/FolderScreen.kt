@@ -65,7 +65,7 @@ import uniffi.zeron_core.WorkspaceSnapshot
  * - **Pinned** — the nav-bar trailing **Edit ↔ Done** glass text capsule
  *   (ticket 47, tag `pinned-edit`, an instant label swap) and with it
  *   Edit mode: the list gets `reorderable = true, editing = editing` and
- *   ticket 47's reorder hookup — drag handles, the in-engine clamp and
+ *   ticket 47's reorder hookup — drag handles and
  *   one `movePin(id, after, before)` per drop;
  * - **Section** — a 44 dp ⋯ [GlassCircleButton] ("More") that opens
  *   ticket 15's glass menu with "Rename Section…" and "Delete Section",
@@ -135,14 +135,13 @@ fun FolderScreen(
 
     // Ticket 47, Pinned only: the Edit/Done state (saveable — it survives a
     // configuration change) and the reorder hookup. Section and Archived
-    // have neither. The keys and the id → engine map come from the same
-    // live rows (ws.front.pinned, already in merged engine-block order);
+    // have neither. The keys come from the live rows (ws.front.pinned,
+    // the shared pin order);
     // the state's `order` then leads the list while a drag or its commit
     // is in flight, and every snapshot is adopted through it.
     var editing by rememberSaveable(route.folderId) { mutableStateOf(initialEditing) }
     val reorder: SessionListReorder? = if (kind == FolderKind.Pinned) {
-        val engineById = remember(rows) { rows.associate { r -> r.id to WORKSPACE_PIN_BLOCK } }
-        val keys = remember(rows) { rows.map { r -> PinKey(r.id, WORKSPACE_PIN_BLOCK) } }
+        val keys = remember(rows) { rows.map { r -> r.id } }
         val state = remember { PinReorderState(keys) }
         LaunchedEffect(keys) { state.adopt(keys) }
         // The auto-scroll starts at the visible edges, not under the glass
@@ -160,7 +159,6 @@ fun FolderScreen(
         SessionListReorder(
             lazyState = lazyState,
             state = state,
-            engineOf = { id -> engineById.getValue(id) },
             dispatch = { mv, onResult -> actions.movePin(mv.id, mv.after, mv.before, onResult) },
         )
     } else {

@@ -100,6 +100,11 @@ class FrontPageModel(
         fold.toggle(id, feedback)
     }
 
+    /** A drop into a folded section opens it (#24; no haptic of its own). */
+    fun expandSection(id: String) {
+        fold.expand(id)
+    }
+
     /**
      * The ⋯ menu's Collapse All (`SessionListController.swift:581-586`):
      * fold every still-open id among Pinned (if pins exist), the user
