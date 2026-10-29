@@ -93,7 +93,11 @@ class ModalPortalTest {
         compose.setContent {
             ZeronTheme(Appearance.Light) { AlertHost(alerts) { Box(Modifier.fillMaxSize()) } }
         }
-        compose.runOnIdle { alerts.show(ZeronAlert(title = "Updated", buttons = listOf(AlertButton("OK")))) }
+        // Two plain buttons: no cancel action (a lone button would be one —
+        // the acknowledgement "OK", AlertRules' cancelActionIndex).
+        compose.runOnIdle {
+            alerts.show(ZeronAlert(title = "Update ready", buttons = listOf(AlertButton("Later"), AlertButton("Update"))))
+        }
         compose.waitForIdle()
 
         tapOutside()
