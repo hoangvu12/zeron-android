@@ -611,6 +611,11 @@ class ZeronApplication : Application() {
                 }
             },
         )
+        // #56 (D6): every workspace snapshot goes through the SessionWatcher
+        // (done / needs input / failed); null while signed out resets it.
+        applicationScope.launch {
+            workspaceFeed.snapshot.collect { notifications.onSnapshot(it) }
+        }
         applicationScope.launch {
             workspaceFeed.devices.collect { devices ->
                 runWatch.onEngineCount(devices.size)
@@ -634,7 +639,8 @@ class ZeronApplication : Application() {
         // TODO(#60): `voice.stop()`. TODO(#48): `cloud.reset()`.
         // TODO(#43): `terminals.signOut()`.
         sessionHolder.addSignOutListener {
-            notifier.cancelAll()
+            // #56: the watcher forgets the account, then everything it posted goes.
+            notifications.signedOut()
             runWatch.signOut()
             // The draft store's mirror is main-thread state; the last-engine
             // forget is its full reset.
