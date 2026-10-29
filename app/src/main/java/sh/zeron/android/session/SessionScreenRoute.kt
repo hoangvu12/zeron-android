@@ -386,7 +386,8 @@ class SessionScreenRoute internal constructor(
                 onOpenAgent = { agent -> agent.docId?.let { openSubagent(it, agent.title, !agent.running) } },
                 onNewSideChat = { newSideChat(true) },
                 onFork = panelFork,
-                // TODO(#43): open a new terminal (iOS `TerminalViewController(tab: nil)`).
+                // TODO(#44): open a new terminal (iOS `TerminalViewController(tab: nil)`)
+                // on the terminal screen, over #43's `app.terminals`.
                 onNewTerminal = {},
                 onArchive = { id, onAccepted ->
                     val actions = app?.rowActions
