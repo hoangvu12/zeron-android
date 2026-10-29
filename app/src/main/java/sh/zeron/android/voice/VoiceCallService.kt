@@ -194,7 +194,7 @@ class VoiceCallService : Service() {
         val caller = Person.Builder().setName(title).setImportant(true).build()
         val builder = NotificationCompat.Builder(this, CHANNEL)
             .setSmallIcon(R.drawable.zi_microphone)
-            .setColor(ContextCompat.getColor(this, R.color.brand_ribbon))
+            .setColor(ContextCompat.getColor(this, R.color.brand_accent))
             .setContentTitle(title)
             .setContentText(snapshot.activityStatus)
             .setContentIntent(open)

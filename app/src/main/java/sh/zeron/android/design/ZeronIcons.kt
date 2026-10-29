@@ -402,11 +402,11 @@ object ZeronIcons {
     val TabSettings = ZeronIcon.Vector(R.drawable.zi_tab_settings)
 
     /**
-     * The Zeron ribbon bow (android-next #03) — the notification small
-     * icon and the themed launcher icon's monochrome layer; listed here for
-     * the icons gallery.
+     * Zeron's logo mark (#140, za: `ZeronIcons.Zeron`) — the notification
+     * small icon and the themed launcher icon's monochrome layer; listed
+     * here for the icons gallery.
      */
-    val ZeronBow = ZeronIcon.Vector(R.drawable.zi_zeron_bow)
+    val Zeron = ZeronIcon.Vector(R.drawable.zi_zeron)
 
     /** Offline engines (ticket 50). */
     val WifiOff = ZeronIcon.Vector(R.drawable.zi_wifi_off)
@@ -585,7 +585,7 @@ object ZeronIcons {
         // Zeron extras.
         RegistryEntry("TabChat", emptyList(), TabChat),
         RegistryEntry("TabSettings", emptyList(), TabSettings),
-        RegistryEntry("ZeronBow", emptyList(), ZeronBow),
+        RegistryEntry("Zeron", emptyList(), Zeron),
         RegistryEntry("WifiOff", emptyList(), WifiOff),
         RegistryEntry("Home", emptyList(), Home),
         RegistryEntry("HardDrive", emptyList(), HardDrive),

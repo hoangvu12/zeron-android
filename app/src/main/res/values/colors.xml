@@ -1,7 +1,9 @@
 <resources>
     <color name="launch_background">#EDEDED</color>
     <color name="accent">#5B43E8</color>
-    <!-- android-next #03: the launcher artwork's ribbon blue (its lit
-         ribbon samples around #495991), the notification accent. -->
-    <color name="brand_ribbon">#4B4F9E</color>
+    <!-- #140: the adaptive icon's background, Zeron's Android app's. -->
+    <color name="icon_background">#12052B</color>
+    <!-- #140: the Zeron icon's lit purple (the head samples around
+         #7C1AF9), the notification accent. -->
+    <color name="brand_accent">#7C1AF9</color>
 </resources>

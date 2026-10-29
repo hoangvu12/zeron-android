@@ -213,7 +213,7 @@ class ZeronIconsTest {
         assertEquals(ZeronIcons.entries.sumOf { it.sfNames.size }, ZeronIcons.bySfName.size)
         assertEquals(
             "the Zeron extras are the only entries without an SF name",
-            listOf("TabChat", "TabSettings", "ZeronBow", "WifiOff", "Home", "HardDrive", "Laptop", "GithubMark"),
+            listOf("TabChat", "TabSettings", "Zeron", "WifiOff", "Home", "HardDrive", "Laptop", "GithubMark"),
             ZeronIcons.entries.filter { it.sfNames.isEmpty() }.map { it.name },
         )
         assertEquals(
@@ -352,7 +352,7 @@ class ZeronIconsTest {
             ZeronIcons.ServerRack to R.drawable.zi_remote_server, // #61
             ZeronIcons.TabChat to R.drawable.zi_tab_chat,
             ZeronIcons.TabSettings to R.drawable.zi_tab_settings,
-            ZeronIcons.ZeronBow to R.drawable.zi_zeron_bow, // android-next #03: replaced ZeronGlyph
+            ZeronIcons.Zeron to R.drawable.zi_zeron, // #140: replaced the Roboco bow
             ZeronIcons.WifiOff to R.drawable.zi_wifi_off,
             ZeronIcons.Home to R.drawable.zi_home,
             ZeronIcons.HardDrive to R.drawable.zi_hard_drive,

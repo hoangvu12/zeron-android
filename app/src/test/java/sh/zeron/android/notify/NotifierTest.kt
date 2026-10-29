@@ -230,12 +230,13 @@ class NotifierTest {
     // -------------------------------------------------- branding
 
     /**
-     * android-next #03: every builder (session event, budget, the
-     * ongoing run) carries the ribbon-bow small icon, the ribbon blue
-     * accent and the launcher artwork as the large icon.
+     * #140: every builder (session event, budget, the ongoing run)
+     * carries Zeron's logo mark as the small icon, the Zeron purple accent
+     * and the launcher artwork as the large icon; the delivery hold keeps
+     * za: `DeliveryService`'s arrow-up.
      */
     @Test
-    fun everyNotificationCarriesTheBowTheRibbonAccentAndTheArtwork() {
+    fun everyNotificationCarriesTheZeronMarkThePurpleAccentAndTheArtwork() {
         notifier.postSessionEvent("c1", "A", NotificationKind.Done, now)
         notifier.postBudgetExhausted()
         val ongoing = notifier.buildOngoing(
@@ -256,12 +257,15 @@ class NotifierTest {
             "budget" to posted("budget"),
             "ongoing" to ongoing,
         )
-        assertEquals(0xFF4B4F9E.toInt(), ContextCompat.getColor(context, R.color.brand_ribbon))
+        assertEquals(0xFF7C1AF9.toInt(), ContextCompat.getColor(context, R.color.brand_accent))
         for ((name, n) in all) {
-            assertEquals("$name small icon", R.drawable.zi_zeron_bow, n.smallIcon.resId)
-            assertEquals("$name accent", 0xFF4B4F9E.toInt(), n.color)
+            assertEquals("$name small icon", R.drawable.zi_zeron, n.smallIcon.resId)
+            assertEquals("$name accent", 0xFF7C1AF9.toInt(), n.color)
             assertNotNull("$name large icon", n.getLargeIcon())
         }
+        val hold = notifier.buildDeliveryHold()
+        assertEquals("delivery hold small icon", R.drawable.zi_arrow_up, hold.smallIcon.resId)
+        assertEquals("delivery hold accent", 0xFF7C1AF9.toInt(), hold.color)
     }
 
     // -------------------------------------------------- helpers
