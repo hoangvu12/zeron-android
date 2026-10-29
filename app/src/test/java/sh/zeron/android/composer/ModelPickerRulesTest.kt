@@ -49,4 +49,39 @@ class ModelPickerRulesTest {
         assertNull(pickerPageNotice(claude, page = 0, initial = 1, note = "note"))
         assertEquals(codex.footer, pickerPageNotice(codex, page = 1, initial = 0, note = "note"))
     }
+
+    @Test
+    fun theFitIsTheListUnderTheHeaderBetweenTheFloorAndTheCap() {
+        // Nothing measured yet: 55% of the large height.
+        assertEquals(550f, fittedPickerHeight(1000f, 120f, null, 280f), 0.01f)
+        assertEquals(550f, fittedPickerHeight(1000f, 120f, 0f, 280f), 0.01f)
+        assertEquals(420f, fittedPickerHeight(1000f, 120f, 300f, 280f), 0.01f)
+        assertEquals("the floor", 280f, fittedPickerHeight(1000f, 120f, 60f, 280f), 0.01f)
+        assertEquals("the cap", 780f, fittedPickerHeight(1000f, 120f, 5000f, 280f), 0.01f)
+    }
+
+    @Test
+    fun switcherSegmentsShareTheTrackThenShareOutThenShrinkToLogos() {
+        assertEquals(54f + 40f, segmentNaturalWidth(40f), 0.01f)
+        // The widest fits n times: equal widths after the 3 dp inset.
+        val equal = switcherFrames(listOf(80f, 100f), 300f, selected = 0)
+        assertEquals(listOf(SegmentFrame(3f, 150f), SegmentFrame(153f, 150f)), equal)
+        // The sum fits: natural widths plus an equal share of the rest.
+        val shared = switcherFrames(listOf(80f, 200f), 300f, selected = 0)
+        assertEquals(listOf(SegmentFrame(3f, 90f), SegmentFrame(93f, 210f)), shared)
+        assertFalse(switcherCompact(listOf(80f, 200f), 300f))
+        // Compact: the chosen one named, the others logos (46 dp).
+        val natural = listOf(120f, 120f, 120f)
+        assertTrue(switcherCompact(natural, 300f))
+        val compact = switcherFrames(natural, 300f, selected = 1)
+        val share = (300f - (SwitcherMetrics.LogoWidth * 2 + 120f)) / 3
+        val expected = listOf(SwitcherMetrics.LogoWidth + share, 120f + share, SwitcherMetrics.LogoWidth + share)
+        expected.zip(compact) { w, f -> assertEquals(w, f.width, 0.01f) }
+        assertEquals(3f, compact.first().x, 0.01f)
+        assertEquals(303f, compact.last().end, 0.01f)
+        // Past even that, the track scrolls: no negative share.
+        val wide = switcherFrames(List(8) { 120f }, 300f, selected = 0)
+        assertEquals(120f + 7 * SwitcherMetrics.LogoWidth + 3f, wide.last().end, 0.01f)
+        assertTrue(switcherFrames(emptyList(), 300f, 0).isEmpty())
+    }
 }

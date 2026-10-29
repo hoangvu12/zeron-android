@@ -71,7 +71,9 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.hazeSource
+import kotlin.math.abs
 import kotlin.math.min
+import kotlin.math.round
 import kotlin.math.roundToInt
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -111,6 +113,12 @@ class GlassSheetState internal constructor(
     /** The visible detents offered: a subset of `[Medium, Large]`, non-empty, never `Hidden`. */
     val detents: List<SheetDetent>,
     internal val draggable: AnchoredDraggableState<SheetDetent>,
+    /**
+     * A fitted `Medium` (UIKit's `.custom` detent, #38): given the large
+     * detent's height in px, the medium sheet's height in px. Read in a
+     * snapshot, so state it reads re-fits the sheet; `null` = `H × 0.5`.
+     */
+    internal val fit: ((largeHeightPx: Float) -> Float)? = null,
 ) {
     init {
         require(detents.isNotEmpty()) { "detents must not be empty" }
@@ -170,14 +178,18 @@ class GlassSheetState internal constructor(
  * [GlassSheet] presents it to the smallest detent.
  */
 @Composable
-fun rememberGlassSheetState(detents: List<SheetDetent> = listOf(SheetDetent.Large)): GlassSheetState {
+fun rememberGlassSheetState(
+    detents: List<SheetDetent> = listOf(SheetDetent.Large),
+    /** A fitted `Medium` height (see [GlassSheetState.fit]); fixed for the state's life. */
+    fit: ((largeHeightPx: Float) -> Float)? = null,
+): GlassSheetState {
     val saved: MutableState<SheetDetent> = rememberSaveable(detents, stateSaver = SheetDetentSaver) {
         mutableStateOf(SheetDetent.Hidden)
     }
     val state = remember(detents) {
         val initial = saved.value.takeIf { it != SheetDetent.Hidden && it in detents }
             ?: SheetDetent.Hidden
-        GlassSheetState(detents, AnchoredDraggableState(initialValue = initial))
+        GlassSheetState(detents, AnchoredDraggableState(initialValue = initial), fit)
     }
     // Keep the saved detent in step with the sheet, so the saveable
     // registry snapshots the live detent.
@@ -270,14 +282,28 @@ fun GlassSheet(
         val detents = state.detents
 
         // -------------------------------------------------------- anchors
-        // Large = sb + 10, Medium = H × 0.5 (dropped on tiny windows),
-        // Hidden = H. Keep the current detent; if it is no longer present
-        // (Medium dropped), fall back to Large.
-        LaunchedEffect(parentHeightPx, statusBarPx, detents) {
-            val anchors = sheetAnchors(parentHeightPx, statusBarPx, density, detents)
+        // Large = sb + 10, Medium = H × 0.5 or the fitted height (dropped
+        // on tiny windows), Hidden = H. Keep the current detent; if it is
+        // no longer present (Medium dropped), fall back to Large.
+        val largeHeightPx = parentHeightPx - statusBarPx - with(density) { GlassSheetDefaults.LargeTopGap.toPx() }
+        val fitPx by remember(state, largeHeightPx) {
+            derivedStateOf { state.fit?.invoke(largeHeightPx)?.let { round(it) } }
+        }
+        LaunchedEffect(parentHeightPx, statusBarPx, detents, fitPx) {
+            val anchors = sheetAnchors(parentHeightPx, statusBarPx, density, detents, fitPx)
             val keep = state.draggable.settledValue
             val target = if (anchors.hasPositionFor(keep)) keep else SheetDetent.Large
+            // A settled fitted sheet glides to its new height (UIKit's
+            // `animateChanges { invalidateDetents() }`); a present or drag
+            // in flight just retargets.
+            val from = state.offset
+            val glide = target == SheetDetent.Medium && state.fit != null &&
+                !from.isNaN() && !state.draggable.isAnimationRunning
             state.draggable.updateAnchors(anchors, target)
+            if (glide && abs(state.offset - from) > 0.5f) {
+                state.draggable.anchoredDrag { dragTo(from) }
+                state.animateTo(SheetDetent.Medium)
+            }
         }
 
         // -------------------------------------------------------- present

@@ -1,6 +1,49 @@
 package sh.zeron.android.composer
 
 import androidx.compose.foundation.background
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyListLayoutInfo
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.layout.positionInParent
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.rememberTextMeasurer
+import kotlin.math.abs
+import kotlin.math.ceil
+import kotlin.math.floor
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.roundToInt
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filterNotNull
+import sh.zeron.android.design.IosSpring
+import sh.zeron.android.design.LocalReduceMotion
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -104,6 +147,8 @@ class ModelPickerRequest(
     val model: String?,
     /** Where the chat runs (the computer's name). */
     val hostName: String,
+    /** The SF name of the host's symbol on the subtitle with several tabs (`cloud` on Cloud). */
+    val hostSymbol: String = HOST_SYMBOL_COMPUTER,
     /** A notice over the chat's own provider page. */
     val note: String? = null,
     /** One provider's models (loaded when the picker opens; never throws). */
@@ -146,6 +191,9 @@ object ModelPickerCopy {
     fun searchPlaceholder(label: String) = "Search $label models"
 }
 
+/** The subtitle's host symbol for a computer (iOS `desktopcomputer`). */
+const val HOST_SYMBOL_COMPUTER = "desktopcomputer"
+
 /** A list longer than this gets a search field (OpenCode can offer hundreds). */
 const val MODEL_SEARCH_THRESHOLD = 12
 
@@ -183,6 +231,83 @@ fun initialPickerPage(tabs: List<ModelPickerTab>, harness: String): Int =
 fun pickerPageNotice(tab: ModelPickerTab, page: Int, initial: Int, note: String?): String? =
     tab.footer ?: if (page == initial) note else null
 
+/**
+ * The sheet's fitted height (iOS `fittedHeight`): tall enough for the
+ * longest provider's list under the header, at least [minHeight], at most
+ * 78% of the large height; 55% while no list has measured yet. Pure.
+ */
+fun fittedPickerHeight(largeHeight: Float, pagerTop: Float, lists: Float?, minHeight: Float): Float {
+    if (lists == null || lists <= 0f) return largeHeight * 0.55f
+    return min(largeHeight * 0.78f, max(pagerTop + lists, minHeight))
+}
+
+/**
+ * A lazy list's whole content height from what it has laid out: exact
+ * when every item is visible, else the visible items' average extent
+ * times the item count, plus the content paddings. `null` with nothing
+ * laid out. Pure.
+ */
+fun lazyContentHeight(info: LazyListLayoutInfo): Float? {
+    val visible = info.visibleItemsInfo
+    if (visible.isEmpty() || info.totalItemsCount == 0) return null
+    val first = visible.first()
+    val last = visible.last()
+    val span = (last.offset + last.size - first.offset).toFloat()
+    val items = if (first.index == 0 && last.index == info.totalItemsCount - 1) {
+        span
+    } else {
+        span / visible.size * info.totalItemsCount
+    }
+    return info.beforeContentPadding + items + info.afterContentPadding
+}
+
+/** One switcher segment's frame on the track (dp, track coordinates). */
+data class SegmentFrame(val x: Float, val width: Float) {
+    val end: Float get() = x + width
+}
+
+/** A segment's natural width: insets, the 17 logo, the gap and its name (iOS `naturalWidth`). Pure. */
+fun segmentNaturalWidth(nameWidth: Float): Float =
+    14f + SwitcherMetrics.Logo + SwitcherMetrics.Gap + nameWidth + 16f
+
+/** The names don't all fit: the others shrink to their logos (iOS `isCompact`). Pure. */
+fun switcherCompact(natural: List<Float>, available: Float): Boolean = natural.sum() > available
+
+/**
+ * The segments' frames with [selected] chosen (iOS `frames(selected:)`):
+ * equal widths when the widest fits that way, else natural widths shared
+ * out, else the chosen one named and the others logos (the track then
+ * scrolls). Pure.
+ */
+fun switcherFrames(natural: List<Float>, available: Float, selected: Int): List<SegmentFrame> {
+    val n = natural.size
+    if (n == 0) return emptyList()
+    val widths: List<Float> = when {
+        natural.max() * n <= available -> List(n) { available / n }
+        natural.sum() <= available -> {
+            val extra = (available - natural.sum()) / n
+            natural.map { it + extra }
+        }
+        else -> {
+            val tight = natural.indices.map { if (it == selected) natural[it] else SwitcherMetrics.LogoWidth }
+            val extra = max(0f, (available - tight.sum()) / n)
+            tight.map { it + extra }
+        }
+    }
+    var x = SwitcherMetrics.Inset
+    return widths.map { w -> SegmentFrame(x, w).also { x += w } }
+}
+
+/** The switcher's geometry (iOS `ProviderSwitcher` / `Segment`), dp. */
+object SwitcherMetrics {
+    const val Height = 40f
+    const val Inset = 3f
+    const val Fade = 34f
+    const val LogoWidth = 46f
+    const val Logo = 17f
+    const val Gap = 7f
+}
+
 /** The picker over the session screen while [controller] holds a request. */
 @Composable
 fun ModelPickerOverlay(controller: ModelPickerController) {
@@ -202,6 +327,27 @@ private fun ModelPickerSheet(request: ModelPickerRequest, onDismissed: () -> Uni
     val rows = remember(request) { mutableStateMapOf<String, List<ModelPickerRow>>() }
     val scope = rememberCoroutineScope()
     val feedback = LocalFeedback.current
+    val focus = LocalFocusManager.current
+    val reduceMotion = LocalReduceMotion.current
+    val density = LocalDensity.current
+
+    // The fitted detent (iOS `fittedHeight`): the header's height over the
+    // pager plus the longest page's list, re-fitted as the lists load.
+    var pagerTop by remember(request) { mutableFloatStateOf(0f) }
+    val listHeights = remember(request) { mutableStateMapOf<String, Float>() }
+    val minHeightPx = with(density) { ModelPickerMinHeight.toPx() }
+    val sheetState = rememberGlassSheetState(detents) { large ->
+        fittedPickerHeight(large, pagerTop, listHeights.values.maxOrNull(), minHeightPx)
+    }
+
+    // Settling on another provider, by swipe or tap: a selection tick and
+    // the keyboard away (iOS `settle(on:)`).
+    LaunchedEffect(pager) {
+        snapshotFlow { pager.currentPage }.drop(1).collect {
+            feedback.haptic(Haptic.Select)
+            focus.clearFocus()
+        }
+    }
 
     // The current provider first, then the rest, so a swipe lands on a
     // loaded list.
@@ -225,7 +371,7 @@ private fun ModelPickerSheet(request: ModelPickerRequest, onDismissed: () -> Uni
     GlassSheet(
         onDismiss = onDismissed,
         modifier = Modifier.testTag("model-picker"),
-        state = rememberGlassSheetState(detents),
+        state = sheetState,
         grabber = true,
         title = ModelPickerCopy.Title,
         // The close circle is glass: it sits after the sheet's haze source
@@ -254,22 +400,37 @@ private fun ModelPickerSheet(request: ModelPickerRequest, onDismissed: () -> Uni
             ModelPickerHeader(
                 subtitle = pickerSubtitle(request.tabs, request.hostName),
                 harness = request.tabs.singleOrNull()?.harness,
+                hostSymbol = request.hostSymbol,
             )
             if (request.tabs.size > 1) {
                 ProviderSwitcher(
                     tabs = request.tabs,
+                    // Fractional, read in the switcher: the thumb follows
+                    // the pages finger for finger.
+                    position = { pager.currentPage + pager.currentPageOffsetFraction },
                     selected = pager.currentPage,
                     onSelect = { ix ->
-                        if (ix != pager.currentPage) feedback.haptic(Haptic.Select)
-                        scope.launch { pager.animateScrollToPage(ix) }
+                        if (ix != pager.currentPage) {
+                            scope.launch {
+                                if (reduceMotion) {
+                                    pager.scrollToPage(ix)
+                                } else {
+                                    pager.animateScrollToPage(ix, animationSpec = SwitchSpring.spec())
+                                }
+                            }
+                        }
                     },
                 )
             }
             HorizontalPager(
                 state = pager,
+                // Every page composes, so each list can report its height
+                // to the fit (a handful of providers at most).
+                beyondViewportPageCount = request.tabs.size,
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .onPlaced { pagerTop = it.positionInParent().y },
             ) { page ->
                 val tab = request.tabs[page]
                 ModelPickerPage(
@@ -278,6 +439,7 @@ private fun ModelPickerSheet(request: ModelPickerRequest, onDismissed: () -> Uni
                     current = current,
                     notice = pickerPageNotice(tab, page, initial, request.note),
                     bottomInset = bottomInset,
+                    onContentHeight = { listHeights[tab.harness] = it },
                 ) { row ->
                     if (!picked) {
                         picked = true
@@ -296,6 +458,12 @@ private fun ModelPickerSheet(request: ModelPickerRequest, onDismissed: () -> Uni
     }
 }
 
+/** The fitted sheet's floor (iOS `max(…, 280)`). */
+private val ModelPickerMinHeight = 280.dp
+
+/** A tapped provider: iOS's 0.45 s spring, damping 0.86. */
+private val SwitchSpring = IosSpring("model-picker-switch", durationSec = 0.45, damping = 0.86f)
+
 /** The header's geometry, shared by the title row and the close circle laid over it. */
 private object ModelPickerHeaderMetrics {
     val TopPadding = 18.dp
@@ -306,9 +474,13 @@ private object ModelPickerHeaderMetrics {
     val CloseTop = TopPadding + 6.dp
 }
 
-/** "Model" over where it runs (with one provider, its mark first); room on the right for the close circle. */
+/**
+ * "Model" over where it runs: with one provider, its mark first; with
+ * several, the host's symbol (11 pt medium). Room on the right for the
+ * close circle.
+ */
 @Composable
-private fun ModelPickerHeader(subtitle: String, harness: String?) {
+private fun ModelPickerHeader(subtitle: String, harness: String?, hostSymbol: String) {
     val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Row(
@@ -327,6 +499,11 @@ private fun ModelPickerHeader(subtitle: String, harness: String?) {
                 if (harness != null) {
                     HarnessMark(harness, 13.dp, palette.secondary)
                     Spacer(Modifier.width(5.dp))
+                } else {
+                    ZeronIcons.forSfName(hostSymbol)?.let { icon ->
+                        Icon(icon, palette.secondary, 11f, SymbolWeight.Medium, Modifier.testTag("model-picker-host-symbol"))
+                        Spacer(Modifier.width(5.dp))
+                    }
                 }
                 BasicText(
                     subtitle,
@@ -342,54 +519,202 @@ private fun ModelPickerHeader(subtitle: String, harness: String?) {
 }
 
 /**
- * The provider switcher: a capsule track of segments (brand mark + name),
- * the chosen one on a light thumb. It scrolls when the providers don't
- * fit.
+ * The provider switcher (iOS `ProviderSwitcher`): a capsule track of
+ * segments (brand mark + name) with a thumb that follows the pages under
+ * it finger for finger ([position] is fractional: 1.4 = 40% of the way
+ * from the second provider to the third). When the names don't all fit,
+ * the others shrink to their logos and the chosen one keeps its name;
+ * when even that doesn't fit, the track scrolls, keeps the chosen one in
+ * the middle and fades out at the edges with more to see. A tab group to
+ * accessibility: each segment is a [Role.Tab], selected on [selected].
  */
 @Composable
-private fun ProviderSwitcher(tabs: List<ModelPickerTab>, selected: Int, onSelect: (Int) -> Unit) {
+private fun ProviderSwitcher(
+    tabs: List<ModelPickerTab>,
+    position: () -> Float,
+    selected: Int,
+    onSelect: (Int) -> Unit,
+) {
     val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
-    val thumb = if (ZeronTheme.isDark) Color.White.copy(alpha = 0.14f) else Color.White
-    Row(
+    val density = LocalDensity.current
+    val dark = ZeronTheme.isDark
+    val thumbColor = if (dark) Color.White.copy(alpha = 0.14f) else Color.White
+    val fullStyle = uiStyle(Face.SansMedium, typeScale.fixed(14f), palette.text)
+    val mutedStyle = fullStyle.copy(color = palette.secondary)
+    val titles = remember(tabs) { tabs.map { switcherTitle(it.label) } }
+    val measurer = rememberTextMeasurer()
+    val nameWidths = remember(titles, fullStyle, density) {
+        titles.map { title ->
+            val px = measurer.measure(title, fullStyle, maxLines = 1, softWrap = false).size.width
+            ceil(with(density) { px.toDp().value })
+        }
+    }
+    val natural = remember(nameWidths) { nameWidths.map(::segmentNaturalWidth) }
+    val scroll = rememberScrollState()
+    BoxWithConstraints(
         Modifier
             .padding(start = 20.dp, end = 20.dp, top = 14.dp)
             .fillMaxWidth()
-            .height(40.dp)
+            .height(SwitcherMetrics.Height.dp)
             .clip(CapsuleShape)
             .background(palette.controlFill)
-            .horizontalScroll(rememberScrollState())
-            .padding(3.dp)
             .testTag("model-picker-switcher"),
-        verticalAlignment = Alignment.CenterVertically,
     ) {
-        tabs.forEachIndexed { ix, tab ->
-            val chosen = ix == selected
-            Row(
+        val width = maxWidth.value
+        val available = width - SwitcherMetrics.Inset * 2
+        val compact = switcherCompact(natural, available)
+        val p = position().coerceIn(0f, tabs.lastIndex.toFloat())
+        val lower = floor(p).toInt().coerceIn(0, tabs.lastIndex)
+        val upper = min(tabs.lastIndex, lower + 1)
+        val t = (p - lower).coerceIn(0f, 1f)
+        val a = switcherFrames(natural, available, lower)
+        val b = switcherFrames(natural, available, upper)
+        val frames = a.indices.map { lerpFrame(a[it], b[it], t) }
+        val thumb = lerpFrame(a[lower], b[upper], t)
+        val content = max(width, frames.last().end + SwitcherMetrics.Inset)
+        // Keep the chosen provider in the middle of the track.
+        val centred = (thumb.x + thumb.width / 2 - width / 2).coerceIn(0f, max(0f, content - width))
+        val centredPx = with(density) { centred.dp.roundToPx() }
+        LaunchedEffect(centredPx) { scroll.scrollTo(centredPx) }
+        val segmentHeight = (SwitcherMetrics.Height - SwitcherMetrics.Inset * 2).dp
+        Box(
+            Modifier
+                .fillMaxSize()
+                .switcherEdges(scroll)
+                .horizontalScroll(scroll),
+        ) {
+            Box(
                 Modifier
-                    .height(34.dp)
-                    .clip(CapsuleShape)
-                    .background(if (chosen) thumb else Color.Transparent)
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                    ) { onSelect(ix) }
-                    .padding(horizontal = 12.dp)
-                    .semantics { this.selected = chosen }
-                    .testTag("model-picker-tab-${tab.harness}"),
-                verticalAlignment = Alignment.CenterVertically,
+                    .width(content.dp)
+                    .fillMaxHeight()
+                    .selectableGroup(),
             ) {
-                HarnessMark(tab.harness, 15.dp, if (chosen) palette.text else palette.secondary)
-                Spacer(Modifier.width(6.dp))
-                BasicText(
-                    switcherTitle(tab.label),
-                    style = uiStyle(
-                        Face.SansMedium,
-                        typeScale.fixed(14f),
-                        if (chosen) palette.text else palette.secondary,
-                    ),
-                    maxLines = 1,
+                Box(
+                    Modifier
+                        .offset(x = thumb.x.dp, y = SwitcherMetrics.Inset.dp)
+                        .size(thumb.width.dp, segmentHeight)
+                        .then(
+                            if (dark) {
+                                Modifier
+                            } else {
+                                Modifier.shadow(3.dp, CapsuleShape, ambientColor = ThumbShadow, spotColor = ThumbShadow)
+                            },
+                        )
+                        .clip(CapsuleShape)
+                        .background(thumbColor),
                 )
+                tabs.forEachIndexed { k, tab ->
+                    SwitcherSegment(
+                        harness = tab.harness,
+                        title = titles[k],
+                        frame = frames[k],
+                        height = segmentHeight,
+                        nameWidth = nameWidths[k],
+                        nameVisibility = if (compact) lerp(if (k == lower) 1f else 0f, if (k == upper) 1f else 0f, t) else 1f,
+                        emphasis = max(0f, 1f - abs(p - k)),
+                        selected = k == selected,
+                        fullStyle = fullStyle,
+                        mutedStyle = mutedStyle,
+                        onClick = { onSelect(k) },
+                    )
+                }
+            }
+        }
+    }
+}
+
+private val ThumbShadow = Color.Black.copy(alpha = 0.1f)
+
+private fun lerp(a: Float, b: Float, t: Float): Float = a + (b - a) * t
+
+private fun lerpFrame(a: SegmentFrame, b: SegmentFrame, t: Float) =
+    SegmentFrame(lerp(a.x, b.x, t), lerp(a.width, b.width, t))
+
+/** Fades the side(s) of the track with more providers past them (iOS `updateEdges`). */
+private fun Modifier.switcherEdges(scroll: ScrollState): Modifier = this
+    .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+    .drawWithContent {
+        drawContent()
+        val maxOffset = scroll.maxValue
+        if (maxOffset <= 0 || maxOffset == Int.MAX_VALUE || size.width <= 0f) return@drawWithContent
+        val f = (SwitcherMetrics.Fade.dp.toPx() / size.width).coerceIn(0f, 0.5f)
+        val start = if (scroll.value > 0) Color.Transparent else Color.Black
+        val end = if (scroll.value < maxOffset) Color.Transparent else Color.Black
+        drawRect(
+            Brush.horizontalGradient(0f to start, f to Color.Black, 1f - f to Color.Black, 1f to end),
+            blendMode = BlendMode.DstIn,
+        )
+    }
+
+/**
+ * One provider on the track (iOS `Segment`): its logo, then its name
+ * (shown by [nameVisibility] in compact mode); two stacked names, muted
+ * and full, cross-fade with [emphasis] so the colour follows the finger
+ * too. A press scales it to 0.96 and dims the logo.
+ */
+@Composable
+private fun SwitcherSegment(
+    harness: String,
+    title: String,
+    frame: SegmentFrame,
+    height: Dp,
+    nameWidth: Float,
+    nameVisibility: Float,
+    emphasis: Float,
+    selected: Boolean,
+    fullStyle: TextStyle,
+    mutedStyle: TextStyle,
+    onClick: () -> Unit,
+) {
+    val palette = ZeronTheme.palette
+    val interaction = remember { MutableInteractionSource() }
+    val pressed by interaction.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (pressed) 0.96f else 1f,
+        animationSpec = tween(if (pressed) 80 else 250),
+        label = "segment-press",
+    )
+    val contentWidth = SwitcherMetrics.Logo + (SwitcherMetrics.Gap + nameWidth) * nameVisibility
+    val x0 = ((frame.width - contentWidth) / 2).roundToInt().toFloat()
+    Box(
+        Modifier
+            .offset(x = frame.x.dp, y = SwitcherMetrics.Inset.dp)
+            .size(frame.width.dp, height)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .clipToBounds()
+            .selectable(
+                selected = selected,
+                interactionSource = interaction,
+                indication = null,
+                role = Role.Tab,
+                onClick = onClick,
+            )
+            .semantics { contentDescription = title }
+            .testTag("model-picker-tab-$harness"),
+        contentAlignment = Alignment.CenterStart,
+    ) {
+        HarnessMark(
+            harness,
+            SwitcherMetrics.Logo.dp,
+            palette.text,
+            Modifier
+                .offset(x = x0.dp)
+                .alpha(if (pressed) 0.45f else 0.55f + 0.45f * emphasis)
+                .clearAndSetSemantics { },
+        )
+        if (nameVisibility > 0f) {
+            Box(
+                Modifier
+                    .offset(x = (x0 + SwitcherMetrics.Logo + SwitcherMetrics.Gap).dp)
+                    .requiredWidth(nameWidth.dp)
+                    .clearAndSetSemantics { },
+            ) {
+                BasicText(title, Modifier.alpha(nameVisibility * (1f - emphasis)), style = mutedStyle, maxLines = 1, softWrap = false)
+                BasicText(title, Modifier.alpha(nameVisibility * emphasis), style = fullStyle, maxLines = 1, softWrap = false)
             }
         }
     }
@@ -403,16 +728,27 @@ private fun ModelPickerPage(
     current: Pair<String, String?>,
     notice: String?,
     bottomInset: Dp,
+    /** The list's whole content height (px), for the sheet's fit. */
+    onContentHeight: (Float) -> Unit,
     onPick: (ModelPickerRow) -> Unit,
 ) {
     val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     var query by remember(tab.harness) { mutableStateOf("") }
     val visible = rows?.let { filterModels(it, query) }.orEmpty()
+    val listState = rememberLazyListState()
+    val reportHeight by rememberUpdatedState(onContentHeight)
+    LaunchedEffect(listState) {
+        snapshotFlow { lazyContentHeight(listState.layoutInfo) }
+            .filterNotNull()
+            .distinctUntilChanged()
+            .collect { reportHeight(it) }
+    }
     LazyColumn(
         Modifier
             .fillMaxSize()
             .testTag("model-picker-list-${tab.harness}"),
+        state = listState,
         contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 10.dp, bottom = bottomInset + 20.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {

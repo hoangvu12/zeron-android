@@ -29,12 +29,17 @@ import kotlin.math.abs
  *
  * `Large` is only included when it is in [detents], so a medium-only sheet
  * cannot settle at an anchor its caller never offered.
+ *
+ * With [fit] (UIKit's `.custom` detent resolver, #38), `Medium` sits where
+ * a sheet of `fit(largeHeight)` px ends instead, `largeHeight` being the
+ * large detent's height (`maximumDetentValue`); the same drop rule applies.
  */
 internal fun sheetAnchors(
     parentHeightPx: Float,
     statusBarPx: Float,
     density: Density,
     detents: List<SheetDetent>,
+    fit: Float? = null,
 ): DraggableAnchors<SheetDetent> {
     val largePx = statusBarPx + with(density) { GlassSheetDefaults.LargeTopGap.toPx() }
     val positions = mutableMapOf<SheetDetent, Float>(
@@ -42,7 +47,7 @@ internal fun sheetAnchors(
     )
     if (SheetDetent.Large in detents) positions[SheetDetent.Large] = largePx
     if (SheetDetent.Medium in detents) {
-        val mediumPx = parentHeightPx * GlassSheetDefaults.MediumFraction
+        val mediumPx = if (fit != null) parentHeightPx - fit else parentHeightPx * GlassSheetDefaults.MediumFraction
         // "only if Medium is in detents and H × 0.5 > sb + 10 + 1"
         if (mediumPx > largePx + MediumDropEpsilon) positions[SheetDetent.Medium] = mediumPx
     }
