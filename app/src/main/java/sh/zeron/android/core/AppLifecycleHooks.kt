@@ -15,8 +15,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 import uniffi.zeron_core.CoreClient
 
 /**
- * The three OS lifecycle calls the core needs (android-ui-parity #35;
- * upstream `mob:client_ffi/mod.rs:488-503`), behind a seam so tests can
+ * The four OS lifecycle calls the core needs (android-ui-parity #35;
+ * `mob:client_ffi/mod.rs:537-560`), behind a seam so tests can
  * drive them with a fake. The real sink holds the live [CoreClient].
  *
  * - [onForeground] — app returned to the foreground: resume, redial/probe;
@@ -24,7 +24,9 @@ import uniffi.zeron_core.CoreClient
  *   writes synchronously, bounded at 2 s — **never on the main thread**);
  * - [setNetworkOnline] — the OS network path; `true` resets backoff and
  *   redials (android-app#06), and re-sends are deduplicated by
- *   [NetworkOnlineTracker].
+ *   [NetworkOnlineTracker];
+ * - [networkPathChanged] — another interface or route: direct
+ *   connections re-pair (`AppModel.swift:104-122`, only on a real change).
  */
 interface LifecycleSink {
     fun onForeground()
@@ -32,6 +34,8 @@ interface LifecycleSink {
     fun onBackground()
 
     fun setNetworkOnline(online: Boolean)
+
+    fun networkPathChanged()
 }
 
 /** The production sink: the live [CoreClient]. Logs each call (`adb logcat -s Zeron`). */
@@ -51,20 +55,44 @@ class CoreLifecycleSink(private val client: CoreClient) : LifecycleSink {
         client.setNetworkOnline(online)
     }
 
+    override fun networkPathChanged() {
+        Log.d(TAG, "networkPathChanged")
+        client.networkPathChanged()
+    }
+
     private companion object {
         const val TAG = "Zeron"
     }
 }
 
 /**
+ * What one network callback asks of the client: [online] to send through
+ * `setNetworkOnline` (null = unchanged), then `networkPathChanged()` when
+ * [pathChanged].
+ */
+data class NetworkCalls(val online: Boolean?, val pathChanged: Boolean) {
+    companion object {
+        val None = NetworkCalls(online = null, pathChanged = false)
+    }
+}
+
+/**
  * Pure dedupe logic for the default-network callback
- * (android-ui-parity #35, `NWPathMonitor`'s Kotlin stand-in). Calls are
- * deduplicated on the pair `(defaultNetworkHandle, online)`: a
- * capability callback that changes only bandwidth or signal strength
- * produces no call, and an interface change (Wi-Fi → cellular) sends
- * `true` again, as on iOS — it resets the redial backoff.
+ * (android-ui-parity #35, `NWPathMonitor`'s Kotlin stand-in,
+ * `AppModel.swift:104-122`).
  *
- * Each method returns the value to send, or `null` when nothing changed.
+ * `setNetworkOnline` is deduplicated on the pair
+ * `(defaultNetworkHandle, online)`: a capability callback that changes
+ * only bandwidth or signal strength produces no call, and an interface
+ * change (Wi-Fi → cellular) sends `true` again, as on iOS — it resets the
+ * redial backoff.
+ *
+ * `networkPathChanged` follows iOS's path *shape*: the default network
+ * when online, empty when not. It fires when the shape changes to a
+ * non-empty one after the first reading — a handover to another network,
+ * or coming back online — and never for the first reading (the install
+ * seed) or for going offline.
+ *
  * Touched from the `ConnectivityManager` callback thread (after install)
  * and read by [AppLifecycleHooks.clientReady] on another thread.
  */
@@ -77,28 +105,43 @@ class NetworkOnlineTracker(initialNetwork: Long?, initialOnline: Boolean) {
 
     private var current: Long? = initialNetwork
 
+    /** The path shape last seen: the seed is the first reading. */
+    private var shape: String = shapeOf(initialNetwork, initialOnline)
+
     /** `onAvailable`: a new (or handover) default network. */
-    fun available(net: Long): Boolean? {
+    fun available(net: Long): NetworkCalls {
         val changed = net != current || !online
         current = net
         online = true
-        return if (changed) true else null
+        return calls(if (changed) true else null)
     }
 
     /** `onCapabilitiesChanged`: only an INTERNET capability flip matters. */
-    fun capabilities(net: Long, hasInternet: Boolean): Boolean? {
-        if (net != current || hasInternet == online) return null
+    fun capabilities(net: Long, hasInternet: Boolean): NetworkCalls {
+        if (net != current || hasInternet == online) return NetworkCalls.None
         online = hasInternet
-        return hasInternet
+        return calls(hasInternet)
     }
 
     /** `onLost`: only the current default going away with no replacement. */
-    fun lost(net: Long): Boolean? {
-        if (net != current) return null
+    fun lost(net: Long): NetworkCalls {
+        if (net != current) return NetworkCalls.None
         current = null
-        if (!online) return null
+        if (!online) return NetworkCalls.None
         online = false
-        return false
+        return calls(false)
+    }
+
+    private fun calls(send: Boolean?): NetworkCalls {
+        val next = shapeOf(current, online)
+        val pathChanged = next != shape && next.isNotEmpty()
+        shape = next
+        return NetworkCalls(send, pathChanged)
+    }
+
+    private companion object {
+        fun shapeOf(network: Long?, online: Boolean): String =
+            if (online && network != null) network.toString() else ""
     }
 }
 
@@ -122,9 +165,10 @@ class NetworkOnlineTracker(initialNetwork: Long?, initialOnline: Boolean) {
  * Every core call goes through the **single-thread** executor, so the
  * order is preserved (background then foreground can never be reordered)
  * and the up-to-2 s `onBackground` flush never runs on the main thread.
- * With no client yet (startup loading, core failed) calls are dropped,
+ * With no client (loading, signed out, core failed) calls are dropped,
  * like iOS's `client?`; the network state is still tracked, and
- * [clientReady] re-sends it once when 71's startup creates the client.
+ * [clientReady] re-sends it once whenever the session holder publishes a
+ * client.
  */
 class AppLifecycleHooks internal constructor(
     private val sink: () -> LifecycleSink?,
@@ -151,14 +195,19 @@ class AppLifecycleHooks internal constructor(
         executor.execute { sink()?.onBackground() }
     }
 
-    /** Forwards a network change (already deduplicated; `null` = silent). */
-    internal fun network(send: Boolean?) {
-        if (send != null) executor.execute { sink()?.setNetworkOnline(send) }
+    /** Forwards a network change (already deduplicated): online first, then the path, as on iOS. */
+    internal fun network(calls: NetworkCalls) {
+        if (calls == NetworkCalls.None) return
+        executor.execute {
+            val sink = sink() ?: return@execute
+            calls.online?.let(sink::setNetworkOnline)
+            if (calls.pathChanged) sink.networkPathChanged()
+        }
     }
 
     /**
-     * Called by the startup code (71) right after `CoreClient.new`
-     * succeeds: re-sends the current online value once, so the fresh
+     * Called by the session holder's wiring each time a client is
+     * published: re-sends the current online value once, so the fresh
      * client starts with the real network state even if it was captured
      * before the client existed.
      */
@@ -231,7 +280,7 @@ class AppLifecycleHooks internal constructor(
             val tracker = NetworkOnlineTracker(active?.networkHandle, online)
             hooks.tracker = tracker
             // Dropped when there is no client yet; clientReady() re-sends.
-            hooks.network(online)
+            hooks.network(NetworkCalls(online, pathChanged = false))
             runCatching {
                 cm.registerDefaultNetworkCallback(
                     object : ConnectivityManager.NetworkCallback() {

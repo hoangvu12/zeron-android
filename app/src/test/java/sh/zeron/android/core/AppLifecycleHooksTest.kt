@@ -24,11 +24,15 @@ import org.robolectric.annotation.Config
  * calls the sink in order (onForeground then afterForeground), `null`
  * sinks are dropped without a crash, a double install returns the same
  * instance and adds no second observer, the real install runs its calls
- * on the `zeron-lifecycle` thread, and `clientReady()` re-sends the
- * current online value once.
+ * on the `zeron-lifecycle` thread, `clientReady()` re-sends the
+ * current online value once, and a network change sends the online value
+ * before `networkPathChanged()`.
+ *
+ * A plain [Application]: `ZeronApplication.onCreate` would load the core
+ * and boot the session holder.
  */
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [36])
+@Config(sdk = [36], application = Application::class)
 class AppLifecycleHooksTest {
 
     /** A sink that records its calls and the threads they ran on. */
@@ -52,6 +56,11 @@ class AppLifecycleHooksTest {
 
         override fun setNetworkOnline(online: Boolean) {
             calls += "setNetworkOnline($online)"
+            threads += Thread.currentThread().name
+        }
+
+        override fun networkPathChanged() {
+            calls += "networkPathChanged"
             threads += Thread.currentThread().name
         }
 
@@ -134,6 +143,30 @@ class AppLifecycleHooksTest {
 
         start()
         stop()
+        // No crash; nothing to assert on the sink side.
+    }
+
+    // ------------------------------------------------------------- network
+
+    @Test
+    fun aNetworkChangeSendsOnlineThenThePathChange() {
+        val hooks = AppLifecycleHooks(sink = { sink }, executor = DirectExecutor, afterForeground = {})
+
+        hooks.network(NetworkCalls(online = true, pathChanged = true))
+        hooks.network(NetworkCalls(online = null, pathChanged = true))
+        hooks.network(NetworkCalls(online = false, pathChanged = false))
+        hooks.network(NetworkCalls.None)
+
+        assertEquals(
+            listOf("setNetworkOnline(true)", "networkPathChanged", "networkPathChanged", "setNetworkOnline(false)"),
+            sink.calls,
+        )
+    }
+
+    @Test
+    fun aNetworkChangeWithNoClientIsDropped() {
+        val hooks = AppLifecycleHooks(sink = { null }, executor = DirectExecutor, afterForeground = {})
+        hooks.network(NetworkCalls(online = true, pathChanged = true))
         // No crash; nothing to assert on the sink side.
     }
 
