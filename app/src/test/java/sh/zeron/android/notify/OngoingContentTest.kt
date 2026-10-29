@@ -34,7 +34,7 @@ class OngoingContentTest {
     @Test
     fun oneRunShowsTheTitleTheWorkingWordAndItsDeepLink() {
         val content = ongoingContent(
-            OngoingInput(working = listOf(run("engine:v1:a", "Fix the login bug")), awaiting = 0, engineCount = 1, liveUpdateDismissed = false),
+            OngoingInput(working = listOf(run("engine:v1:a", "Fix the login bug")), awaiting = 0, deviceCount = 1, liveUpdateDismissed = false),
             now,
             apiPromotionPossible = true,
         )
@@ -43,16 +43,16 @@ class OngoingContentTest {
         assertEquals("Working", content.chip)
         assertEquals("engine:v1:a", content.tapChatId)
         assertEquals(now - 60_000, content.whenMs)
-        // One engine: no subText.
+        // One device: no subText.
         assertNull(content.subText)
         // The desktop started it: ambient, never promoted.
         assertFalse(content.promoteLiveUpdate)
     }
 
     @Test
-    fun oneBlankTitleFallsBackToNewSessionAndTwoEnginesShowTheSubText() {
+    fun oneBlankTitleFallsBackToNewSessionAndTwoDevicesShowTheSubText() {
         val content = ongoingContent(
-            OngoingInput(working = listOf(run("engine:v1:a", "   ")), awaiting = 0, engineCount = 2, liveUpdateDismissed = false),
+            OngoingInput(working = listOf(run("engine:v1:a", "   ")), awaiting = 0, deviceCount = 2, liveUpdateDismissed = false),
             now,
             apiPromotionPossible = false,
         )
@@ -64,7 +64,7 @@ class OngoingContentTest {
     @Test
     fun oneRunWithoutAStartSkipsTheChronometer() {
         val content = ongoingContent(
-            OngoingInput(working = listOf(run("engine:v1:a", "A", startedAt = null)), awaiting = 0, engineCount = 1, liveUpdateDismissed = false),
+            OngoingInput(working = listOf(run("engine:v1:a", "A", startedAt = null)), awaiting = 0, deviceCount = 1, liveUpdateDismissed = false),
             now,
             apiPromotionPossible = false,
         )
@@ -79,7 +79,7 @@ class OngoingContentTest {
             OngoingInput(
                 working = listOf(run("engine:v1:a", "Alpha"), run("engine:v1:b", "Beta")),
                 awaiting = 0,
-                engineCount = 3,
+                deviceCount = 3,
                 liveUpdateDismissed = false,
             ),
             now,
@@ -99,7 +99,7 @@ class OngoingContentTest {
             OngoingInput(
                 working = listOf(run("engine:v1:a", "Alpha"), run("engine:v1:b", "Beta")),
                 awaiting = awaiting,
-                engineCount = 1,
+                deviceCount = 1,
                 liveUpdateDismissed = false,
             ),
             now,
@@ -119,7 +119,7 @@ class OngoingContentTest {
                     run("engine:v1:b", "Beta", startedAt = now - 50_000),
                 ),
                 awaiting = 0,
-                engineCount = 1,
+                deviceCount = 1,
                 liveUpdateDismissed = false,
             ),
             now,
@@ -134,7 +134,7 @@ class OngoingContentTest {
                     run("engine:v1:b", "Beta", startedAt = now - 50_000),
                 ),
                 awaiting = 0,
-                engineCount = 1,
+                deviceCount = 1,
                 liveUpdateDismissed = false,
             ),
             now,
@@ -152,7 +152,7 @@ class OngoingContentTest {
                 OngoingInput(
                     working = listOf(run("engine:v1:a", "A", fromThisDevice = fromDevice)),
                     awaiting = 0,
-                    engineCount = 1,
+                    deviceCount = 1,
                     liveUpdateDismissed = dismissed,
                 ),
                 now,
@@ -178,7 +178,7 @@ class OngoingContentTest {
                     run("engine:v1:b", "Beta", fromThisDevice = true),
                 ),
                 awaiting = 0,
-                engineCount = 1,
+                deviceCount = 1,
                 liveUpdateDismissed = false,
             ),
             now,
@@ -190,15 +190,15 @@ class OngoingContentTest {
     // -------------------------------------------------- empty
 
     @Test
-    fun anEmptyWorkingSetRendersTheIdleStayingConnectedContent() {
-        // The linger after the last run, or Stay connected (ADR 0010).
+    fun anEmptyWorkingSetRendersTheIdleLingerContent() {
+        // The 2 min linger after the last run (#57; D8 dropped Stay connected).
         val content = ongoingContent(
-            OngoingInput(working = emptyList(), awaiting = 0, engineCount = 2, liveUpdateDismissed = false),
+            OngoingInput(working = emptyList(), awaiting = 0, deviceCount = 2, liveUpdateDismissed = false),
             now,
             apiPromotionPossible = true,
         )
         assertEquals("Staying connected", content.title)
-        assertEquals("Keeping 2 engines connected", content.text)
+        assertEquals("Keeping your sessions up to date", content.text)
         assertEquals("", content.chip)
         assertNull("no chronometer", content.whenMs)
         assertNull(content.subText)
@@ -208,14 +208,24 @@ class OngoingContentTest {
     }
 
     @Test
-    fun theIdleContentCountsOneEngineAndTheChatsThatNeedYou() {
-        fun idle(engines: Int, awaiting: Int) = ongoingContent(
-            OngoingInput(working = emptyList(), awaiting = awaiting, engineCount = engines, liveUpdateDismissed = false),
+    fun theIdleContentCountsTheChatsThatNeedYou() {
+        fun idle(awaiting: Int) = ongoingContent(
+            OngoingInput(working = emptyList(), awaiting = awaiting, deviceCount = 1, liveUpdateDismissed = false),
             now,
             apiPromotionPossible = false,
         ).text
-        assertEquals("Keeping 1 engine connected", idle(1, 0))
-        assertEquals("Keeping 1 engine connected · 1 needs you", idle(1, 1))
-        assertEquals("Keeping 3 engines connected · 2 need you", idle(3, 2))
+        assertEquals("Keeping your sessions up to date", idle(0))
+        assertEquals("Keeping your sessions up to date \u00b7 1 needs you", idle(1))
+        assertEquals("Keeping your sessions up to date \u00b7 2 need you", idle(2))
+    }
+
+    @Test
+    fun aBlankDeviceNameShowsNoSubText() {
+        val content = ongoingContent(
+            OngoingInput(working = listOf(run("a", "A", engine = "")), awaiting = 0, deviceCount = 2, liveUpdateDismissed = false),
+            now,
+            apiPromotionPossible = false,
+        )
+        assertNull(content.subText)
     }
 }

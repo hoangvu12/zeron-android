@@ -9,7 +9,7 @@ package sh.zeron.android.notify
  * |---|---|---|
  * | Foreground | **No banner and no chime** while the process is foreground (≥ STARTED). Covers "the chat currently open". | iOS `willPresent` → `[]` (PushNotifications.swift:160-167) |
  * | Master | `prefs.enabled && status == Granted` | `MoreViewController.swift:126-129` |
- * | Kind | the per-kind pref; LinkLost rides the `.failed` pref | #99 |
+ * | Kind | the per-kind pref | #99 |
  */
 object NotificationPolicy {
 
@@ -27,13 +27,6 @@ object NotificationPolicy {
         !appInForeground &&
             masterOn(prefs, status) &&
             prefs.isOn(kind)
-
-    /** LinkLost uses the `.failed` kind's gate and copy category. */
-    fun linkLostAllowed(
-        prefs: NotificationPrefs.Snapshot,
-        status: NotificationStatus,
-        appInForeground: Boolean,
-    ): Boolean = sessionEventAllowed(NotificationKind.Failed, prefs, status, appInForeground)
 
     /**
      * The master + permission gate: the state the foreground service's

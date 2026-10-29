@@ -71,11 +71,8 @@ class NotifierTest {
         assertEquals("Input required", input.name.toString())
         assertEquals("When an agent needs your response", input.description)
         assertEquals(NotificationManager.IMPORTANCE_HIGH, input.importance)
-        assertEquals("Errors and disconnections", failed.name.toString())
-        assertEquals(
-            "When a run fails or the connection remains unavailable",
-            failed.description,
-        )
+        assertEquals("Errors", failed.name.toString())
+        assertEquals("When a run fails", failed.description)
         assertEquals(NotificationManager.IMPORTANCE_HIGH, failed.importance)
         assertEquals("Runs in progress", runs.name.toString())
         assertEquals("Shown while an agent run is active", runs.description)
@@ -165,29 +162,6 @@ class NotifierTest {
     }
 
     @Test
-    fun linkLostCarriesItsCopyAndCancelsOnRestore() {
-        notifier.postLinkLost("e1", "Studio Mac", now)
-        val lost = posted("link:e1")
-        assertEquals("Connection unavailable", title(lost))
-        // The body picks the offline copy when no validated network
-        // exists; which one Robolectric's shadow reports is not the
-        // behaviour under test — both are the ticket's copy.
-        assertTrue(
-            "the link-lost copy must be one of the two sentences",
-            text(lost) == "Zeron is trying to reconnect" || text(lost) == "Your device is offline",
-        )
-        assertEquals(NotificationCompat.CATEGORY_ERROR, lost.category)
-        assertEquals("session-failed-v1", lost.channelId)
-        assertEquals("Studio Mac", subText(lost))
-        // Restored: only the lost notification goes.
-        notifier.postLinkLost("e2", "Other", now)
-        assertEquals(2, manager.activeNotifications.count { it.tag?.startsWith("link:") == true })
-        notifier.cancelLinkLost("e1")
-        assertNull(active("link:e1"))
-        assertNotNull(active("link:e2"))
-    }
-
-    @Test
     fun theBudgetNotificationPostsAndCancels() {
         notifier.postBudgetExhausted()
         val budget = posted("budget")
@@ -224,7 +198,7 @@ class NotifierTest {
                     WorkingRun("engine:v1:a", "Alpha", "Mac", now - 90_000, fromThisDevice = true),
                 ),
                 awaiting = 0,
-                engineCount = 1,
+                deviceCount = 1,
                 liveUpdateDismissed = false,
             ),
             now,
@@ -253,33 +227,23 @@ class NotifierTest {
         assertChatTap("c1", posted("chat:c1").contentIntent)
     }
 
-    @Test
-    fun aLinkLostTapOnlyOpensTheApp() {
-        notifier.postLinkLost("e1", "Mac", now)
-        val intent = targetIntent(posted("link:e1").contentIntent)
-        assertEquals(MainActivity::class.java.name, intent.component?.className)
-        assertEquals(Intent.ACTION_MAIN, intent.action)
-        assertNull(intent.getStringExtra(DeepLinks.EXTRA_CHAT_ID))
-    }
-
     // -------------------------------------------------- branding
 
     /**
-     * android-next #03: every builder (session event, link lost, budget,
-     * the ongoing run) carries the ribbon-bow small icon, the ribbon blue
+     * android-next #03: every builder (session event, budget, the
+     * ongoing run) carries the ribbon-bow small icon, the ribbon blue
      * accent and the launcher artwork as the large icon.
      */
     @Test
     fun everyNotificationCarriesTheBowTheRibbonAccentAndTheArtwork() {
         notifier.postSessionEvent("c1", "A", NotificationKind.Done, now)
-        notifier.postLinkLost("e1", "Mac", now)
         notifier.postBudgetExhausted()
         val ongoing = notifier.buildOngoing(
             ongoingContent(
                 OngoingInput(
                     working = listOf(WorkingRun("engine:v1:a", "Alpha", "Mac", now, fromThisDevice = false)),
                     awaiting = 0,
-                    engineCount = 1,
+                    deviceCount = 1,
                     liveUpdateDismissed = false,
                 ),
                 now,
@@ -289,7 +253,6 @@ class NotifierTest {
         )
         val all = mapOf(
             "session" to posted("chat:c1"),
-            "link" to posted("link:e1"),
             "budget" to posted("budget"),
             "ongoing" to ongoing,
         )

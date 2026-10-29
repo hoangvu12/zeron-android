@@ -15,8 +15,8 @@ import uniffi.zeron_core.WorkspaceSnapshot
  * or `setNotificationSink`), and the edge pushes only to APNs (D6): the
  * app feeds every workspace snapshot to [onSnapshot], where the
  * [SessionWatcher] applies the edge's done / needs-input / failed rule and
- * the gates decide what posts. TODO(#57): the [RunWatchController]'s
- * inputs from the same snapshots.
+ * the gates decide what posts, and the [RunActivityTracker] feeds the
+ * [RunWatchController] (#57) from the same snapshots.
  *
  * Threading: every callback hops to [scope] (Dispatchers.Default —
  * `NotificationManagerCompat.notify` is thread-safe) and is fully
@@ -35,7 +35,6 @@ class NotificationCenter(
     private val prefs: NotificationPrefs = NotificationPrefs.get(context),
     private val notifier: Notifier = Notifier(context),
     private val status: () -> NotificationStatus = { NotificationPermission.status(context) },
-    private val engineCount: () -> Int = { 0 },
     private val clock: () -> Long = System::currentTimeMillis,
     private val log: (String, Throwable?) -> Unit = { message, error ->
         if (error == null) Log.w(TAG, message) else Log.w(TAG, message, error)
@@ -50,23 +49,11 @@ class NotificationCenter(
     @Volatile
     var foreground: Boolean = true
 
-    /**
-     * The engine count source (the app's startup state); set after
-     * construction by [setEngineCountSource] because the application's
-     * startup pipeline outlives this constructor call site.
-     */
-    @Volatile
-    private var engineCountSource: () -> Int = engineCount
-
-    /** Point the subText engine-count gate at the live source. */
-    fun setEngineCountSource(source: () -> Int) {
-        engineCountSource = source
-    }
-
     // ── the app-side seams ───────────────────────────────────────────────
 
-    /** Driven only from [scope]'s single lane, so it needs no lock. */
+    /** Driven only from [scope]'s single lane, so they need no lock. */
     private val watcher = SessionWatcher()
+    private val runs = RunActivityTracker()
 
     /**
      * Called with every client the session holder publishes (each
@@ -75,7 +62,10 @@ class NotificationCenter(
      */
     @Suppress("UNUSED_PARAMETER")
     fun attachTo(client: uniffi.zeron_core.CoreClient) {
-        scope.launch { watcher.reset() }
+        scope.launch {
+            watcher.reset()
+            runs.reset()
+        }
     }
 
     /**
@@ -90,9 +80,14 @@ class NotificationCenter(
             try {
                 if (snapshot == null) {
                     watcher.reset()
+                    runs.reset()
+                    controller.onRunActivity(emptyList(), 0)
                     return@launch
                 }
-                val notices = watcher.update(SessionWatcher.rows(snapshot))
+                val rows = SessionWatcher.rows(snapshot)
+                val activity = runs.update(rows)
+                controller.onRunActivity(activity.working, activity.awaiting)
+                val notices = watcher.update(rows)
                 if (notices.isEmpty()) return@launch
                 val current = prefs.state.value
                 val permission = status()
@@ -114,6 +109,7 @@ class NotificationCenter(
         scope.launch {
             try {
                 watcher.reset()
+                runs.reset()
                 notifier.cancelAll()
             } catch (error: Throwable) {
                 log("sign-out cancel failed", error)

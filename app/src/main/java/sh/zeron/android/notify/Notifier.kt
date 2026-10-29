@@ -9,8 +9,6 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.AudioAttributes
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import android.net.Uri
 import android.util.Log
 import androidx.core.app.NotificationCompat
@@ -29,9 +27,6 @@ import sh.zeron.android.shell.DeepLinks
  * body.
  */
 object NotifyCopy {
-    const val LinkLostTitle = "Connection unavailable"
-    const val LinkLostReconnecting = "Zeron is trying to reconnect"
-    const val LinkLostOffline = "Your device is offline"
     const val BudgetTitle = "Background updates paused"
     const val BudgetText = "Open Zeron to resume."
 
@@ -158,42 +153,11 @@ class Notifier(private val context: Context) {
         notify(tag, notification)
     }
 
-    /**
-     * The engine link is unavailable: the per-engine outage notification,
-     * cancelled by [cancelLinkLost] when the engine reconnects. The copy
-     * flips to "Your device is offline" when no validated network exists.
-     */
-    fun postLinkLost(engineId: String, engineName: String, nowMs: Long) {
-        val tag = linkTag(engineId)
-        val text = if (hasValidatedNetwork()) {
-            NotifyCopy.LinkLostReconnecting
-        } else {
-            NotifyCopy.LinkLostOffline
-        }
-        val notification = NotificationCompat.Builder(context, channelId(NotificationKind.Failed))
-            .brand()
-            .setContentTitle(NotifyCopy.LinkLostTitle)
-            .setContentText(text)
-            .setSubText(engineName)
-            .setCategory(NotificationCompat.CATEGORY_ERROR)
-            .setShowWhen(true)
-            .setWhen(nowMs)
-            .setAutoCancel(true)
-            .setContentIntent(chatTapPendingIntent(tag, chatId = null))
-            .build()
-        notify(tag, notification)
-    }
-
     // ── cancels ──────────────────────────────────────────────────────────
 
     /** The chat was opened in the app (the router or the session screen): its notification goes. */
     fun cancelChatFor(chatId: String) {
         manager.cancel(chatTag(chatId), NOTIFICATION_ID)
-    }
-
-    /** LinkRestored: only the lost notification goes. */
-    fun cancelLinkLost(engineId: String) {
-        manager.cancel(linkTag(engineId), NOTIFICATION_ID)
     }
 
     /**
@@ -332,7 +296,6 @@ class Notifier(private val context: Context) {
 
     private fun chatTag(chatId: String) = "$CHAT_TAG_PREFIX$chatId"
 
-    private fun linkTag(engineId: String) = "link:$engineId"
 
     /**
      * The tap (#19): an explicit `MainActivity` intent with the chat id in
@@ -369,14 +332,6 @@ class Notifier(private val context: Context) {
         )
     }
 
-    /** `ConnectivityManager`: a validated default network exists. */
-    private fun hasValidatedNetwork(): Boolean {
-        val cm = context.getSystemService(ConnectivityManager::class.java) ?: return false
-        val network = cm.activeNetwork ?: return false
-        val caps = cm.getNetworkCapabilities(network) ?: return false
-        return caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
-    }
-
     private companion object {
         const val TAG = "ZeronNotify"
         const val CHANNEL_VERSION = 1
@@ -406,14 +361,14 @@ private fun NotificationKind.chimeResource(): String = when (this) {
 private fun NotificationKind.channelName(): String = when (this) {
     NotificationKind.Done -> "Task completed"
     NotificationKind.Input -> "Input required"
-    NotificationKind.Failed -> "Errors and disconnections"
+    NotificationKind.Failed -> "Errors"
 }
 
 /** The system-settings channel description of a kind. */
 private fun NotificationKind.channelDescription(): String = when (this) {
     NotificationKind.Done -> "When an agent finishes a run"
     NotificationKind.Input -> "When an agent needs your response"
-    NotificationKind.Failed -> "When a run fails or the connection remains unavailable"
+    NotificationKind.Failed -> "When a run fails"
 }
 
 /** #699's vibration patterns (pr699:core/Notifier.kt:61-63), in ms. */

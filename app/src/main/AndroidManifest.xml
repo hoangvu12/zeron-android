@@ -21,9 +21,6 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
-    <!-- ADR 0010: "Stay connected in background" runs the same service as
-         specialUse (API 34+, normal permission, no time limit). -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.POST_PROMOTED_NOTIFICATIONS" />
     <!-- #58: a few seconds of delivery after leaving right after Send (DeliveryService). -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SHORT_SERVICE" />
@@ -77,21 +74,14 @@
                 <data android:host="voice" />
             </intent-filter>
         </activity>
-        <!-- android-app#28 + ADR 0010: the run-watching foreground service.
+        <!-- android-app#28, #57: the run-watching foreground service,
              dataSync while a run is Working (and for the 2 min linger after
-             it) with notifications on; specialUse while the opt-in "Stay
-             connected in background" setting holds it (dataSync is
-             time-limited on API 35+, specialUse is not). Never started from
-             the background, never at boot. The subtype property is the
-             justification Play would review; Zeron ships no Play build. -->
+             it) with notifications on. Never started from the background,
+             never at boot. D8 dropped "Stay connected" and its specialUse. -->
         <service
             android:name=".background.RunWatchService"
             android:exported="false"
-            android:foregroundServiceType="dataSync|specialUse">
-            <property
-                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="Opt-in setting: keeps the user's own paired engine connections (self-hosted coding-agent desktop, LAN or tunnel WebSocket) open while the app is in the background, so run status and completion notifications arrive live. No push service exists (no FCM by design)." />
-        </service>
+            android:foregroundServiceType="dataSync" />
         <!-- #58: the delivery hold, 25 s after backgrounding right after a
              send. shortService on API 34+ (no budget), dataSync below. -->
         <service

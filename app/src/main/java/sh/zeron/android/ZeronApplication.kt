@@ -447,7 +447,6 @@ class ZeronApplication : Application() {
             prefs = notificationPrefs,
             notifier = notifier,
         )
-        center.setEngineCountSource { workspaceFeed.devices.value.size }
         center
     }
 
@@ -465,10 +464,10 @@ class ZeronApplication : Application() {
     /**
      * The run-watching foreground service's controller (android-app#28):
      * starts `RunWatchService` while any run is Working and notifications
-     * are on, stops it 2 min after the last run leaves Working, and keeps
-     * it up while "Stay connected in background" is on (ADR 0010). Never owns
-     * sockets — the core client does; the service keeps the process out
-     * of the cached/frozen set.
+     * are on, and stops it 2 min after the last run leaves Working. Its
+     * run inputs come from the notification centre's snapshots (#57).
+     * Never owns sockets — the core client does; the service keeps the
+     * process out of the cached/frozen set.
      */
     val runWatch: RunWatchController by lazy {
         RunWatchController(this, applicationScope, notifier = notifier)
@@ -647,17 +646,11 @@ class ZeronApplication : Application() {
         }
         applicationScope.launch {
             workspaceFeed.devices.collect { devices ->
-                runWatch.onEngineCount(devices.size)
+                runWatch.onDeviceCount(devices.count { it.isExecutionHost })
             }
         }
         applicationScope.launch {
             notificationPrefs.state.collect { refreshNotificationsOn() }
-        }
-        // ADR 0010: Settings → "Stay connected in background" holds the
-        // service (false until the DataStore read lands; the flip from
-        // Settings arrives while the app is visible, so the start is legal).
-        applicationScope.launch {
-            prefs.stayConnected.collect { runWatch.onStayConnected(it) }
         }
         // #36: the stored math settings (and every Settings change) reach
         // every live transcript, which reflows at once (iOS `didChange`).
@@ -713,6 +706,8 @@ class ZeronApplication : Application() {
                     workspaceFeed.reset()
                     // #58: sign-out ends the delivery hold (iOS clears it with the client).
                     if (client == null) DeliveryService.release(this@ZeronApplication)
+                    // #57: the run watch serves a signed-in account only.
+                    runWatch.onSignedIn(client != null)
                     if (client != null) {
                         lifecycleHooks.clientReady()
                         notifications.attachTo(client)

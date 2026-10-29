@@ -14,6 +14,10 @@ data class WatchedRow(
     val lastActivityMs: Long,
     /** Archived, or a side chat: never notifies (`chatForNotification`). */
     val silent: Boolean,
+    /** The host's name (the ongoing notification's subText). */
+    val deviceName: String = "",
+    /** This phone has a send in flight into the chat (`SessionRow.sendState`). */
+    val sending: Boolean = false,
 )
 
 /** One notification to post: [kind] for [chatId], titled [title], dated [whenMs]. */
@@ -112,6 +116,51 @@ class SessionWatcher {
             workingSinceMs = row.workingSinceMs,
             lastActivityMs = row.lastActivityMs,
             silent = row.archived || row.parentChatId != null,
+            deviceName = row.deviceName.orEmpty(),
+            sending = row.sendState != null,
+        )
+    }
+}
+
+/** What the run-watching service shows and holds on to (#57). */
+data class RunActivity(val working: List<WorkingRun>, val awaiting: Int) {
+    companion object {
+        val Idle = RunActivity(emptyList(), 0)
+    }
+}
+
+/**
+ * The RunWatchController's inputs from the same snapshots (docs/port/05
+ * §2.4; the Roboco core's `RunActivity` replacement): the top-level chats
+ * Working (title, device, run start), how many wait on an answer, and
+ * which runs this phone started — a chat this phone sent into
+ * (`sendState`) counts until its run leaves Working, which is what the
+ * API 36 Live Update promotion asks for. Side and archived chats are left
+ * out, like the notifications.
+ *
+ * Not thread-safe: the notification centre drives it from one lane.
+ */
+class RunActivityTracker {
+
+    private var fromHere: Set<String> = emptySet()
+
+    fun reset() {
+        fromHere = emptySet()
+    }
+
+    fun update(rows: List<WatchedRow>): RunActivity {
+        val live = rows.filter { !it.silent }
+        val sentHere = HashSet<String>()
+        for (row in live) {
+            val working = row.indicator == ChatIndicator.WORKING
+            if (row.sending || (working && row.id in fromHere)) sentHere += row.id
+        }
+        fromHere = sentHere
+        return RunActivity(
+            working = live
+                .filter { it.indicator == ChatIndicator.WORKING }
+                .map { WorkingRun(it.id, it.title, it.deviceName, it.workingSinceMs, fromThisDevice = it.id in sentHere) },
+            awaiting = live.count { it.indicator == ChatIndicator.AWAITING_INPUT },
         )
     }
 }
