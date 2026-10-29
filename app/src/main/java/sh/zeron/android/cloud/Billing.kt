@@ -1,5 +1,9 @@
 package sh.zeron.android.cloud
 
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.heading
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -109,6 +113,7 @@ object BillingCopy {
     const val Fewer = "Fewer packs"
     const val More = "More packs"
 
+    fun packs(n: Int) = if (n == 1) "1 pack" else "$n packs"
     fun loadFailed(error: String) = "Couldn't load billing. $error"
     fun choose(plan: String) = "Choose $plan"
     fun buy(price: String) = "Buy for $price"
@@ -402,7 +407,7 @@ fun BillingScreen(
 private fun SectionLabel(text: String) {
     BasicText(
         text,
-        Modifier.padding(start = 4.dp, top = 20.dp, bottom = 10.dp),
+        Modifier.padding(start = 4.dp, top = 20.dp, bottom = 10.dp).semantics { heading() },
         style = uiStyle(Face.SansMedium, LocalTypeScale.current.fixed(13f), ZeronTheme.palette.secondary),
     )
 }
@@ -496,7 +501,8 @@ private fun CreditsCard(b: BillingInfo) {
 private fun FigureRow(figure: String, unit: String, size: Float, trailing: String? = null, tag: String? = null) {
     val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
-    Row(Modifier.fillMaxWidth()) {
+    // #63: "1,250 credits, about 20 hours" as one TalkBack stop.
+    Row(Modifier.fillMaxWidth().semantics(mergeDescendants = true) {}) {
         BasicText(
             figure,
             Modifier.alignByBaseline().then(if (tag != null) Modifier.testTag(tag) else Modifier),
@@ -526,7 +532,9 @@ private fun SplitBar(shares: List<Float>) {
             .fillMaxWidth()
             .height(4.dp)
             .clip(RoundedCornerShape(2.dp))
-            .background(palette.controlFill),
+            .background(palette.controlFill)
+            // Drawn only: the rows under it say the same in words.
+            .clearAndSetSemantics { },
     ) {
         shares.forEachIndexed { ix, share ->
             if (share > 0f) {
@@ -637,7 +645,14 @@ private fun PackStepper(count: Int, onChange: (Int) -> Unit) {
         StepButton(ZeronIcons.Minus, BillingCopy.Fewer, enabled = count > 1) { onChange(BillingRules.step(count, -1)) }
         BasicText(
             "$count",
-            Modifier.widthIn(min = 22.dp).testTag("packs"),
+            Modifier
+                .widthIn(min = 22.dp)
+                .semantics {
+                    // #63: the count is announced as it steps.
+                    contentDescription = BillingCopy.packs(count)
+                    liveRegion = LiveRegionMode.Polite
+                }
+                .testTag("packs"),
             style = figures(uiStyle(Face.SansMedium, LocalTypeScale.current.fixed(14f), palette.text))
                 .copy(textAlign = TextAlign.Center),
         )

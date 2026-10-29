@@ -1,5 +1,7 @@
 package sh.zeron.android.onboarding
 
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -318,7 +320,9 @@ internal fun GitHubPage(app: ZeronApplication) {
                 ) {
                     if (connected) {
                         // `CloudRow.check()`: a 22 pt filled check in success green.
-                        Icon(ZeronIcons.CheckmarkCircleFill, tint = palette.success, sizePt = 22f, weight = SymbolWeight.Semibold)
+                        Box(Modifier.semantics { contentDescription = "Connected" }) {
+                            Icon(ZeronIcons.CheckmarkCircleFill, tint = palette.success, sizePt = 22f, weight = SymbolWeight.Semibold)
+                        }
                     } else {
                         RowButton("Connect", prominent = true, tag = "onboarding-github") { connecting = true }
                     }
@@ -349,7 +353,7 @@ internal fun AgentsPage(modifier: Modifier = Modifier) {
         }
     }
     Column(modifier) {
-        Heading("Your agents", detail)
+        Heading("Your agents", detail, announce = true)
         Spacer(Modifier.height(4.dp))
         val stack = remember { NavStack(ProvidersRoute(embedded = true)) }
         DisposableEffect(stack) { onDispose { stack.closeAll() } }

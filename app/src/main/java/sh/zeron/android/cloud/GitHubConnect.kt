@@ -1,5 +1,10 @@
 package sh.zeron.android.cloud
 
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.heading
 import android.content.ClipData
 import android.content.ClipboardManager
 import androidx.compose.foundation.background
@@ -212,7 +217,8 @@ private fun GitHubConnectContent(model: GitHubConnectModel, onOpen: () -> Unit, 
             Modifier
                 .size(56.dp)
                 .clip(RoundedCornerShape(56.dp * 0.28f))
-                .background(palette.controlFill),
+                .background(palette.controlFill)
+                .clearAndSetSemantics { },
             contentAlignment = Alignment.Center,
         ) {
             Icon(ZeronIcons.GithubMark, tint = palette.text, sizePt = 28f)
@@ -220,7 +226,7 @@ private fun GitHubConnectContent(model: GitHubConnectModel, onOpen: () -> Unit, 
         Spacer(Modifier.height(16.dp))
         BasicText(
             GitHubConnectCopy.Title,
-            Modifier.fillMaxWidth(),
+            Modifier.fillMaxWidth().semantics { heading() },
             style = uiStyle(Face.SansSemibold, typeScale.fixed(28f), palette.text).copy(textAlign = TextAlign.Center),
         )
         Spacer(Modifier.height(10.dp))
@@ -248,7 +254,12 @@ private fun GitHubConnectContent(model: GitHubConnectModel, onOpen: () -> Unit, 
         Spacer(Modifier.height(22.dp))
         val status = model.status
         if (status != null) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            // #63: the status is announced as it changes ("Waiting…", "Connected").
+            Row(
+                Modifier.semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 if (model.busy) ActivitySpinner(palette.secondary)
                 BasicText(
                     status,

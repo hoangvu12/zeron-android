@@ -1,5 +1,9 @@
 package sh.zeron.android.accounts
 
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.progressBarRangeInfo
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import android.content.ClipData
 import android.content.ClipboardManager
 import androidx.compose.foundation.background
@@ -383,7 +387,7 @@ fun AgentAccountsPage(
                         title = AccountsCopy.Waiting,
                         position = position,
                         subtitle = detail,
-                        accessories = listOf(GroupedAccessory.Custom { StatusGlyph(StatusGlyphKind.Spinner) }),
+                        accessories = listOf(GroupedAccessory.Custom { BusyGlyph() }),
                         testTag = "sign-in-waiting",
                         onClick = if (target is AccountsTarget.Device) ({ deviceSignIn.cancel() }) else null,
                     )
@@ -442,6 +446,7 @@ private fun AccountRow(
             position = position,
             modifier = Modifier.onGloballyPositioned { bounds = it.boundsInWindow() },
             testTag = "account-${item.id}",
+            onLongClickLabel = AccountsCopy.MoreActions,
             onLongClick = if (actionable) ({
                 val children = buildList {
                     if (!item.active) {
@@ -521,7 +526,7 @@ private fun AccountTrailing(item: AccountItem, busy: Boolean, onSwitch: () -> Un
     val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
     when {
-        busy -> StatusGlyph(StatusGlyphKind.Spinner)
+        busy -> BusyGlyph()
         item.active -> BasicText(
             AccountsCopy.InUse,
             Modifier
@@ -536,7 +541,7 @@ private fun AccountTrailing(item: AccountItem, busy: Boolean, onSwitch: () -> Un
             Modifier
                 .clip(CapsuleShape)
                 .background(palette.controlFill)
-                .clickable(onClick = onSwitch)
+                .clickable(role = Role.Button, onClick = onSwitch)
                 .padding(horizontal = 12.dp, vertical = 5.dp)
                 .testTag("account-switch"),
             style = uiStyle(Face.SansMedium, ts.fixed(13f), palette.text),
@@ -552,7 +557,13 @@ private fun UsageMeter(window: UsageWindowInfo) {
     val ts = LocalTypeScale.current
     val fraction = window.usedFraction.coerceIn(0f, 1f)
     val fill: Color = if (fraction > 0.9f) palette.danger else palette.text.copy(alpha = 0.55f)
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    // #63: one stop — "Session, 34% · 3h" — with the share as its progress.
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .semantics(mergeDescendants = true) { progressBarRangeInfo = ProgressBarRangeInfo(fraction, 0f..1f) },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         BasicText(window.label, Modifier.width(56.dp), style = uiStyle(Face.Sans, ts.fixed(12f), palette.secondary), maxLines = 1)
         Spacer(Modifier.width(6.dp))
         Box(
@@ -572,4 +583,10 @@ private fun UsageMeter(window: UsageWindowInfo) {
             maxLines = 1,
         )
     }
+}
+
+/** A row's spinner that TalkBack reads as "in progress" (#63). */
+@Composable
+private fun BusyGlyph() {
+    Box(Modifier.semantics { progressBarRangeInfo = ProgressBarRangeInfo.Indeterminate }) { StatusGlyph(StatusGlyphKind.Spinner) }
 }

@@ -1,5 +1,8 @@
 package sh.zeron.android.cloud
 
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.keyframes
 import androidx.compose.foundation.background
@@ -86,7 +89,8 @@ fun CloudCreditsNotice(state: CreditsNoticeState, onAddCredits: () -> Unit, modi
         Icon(ZeronIcons.ExclamationmarkTriangleFill, palette.danger, 13f, SymbolWeight.Semibold)
         BasicText(
             "Out of Cloud credits",
-            Modifier.weight(1f),
+            // #63: announced when it appears (and again on a kept send's nudge).
+            Modifier.weight(1f).semantics { liveRegion = LiveRegionMode.Polite },
             style = uiStyle(Face.SansMedium, ts.fixed(14f), palette.text),
             maxLines = 1,
         )

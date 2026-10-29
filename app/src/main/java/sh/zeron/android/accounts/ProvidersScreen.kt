@@ -1,5 +1,9 @@
 package sh.zeron.android.accounts
 
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.progressBarRangeInfo
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -332,7 +336,8 @@ private fun ProviderRowView(
     val accessories = buildList {
         when {
             row.signIn && !row.busy -> add(GroupedAccessory.Custom { SignInCapsule(row, onSignIn) })
-            row.busy -> add(GroupedAccessory.Custom { StatusGlyph(StatusGlyphKind.Spinner) })
+            // #63: the spinner reads as "in progress" in the row's announcement.
+            row.busy -> add(GroupedAccessory.Custom { Box(Modifier.semantics { progressBarRangeInfo = ProgressBarRangeInfo.Indeterminate }) { StatusGlyph(StatusGlyphKind.Spinner) } })
             row.toggle != null -> add(
                 GroupedAccessory.Custom {
                     ZeronSwitch(
@@ -368,7 +373,7 @@ private fun SignInCapsule(row: ProviderRow, onClick: () -> Unit) {
     Box(
         Modifier
             .background(palette.controlFill, CapsuleShape)
-            .clickable(onClick = onClick)
+            .clickable(role = Role.Button, onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 5.dp)
             .testTag("providers-sign-in-${row.harness.orEmpty()}"),
     ) {
