@@ -219,18 +219,19 @@ class SessionHolder<C : Any>(
 
     /**
      * Shut the client down and forget the account (`AppModel.signOutLocally`).
-     * [forget] — the user asked — also deletes the local store. The demo
-     * never touches the stored account. Blocks.
+     * [forget] — the user asked — also deletes the local store. As on iOS,
+     * leaving the demo does the same: the stored real account (credentials
+     * and profile) goes too, and a forgetting sign-out deletes its `core/`
+     * store; the demo's own `demo/` dir is never touched. Blocks.
      */
     fun signOutLocally(forget: Boolean) {
         synchronized(lifecycle) {
-            val wasDemo = isDemo
             synchronized(auth) {
                 generation++
-                if (!wasDemo) credentials.clear()
+                credentials.clear()
             }
             _client.value?.let(::retire)
-            if (!wasDemo && forget) coreDir.deleteRecursively()
+            if (forget) coreDir.deleteRecursively()
         }
         for (listener in signOutListeners) {
             try {

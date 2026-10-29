@@ -121,7 +121,7 @@ class SessionHolderTest {
         assertTrue(holder.booted.value)
         assertEquals(listOf<Credentials>(demo), built.map { it.credentials })
         assertTrue(holder.isDemo)
-        assertEquals("the demo keeps the stored account", account(), store.stored())
+        assertEquals("starting the demo keeps the stored account", account(), store.stored())
     }
 
     @Test
@@ -327,12 +327,35 @@ class SessionHolderTest {
         assertEquals(listOf(true), signOuts)
     }
 
+    /** iOS `signOutLocally` has no demo exception: the stored real account goes too (#18). */
     @Test
-    fun leavingTheDemoKeepsTheStoredAccount() {
+    fun leavingTheDemoClearsTheStoredAccountButKeepsItsStore() {
         store.store(account())
+        File(coreDir, "docs.db").apply { parentFile?.mkdirs() }.writeText("the real account's cache")
         holder.start(demo)
+
+        holder.signOutLocally(forget = false)
+
+        assertNull(holder.client.value)
+        assertTrue(built.single().shutDown)
+        assertNull("the stored account is cleared", store.stored())
+        assertTrue("an unasked sign-out keeps core/", File(coreDir, "docs.db").exists())
+        assertEquals(listOf(false), signOuts)
+    }
+
+    @Test
+    fun aForgettingSignOutFromTheDemoAlsoDeletesTheRealStoreButNotTheDemos() {
+        store.store(account())
+        File(coreDir, "docs.db").apply { parentFile?.mkdirs() }.writeText("the real account's cache")
+        holder.start(demo)
+        val demoDir = built.single().dir
+        File(demoDir, "seed").writeText("demo data")
+
         holder.signOutLocally(forget = true)
-        assertEquals(account(), store.stored())
+
+        assertNull(store.stored())
+        assertFalse("iOS deletes core/ on any asked-for sign-out", coreDir.exists())
+        assertTrue("the demo's own dir is never touched", File(demoDir, "seed").exists())
     }
 
     // ------------------------------------------------------------- events
