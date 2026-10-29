@@ -1,6 +1,6 @@
 # zeron-android — Spec
 
-Status: draft for review · Zeron pin: v0.2.129 · Last updated: 2026-10-29
+Status: draft for review · Zeron pin: v0.2.129 · Last updated: 2026-10-29 · Roadmap: #67
 
 ## 1. Goal
 
@@ -123,11 +123,11 @@ docs/port/      the five iOS → Android gap audits (row IDs referenced by ticke
 | D4 | Sign-in: `workosAuthorizeUrl` → Auth Tab (fallback Custom Tab) → `zeron://callback` → `parseAuthCallback` (state check) → `authExchangeCode` → `authListOrgs` (picker if >1) → `authRefresh` → `CoreClient(Credentials.WorkOs)` | proposed |
 | D5 | Credentials: Roboco's `KeystoreSecretCipher` (AES-GCM, non-exportable) under a small `CredentialStore` with **synchronous** writes (Zeron Android's async `apply()` can lose a rotated refresh token) | proposed |
 | D6 | Notifications: no push (the edge is APNs-only). A Kotlin `SessionWatcher` applies the edge's done / needs-input / failed rule to workspace snapshots; Roboco's `Notifier` + `RunWatchService` deliver; Zeron's `DeliveryService` holds the process after a send | proposed |
-| D7 | Custom vs Material components: decided per component after the component lab renders (custom / Material restyled / stock side by side) | **owner decision** |
-| D8 | "Stay connected in background" (Roboco's opt-in foreground service): keep as an Android-only setting, because without push it is the only way to hear about runs started on the desktop while the phone is idle | **owner decision** |
-| D9 | Real Android push: propose FCM and/or UnifiedPush support to upstream (edge only, no core patch) — later, separate track | **owner decision** |
-| D10 | Open-source licences page: needs a home since iOS has no About section | **owner decision** |
-| D11 | Android-only extras kept or dropped: launcher shortcuts (`zeron://new|settings|search`), empty/no-results copy, the "● N agents" pill, iOS scroll physics vs platform fling | **owner decision** |
+| D7 (#1) | Custom vs Material components: decided per component after the component lab renders (custom / Material restyled / stock side by side) | **owner decision** |
+| D8 (#2) | "Stay connected in background" (Roboco's opt-in foreground service): keep as an Android-only setting, because without push it is the only way to hear about runs started on the desktop while the phone is idle | **owner decision** |
+| D9 (#3) | Real Android push: propose FCM and/or UnifiedPush support to upstream (edge only, no core patch) — later, separate track | **owner decision** |
+| D10 (#4) | Open-source licences page: needs a home since iOS has no About section | **owner decision** |
+| D11 (#5) | Android-only extras kept or dropped: launcher shortcuts (`zeron://new|settings|search`), empty/no-results copy, the "● N agents" pill, iOS scroll physics vs platform fling | **owner decision** |
 | D12 | Demo, dev credentials and routes are debug launch extras only, as on iOS (no "Explore the demo" button) | proposed |
 | D13 | Voice in scope: WebRTC (`io.github.webrtc-sdk:android`), microphone foreground service + CallStyle notification as the Live Activity stand-in | proposed |
 | D14 | Visual shaders/3D need Vulkan; devices without it get the core's software fallback / error state | proposed |
