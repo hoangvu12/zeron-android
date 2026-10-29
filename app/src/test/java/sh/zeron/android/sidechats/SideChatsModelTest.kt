@@ -8,18 +8,17 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import sh.zeron.android.session.SessionEventHub
 import sh.zeron.android.sessions.SessionRowVM
 import uniffi.zeron_core.ClientEvent
-import uniffi.zeron_core.SubagentInfo
+import uniffi.zeron_core.SubagentRow
 import uniffi.zeron_core.SubagentState
 
 /**
  * The side chats state holder (android-next #06): the sections a pull
- * yields ([SideChatsUi.of]), the header badge, the FFI lifecycle mapping,
+ * yields ([SideChatsUi.of]), the companion counts, the FFI lifecycle mapping,
  * the engine-version gate, and [SideChatsModel]'s refresh shape — a pull
  * on start, one per hub event for the chat (a `SessionChanged` moves the
  * spawn chips, a `WorkspaceChanged` the children), the previous rows kept
@@ -32,7 +31,7 @@ import uniffi.zeron_core.SubagentState
 class SideChatsModelTest {
 
     private fun agent(id: String, state: AgentState, at: Long = 0L) =
-        SideChatsAgent(docId = "engine:v1:k:chat--sub--$id", title = "Agent $id", state = state, spawnedAtMs = at)
+        SideChatsAgent(id = id, docId = "engine:v1:k:chat--sub--$id", title = "Agent $id", state = state, spawnedAtMs = at)
 
     private fun chat(id: String) = SessionRowVM(
         id = id,
@@ -91,21 +90,15 @@ class SideChatsModelTest {
     }
 
     @Test
-    fun theBadgeIsTheRunningPillOrAQuietCountAndHidesWhenEmpty() {
-        assertNull("nothing hangs off the chat: no button", SideChatsUi().badge)
-
-        val running = SideChatsUi.of(listOf(agent("a", AgentState.Running), agent("b", AgentState.Running)), listOf(chat("x")))
-        val badge = running.badge!!
-        assertEquals("● 2", badge.text)
-        assertTrue(badge.accent)
-        assertEquals("2 running", badge.a11yValue)
-        assertEquals("Side chats and agents, 2 running", sideChatsButtonLabel(badge))
-
-        val quiet = SideChatsUi.of(listOf(agent("a", AgentState.Done)), listOf(chat("x"), chat("y"))).badge!!
-        assertEquals("3", quiet.text)
-        assertFalse(quiet.accent)
-        assertNull(quiet.a11yValue)
-        assertEquals("Side chats and agents", sideChatsButtonLabel(quiet))
+    fun theCompanionCountsCoverEverySpawnAndTheChats() {
+        assertTrue("nothing hangs off the chat", SideChatsUi().companions.isEmpty)
+        val ui = SideChatsUi.of(
+            listOf(agent("a", AgentState.Running), agent("b", AgentState.Done).copy(docId = null)),
+            listOf(chat("x")),
+        )
+        assertEquals(2, ui.companions.agents)
+        assertEquals(1, ui.companions.runningAgents)
+        assertEquals(1, ui.companions.sideChats)
     }
 
     @Test
@@ -114,17 +107,28 @@ class SideChatsModelTest {
         assertEquals(AgentState.Done, agentState(SubagentState.DONE))
         assertEquals(AgentState.Failed, agentState(SubagentState.FAILED))
         val mirrored = SideChatsAgent.from(
-            SubagentInfo(
+            SubagentRow(
+                id = "t1",
                 docId = "engine:v1:k:chat--sub--t1",
                 title = "Audit the repo",
+                model = "haiku",
+                kind = "Explore",
                 state = SubagentState.RUNNING,
                 tail = null,
-                model = "haiku",
-                spawnedAtMs = 1_000L,
+                startedAtMs = 1_000L,
             ),
         )
         assertEquals(
-            SideChatsAgent("engine:v1:k:chat--sub--t1", "Audit the repo", AgentState.Running, null, "haiku", 1_000L),
+            SideChatsAgent(
+                id = "t1",
+                docId = "engine:v1:k:chat--sub--t1",
+                title = "Audit the repo",
+                state = AgentState.Running,
+                tail = null,
+                model = "haiku",
+                kind = "Explore",
+                spawnedAtMs = 1_000L,
+            ),
             mirrored,
         )
         assertTrue(mirrored.running)
@@ -157,7 +161,7 @@ class SideChatsModelTest {
             scope = CoroutineScope(SupervisorJob() + dispatcher),
             io = dispatcher,
         )
-        assertNull("no pull before start", model.ui.value.badge)
+        assertEquals("no pull before start", 0, model.ui.value.total)
 
         model.start()
         advanceUntilIdle()

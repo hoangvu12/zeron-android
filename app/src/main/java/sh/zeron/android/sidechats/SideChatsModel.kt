@@ -44,6 +44,8 @@ data class SideChatsAgent(
     val tail: String? = null,
     /** The model the spawn picked, when it named one. */
     val model: String? = null,
+    /** The subagent type the spawn named (`Explore`, …). */
+    val kind: String? = null,
     /** When the spawning reply was written (epoch ms). */
     val spawnedAtMs: Long = 0L,
 ) {
@@ -58,6 +60,7 @@ data class SideChatsAgent(
             state = agentState(info.state),
             tail = info.tail,
             model = info.model,
+            kind = info.kind,
             spawnedAtMs = info.startedAtMs,
         )
     }
