@@ -33,6 +33,9 @@ uiAutomator = "2.4.0"
 # paired with runner/core 1.7.0.
 androidxTestEspresso = "3.7.0"
 jna = "5.19.1"
+# #60 (SPEC D13): voice's WebRTC peer. M150, the milestone the iOS app pins;
+# the same version as zeron/apps/android (published 2026-08-31).
+webrtc = "150.7871.01"
 junit = "4.13.2"
 # Squircle corners (SmoothRoundedShape): newest stable 1.x on maven.google.com
 # as of 2026-10-12. Multiplatform umbrella; Gradle resolves the -android variant.
@@ -102,6 +105,7 @@ androidx-test-uiautomator = { group = "androidx.test.uiautomator", name = "uiaut
 # only, never release.
 androidx-metrics-performance = { group = "androidx.metrics", name = "metrics-performance", version.ref = "androidxMetrics" }
 jna = { group = "net.java.dev.jna", name = "jna", version.ref = "jna" }
+webrtc = { group = "io.github.webrtc-sdk", name = "android", version.ref = "webrtc" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 

@@ -161,6 +161,15 @@ class LaunchOptionsTest {
     }
 
     @Test
+    fun remoteVoiceTakesEitherBooleanForm() {
+        assertTrue(LaunchOptions.parse(mapOf("remote-voice" to true), debuggable = true).remoteVoice)
+        assertTrue(LaunchOptions.parse(mapOf("remote-voice" to "true"), debuggable = true).remoteVoice)
+        assertFalse(LaunchOptions.parse(emptyMap(), debuggable = true).remoteVoice)
+        // Not an account extra: it never starts the demo or touches the account.
+        assertFalse(LaunchOptions.parse(mapOf("remote-voice" to true), debuggable = true).touchesAccount)
+    }
+
+    @Test
     fun nonDebuggableIgnoresEveryDebugExtra() {
         val extras = mapOf(
             "wallpaper" to "/x/a.png",
@@ -174,6 +183,7 @@ class LaunchOptionsTest {
             "route" to "new",
             "edge" to "http://evil",
             "workos" to "client_evil",
+            "remote-voice" to true,
         )
         assertEquals(LaunchOptions(), LaunchOptions.parse(extras, debuggable = false))
         assertFalse(LaunchOptions.parse(extras, debuggable = false).touchesAccount)

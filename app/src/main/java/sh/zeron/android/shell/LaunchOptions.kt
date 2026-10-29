@@ -42,7 +42,8 @@ internal var launchOptionsLog: (String) -> Unit = { message ->
  *   `fast`, `longreply`, and `cloud` (the demo's Cloud row, read by the
  *   Cloud tickets); a `route` that parses also runs the demo when nothing
  *   is stored. `edge <url|prod>` / `workos <client|prod>` are the sticky
- *   endpoint overrides (`Endpoints`). Booleans take `--ez x true` or
+ *   endpoint overrides (`Endpoints`). `remote-voice` (#60) offers voice
+ *   before any host advertises it. Booleans take `--ez x true` or
  *   `--es x true`.
  *
  * Wrong types (an `Int` where a `String` is expected) read as absent;
@@ -69,6 +70,8 @@ data class LaunchOptions(
     val cloud: Boolean = false,
     val edge: String? = null,
     val workos: String? = null,
+    /** iOS `-remote-voice` (#60): offer voice before any host advertises it. */
+    val remoteVoice: Boolean = false,
 ) {
 
     /** Any extra that changes which account (or edge) this launch runs. */
@@ -170,6 +173,7 @@ data class LaunchOptions(
                 cloud = flag("cloud"),
                 edge = string("edge")?.trim(),
                 workos = string("workos")?.trim(),
+                remoteVoice = flag("remote-voice"),
             )
         }
 
