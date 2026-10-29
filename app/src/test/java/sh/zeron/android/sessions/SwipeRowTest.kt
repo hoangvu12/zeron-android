@@ -51,7 +51,6 @@ import sh.zeron.android.design.Haptic
 import sh.zeron.android.design.LocalFeedback
 import sh.zeron.android.design.ProvideReduceMotion
 import sh.zeron.android.design.ReduceMotion
-import sh.zeron.android.design.ZeronAlert
 import sh.zeron.android.design.ZeronTheme
 import uniffi.zeron_core.SessionRow
 import uniffi.zeron_core.SectionView
@@ -351,10 +350,7 @@ class SwipeRowTest {
                 sheets += model
             }
         }
-        val alerts = object : Alerts {
-            override fun show(alert: ZeronAlert) {}
-        }
-        val real = SessionRowCommands(RowActions.Noop, DefaultSessionPrompts(RowActions.Noop, alerts, presenter))
+        val real = SessionRowCommands(RowActions.Noop, DefaultSessionPrompts(RowActions.Noop, Alerts.Noop, presenter))
         host(commands = real)
         swipeRight(compose.onNodeWithTag("session-chat-i18n"), dpToTheRight = -80f)
         compose.onNodeWithTag("swipe-action-move").performClick()
