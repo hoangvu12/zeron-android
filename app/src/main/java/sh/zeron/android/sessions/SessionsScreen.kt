@@ -36,6 +36,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import sh.zeron.android.ZeronApplication
+import sh.zeron.android.core.SessionGrouping
 import sh.zeron.android.design.Appearance
 import sh.zeron.android.design.ContextMenuHost
 import sh.zeron.android.design.LocalBottomChrome
