@@ -52,6 +52,12 @@ androidxMetrics = "1.0.0"
 # artifacts. The newest stable that supports AGP 9 (plugin README,
 # re-verified 2026-10-12).
 aboutlibraries = "15.2.0"
+# Compose Unstyled (#12's component lab, decision D7): headless,
+# accessible primitives. Debug only until D7's per-component choices land.
+# 2.10.1 (Maven Central, 2026-10-13): the newest release at least two
+# weeks old on 2026-10-29. Needs CMP foundation 1.12.0 / Kotlin 2.4.0,
+# both at or below our pins.
+composeUnstyled = "2.10.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -64,6 +70,10 @@ compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
+# Stock Material 3 for #12's component lab only (debugImplementation): the
+# behaviour reference. src/main stays Material-free (NoMaterialImportsTest).
+compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+composeunstyled = { module = "com.composables:composeunstyled", version.ref = "composeUnstyled" }
 compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 graphics-shapes = { group = "androidx.graphics", name = "graphics-shapes", version.ref = "graphicsShapes" }

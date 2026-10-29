@@ -11,6 +11,10 @@ import java.io.File
  * (HazeMaterials) is equally banned — the iOS look is this repo's own
  * glass recipe, not Haze's presets.
  *
+ * Revived by #12: material3 is now a `debugImplementation` (the component
+ * lab's behaviour reference), so it is on the debug compile classpath of
+ * `src/main` too; this scan is what keeps it out of the app.
+ *
  * `user.dir` is the Gradle module directory (`apps/android/app`), so the scan
  * covers the whole app module, not just the design package.
  */
