@@ -385,7 +385,9 @@ class SessionChipMenus(
             harness = harness,
             // No model of its own: it runs the default, so that's the one ticked.
             model = model ?: defaultModels["$deviceId|$harness"]?.id,
-            hostName = row.deviceName ?: PICKER_HOST_FALLBACK,
+            // #53: a Cloud chat runs on "Cloud" (iOS `(name: "Cloud", symbol: "cloud")`).
+            hostName = if (row.isCloud) "Cloud" else row.deviceName ?: PICKER_HOST_FALLBACK,
+            hostSymbol = if (row.isCloud) "cloud" else HOST_SYMBOL_COMPUTER,
             note = providerSwitchNote(s.canSwitch, s.running, s.hostSwitches),
             load = { h -> pickerRows(deviceId, h) },
             onPick = { h, picked ->

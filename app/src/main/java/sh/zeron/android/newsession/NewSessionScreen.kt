@@ -3,7 +3,31 @@ package sh.zeron.android.newsession
 import sh.zeron.android.design.modalLayerBackground
 import sh.zeron.android.design.ModalLayer
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.unit.dp
+import sh.zeron.android.cloud.CloudRepoPickerSheet
+import sh.zeron.android.cloud.CloudRoutes
+import sh.zeron.android.composer.HOST_SYMBOL_COMPUTER
+import sh.zeron.android.core.Face
+import sh.zeron.android.design.CapsuleShape
+import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.design.LocalToaster
+import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.ActivitySpinner
+import sh.zeron.android.design.uiStyle
+import sh.zeron.android.shell.LocalAppRouter
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -91,6 +115,11 @@ internal fun NewSessionScreenBody(
     labels: ChipLabels = CoreChipLabels,
 ) {
     val composer = rememberComposerController(initialText = ns.initialText)
+    val morph = rememberComposerMorphState(
+        alwaysCard = true,
+        hasImages = { composer.images.isNotEmpty() },
+        hideSuggestions = { composer.hideSuggestions() },
+    )
 
     // ── 94: the handoff capture and the send handler ───────────────────
 
@@ -114,16 +143,23 @@ internal fun NewSessionScreenBody(
     // is skipped).
     val activity = remember(context) { context.findActivity() as? ComponentActivity }
     val latestOnCreated by rememberUpdatedState(onCreated)
+    // #53: the out-of-credits toast's "Add credits" opens Billing.
+    val toaster = LocalToaster.current
+    val feedback = LocalFeedback.current
+    val router = LocalAppRouter.current
     val handler = remember {
+        val core = CoreNewSessionCore(client = { app.clientOrNull() }, workspaceChanged = { app.workspaceFeed.refresh() })
         NewSessionSendHandler(
             page = ModelNewSessionPage(ns),
-            creator = NewSessionCreator(CoreNewSessionCore { app.clientOrNull() }),
+            creator = NewSessionCreator(core),
             alerts = alerts,
             askAfterFirstSession = {
                 activity?.let { target -> NotificationPermission.askAfterFirstSession(target) }
             },
             capture = capture::capture,
             onCreated = { chatId, handoff -> latestOnCreated(chatId, handoff) },
+            cloudCreator = CloudSessionCreator(core),
+            onOutOfCredits = { CloudRoutes.showOutOfCredits(toaster, feedback, router) },
         )
     }
 
@@ -141,11 +177,16 @@ internal fun NewSessionScreenBody(
                     newSessionModelPicker(
                         models = ns.models,
                         draft = ns.draft,
-                        hostName = newSessionPickerHostName(
-                            ns.project,
-                            ns.currentOptions?.hosts.orEmpty(),
-                            ns.draft.hostId,
-                        ),
+                        hostName = if (ns.runsOnCloud) {
+                            CLOUD_HOST_NAME
+                        } else {
+                            newSessionPickerHostName(
+                                ns.project,
+                                ns.currentOptions?.hosts.orEmpty(),
+                                ns.draft.hostId,
+                            )
+                        },
+                        hostSymbol = if (ns.runsOnCloud) CLOUD_HOST_SYMBOL else HOST_SYMBOL_COMPUTER,
                         update = ns::update,
                     ),
                 )
@@ -165,8 +206,14 @@ internal fun NewSessionScreenBody(
     val alive = remember { AtomicBoolean(true) }
     DisposableEffect(Unit) { onDispose { alive.set(false) } }
     val newProjectPresenter = rememberNewProjectPresenter()
+    // #53: "New Cloud Project…" opens the repo picker over the page; its
+    // `onCreated(id)` picks the new project on Cloud.
+    var cloudRepoPicker by remember { mutableStateOf<((String) -> Unit)?>(null) }
     val projectMenus = remember(ns, newProjectPresenter) {
-        ProjectRunOnMenus(ns, newProjectPresenter, alive::get)
+        ProjectRunOnMenus(ns, newProjectPresenter, alive::get) { onCreated ->
+            morph.blur()
+            cloudRepoPicker = onCreated
+        }
     }
     val refSource = remember { CoreRefSource(client = { app.clientOrNull() }) }
     val checkoutMenus = remember(ns) {
@@ -176,17 +223,14 @@ internal fun NewSessionScreenBody(
             selectedModel = { ns.selectedModel },
             update = ns::update,
             refSource = refSource,
+            runsOnCloud = { ns.runsOnCloud },
+            cloudBranches = { repo -> app.clientOrNull()?.githubBranches(repo) ?: emptyList() },
         )
     }
     val chipMenus = remember(projectMenus, checkoutMenus) {
         newSessionChipMenus(projectMenus.providers(), checkoutMenus.providers())
     }
     NewSessionChipsEffect(ns, composer, chipMenus, labels)
-    val morph = rememberComposerMorphState(
-        alwaysCard = true,
-        hasImages = { composer.images.isNotEmpty() },
-        hideSuggestions = { composer.hideSuggestions() },
-    )
     val keyboard = LocalSoftwareKeyboardController.current
     val canvasState = remember { NewSessionCanvasState() }
     NewSessionFocusOnAppear(focusOnAppear, embedded, canvasState) { morph.focus() }
@@ -199,15 +243,31 @@ internal fun NewSessionScreenBody(
             onClose = onClose,
             onBackgroundTap = { morph.blur(); keyboard?.hide() },
             composer = {
-                ComposerBar(
-                    composer,
-                    morph,
-                    Modifier
-                        .testTag("new-session-composer")
-                        .handoffComposer(capture),
-                    textHidden = capture.textHidden,
-                    onTextRect = capture::onTextRect,
-                )
+                // #53: while a Cloud machine is minted the composer is
+                // locked and "Starting on Cloud…" sits above it.
+                Box {
+                    ComposerBar(
+                        composer,
+                        morph,
+                        Modifier
+                            .testTag("new-session-composer")
+                            .handoffComposer(capture)
+                            .then(if (ns.cloudStarting) Modifier.lockedForCloud() else Modifier),
+                        textHidden = capture.textHidden,
+                        onTextRect = capture::onTextRect,
+                    )
+                    if (ns.cloudStarting) {
+                        CloudStartingHud(
+                            Modifier
+                                .align(Alignment.TopCenter)
+                                .layout { m, c ->
+                                    val p = m.measure(c.copy(minWidth = 0, minHeight = 0))
+                                    // Above the composer, 10 dp clear of its top.
+                                    layout(c.maxWidth, 0) { p.place((c.maxWidth - p.width) / 2, -p.height - 10.dp.roundToPx()) }
+                                },
+                        )
+                    }
+                }
             },
             state = canvasState,
             // 94: the page root records the scene (its Layout holds the
@@ -217,6 +277,9 @@ internal fun NewSessionScreenBody(
             modifier = Modifier.handoffScene(capture).then(modalLayerBackground()),
         )
         ModelPickerOverlay(modelPicker)
+        cloudRepoPicker?.let { onCreated ->
+            CloudRepoPickerSheet(onDismissed = { cloudRepoPicker = null }, onCreated = onCreated)
+        }
     }
     }
 }
@@ -308,3 +371,36 @@ internal suspend fun awaitPlacementSettled(coords: () -> LayoutCoordinates?) {
 
 /** The settle cap: 1000 ms of frames, against a never-settling host. */
 private const val SettleTimeoutNanos = 1_000_000_000L
+
+/** The Model picker's host line for a Cloud draft (iOS `(name: "Cloud", symbol: "cloud")`). */
+const val CLOUD_HOST_NAME = "Cloud"
+
+/** The Cloud host's SF symbol. */
+const val CLOUD_HOST_SYMBOL = "cloud"
+
+/** #53: the composer takes no touches while its Cloud start runs (iOS `isUserInteractionEnabled = false`). */
+private fun Modifier.lockedForCloud(): Modifier = pointerInput(Unit) {
+    awaitPointerEventScope {
+        while (true) {
+            awaitPointerEvent(androidx.compose.ui.input.pointer.PointerEventPass.Initial).changes.forEach { it.consume() }
+        }
+    }
+}
+
+/** "Starting on Cloud…" above the composer while the machine is minted (iOS `CloudStartingHUD`). */
+@Composable
+internal fun CloudStartingHud(modifier: Modifier = Modifier) {
+    val palette = ZeronTheme.palette
+    Row(
+        modifier
+            .clip(CapsuleShape)
+            .background(palette.elevated)
+            .padding(horizontal = 16.dp, vertical = 10.dp)
+            .testTag("cloud-starting"),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        ActivitySpinner(palette.secondary)
+        BasicText("Starting on Cloud…", style = uiStyle(Face.SansMedium, LocalTypeScale.current.fixed(14f), palette.text))
+    }
+}

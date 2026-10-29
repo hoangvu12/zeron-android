@@ -7,6 +7,13 @@ import sh.zeron.android.voice.VoiceBarItem
 import sh.zeron.android.voice.LocalVoiceController
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.design.Haptic
+import sh.zeron.android.shell.LocalAppRouter
+import sh.zeron.android.cloud.CloudCreditsNotice
+import sh.zeron.android.cloud.CloudRoutes
+import sh.zeron.android.cloud.CreditsNoticeState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -409,10 +416,33 @@ fun SessionScreen(
         null
     }
     val editing = queueEdit?.isEditing == true
+    // #53: a Cloud chat out of credits can't wake its machine: the notice
+    // over the pill row, and a send is kept with a nudge (iOS
+    // `cloudOutOfCredits`, `creditsNotice`).
+    val cloudApp = LocalContext.current.applicationContext as? ZeronApplication
+    val cloudOutOfCredits = controller.sessionRow?.isCloud == true && cloudApp?.cloud?.outOfCredits == true
+    val creditsNotice = remember { CreditsNoticeState() }
+    val noticeFeedback = LocalFeedback.current
+    val noticeRouter = LocalAppRouter.current
+    val latestOutOfCredits by rememberUpdatedState(cloudOutOfCredits)
+    if (composerBinding != null) {
+        SideEffect {
+            composerBinding.cloudGate = {
+                if (latestOutOfCredits) {
+                    noticeFeedback.haptic(Haptic.Attention)
+                    creditsNotice.nudge()
+                    true
+                } else {
+                    false
+                }
+            }
+        }
+    }
     val model = BottomStackModel.from(
         chrome,
         editing = editing,
         stripShown = onCompanionTap != null && !companions.isEmpty,
+        noticeShown = cloudOutOfCredits,
     )
 
     // 9.65 Ticket 73: the pill's banner filler (registered by 83 in 76's
@@ -581,15 +611,24 @@ fun SessionScreen(
                 }
             },
             pill = {
-                // 73: the shown banner (83's editing overlay folded in); 74
-                // shows and hides the row from the same model.
-                StatusPillRow(
-                    shownBanner(chrome.banner, editing),
-                    onTap = { banner -> statusBanner?.onTap(banner) },
-                    tapEnabled = { banner -> bannerTapAction(banner) != BannerTap.None },
-                    // #40: the companion strip at the row's trailing end.
-                    trailing = onCompanionTap?.let { tap -> { CompanionStrip(companions, tap) } },
-                )
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    // #53: the credits notice above the pill row (iOS's
+                    // bottom stack order: notice, pill row, queue, …).
+                    if (model.noticeShown) {
+                        CloudCreditsNotice(creditsNotice, onAddCredits = { CloudRoutes.openBilling(noticeRouter) })
+                    }
+                    // 73: the shown banner (83's editing overlay folded in); 74
+                    // shows and hides the row from the same model.
+                    if (model.rowShown) {
+                        StatusPillRow(
+                            shownBanner(chrome.banner, editing),
+                            onTap = { banner -> statusBanner?.onTap(banner) },
+                            tapEnabled = { banner -> bannerTapAction(banner) != BannerTap.None },
+                            // #40: the companion strip at the row's trailing end.
+                            trailing = onCompanionTap?.let { tap -> { CompanionStrip(companions, tap) } },
+                        )
+                    }
+                }
             },
             queue = {
                 // 82 + 83: the queue card above the composer. Its ⋯ menu's

@@ -233,7 +233,7 @@ fun rememberSessionMenu(
                         if (outcome == ActionOutcome.Ok || outcome == ActionOutcome.Gone) leave()
                     }
                 },
-                // TODO(#53): a Cloud chat's confirm adds "and its Cloud machine…".
+                // The confirm reads the row: a Cloud chat's adds "and its Cloud machine…" (#28/#53).
                 onDelete = { prompts.confirmDeleteSession(chatId, chrome.title, onDeleted = leave) },
                 companions = currentCompanions(),
                 title = chrome.title,

@@ -109,9 +109,24 @@ fun newSessionChips(
     hosts: List<HostOption>,
     models: List<ModelChoice>,
     labels: ChipLabels,
+    /** #53: the session runs on its own Cloud machine (iOS `runsOnCloud`). */
+    runsOnCloud: Boolean = false,
 ): List<ComposerChip> {
     val chips = ArrayList<ComposerChip>(5)
-    if (project != null) {
+    if (project != null && runsOnCloud) {
+        // On its own Cloud machine, from a branch of the repository.
+        chips += ComposerChip(
+            id = NewSessionChipIds.Project,
+            title = project.groupName,
+            icon = ChipIcon.Project(project.groupName, project.colorIndex),
+        )
+        chips += ComposerChip(id = NewSessionChipIds.Host, title = "Cloud", symbol = "cloud")
+        chips += ComposerChip(
+            id = NewSessionChipIds.Branch,
+            title = draft.branch?.let { "From $it" } ?: "Default branch",
+            icon = ChipIcon.Branch,
+        )
+    } else if (project != null) {
         // The project, then the host it runs on.
         chips += ComposerChip(
             id = NewSessionChipIds.Project,
@@ -261,6 +276,7 @@ fun NewSessionChipsEffect(
                 model.currentOptions?.hosts.orEmpty(),
                 model.models,
                 labels,
+                runsOnCloud = model.runsOnCloud,
             )
         }
     }

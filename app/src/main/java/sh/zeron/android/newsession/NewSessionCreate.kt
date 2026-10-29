@@ -13,6 +13,7 @@ import sh.zeron.android.design.ZeronAlert
 import uniffi.zeron_core.BusyPolicy
 import uniffi.zeron_core.ChatConfig
 import uniffi.zeron_core.CoreClient
+import uniffi.zeron_core.CoreException
 import uniffi.zeron_core.NewSession
 import uniffi.zeron_core.OutgoingAttachment
 import uniffi.zeron_core.SandboxLevel
@@ -42,6 +43,16 @@ interface NewSessionCore {
 
     /** `CoreClient.openSession(chatId).send(request)` — open, then the first message. */
     suspend fun sendFirst(chatId: String, request: SendRequest)
+
+    /** #53: `CoreClient.createCloudSession(spaceId, config, branch, null)` — the edge mints the machine. */
+    suspend fun createCloudSession(spaceId: String, config: ChatConfig, branch: String?): String =
+        throw UnsupportedOperationException("no Cloud")
+
+    /** #53: the chat still exists (`CoreClient.sessionRow(chatId) != null`). */
+    fun hasSession(chatId: String): Boolean = false
+
+    /** #53: iOS `refreshWorkspace()` after a Cloud start. */
+    fun refreshWorkspace() {}
 }
 
 /**
@@ -51,7 +62,17 @@ interface NewSessionCore {
  * `guard let client` (`AppModel.swift:621`) — becomes an error here, so
  * the creator's catch turns it into the failure alert.
  */
-class CoreNewSessionCore(private val client: () -> CoreClient?) : NewSessionCore {
+class CoreNewSessionCore(
+    private val client: () -> CoreClient?,
+    private val workspaceChanged: () -> Unit = {},
+) : NewSessionCore {
+
+    override suspend fun createCloudSession(spaceId: String, config: ChatConfig, branch: String?): String =
+        (client() ?: throw CoreException.Closed()).createCloudSession(spaceId, config, branch, null)
+
+    override fun hasSession(chatId: String): Boolean = client()?.sessionRow(chatId) != null
+
+    override fun refreshWorkspace() = workspaceChanged()
 
     override suspend fun createSession(newSession: NewSession): String =
         (client() ?: error("no core client")).createSession(newSession)
@@ -204,5 +225,64 @@ class NewSessionCreator(
 val StartFailedAlert = ZeronAlert(
     title = "Couldn't start the session",
     message = "Choose a project or a host that can run it.",
+    buttons = listOf(AlertButton("OK", AlertButtonRole.Default)),
+)
+
+/**
+ * A session on its own Cloud machine (#53; iOS `AppModel.createCloudSession`):
+ * the edge mints the machine, then the first message is sent as usual — it
+ * waits in the chat until the machine is up. A retry after a failed first
+ * send reuses that chat (and machine) while nothing it was made with changed
+ * (its project, branch, provider, model). Throws on failure (the caller
+ * tells out of credits from the rest); runs the FFI on [io].
+ */
+class CloudSessionCreator(
+    private val core: NewSessionCore,
+    private val io: CoroutineDispatcher = Dispatchers.IO,
+) {
+    suspend fun createAndSend(d: NewSessionDraft, text: String, images: List<StagedImage>): String = withContext(io) {
+        val spaceId = d.projectId ?: throw CoreException.Closed()
+        val config = ChatConfig(
+            harness = d.harness,
+            model = d.model,
+            reasoning = d.effort,
+            modelOptions = emptyMap(),
+            sandbox = SandboxLevel.WORKSPACE_WRITE,
+        )
+        val key = cloudChatKey(d)
+        val unsent = unsentCloudChat
+        val chatId = if (unsent != null && unsent.first == key && core.hasSession(unsent.second)) {
+            unsent.second
+        } else {
+            core.createCloudSession(spaceId, config, d.branch).also { unsentCloudChat = key to it }
+        }
+        core.sendFirst(
+            chatId,
+            SendRequest(
+                text = text,
+                attachments = images.map { OutgoingAttachment(name = it.name, mimeType = "image/jpeg", data = it.bytes) },
+                worktree = null,
+                busy = BusyPolicy.QUEUE,
+            ),
+        )
+        unsentCloudChat = null
+        core.refreshWorkspace()
+        chatId
+    }
+
+    companion object {
+        /** iOS `AppModel.unsentCloudChat`: process-wide, like the app model. */
+        @Volatile
+        internal var unsentCloudChat: Pair<String, String>? = null
+
+        /** The chat's identity for reuse: project, branch, provider, model. Pure. */
+        fun cloudChatKey(d: NewSessionDraft): String = "${d.projectId}|${d.branch ?: ""}|${d.harness}|${d.model ?: ""}"
+    }
+}
+
+/** #53: iOS's "Couldn't start on Cloud" alert, with the core's message. */
+fun cloudStartFailedAlert(message: String) = ZeronAlert(
+    title = "Couldn't start on Cloud",
+    message = message,
     buttons = listOf(AlertButton("OK", AlertButtonRole.Default)),
 )

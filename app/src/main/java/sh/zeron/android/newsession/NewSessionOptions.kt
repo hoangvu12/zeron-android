@@ -30,6 +30,10 @@ data class ProjectOption(
     val groupKey: String,
     val groupName: String,
     val colorIndex: Int,
+    /** Lives on Cloud alone (#53). */
+    val isCloud: Boolean = false,
+    /** `owner/name` of its GitHub repository, when known (#53). */
+    val githubRepo: String? = null,
 )
 
 /** `HostOption`: one execution device — one paired engine (the phone can never be one). */
@@ -59,11 +63,14 @@ data class NewSessionOptions(
  * lowercase name, then id — so the order equals `executionDevices()`);
  * offline engines are included.
  */
-fun WorkspaceSnapshot.toNewSessionOptions(): NewSessionOptions {
+fun WorkspaceSnapshot.toNewSessionOptions(
+    /** #53 (iOS `projectOptions`): a Cloud project runs only on Cloud, hidden when this account isn't offered Cloud. */
+    cloudOffered: Boolean = true,
+): NewSessionOptions {
     fun deviceNameOf(id: String): String =
         devices.firstOrNull { it.id == id }?.name ?: UNKNOWN_DEVICE
     return NewSessionOptions(
-        projects = projects.map { p ->
+        projects = projects.filter { !it.isCloud || cloudOffered }.map { p ->
             ProjectOption(
                 id = p.id,
                 name = p.name,
@@ -75,6 +82,8 @@ fun WorkspaceSnapshot.toNewSessionOptions(): NewSessionOptions {
                 groupKey = p.groupKey,
                 groupName = p.groupName,
                 colorIndex = p.colorIndex.toInt(),
+                isCloud = p.isCloud,
+                githubRepo = p.githubRepo,
             )
         },
         hosts = devices.filter { it.isExecutionHost }.map { d -> HostOption(d.id, d.name, d.online) },

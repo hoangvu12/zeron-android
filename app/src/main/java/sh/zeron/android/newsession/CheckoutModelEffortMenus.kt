@@ -106,6 +106,10 @@ class CheckoutModelEffortMenus(
     private val refSource: RefSource,
     /** The FFI hop of the branch load; never touched by the other two menus. */
     private val io: CoroutineDispatcher = Dispatchers.IO,
+    /** #53: the draft runs on Cloud (iOS `runsOnCloud`): the branch chip picks where the machine starts. */
+    private val runsOnCloud: () -> Boolean = { false },
+    /** #53: a repository's GitHub branches, through Cloud (iOS `AppModel.cloudBranches`); `[]` on failure. */
+    private val cloudBranches: suspend (repo: String) -> List<String> = { emptyList() },
 ) {
 
     /** The hoisted branch deferred plus its key. Read and written on main only. */
@@ -119,6 +123,8 @@ class CheckoutModelEffortMenus(
      * only the deferred load suspends, and ticket 15 runs it.
      */
     fun checkout(): Menu {
+        val repo = project()?.githubRepo
+        if (runsOnCloud() && repo != null) return startFrom(repo)
         val d = draft()
         val p = project()
         val key = BranchKey(d, p?.id, p?.device, p?.path)
@@ -158,6 +164,27 @@ class CheckoutModelEffortMenus(
      * `effort`; `project` and `host` stay 113's, and `model` has no menu
      * so its tap reaches the composer's `onChipTap`).
      */
+    /**
+     * #53 (iOS `branchMenu()` on Cloud): "Start from" — the machine clones
+     * the repository, starting from the default branch or one picked from
+     * GitHub's (loaded on open).
+     */
+    fun startFrom(repo: String): Menu = Menu(
+        title = "Start from",
+        children = listOf(
+            MenuElement.Deferred(cached = false) {
+                val branches = try {
+                    withContext(io) { cloudBranches(repo) }
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (failure: Throwable) {
+                    emptyList()
+                }
+                startFromRows(branches, draft().branch) { b -> update { it.copy(branch = b) } }
+            },
+        ),
+    )
+
     fun providers(): Map<String, ChipMenuProvider> = mapOf(
         NewSessionChipIds.Branch to { checkout() },
         NewSessionChipIds.Effort to { effort() },
@@ -246,3 +273,8 @@ internal fun effortMenu(model: ModelChoice?, effort: String?, onPick: (String) -
  * level differently. `low` → `Low`, `xhigh` → `Xhigh`, `HIGH` → `High`.
  */
 internal fun effortTitle(level: String): String = level.swiftCapitalized()
+
+/** The "Start from" rows (#53): "Default branch" (checked with no branch), then GitHub's, the draft's checked. Pure. */
+internal fun startFromRows(branches: List<String>, branch: String?, onPick: (String?) -> Unit): List<MenuElement> =
+    listOf<MenuElement>(MenuItem(title = "Default branch", checked = branch == null, testTag = "start-from-default") { onPick(null) }) +
+        branches.map { b -> MenuItem(title = b, checked = b == branch, testTag = "start-from-$b") { onPick(b) } }
