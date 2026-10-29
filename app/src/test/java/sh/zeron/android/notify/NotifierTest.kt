@@ -19,17 +19,21 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows
 import org.robolectric.annotation.Config
+import sh.zeron.android.MainActivity
 import sh.zeron.android.R
+import sh.zeron.android.shell.DeepLink
+import sh.zeron.android.shell.DeepLinks
 
 /**
  * The notifier (android-app#28): versioned channels with the desktop
  * chimes, migration, one-notification-per-chat replacement, the cancel
  * paths, the copy table and the "New session" fallback. Robolectric —
  * the `NotificationManager` shadows (API 31, so the 33+ runtime
- * permission never gates the shadow's `notify`).
+ * permission never gates the shadow's `notify`), on a plain [Application]
+ * so the core never loads.
  */
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [31])
+@Config(sdk = [31], application = Application::class)
 class NotifierTest {
 
     private val context: Application
@@ -240,10 +244,25 @@ class NotifierTest {
         assertEquals(now - 90_000, notification.`when`)
         // `Notification.usesChronometer()` is @hide (not in android.jar).
         assertTrue(notification.extras.getBoolean(Notification.EXTRA_SHOW_CHRONOMETER))
-        // The tap opens the chat's deep link.
-        val intent = targetIntent(notification.contentIntent)
-        assertEquals(Intent.ACTION_VIEW, intent.action)
-        assertEquals("zeron://chat/engine:v1:a", intent.data.toString())
+        // The tap opens the chat (#19).
+        assertChatTap("engine:v1:a", notification.contentIntent)
+    }
+
+    // -------------------------------------------------- taps (#19)
+
+    @Test
+    fun aSessionTapIsAnExplicitIntentWithTheChatIdExtra() {
+        notifier.postSessionEvent("e1", "c1", "A", NotificationKind.Done, null, now)
+        assertChatTap("c1", posted("chat:e1:c1").contentIntent)
+    }
+
+    @Test
+    fun aLinkLostTapOnlyOpensTheApp() {
+        notifier.postLinkLost("e1", "Mac", now)
+        val intent = targetIntent(posted("link:e1").contentIntent)
+        assertEquals(MainActivity::class.java.name, intent.component?.className)
+        assertEquals(Intent.ACTION_MAIN, intent.action)
+        assertNull(intent.getStringExtra(DeepLinks.EXTRA_CHAT_ID))
     }
 
     // -------------------------------------------------- branding
@@ -301,6 +320,15 @@ class NotifierTest {
 
     private fun subText(n: Notification): String? =
         n.extras.getCharSequence(Notification.EXTRA_SUB_TEXT)?.toString()
+
+    /** An explicit `MainActivity` intent, no URL, the chat in the `chatId` extra. */
+    private fun assertChatTap(chatId: String, pending: PendingIntent) {
+        val intent = targetIntent(pending)
+        assertEquals(MainActivity::class.java.name, intent.component?.className)
+        assertNull(intent.data)
+        assertEquals(chatId, intent.getStringExtra(DeepLinks.EXTRA_CHAT_ID))
+        assertEquals(DeepLink.OpenChat(chatId), DeepLinks.notificationTap(intent.getStringExtra(DeepLinks.EXTRA_CHAT_ID)))
+    }
 
     /** Resolves a pending intent's target intent (the Robolectric shadow). */
     private fun targetIntent(pending: PendingIntent): Intent =

@@ -80,7 +80,6 @@ import sh.zeron.android.shell.RouterHooks
 import sh.zeron.android.shell.SearchTabState
 import uniffi.zeron_core.ClientEvent
 import uniffi.zeron_core.CoreClient
-import uniffi.zeron_core.WorkspaceSnapshot
 
 /**
  * The Zeron app shell: verifies the bundled fonts, loads the Rust mobile
@@ -144,19 +143,13 @@ class ZeronApplication : Application() {
     val chromeFillers = ChromeFillerRegistry()
 
     /**
-     * The process-wide deep-link hub (ticket 36): holds `zeron://` links
-     * and `route` extras until a shell can take them (dispatched after the
-     * shell's first frame) and drops them while the welcome root is on
-     * screen. App-lifetime on purpose: a link held while the
-     * splash is up survives activity recreation.
-     *
-     * [knownChatIds] reads the workspace snapshot — an in-memory list of
-     * scoped ids (`allSessionIds` below), never a blocking FFI call on the
-     * main thread, and only ever for a link with a **raw** engine id.
+     * The process-wide deep-link hub (ticket 36, #19): holds notification
+     * taps and `route` extras until a shell can take them (dispatched
+     * after the shell's first frame) and drops them while the welcome root
+     * is on screen. App-lifetime on purpose: a link held while the splash
+     * is up survives activity recreation.
      */
-    val deepLinks: DeepLinkHub by lazy {
-        DeepLinkHub(knownChatIds = { workspaceFeed.snapshot.value.allSessionIds() })
-    }
+    val deepLinks: DeepLinkHub by lazy { DeepLinkHub() }
 
     /**
      * The appearance preference (ticket 96): the DataStore-backed
@@ -736,28 +729,4 @@ class ZeronApplication : Application() {
             }
         }
     }
-}
-
-/**
- * Every session id the workspace snapshot carries (ticket 36's
- * `knownChatIds`): pinned, sections, recent, projects,
- * projectless, pull requests and archived — all **scoped** ids
- * (`engine:v1:…`), all already in memory (`emptyList()` while the
- * snapshot is null). Deduplicated: `recent`, `projects` and
- * `projectless` deliberately overlap, and the hub's raw-id resolution
- * counts **distinct** matching scoped ids.
- */
-private fun WorkspaceSnapshot?.allSessionIds(): List<String> {
-    if (this == null) return emptyList()
-    return buildList {
-        front.pinned.forEach { add(it.id) }
-        front.sections.forEach { section -> section.sessions.forEach { add(it.id) } }
-        front.recent.forEach { add(it.id) }
-        projects.forEach { project -> project.sessions.forEach { add(it.id) } }
-        addAll(projectless.map { it.id })
-        addAll(pullRequests.open.map { it.id })
-        addAll(pullRequests.merged.map { it.id })
-        addAll(pullRequests.closed.map { it.id })
-        addAll(archived.map { it.id })
-    }.distinct()
 }

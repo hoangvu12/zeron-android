@@ -160,7 +160,7 @@ data class LaunchOptions(
                 signedOut = flag("signedout"),
                 dev = string("dev")?.let(::devCredentials),
                 demo = flag("demo"),
-                route = route(extras) != null,
+                route = route(extras, debuggable = true) != null,
                 noProjects = flag("noprojects"),
                 iosOnly = flag("iosonly"),
                 big = flag("big"),
@@ -185,11 +185,12 @@ data class LaunchOptions(
 
         /**
          * The `route` extra as a [DeepLink] — always parsed, in both
-         * `onCreate` and `onNewIntent`, regardless of the debug gate.
+         * `onCreate` and `onNewIntent`; only [debuggable] builds take the
+         * debug Cloud / providers / accounts routes (#19, iOS `#if DEBUG`).
          * Non-string, absent or unknown values read as nothing.
          */
-        fun route(extras: Map<String, Any?>): DeepLink? =
-            LaunchRoute.parse(extras["route"] as? String)
+        fun route(extras: Map<String, Any?>, debuggable: Boolean = false): DeepLink? =
+            LaunchRoute.parse(extras["route"] as? String, debug = debuggable)
     }
 }
 

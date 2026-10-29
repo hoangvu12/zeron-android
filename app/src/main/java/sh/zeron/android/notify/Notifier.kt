@@ -18,6 +18,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import sh.zeron.android.MainActivity
 import sh.zeron.android.R
+import sh.zeron.android.shell.DeepLinks
 
 /**
  * The notification copy that has no per-kind owner (android-app#28,
@@ -359,17 +360,17 @@ class Notifier(private val context: Context) {
     private fun linkTag(engineId: String) = "link:$engineId"
 
     /**
-     * The tap: the chat's deep link through an explicit `MainActivity`
-     * component (`singleTask`, so a warm app gets it in `onNewIntent` and
-     * a cold start holds it in the hub's pending slot). Always the scoped
-     * id, so two engines with colliding raw ids cannot misroute.
+     * The tap (#19): an explicit `MainActivity` intent with the chat id in
+     * the `chatId` extra — iOS's `userInfo["chatId"]`, not a URL.
+     * `singleTask`, so a warm app gets it in `onNewIntent` and a cold
+     * start holds it in the hub's pending slot. No chat (the outage
+     * notification) just opens the app.
      */
     private fun chatTapPendingIntent(tag: String, chatId: String?): PendingIntent {
+        if (chatId == null) return rootTapPendingIntent()
         val intent = Intent(context, MainActivity::class.java).apply {
-            action = Intent.ACTION_VIEW
-            if (chatId != null) {
-                data = Uri.parse("zeron://chat/$chatId")
-            }
+            action = ACTION_OPEN_CHAT
+            putExtra(DeepLinks.EXTRA_CHAT_ID, chatId)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         return PendingIntent.getActivity(
@@ -406,6 +407,9 @@ class Notifier(private val context: Context) {
         const val CHANNEL_VERSION = 1
         const val NOTIFICATION_ID = 1
         const val BUDGET_TAG = "budget"
+
+        /** The tap's action: only labels the intent (it is explicit, no filter matches it). */
+        const val ACTION_OPEN_CHAT = "sh.zeron.android.action.OPEN_CHAT"
         val SMALL_ICON = R.drawable.zi_zeron_bow
     }
 }

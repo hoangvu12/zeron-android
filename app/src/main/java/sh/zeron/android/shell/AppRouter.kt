@@ -19,6 +19,27 @@ const val OPEN_ERROR_TOAST = "Couldn't open session. Try again."
  */
 interface AppRouter {
 
+    /**
+     * A debug `route` screen (#19, iOS `SceneDelegate.openCloudRoute`).
+     * None of the screens exists yet, so the shells don't override this:
+     * it logs and stays put until each owner wires its destination.
+     */
+    fun showDebugRoute(route: DebugRoute) {
+        when (route) {
+            // TODO(#51): Cloud settings; the GitHub connect sheet.
+            DebugRoute.CloudSettings, DebugRoute.GitHubConnect -> Unit
+            // TODO(#52): Billing (alone or pushed on Cloud settings); the Cloud repo picker.
+            DebugRoute.CloudBilling, DebugRoute.Billing, DebugRoute.CloudRepos -> Unit
+            // TODO(#50): the Providers page; a computer's or a Cloud agent's
+            // accounts pushed from it (AgentAccountsRoute exists, Providers doesn't).
+            is DebugRoute.Providers, is DebugRoute.Accounts, is DebugRoute.CloudAgent -> Unit
+            // TODO: no owning ticket yet — the Welcome page (#16's screen)
+            // presented full-screen over the shell, without signing out.
+            DebugRoute.Welcome -> Unit
+        }
+        deepLinksLog("debug route $route: no screen yet")
+    }
+
     /** Push a session on the Sessions tab (deep links, notifications, search, new session without handoff). */
     fun openSession(chatId: String)
 
