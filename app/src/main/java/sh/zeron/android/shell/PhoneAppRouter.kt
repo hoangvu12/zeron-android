@@ -52,6 +52,9 @@ interface PhoneShell {
      */
     fun pushSettingsPage(route: NavRoute) = pushSettings()
 
+    /** #50: debug pages over the Sessions root (the last animated). */
+    fun pushPages(routes: List<NavRoute>) {}
+
     /** `sessionsList.activateSearch()`: the bar's field active and focused. */
     fun activateSearch()
 
@@ -159,6 +162,12 @@ class PhoneAppRouter(
         generation++
         if (shell.isSheetPresented) return
         shell.presentNewSession(prompt) { id, handoff -> openSession(id, handoff) }
+    }
+
+    override fun showDebugPages(routes: List<NavRoute>) {
+        generation++
+        if (shell.isSheetPresented) shell.dismissSheet(animated = false)
+        shell.pushPages(routes)
     }
 
     override fun showSettings() {

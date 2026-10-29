@@ -79,6 +79,8 @@ data class AlertField(
     val placeholder: String = "",
     val capitalization: KeyboardCapitalization = KeyboardCapitalization.Sentences,
     val autocorrect: Boolean = true,
+    /** #50: `isSecureTextEntry` — dots and a password keyboard (an API key). */
+    val secure: Boolean = false,
 )
 
 /**

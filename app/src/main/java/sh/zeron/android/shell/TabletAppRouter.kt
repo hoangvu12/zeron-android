@@ -350,6 +350,11 @@ class TabletAppRouter(
         super.showDebugRoute(route)
     }
 
+    override fun showDebugPages(routes: List<NavRoute>) {
+        if (shell.isCollapsed) return phone.run { it.showDebugPages(routes) }
+        routes.forEachIndexed { i, route -> detailStack.push(route, animated = i == routes.lastIndex) }
+    }
+
     override fun showSettings() {
         if (shell.isCollapsed) return phone.run { it.showSettings() }
         phone.clearPending()

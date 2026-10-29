@@ -236,6 +236,11 @@ private fun AlertTextField(
         cursorBrush = SolidColor(palette.accent),
         keyboardOptions = field.keyboardOptions(),
         keyboardActions = KeyboardActions(onDone = { onImeDone() }),
+        visualTransformation = if (field.secure) {
+            androidx.compose.ui.text.input.PasswordVisualTransformation()
+        } else {
+            androidx.compose.ui.text.input.VisualTransformation.None
+        },
         modifier = modifier
             .focusRequester(focusRequester)
             .testTag("alert-field")

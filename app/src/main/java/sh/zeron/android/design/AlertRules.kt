@@ -137,8 +137,8 @@ internal fun isEnabled(button: AlertButton, hasField: Boolean, fieldText: String
  */
 internal fun AlertField.keyboardOptions(): KeyboardOptions = KeyboardOptions(
     capitalization = capitalization,
-    autoCorrectEnabled = autocorrect,
-    keyboardType = KeyboardType.Text,
+    autoCorrectEnabled = autocorrect && !secure,
+    keyboardType = if (secure) KeyboardType.Password else KeyboardType.Text,
     imeAction = ImeAction.Done,
 )
 
