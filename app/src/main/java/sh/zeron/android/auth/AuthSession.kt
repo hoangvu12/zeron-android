@@ -64,7 +64,7 @@ interface AuthApi {
     suspend fun refresh(refreshToken: String, organizationId: String): AuthTokens
 }
 
-/** [AuthApi] over `uniffi.zeron_core` against the production edge, or the debug overrides (#18). */
+/** [AuthApi] over `uniffi.zeron_core` against [Endpoints]: Zeron's relay, the Relay setting (#130) or the debug overrides (#18). */
 object CoreAuthApi : AuthApi {
     private val edge: String get() = Endpoints.edgeUrl
 

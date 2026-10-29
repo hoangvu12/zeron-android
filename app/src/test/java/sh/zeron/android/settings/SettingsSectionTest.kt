@@ -44,6 +44,7 @@ class SettingsSectionTest {
     @Test
     fun rowIdsMapToTheirSections() {
         assertEquals(SettingsSection.Account, settingsSectionFor(AccountRowIds.Account))
+        assertEquals(SettingsSection.Account, settingsSectionFor(AccountRowIds.Relay))
         assertEquals(SettingsSection.AgentAccounts, settingsSectionFor("agent-account:claude-code"))
         assertEquals(SettingsSection.Devices, settingsSectionFor(DevicesRowIds.device("mac")))
         assertEquals(SettingsSection.Voice, settingsSectionFor("voice"))
