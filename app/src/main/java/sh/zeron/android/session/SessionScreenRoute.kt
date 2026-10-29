@@ -31,6 +31,8 @@ import sh.zeron.android.composer.QueueEditController
 import sh.zeron.android.composer.QueueEditPort
 import sh.zeron.android.composer.SessionChipMenus
 import sh.zeron.android.composer.sessionDraftSaver
+import sh.zeron.android.design.Haptic
+import sh.zeron.android.design.LocalFeedback
 import sh.zeron.android.design.LocalToaster
 import sh.zeron.android.sessions.rememberSessionListOpener
 import sh.zeron.android.sidechats.FreshSideChats
@@ -323,6 +325,7 @@ class SessionScreenRoute internal constructor(
         val openChat = rememberSessionListOpener()
         val app = LocalContext.current.applicationContext as? ZeronApplication
         val toaster = LocalToaster.current
+        val feedback = LocalFeedback.current
         val fork: SideChatFork? = remember(entry) {
             val live = core as? CoreSessionCore
             if (live == null || app == null) {
@@ -380,10 +383,11 @@ class SessionScreenRoute internal constructor(
             }
         }
         val forkSideChat: () -> Unit = {
-            // iOS `fork()`: "Forking…" first, then the fork.
-            // TODO(#71): the `.success` notification haptic once it lands.
+            // iOS `fork()`: "Forking…" first, then the fork, then the
+            // `.success` notification.
             if (fork != null && !fork.forking) toaster.show("Forking…")
             fork?.start(controller.chatId) { forkId ->
+                feedback.haptic(Haptic.Success)
                 sideChatsModel?.invalidate()
                 // iOS opens the fork only while this screen is still shown.
                 if (isTopAndIdle()) openSideChat(forkId)
@@ -461,8 +465,9 @@ class SessionScreenRoute internal constructor(
         // #41: the panel's fork keeps the sheet up ("Forking…" on its row),
         // then puts it away and opens the fork (iOS `perform(.fork)`).
         val panelFork: () -> Unit = {
-            // TODO(#71): the `.success` notification haptic once it lands.
             fork?.start(controller.chatId) { forkId ->
+                // iOS `perform(.fork)`: the `.success` notification.
+                feedback.haptic(Haptic.Success)
                 sideChatsModel?.invalidate()
                 sheet.closeThen { if (isTopAndIdle()) openChat(forkId) }
             }

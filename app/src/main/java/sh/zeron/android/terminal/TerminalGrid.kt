@@ -10,6 +10,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.viewinterop.AndroidView
 import sh.zeron.android.ZeronApplication
+import sh.zeron.android.design.LocalFeedback
 import sh.zeron.android.design.ZeronTheme
 
 /**
@@ -38,6 +39,7 @@ fun TerminalGrid(
     LaunchedEffect(dark, app) { app?.terminals?.dark = dark }
     val foreground = palette.text.toArgb()
     val accent = palette.accent.toArgb()
+    val feedback = LocalFeedback.current
     AndroidView(
         // The grid's own semantics (a direct-interaction region, E32); the
         // platform view reports the visible text to TalkBack while a screen
@@ -47,6 +49,7 @@ fun TerminalGrid(
         update = { view ->
             view.foreground = foreground
             view.accent = accent
+            view.feedback = feedback
         },
     )
     SideEffect { tab.session.setDark(dark) }

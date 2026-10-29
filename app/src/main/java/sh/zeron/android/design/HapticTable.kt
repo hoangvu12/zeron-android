@@ -70,7 +70,9 @@ object HapticTable {
         Haptic.Threshold -> "UIKit full swipe / refresh"
         Haptic.ToggleOn -> "UISwitch on"
         Haptic.ToggleOff -> "UISwitch off"
-        Haptic.Success, Haptic.Attention, Haptic.Error -> "reserved (android-app#28)"
+        Haptic.Success -> "notification .success · CompanionsViewController.swift:309"
+        Haptic.Attention -> "notification .warning · SessionViewController.swift:972"
+        Haptic.Error -> "notification .error · RemoteVoiceController.swift:160"
     }
 
     private fun api(level: Int, constant: Int): (Int) -> Int? = { sdk -> if (sdk >= level) constant else null }

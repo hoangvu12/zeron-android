@@ -23,6 +23,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import sh.zeron.android.ZeronApplication
+import sh.zeron.android.design.Haptic
+import sh.zeron.android.design.LocalFeedback
 import sh.zeron.android.design.LocalToaster
 import sh.zeron.android.design.ZeronTheme
 
@@ -107,6 +109,7 @@ private fun CompanionsInspectorScreen(route: CompanionsInspectorRoute) {
     val nav = LocalNavStack.current
     val hooks = LocalRouterHooks.current
     val toaster = LocalToaster.current
+    val feedback = LocalFeedback.current
     val scope = rememberCoroutineScope()
     val close = LocalInspectorClose.current
     val chatId = route.chatId
@@ -209,7 +212,8 @@ private fun CompanionsInspectorScreen(route: CompanionsInspectorRoute) {
                             }
                         }
                         CompanionAction.Fork -> fork.start(chatId) { id ->
-                            // TODO(#71): the `.success` notification haptic once it lands.
+                            // iOS `perform(.fork)`: the `.success` notification.
+                            feedback.haptic(Haptic.Success)
                             model.invalidate()
                             openSideChat(id)
                         }

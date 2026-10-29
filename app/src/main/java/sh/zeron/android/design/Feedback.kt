@@ -13,8 +13,8 @@ import androidx.compose.runtime.staticCompositionLocalOf
  * `Stop` (impact .rigid), `Light` (impact .light), plus the ones UIKit plays
  * for free: `LongPress` (context-menu lift), `Threshold` (full swipe /
  * pull-to-refresh commit) and `ToggleOn`/`ToggleOff` (UISwitch).
- * `Success`/`Attention`/`Error` cover UINotificationFeedbackGenerator and
- * are reserved for android-app#28 — no ticket in this set fires them.
+ * `Success`/`Attention`/`Error` cover UINotificationFeedbackGenerator
+ * (.success / .warning / .error). The iOS site → moment table is in #71's PR.
  */
 enum class Haptic {
     Select,
