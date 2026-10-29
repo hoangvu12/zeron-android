@@ -3,9 +3,7 @@ package zeron.gradle
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -18,8 +16,12 @@ import java.io.File
  * generated APK assets (android-app#31): a sideloaded APK is the whole
  * distribution, so its licenses ship inside it. Settings → About (ticket
  * 26) displays these files from `assets/licenses/`, beside the font
- * licenses `syncZeronFonts` stages and the `rust-crates.json` the
- * `RustLicensesTask` writes.
+ * licenses `syncZeronFonts` stages.
+ *
+ * TODO: the Rust core's crate licences (`licenses/rust-crates.json`, once
+ * written by Roboco's `cargo xtask android-licenses`) are not generated for
+ * the Zeron core yet; the Licenses screen skips its "Rust core" section
+ * while that asset is absent.
  *
  * A dedicated task (rather than a bare `Sync`) so AGP's
  * `addGeneratedSourceDirectory` wiring sees a plain `@OutputDirectory`
@@ -33,7 +35,7 @@ abstract class LicensesSync : DefaultTask() {
     abstract val noticeFiles: ConfigurableFileCollection
 
     /**
-     * The committed canonical SPDX texts (`apps/android/licenses/spdx/`),
+     * The committed canonical SPDX texts (`licenses/spdx/`),
      * the fallback for AboutLibraries licences whose `content` is empty
      * in offline mode (ticket 101). Empty = the folder is empty, which is
      * valid when the plugin fills every `content`.
@@ -41,23 +43,6 @@ abstract class LicensesSync : DefaultTask() {
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.NAME_ONLY)
     abstract val spdxFiles: ConfigurableFileCollection
-
-    /**
-     * The Tailcat adapter's Go licence bundle
-     * (`adapters/zeron-tailcat/licenses/bundle`: `DEPENDENCIES.txt`,
-     * `go/`, `modules/`), staged under `licenses/go/` with its layout kept
-     * — the APK ships `libzeron_tailcat.so` (android-next#02). Optional:
-     * unset stages no `licenses/go/` at all.
-     */
-    @get:Optional
-    @get:InputDirectory
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    abstract val goBundleDir: DirectoryProperty
-
-    /** Extra Go-side licences staged flat beside the bundle (`LICENSE.kratos`). */
-    @get:InputFiles
-    @get:PathSensitive(PathSensitivity.NAME_ONLY)
-    abstract val goLicenseFiles: ConfigurableFileCollection
 
     /** The generated assets root; notices land in `licenses/`, SPDX texts in `licenses/spdx/`. */
     @get:OutputDirectory
@@ -80,15 +65,6 @@ abstract class LicensesSync : DefaultTask() {
             spdx.mkdirs()
             for (file in spdxSources) {
                 file.copyTo(spdx.resolve(file.name), overwrite = true)
-            }
-        }
-        // Same reset rule for the Go bundle: nothing stale survives.
-        val go = licenses.resolve("go")
-        go.deleteRecursively()
-        if (goBundleDir.isPresent) {
-            goBundleDir.get().asFile.copyRecursively(go, overwrite = true)
-            for (file in goLicenseFiles) {
-                file.copyTo(go.resolve(file.name), overwrite = true)
             }
         }
     }

@@ -1,0 +1,37 @@
+[package]
+name = "zeron-android-assets"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+license = "MIT"
+publish = false
+
+# The Android asset pipeline (android-app#13): converts the shared line-icon
+# SVGs to VectorDrawables and rasterizes the tool/file icons to PNG, so the
+# whole pipeline is Rust, runs on Windows and Linux, and is deterministic.
+#
+# Vendored from Roboco's `crates/android-assets` as a standalone package with
+# its own Cargo.lock: it reads Zeron's shared icons from the `zeron/`
+# submodule but is never part of Zeron's workspace. A library with a thin CLI
+# wrapper: the integration tests drive the same functions the Gradle task
+# invokes through `cargo run --locked --release --manifest-path
+# tools/android-assets/Cargo.toml`.
+[lib]
+name = "zeron_android_assets"
+path = "src/lib.rs"
+
+[[bin]]
+name = "zeron-android-assets"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1"
+resvg = "0.46"
+tiny-skia = "0.11"
+usvg = "0.46"
+
+[dev-dependencies]
+tempfile = "3"
+
+# Standalone: never search parent directories for a workspace.
+[workspace]

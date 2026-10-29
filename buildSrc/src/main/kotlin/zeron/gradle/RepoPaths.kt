@@ -1,19 +1,37 @@
 package zeron.gradle
 
+import org.gradle.api.GradleException
 import org.gradle.api.Project
 import java.io.File
 
 /**
- * The repository root as seen from `apps/android` (two levels above the
- * Gradle root project). Resolved at configuration time only; task inputs
+ * Repository geometry. The Gradle root project is the repository root; the
+ * Zeron sources (crates, shared assets, `Cargo.toml`, notices) live in the
+ * `zeron/` git submodule. Resolved at configuration time only; task inputs
  * hold plain files, so nothing reads `Project` state at execution time
  * (configuration-cache safe).
  */
 object RepoPaths {
 
-    fun root(project: Project): File = project.rootDir.parentFile.parentFile
+    /** This repository's root (the Gradle root project). */
+    fun root(project: Project): File = project.rootDir
 
-    /** `target/android-core/<profile>` — the xtask's output root. */
-    fun androidCore(project: Project, profile: String): File =
-        root(project).resolve("target/android-core").resolve(profile)
+    /** The `zeron/` submodule, checked out (fails with a hint otherwise). */
+    fun zeron(project: Project): File {
+        val dir = root(project).resolve("zeron")
+        if (!dir.resolve("Cargo.toml").isFile) {
+            throw GradleException(
+                "The zeron/ submodule is not checked out ($dir has no Cargo.toml). " +
+                    "Run `git submodule update --init`.",
+            )
+        }
+        return dir
+    }
+
+    /** Zeron's shared UI assets: `zeron/crates/ui/assets`. */
+    fun uiAssets(project: Project): File = zeron(project).resolve("crates/ui/assets")
+
+    /** The vendored icon pipeline's Cargo manifest. */
+    fun androidAssetsManifest(project: Project): File =
+        root(project).resolve("tools/android-assets/Cargo.toml")
 }

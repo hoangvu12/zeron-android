@@ -3,6 +3,7 @@ package zeron.gradle
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
@@ -19,7 +20,13 @@ import javax.inject.Inject
  * `svg2vd.py`/`gen-icons.sh` so the pipeline is bash-free and works on
  * Windows hosts (no `rsvg-convert`, no locale-encoded Python).
  *
- * Deterministic by contract (see `crates/android-assets/tests/pipeline.rs`),
+ * The generator is vendored as a standalone Cargo package under
+ * `tools/android-assets` (its own `Cargo.lock`), run with
+ * `cargo run --locked --release --manifest-path tools/android-assets/Cargo.toml`.
+ * It reads Zeron's shared icons from `zeron/crates/ui/assets` and this
+ * repository's Android-only icons from `icons/`.
+ *
+ * Deterministic by contract (see `tools/android-assets/tests/pipeline.rs`),
  * so Gradle's up-to-date checks are meaningful.
  */
 abstract class AndroidAssetsGen : DefaultTask() {
@@ -30,6 +37,10 @@ abstract class AndroidAssetsGen : DefaultTask() {
     /** The repository root — passed as `--repo` (the crate's working dir). */
     @get:Internal
     abstract val repoRoot: DirectoryProperty
+
+    /** `tools/android-assets/Cargo.toml`, passed as `--manifest-path`. */
+    @get:Internal
+    abstract val manifest: RegularFileProperty
 
     /** The generator crate, its lock inputs, and every SVG source it reads. */
     @get:InputFiles
@@ -52,9 +63,9 @@ abstract class AndroidAssetsGen : DefaultTask() {
                 "cargo",
                 "run",
                 "--locked",
-                "-p",
-                "zeron-android-assets",
                 "--release",
+                "--manifest-path",
+                manifest.get().asFile.absolutePath,
                 "--",
                 "--repo",
                 repoRoot.get().asFile.absolutePath,
