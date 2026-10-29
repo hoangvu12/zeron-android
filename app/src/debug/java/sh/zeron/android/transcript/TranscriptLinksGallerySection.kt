@@ -75,7 +75,7 @@ fun TranscriptLinksGallerySection() {
         loadFull = { reference ->
             if (!reference.endsWith(".png")) null
             else withContext(Dispatchers.Default) {
-                BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher_art)
+                BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher_foreground)
                     ?.asImageBitmap()
             }
         },

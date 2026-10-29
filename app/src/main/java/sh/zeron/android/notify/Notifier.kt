@@ -250,7 +250,7 @@ class Notifier(private val context: Context) {
      */
     fun buildDeliveryHold(): Notification =
         NotificationCompat.Builder(context, runsChannelId())
-            .brand()
+            .brand(smallIcon = R.drawable.zi_arrow_up)
             .setContentTitle(NotifyCopy.DeliveryHoldTitle)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setPriority(NotificationCompat.PRIORITY_MIN)
@@ -262,23 +262,24 @@ class Notifier(private val context: Context) {
     // ── internals ────────────────────────────────────────────────────────
 
     /**
-     * android-next #03's branding, on every builder: the ribbon-bow small
-     * icon (status bar and shade), the ribbon blue accent and the launcher
-     * artwork as the large icon (expanded notification).
+     * The branding on every builder (#140): Zeron's logo mark as the small
+     * icon (status bar and shade; the delivery hold keeps za:
+     * `DeliveryService`'s arrow-up), the Zeron icon's purple accent and
+     * the launcher artwork as the large icon (expanded notification).
      */
-    private fun NotificationCompat.Builder.brand(): NotificationCompat.Builder =
-        setSmallIcon(SMALL_ICON)
-            .setColor(ContextCompat.getColor(context, R.color.brand_ribbon))
+    private fun NotificationCompat.Builder.brand(smallIcon: Int = SMALL_ICON): NotificationCompat.Builder =
+        setSmallIcon(smallIcon)
+            .setColor(ContextCompat.getColor(context, R.color.brand_accent))
             .apply { largeIcon?.let { setLargeIcon(it) } }
 
     /**
-     * The launcher artwork, decoded once per [Notifier] (the density bucket's
-     * `ic_launcher_art`); `null` if it cannot be decoded, and the
+     * The launcher artwork, decoded once per [Notifier] (Zeron's
+     * `ic_launcher_foreground`); `null` if it cannot be decoded, and the
      * notification simply goes without a large icon.
      */
     private val largeIcon: Bitmap? by lazy {
         try {
-            BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher_art)
+            BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher_foreground)
         } catch (_: RuntimeException) {
             null
         }
@@ -341,7 +342,7 @@ class Notifier(private val context: Context) {
 
         /** The tap's action: only labels the intent (it is explicit, no filter matches it). */
         const val ACTION_OPEN_CHAT = "sh.zeron.android.action.OPEN_CHAT"
-        val SMALL_ICON = R.drawable.zi_zeron_bow
+        val SMALL_ICON = R.drawable.zi_zeron
     }
 }
 

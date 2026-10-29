@@ -3,15 +3,15 @@
 Files in this directory are **committed sources** for the
 `zeron-android-assets` generator (`cargo run --locked -p
 zeron-android-assets`); outputs land under `app/build/generated/` and never
-in git (except the launcher mipmaps, which
-`scripts/generate-app-icons.py` commits).
+in git (except the launcher mipmap, a copy of Zeron's
+`apps/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png`).
 
 | Path | Origin | License |
 |---|---|---|
 | `tab-chat.svg`, `tab-settings.svg` | iOS tab glyphs, `apps/ios/Zeron/Assets.xcassets/TabIcons/` at upstream `zeronsh/zeron` sha `edb23db4b409df035808e38c44180d1c7a2d2d7e` | MIT (upstream) |
 | `file-icons-dark/*-dark.svg` (198) | iOS dark-appearance variants, `apps/ios/Zeron/Assets.xcassets/FileIcons/` at the same sha | MIT (upstream); art from vscode-symbols |
 | `github-mark.svg` | A copy of Zeron's `crates/ui/assets/icons/github-mark.svg` (the generator skips `*-mark.svg` line icons, which are painted from paths; Cloud's GitHub rows tint this one as an icon, #51) | GitHub's mark, as upstream uses it |
-| `zeron-bow.svg` | Drawn for Zeron (android-next #03): the ribbon-bow silhouette for the notification icon and the themed launcher icon | Zeron |
+| `zeron.svg` | A copy of Zeron's `apps/android/icons/zeron.svg` (its logo mark, za: `zi_zeron`; the generator skips `crates/ui/assets/icons/zeron-logo.svg`), with `width`/`height` added so the drawable is 24 dp tall: the notification icon and the themed launcher icon (#140) | Zeron |
 
 The light file/folder icons and the line icons are **not** imported: they
 already live in `crates/ui/assets/{icons,file-icons}/` and the generator

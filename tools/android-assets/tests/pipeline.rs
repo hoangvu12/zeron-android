@@ -38,7 +38,7 @@ fn light_file_icon_count() -> usize {
 }
 
 fn extra_icon_count() -> usize {
-    // The tab glyphs, the Zeron bow and the Solar extras, directly under icons/.
+    // The tab glyphs, the Zeron logo mark and the Solar extras, directly under icons/.
     let dir = repo_root().join("icons");
     std::fs::read_dir(&dir)
         .unwrap()
@@ -99,7 +99,7 @@ fn names_skip_rules_and_counts() {
         "res/drawable/zi_tab_chat.xml",
         "res/drawable/zi_tab_settings.xml",
         "res/drawable/zi_plus.xml",
-        "res/drawable/zi_zeron_bow.xml",
+        "res/drawable/zi_zeron.xml",
         "assets/icons/tool-terminal.png",
         "assets/icons/tool-bot.png",
         "assets/icons/fileicon-files-rust.png",
