@@ -104,6 +104,15 @@ class WorkspaceFeed(
     /** The aggregate connectivity posture; null until the first read. */
     val connectivity: StateFlow<Connectivity?> = _connectivity.asStateFlow()
 
+    private val _reads = MutableStateFlow(0L)
+
+    /**
+     * Counts completed workspace reads, changed or not — the moment iOS's
+     * `refreshWorkspace()` notifies its observers. Pull to refresh waits for
+     * the next one (`sessions/Refresher.kt`).
+     */
+    val reads: StateFlow<Long> = _reads.asStateFlow()
+
     /**
      * One emission each time the client becomes connected again after a
      * known non-connected state (an unknown `null` never counts) — failed
@@ -122,6 +131,7 @@ class WorkspaceFeed(
                 val ws = try { c.workspace() } catch (e: CoreException) { continue }
                 if (ws != _snapshot.value) _snapshot.value = ws
                 if (ws.devices != _devices.value) _devices.value = ws.devices
+                _reads.value++
                 if (_connectivity.value == null) {
                     // The first read: no ConnectivityChanged may come for a while.
                     val conn = try { c.connectivity() } catch (e: CoreException) { null }

@@ -222,4 +222,25 @@ class SessionPromptsTest {
         sheets.shown.last().actions.single().onSelect()
         assertEquals(2, popped)
     }
+
+    /** G5: the confirm reads the workspace's row — its title and its Cloud flag — as iOS `app.row(id)` does. */
+    @Test
+    fun confirmDeleteSessionReadsTheRowForTitleAndCloud() {
+        val cloud = testRow("c9", title = "Deploy").copy(isCloud = true)
+        val untitled = testRow("c8").copy(hasTitle = false)
+        val withRows = DefaultSessionPrompts(actions, alerts, sheets) { id ->
+            listOf(cloud, untitled).firstOrNull { it.id == id }
+        }
+        withRows.confirmDeleteSession("c9", "stale title") {}
+        assertEquals(
+            "“Deploy” and its Cloud machine will be permanently deleted, with anything not pushed from it. " +
+                "This can’t be undone.",
+            alerts.shown.last().message,
+        )
+        withRows.confirmDeleteSession("c8", "c8") {}
+        assertEquals("“New session” will be permanently deleted. This can’t be undone.", alerts.shown.last().message)
+        // No row: the caller's title stands.
+        withRows.confirmDeleteSession("gone", "Old title") {}
+        assertEquals("“Old title” will be permanently deleted. This can’t be undone.", alerts.shown.last().message)
+    }
 }

@@ -133,14 +133,12 @@ fun rememberSessionListModel(
     sections: List<ListSection>,
     collapsible: Boolean = false,
     collapsedIds: Set<String> = emptySet(),
-    loading: Boolean = false,
-    empty: SessionListEmpty = SessionListEmpty.None,
     onScreen: Boolean = true,
 ): SessionListModel {
     val items = remember(sections, collapsible, collapsedIds) {
         buildSessionListItems(sections, collapsible, collapsedIds)
     }
-    val status = sessionListStatus(items, loading, empty)
+    val status = sessionListStatus(items)
     val factor = LocalTypeScale.current.factor
     var lastFactor by remember { mutableFloatStateOf(factor) }
     var lastOnScreen by remember { mutableStateOf(onScreen) }
@@ -1047,7 +1045,6 @@ fun SessionList(
 
     Box(modifier.fillMaxSize().background(palette.background)) {
         backdrop()
-        SessionListStatusOverlay(model.status, safePadding = contentPadding)
         refreshWrapper {
             LazyColumn(
                 state = state,

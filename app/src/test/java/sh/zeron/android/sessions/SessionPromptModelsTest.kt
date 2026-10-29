@@ -235,4 +235,19 @@ class SessionPromptModelsTest {
             SessionPromptCopy.deleteSessionMessage("  "),
         )
     }
+
+    /** G5: a Cloud chat's confirm also names its Cloud machine (`SessionViewController.swift:874-876`). */
+    @Test
+    fun aCloudSessionsDeleteMessageNamesItsMachine() {
+        assertEquals(
+            "“Deploy” and its Cloud machine will be permanently deleted, with anything not pushed from it. " +
+                "This can’t be undone.",
+            SessionPromptCopy.deleteSessionMessage("Deploy", isCloud = true),
+        )
+        assertEquals(
+            "“Deploy” and its Cloud machine will be permanently deleted, with anything not pushed from it. " +
+                "This can’t be undone.",
+            deleteSessionAlert("Deploy", isCloud = true) {}.message,
+        )
+    }
 }

@@ -32,8 +32,7 @@ import sh.zeron.android.design.glass.GlassMenuHost
 import sh.zeron.android.design.wallpaperFixture
 import sh.zeron.android.shell.NavStack
 import sh.zeron.android.shell.NavStackHost
-import sh.zeron.android.shell.TabId
-import sh.zeron.android.shell.TabRootRoute
+import sh.zeron.android.shell.SessionsRootRoute
 
 /**
  * The Sessions tab root's goldens (android-ui-parity #46): the ticket's
@@ -108,14 +107,14 @@ class SessionsScreenScreenshotTest {
     ) {
         val resolvedHero: @Composable (Modifier, () -> Float) -> Unit =
             hero ?: { m, f -> WallpaperHero(modifier = m, scrollFade = f) }
-        val stack = NavStack(TabRootRoute(TabId.Sessions))
+        val stack = NavStack(SessionsRootRoute)
         compose.setContent {
             ZeronTheme(appearance) {
                 ProvideGlyphClock(frozenAtNanos = 0L) {
                     ContextMenuHost {
                         GlassMenuHost(hazeState = rememberHazeState()) {
                             NavStackHost(stack = stack, active = true) { entry ->
-                                if (entry.route is TabRootRoute) {
+                                if (entry.route is SessionsRootRoute) {
                                     SessionsScreenContent(
                                         sections = sections,
                                         collapsedIds = emptySet(),

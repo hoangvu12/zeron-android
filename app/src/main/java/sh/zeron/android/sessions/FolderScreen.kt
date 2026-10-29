@@ -104,7 +104,6 @@ import uniffi.zeron_core.WorkspaceSnapshot
 fun FolderScreen(
     route: FolderRoute,
     workspace: WorkspaceSnapshot?,
-    loading: Boolean,
     modifier: Modifier = Modifier,
     // 104: defaults to 25's resolved default, so the screen insets nothing
     // when hosted inside the tablet Settings card.
@@ -123,8 +122,6 @@ fun FolderScreen(
     val model = rememberSessionListModel(
         sections = listOf(ListSection(id = "sessions", header = null, rows = rows)),
         collapsible = false,
-        loading = loading,
-        empty = if (kind == FolderKind.Archived) SessionListEmpty.Archived else SessionListEmpty.None,
         onScreen = rememberNavEntryOnScreen(),
     )
     val listState = rememberLazyListState()
@@ -191,15 +188,8 @@ fun FolderScreen(
         contentPadding = PaddingValues(bottom = bottom),
         modifier = modifier.testTag("folder-screen"),
         trailing = { FolderTrailing(kind, editing, { editing = !editing }, ::rename, ::confirmDelete) },
-        backdrop = {
-            SessionListStatusOverlay(
-                status = model.status,
-                safePadding = PaddingValues(
-                    top = topInset + LargeTitleDefaults.NavRowHeight + LargeTitleDefaults.LargeRowHeight,
-                    bottom = bottom,
-                ),
-            )
-        },
+        // #23 (I8): pull to refresh on every folder page, as on iOS.
+        pullToRefresh = rememberSessionsPullToRefresh(),
     ) {
         sessionListItems(
             model = model,
@@ -309,7 +299,6 @@ fun FolderRouteContent(route: FolderRoute) {
     FolderScreen(
         route = route,
         workspace = if (fixture != null) fixture.workspace else liveWorkspace,
-        loading = fixture == null && sessionsLoading(liveWorkspace),
     )
 }
 
@@ -457,7 +446,6 @@ private fun FolderScreenPreview(
                         FolderScreen(
                             route = r,
                             workspace = workspace,
-                            loading = false,
                             topInset = 24.dp,
                             initialEditing = initialEditing,
                         )

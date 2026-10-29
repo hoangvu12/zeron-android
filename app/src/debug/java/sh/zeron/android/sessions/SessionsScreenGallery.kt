@@ -172,7 +172,6 @@ fun SessionsScreenGallerySection() {
                                 SessionsScreenFixtures.sections()
                             },
                             collapsedIds = emptySet(),
-                            loading = false,
                             actions = actions,
                             showsNavOptions = true,
                             currentChatId = null,

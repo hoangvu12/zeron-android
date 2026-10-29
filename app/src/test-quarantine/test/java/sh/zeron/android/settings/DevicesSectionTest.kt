@@ -55,8 +55,7 @@ import sh.zeron.android.shell.PageSheetScope
 import sh.zeron.android.shell.SheetHost
 import sh.zeron.android.shell.SheetHostState
 import sh.zeron.android.shell.SheetStyle
-import sh.zeron.android.shell.TabId
-import sh.zeron.android.shell.TabRootRoute
+import sh.zeron.android.shell.SessionsRootRoute
 import uniffi.zeron_core.EngineState
 import uniffi.zeron_core.EngineView
 import uniffi.zeron_core.PairedEngine
@@ -472,7 +471,7 @@ class DevicesSectionTest {
 
     @Test
     fun theDefaultEngineHandlerPushesExactlyOneDetailRoute() {
-        val stack = NavStack(TabRootRoute(TabId.Settings))
+        val stack = NavStack(SettingsRoute)
         mountWithStack(stack)
         row("settings-device:e1").performClick()
         compose.waitForIdle()
@@ -494,7 +493,7 @@ class DevicesSectionTest {
     @Test
     fun theDefaultPairHandlerPresentsThePairPageThroughTheHost() {
         val sheetHost = SheetHostState()
-        val stack = NavStack(TabRootRoute(TabId.Settings))
+        val stack = NavStack(SettingsRoute)
         compose.setContent {
             ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(
@@ -539,7 +538,7 @@ class DevicesSectionTest {
     @Test
     fun insideASheetTheDefaultPairHandlerStacksThePairPageOverIt() {
         val sheetHost = SheetHostState()
-        val stack = NavStack(TabRootRoute(TabId.Settings))
+        val stack = NavStack(SettingsRoute)
         val enclosing = RecordingSheetScope()
         compose.setContent {
             ZeronTheme(Appearance.Light) {
@@ -599,7 +598,7 @@ class DevicesSectionTest {
     @Test
     fun withNoPairPageLauncherThePairClickIsASilentNoOp() {
         val sheetHost = SheetHostState()
-        val stack = NavStack(TabRootRoute(TabId.Settings))
+        val stack = NavStack(SettingsRoute)
         compose.setContent {
             ZeronTheme(Appearance.Light) {
                 CompositionLocalProvider(
