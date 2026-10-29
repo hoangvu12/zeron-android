@@ -15,7 +15,6 @@ import android.provider.Settings
 import android.text.InputType
 import android.view.ActionMode
 import android.view.GestureDetector
-import android.view.HapticFeedbackConstants
 import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
@@ -28,6 +27,9 @@ import android.view.inputmethod.InputConnection
 import android.view.inputmethod.InputMethodManager
 import android.widget.OverScroller
 import sh.zeron.android.core.Fonts
+import sh.zeron.android.design.Feedback
+import sh.zeron.android.design.Haptic
+import sh.zeron.android.design.NoFeedback
 import uniffi.zeron_core.FaceRole
 import uniffi.zeron_core.KeyModifiers
 import uniffi.zeron_core.TerminalCursorShape
@@ -98,6 +100,8 @@ class TerminalView(context: Context, val tab: TerminalTab) : View(context) {
     var onFocusChanged: ((Boolean) -> Unit)? = null
     /** First frame with something painted (the screen's loader steps aside). */
     var onContent: (() -> Unit)? = null
+    /** The app's haptics (#71: the iOS moments, through the touch-feedback path). */
+    var feedback: Feedback = NoFeedback
 
     /** Default foreground, cursor/selection accent (ARGB). */
     var foreground: Int = Color.BLACK
@@ -119,7 +123,8 @@ class TerminalView(context: Context, val tab: TerminalTab) : View(context) {
         isFocusable = true
         isFocusableInTouchMode = true
         contentDescription = "Terminal"
-        tab.onBell = { performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP) }
+        // iOS `TerminalStore.bell`: impact .soft at 0.6, the app's Light.
+        tab.onBell = { feedback.haptic(Haptic.Light) }
     }
 
     override fun onAttachedToWindow() {
@@ -285,7 +290,7 @@ class TerminalView(context: Context, val tab: TerminalTab) : View(context) {
             if (scaling) return
             selecting = true
             actionMode?.finish()
-            performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+            feedback.haptic(Haptic.Select)
             val (row, col) = cell(e.x, e.y)
             session.select(row.toUShort(), col.toUShort(), true)
         }
@@ -305,7 +310,8 @@ class TerminalView(context: Context, val tab: TerminalTab) : View(context) {
             pinchBase *= detector.scaleFactor
             val size = ((pinchBase.coerceIn(MIN_SIZE, MAX_SIZE)) * 2).roundToInt() / 2f
             if (size != fontSize) {
-                performHapticFeedback(if (size == MIN_SIZE || size == MAX_SIZE) HapticFeedbackConstants.LONG_PRESS else HapticFeedbackConstants.CLOCK_TICK)
+                // iOS: impact .rigid at the 8 / 22 stops, a selection tick between.
+                feedback.haptic(if (size == MIN_SIZE || size == MAX_SIZE) Haptic.Stop else Haptic.Select)
                 setFontSize(size)
             }
             return true
@@ -408,7 +414,7 @@ class TerminalView(context: Context, val tab: TerminalTab) : View(context) {
 
     /** The copy flash (the desktop's): the selection brightens, then lets go. */
     private fun flashSelection() {
-        performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+        feedback.haptic(Haptic.Light)
         selectionBoost = 1f
         invalidate()
         postDelayed({
