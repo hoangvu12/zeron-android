@@ -47,12 +47,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <!-- zeron:// deep links (ticket 36). No autoVerify: custom
-                 scheme. One filter: scheme × the four hosts, any path. -->
+                 scheme. One filter: scheme × the hosts, any path. `callback`
+                 is the WorkOS redirect when the browser has no Auth Tab
+                 (#15); the other hosts are #19's to rework. -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="zeron" />
+                <data android:host="callback" />
                 <data android:host="chat" />
                 <data android:host="new" />
                 <data android:host="settings" />

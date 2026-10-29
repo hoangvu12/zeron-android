@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import sh.zeron.android.ZeronApplication
+import sh.zeron.android.auth.OrgPicker
 import sh.zeron.android.core.FontGate
 import sh.zeron.android.design.FontGateHost
 import sh.zeron.android.design.ProvideFeedback
@@ -79,6 +80,8 @@ fun ZeronAppContent(app: ZeronApplication, rootState: AppRootState) {
                         // ToastHost so every screen can write and the
                         // toasts land in the root host.
                         CompositionLocalProvider(LocalRowActions provides app.rowActions) {
+                            // #15: "Choose an organization" over whatever started the sign-in.
+                            OrgPicker(app.authSession)
                             AppRootContent(
                                 app = app,
                                 rootState = rootState,
