@@ -88,8 +88,9 @@ data class SideChatsUi(
     val total: Int get() = running.size + chats.size + finished.size
 
     /**
-     * The strip and the nav badge (#40, iOS `syncCompanions`).
-     * TODO(#44): terminals and live terminals from the terminal store.
+     * The strip and the nav badge (#40, iOS `syncCompanions`). The
+     * terminal counts come from the terminal store; the session route
+     * fills them in (#44).
      */
     val companions: CompanionCounts
         get() = CompanionCounts(
