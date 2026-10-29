@@ -253,10 +253,20 @@ fun StatusPillRow(
     modifier: Modifier = Modifier,
     tapEnabled: (SessionChrome.Banner) -> Boolean = { true },
     nowMs: () -> Long = System::currentTimeMillis,
+    /** #40: the companion strip at the row's trailing end (iOS `[pill, UIView(), strip]`). */
+    trailing: (@Composable () -> Unit)? = null,
 ) {
-    Row(modifier.fillMaxWidth()) {
-        StatusPill(banner, onTap, tapEnabled = tapEnabled, nowMs = nowMs)
+    Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        // The row shows for the strip alone too: then the pill hides (iOS
+        // `pill.isHidden = banner == .none`).
+        if (trailing == null || banner != SessionChrome.Banner.None) {
+            StatusPill(banner, onTap, tapEnabled = tapEnabled, nowMs = nowMs)
+        }
         Spacer(Modifier.weight(1f))
+        if (trailing != null) {
+            Spacer(Modifier.width(6.dp))
+            trailing()
+        }
     }
 }
 

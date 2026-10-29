@@ -298,7 +298,7 @@ internal fun SideChatsList(
         contentPadding = PaddingValues(bottom = (bottomInset + 16f).dp),
     ) {
         section(SideChatsSection.Running, ui.running.size, live = true) {
-            items(ui.running, key = { "agent:${it.docId}" }) { agent ->
+            items(ui.running, key = { "agent:${it.id}" }) { agent ->
                 SubagentRowView(agent, onClick = { openAgent(agent) })
             }
         }
@@ -314,7 +314,7 @@ internal fun SideChatsList(
             }
         }
         section(SideChatsSection.Finished, ui.finished.size, live = false) {
-            items(ui.finished, key = { "agent:${it.docId}" }) { agent ->
+            items(ui.finished, key = { "agent:${it.id}" }) { agent ->
                 SubagentRowView(agent, onClick = { openAgent(agent) })
             }
         }
@@ -379,9 +379,9 @@ internal fun subagentRowA11yLabel(agent: SideChatsAgent): String {
     ).joinToString(", ")
 }
 
-/** "haiku" → "Haiku" (iOS `prefix(1).uppercased() + dropFirst()`). */
+/** The model as iOS labels it (#40: `SubagentFormat.model`, `claude-haiku-5` → "Haiku 5"). */
 internal fun capitalizedModel(model: String): String =
-    if (model.isEmpty()) model else model.substring(0, 1).uppercase() + model.substring(1)
+    if (model.isEmpty()) model else SubagentFormat.model(model)
 
 /**
  * A subagent row (the port of `SubagentCell`): its status glyph stands
@@ -442,7 +442,7 @@ internal fun SubagentRowView(
             }
             .clickable(src, indication = null, role = Role.Button, onClick = onClick)
             .clearAndSetSemantics {
-                testTag = "subagent-${agent.docId}"
+                testTag = "subagent-${agent.docId ?: agent.id}"
                 contentDescription = subagentRowA11yLabel(agent)
             },
     ) {

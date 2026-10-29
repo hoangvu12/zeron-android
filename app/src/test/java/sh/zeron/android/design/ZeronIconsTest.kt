@@ -94,6 +94,7 @@ class ZeronIconsTest {
         "command",
         "bubble.left.and.text.bubble.right",
         "apple.terminal",
+        "bubble.left.and.bubble.right",
     )
 
     @Test
@@ -305,6 +306,7 @@ class ZeronIconsTest {
             ZeronIcons.Command to R.drawable.zi_command,
             ZeronIcons.BubbleLeftAndTextBubbleRight to R.drawable.zi_chat_round_line, // #33
             ZeronIcons.Terminal to R.drawable.zi_terminal, // #33
+            ZeronIcons.BubbleLeftAndBubbleRight to R.drawable.zi_bubble_left_and_bubble_right, // #40
             ZeronIcons.Refresh to R.drawable.zi_refresh, // android-next#04
             ZeronIcons.TabChat to R.drawable.zi_tab_chat,
             ZeronIcons.TabSettings to R.drawable.zi_tab_settings,

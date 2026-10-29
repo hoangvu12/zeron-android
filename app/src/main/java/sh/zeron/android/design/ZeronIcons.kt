@@ -318,6 +318,9 @@ object ZeronIcons {
     /** SF `bubble.left.and.text.bubble.right` — the session ⋯ "New Side Chat". */
     val BubbleLeftAndTextBubbleRight = ZeronIcon.Vector(R.drawable.zi_chat_round_line)
 
+    /** SF `bubble.left.and.bubble.right` — the companion strip's side chats chip (#40). */
+    val BubbleLeftAndBubbleRight = ZeronIcon.Vector(R.drawable.zi_bubble_left_and_bubble_right)
+
     /** SF `apple.terminal` — the session ⋯ "Terminal". */
     val Terminal = ZeronIcon.Vector(R.drawable.zi_terminal)
 
@@ -463,6 +466,7 @@ object ZeronIcons {
             BubbleLeftAndTextBubbleRight,
         ),
         RegistryEntry("Terminal", listOf("apple.terminal"), Terminal),
+        RegistryEntry("BubbleLeftAndBubbleRight", listOf("bubble.left.and.bubble.right"), BubbleLeftAndBubbleRight),
         // Zeron extras.
         RegistryEntry("TabChat", emptyList(), TabChat),
         RegistryEntry("TabSettings", emptyList(), TabSettings),
