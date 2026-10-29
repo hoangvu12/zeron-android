@@ -21,6 +21,8 @@ import kotlinx.coroutines.launch
 import sh.zeron.android.auth.AuthSession
 import sh.zeron.android.auth.CoreAuthApi
 import sh.zeron.android.auth.PrefsPendingAuthState
+import sh.zeron.android.sidechats.CoreSideChatCore
+import sh.zeron.android.sidechats.FreshSideChats
 import sh.zeron.android.background.DeliveryHold
 import sh.zeron.android.background.DeliveryService
 import sh.zeron.android.background.RunWatchController
@@ -303,6 +305,20 @@ class ZeronApplication : Application() {
      */
     val foldState: FoldState by lazy { FoldState(zeronPrefsStore, applicationScope) }
 
+    /**
+     * #39: side chats started here that nothing was sent in yet (iOS
+     * `AppModel.freshSideChats`): created at once, deleted when closed
+     * unused or found empty a minute on by the workspace sweep below.
+     */
+    val freshSideChats: FreshSideChats by lazy {
+        FreshSideChats(
+            prefs = getSharedPreferences("zeron_side_chats", MODE_PRIVATE),
+            core = { sessionHolder.clientOrNull()?.let(::CoreSideChatCore) },
+            refreshWorkspace = { workspaceFeed.refresh() },
+            scope = applicationScope,
+        )
+    }
+
     /** The Sessions tab's front page model (tickets 40 and 50); 46 hosts it. */
     val frontPage: FrontPageModel by lazy {
         FrontPageModel(workspaceFeed, prefs, foldState, applicationScope)
@@ -442,6 +458,11 @@ class ZeronApplication : Application() {
             sink = { clientOrNull()?.let(::CoreLifecycleSink) },
             afterForeground = { workspaceFeed.refresh() },
         )
+        // #39: every workspace refresh sweeps the fresh side chats (iOS
+        // `refreshWorkspace` → `sweepFreshSideChats`).
+        applicationScope.launch {
+            workspaceFeed.snapshot.collect { if (it != null) freshSideChats.sweep() }
+        }
         // #20: iOS's 30 s workspace clock (docs/port/01 A13), while the
         // app is in the foreground — iOS timers don't fire suspended.
         applicationScope.launch {

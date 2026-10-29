@@ -196,8 +196,10 @@ class NewSessionCreator(
         val target = NewSessionRequests.target(d, side) ?: return null
         return withContext(io) {
             try {
-                // TODO(#39): the side chat takes the parent's config, not the
-                // draft's harness/model/effort (Zeron's `createSideChat`).
+                // #39: no caller passes `side` any more — New Side Chat
+                // creates the chat at once from the session
+                // (`FreshSideChats.create`), taking the parent's config.
+                // The `side` plumbing can go with the New Session rework.
                 val chatId = if (side != null) {
                     core.createSideChat(side.chatId)
                 } else {
