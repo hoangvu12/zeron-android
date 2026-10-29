@@ -6,7 +6,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import sh.zeron.android.accounts.AgentAccountsRoute
-import sh.zeron.android.accounts.AgentAccountsScreen
+import sh.zeron.android.accounts.AgentAccountsPage
+import sh.zeron.android.accounts.ProvidersRoute
+import sh.zeron.android.accounts.ProvidersScreen
 import sh.zeron.android.cloud.CloudSettingsRoute
 import sh.zeron.android.cloud.CloudSettingsScreen
 import sh.zeron.android.session.SessionScreenRoute
@@ -68,9 +70,10 @@ fun ShellRouteContent(route: NavRoute) {
         // #44: a chat's terminal, pushed from the session (the panel's
         // terminal rows and New terminal, the ⋯ Terminal row, Ctrl+J).
         is TerminalRoute -> route.Content()
-        // android-next #05: the Accounts & Usage page — an error card's
-        // "Log in" and (until #50) Settings → Agents → Providers push it.
-        is AgentAccountsRoute -> AgentAccountsScreen(route)
+        // #50: Settings → Agents → Providers, and one agent's accounts
+        // pushed from it (or by an error card's "Log in").
+        is ProvidersRoute -> ProvidersScreen(route)
+        is AgentAccountsRoute -> AgentAccountsPage(route)
         // #51: Settings → Cloud.
         is CloudSettingsRoute -> CloudSettingsScreen(route)
         else -> Unit

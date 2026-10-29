@@ -32,15 +32,24 @@ interface AppRouter {
             DebugRoute.CloudSettings, DebugRoute.GitHubConnect -> Unit
             // TODO(#52): Billing (alone or pushed on Cloud settings); the Cloud repo picker.
             DebugRoute.CloudBilling, DebugRoute.Billing, DebugRoute.CloudRepos -> Unit
-            // TODO(#50): the Providers page; a computer's or a Cloud agent's
-            // accounts pushed from it (AgentAccountsRoute exists, Providers doesn't).
-            is DebugRoute.Providers, is DebugRoute.Accounts, is DebugRoute.CloudAgent -> Unit
+            // #50 (iOS `openCloudRoute`): Providers; a computer's accounts
+            // pushed from it; a Cloud agent's accounts.
+            is DebugRoute.Providers, is DebugRoute.Accounts, is DebugRoute.CloudAgent -> {
+                showDebugPages(debugAccountsPages(route))
+                return
+            }
             // #63: the app shows it itself (`DeepLinkHub`'s debug screens,
             // `ZeronApplication.debugWelcome`); never reaches a router.
             DebugRoute.Welcome -> Unit
         }
         deepLinksLog("debug route $route: no screen yet")
     }
+
+    /**
+     * #50: debug pages pushed over the shell's main stack, the last one
+     * animated (iOS presents them; Android pushes). No-op by default.
+     */
+    fun showDebugPages(routes: List<NavRoute>) {}
 
     /** Push a session on the Sessions tab (deep links, notifications, search, new session without handoff). */
     fun openSession(chatId: String)
@@ -115,3 +124,17 @@ interface SessionPresenceListener {
 
 /** The nearest shell's router; [AppRouter.Noop] outside one (the iOS window-root cast). */
 val LocalAppRouter = staticCompositionLocalOf<AppRouter> { AppRouter.Noop }
+
+/** #50: the pages a Providers / accounts debug route opens (iOS `openCloudRoute`). */
+internal fun debugAccountsPages(route: DebugRoute): List<NavRoute> = when (route) {
+    is DebugRoute.Providers -> listOf(sh.zeron.android.accounts.ProvidersRoute(route.target))
+    is DebugRoute.Accounts -> listOf(
+        sh.zeron.android.accounts.ProvidersRoute(),
+        // The first computer's accounts for one agent, reached as the app does.
+        sh.zeron.android.accounts.AgentAccountsRoute(sh.zeron.android.accounts.AccountsTarget.Device(deviceId = null, harness = route.harness)),
+    )
+    is DebugRoute.CloudAgent -> listOf(
+        sh.zeron.android.accounts.AgentAccountsRoute(sh.zeron.android.accounts.AccountsTarget.Cloud(route.harness)),
+    )
+    else -> emptyList()
+}

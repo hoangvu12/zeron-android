@@ -43,7 +43,7 @@ enum class ZeronUrl {
 
     /**
      * `zeron://signed-in` — the `doneUrl` of provider and device logins
-     * (`AccountSignIn.DONE_URL`). Arriving is the whole job: `singleTask`
+     * (`ProvidersCore`'s `DONE_URL`). Arriving is the whole job: `singleTask`
      * clears the Custom Tab above the activity, and the waiting sign-in
      * finishes on its own poll.
      */

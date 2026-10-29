@@ -2,39 +2,45 @@ package sh.zeron.android.accounts
 
 import sh.zeron.android.shell.NavRoute
 
-/**
- * The Accounts & Usage page's route (android-next#05). Pushed by an
- * error card's "Log in" and, until the Providers page lands (#50), by
- * Settings → Agents → Providers (#49). Roboco's usage chip and ⋯ "Account &
- * Usage" entry points are gone (05 I1/I2).
- *
- * [deviceId] is the computer whose accounts the page shows — the engine
- * device id the opener holds (`null` = the primary device: the page picks
- * the Settings section's rule). [focusHarness] (the session opener's
- * agent) scrolls the page to that harness's section. [signIn] (an error
- * card's "Log in", wave-10 35) starts [focusHarness]'s first login as
- * soon as the page has its accounts — the iPhone's `signIn: true`, the
- * desktop's `start_first_login`.
- *
- * `hidesBottomChrome` stays false: Settings pushes keep the tab bar
- * (only the Session screen hides it).
- */
-data class AgentAccountsRoute(
-    val deviceId: String?,
-    val focusHarness: String? = null,
-    val signIn: Boolean = false,
-) : NavRoute {
-    override val paneTitle: String = AccountsCopy.PageTitle
+/** Whose accounts one agent's page shows (iOS `AgentAccountsViewController.Target`). */
+sealed interface AccountsTarget {
+    val harness: String
+
+    /** A Cloud agent's logins and keys, kept in Cloud's vault. */
+    data class Cloud(override val harness: String) : AccountsTarget
+
+    /**
+     * A computer's logins for one agent. [deviceId] `null` means the first
+     * computer (a debug route); [name] / [label] are the device's and the
+     * agent's names as Providers showed them, filled in on the page when
+     * missing.
+     */
+    data class Device(
+        val deviceId: String?,
+        override val harness: String,
+        val name: String? = null,
+        val label: String? = null,
+    ) : AccountsTarget
 }
 
 /**
- * Where an error card's "Log in" goes (wave-10 35, upstream #967's
- * `SessionViewController.swift:89-99`): the chat's agent on its computer,
- * its first login started at once. Pure.
+ * One agent's accounts on one device (#50, iOS `AgentAccountsViewController`):
+ * pushed from Providers. [signIn] starts the agent's first login option on
+ * appear (an error card's "Log in").
  */
-fun errorCardLogInRoute(hostDeviceId: String, harness: String?): AgentAccountsRoute =
-    AgentAccountsRoute(
-        deviceId = hostDeviceId.ifEmpty { null },
-        focusHarness = harness,
-        signIn = true,
-    )
+data class AgentAccountsRoute(val target: AccountsTarget, val signIn: Boolean = false) : NavRoute {
+    override val paneTitle: String get() = "Accounts"
+}
+
+/**
+ * An error card's "Log in" (wave-9 #14, upstream #967): the chat's agent's
+ * accounts on its computer, starting its first sign-in — or Providers for
+ * that computer when the chat has no agent.
+ * TODO(#55): the accounts sheet over the session instead of a push.
+ */
+fun errorCardLogInRoute(hostDeviceId: String, harness: String?): NavRoute =
+    if (harness == null) {
+        ProvidersRoute(hostDeviceId)
+    } else {
+        AgentAccountsRoute(AccountsTarget.Device(deviceId = hostDeviceId, harness = harness), signIn = true)
+    }

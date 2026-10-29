@@ -67,6 +67,12 @@ internal class PhoneShellAdapter(
         stack.push(route, animated = true)
     }
 
+    override fun pushPages(routes: List<NavRoute>) {
+        val stack = tabs.sessions
+        stack.popToRoot(animated = false)
+        routes.forEachIndexed { i, route -> stack.push(route, animated = i == routes.lastIndex) }
+    }
+
     override fun activateSearch() {
         search.activate()
     }

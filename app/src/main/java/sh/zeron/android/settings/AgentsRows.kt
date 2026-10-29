@@ -2,7 +2,7 @@ package sh.zeron.android.settings
 
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.runtime.Immutable
-import sh.zeron.android.accounts.AgentAccountsRoute
+import sh.zeron.android.accounts.ProvidersRoute
 import sh.zeron.android.cloud.CloudSettingsRoute
 import sh.zeron.android.core.CloudStore
 import sh.zeron.android.design.GroupedRow
@@ -101,15 +101,13 @@ fun LazyListScope.agentsSection(rows: List<AgentsRow>, onOpen: (id: String) -> U
 
 /**
  * A tap on an Agents row (iOS `didSelectItemAt`): each pushes its page.
- * TODO(#50): Providers pushes `ProvidersViewController`; until it lands the
- * row opens the per-device Agent Accounts page it replaces.
  * Cloud pushes Settings → Cloud (#51).
  * TODO(#52): Billing pushes `BillingViewController`.
  */
 fun openAgentsRow(nav: NavStack, id: String) {
     when (id) {
         AgentsRowIds.Providers -> {
-            val route = AgentAccountsRoute(deviceId = null)
+            val route = ProvidersRoute()
             if (nav.top.route != route) nav.push(route, animated = true)
         }
         AgentsRowIds.Cloud -> if (nav.top.route !is CloudSettingsRoute) nav.push(CloudSettingsRoute(), animated = true)

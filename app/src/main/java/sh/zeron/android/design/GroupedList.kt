@@ -615,6 +615,8 @@ fun GroupedRow(
     onLongClick: (() -> Unit)? = null,
     onLongClickLabel: String? = null,
     previewPressed: Boolean = false,
+    /** #50: a leading view in the icon's 20 dp slot (a brand mark) instead of [icon]. */
+    leading: (@Composable () -> Unit)? = null,
 ) {
     // The Value accessory caps at 50 % of the card's inner width, which is
     // only known from the row's incoming constraints: a BoxWithConstraints
@@ -640,6 +642,7 @@ fun GroupedRow(
                 onLongClick = onLongClick,
                 onLongClickLabel = onLongClickLabel,
                 previewPressed = previewPressed,
+                leading = leading,
             )
         }
     } else {
@@ -659,6 +662,7 @@ fun GroupedRow(
             onLongClick = onLongClick,
             onLongClickLabel = onLongClickLabel,
             previewPressed = previewPressed,
+            leading = leading,
         )
     }
 }
@@ -680,13 +684,14 @@ private fun GroupedRowBody(
     onLongClick: (() -> Unit)?,
     onLongClickLabel: String?,
     previewPressed: Boolean,
+    leading: (@Composable () -> Unit)? = null,
 ) {
     val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
     GroupedRowContainer(
         position = position,
         modifier = modifier,
-        separatorStart = if (icon != null) GroupedListTokens.TextStartWithIcon else GroupedListTokens.ContentStart,
+        separatorStart = if (icon != null || leading != null) GroupedListTokens.TextStartWithIcon else GroupedListTokens.ContentStart,
         testTag = testTag,
         onClick = onClick,
         onLongClick = onLongClick,
@@ -695,7 +700,10 @@ private fun GroupedRowBody(
         previewPressed = previewPressed,
     ) {
         Spacer(Modifier.width(GroupedListTokens.ContentStart))
-        if (icon != null) {
+        if (leading != null) {
+            Box(Modifier.size(24.dp), contentAlignment = Alignment.Center) { leading() }
+            Spacer(Modifier.width(GroupedListTokens.IconTextGap))
+        } else if (icon != null) {
             Icon(
                 icon,
                 if (destructive) palette.danger else iconTint,
