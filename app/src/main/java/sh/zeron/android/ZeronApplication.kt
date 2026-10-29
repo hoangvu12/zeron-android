@@ -1,6 +1,7 @@
 package sh.zeron.android
 
 import android.app.Application
+import android.content.pm.ApplicationInfo
 import android.os.SystemClock
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
@@ -14,10 +15,13 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import sh.zeron.android.auth.AuthSession
 import sh.zeron.android.auth.CoreAuthApi
 import sh.zeron.android.auth.PrefsPendingAuthState
@@ -39,6 +43,7 @@ import sh.zeron.android.core.CoreLoader
 import sh.zeron.android.core.CoreLifecycleSink
 import sh.zeron.android.core.CoreStatus
 import sh.zeron.android.core.CredentialStore
+import sh.zeron.android.core.Endpoints
 import sh.zeron.android.core.FontGate
 import sh.zeron.android.core.Prefs
 import sh.zeron.android.core.SessionHolder
@@ -67,7 +72,9 @@ import sh.zeron.android.sessions.CoreRowActions
 import sh.zeron.android.sessions.FoldState
 import sh.zeron.android.sessions.FrontPageModel
 import sh.zeron.android.sessions.asSessionWrites
+import sh.zeron.android.settings.AccountIdentity
 import sh.zeron.android.shell.DeepLinkHub
+import sh.zeron.android.shell.LaunchOptions
 import sh.zeron.android.shell.RootInput
 import sh.zeron.android.shell.RouterHooks
 import sh.zeron.android.shell.SearchTabState
@@ -256,6 +263,22 @@ class ZeronApplication : Application() {
         )
     }
 
+    private val _account = MutableStateFlow(AccountIdentity())
+
+    /**
+     * Who the app runs as (#18): Settings' Account row. Follows the client;
+     * the profile is read off main once per client, so the row never waits
+     * on the Keystore.
+     */
+    val account: StateFlow<AccountIdentity> = _account.asStateFlow()
+
+    /**
+     * A fresh launch's debug account extras are still being applied (#18):
+     * the root stays `Loading`, so neither the Welcome root nor its drop
+     * of the held `route` link happens before the demo / dev client is up.
+     */
+    private val launchPending = MutableStateFlow(false)
+
     /**
      * The process lifecycle / network hooks (ticket 35): foreground and
      * background `onForeground()`/`onBackground()`, the default-network
@@ -443,6 +466,9 @@ class ZeronApplication : Application() {
         TextEngine.init(this)
         TextEngine.prewarm()
         core = CoreLoader.load()
+        // #18: the debug `edge` / `workos` overrides are read (debuggable
+        // builds only) before any client or sign-in call needs an endpoint.
+        Endpoints.install(this, debuggable = (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0)
         // Ticket 84: warm the drafts mirror now — Application.onCreate
         // precedes every activity's setContent, so `peek` is nearly
         // always loaded by the time a session opens (one opened before
@@ -485,8 +511,12 @@ class ZeronApplication : Application() {
         // Welcome, signed in → the shell), cross-fading on every change.
         rootInput = when (val c = core) {
             is CoreStatus.Failed -> MutableStateFlow(RootInput.CoreFailed(c.reason))
-            is CoreStatus.Loaded -> combine(sessionHolder.booted, sessionHolder.client) { booted, client ->
-                if (!booted) RootInput.Loading else RootInput.Ready(signedIn = client != null)
+            is CoreStatus.Loaded -> combine(
+                sessionHolder.booted,
+                sessionHolder.client,
+                launchPending,
+            ) { booted, client, pending ->
+                if (!booted || pending) RootInput.Loading else RootInput.Ready(signedIn = client != null)
             }.distinctUntilChanged()
                 .stateIn(applicationScope, SharingStarted.Eagerly, RootInput.Loading)
         }
@@ -602,7 +632,37 @@ class ZeronApplication : Application() {
         applicationScope.launch {
             prefs.stayConnected.collect { runWatch.onStayConnected(it) }
         }
+        // #18: everything a sign-out clears beyond the holder's own
+        // (client, credentials and profile, and — asked for — the core
+        // dir): the notifications (iOS `push.signingOut`), the run watch,
+        // and the new-session draft (iOS `lastDraft` / `newSessionText` /
+        // `newSessionImages`). Per-chat drafts stay ("Local drafts stay on
+        // this device."). An expiry clears the same, keeping the store.
+        // TODO(#60): `voice.stop()`. TODO(#48): `cloud.reset()`.
+        // TODO(#43): `terminals.signOut()`.
+        sessionHolder.addSignOutListener {
+            notifier.cancelAll()
+            runWatch.signOut()
+            // The draft store's mirror is main-thread state; the last-engine
+            // forget is its full reset.
+            applicationScope.launch {
+                newSessionDrafts.forgetEngine(emptySet(), emptySet(), enginesLeft = 0)
+            }
+        }
         if (core is CoreStatus.Loaded) {
+            // #18: the Account row's identity, read off main per client.
+            // `isDemo` is set before the holder publishes the client.
+            applicationScope.launch {
+                sessionHolder.client.collectLatest { client ->
+                    val demo = client != null && sessionHolder.isDemo
+                    val profile = if (client == null || demo) {
+                        CredentialStore.Profile()
+                    } else {
+                        withContext(Dispatchers.IO) { credentials.profile }
+                    }
+                    _account.value = AccountIdentity(demo = demo, signedIn = client != null, profile = profile)
+                }
+            }
             // #13: everything that follows the account's client. A new
             // client gets the network state and the notification driver; any
             // change (sign-in, sign-out, AuthExpired) drops the previous
@@ -643,6 +703,39 @@ class ZeronApplication : Application() {
 
     /** The live client; null while signed out (or before the stored account started). */
     fun clientOrNull(): CoreClient? = sessionHolder.clientOrNull()
+
+    /**
+     * Settings → Sign Out, confirmed (#18, iOS `AppModel.signOut`): this
+     * phone forgets the account — its local store included — and the root
+     * cross-fades to Welcome as the client goes. Also leaves the demo.
+     */
+    fun signOut() {
+        applicationScope.launch(Dispatchers.IO) { sessionHolder.signOutLocally(forget = true) }
+    }
+
+    /**
+     * A fresh launch's debug extras that pick the account or the edge
+     * (#18; `MainActivity` calls this only in debuggable builds, before
+     * `setContent`): the sticky endpoint overrides are written, then the
+     * holder applies `signedout` / `dev` / `demo` after (or instead of)
+     * the stored account's boot. The root holds `Loading` until done.
+     */
+    internal fun applyLaunchAccount(options: LaunchOptions) {
+        if (!options.touchesAccount || core !is CoreStatus.Loaded) return
+        launchPending.value = true
+        applicationScope.launch(Dispatchers.IO) {
+            try {
+                val edgeChanged = Endpoints.applyLaunch(options.edge, options.workos)
+                sessionHolder.relaunch(
+                    clearStored = options.signedOut,
+                    restart = edgeChanged,
+                    choose = options::launchCredentials,
+                )
+            } finally {
+                launchPending.value = false
+            }
+        }
+    }
 }
 
 /**

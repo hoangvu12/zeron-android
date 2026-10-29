@@ -207,6 +207,24 @@ class RunWatchController(
         }
     }
 
+    /**
+     * Signed out (#18): the account's runs and engines are gone, so the
+     * service stops now — no linger (nobody is left to tap a Done
+     * notification) — and the next account starts from a clean slate.
+     * The process-wide gates (foreground, notifications, Stay connected)
+     * are kept.
+     */
+    fun signOut() {
+        synchronized(gate) {
+            working = emptyList()
+            awaiting = 0
+            engineCount = 0
+            emptySinceMs = null
+            liveUpdateDismissed = false
+            update()
+        }
+    }
+
     // ── the service's reports ────────────────────────────────────────────
 
     /** The service's `onTimeout(startId, fgsType)` (API 35+). */

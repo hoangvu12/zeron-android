@@ -1,6 +1,11 @@
 package sh.zeron.android.shell
 
 import java.io.File
+import uniffi.zeron_core.Credentials
+import uniffi.zeron_core.DemoFixture
+import uniffi.zeron_core.DemoOptions
+import uniffi.zeron_core.StreamSpeed
+import uniffi.zeron_core.TranscriptScale
 
 /**
  * Test seam over `android.util.Log.w` — the plain-JVM tests replace it
@@ -29,6 +34,17 @@ internal var launchOptionsLog: (String) -> Unit = { message ->
  *   `onCreate`: an exported activity's extras can be sent by any app in
  *   release.
  *
+ * - The account extras (#18, iOS's DEBUG launch args in `AppModel.init`,
+ *   `AppModel.swift:124-151`; SPEC D12: debug only, never a button) —
+ *   same gate: `signedout` wipes the stored account; `dev "<userId>
+ *   <orgId>"` runs `Credentials.Dev` (never persisted); `demo` runs the
+ *   offline demo, shaped by `noprojects` / `iosonly`, `big` / `huge`,
+ *   `fast`, `longreply`, and `cloud` (the demo's Cloud row, read by the
+ *   Cloud tickets); a `route` that parses also runs the demo when nothing
+ *   is stored. `edge <url|prod>` / `workos <client|prod>` are the sticky
+ *   endpoint overrides (`Endpoints`). Booleans take `--ez x true` or
+ *   `--es x true`.
+ *
  * Wrong types (an `Int` where a `String` is expected) read as absent;
  * blank strings read as null.
  */
@@ -37,7 +53,54 @@ data class LaunchOptions(
     val wallpaperEffect: String? = null,
     val harness: String? = null,
     val measureOpen: Boolean = false,
+    val signedOut: Boolean = false,
+    /** `dev "<userId> <orgId>"`: the dev stack's account. */
+    val dev: Credentials.Dev? = null,
+    val demo: Boolean = false,
+    /** A `route` that parses was given (it implies the demo when nothing is stored). */
+    val route: Boolean = false,
+    val noProjects: Boolean = false,
+    val iosOnly: Boolean = false,
+    val big: Boolean = false,
+    val huge: Boolean = false,
+    val fast: Boolean = false,
+    val longReply: Boolean = false,
+    /** iOS `-cloud`: the demo offers Cloud (`MoreViewController.swift:201`). */
+    val cloud: Boolean = false,
+    val edge: String? = null,
+    val workos: String? = null,
 ) {
+
+    /** Any extra that changes which account (or edge) this launch runs. */
+    val touchesAccount: Boolean
+        get() = signedOut || dev != null || demo || route || edge != null || workos != null
+
+    /**
+     * The account this launch starts instead of the stored one, iOS
+     * order: `dev` wins, then `demo` (or a `route` with [hasStored]
+     * false); null keeps the stored account. Asked after `signedout` ran.
+     */
+    fun launchCredentials(hasStored: Boolean): Credentials? = when {
+        dev != null -> dev
+        demo || (route && !hasStored) -> Credentials.Demo(demoOptions())
+        else -> null
+    }
+
+    /** iOS `AppModel.demoOptions()`: `huge` beats `big`, `noprojects` beats `iosonly`. */
+    fun demoOptions(): DemoOptions = DemoOptions(
+        fixture = when {
+            noProjects -> DemoFixture.NO_PROJECTS
+            iosOnly -> DemoFixture.IOS_ONLY
+            else -> DemoFixture.STANDARD
+        },
+        transcriptScale = when {
+            huge -> TranscriptScale.Huge
+            big -> TranscriptScale.Big
+            else -> TranscriptScale.Normal
+        },
+        streamSpeed = if (fast) StreamSpeed.FAST else StreamSpeed.REALISTIC,
+        longReply = longReply,
+    )
 
     /**
      * Wallpaper first, effect second (iOS order,
@@ -84,7 +147,7 @@ data class LaunchOptions(
             if (!debuggable) return LaunchOptions()
             fun string(key: String): String? =
                 (extras[key] as? String)?.takeIf { it.isNotBlank() }
-            val measureOpen = when (val value = extras["measureopen"]) {
+            fun flag(key: String): Boolean = when (val value = extras[key]) {
                 is Boolean -> value
                 is String -> value.equals("true", ignoreCase = true)
                 else -> false
@@ -93,8 +156,31 @@ data class LaunchOptions(
                 wallpaper = string("wallpaper"),
                 wallpaperEffect = string("wallpaper-effect"),
                 harness = string("harness"),
-                measureOpen = measureOpen,
+                measureOpen = flag("measureopen"),
+                signedOut = flag("signedout"),
+                dev = string("dev")?.let(::devCredentials),
+                demo = flag("demo"),
+                route = route(extras) != null,
+                noProjects = flag("noprojects"),
+                iosOnly = flag("iosonly"),
+                big = flag("big"),
+                huge = flag("huge"),
+                fast = flag("fast"),
+                longReply = flag("longreply"),
+                cloud = flag("cloud"),
+                edge = string("edge")?.trim(),
+                workos = string("workos")?.trim(),
             )
+        }
+
+        /** `"<userId> <orgId>"` (iOS `-dev <userId> <orgId>`); anything else is absent. */
+        private fun devCredentials(value: String): Credentials.Dev? {
+            val parts = value.trim().split(Regex("\\s+"))
+            if (parts.size != 2) {
+                launchOptionsLog("dev: expected \"<userId> <orgId>\"")
+                return null
+            }
+            return Credentials.Dev(parts[0], parts[1])
         }
 
         /**
@@ -103,7 +189,7 @@ data class LaunchOptions(
          * Non-string, absent or unknown values read as nothing.
          */
         fun route(extras: Map<String, Any?>): DeepLink? =
-            DeepLinks.parseRoute(extras["route"] as? String)
+            LaunchRoute.parse(extras["route"] as? String)
     }
 }
 

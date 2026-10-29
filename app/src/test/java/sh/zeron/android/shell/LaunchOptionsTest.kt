@@ -8,12 +8,18 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import uniffi.zeron_core.Credentials
+import uniffi.zeron_core.DemoFixture
+import uniffi.zeron_core.DemoOptions
+import uniffi.zeron_core.StreamSpeed
+import uniffi.zeron_core.TranscriptScale
 
 /**
- * The launch extras (android-ui-parity #36): `LaunchOptions.parse`'s
- * debug gate and type rules, the ungated `route` read, and
- * `applyWallpaper`'s call order against a recording [WallpaperTarget] —
- * every row of the ticket's `LaunchOptionsTest` list. Plain JUnit: the
+ * The launch extras (android-ui-parity #36, #18): `LaunchOptions.parse`'s
+ * debug gate and type rules, the ungated `route` read, the account extras
+ * (which account a launch starts, the demo's options), and
+ * `applyWallpaper`'s call order against a recording [WallpaperTarget].
+ * Plain JUnit: the
  * seam over `android.util.Log` ("not mocked" on the plain JVM) is
  * replaced in [setUp] and restored in [tearDown].
  */
@@ -42,7 +48,19 @@ class LaunchOptionsTest {
                 "wallpaper-effect" to "halftone",
                 "harness" to "mock",
                 "measureopen" to true,
-                "pair" to "http://127.0.0.1:27701/pair#token=a, http://127.0.0.1:27702/pair#token=b",
+                "signedout" to true,
+                "dev" to "alice org1",
+                "demo" to true,
+                "route" to "chat:chat-deploy",
+                "noprojects" to true,
+                "iosonly" to "true",
+                "big" to true,
+                "huge" to true,
+                "fast" to true,
+                "longreply" to true,
+                "cloud" to true,
+                "edge" to "http://10.0.2.2:8787",
+                "workos" to "client_staging",
             ),
             debuggable = true,
         )
@@ -50,28 +68,84 @@ class LaunchOptionsTest {
         assertEquals("halftone", options.wallpaperEffect)
         assertEquals("mock", options.harness)
         assertTrue(options.measureOpen)
+        assertTrue(options.signedOut)
+        assertEquals(Credentials.Dev("alice", "org1"), options.dev)
+        assertTrue(options.demo)
+        assertTrue(options.route)
+        assertTrue(options.noProjects)
+        assertTrue(options.iosOnly)
+        assertTrue(options.big)
+        assertTrue(options.huge)
+        assertTrue(options.fast)
+        assertTrue(options.longReply)
+        assertTrue(options.cloud)
+        assertEquals("http://10.0.2.2:8787", options.edge)
+        assertEquals("client_staging", options.workos)
+        assertTrue(options.touchesAccount)
+    }
+
+    // #18: `dev "<userId> <orgId>"` — exactly two words.
+    @Test
+    fun devNeedsAUserAndAnOrg() {
         assertEquals(
-            listOf(
-                "http://127.0.0.1:27701/pair#token=a",
-                "http://127.0.0.1:27702/pair#token=b",
-            ),
-            options.pair,
+            Credentials.Dev("alice", "org1"),
+            LaunchOptions.parse(mapOf("dev" to "  alice   org1 "), debuggable = true).dev,
+        )
+        assertNull(LaunchOptions.parse(mapOf("dev" to "alice"), debuggable = true).dev)
+        assertNull(LaunchOptions.parse(mapOf("dev" to "a b c"), debuggable = true).dev)
+        assertEquals(2, logs.size)
+    }
+
+    // ------------------------------------------------------------ account
+
+    @Test
+    fun devWinsOverTheDemo() {
+        val options = LaunchOptions(dev = Credentials.Dev("alice", "org1"), demo = true)
+        assertEquals(Credentials.Dev("alice", "org1"), options.launchCredentials(hasStored = true))
+    }
+
+    @Test
+    fun theDemoRunsWhetherOrNotAnAccountIsStored() {
+        val options = LaunchOptions(demo = true)
+        assertTrue(options.launchCredentials(hasStored = true) is Credentials.Demo)
+        assertTrue(options.launchCredentials(hasStored = false) is Credentials.Demo)
+    }
+
+    @Test
+    fun aRouteImpliesTheDemoOnlyWhenNothingIsStored() {
+        val options = LaunchOptions(route = true)
+        assertTrue(options.launchCredentials(hasStored = false) is Credentials.Demo)
+        assertNull(options.launchCredentials(hasStored = true))
+        assertNull(LaunchOptions().launchCredentials(hasStored = false))
+    }
+
+    @Test
+    fun onlyARouteThatParsesCounts() {
+        assertTrue(LaunchOptions.parse(mapOf("route" to "new"), debuggable = true).route)
+        assertFalse(LaunchOptions.parse(mapOf("route" to "gallery"), debuggable = true).route)
+    }
+
+    @Test
+    fun demoOptionsFollowIosPrecedence() {
+        assertEquals(
+            DemoOptions(DemoFixture.STANDARD, TranscriptScale.Normal, StreamSpeed.REALISTIC, false),
+            LaunchOptions(demo = true).demoOptions(),
+        )
+        assertEquals(
+            DemoOptions(DemoFixture.NO_PROJECTS, TranscriptScale.Huge, StreamSpeed.FAST, true),
+            LaunchOptions(noProjects = true, iosOnly = true, big = true, huge = true, fast = true, longReply = true)
+                .demoOptions(),
+        )
+        assertEquals(
+            DemoOptions(DemoFixture.IOS_ONLY, TranscriptScale.Big, StreamSpeed.REALISTIC, false),
+            LaunchOptions(iosOnly = true, big = true).demoOptions(),
         )
     }
 
-    // android-app#30: the flow rig's `pair` extra — comma-separated
-    // pairing URLs, trimmed, blanks dropped.
     @Test
-    fun pairSplitsTrimsAndDropsBlanks() {
-        assertEquals(
-            listOf("http://h:1/pair#token=a", "http://h:2/pair#token=b"),
-            LaunchOptions.parse(
-                mapOf("pair" to " http://h:1/pair#token=a ,,http://h:2/pair#token=b "),
-                debuggable = true,
-            ).pair,
-        )
-        assertEquals(emptyList<String>(), LaunchOptions.parse(mapOf("pair" to ""), debuggable = true).pair)
-        assertEquals(emptyList<String>(), LaunchOptions.parse(emptyMap(), debuggable = true).pair)
+    fun wallpaperAloneDoesNotTouchTheAccount() {
+        assertFalse(LaunchOptions(wallpaper = "none", cloud = true, fast = true).touchesAccount)
+        assertTrue(LaunchOptions(edge = "prod").touchesAccount)
     }
 
     @Test
@@ -90,13 +164,19 @@ class LaunchOptionsTest {
     fun nonDebuggableIgnoresEveryDebugExtra() {
         val extras = mapOf(
             "wallpaper" to "/x/a.png",
-            "pair" to "http://h:1/pair#token=a",
             "wallpaper-effect" to "halftone",
             "harness" to "mock",
             "measureopen" to true,
+            // SPEC D12: the account extras are debug-only too.
+            "signedout" to true,
+            "dev" to "alice org1",
+            "demo" to true,
+            "route" to "new",
+            "edge" to "http://evil",
+            "workos" to "client_evil",
         )
         assertEquals(LaunchOptions(), LaunchOptions.parse(extras, debuggable = false))
-        assertEquals(emptyList<String>(), LaunchOptions.parse(extras, debuggable = false).pair)
+        assertFalse(LaunchOptions.parse(extras, debuggable = false).touchesAccount)
     }
 
     @Test
@@ -107,7 +187,9 @@ class LaunchOptionsTest {
                 "wallpaper-effect" to 5,
                 "harness" to "",
                 "measureopen" to "yes",
-                "pair" to 27,
+                "demo" to 1,
+                "edge" to " ",
+                "dev" to 27,
             ),
             debuggable = true,
         )
@@ -115,7 +197,9 @@ class LaunchOptionsTest {
         assertNull(options.wallpaperEffect)
         assertNull(options.harness)
         assertFalse(options.measureOpen)
-        assertEquals(emptyList<String>(), options.pair)
+        assertFalse(options.demo)
+        assertNull(options.edge)
+        assertNull(options.dev)
     }
 
     // --------------------------------------------------------------- route
@@ -128,7 +212,8 @@ class LaunchOptionsTest {
         // record, and route still reads it).
         assertEquals(DeepLink.OpenChat("abc"), LaunchOptions.route(extras))
         assertEquals(LaunchOptions(), LaunchOptions.parse(extras, debuggable = false))
-        assertEquals(LaunchOptions(), LaunchOptions.parse(extras, debuggable = true))
+        // Debuggable, a route only records that one was given (#18's demo).
+        assertEquals(LaunchOptions(route = true), LaunchOptions.parse(extras, debuggable = true))
         // Non-string, absent and unknown routes read as nothing.
         assertNull(LaunchOptions.route(mapOf("route" to 7)))
         assertNull(LaunchOptions.route(emptyMap()))

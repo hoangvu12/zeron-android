@@ -111,6 +111,70 @@ class SessionHolderTest {
         assertEquals(account(), store.stored())
     }
 
+    // ------------------------------------------------- launch extras (#18)
+
+    @Test
+    fun aDemoLaunchBeforeBootNeverStartsTheStoredAccount() {
+        store.store(account())
+        holder.relaunch(clearStored = false, restart = false) { demo }
+        holder.boot()
+        assertTrue(holder.booted.value)
+        assertEquals(listOf<Credentials>(demo), built.map { it.credentials })
+        assertTrue(holder.isDemo)
+        assertEquals("the demo keeps the stored account", account(), store.stored())
+    }
+
+    @Test
+    fun aDemoLaunchAfterBootReplacesTheStoredClient() {
+        store.store(account())
+        holder.boot()
+        holder.relaunch(clearStored = false, restart = false) { demo }
+        assertTrue(built[0].shutDown)
+        assertSame(built[1], holder.clientOrNull())
+        assertTrue(holder.isDemo)
+    }
+
+    @Test
+    fun noLaunchAccountBootsTheStoredOne() {
+        store.store(account())
+        holder.relaunch(clearStored = false, restart = false) { null }
+        assertEquals(account(), built.single().credentials)
+        assertTrue(holder.booted.value)
+    }
+
+    @Test
+    fun signedOutWipesTheStoredAccountBeforeChoosing() {
+        store.store(account())
+        var sawStored: Boolean? = null
+        holder.relaunch(clearStored = true, restart = false) { stored -> sawStored = stored; null }
+        assertEquals(false, sawStored)
+        assertNull(store.stored())
+        assertNull(holder.client.value)
+        assertTrue(built.isEmpty())
+    }
+
+    @Test
+    fun signedOutAfterBootSignsTheRunningAccountOutKeepingItsStore() {
+        store.store(account())
+        holder.boot()
+        File(coreDir, "outbox.db").writeText("unsent")
+        holder.relaunch(clearStored = true, restart = false) { Credentials.Dev("alice", "org1") }
+        assertTrue(built[0].shutDown)
+        assertEquals(listOf(false), signOuts)
+        assertNull(store.stored())
+        assertEquals(Credentials.Dev("alice", "org1"), holder.clientOrNull()?.credentials)
+    }
+
+    @Test
+    fun aNewEdgeRestartsTheStoredAccount() {
+        store.store(account())
+        holder.boot()
+        holder.relaunch(clearStored = false, restart = true) { null }
+        assertEquals(2, built.size)
+        assertTrue(built[0].shutDown)
+        assertEquals(account(), built[1].credentials)
+    }
+
     // --------------------------------------------------------------- start
 
     @Test

@@ -152,6 +152,16 @@ class ZeronIconsTest {
     }
 
     @Test
+    fun theAccountGlyphsAreBack() {
+        // #18 restores Settings' Account and Sign Out rows.
+        assertSame(ZeronIcons.PersonCropCircle, ZeronIcons.forSfName("person.crop.circle"))
+        assertSame(
+            ZeronIcons.RectanglePortraitAndArrowRight,
+            ZeronIcons.forSfName("rectangle.portrait.and.arrow.right"),
+        )
+    }
+
+    @Test
     fun droppedAndUnknownAndOutOfRangeNamesReturnNullWithoutThrowing() {
         for (name in listOf(
             "51.circle", // past SF's 0.circle…50.circle
@@ -162,8 +172,6 @@ class ZeronIconsTest {
             "-1.circle",
             "waveform", // dropped: voice
             "mic.fill",
-            "person.crop.circle", // dropped: account
-            "rectangle.portrait.and.arrow.right", // dropped: sign out
             "sparkle", // dropped: sign-in mark
             "tab-chat", // Zeron extras have no SF name
             "WifiOff",
@@ -308,6 +316,8 @@ class ZeronIconsTest {
             ZeronIcons.Terminal to R.drawable.zi_terminal, // #33
             ZeronIcons.BubbleLeftAndBubbleRight to R.drawable.zi_bubble_left_and_bubble_right, // #40
             ZeronIcons.Refresh to R.drawable.zi_refresh, // android-next#04
+            ZeronIcons.PersonCropCircle to R.drawable.zi_user_circle, // #18
+            ZeronIcons.RectanglePortraitAndArrowRight to R.drawable.zi_logout_2, // #18
             ZeronIcons.TabChat to R.drawable.zi_tab_chat,
             ZeronIcons.TabSettings to R.drawable.zi_tab_settings,
             ZeronIcons.ZeronBow to R.drawable.zi_zeron_bow, // android-next #03: replaced ZeronGlyph

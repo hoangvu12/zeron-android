@@ -220,6 +220,15 @@ class Notifier(private val context: Context) {
         cancelLinkLost(engineId)
     }
 
+    /**
+     * Signed out (#18, the stand-in for iOS's `push.signingOut`): every
+     * notification the account raised goes. A foreground service's own
+     * ongoing notification stays until that service stops.
+     */
+    fun cancelAll() {
+        manager.cancelAll()
+    }
+
     // ── the dataSync budget ──────────────────────────────────────────────
 
     /** `onTimeout`: background updates are paused until the app opens. */

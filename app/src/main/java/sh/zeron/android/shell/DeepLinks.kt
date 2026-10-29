@@ -113,28 +113,8 @@ object DeepLinks {
         }
     }
 
-    /**
-     * The `route` extra — iOS's `-route` (`SceneDelegate.swift:64-72`):
-     * exact, case-sensitive, not trimmed, ungated. `chat:<id>` takes
-     * everything after the first 5 chars verbatim (no percent-decoding,
-     * like iOS `dropFirst(5)`); `new` / `more` / `search` are exact
-     * matches. Everything else — `chat:` (empty id), `settings`, `New`,
-     * `""`, non-strings — is null.
-     */
-    fun parseRoute(route: String?): DeepLink? {
-        if (route == null) return null
-        if (route.startsWith("chat:")) {
-            val id = route.substring(5)
-            if (id.isEmpty()) return null
-            return DeepLink.OpenChat(id)
-        }
-        return when (route) {
-            "new" -> DeepLink.NewSession(null)
-            "more" -> DeepLink.Settings
-            "search" -> DeepLink.Search
-            else -> null
-        }
-    }
+    /** The `route` extra — its grammar lives in [LaunchRoute] (#18). */
+    fun parseRoute(route: String?): DeepLink? = LaunchRoute.parse(route)
 }
 
 /**
