@@ -612,6 +612,11 @@ class ZeronApplication : Application() {
                 }
             },
         )
+        // #56 (D6): every workspace snapshot goes through the SessionWatcher
+        // (done / needs input / failed); null while signed out resets it.
+        applicationScope.launch {
+            workspaceFeed.snapshot.collect { notifications.onSnapshot(it) }
+        }
         applicationScope.launch {
             workspaceFeed.devices.collect { devices ->
                 runWatch.onEngineCount(devices.size)
@@ -634,7 +639,8 @@ class ZeronApplication : Application() {
         // this device."). An expiry clears the same, keeping the store.
         // TODO(#60): `voice.stop()`. TODO(#48): `cloud.reset()`.
         sessionHolder.addSignOutListener {
-            notifier.cancelAll()
+            // #56: the watcher forgets the account, then everything it posted goes.
+            notifications.signedOut()
             runWatch.signOut()
             // #43: every terminal let go of (the shells keep running on
             // their hosts) and the saved refs cleared (iOS

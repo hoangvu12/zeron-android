@@ -46,8 +46,9 @@ object NotifyCopy {
  * Channel ids carry a version (sounds are immutable once a channel exists,
  * so `migrateChannels` deletes every `session-*` / `runs-*` channel of
  * another version at start). One notification per chat: tag
- * `chat:<engineId>:<chatId>` (the scoped id), id 1 — a newer event replaces
- * the older one, including a change of kind/channel. `link:<engineId>` is
+ * `chat:<chatId>`, id 1 — a newer event replaces the older one, including
+ * a change of kind/channel (the edge's `apns-collapse-id = chatId`,
+ * docs/port/05 K11). `link:<engineId>` is
  * the engine outage's notification, cancelled by LinkRestored. The
  * foreground service's ongoing notification posts untagged with id 1.
  */
@@ -124,20 +125,18 @@ class Notifier(private val context: Context) {
     // ── session events ───────────────────────────────────────────────────
 
     /**
-     * A session event for one chat: replaces any earlier notification for
-     * the same chat (the tag), tapping opens the chat's deep link.
-     * `subText` is the engine name — only while ≥ 2 engines are paired.
+     * A session event for one chat (#56's SessionWatcher): replaces any
+     * earlier notification for the same chat (the tag); tapping opens the
+     * chat. [whenMs] is the row's last activity.
      */
     fun postSessionEvent(
-        engineId: String,
         chatId: String,
         chatTitle: String,
         kind: NotificationKind,
-        subText: String?,
-        nowMs: Long,
+        whenMs: Long,
     ) {
         val text = kind.title
-        val tag = chatTag(engineId, chatId)
+        val tag = chatTag(chatId)
         val notification = NotificationCompat.Builder(context, channelId(kind))
             .brand()
             // The core applies the fallback already; a blank title from any
@@ -152,11 +151,8 @@ class Notifier(private val context: Context) {
                 }
             )
             .setShowWhen(true)
-            .setWhen(nowMs)
+            .setWhen(whenMs)
             .setAutoCancel(true)
-            .apply {
-                if (subText != null) setSubText(subText)
-            }
             .setContentIntent(chatTapPendingIntent(tag, chatId))
             .build()
         notify(tag, notification)
@@ -190,35 +186,14 @@ class Notifier(private val context: Context) {
 
     // ── cancels ──────────────────────────────────────────────────────────
 
-    /** Resolved, or the chat was opened: cancel that chat's notification. */
-    fun cancelChat(engineId: String, chatId: String) {
-        manager.cancel(chatTag(engineId, chatId), NOTIFICATION_ID)
-    }
-
-    /**
-     * The chat was opened in the app (the router or the session screen):
-     * cancel its notification without knowing the engine — the tag ends
-     * with the scoped chat id.
-     */
+    /** The chat was opened in the app (the router or the session screen): its notification goes. */
     fun cancelChatFor(chatId: String) {
-        val suffix = ":$chatId"
-        manager.activeNotifications
-            .filter { it.tag != null && it.tag.startsWith("chat:") && it.tag.endsWith(suffix) }
-            .forEach { manager.cancel(it.tag, it.id) }
+        manager.cancel(chatTag(chatId), NOTIFICATION_ID)
     }
 
     /** LinkRestored: only the lost notification goes. */
     fun cancelLinkLost(engineId: String) {
         manager.cancel(linkTag(engineId), NOTIFICATION_ID)
-    }
-
-    /** An engine was forgotten: all of its notifications go. */
-    fun cancelEngine(engineId: String) {
-        val prefix = "chat:$engineId:"
-        manager.activeNotifications
-            .filter { it.tag != null && it.tag.startsWith(prefix) }
-            .forEach { manager.cancel(it.tag, it.id) }
-        cancelLinkLost(engineId)
     }
 
     /**
@@ -355,7 +330,7 @@ class Notifier(private val context: Context) {
         }
     }
 
-    private fun chatTag(engineId: String, chatId: String) = "chat:$engineId:$chatId"
+    private fun chatTag(chatId: String) = "$CHAT_TAG_PREFIX$chatId"
 
     private fun linkTag(engineId: String) = "link:$engineId"
 
@@ -407,6 +382,7 @@ class Notifier(private val context: Context) {
         const val CHANNEL_VERSION = 1
         const val NOTIFICATION_ID = 1
         const val BUDGET_TAG = "budget"
+        const val CHAT_TAG_PREFIX = "chat:"
 
         /** The tap's action: only labels the intent (it is explicit, no filter matches it). */
         const val ACTION_OPEN_CHAT = "sh.zeron.android.action.OPEN_CHAT"
