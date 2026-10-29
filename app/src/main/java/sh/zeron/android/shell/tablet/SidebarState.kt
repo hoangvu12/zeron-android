@@ -1,5 +1,6 @@
 package sh.zeron.android.shell.tablet
 
+import sh.zeron.android.design.bottomChrome
 import androidx.annotation.MainThread
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBars
@@ -138,7 +139,8 @@ fun rememberSidebarState(): SidebarState = remember { SidebarState() }
 @Composable
 fun rememberSidebarBottomInsets(): BottomChromeInsets {
     val d = LocalDensity.current
-    val navBars = WindowInsets.navigationBars
+    // #72: the navigation bar and the mandatory home-gesture area.
+    val navBars = WindowInsets.bottomChrome
     val n = with(d) { navBars.getBottom(this).toDp() }
     val bar = n + SidebarChromeMetrics.ToolbarGap
     return remember(bar) {

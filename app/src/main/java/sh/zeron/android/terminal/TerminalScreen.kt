@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.isImeVisible
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -74,6 +73,7 @@ import kotlinx.coroutines.withContext
 import sh.zeron.android.ZeronApplication
 import sh.zeron.android.core.Face
 import sh.zeron.android.design.CapsuleShape
+import sh.zeron.android.design.bottomChromePadding
 import sh.zeron.android.design.Haptic
 import sh.zeron.android.design.LocalFeedback
 import sh.zeron.android.design.LocalReduceMotion
@@ -356,7 +356,7 @@ internal fun TerminalScreen(route: TerminalRoute) {
             }
             RiseIn(
                 visible = status != null,
-                modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 12.dp),
+                modifier = Modifier.align(Alignment.BottomCenter).bottomChromePadding().padding(bottom = 12.dp),
             ) {
                 status?.let { s ->
                     TerminalStatusPill(s) {
@@ -387,7 +387,7 @@ internal fun TerminalScreen(route: TerminalRoute) {
                     onClick = { terminalView?.showKeyboard() },
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
-                        .navigationBarsPadding()
+                        .bottomChromePadding()
                         .padding(end = 16.dp, bottom = 12.dp)
                         .graphicsLayer {
                             alpha = shown
@@ -439,7 +439,9 @@ internal fun TerminalScreen(route: TerminalRoute) {
                 }
             })
         }
-        Spacer(Modifier.imePadding().navigationBarsPadding())
+        // #72: the key bar clears the IME, the 3-button bar and the
+        // home-gesture area alike.
+        Spacer(Modifier.imePadding().bottomChromePadding())
     }
 }
 

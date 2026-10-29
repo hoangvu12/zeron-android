@@ -81,7 +81,8 @@ val LocalBottomChrome = staticCompositionLocalOf { BottomChromeInsets.None }
 @Composable
 fun rememberSafeBottom(windowHeight: Dp): Dp {
     val density = LocalDensity.current
-    val bars = WindowInsets.systemBars.union(WindowInsets.displayCutout).getBottom(density)
+    // #72: plus the mandatory home-gesture area (a toast's Undo is tappable).
+    val bars = WindowInsets.systemBars.union(WindowInsets.displayCutout).union(WindowInsets.bottomChrome).getBottom(density)
     val ime = WindowInsets.ime.getBottom(density)
     val insetPx = max(bars, ime)
     return windowHeight - with(density) { insetPx.toDp() }

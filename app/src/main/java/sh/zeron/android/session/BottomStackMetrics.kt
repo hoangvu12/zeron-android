@@ -73,7 +73,9 @@ object BottomStackMetrics {
      * from the window bottom — instead of the fixed gap above the nav
      * inset, so the two sit level (it may sink into the safe area, as the
      * toolbar does). The keyboard still lifts it: once the IME top passes
-     * that rest, the keyboard rule wins, smoothly.
+     * that rest, the keyboard rule wins, smoothly. #72: it never sinks
+     * below [floor] (the bottom chrome inset: the navigation bar and the
+     * mandatory home-gesture area), where a tap would go to the system.
      */
     fun stackBottomBesideToolbar(
         H: Float,
@@ -81,7 +83,8 @@ object BottomStackMetrics {
         toolbarMid: Float,
         restHeight: Float = ComposerRestHeight.value,
         gap: Float = KeyboardGap.value,
-    ): Float = kotlin.math.min(H - toolbarMid + restHeight / 2f, H - ime - gap)
+        floor: Float = 0f,
+    ): Float = minOf(H - toolbarMid + restHeight / 2f, H - ime - gap, H - floor)
 
     /**
      * How much of the window the stack plus its pad covers:
