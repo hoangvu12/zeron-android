@@ -33,6 +33,9 @@ object NotifyCopy {
     const val LinkLostOffline = "Your device is offline"
     const val BudgetTitle = "Background updates paused"
     const val BudgetText = "Open Zeron to resume."
+
+    /** za: `DeliveryService.kt` (the delivery hold, #58). */
+    const val DeliveryHoldTitle = "Sending your message…"
 }
 
 /**
@@ -288,6 +291,23 @@ class Notifier(private val context: Context) {
                     )
                 }
             }
+            .build()
+
+    /**
+     * The delivery hold's notification (#58, za: `DeliveryService`'s copy):
+     * a foreground service needs one. It rides the quiet `runs-v1` channel
+     * rather than za:'s own `delivery` channel; the hold lasts 25 s, so
+     * the platform's ~10 s FGS notification deferral usually hides it.
+     */
+    fun buildDeliveryHold(): Notification =
+        NotificationCompat.Builder(context, runsChannelId())
+            .brand()
+            .setContentTitle(NotifyCopy.DeliveryHoldTitle)
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
+            .setPriority(NotificationCompat.PRIORITY_MIN)
+            .setOngoing(true)
+            .setSilent(true)
+            .setContentIntent(rootTapPendingIntent())
             .build()
 
     // ── internals ────────────────────────────────────────────────────────

@@ -1,6 +1,7 @@
 package sh.zeron.android
 
 import android.app.Application
+import android.os.SystemClock
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -17,6 +18,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import sh.zeron.android.background.DeliveryHold
+import sh.zeron.android.background.DeliveryService
 import sh.zeron.android.background.RunWatchController
 import sh.zeron.android.composer.CoreChipMenuCore
 import sh.zeron.android.composer.Drafts
@@ -516,6 +519,7 @@ class ZeronApplication : Application() {
         ProcessLifecycleOwner.get().lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onStart(owner: LifecycleOwner) {
+                    DeliveryService.release(this@ZeronApplication)
                     notifications.foreground = true
                     runWatch.onForeground(true)
                     refreshNotificationsOn()
@@ -524,6 +528,15 @@ class ZeronApplication : Application() {
                 override fun onStop(owner: LifecycleOwner) {
                     notifications.foreground = false
                     runWatch.onForeground(false)
+                    // #58: a just-sent message gets 25 s to reach the edge
+                    // (iOS `didEnterBackground`; ended on the next start).
+                    DeliveryService.release(this@ZeronApplication)
+                    val hold = DeliveryHold.shouldHold(
+                        now = SystemClock.elapsedRealtime(),
+                        signedIn = clientOrNull() != null,
+                        pending = DeliveryHold.pendingIn(workspaceFeed.snapshot.value),
+                    )
+                    if (hold) DeliveryService.hold(this@ZeronApplication)
                 }
             },
         )
@@ -549,6 +562,8 @@ class ZeronApplication : Application() {
             applicationScope.launch {
                 sessionHolder.client.collect { client ->
                     workspaceFeed.reset()
+                    // #58: sign-out ends the delivery hold (iOS clears it with the client).
+                    if (client == null) DeliveryService.release(this@ZeronApplication)
                     if (client != null) {
                         lifecycleHooks.clientReady()
                         notifications.attachTo(client)

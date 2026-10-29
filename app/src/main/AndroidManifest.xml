@@ -25,6 +25,8 @@
          specialUse (API 34+, normal permission, no time limit). -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.POST_PROMOTED_NOTIFICATIONS" />
+    <!-- #58: a few seconds of delivery after leaving right after Send (DeliveryService). -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SHORT_SERVICE" />
     <application
         android:name=".ZeronApplication"
         android:allowBackup="false"
@@ -72,6 +74,12 @@
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="Opt-in setting: keeps the user's own paired engine connections (self-hosted coding-agent desktop, LAN or tunnel WebSocket) open while the app is in the background, so run status and completion notifications arrive live. No push service exists (no FCM by design)." />
         </service>
+        <!-- #58: the delivery hold, 25 s after backgrounding right after a
+             send. shortService on API 34+ (no budget), dataSync below. -->
+        <service
+            android:name=".background.DeliveryService"
+            android:exported="false"
+            android:foregroundServiceType="shortService|dataSync" />
         <!-- android-ui-parity #87: the attach menu's camera capture file. No
              uses-permission CAMERA and no uses-feature camera: the capture
              intent needs neither, and a required feature would hide the app

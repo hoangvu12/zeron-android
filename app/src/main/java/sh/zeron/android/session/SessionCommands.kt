@@ -2,6 +2,7 @@ package sh.zeron.android.session
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import sh.zeron.android.background.DeliveryHold
 import sh.zeron.android.composer.DeliveryMode
 import sh.zeron.android.composer.StagedImage
 import uniffi.zeron_core.BusyPolicy
@@ -82,6 +83,8 @@ class CoreSessionCommands(
                 busy = busyPolicyFor(mode),
             ),
         )
+        // #58: iOS `app?.noteDeliveryActivity()` after an accepted send.
+        DeliveryHold.noteActivity()
         Unit
     }
 
