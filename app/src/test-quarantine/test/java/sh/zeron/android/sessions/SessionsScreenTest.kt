@@ -65,7 +65,7 @@ import sh.zeron.android.shell.LocalTabId
 import sh.zeron.android.shell.LocalTabScrollToTop
 import sh.zeron.android.shell.ShellRouteContent
 import sh.zeron.android.shell.TabId
-import sh.zeron.android.shell.TabRootRoute
+import sh.zeron.android.shell.SessionsRootRoute
 import sh.zeron.android.shell.TabScrollToTop
 
 /**
@@ -78,7 +78,7 @@ import sh.zeron.android.shell.TabScrollToTop
  *
  * The host mirrors ticket 35's mount order with the menus inside:
  * `ZeronTheme { ContextMenuHost { GlassMenuHost { NavStackHost { … } } } }`
- * (16 outermost), over a real `NavStack(TabRootRoute(TabId.Sessions))`:
+ * (16 outermost), over a real `NavStack(SessionsRootRoute)`:
  * pushes land on this tab's stack and render through
  * [ShellRouteContent] (45's folder pages). The glyph clock is frozen (the
  * loading state's spinner), [LocalFeedback] is a recorder (the long-press
@@ -151,7 +151,7 @@ class SessionsScreenTest {
     }
 
     private val feedback = RecordingFeedback()
-    private val stack = NavStack(TabRootRoute(TabId.Sessions))
+    private val stack = NavStack(SessionsRootRoute)
     private val recorder = ScreenRecorder(stack)
     private val contexts = CopyOnWriteArrayList<SessionRowContext>()
 
@@ -215,7 +215,7 @@ class SessionsScreenTest {
                                 val content: @Composable () -> Unit = {
                                     NavStackHost(stack = stack, active = true) { entry ->
                                         val route = entry.route
-                                        if (route is TabRootRoute && route.tab == TabId.Sessions) {
+                                        if (route is SessionsRootRoute) {
                                             SessionsScreenContent(
                                                 sections = sections,
                                                 collapsedIds = emptySet(),

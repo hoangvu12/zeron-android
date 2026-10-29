@@ -117,7 +117,6 @@ fun SessionsScreen(
     // row — the ⋯ — are never swallowed).
     val hookup = rememberSessionRowActions(listState)
     val ui by app.frontPage.ui.collectAsState()
-    val workspace by app.workspaceFeed.snapshot.collectAsState()
     val density = LocalDensity.current
     val swallowTopPx = remember(density, topInset) {
         { with(density) { (topInset + LargeTitleDefaults.NavRowHeight).toPx() } }
@@ -157,7 +156,6 @@ fun SessionsScreen(
     SessionsScreenContent(
         sections = if (fixture != null) fixture.sections else ui?.sections.orEmpty(),
         collapsedIds = if (fixture != null) fixture.collapsedIds else ui?.collapsedIds.orEmpty(),
-        loading = fixture == null && (ui == null || sessionsLoading(workspace)),
         actions = actions,
         showsNavOptions = showsNavOptions,
         currentChatId = currentChatId,
@@ -186,7 +184,7 @@ fun SessionsScreen(
  *
  * The sidebar parameters (105): [content] picks the front page (46's
  * sections) or the query results — one header-less `"results"` section
- * with the same 41/44 row machinery, per-row archived actions and the
+ * with the same 41/44 row machinery, the normal row actions and the
  * current-row fill — inside the **same** `LazyColumn`, so 41's item
  * animations swap the two by key. [pinnedAccessory]/[pinnedAccessoryHeight]
  * are 25's stacked-accessory slots (the sidebar search field), and
@@ -196,7 +194,6 @@ fun SessionsScreen(
 internal fun SessionsScreenContent(
     sections: List<ListSection>,
     collapsedIds: Set<String>,
-    loading: Boolean,
     actions: SessionsScreenActions,
     showsNavOptions: Boolean,
     currentChatId: String?,
@@ -217,8 +214,6 @@ internal fun SessionsScreenContent(
         sections = sections,
         collapsible = true,
         collapsedIds = collapsedIds,
-        loading = loading,
-        empty = SessionListEmpty.Sessions,
         onScreen = rememberNavEntryOnScreen(),
     )
     // 105: the query results model — remembered unconditionally (with an
@@ -232,8 +227,6 @@ internal fun SessionsScreenContent(
             emptyList()
         },
         collapsible = true,
-        loading = false,
-        empty = SessionListEmpty.None,
         onScreen = rememberNavEntryOnScreen(),
     )
     // The opener is @Composable and the LazyListScope content is not, so
@@ -268,7 +261,7 @@ internal fun SessionsScreenContent(
     }
 
     // 105: the free area below the expanded large title and the pinned
-    // accessory (the results-mode overlays' safe padding).
+    // accessory (the section drag's auto-scroll edge).
     val freeAreaTop = topInset + LargeTitleDefaults.NavRowHeight +
         LargeTitleDefaults.LargeRowHeight + pinnedAccessoryHeight
 
@@ -292,6 +285,8 @@ internal fun SessionsScreenContent(
         trailing = { if (showsNavOptions) SessionsOptionsButton(actions) },
         pinnedAccessory = pinnedAccessory,
         pinnedAccessoryHeight = pinnedAccessoryHeight,
+        // #23 (C10): pull to refresh on the front page (and the sidebar).
+        pullToRefresh = rememberSessionsPullToRefresh(),
         backdrop = {
             // The hero frame: fixed behind the list, inside the haze
             // source, above the page background and below every cell —
@@ -313,29 +308,19 @@ internal fun SessionsScreenContent(
                     sessionsScrollFade(px / density.density, heroHDp)
                 }
             }
-            // 41 step 7: the empty / loading overlay behind the clear
-            // list, above the hero — the expanded bar's bottom is its top
-            // safe padding. 105: the emitted model's status (results mode
-            // is never Loading / EmptySessions), below the accessory.
-            SessionListStatusOverlay(
-                status = if (resultsContent != null) resultsModel.status else model.status,
-                safePadding = PaddingValues(top = freeAreaTop, bottom = bottomPadding),
-            )
-            // No results: a blank list, as on iOS (J3; D11 drops the
-            // Android-only "No Results" copy with the old Search tab).
+            // No empty, loading or no-results state: a blank list, as on
+            // iOS (C13, C14, J3; D11).
         },
     ) {
         if (resultsContent != null) {
             // 105: one header-less "results" section — the hits in core
-            // order, the per-row archived actions (49 step 4), the
-            // current-row fill and 44's row wrapper (a hit may be
-            // archived or off the front page). No header, so no header
-            // menus are reachable.
-            val results = resultsContent.results
+            // order, the current-row fill and 44's row wrapper. J2: the
+            // list's normal row actions for every hit, archived or not
+            // (iOS has no per-row archived variant). No header, so no
+            // header menus are reachable.
             sessionListItems(
                 model = resultsModel,
                 onOpenSession = openSession,
-                archivedRow = { it in results.archivedIds },
                 currentChatId = currentChatId,
                 rowWrapper = rowWrapper,
             )
@@ -411,7 +396,6 @@ private fun SessionsScreenPreview(appearance: Appearance) {
                         SessionsScreenContent(
                             sections = SessionsScreenFixtures.sections(),
                             collapsedIds = emptySet(),
-                            loading = false,
                             actions = PreviewSessionsActions,
                             showsNavOptions = true,
                             currentChatId = null,

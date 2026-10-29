@@ -167,35 +167,13 @@ fun buildSessionListItems(
 }
 
 /**
- * Which empty-state copy a list with no items shows (Zeron addition — iOS
- * shows a blank list). `Sessions` is the front page, `Archived` the
- * archived folder page; `None` (Pinned, user sections, Search) is blank.
+ * The list's derived status (#25): rows, or a blank list. iOS draws no
+ * empty, no-results and no loading state on any session list — the front
+ * page, a folder, Archived and the search results stay blank until rows
+ * arrive (D11 drops the Android-only copy and spinner).
  */
-enum class SessionListEmpty { None, Sessions, Archived }
+enum class SessionListStatus { Content, Blank }
 
-/** The list's derived status — see `SessionListStatusOverlay`'s table. */
-enum class SessionListStatus { Content, Loading, EmptySessions, EmptyArchived, Blank }
-
-/**
- * First match wins: items → [SessionListStatus.Content]; no items and
- * loading → [SessionListStatus.Loading] for every empty kind (the
- * spinner outranks the copy); then the [SessionListEmpty] kind;
- * `None` → [SessionListStatus.Blank].
- */
-fun sessionListStatus(items: List<SessionListItem>, loading: Boolean, empty: SessionListEmpty): SessionListStatus =
-    when {
-        items.isNotEmpty() -> SessionListStatus.Content
-        loading -> SessionListStatus.Loading
-        empty == SessionListEmpty.Sessions -> SessionListStatus.EmptySessions
-        empty == SessionListEmpty.Archived -> SessionListStatus.EmptyArchived
-        else -> SessionListStatus.Blank
-    }
-
-/**
- * The workspace has not finished its first sync this process (Zeron's
- * `WorkspaceSnapshot.synced`; Roboco read per-engine `from_cache` and
- * connection state). Rows already on screen still win over the spinner.
- * TODO(#25): the iOS loading/empty states.
- */
-fun sessionsLoading(workspace: WorkspaceSnapshot?): Boolean =
-    workspace == null || !workspace.synced
+/** [SessionListStatus.Content] when there is anything to show, else [SessionListStatus.Blank]. */
+fun sessionListStatus(items: List<SessionListItem>): SessionListStatus =
+    if (items.isNotEmpty()) SessionListStatus.Content else SessionListStatus.Blank

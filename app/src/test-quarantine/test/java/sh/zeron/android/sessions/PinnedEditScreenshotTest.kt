@@ -23,8 +23,7 @@ import sh.zeron.android.design.ZeronTheme
 import sh.zeron.android.design.glass.GlassMenuHost
 import sh.zeron.android.shell.NavStack
 import sh.zeron.android.shell.NavStackHost
-import sh.zeron.android.shell.TabId
-import sh.zeron.android.shell.TabRootRoute
+import sh.zeron.android.shell.SessionsRootRoute
 import uniffi.zeron_core.ChatIndicator
 import uniffi.zeron_core.FrontPage
 import uniffi.zeron_core.ProjectRef
@@ -87,7 +86,7 @@ class PinnedEditScreenshotTest {
      * content is set, so the push transition is already committed.
      */
     private fun editShot(appearance: Appearance, file: String) {
-        val stack = NavStack(TabRootRoute(TabId.Sessions)).apply { push(FolderRoute.pinned(), animated = false) }
+        val stack = NavStack(SessionsRootRoute).apply { push(FolderRoute.pinned(), animated = false) }
         compose.setContent {
             ZeronTheme(appearance) {
                 ProvideGlyphClock(frozenAtNanos = 0L) {

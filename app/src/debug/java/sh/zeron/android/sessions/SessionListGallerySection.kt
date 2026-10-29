@@ -30,27 +30,24 @@ import sh.zeron.android.design.ZeronTheme
 import sh.zeron.android.design.TypeScale
 import sh.zeron.android.design.uiStyle
 
-/** The gallery's status selector — each value is one overlay state. */
+/** The gallery's status selector: rows, or the blank list (iOS has no other state). */
 private enum class StatusDemo(val label: String) {
     Content("Content"),
-    Loading("Loading"),
-    EmptySessions("Empty sessions"),
-    EmptyArchived("Empty archived"),
     Blank("Blank"),
 }
 
 /**
  * The "Session list" page of the debug design gallery (android-ui-parity
  * #41): the shared list host over [SessionListFixtures] with the ticket's
- * toggles — collapsible, fold "Mobile", current row 3, editing, every
- * overlay status, "Shuffle Recent" (to watch the move animations), the
+ * toggles — collapsible, fold "Mobile", current row 3, editing, content or
+ * blank, "Shuffle Recent" (to watch the move animations), the
  * folder + plain-header demo, and the fake font scale 0.85 / 1.0 / 1.6
  * via [LinearFontScaleDensity].
  *
  * Tapping a row shows the `BasicText` readout "open <id>" (no NavStack in
- * the gallery); `onScreen` stays true. The list's safe padding mimics the
- * worked example: top 155 (59 status + 44 nav row + 52 large title),
- * bottom 110 — so the overlay anchor sits where the front page's would.
+ * the gallery); `onScreen` stays true. The list's padding mimics the
+ * front page: top 155 (59 status + 44 nav row + 52 large title), bottom
+ * 110.
  *
  * Registered in `design/Gallery.kt` as
  * `GallerySection("Session list", layout = GalleryLayout.Fill, screenshotHeightDp = 852) { SessionListGallerySection() }`.
@@ -80,11 +77,6 @@ fun SessionListGallerySection() {
     // The folder demo is the non-collapsible API: plain headers, one folder.
     val effectiveCollapsible = collapsible && !folderDemo
     val collapsedIds = if (foldMobile) setOf("mobile") else emptySet()
-    val emptyKind = when (statusKind) {
-        StatusDemo.EmptySessions -> SessionListEmpty.Sessions
-        StatusDemo.EmptyArchived -> SessionListEmpty.Archived
-        else -> SessionListEmpty.None
-    }
 
     Column(Modifier.fillMaxSize().background(palette.background)) {
         ControlRow(
@@ -122,8 +114,6 @@ fun SessionListGallerySection() {
                     sections = sections,
                     collapsible = effectiveCollapsible,
                     collapsedIds = collapsedIds,
-                    loading = statusKind == StatusDemo.Loading,
-                    empty = emptyKind,
                 )
                 SessionList(
                     model = model,
@@ -164,7 +154,7 @@ private fun ControlRow(text: String, checked: Boolean, onClick: () -> Unit) {
 }
 
 // ---------------------------------------------------------------------------
-// Previews: light + dark with the fixture, plus one per overlay state.
+// Previews: light + dark with the fixture, plus the blank list.
 // All pass their own onOpenSession — rememberSessionListOpener needs a
 // NavStackHost, which previews do not have.
 // ---------------------------------------------------------------------------
@@ -174,8 +164,6 @@ private fun SessionListPreviewBody(
     appearance: Appearance,
     sections: List<ListSection> = SessionListFixtures.sections(),
     collapsible: Boolean = true,
-    loading: Boolean = false,
-    empty: SessionListEmpty = SessionListEmpty.None,
 ) {
     ZeronTheme(appearance) {
         // Frozen at 0 ns: the spinner renders the cycle-0 pattern and the
@@ -184,8 +172,6 @@ private fun SessionListPreviewBody(
             val model = rememberSessionListModel(
                 sections = sections,
                 collapsible = collapsible,
-                loading = loading,
-                empty = empty,
             )
             SessionList(
                 model = model,
@@ -208,28 +194,10 @@ private fun SessionListDarkPreview() {
     SessionListPreviewBody(Appearance.Dark)
 }
 
-@Preview(name = "Session list – loading", widthDp = 393, heightDp = 852)
-@Composable
-private fun SessionListLoadingPreview() {
-    SessionListPreviewBody(Appearance.Light, sections = emptyList(), loading = true)
-}
-
-@Preview(name = "Session list – empty", widthDp = 393, heightDp = 852)
-@Composable
-private fun SessionListEmptyPreview() {
-    SessionListPreviewBody(Appearance.Light, sections = emptyList(), empty = SessionListEmpty.Sessions)
-}
-
-@Preview(name = "Session list – empty archived", widthDp = 393, heightDp = 852)
-@Composable
-private fun SessionListEmptyArchivedPreview() {
-    SessionListPreviewBody(Appearance.Light, sections = emptyList(), empty = SessionListEmpty.Archived)
-}
-
 @Preview(name = "Session list – blank", widthDp = 393, heightDp = 852)
 @Composable
 private fun SessionListBlankPreview() {
-    SessionListPreviewBody(Appearance.Light, sections = emptyList(), empty = SessionListEmpty.None)
+    SessionListPreviewBody(Appearance.Light, sections = emptyList())
 }
 
 @Preview(name = "Session list – folder + plain header", widthDp = 393, heightDp = 852)

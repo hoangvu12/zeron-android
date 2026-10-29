@@ -46,8 +46,7 @@ import sh.zeron.android.design.ToasterState
 import sh.zeron.android.design.glass.GlassMenuHost
 import sh.zeron.android.shell.NavStack
 import sh.zeron.android.shell.NavStackHost
-import sh.zeron.android.shell.TabId
-import sh.zeron.android.shell.TabRootRoute
+import sh.zeron.android.shell.SessionsRootRoute
 import uniffi.zeron_core.SectionView
 import uniffi.zeron_core.WorkspaceSnapshot
 
@@ -159,7 +158,7 @@ class FolderScreenTest {
     private val toaster = ToasterState()
     private val actions = RecordingRowActions()
     private val contexts = CopyOnWriteArrayList<SessionRowContext>()
-    private val stack = NavStack(TabRootRoute(TabId.Sessions))
+    private val stack = NavStack(SessionsRootRoute)
     private var workspace by mutableStateOf<WorkspaceSnapshot?>(null)
 
     @Before

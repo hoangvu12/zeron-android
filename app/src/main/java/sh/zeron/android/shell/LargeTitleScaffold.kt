@@ -45,6 +45,8 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.hideFromAccessibility
 import androidx.compose.ui.semantics.isTraversalGroup
@@ -152,6 +154,9 @@ object LargeTitleDefaults {
  * dialog insets) are the providers.
  */
 val LocalPrefersLargeTitles = staticCompositionLocalOf { true }
+
+/** The list's accessibility action that runs a pull to refresh (#23). */
+const val PullToRefreshActionLabel = "Refresh"
 
 /**
  * The insets this scaffold's host already guarantees (android-ui-parity
@@ -490,6 +495,16 @@ fun LargeTitleScaffold(
                             .fillMaxSize()
                             .onSizeChanged { pull.viewportPx = it.height.toFloat() }
                             .offset { IntOffset(0, pull.offsetPx.roundToInt()) }
+                            // #23: the gesture has no accessibility path of
+                            // its own — the list offers "Refresh" instead.
+                            .semantics {
+                                customActions = listOf(
+                                    CustomAccessibilityAction(PullToRefreshActionLabel) {
+                                        pull.refresh()
+                                        true
+                                    },
+                                )
+                            }
                             .observeFingerForSnap(snapGate, listState)
                     } else {
                         Modifier.fillMaxSize().observeFingerForSnap(snapGate, listState)

@@ -218,7 +218,7 @@ fun FolderScreensGallerySection() {
                         NavStackHost(stack = stack, active = true) { entry ->
                             val route = entry.route
                             if (route is FolderRoute) {
-                                FolderScreen(route = route, workspace = workspaceOf(route), loading = false)
+                                FolderScreen(route = route, workspace = workspaceOf(route))
                             } else {
                                 // The list under the folder page: a blank
                                 // page background in this frame.

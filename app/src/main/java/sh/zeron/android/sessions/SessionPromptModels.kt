@@ -71,9 +71,21 @@ object SessionPromptCopy {
     /** An untitled chat in the confirm's message (`row.hasTitle ? row.title : "New session"`). */
     const val UntitledSession = "New session"
 
-    /** `“<title>” will be permanently deleted. This can’t be undone.` — curly quotes and apostrophe as upstream. */
-    fun deleteSessionMessage(title: String) =
-        "“${title.ifBlank { UntitledSession }}” will be permanently deleted. This can’t be undone."
+    /**
+     * `ios:Session/SessionViewController.swift:873-876`, curly quotes and
+     * apostrophe as iOS: `“<title>” will be permanently deleted. This can’t
+     * be undone.`, or for a Cloud chat `“<title>” and its Cloud machine will
+     * be permanently deleted, with anything not pushed from it. This can’t
+     * be undone.`
+     */
+    fun deleteSessionMessage(title: String, isCloud: Boolean = false): String {
+        val quoted = "“${title.ifBlank { UntitledSession }}”"
+        return if (isCloud) {
+            "$quoted and its Cloud machine will be permanently deleted, with anything not pushed from it. This can’t be undone."
+        } else {
+            "$quoted will be permanently deleted. This can’t be undone."
+        }
+    }
 }
 
 /**
@@ -167,13 +179,13 @@ fun deleteSectionSheet(name: String, onDelete: () -> Unit): ActionSheetModel = A
 )
 
 /**
- * "Delete session?" (upstream #967): an alert, not a sheet — Cancel, then
- * a destructive "Delete". Zeron has no Cloud machines, so the message is
- * always the plain "will be permanently deleted" one.
+ * "Delete session?" (`confirmDelete`): an alert, not a sheet — Cancel,
+ * then a destructive "Delete". A Cloud chat's message also names its Cloud
+ * machine (G5).
  */
-fun deleteSessionAlert(title: String, onDelete: () -> Unit): ZeronAlert = ZeronAlert(
+fun deleteSessionAlert(title: String, isCloud: Boolean = false, onDelete: () -> Unit): ZeronAlert = ZeronAlert(
     title = SessionPromptCopy.DeleteSessionTitle,
-    message = SessionPromptCopy.deleteSessionMessage(title),
+    message = SessionPromptCopy.deleteSessionMessage(title, isCloud),
     buttons = listOf(
         AlertButton(SessionPromptCopy.Cancel, role = AlertButtonRole.Cancel),
         AlertButton(SessionPromptCopy.Delete, role = AlertButtonRole.Destructive) { onDelete() },

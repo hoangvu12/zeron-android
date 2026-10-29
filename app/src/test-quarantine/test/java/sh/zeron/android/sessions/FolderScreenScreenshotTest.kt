@@ -16,8 +16,7 @@ import sh.zeron.android.design.ZeronTheme
 import sh.zeron.android.design.glass.GlassMenuHost
 import sh.zeron.android.shell.NavStack
 import sh.zeron.android.shell.NavStackHost
-import sh.zeron.android.shell.TabId
-import sh.zeron.android.shell.TabRootRoute
+import sh.zeron.android.shell.SessionsRootRoute
 import uniffi.zeron_core.WorkspaceSnapshot
 
 /**
@@ -53,7 +52,7 @@ class FolderScreenScreenshotTest {
      * of the root alone is ever captured.
      */
     private fun shot(appearance: Appearance, file: String, route: FolderRoute, workspace: WorkspaceSnapshot?) {
-        val stack = NavStack(TabRootRoute(TabId.Sessions)).apply { push(route, animated = false) }
+        val stack = NavStack(SessionsRootRoute).apply { push(route, animated = false) }
         compose.setContent {
             ZeronTheme(appearance) {
                 ProvideGlyphClock(frozenAtNanos = 0L) {

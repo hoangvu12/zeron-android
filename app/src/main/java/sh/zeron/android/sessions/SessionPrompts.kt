@@ -2,12 +2,15 @@ package sh.zeron.android.sessions
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import sh.zeron.android.ZeronApplication
 import sh.zeron.android.design.ActionSheetPresenter
 import sh.zeron.android.design.Alerts
 import sh.zeron.android.design.LocalActionSheet
 import sh.zeron.android.design.LocalAlerts
 import uniffi.zeron_core.CoreClient
 import uniffi.zeron_core.SessionRow
+import uniffi.zeron_core.WorkspaceSnapshot
 
 /**
  * The launcher layer over the five prompt builders (android-ui-parity
@@ -101,6 +104,8 @@ internal class DefaultSessionPrompts(
     private val rowActions: RowActions,
     private val alerts: Alerts,
     private val sheets: ActionSheetPresenter,
+    /** The workspace's row for a chat id (iOS `app.row(id)`), for the delete confirm; null when unknown. */
+    private val rowById: (String) -> SessionRow? = { null },
 ) : SessionPrompts {
 
     override fun renameSession(row: SessionRow) {
@@ -145,8 +150,13 @@ internal class DefaultSessionPrompts(
     }
 
     override fun confirmDeleteSession(chatId: String, title: String, onDeleted: () -> Unit) {
+        // iOS reads the row at confirm time: its title (untitled → "New
+        // session") and whether it is a Cloud chat. Without one the
+        // caller's title stands.
+        val row = rowById(chatId)
+        val shown = row?.let { if (it.hasTitle) it.title else "" } ?: title
         alerts.show(
-            deleteSessionAlert(title) {
+            deleteSessionAlert(shown, isCloud = row?.isCloud == true) {
                 rowActions.delete(chatId) { outcome ->
                     if (outcome == ActionOutcome.Ok || outcome == ActionOutcome.Gone) onDeleted()
                 }
@@ -168,7 +178,15 @@ fun rememberSessionPrompts(
 ): SessionPrompts {
     val alerts = LocalAlerts.current
     val sheets = LocalActionSheet.current
-    return remember(rowActions, alerts, sheets) {
-        DefaultSessionPrompts(rowActions, alerts, sheets)
+    val app = LocalContext.current.applicationContext as? ZeronApplication
+    return remember(rowActions, alerts, sheets, app) {
+        DefaultSessionPrompts(rowActions, alerts, sheets) { id -> app?.workspaceFeed?.snapshot?.value?.row(id) }
     }
 }
+
+/** The row for [chatId] anywhere in the workspace (front page or Archived), or null. */
+internal fun WorkspaceSnapshot.row(chatId: String): SessionRow? =
+    front.pinned.firstOrNull { it.id == chatId }
+        ?: front.sections.firstNotNullOfOrNull { s -> s.sessions.firstOrNull { it.id == chatId } }
+        ?: front.recent.firstOrNull { it.id == chatId }
+        ?: archived.firstOrNull { it.id == chatId }

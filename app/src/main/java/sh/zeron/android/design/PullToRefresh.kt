@@ -332,13 +332,22 @@ class PullToRefreshState internal constructor(
         }
     }
 
-    /** Test/gallery hook: behaves like a release past the threshold (offset snapped to the hold). */
-    @VisibleForTesting
-    internal fun startRefresh() {
+    /**
+     * A refresh without the gesture — the list's "Refresh" accessibility
+     * action (#23; the full pull-to-refresh accessibility pass is #63):
+     * behaves like a release past the threshold, the gap snapped to the
+     * hold. Does nothing while a refresh already runs.
+     */
+    fun refresh() {
+        if (phase == PullPhase.Refreshing) return
         settleJob?.cancel()
         offsetPx = holdPx
         trigger()
     }
+
+    /** Test/gallery hook: [refresh]. */
+    @VisibleForTesting
+    internal fun startRefresh() = refresh()
 
     /** Screenshot hook: cancels any settle and pins [px] (the phase stays as is). */
     @VisibleForTesting
