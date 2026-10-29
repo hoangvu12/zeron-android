@@ -53,8 +53,8 @@ tablet/foldable layouts, notifications.
 4. **No core patches.** Adapt in Kotlin.
 5. **Nothing builds locally.** All compilation, tests and screenshot renders
    run on GitHub Actions; the owner's machine needs only git + gh.
-6. **Small, reviewable PRs**, one ticket each, with CI green and screenshots
-   attached for UI changes.
+6. **Small, reviewable PRs**, one ticket each, with CI green. The owner tests
+   CI-built APKs on their own phone; there are no CI screenshot renders.
 
 ## 4. Architecture
 
@@ -82,8 +82,8 @@ docs/port/      the five iOS → Android gap audits (row IDs referenced by ticke
   of the core for Robolectric (JNA). Cached by submodule SHA; only runs when
   `zeron/` or the workflow changes.
 - `app` workflow: consumes `core-out` (`-PzeronCoreDir`), builds the debug APK,
-  runs JVM tests and Roborazzi screenshot renders, uploads the APK and the
-  screenshots as artifacts. Every PR gets an installable APK.
+  runs JVM tests, and uploads the APK (signed with the shared test key from
+  repo secrets) as an artifact. Every PR gets an installable APK.
 - `release` workflow (M10): signed arm64 APK on a GitHub Release.
 - Packaging ships `libc++_shared.so` beside `libzeron_mobile.so`; R8 keep
   rules for JNA/UniFFI (and WebRTC once voice lands).
@@ -109,10 +109,10 @@ docs/port/      the five iOS → Android gap audits (row IDs referenced by ticke
 - Roboco's ~136k lines of JVM tests target Roboco's core and fakes. They are
   **quarantined** (excluded from compilation) in M0 and revived per area as
   that area is ported; each area ticket revives or rewrites its tests.
-- Screenshot renders (Roborazzi, JVM, no emulator) are the preview channel:
-  CI uploads them; UI tickets attach before/after next to the iOS reference.
-- Demo mode (`Credentials.Demo`, launch extras) gives renders and manual QA a
-  workspace without signing in.
+- No CI screenshot renders: every CI run uploads a debug APK (signed with the
+  shared test key, so builds install over each other) and the owner tests it
+  on their phone.
+- Demo mode (`Credentials.Demo`) stays available as a debug launch extra.
 
 ## 5. Decisions
 
@@ -124,7 +124,7 @@ docs/port/      the five iOS → Android gap audits (row IDs referenced by ticke
 | D4 | Sign-in: `workosAuthorizeUrl` → Auth Tab (fallback Custom Tab) → `zeron://callback` → `parseAuthCallback` (state check) → `authExchangeCode` → `authListOrgs` (picker if >1) → `authRefresh` → `CoreClient(Credentials.WorkOs)` | decided (owner) |
 | D5 | Credentials: Roboco's `KeystoreSecretCipher` (AES-GCM, non-exportable) under a small `CredentialStore` with **synchronous** writes (Zeron Android's async `apply()` can lose a rotated refresh token) | decided (owner) |
 | D6 | Notifications: no push (the edge is APNs-only). A Kotlin `SessionWatcher` applies the edge's done / needs-input / failed rule to workspace snapshots; Roboco's `Notifier` + `RunWatchService` deliver; Zeron's `DeliveryService` holds the process after a send | decided (owner) |
-| D7 (#1) | Components: our look on headless, accessible primitives (Compose Foundation, Compose Unstyled), each with an accessibility contract (role, label, state, focus, keyboard, predictive back, IME). Glass surfaces stay in-window (separate-window Dialog/Popup can't blur behind). Per-component choices after the component lab renders | direction decided (owner); per component pending |
+| D7 (#1) | Components: our look on headless, accessible primitives (Compose Foundation, Compose Unstyled), each with an accessibility contract (role, label, state, focus, keyboard, predictive back, IME). Glass surfaces stay in-window (separate-window Dialog/Popup can't blur behind). Per-component choices after the owner tries the in-app component lab (#12) | direction decided (owner); per component pending |
 | D8 (#2) | "Stay connected in background": **dropped** (iOS has none), and no background catch-up worker. RunWatch notifies for any run working when the app was last opened (Roboco's behaviour); runs started on the desktop while the app hasn't been opened notify only once it is | decided (owner) |
 | D9 (#3) | Real Android push upstream: **not planned** | decided (owner) |
 | D10 (#4) | Licences page: **none** (iOS has none); licence texts ship inside the APK assets | decided (owner) |
@@ -140,7 +140,7 @@ GitHub issues in this repo.
 
 | Milestone | Outcome |
 |---|---|
-| **M0 Foundation** | Builds on Zeron's core in CI: plumbing, rename, Roboco-only systems removed, bindings swapped, tests quarantined, component lab renders |
+| **M0 Foundation** | Builds on Zeron's core in CI: plumbing, rename, Roboco-only systems removed, bindings swapped, tests quarantined, in-app component lab |
 | **M1 Account** | Sign in to the real workspace: session holder, credentials, Auth Tab, welcome, onboarding (non-Cloud steps), sign-out, demo/dev extras, `zeron://` links |
 | **M2 Shell & sessions** | Sessions list and shell at iOS parity: live data, groups/folds, pull to refresh, drag between sections, split/foldable, New Project |
 | **M3 Session, transcript, composer** | Chat screen at parity: status pill, painter (math, veil, icons, subagent card, links), header/menu, question panel, chips, error-card log-in |
@@ -150,7 +150,7 @@ GitHub issues in this repo.
 | **M7 Cloud & providers** | CloudStore, Providers + agent accounts, Cloud settings/GitHub/repos/billing, Cloud in new session and sessions, Cloud onboarding steps |
 | **M8 Notifications** | SessionWatcher, RunWatch on snapshots, delivery hold, notification settings |
 | **M9 Voice** | Voice core and UI, settings, call notification |
-| **M10 Polish & release** | Component swaps (D7), accessibility pass, parity screenshot board, signed releases |
+| **M10 Polish & release** | Component swaps (D7), accessibility pass, signed releases |
 
 ## 7. Ticket conventions
 
@@ -159,6 +159,6 @@ GitHub issues in this repo.
   **Zeron refs** (core API, `zeron/apps/android` file) · **Tasks** ·
   **Acceptance** · **Audit rows** (`docs/port/0N-*.md` row IDs) ·
   **Depends on**.
-- Done = CI green, acceptance met, screenshots (UI) attached next to iOS,
-  audit rows ticked in the PR description.
+- Done = CI green, acceptance met, audit rows ticked in the PR description.
+  Ignore any older "attach renders" wording in tickets.
 - `type:decision` issues hold owner decisions; the spec's §5 links them.
