@@ -28,6 +28,8 @@ data class NewSessionDraft(
     val harness: String = DEFAULT_HARNESS,
     val model: String? = null,
     val effort: String? = null,
+    /** Run on its own Cloud machine (#53, iOS `cloud: Bool?`: optional, drafts saved before Cloud). */
+    val cloud: Boolean? = null,
 ) {
     /**
      * Forgotten-engine ids removed (ticket 92's engine-forget rule): a
@@ -86,6 +88,7 @@ object NewSessionDraftJson : NewSessionDraftCodec {
         o.put("harness", d.harness)
         d.model?.let { o.put("model", it) }
         d.effort?.let { o.put("effort", it) }
+        d.cloud?.let { o.put("cloud", it) }
         return o.toString()
     }
 
@@ -110,6 +113,11 @@ object NewSessionDraftJson : NewSessionDraftCodec {
                 harness = string("harness") ?: DEFAULT_HARNESS,
                 model = string("model"),
                 effort = string("effort"),
+                cloud = if (o.has("cloud") && !o.isNull("cloud")) {
+                    o.get("cloud") as? Boolean ?: throw JSONException("cloud is not a boolean")
+                } else {
+                    null
+                },
             )
         } catch (e: JSONException) {
             reset()

@@ -34,10 +34,16 @@ data class BottomStackModel(
     val editing: Boolean = false,
     /** #40: the companion strip has a chip (iOS `!strip.state.isEmpty`). */
     val stripShown: Boolean = false,
+    /** #53: a Cloud chat out of credits shows its notice over the pill row (iOS `creditsNotice`). */
+    val noticeShown: Boolean = false,
 ) {
-    /** The pill row shows for a banner, an edit, or the companion strip (`:502`, `:776`). */
-    val pillShown: Boolean
+    /** The pill row itself: a banner, an edit, or the companion strip (`:502`, `:776`). */
+    val rowShown: Boolean
         get() = bannerShown || editing || stripShown
+
+    /** The pill slot shows for its row or the credits notice. */
+    val pillShown: Boolean
+        get() = rowShown || noticeShown
 
     /** The queue shows when non-empty and no questions (`:500`). */
     val queueShown: Boolean
@@ -61,12 +67,18 @@ data class BottomStackModel(
          * isEditing)`, and the pill slot still renders
          * `shownBanner(chrome.banner, editing)` (73).
          */
-        fun from(chrome: SessionChrome, editing: Boolean, stripShown: Boolean = false): BottomStackModel = BottomStackModel(
+        fun from(
+            chrome: SessionChrome,
+            editing: Boolean,
+            stripShown: Boolean = false,
+            noticeShown: Boolean = false,
+        ): BottomStackModel = BottomStackModel(
             questionsShown = chrome.questions != null,
             queueCount = chrome.queue.size,
             bannerShown = chrome.banner != SessionChrome.Banner.None,
             editing = editing,
             stripShown = stripShown,
+            noticeShown = noticeShown,
         )
     }
 }

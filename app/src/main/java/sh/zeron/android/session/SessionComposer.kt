@@ -133,6 +133,13 @@ class SessionComposerBinding internal constructor(
     /** Set by 83 when its queue-edit controller exists. */
     var queueEdit: QueuedEditGate? by mutableStateOf(null)
 
+    /**
+     * #53: a Cloud chat out of credits can't wake its machine — true keeps
+     * the send (and nudges the credits notice) instead of one that never
+     * lands (iOS `cloudOutOfCredits`). Read at send time.
+     */
+    var cloudGate: () -> Boolean = { false }
+
     /** Set by 89 when its chip-menu provider map lands; `emptyMap()` until then. */
     var chipMenus: (List<ComposerChip>) -> Map<String, ChipMenuProvider> = { emptyMap() }
 
@@ -164,6 +171,7 @@ class SessionComposerBinding internal constructor(
      */
     internal suspend fun onSend(text: String, images: List<StagedImage>, mode: DeliveryMode): SendResult {
         queueEdit?.interceptSend(text)?.let { return it }
+        if (cloudGate()) return SendResult.Kept
         val queued = composer.running && mode == DeliveryMode.Queue
         if (queued) transcript.expectQueuedTurn() else transcript.beginOwnTurn()
         val error: Throwable? = try {

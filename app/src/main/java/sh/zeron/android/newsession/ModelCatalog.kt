@@ -32,6 +32,12 @@ interface ModelCatalogSource {
      * launches it on the app scope with `Dispatchers.IO`.
      */
     suspend fun fetch(deviceId: String): List<ModelChoice>
+
+    /**
+     * #53: Cloud's models, as the edge lists them (iOS `AppModel.cloudModels`):
+     * `cloudModels(h)` for each Cloud harness; `[]` without a client.
+     */
+    suspend fun fetchCloud(): List<ModelChoice> = emptyList()
 }
 
 /** One `HarnessInfo` × `ModelInfo` row of the pickers. */
@@ -68,6 +74,23 @@ class CoreModelCatalogSource(
     }
 
     override fun builtIn(): List<ModelChoice> = builtInCache
+
+    override suspend fun fetchCloud(): List<ModelChoice> {
+        val c = client() ?: return emptyList()
+        return CLOUD_HARNESSES.flatMap { h ->
+            val label = uniffi.zeron_core.harnessLabel(h)
+            c.cloudModels(h).map { m ->
+                ModelChoice(
+                    harness = h,
+                    harnessLabel = label,
+                    id = m.id,
+                    label = m.label,
+                    efforts = m.reasoningLevels,
+                    detail = m.description?.takeIf { it.isNotBlank() },
+                )
+            }
+        }
+    }
 
     override suspend fun fetch(deviceId: String): List<ModelChoice> {
         val c = client() ?: return emptyList()

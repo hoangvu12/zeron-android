@@ -67,12 +67,14 @@ fun newSessionModelPicker(
     draft: NewSessionDraft,
     hostName: String,
     update: ((NewSessionDraft) -> NewSessionDraft) -> Unit,
+    /** #53: `cloud` for a draft that runs on Cloud. */
+    hostSymbol: String = sh.zeron.android.composer.HOST_SYMBOL_COMPUTER,
 ): ModelPickerRequest = ModelPickerRequest(
     tabs = newSessionPickerTabs(models, draft.harness),
     harness = draft.harness,
     model = draft.model,
-    // TODO(#53): hostName "Cloud" with hostSymbol "cloud" when the draft runs on Cloud.
     hostName = hostName,
+    hostSymbol = hostSymbol,
     load = { h -> newSessionPickerRows(models, h) },
     onPick = { h, row -> update { applyNewSessionModelPick(it, h, row.id) } },
 )

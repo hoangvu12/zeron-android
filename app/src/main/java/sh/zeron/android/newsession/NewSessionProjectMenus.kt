@@ -123,7 +123,20 @@ fun pickProjectTarget(
 fun NewSessionDraft.withCheckout(p: ProjectOption): NewSessionDraft = copy(
     projectId = p.id,
     hostId = null,
-    branch = if (p.id != projectId) null else branch,
+    // #53: a branch picked for Cloud ("Start from") isn't the checkout's.
+    branch = if (p.id != projectId || cloud == true) null else branch,
+    cloud = if (p.isCloud) true else null,
+)
+
+/** #53 (iOS `pickCloud`): run the picked project's session on Cloud. */
+fun NewSessionDraft.withCloud(): NewSessionDraft = copy(cloud = true, branch = null, worktree = false)
+
+/** #53: "New Cloud Project…"'s `onCreated(id)`: the new project, on Cloud. */
+fun NewSessionDraft.withCreatedCloudProject(id: String): NewSessionDraft = copy(
+    projectId = id,
+    hostId = null,
+    branch = null,
+    cloud = true,
 )
 
 /**
@@ -170,6 +183,8 @@ fun buildProjectMenu(
     onNoProject: () -> Unit,
     onNewProject: () -> Unit,
     compare: Comparator<String> = localizedCaseInsensitive(),
+    /** #53: "New Cloud Project…", hidden (null) while Cloud isn't offered. */
+    onNewCloudProject: (() -> Unit)? = null,
 ): Menu {
     val picked = projects.firstOrNull { it.id == draft.projectId }?.groupKey
     val groups = projectGroups(projects, compare).map { g ->
@@ -181,13 +196,21 @@ fun buildProjectMenu(
             testTag = "project-menu-group",
         ) { onPickGroup(g.members) }
     }
-    val fixed = listOf(
+    val fixed = listOfNotNull(
         MenuItem(
             title = "No Project…",
             icon = MenuIcon.Symbol(ZeronIcons.Tray),
             checked = draft.projectId == null,
             testTag = "project-menu-none",
         ) { onNoProject() },
+        onNewCloudProject?.let { open ->
+            MenuItem(
+                title = "New Cloud Project…",
+                icon = MenuIcon.Symbol(ZeronIcons.Cloud),
+                checked = false,
+                testTag = "project-menu-new-cloud",
+            ) { open() }
+        },
         MenuItem(
             title = "New Project…",
             icon = MenuIcon.Symbol(ZeronIcons.FolderBadgePlus),
@@ -221,17 +244,42 @@ fun buildRunOnMenu(
     draft: NewSessionDraft,
     onPickCheckout: (ProjectOption) -> Unit,
     onPickHost: (HostOption) -> Unit,
+    /** #53: a project is picked (a Cloud project has no checkout rows, but still no host list). */
+    hasProject: Boolean = checkouts.isNotEmpty(),
+    /** #53: the session runs on Cloud now (no checkout is checked). */
+    runsOnCloud: Boolean = false,
+    /** #53: the inline Cloud row's subtitle when Cloud is offered for the project (iOS `cloudOffered`), else null. */
+    cloudSubtitle: String? = null,
+    onPickCloud: () -> Unit = {},
 ): Menu {
-    val children: List<MenuElement> = if (checkouts.isNotEmpty()) {
-        checkouts.map { p ->
-            val shared = checkouts.count { it.device == p.device } > 1
+    // A Cloud project's own entry is the Cloud row, never a computer.
+    val machines = checkouts.filter { !it.isCloud }
+    val children: List<MenuElement> = if (machines.isNotEmpty() || hasProject) {
+        val rows: List<MenuElement> = machines.map { p ->
+            val shared = machines.count { it.device == p.device } > 1
             MenuItem(
                 title = p.deviceName,
                 subtitle = if (shared) p.path else if (p.online) "Online" else "Offline",
                 icon = MenuIcon.Symbol(ZeronIcons.Desktopcomputer),
-                checked = p.id == draft.projectId,
+                checked = p.id == draft.projectId && !runsOnCloud,
                 testTag = "run-on-row",
             ) { onPickCheckout(p) }
+        }
+        if (cloudSubtitle != null) {
+            rows + MenuSection(
+                inline = true,
+                children = listOf(
+                    MenuItem(
+                        title = "Cloud",
+                        subtitle = cloudSubtitle,
+                        icon = MenuIcon.Symbol(ZeronIcons.Cloud),
+                        checked = runsOnCloud,
+                        testTag = "run-on-cloud",
+                    ) { onPickCloud() },
+                ),
+            )
+        } else {
+            rows
         }
     } else {
         hosts.map { h ->
@@ -265,6 +313,8 @@ class ProjectRunOnMenus(
     private val newProject: NewProjectPresenter,
     /** The page's liveness guard — the iOS `[weak self]` of `onCreated`. */
     private val isAlive: () -> Boolean,
+    /** #53: opens the Cloud repo picker; its `onCreated(id)` is the argument. */
+    private val newCloudProject: ((onCreated: (String) -> Unit) -> Unit)? = null,
 ) {
 
     /** The project chip's menu, over the model's current options. */
@@ -288,6 +338,11 @@ class ProjectRunOnMenus(
                     if (isAlive()) model.update { it.withCreatedProject(id) }
                 }
             },
+            onNewCloudProject = newCloudProject?.takeIf { model.cloud.available }?.let { open ->
+                {
+                    open { id -> if (isAlive()) model.update { it.withCreatedCloudProject(id) } }
+                }
+            },
         )
     }
 
@@ -303,6 +358,10 @@ class ProjectRunOnMenus(
         draft = model.draft,
         onPickCheckout = { p -> model.update { it.withCheckout(p) } },
         onPickHost = { h -> model.update { it.withHost(h) } },
+        hasProject = model.project != null,
+        runsOnCloud = model.runsOnCloud,
+        cloudSubtitle = if (model.cloudOffered) cloudRowSubtitle(model.cloud.credits) else null,
+        onPickCloud = { model.update { it.withCloud() } },
     ).takeIf { it.hasContent() }
 
     /** The two chip ids 109's strip looks up: `project` and `host`. */
@@ -311,3 +370,7 @@ class ProjectRunOnMenus(
         NewSessionChipIds.Host to { runOn() },
     )
 }
+
+/** #53: the Run on menu's Cloud row subtitle (iOS): "N credits left", else "Its own machine". */
+fun cloudRowSubtitle(credits: Double?): String =
+    credits?.let { "${sh.zeron.android.core.CloudStore.credits(it)} credits left" } ?: "Its own machine"

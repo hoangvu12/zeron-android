@@ -16,7 +16,9 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -69,6 +71,8 @@ class NewSessionModel(
     private val appScope: CoroutineScope,
     private val io: CoroutineDispatcher = Dispatchers.IO,
     private val main: CoroutineDispatcher = Dispatchers.Main.immediate,
+    /** #53: what the page reads of Cloud (the app's [sh.zeron.android.core.CloudStore]). */
+    val cloud: NewSessionCloud = NewSessionCloud.None,
 ) {
 
     /** The epoch the page opened with; a full reset while open freezes this page. */
@@ -91,6 +95,9 @@ class NewSessionModel(
     /** Snapshot state; assigned by the options collector (109/113 read it in `derivedStateOf`). */
     var currentOptions: NewSessionOptions? by mutableStateOf(options.value)
         private set
+
+    /** #53: a Cloud start is minting its machine ("Starting on Cloud…", the composer locked). */
+    var cloudStarting: Boolean by mutableStateOf(false)
 
     /** True after a successful create: later saves keep nothing (`:81,415-418`). */
     var created: Boolean by mutableStateOf(false)
@@ -118,6 +125,12 @@ class NewSessionModel(
             if (n != draft) updateInternal({ n }, userEdit = false)
         }
         loadModels()
+        // #53: Cloud's status arrives later than the page (iOS observes the
+        // store): a change in where the draft runs reloads the catalog.
+        cloud.refreshIfUnread()
+        pageScope.launch {
+            snapshotFlow { runsOnCloud }.collect { loadModels() }
+        }
         // Every options change re-runs the stale rule; the else branch
         // covers a project whose device changed.
         pageScope.launch {
@@ -155,6 +168,18 @@ class NewSessionModel(
     /** The engine the session runs on (iOS `:237`). */
     val deviceId: String
         get() = project?.device ?: draft.hostId ?: ""
+
+    /**
+     * The session will run on its own Cloud machine (iOS `runsOnCloud`): a
+     * Cloud project, or Cloud picked for a project whose repository Cloud
+     * reaches.
+     */
+    val runsOnCloud: Boolean
+        get() = runsOnCloud(project, draft, cloud)
+
+    /** Cloud can run this project's sessions (iOS `cloudOffered`): the Run on menu's Cloud row. */
+    val cloudOffered: Boolean
+        get() = project?.let { p -> cloud.available && (p.isCloud || cloud.reaches(p.githubRepo)) } == true
 
     /**
      * Checkouts of the picked project, one per row of the host menu
@@ -234,14 +259,25 @@ class NewSessionModel(
      * changes nothing.
      */
     internal fun loadModels() {
-        val device = deviceId
+        val onCloud = runsOnCloud
+        val device = if (onCloud) CLOUD_MODELS_KEY else deviceId
         if (device == modelsDevice) return // Compose recomposes the chips by itself
         modelsDevice = device
-        models = ModelCatalogCache[device] ?: catalog.builtIn()
+        if (onCloud) {
+            // Cloud runs the agents it has accounts for (iOS `:197-205`):
+            // its catalog, and the draft moved onto one of them.
+            models = ModelCatalogCache[device] ?: catalog.builtIn().filter { it.harness in CLOUD_HARNESSES }
+            val first = models.firstOrNull()
+            if (first != null && models.none { it.harness == draft.harness }) {
+                updateInternal({ it.copy(harness = first.harness, model = null, effort = null) }, userEdit = false)
+            }
+        } else {
+            models = ModelCatalogCache[device] ?: catalog.builtIn()
+        }
         if (device.isEmpty()) return // no engine to ask; the built-in list is the answer
         appScope.launch(io) {
             val fresh = try {
-                catalog.fetch(device)
+                if (onCloud) catalog.fetchCloud() else catalog.fetch(device)
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (t: Throwable) {
@@ -316,19 +352,23 @@ fun rememberNewSessionModel(prompt: String?): NewSessionModel {
     val pageScope = rememberCoroutineScope()
     val model = remember(prompt) {
         val feed = app.workspaceFeed
+        val cloud = StoreNewSessionCloud(app.cloud)
+        // #53 (iOS `projectOptions`): Cloud projects only while the account
+        // is offered Cloud (always in the demo).
+        val offered = snapshotFlow { app.sessionHolder.isDemo || app.cloud.available }
         NewSessionModel(
             prompt = prompt,
             store = app.newSessionDrafts,
-            options = feed.snapshot
-                .map { it?.toNewSessionOptions() }
+            options = combine(feed.snapshot, offered) { s, o -> s?.toNewSessionOptions(cloudOffered = o) }
                 .stateIn(
                     pageScope,
                     SharingStarted.Eagerly,
-                    feed.snapshot.value?.toNewSessionOptions(),
+                    feed.snapshot.value?.toNewSessionOptions(app.sessionHolder.isDemo || app.cloud.available),
                 ),
             catalog = CoreModelCatalogSource { app.clientOrNull() },
             pageScope = pageScope,
             appScope = app.appScope,
+            cloud = cloud,
         )
     }
     DisposableEffect(model) {
@@ -376,5 +416,56 @@ fun NewSessionDraftEffect(model: NewSessionModel, composer: ComposerController) 
     }
     DisposableEffect(model, composer) {
         onDispose { model.rememberDraft(composer.text, composer.images) }
+    }
+}
+
+/** The catalog key of Cloud's models (iOS `cloudModelsKey`): never a device id. */
+internal const val CLOUD_MODELS_KEY = "\u0000cloud"
+
+/** The agents Cloud runs (iOS `AppModel.cloudHarnesses`). */
+val CLOUD_HARNESSES = listOf("claude-code", "codex")
+
+/** iOS `runsOnCloud`, pure. */
+fun runsOnCloud(project: ProjectOption?, draft: NewSessionDraft, cloud: NewSessionCloud): Boolean {
+    val p = project ?: return false
+    return p.isCloud || (draft.cloud == true && cloud.reaches(p.githubRepo))
+}
+
+/**
+ * What the New Session page reads of Cloud (#53): a seam over the app's
+ * [sh.zeron.android.core.CloudStore] (snapshot state, so readers
+ * recompose), so the page's rules stay plain-JVM testable.
+ */
+interface NewSessionCloud {
+    val available: Boolean
+    val credits: Double?
+    val outOfCredits: Boolean
+
+    /** Cloud reaches `owner/name`: its sessions can run there. */
+    fun reaches(repo: String?): Boolean
+
+    /** iOS `if app.cloud.info == nil { app.cloud.refresh() }`. */
+    fun refreshIfUnread()
+
+    companion object {
+        /** No Cloud (tests, previews). */
+        val None: NewSessionCloud = object : NewSessionCloud {
+            override val available = false
+            override val credits: Double? = null
+            override val outOfCredits = false
+            override fun reaches(repo: String?) = false
+            override fun refreshIfUnread() {}
+        }
+    }
+}
+
+/** The live [NewSessionCloud] over the app's store. */
+class StoreNewSessionCloud(private val store: sh.zeron.android.core.CloudStore) : NewSessionCloud {
+    override val available: Boolean get() = store.available
+    override val credits: Double? get() = store.credits
+    override val outOfCredits: Boolean get() = store.outOfCredits
+    override fun reaches(repo: String?): Boolean = store.reaches(repo)
+    override fun refreshIfUnread() {
+        if (store.info == null) store.refresh()
     }
 }

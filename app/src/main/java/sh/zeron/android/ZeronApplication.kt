@@ -581,7 +581,11 @@ class ZeronApplication : Application() {
         // `noteFailureMessage`, and the pill's tap cancels an open edit
         // through its `onEditingTap`.
         chromeFillers.register(ChromeFillerRegistry.BANNER) { core ->
-            StatusBanner(retryDelivery = { (core as CoreSessionCore).handle.retryDelivery() })
+            StatusBanner(
+                retryDelivery = { (core as CoreSessionCore).handle.retryDelivery() },
+                // #53: a Cloud chat's "Not delivered" reads its machine's state.
+                cloud = sh.zeron.android.session.StoreCloudBannerSource(cloud),
+            )
         }
         // Ticket 89 (chip menus): the content and actions behind the
         // model / effort / PR chips — slot 21, right after the chips it

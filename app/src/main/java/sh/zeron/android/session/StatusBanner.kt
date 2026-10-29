@@ -143,6 +143,8 @@ class StatusBanner(
     /** The chat's `retryDelivery` (runs on [io], never main — upstream #609's trap). */
     private val retryDelivery: suspend () -> Unit,
     io: CoroutineDispatcher = Dispatchers.IO,
+    /** #53: what a Cloud chat's "Not delivered" reads instead (iOS `cloudBanner`). */
+    private val cloud: CloudBannerSource? = null,
     private val logW: (String, Throwable) -> Unit = { message, error ->
         android.util.Log.w("ZeronSession", message, error)
     },
@@ -218,8 +220,15 @@ class StatusBanner(
     }
 
     /** Derives the banner from the lite inputs and the sticky failure; no FFI. */
-    override fun fill(chrome: SessionChrome, input: ChromeInput): SessionChrome =
-        chrome.copy(banner = deriveBanner(bannerInputs(input, sendFailure)))
+    override fun fill(chrome: SessionChrome, input: ChromeInput): SessionChrome {
+        val banner = deriveBanner(bannerInputs(input, sendFailure))
+        val c = cloud
+        if (c == null || banner != SessionChrome.Banner.NotDelivered || input.row?.isCloud != true) {
+            return chrome.copy(banner = banner)
+        }
+        c.refreshSessions()
+        return chrome.copy(banner = cloudBanner(banner, isCloud = true, c.outOfCredits, c.sessionError(input.chatId, input.row.deviceId)))
+    }
 
     /** Sets the sticky send failure; invalidates only when the text changed. */
     private fun replaceSendFailure(next: String?) {
@@ -241,8 +250,7 @@ internal fun SendState.toSendLite(): SendLite = when (this) {
  * Maps a [ChromeInput] (uniffi records) plus the filler's sticky failure
  * into the pure [BannerInputs] (internal so the tests can drive it).
  *
- * TODO(#53): a Cloud chat's "Not delivered" becomes nothing when out of
- * credits, or "Cloud machine: … · Tap to retry" (iOS `cloudBanner`).
+ * A Cloud chat's "Not delivered" is then read again by [cloudBanner] (#53).
  */
 internal fun bannerInputs(input: ChromeInput, sendFailure: String?): BannerInputs {
     val composer = input.composer
@@ -255,4 +263,41 @@ internal fun bannerInputs(input: ChromeInput, sendFailure: String?): BannerInput
         roomConnected = composer.room.connected,
         roomRetryAtMs = composer.room.retryAtMs,
     )
+}
+
+/** #53: the Cloud reads a Cloud chat's banner needs (the app's [sh.zeron.android.core.CloudStore]). */
+interface CloudBannerSource {
+    val outOfCredits: Boolean
+
+    /** Why the chat's machine isn't running, when the edge said. */
+    fun sessionError(chatId: String, device: String?): String?
+
+    /** Re-read the machines (throttled by the store). Any thread. */
+    fun refreshSessions()
+}
+
+/** The live [CloudBannerSource]: snapshot reads; the re-read hops to main. */
+class StoreCloudBannerSource(private val store: sh.zeron.android.core.CloudStore) : CloudBannerSource {
+    private val main = android.os.Handler(android.os.Looper.getMainLooper())
+    override val outOfCredits: Boolean get() = store.outOfCredits
+    override fun sessionError(chatId: String, device: String?): String? = store.sessionError(chatId, device)
+    override fun refreshSessions() {
+        main.post { store.refreshSessions() }
+    }
+}
+
+/**
+ * iOS `cloudBanner`: a Cloud chat whose send can't land says why instead
+ * of a bare "Not delivered" — nothing when out of credits (the credits
+ * notice says it), its machine's error when the edge reported one. Pure.
+ */
+fun cloudBanner(
+    banner: SessionChrome.Banner,
+    isCloud: Boolean,
+    outOfCredits: Boolean,
+    machineError: String?,
+): SessionChrome.Banner {
+    if (banner != SessionChrome.Banner.NotDelivered || !isCloud) return banner
+    if (outOfCredits) return SessionChrome.Banner.None
+    return machineError?.let { SessionChrome.Banner.Failed("Cloud machine: $it · Tap to retry") } ?: banner
 }
