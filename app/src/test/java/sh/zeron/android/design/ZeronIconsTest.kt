@@ -98,6 +98,20 @@ class ZeronIconsTest {
         "cpu",
         "cloud",
         "creditcard",
+        // #61: voice.
+        "waveform",
+        "mic.fill",
+        "mic.slash.fill",
+        "phone.down.fill",
+        "text.bubble",
+        "person.wave.2",
+        "speaker.wave.2.fill",
+        "iphone",
+        "ear",
+        "lock",
+        "laptopcomputer",
+        "pc",
+        "server.rack",
     )
 
     @Test
@@ -173,8 +187,6 @@ class ZeronIconsTest {
             "3.circle.fill",
             "square.circle", // not numeric
             "-1.circle",
-            "waveform", // dropped: voice
-            "mic.fill",
             "sparkle", // dropped: sign-in mark
             "tab-chat", // Zeron extras have no SF name
             "WifiOff",
@@ -327,6 +339,17 @@ class ZeronIconsTest {
             ZeronIcons.Refresh to R.drawable.zi_refresh, // android-next#04
             ZeronIcons.PersonCropCircle to R.drawable.zi_user_circle, // #18
             ZeronIcons.RectanglePortraitAndArrowRight to R.drawable.zi_logout_2, // #18
+            ZeronIcons.Waveform to R.drawable.zi_waveform, // #61
+            ZeronIcons.MicFill to R.drawable.zi_microphone, // #61
+            ZeronIcons.MicSlashFill to R.drawable.zi_microphone_off, // #61
+            ZeronIcons.PhoneDownFill to R.drawable.zi_phone_hang_up, // #61
+            ZeronIcons.TextBubble to R.drawable.zi_chat_round_line, // #61
+            ZeronIcons.PersonWave2 to R.drawable.zi_person_wave, // #61
+            ZeronIcons.SpeakerWave2Fill to R.drawable.zi_volume_loud, // #61
+            ZeronIcons.Iphone to R.drawable.zi_smartphone, // #61
+            ZeronIcons.Ear to R.drawable.zi_ear, // #61
+            ZeronIcons.Laptopcomputer to R.drawable.zi_laptop, // #61
+            ZeronIcons.ServerRack to R.drawable.zi_remote_server, // #61
             ZeronIcons.TabChat to R.drawable.zi_tab_chat,
             ZeronIcons.TabSettings to R.drawable.zi_tab_settings,
             ZeronIcons.ZeronBow to R.drawable.zi_zeron_bow, // android-next #03: replaced ZeronGlyph

@@ -37,6 +37,9 @@ import sh.zeron.android.design.LocalBottomChromeTop
 import sh.zeron.android.design.LocalReduceMotion
 import sh.zeron.android.design.ZeronTheme
 import sh.zeron.android.design.glass.LocalHazeState
+import sh.zeron.android.voice.LocalOpenVoiceSettings
+import sh.zeron.android.voice.VoiceBarItem
+import sh.zeron.android.voice.openVoiceSettings
 
 /**
  * The phone shell: the app root on phones, the port of
@@ -205,6 +208,18 @@ fun MainTabShell(
                             onSettings = { router.showSettings() },
                             onNewSession = newSessionTap,
                             onFrontPage = !stack.hidesChrome(stack.top),
+                            // #61: the voice item; its menu's Voice Settings
+                            // pushes on the Sessions stack.
+                            voice = {
+                                CompositionLocalProvider(LocalOpenVoiceSettings provides { openVoiceSettings(stack) }) {
+                                    VoiceBarItem(
+                                        size = SessionsBottomBarMetrics.Height.dp,
+                                        iconPt = SessionsBottomBarMetrics.IconPt,
+                                        liveOrb = false,
+                                        testTag = "bottom-voice",
+                                    )
+                                }
+                            },
                             modifier = Modifier
                                 .align(Alignment.BottomCenter)
                                 .windowInsetsPadding(WindowInsets.ime.exclude(WindowInsets.navigationBars))

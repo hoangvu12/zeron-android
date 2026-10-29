@@ -18,6 +18,8 @@ import sh.zeron.android.sessions.FolderRouteContent
 import sh.zeron.android.sessions.SessionsScreen
 import sh.zeron.android.sidechats.SubagentRoute
 import sh.zeron.android.terminal.TerminalRoute
+import sh.zeron.android.voice.VoiceSettingsRoute
+import sh.zeron.android.voice.VoiceSettingsScreen
 
 /**
  * The phone shell's root route: the Sessions list, the first entry of
@@ -76,6 +78,9 @@ fun ShellRouteContent(route: NavRoute) {
         is AgentAccountsRoute -> AgentAccountsPage(route)
         // #51: Settings → Cloud.
         is CloudSettingsRoute -> CloudSettingsScreen(route)
+        // #61: Voice settings — Settings' Voice row and a voice control's
+        // menu or host picker push it.
+        is VoiceSettingsRoute -> VoiceSettingsScreen()
         else -> Unit
     }
 }

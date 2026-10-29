@@ -28,7 +28,11 @@ import sh.zeron.android.design.ProvideFeedback
 import sh.zeron.android.design.ZeronTheme
 import sh.zeron.android.sessions.LocalRowActions
 import sh.zeron.android.shell.tablet.Sidebar
+import sh.zeron.android.voice.LocalVoiceController
+import sh.zeron.android.voice.LocalVoiceStage
 import sh.zeron.android.voice.VoiceHost
+import sh.zeron.android.voice.VoiceStageHost
+import sh.zeron.android.voice.VoiceStagePresenter
 
 /**
  * The real app content wiring (android-ui-parity #35) — the only place
@@ -90,7 +94,13 @@ fun ZeronAppContent(app: ZeronApplication, rootState: AppRootState) {
                         // 42's row actions, provided inside the root
                         // ToastHost so every screen can write and the
                         // toasts land in the root host.
-                        CompositionLocalProvider(LocalRowActions provides app.rowActions) {
+                        // #61: voice for every entry point, and the stage over the app.
+                        val voiceStage = remember { VoiceStagePresenter() }
+                        CompositionLocalProvider(
+                            LocalRowActions provides app.rowActions,
+                            LocalVoiceController provides app.voice,
+                            LocalVoiceStage provides voiceStage,
+                        ) {
                             // #15: "Choose an organization" over whatever started the sign-in.
                             OrgPicker(app.authSession)
                             // #60: the call's prompt, screen wake, haptics and failure toast.
@@ -101,6 +111,11 @@ fun ZeronAppContent(app: ZeronApplication, rootState: AppRootState) {
                                     rootState = rootState,
                                     presentations = presentations,
                                 )
+                                // #61: the call stage, over the shell and under
+                                // onboarding; its transcript button opens the chat.
+                                VoiceStageHost(app.voice, voiceStage) { chatId ->
+                                    app.deepLinks.submit(DeepLink.OpenChat(chatId))
+                                }
                                 // #17: onboarding over the root (Welcome before
                                 // signing in, the shell after); the root swap
                                 // under it never shows.

@@ -159,14 +159,14 @@ class TranscriptIconsTest {
 
     @Test
     fun sourceReturnsUnknownForNamesThatResolveToNothing() {
-        for (name in listOf("tool-nope", "waveform", "")) {
+        for (name in listOf("tool-nope", "sparkle", "")) {
             assertEquals("$name draws nothing", TranscriptIconSource.Unknown, TranscriptIcons.source(name))
         }
         assertEquals(
             "each unknown name is logged once, with the ticket's wording",
             listOf(
                 "icon widget: no glyph for 'tool-nope'",
-                "icon widget: no glyph for 'waveform'",
+                "icon widget: no glyph for 'sparkle'",
                 "icon widget: no glyph for ''",
             ),
             logged,
@@ -175,7 +175,7 @@ class TranscriptIconsTest {
 
     @Test
     fun unknownNamesAreLoggedOnceHoweverOftenTheyResolve() {
-        repeat(10) { TranscriptIcons.source("waveform") }
+        repeat(10) { TranscriptIcons.source("sparkle") }
         repeat(10) { TranscriptIcons.source("tool-nope") }
         assertEquals("one line per name, not per lookup", 2, logged.size)
     }
@@ -190,7 +190,7 @@ class TranscriptIconsTest {
                     // genuinely re-resolved — the cache and the log-once
                     // memory hold.
                     TranscriptIcon(
-                        name = "waveform",
+                        name = "sparkle",
                         color = if (tick.intValue % 2 == 0) ColorRole.TEXT_TERTIARY else ColorRole.TEXT_SECONDARY,
                         heightDp = 16f,
                         palette = TranscriptPalette(false),
@@ -206,7 +206,7 @@ class TranscriptIconsTest {
             }
             compose.mainClock.advanceTimeByFrame()
         }
-        assertEquals(listOf("icon widget: no glyph for 'waveform'"), logged)
+        assertEquals(listOf("icon widget: no glyph for 'sparkle'"), logged)
     }
 
     // -------------------------------------------------------- the bitmap cache
