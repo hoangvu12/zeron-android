@@ -1,5 +1,8 @@
 package sh.zeron.android.voice
 
+import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -186,6 +189,12 @@ fun VoiceSettingsScreen(modifier: Modifier = Modifier) {
                 GroupedRow(
                     title = row.title,
                     position = position,
+                    // #63 (iOS's cell traits): the chosen host reads as
+                    // selected, one that can't be picked as dimmed.
+                    modifier = Modifier.semantics {
+                        selected = row.selected
+                        if (!row.enabled) disabled()
+                    },
                     subtitle = row.subtitle,
                     icon = row.icon,
                     iconTint = if (row.enabled) ZeronTheme.palette.secondary else ZeronTheme.palette.tertiary,

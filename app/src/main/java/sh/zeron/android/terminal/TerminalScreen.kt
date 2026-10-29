@@ -1,5 +1,10 @@
 package sh.zeron.android.terminal
 
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.progressBarRangeInfo
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import android.content.ClipData
 import android.content.ClipboardManager
 import androidx.compose.animation.AnimatedVisibility
@@ -350,7 +355,12 @@ internal fun TerminalScreen(route: TerminalRoute) {
             if (loading) {
                 StatusGlyph(
                     StatusGlyphKind.Spinner,
-                    modifier = Modifier.align(Alignment.Center).offset(y = (-40).dp).testTag("terminal-loading"),
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .offset(y = (-40).dp)
+                        // #63: read as "in progress".
+                        .semantics { progressBarRangeInfo = ProgressBarRangeInfo.Indeterminate }
+                        .testTag("terminal-loading"),
                     scale = 1.75f,
                 )
             }
@@ -501,6 +511,8 @@ private fun TerminalStatusPill(status: TerminalStatus, onAction: () -> Unit) {
             .clearAndSetSemantics {
                 contentDescription = status.a11y
                 role = Role.Button
+                // #63: "Reconnecting…", an exit or a failure is announced as it shows.
+                liveRegion = LiveRegionMode.Polite
                 onClick { onAction(); true }
             }
             .testTag("terminal-status"),

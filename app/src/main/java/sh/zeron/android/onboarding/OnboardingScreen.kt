@@ -1,5 +1,15 @@
 package sh.zeron.android.onboarding
 
+import sh.zeron.android.design.ModalBackHandler
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -97,7 +107,17 @@ fun OnboardingHost(app: ZeronApplication) {
 private fun Onboarding(app: ZeronApplication, screen: OnboardingScreen) {
     val palette = ZeronTheme.palette
     val signedIn = app.sessionHolder.client.collectAsState().value != null
-    BackHandler { app.onboarding.back(signedIn) }
+    // #63: predictive back eases the step toward the previous one; the
+    // commit goes back. Where there is nothing to go back to, Back is
+    // swallowed as before.
+    val canGoBack = screen.step.previous != null || !signedIn
+    var backProgress by remember { mutableFloatStateOf(0f) }
+    val backSign = if (LocalLayoutDirection.current == LayoutDirection.Rtl) -1f else 1f
+    ModalBackHandler(enabled = canGoBack, onProgress = { backProgress = it }) {
+        backProgress = 0f
+        app.onboarding.back(signedIn)
+    }
+    BackHandler(enabled = !canGoBack) {}
     // `viewDidLoad`: signed in, read Cloud (GitHub, the agents' logins) for
     // the Cloud steps; a status that lands on GitHub with Cloud withheld
     // moves on (`refresh()`, J2).
@@ -142,7 +162,13 @@ private fun Onboarding(app: ZeronApplication, screen: OnboardingScreen) {
                                 .togetherWith(fadeOut(tween(PageMillis, easing = EaseOut)))
                         }
                     },
-                    modifier = Modifier.weight(1f).fillMaxWidth(),
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .graphicsLayer {
+                            translationX = backSign * backProgress * slidePx
+                            alpha = 1f - 0.3f * backProgress
+                        },
                     label = "onboarding-page",
                 ) { step ->
                     Page(app, step, signedIn)
@@ -250,12 +276,17 @@ private fun Footer(app: ZeronApplication, step: OnboardingStep, signedIn: Boolea
 
 /** Title + detail, the way every step opens (`heading`): Sans SemiBold 26 over Sans 15. */
 @Composable
-internal fun Heading(title: String, detail: String) {
+internal fun Heading(title: String, detail: String, announce: Boolean = false) {
     val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        BasicText(title, style = uiStyle(Face.SansSemibold, typeScale.fixed(26f), palette.text))
-        BasicText(detail, style = uiStyle(Face.Sans, typeScale.fixed(15f), palette.secondary))
+        BasicText(title, Modifier.semantics { heading() }, style = uiStyle(Face.SansSemibold, typeScale.fixed(26f), palette.text))
+        BasicText(
+            detail,
+            // #63: a line that follows what the step finds (the Agents step's) is announced.
+            if (announce) Modifier.semantics { liveRegion = LiveRegionMode.Polite } else Modifier,
+            style = uiStyle(Face.Sans, typeScale.fixed(15f), palette.secondary),
+        )
     }
 }
 
@@ -298,7 +329,8 @@ internal fun CardRow(
         horizontalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         Tile(icon)
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        // #63: the title and its line as one TalkBack stop.
+        Column(Modifier.weight(1f).semantics(mergeDescendants = true) {}, verticalArrangement = Arrangement.spacedBy(2.dp)) {
             BasicText(title, style = uiStyle(Face.SansMedium, typeScale.fixed(16f), palette.text))
             if (detail != null) {
                 BasicText(
@@ -320,7 +352,8 @@ private fun Tile(icon: ZeronIcon) {
         Modifier
             .size(TileSide)
             .clip(RoundedCornerShape(TileSide * 0.28f))
-            .background(palette.controlFill),
+            .background(palette.controlFill)
+            .clearAndSetSemantics { },
         contentAlignment = Alignment.Center,
     ) {
         Icon(icon, tint = palette.text, sizePt = 17f, weight = SymbolWeight.Medium)

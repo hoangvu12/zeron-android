@@ -106,9 +106,13 @@ fun ZeronAppContent(app: ZeronApplication, rootState: AppRootState) {
                             // #60: the call's prompt, screen wake, haptics and failure toast.
                             VoiceHost(app.voice, app.appToaster)
                             Box(Modifier.fillMaxSize()) {
-                                // #63: the app under the call stage is hidden
-                                // from TalkBack while the stage is up.
-                                Box(Modifier.fillMaxSize().then(sh.zeron.android.design.modalBackground(overlayUp = voiceStage.showing))) {
+                                // #63: the app under the call stage, onboarding
+                                // or the debug welcome page is hidden from
+                                // TalkBack while one of them is up.
+                                val onboardingUp by app.onboarding.screen.collectAsState()
+                                val welcomeUp by app.debugWelcome.collectAsState()
+                                val covered = voiceStage.showing || onboardingUp != null || welcomeUp
+                                Box(Modifier.fillMaxSize().then(sh.zeron.android.design.modalBackground(overlayUp = covered))) {
                                     AppRootContent(
                                         app = app,
                                         rootState = rootState,

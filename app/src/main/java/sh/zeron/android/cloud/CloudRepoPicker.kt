@@ -1,5 +1,13 @@
 package sh.zeron.android.cloud
 
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -227,13 +235,22 @@ private fun SearchField(query: String, onQuery: (String) -> Unit) {
     ) {
         Icon(ZeronIcons.Magnifyingglass, palette.secondary, 14f, SymbolWeight.Medium)
         Spacer(Modifier.width(8.dp))
+        val keyboard = LocalSoftwareKeyboardController.current
         BasicTextField(
             value = query,
             onValueChange = onQuery,
             singleLine = true,
+            // #63: a search keyboard; its Search key only puts it away (the
+            // list filters as you type), and a label for TalkBack.
+            keyboardOptions = KeyboardOptions(
+                capitalization = KeyboardCapitalization.None,
+                autoCorrectEnabled = false,
+                imeAction = ImeAction.Search,
+            ),
+            keyboardActions = KeyboardActions(onSearch = { keyboard?.hide() }),
             textStyle = uiStyle(Face.Sans, ts.fixed(16f), palette.text),
             cursorBrush = SolidColor(palette.accent),
-            modifier = Modifier.weight(1f).testTag("repo-search"),
+            modifier = Modifier.weight(1f).semantics { contentDescription = RepoPickerCopy.Search }.testTag("repo-search"),
             decorationBox = { inner ->
                 Box(contentAlignment = Alignment.CenterStart) {
                     if (query.isEmpty()) {
@@ -280,7 +297,7 @@ private fun EmptyState(state: RepoPickerEmpty, onRetry: () -> Unit, onConnect: (
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 BasicText(
                     title,
-                    Modifier.fillMaxWidth(),
+                    Modifier.fillMaxWidth().semantics { heading() },
                     style = uiStyle(Face.SansSemibold, ts.fixed(28f), palette.text).copy(textAlign = TextAlign.Center),
                 )
                 BasicText(

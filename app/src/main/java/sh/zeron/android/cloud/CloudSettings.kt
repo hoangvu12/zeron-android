@@ -1,5 +1,9 @@
 package sh.zeron.android.cloud
 
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Box
+import sh.zeron.android.design.modalLayerBackground
+import sh.zeron.android.design.ModalLayer
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -252,9 +256,14 @@ fun CloudSettingsScreen(route: CloudSettingsRoute, modifier: Modifier = Modifier
         }
     }
 
+    // #63: its own modal layer — the GitHub and repository sheets hide the
+    // page from TalkBack while up. Without it they would register with the
+    // shell's layer and hide the shell, themselves included.
+    ModalLayer {
+    Box(Modifier.fillMaxSize()) {
     LargeTitleScaffold(
         title = CloudSettingsCopy.Title,
-        modifier = modifier.testTag("cloud-settings"),
+        modifier = modifier.testTag("cloud-settings").then(modalLayerBackground()),
         mode = TitleMode.InlineOnly,
         listState = rememberLazyListState(),
         contentPadding = PaddingValues(bottom = chrome.contentPadding + 16.dp),
@@ -293,6 +302,8 @@ fun CloudSettingsScreen(route: CloudSettingsRoute, modifier: Modifier = Modifier
         CloudSheet.GitHub -> GitHubConnectSheet(onDismissed = { sheet = null })
         CloudSheet.Repos -> CloudRepoPickerSheet(onDismissed = { sheet = null })
         null -> Unit
+    }
+    }
     }
 }
 

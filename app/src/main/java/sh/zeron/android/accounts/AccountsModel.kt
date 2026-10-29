@@ -51,6 +51,8 @@ object ProvidersCopy {
 
 /** One agent's accounts page copy, iOS's. */
 object AccountsCopy {
+    /** #63: TalkBack's label for an account row's long press (its Switch / Remove menu). */
+    const val MoreActions = "Show actions"
     const val Loading = "Loading accounts…"
     const val LoadFailed = "Couldn't load accounts"
     const val Waiting = "Finish signing in in the browser…"
