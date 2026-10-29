@@ -109,6 +109,17 @@ docs/port/      the five iOS → Android gap audits (row IDs referenced by ticke
 - Roboco's ~136k lines of JVM tests target Roboco's core and fakes. They are
   **quarantined** (excluded from compilation) in M0 and revived per area as
   that area is ported; each area ticket revives or rewrites its tests.
+- Quarantine: `app/src/test-quarantine/{test,androidTest}/…` mirrors the
+  original source-set paths. It is not a Gradle source set, so nothing there
+  compiles.
+- **Revive rule**: when an area ticket ports an area, the same PR `git mv`s
+  that area's tests from `app/src/test-quarantine/<set>/…` back to
+  `app/src/<set>/…` and fixes or rewrites them against Zeron's core. A test
+  for a removed Roboco system is deleted instead. Nothing is revived without
+  compiling and passing in that PR.
+- Smoke suite (`app/src/test`): pure-Kotlin tests of code that touches no
+  `uniffi.*` type and no fake (design, geometry, formatting, scroll math). CI
+  runs `:app:testDebugUnitTest` after `assembleDebug`.
 - No CI screenshot renders: every CI run uploads a debug APK (signed with the
   shared test key, so builds install over each other) and the owner tests it
   on their phone.
