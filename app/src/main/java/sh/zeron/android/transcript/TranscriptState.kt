@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.sp
 import sh.zeron.android.core.TextEngine
 import sh.zeron.android.design.ReduceMotion
 import sh.zeron.android.transcript.widgets.ToolRailMemory
+import sh.zeron.android.transcript.widgets.TranscriptVisuals
 import uniffi.zeron_core.LayoutFrame
 import uniffi.zeron_core.LayoutListener
 import uniffi.zeron_core.RowPlacement
@@ -137,6 +138,9 @@ class TranscriptState internal constructor(
     override var uploadProgress by mutableStateOf<Double?>(null)
     /** The style table for this transcript, synced in [apply] step 4 (data half; ticket 62 adds the paints). */
     val fonts = StyleFonts()
+
+    /** #46: the agent visuals by id, kept across row reuse; closed by [close]. */
+    val visuals = TranscriptVisuals { id -> engine.visual(id) }
 
     // ------------------------------------------------------------------
     // Ticket 68: the scroll model. The viewport is the single source of
@@ -590,6 +594,8 @@ class TranscriptState internal constructor(
         // that still arrives finds the pipeline closed and stops at the
         // inflight/counter steps.
         models.close()
+        // #46: no visual lookups on a closed engine (its shutdown stops the workers).
+        visuals.close()
         engine.shutdown()
         engine.close()
         listeners.clear()

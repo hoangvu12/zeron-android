@@ -82,7 +82,8 @@ val WidgetKind.isTranscriptControl: Boolean
         is WidgetKind.Subagent, is WidgetKind.Action -> true
         is WidgetKind.Image, is WidgetKind.Chevron, is WidgetKind.Icon, is WidgetKind.ToolStatus,
         WidgetKind.Spinner, is WidgetKind.Working, is WidgetKind.ToolRail, WidgetKind.Shimmer,
-        // TODO(#46): a visual's controls route through its own host.
+        // iOS's `VisualView` is a plain view (a tap on its paint dismisses);
+        // TODO(#47): its control targets claim the tap, like UIControls.
         is WidgetKind.Visual -> false
     }
 

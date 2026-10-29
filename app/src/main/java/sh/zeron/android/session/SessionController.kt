@@ -194,20 +194,31 @@ class SessionController private constructor(
     //    runs is 75/85/76) ────────────────────────────────────────────
 
     /**
+     * #46: the agent visuals' frame scale ([attach]'s `max(2, density)`)
+     * and the view and host [connectVisuals] last sent. IO lane only.
+     */
+    @Volatile
+    private var visualScale = 2f
+    private var visualView: TranscriptView? = null
+    private var visualHost = ""
+
+    /**
      * `TranscriptView.attach(client, chatId)` first (its `false` return
      * is logged, otherwise ignored — iOS `CoreSessionSource.swift:26-29`),
-     * then `setViewAttached(true)`. The second call with the same view
-     * instance is a no-op. On the IO lane.
+     * then the visuals' source (#46), then `setViewAttached(true)`. The
+     * second call with the same view instance is a no-op. On the IO lane.
      */
-    fun attach(view: TranscriptView) {
+    fun attach(view: TranscriptView, visualScale: Float = 2f) {
         if (closed.get()) return
         if (attachedView.get() === view) return
         attachedView.set(view)
+        this.visualScale = visualScale
         scope.launch {
             try {
                 if (!core.attachTranscript(view)) {
                     logFailure("transcript attach returned false for ${core.chatId}", null)
                 }
+                connectVisuals()
                 core.setViewAttached(true)
             } catch (cancelled: CancellationException) {
                 throw cancelled
@@ -346,6 +357,8 @@ class SessionController private constructor(
             val row = core.sessionRow()
             val engine = core.engine()
             hostDeviceId = c.host.deviceId
+            // #46: a new host re-points the visuals (iOS `hostDevice` didSet).
+            connectVisuals()
             pinned = row?.pinned == true
             engineVersion = engine?.version
             sessionRow = row
@@ -370,6 +383,28 @@ class SessionController private constructor(
             throw cancelled
         } catch (t: Throwable) {
             logFailure("refresh failed", t)
+        }
+    }
+
+    /**
+     * #46, iOS `connectVisuals` (`CoreSessionSource.swift:50-54`): agent
+     * visuals load their scripts from the chat's host, so the attached
+     * view learns the host on attach and again whenever it changes. Skips
+     * an unknown host and a repeat of what was last sent. IO lane (or the
+     * factory thread's first refresh, before any attach).
+     */
+    private fun connectVisuals() {
+        val view = attachedView.get() ?: return
+        val host = hostDeviceId
+        if (host.isEmpty() || (view === visualView && host == visualHost)) return
+        try {
+            core.setVisualSource(view, host, visualScale)
+            visualView = view
+            visualHost = host
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (t: Throwable) {
+            logFailure("setVisualSource failed", t)
         }
     }
 
