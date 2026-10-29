@@ -27,6 +27,9 @@ sealed interface DeepLink {
 
     /** `route search` — `router.showSearch`. */
     data object Search : DeepLink
+
+    /** A debug `route` screen (debuggable builds only) — `router.showDebugRoute`. */
+    data class Debug(val route: DebugRoute) : DeepLink
 }
 
 /**
@@ -95,5 +98,5 @@ object DeepLinks {
         chatId?.takeIf { it.isNotBlank() }?.let(DeepLink::OpenChat)
 
     /** The `route` extra — its grammar lives in [LaunchRoute] (#18). */
-    fun parseRoute(route: String?): DeepLink? = LaunchRoute.parse(route)
+    fun parseRoute(route: String?, debug: Boolean = false): DeepLink? = LaunchRoute.parse(route, debug)
 }

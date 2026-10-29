@@ -93,6 +93,8 @@ class DeepLinkHub {
             DeepLink.Settings -> router.showSettings()
 
             DeepLink.Search -> router.showSearch()
+
+            is DeepLink.Debug -> router.showDebugRoute(link.route)
         }
     }
 }

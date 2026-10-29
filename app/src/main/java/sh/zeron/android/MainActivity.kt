@@ -203,7 +203,8 @@ class MainActivity : ComponentActivity() {
             }
         }
         DeepLinks.notificationTap(intent.getStringExtra(DeepLinks.EXTRA_CHAT_ID))?.let(hub::submit)
-        LaunchOptions.route(intent.extras.toExtrasMap())?.let(hub::submit)
+        val debuggable = (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
+        LaunchOptions.route(intent.extras.toExtrasMap(), debuggable)?.let(hub::submit)
     }
 
     /**

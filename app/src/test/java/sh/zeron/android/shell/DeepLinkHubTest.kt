@@ -145,6 +145,23 @@ class DeepLinkHubTest {
         assertEquals(listOf("new(Fix tests)", "new(null)"), router.calls)
     }
 
+    @Test
+    fun debugRoutesGoToTheRouter() {
+        val router = FakeRouter()
+        val hub = DeepLinkHub()
+        hub.attachRouter(router)
+        hub.submit(DeepLink.Debug(DebugRoute.Accounts("codex")))
+        assertEquals(listOf("debug(Accounts(harness=codex))"), router.calls)
+    }
+
+    @Test
+    fun theDefaultDebugRouteOnlyLogs() {
+        val hub = DeepLinkHub()
+        hub.attachRouter(AppRouter.Noop)
+        hub.submit(DeepLink.Debug(DebugRoute.Welcome))
+        assertTrue(logs.contains("debug route Welcome: no screen yet"))
+    }
+
     // ---------------------------------------------------------------- rig
 
     /** Records every call as a readable string. */
@@ -177,6 +194,10 @@ class DeepLinkHubTest {
 
         override fun popToFrontPage() {
             calls.add("pop")
+        }
+
+        override fun showDebugRoute(route: DebugRoute) {
+            calls.add("debug($route)")
         }
     }
 }
