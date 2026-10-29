@@ -46,7 +46,7 @@ object PrefKeys {
     /** Phone-local fold set: Pinned, Recent and `project:*`/`home:*` groups. */
     val COLLAPSED_SECTIONS = stringSetPreferencesKey("collapsedSections")
 
-    /** `"<1|0>|<engineId>|<sectionId>"` offline overrides (see [sh.zeron.android.sessions.FoldState]). */
+    /** Obsolete synced-fold overrides; [sh.zeron.android.sessions.FoldState] removes the key on load. */
     val SECTION_FOLD_OVERRIDES = stringSetPreferencesKey("sectionFoldOverrides")
 
     /**

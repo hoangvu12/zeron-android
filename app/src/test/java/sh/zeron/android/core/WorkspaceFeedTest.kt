@@ -50,7 +50,6 @@ class WorkspaceFeedTest {
             connectivityReads++
             return conn
         }
-        override fun setSectionCollapsed(sectionId: String, collapsed: Boolean) {}
     }
 
     private class Harness(val core: FakeCore, val feed: WorkspaceFeed, val scope: CoroutineScope)

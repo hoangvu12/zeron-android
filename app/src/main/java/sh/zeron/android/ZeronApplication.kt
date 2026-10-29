@@ -275,12 +275,11 @@ class ZeronApplication : Application() {
     }
 
     /**
-     * The fold state (ticket 40): phone-local folds for Pinned/Recent/
-     * groups, engine-synced folds for user sections, offline overrides
-     * pushed on reconnect. One instance per process — the tablet sidebar
-     * (105) shares it.
+     * The fold state (#21): every fold phone-local under
+     * `collapsedSections`, as on iOS. One instance per process — the
+     * tablet sidebar (105) shares it.
      */
-    val foldState: FoldState by lazy { FoldState(zeronPrefsStore, liveCore, applicationScope) }
+    val foldState: FoldState by lazy { FoldState(zeronPrefsStore, applicationScope) }
 
     /** The Sessions tab's front page model (tickets 40 and 50); 46 hosts it. */
     val frontPage: FrontPageModel by lazy {
