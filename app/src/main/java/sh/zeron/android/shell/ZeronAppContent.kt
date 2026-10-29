@@ -130,27 +130,16 @@ private fun AppRootContent(
                 // 36: the phone router (32's `onRouter` — the
                 // `window.rootViewController as? AppRouter` port) is attached
                 // after the shell's first frame, never during its composition.
-                // 26: the shell state is the scope's — the tab stacks survive
-                // the 840 dp round trip (one `MainTabState`, like iOS's one
-                // `MainTabController`). 106/108: `presence` forwards the tab
+                // The shell state is the scope's — the Sessions stack survives
+                // the Phone ↔ Split round trip (one `MainTabState`, like iOS's
+                // one `MainTabController`). 106/108: `presence` forwards the tab
                 // shell's session appear/close into the carry-over through
                 // 106's `tabPresence`, and the slot keeps the router for the
                 // tablet router's collapsed delegation.
                 var phoneRouter by remember { mutableStateOf<AppRouter?>(null) }
-                // 27 step 4: the accessory's live summary off the one
-                // workspace feed (the flow coalesces by revision off the
-                // main thread). The state is NOT read here: a stable
-                // provider hands it to the accessory, so a counts change
-                // recomposes the accessory only, never this slot or the
-                // shell's measure-time subcomposition.
-                val counts = rememberLiveCounts(app.workspaceFeed.snapshot)
-                val liveCounts = remember(counts) { { counts.value } }
                 MainTabShell(
                     state = s.tabs,
-                    liveCounts = liveCounts,
                     presence = s.presence,
-                    // Wave-10 37: the iPhone's one-row bottom bar.
-                    oneRowBar = true,
                     onRouter = { router -> phoneRouter = router; s.phoneSlot.attach(router) },
                 )
                 phoneRouter?.let { DeepLinkRouterEffect(app.deepLinks, it) }

@@ -235,8 +235,7 @@ internal object LargeTitleRecompositionProbe {
  *   [LocalPrefersLargeTitles] = false
  * @param listState the scaffold reads `firstVisibleItemIndex/Offset` only
  *   inside draw/derived lambdas — callers may share the state with
- *   pull-to-refresh (48) and `RegisterScrollToTop`
- *   (26)
+ *   pull-to-refresh (48)
  * @param topInset the status bar height; **0** when hosted in a dialog or
  *   sheet that already sits below it (104, 31)
  * @param contentPadding extra padding (bottom chrome etc.) added to the

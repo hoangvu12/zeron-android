@@ -15,7 +15,9 @@ import uniffi.zeron_core.Credentials
  * write still queued when the process dies would sign the user out.
  *
  * Only `Credentials.WorkOs` is ever stored (dev bearers come from launch
- * extras, the demo has none), like iOS.
+ * extras, the demo has none), like iOS. Implementations never throw: an
+ * unreadable store reads as signed out, a failed write keeps the old value.
+ * The app's implementation is [CredentialStore].
  */
 interface CredentialPersistence {
     /** The stored account, or null when signed out (or unreadable). */
@@ -29,33 +31,4 @@ interface CredentialPersistence {
 
     /** Signed out: nothing stays. */
     fun clear()
-}
-
-/**
- * TODO(#14): replaced by the Keystore-sealed `CredentialStore`
- * (`KeystoreSecretCipher`, `noBackupFilesDir`, `commit()`). Until then
- * nothing survives the process, so every launch starts signed out — which
- * is also all there is before #15's sign-in.
- */
-class InMemoryCredentialStore : CredentialPersistence {
-
-    @Volatile
-    private var current: Credentials.WorkOs? = null
-
-    override fun stored(): Credentials? = current
-
-    @Synchronized
-    override fun store(credentials: Credentials.WorkOs) {
-        current = credentials
-    }
-
-    @Synchronized
-    override fun updateTokens(tokens: AuthTokens) {
-        current = current?.copy(tokens = tokens)
-    }
-
-    @Synchronized
-    override fun clear() {
-        current = null
-    }
 }

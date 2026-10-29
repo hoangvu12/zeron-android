@@ -6,7 +6,6 @@ import sh.zeron.android.composer.ComposerChip
 import uniffi.zeron_core.ComposerState
 import uniffi.zeron_core.PullRequestState
 import uniffi.zeron_core.SessionRow
-import java.util.Locale
 
 /**
  * The composer's context chips (android-ui-parity #78) — the port of
@@ -18,7 +17,7 @@ import java.util.Locale
  * strip, ticket 89's menus and the test tags `composer-chip-<id>`.
  */
 object SessionChipIds {
-    /** `row.modelLabel ?? row.harnessLabel` — the model / harness chip. */
+    /** `row.modelLabel ?? host default ?? row.harnessLabel` — the model chip (`SessionChipMenus` names the default). */
     const val Model = "model"
 
     /** `row.reasoning` — the reasoning-effort chip. */
@@ -30,7 +29,7 @@ object SessionChipIds {
     /** `row.branch` — shown only when there is no PR. */
     const val Branch = "branch"
 
-    /** `composer.contextUsage` — shown whenever usage is reported (android-next #01). */
+    /** `composer.contextUsage` — shown from 50 % of the window, no menu (#34). */
     const val Context = "context"
 }
 
@@ -97,22 +96,18 @@ data class ChipSource(
  * Rules kept exactly:
  * - **model** — `modelLabel` else `harnessLabel`; the brand mark of
  *   `harness ?: "claude-code"`, and **no icon when the harness string is
- *   empty** (`BrandMarks.image(for:)` returns nil, `BrandMarks.swift:380-381`);
+ *   empty** (`BrandMarks.image(for:)` returns nil, `BrandMarks.swift:380-381`).
+ *   Without a `modelLabel`, `SessionChipMenus.fill` then renames it to the
+ *   host's default model (iOS's middle `??`), which needs the model catalog;
  * - **effort** — only when `reasoning` is non-null and non-empty;
  * - **pr** — the bare number (no `#`), the PR-state tint, the 12 dp PR
  *   glyph; a PR **replaces** the branch chip;
  * - **branch** — only without a PR, and only when non-empty;
- * - **context** — android-next #01 supersedes iOS's `fraction >= 0.5`
- *   gate: [contextReading] / [contextChip] show it at any fraction (0 %
- *   included), `N tokens` without a window, and hide it only with no
- *   token count. The percentage rounds **half away from zero**, the
- *   warning symbol and tint come from the **unrounded** `fraction >= 0.85`
- *   (`845 / 1000` shows `85% context` calm), and fractions above 1 are not
- *   clamped (`120% context`). [locale] groups the a11y label's numbers.
+ * - **context** — [contextChip]: only at `fraction >= 0.5` of a reported
+ *   window, warning glyph and tint from `0.85` (#34, docs/port/02 C16).
  */
 fun sessionChips(
     s: ChipSource,
-    locale: Locale = Locale.getDefault(),
     reasoningLabel: (String) -> String,
 ): List<ComposerChip> = buildList {
     (s.modelLabel ?: s.harnessLabel)?.let { title ->
@@ -154,8 +149,7 @@ fun sessionChips(
             )
         }
     }
-    // android-next #01: always shown once usage is reported (no 50 % gate).
-    contextReading(s.tokens, s.window)?.let { add(contextChip(it, locale)) }
+    contextChip(s.tokens, s.window)?.let(::add)
 }
 
 /**
@@ -172,9 +166,7 @@ fun sessionChips(
  */
 class SessionChipsFiller(
     private val reasoningLabel: (String) -> String = { uniffi.zeron_core.reasoningLabel(it) },
-    /** Read per refresh, so a locale change regroups the context label on the next chrome. */
-    private val locale: () -> Locale = { Locale.getDefault() },
 ) : ChromeFiller {
     override fun fill(chrome: SessionChrome, input: ChromeInput): SessionChrome =
-        chrome.copy(chips = sessionChips(ChipSource.from(input.row, input.composer), locale(), reasoningLabel))
+        chrome.copy(chips = sessionChips(ChipSource.from(input.row, input.composer), reasoningLabel))
 }

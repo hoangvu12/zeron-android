@@ -165,7 +165,13 @@ fun BottomStackSlotScope.SessionQuestionsSlot(
         }
     }
 
-    QuestionCardGlass(visible = glassVisible, animate = animateGlass, modifier = modifier) {
+    QuestionCardGlass(
+        // #32: the corner close declines the whole set ([QuestionPanelState.dismiss]).
+        onClose = { state.dismiss() },
+        visible = glassVisible,
+        animate = animateGlass,
+        modifier = modifier,
+    ) {
         if (state.items.isEmpty()) return@QuestionCardGlass // nothing configured yet
         // A reset (new generation) recreates the AnimatedContent: a fresh
         // one composes and measures only the new first page in the same

@@ -35,10 +35,8 @@ import sh.zeron.android.design.uiStyle
 import sh.zeron.android.design.wallpaperFixture
 import sh.zeron.android.shell.NavStack
 import sh.zeron.android.shell.NavStackHost
-import sh.zeron.android.shell.PlaceholderTabRoot
 import sh.zeron.android.shell.ShellRouteContent
-import sh.zeron.android.shell.TabId
-import sh.zeron.android.shell.TabRootRoute
+import sh.zeron.android.shell.SessionsRootRoute
 
 /**
  * The gallery's recorder: every call logs one line under the frame (the
@@ -126,7 +124,7 @@ fun SessionsScreenGallerySection() {
     var result by remember { mutableStateOf("—") }
     var fade by remember { mutableStateOf(1f) }
     var heroHDp by remember { mutableStateOf(0f) }
-    val stack = remember { NavStack(TabRootRoute(TabId.Sessions)) }
+    val stack = remember { NavStack(SessionsRootRoute) }
     val actions = remember(stack) {
         GallerySessionsActions(stack, { grouped }, { grouped = it }, { result = it })
     }
@@ -166,7 +164,7 @@ fun SessionsScreenGallerySection() {
             ) {
                 NavStackHost(stack = stack, active = true) { entry ->
                     val route = entry.route
-                    if (route is TabRootRoute && route.tab == TabId.Sessions) {
+                    if (route is SessionsRootRoute) {
                         SessionsScreenContent(
                             sections = if (grouped) {
                                 SessionsScreenFixtures.groupedSections()
@@ -198,8 +196,6 @@ fun SessionsScreenGallerySection() {
                                 { _, _ -> }
                             },
                         )
-                    } else if (route is TabRootRoute) {
-                        PlaceholderTabRoot(route.tab)
                     } else {
                         ShellRouteContent(route)
                     }

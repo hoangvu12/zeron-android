@@ -195,6 +195,9 @@ object ZeronIcons {
     /** SF `pencil` — queue-row and row menus. */
     val Pencil = ZeronIcon.Vector(R.drawable.zi_pen)
 
+    /** SF `square.and.pencil` — the iPhone bottom bar's New session. */
+    val SquareAndPencil = ZeronIcon.Vector(R.drawable.zi_pen_new_square)
+
     /** SF `trash` — row menus, Settings wallpaper. */
     val Trash = ZeronIcon.Vector(R.drawable.zi_trash_bin_minimalistic)
 
@@ -294,6 +297,15 @@ object ZeronIcons {
     /** SF `exclamationmark.triangle` — Settings notifications; core chip rows. */
     val ExclamationmarkTriangle = ZeronIcon.Vector(R.drawable.zi_danger_triangle)
 
+    /** SF `exclamationmark.triangle.fill` — the core's error card (#30). */
+    val ExclamationmarkTriangleFill = ZeronIcon.Vector(R.drawable.zi_danger_triangle_fill)
+
+    /** SF `bubble.left` — the core's sender caption for a chat without a harness mark (#30). */
+    val BubbleLeft = ZeronIcon.Vector(R.drawable.zi_bubble_left)
+
+    /** SF `arrow.left.arrow.right` — the core's provider-switch seam (#30). */
+    val ArrowLeftArrowRight = ZeronIcon.Vector(R.drawable.zi_arrow_left_arrow_right)
+
     /** SF `exclamationmark.circle` — context-usage chip. */
     val ExclamationmarkCircle = ZeronIcon.Vector(R.drawable.zi_exclamation_circle)
 
@@ -388,6 +400,7 @@ object ZeronIcons {
             FolderBadgeGearshape,
         ),
         RegistryEntry("Pencil", listOf("pencil"), Pencil),
+        RegistryEntry("SquareAndPencil", listOf("square.and.pencil"), SquareAndPencil),
         RegistryEntry("Trash", listOf("trash"), Trash),
         RegistryEntry("Doc", listOf("doc"), Doc),
         RegistryEntry("DocText", listOf("doc.text"), DocText),
@@ -433,6 +446,13 @@ object ZeronIcons {
             listOf("exclamationmark.triangle"),
             ExclamationmarkTriangle,
         ),
+        RegistryEntry(
+            "ExclamationmarkTriangleFill",
+            listOf("exclamationmark.triangle.fill"),
+            ExclamationmarkTriangleFill,
+        ),
+        RegistryEntry("BubbleLeft", listOf("bubble.left"), BubbleLeft),
+        RegistryEntry("ArrowLeftArrowRight", listOf("arrow.left.arrow.right"), ArrowLeftArrowRight),
         RegistryEntry("ExclamationmarkCircle", listOf("exclamationmark.circle"), ExclamationmarkCircle),
         RegistryEntry("InfoCircle", listOf("info.circle"), InfoCircle),
         RegistryEntry("ArrowTriangleBranch", listOf("arrow.triangle.branch"), ArrowTriangleBranch),

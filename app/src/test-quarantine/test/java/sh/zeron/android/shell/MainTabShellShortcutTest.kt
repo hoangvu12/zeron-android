@@ -50,7 +50,7 @@ class MainTabShellShortcutTest {
                     // Ticket 46: the real Sessions root needs the menu host
                     // and the frozen glyph clock (the loading spinner).
                     ProvideGlyphClock(frozenAtNanos = 0L) {
-                        GlassMenuHost { MainTabShell(state = MainTabState(TabId.Sessions)) }
+                        GlassMenuHost { MainTabShell(state = MainTabState()) }
                     }
                 }
             }
@@ -69,7 +69,7 @@ class MainTabShellShortcutTest {
             ZeronTheme {
                 CompositionLocalProvider(LocalShortcutSink provides sink) {
                     ProvideGlyphClock(frozenAtNanos = 0L) {
-                        GlassMenuHost { MainTabShell(state = MainTabState(TabId.Sessions)) }
+                        GlassMenuHost { MainTabShell(state = MainTabState()) }
                     }
                 }
             }

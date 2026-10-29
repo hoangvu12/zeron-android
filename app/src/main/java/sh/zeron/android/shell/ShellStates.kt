@@ -27,8 +27,9 @@ import sh.zeron.android.shell.tablet.SidebarState
  * change and is released only when the shell layer itself leaves
  * composition (Welcome, core failure, activity teardown):
  *
- * - 26's [MainTabState] (the three tab stacks live in it — the pushed
- *   session survives the collapse exactly as iOS's `tabs` stack does);
+ * - the phone shell's [MainTabState] (the Sessions stack lives in it —
+ *   the pushed session survives the collapse exactly as iOS's `tabs`
+ *   stack does);
  * - 33's [TabletShellState] (`currentChatId`, `sidebarVisible`,
  *   `detailRoot`; `isCollapsed` gets its single writer here);
  * - 105's [SidebarState];
@@ -66,7 +67,7 @@ fun TabletShellState.carryOverSelection(): CarryOverSelection = object : CarryOv
  */
 @Stable
 class ShellStates internal constructor(
-    /** Ticket 26: the phone tab shell's state (the three tab stacks). */
+    /** The phone shell's state (the Sessions stack). */
     val tabs: MainTabState,
 
     /** Ticket 33: the split's state (currentChatId, sidebarVisible, detailRoot, isCollapsed). */
@@ -99,7 +100,7 @@ class ShellStates internal constructor(
 val LocalShellStates = staticCompositionLocalOf<ShellStates> { error("No ShellStates") }
 
 /**
- * [TabsColumn] over the hoisted state: ticket 26's [MainTabState] stacks
+ * [TabsColumn] over the hoisted state: the [MainTabState] stack
  * plus ticket 106's [PhoneRouterSlot]. Works hostless — the pops run after
  * the phone shell left composition, and the open lands on the next phone
  * router when the phone shell is not up yet.
@@ -115,19 +116,11 @@ internal class MainTabsColumn(
         // A phone call queued before the widen is stale: the latest intent
         // (this pop, then the detail open) wins.
         slot.clearPending()
-        tabs.stack(TabId.Sessions).popToRoot(animated = false)
-    }
-
-    override fun popSearchSessions() {
-        // ADAPT: iOS pops only the Sessions stack; a session pushed from
-        // the Search tab would stay attached in the hidden tab shell while
-        // the detail opens a second copy. The Search query is untouched.
-        val stack = tabs.stack(TabId.Search)
-        if (stack.entries.any { it.route is SessionRoute }) stack.popToRoot(animated = false)
+        tabs.sessions.popToRoot(animated = false)
     }
 
     override fun popAllToRoot() {
-        TabId.entries.forEach { tabs.stack(it).popToRoot(animated = false) }
+        tabs.sessions.popToRoot(animated = false)
     }
 }
 
@@ -181,7 +174,7 @@ internal fun ShellStateScope(
     tabsOverride: TabsColumn?,
     content: @Composable () -> Unit,
 ) {
-    // 26 (saver: selected + previousTab; the stacks live in the state).
+    // The phone shell's Sessions stack (not saved, as iOS).
     val tabs = rememberMainTabState()
     // 33 (rememberSaveable: currentChatId, sidebarVisible, detailRoot).
     val tablet = rememberTabletShellState()

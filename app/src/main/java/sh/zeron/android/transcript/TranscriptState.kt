@@ -108,6 +108,15 @@ class TranscriptState internal constructor(
     val engine: TranscriptView = makeEngine(text, relay)
 
     /**
+     * #29: the math settings, applied on create and on every change (iOS
+     * TLV:288-293); unregistered by [close].
+     */
+    private val stopMath: () -> Unit = run {
+        MathSettings.apply(engine)
+        MathSettings.observe { values -> if (!isClosed) MathSettings.apply(engine, values) }
+    }
+
+    /**
      * The model pipeline (117): the insertion-ordered row-model cache,
      * the async upgrade path, the directional prefetch and their single
      * `sh.zeron.transcript.prefetch` worker. Main thread only, like the
@@ -575,6 +584,7 @@ class TranscriptState internal constructor(
     fun close() {
         if (isClosed) return
         isClosed = true
+        stopMath()
         relay.close()
         // 117: stop the model pipeline before the engine — a completion
         // that still arrives finds the pipeline closed and stops at the

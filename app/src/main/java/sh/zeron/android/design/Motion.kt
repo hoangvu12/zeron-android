@@ -205,6 +205,12 @@ object Motion {
      */
     val ImeSettle = IosSpring("imeSettle", 0.25, 1f)
 
+    /** Subagent card wash in (controlFill). ios:Transcript/ToolViews.swift:330 (#31) */
+    val SubagentPressIn = IosSpring("subagentPressIn", 0.12, 1f)
+
+    /** Subagent card wash out. ios:Transcript/ToolViews.swift:330 (#31) */
+    val SubagentPressOut = IosSpring("subagentPressOut", 0.28, 0.7f)
+
     /** Every spring of ticket 04's Motion table, in table order (MotionTest pins
      * this list). Later tickets' springs stay out and are pinned by their own
      * tickets' tests — except ui-parity#28's [TabBarMinimize] and

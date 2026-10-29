@@ -63,6 +63,7 @@ import uniffi.zeron_core.HostCapabilities
 import uniffi.zeron_core.HostInfo
 import uniffi.zeron_core.LayoutFrame
 import uniffi.zeron_core.LiveStatus
+import uniffi.zeron_core.MathFace
 import uniffi.zeron_core.NoHandle
 import uniffi.zeron_core.RoomState
 import uniffi.zeron_core.SessionRow
@@ -375,6 +376,7 @@ private class GallerySessionCore(private val onLog: (String) -> Unit) : SessionC
 /** The gallery's transcript engine: no FFI, no frames, no-op shutdown. */
 private class GalleryTranscriptEngine : TranscriptView(NoHandle) {
     override fun setViewport(width: Float, textScale: Float) {}
+    override fun setMath(enabled: Boolean, face: MathFace, sizePercent: UShort) {}
     override fun frame(): LayoutFrame = error("the nav gallery never asks the engine for a frame")
     override fun shutdown() {}
     override fun close() {}

@@ -38,8 +38,6 @@ import sh.zeron.android.design.gallery.AlertGallerySection
 import sh.zeron.android.design.gallery.GlassGallerySection
 import sh.zeron.android.design.gallery.QuestionCardGallerySection
 import sh.zeron.android.design.gallery.ScrollEdgeEffectGallerySection
-import sh.zeron.android.design.gallery.SearchTabMorphGallerySection
-import sh.zeron.android.design.gallery.TabBarMinimizeGallerySection
 import sh.zeron.android.design.gallery.ToastGallerySection
 import sh.zeron.android.design.reference.ReferenceGalleryPage
 import sh.zeron.android.design.sheet.GlassSheetGallerySection
@@ -52,9 +50,7 @@ import sh.zeron.android.newsession.NewSessionChipsGallerySection
 import sh.zeron.android.newsession.ProjectMenusGallerySection
 import sh.zeron.android.newsession.FolderLocationsGallerySection
 import sh.zeron.android.sessions.FolderScreensGallerySection
-import sh.zeron.android.sessions.LocalSidebarFixtures
 import sh.zeron.android.sessions.PinnedReorderGallerySection
-import sh.zeron.android.shell.ChromeVisibilityGallerySection
 import sh.zeron.android.shell.LargeTitleGallerySection
 import sh.zeron.android.session.BottomStackGallerySection
 import sh.zeron.android.session.SessionNavGallerySection
@@ -63,7 +59,6 @@ import sh.zeron.android.session.SessionHeaderGallerySection
 import sh.zeron.android.session.SessionOpenGallerySection
 import sh.zeron.android.session.StatusPillGallerySection
 import sh.zeron.android.sessions.RowActionsGallerySection
-import sh.zeron.android.sessions.SearchGallerySection
 import sh.zeron.android.sessions.SessionListGallerySection
 import sh.zeron.android.sessions.SessionPromptsGallerySection
 import sh.zeron.android.sessions.SessionRowGallerySection
@@ -80,13 +75,10 @@ import sh.zeron.android.settings.SettingsScreenGallerySection
 import sh.zeron.android.settings.SessionsSettingsGallerySection
 import sh.zeron.android.shell.NavGallerySection
 import sh.zeron.android.shell.AppRootGallerySection
-import sh.zeron.android.shell.NewSessionAccessoryGallerySection
 import sh.zeron.android.shell.PageSheetGallerySection
 import sh.zeron.android.shell.SettingsDialogGallerySection
-import sh.zeron.android.shell.TabBarGallerySection
 import sh.zeron.android.shell.SidebarToolbarGallerySection
 import sh.zeron.android.shell.tablet.SidebarGallerySection
-import sh.zeron.android.shell.tablet.settledEmptySessionsFixtures
 import sh.zeron.android.sheets.TextSheetsGallerySection
 import sh.zeron.android.image.ImageViewerGallerySection
 import sh.zeron.android.transcript.KeyboardInsetGallerySection
@@ -170,19 +162,11 @@ object Gallery {
         GallerySection("Text engine", GalleryLayout.Fill) {
             if (LocalGalleryCapture.current) TextEngineSpecimen(cjkSource = "fixture", measurerCalls = 0) else TextEngineSpecimen()
         },
-        // Ticket 27 (the ticket names this registration line):
-        GallerySection("New session accessory") { NewSessionAccessoryGallerySection() },
         GallerySection("Glass buttons") { GlassButtonsGallerySection() },
         GallerySection("GlassMenu", GalleryLayout.Fill) { GlassMenuGallerySection() },
-        // Ticket 26 (glass tab bar): the phone shell's bottom chrome.
-        GallerySection("Tab bar", screenshotHeightDp = 1700) { SettledSessionsUnderCapture { TabBarGallerySection() } },
         // Ticket 09: Fill because it owns the LazyColumn.
         GallerySection("Scroll edge effect", layout = GalleryLayout.Fill) { ScrollEdgeEffectGallerySection() },
         GallerySection("Action sheet", GalleryLayout.Fill) { ActionSheetGallerySection() },
-        // Ticket 28 (tab bar minimize): the scroll-driven chrome morph.
-        GallerySection("Tab bar minimize", GalleryLayout.Scroll, screenshotHeightDp = 1120) {
-            TabBarMinimizeGallerySection()
-        },
         // Ticket 16 (context menu): long-press lift, dimmed backdrop, menu at the row.
         GallerySection("Context menu", GalleryLayout.Fill, screenshotHeightDp = 891) { ContextMenuGallerySection() },
         // Ticket 70 (inset-grouped list): Fill — the cards sit 16 dp from
@@ -197,11 +181,6 @@ object Gallery {
         // core (ticket 60's LocalGalleryCapture rule).
         GallerySection("Mentions", screenshotHeightDp = 420) {
             if (LocalGalleryCapture.current) MentionStyleDemo() else MentionsGallerySection()
-        },
-        // Ticket 29 (search tab morph): the bar-to-field morph, the IME
-        // ride and the accessory fade.
-        GallerySection("Search tab morph", GalleryLayout.Scroll, screenshotHeightDp = 1240) {
-            SearchTabMorphGallerySection()
         },
         // Ticket 63 (text runs): every run-painting case through the real
         // RowModel path — Rust positions, decorations, mono double-width.
@@ -263,11 +242,6 @@ object Gallery {
         // switch for the scripted failures, the write buttons and the
         // notice toast, through the fake SessionWrites.
         GallerySection("Row actions") { RowActionsGallerySection() },
-        // Ticket 30 (chrome visibility): hidden over a Session, the
-        // after-Search fade, the pop reveal, the bottom insets.
-        GallerySection("Chrome visibility", GalleryLayout.Scroll, screenshotHeightDp = 1200) {
-            SettledSessionsUnderCapture { ChromeVisibilityGallerySection() }
-        },
         // Ticket 58 (composer action button): the trailing send/queue/stop
         // control — the state morph, the glyph bounce and the long-press
         // delivery menu over the busy backdrop.
@@ -386,10 +360,6 @@ object Gallery {
         // the checkmark moves locally only; the gallery's own appearance
         // segment (its top bar) drives the theme, never the app preference.
         GallerySection("Settings · Appearance", screenshotHeightDp = 400) { AppearanceGallerySection() },
-        // Ticket 49 (Search screen): the Search tab's root — the large
-        // title, the Recent / hits / no-results / loading states over the
-        // fixture, in the goldens' 412 × 700 dp frame.
-        GallerySection("Search screen", GalleryLayout.Fill, 700) { SearchGallerySection() },
         // Ticket 46 (Sessions tab root): the tab's real screen — large
         // title, ⋯ options menu, header long-press menus, the wallpaper
         // hero with the live scroll fade — over the 1-off/3-on fixtures,
@@ -735,23 +705,6 @@ fun GalleryProviders(appearance: Appearance, capture: Boolean = false, content: 
                 ProvideFeedback(inner)
             }
         }
-    }
-}
-
-/**
- * Under capture, the real shell's Sessions root (Tab bar, Chrome visibility)
- * renders the settled empty front page ([settledEmptySessionsFixtures])
- * instead of the app's live `FrontPageModel`, whose async first load raced
- * the capture (spinner vs "No sessions yet"). Interactive gallery use keeps
- * the live data.
- */
-@Composable
-private fun SettledSessionsUnderCapture(content: @Composable () -> Unit) {
-    if (LocalGalleryCapture.current) {
-        val fixtures = remember { settledEmptySessionsFixtures() }
-        CompositionLocalProvider(LocalSidebarFixtures provides fixtures, content = content)
-    } else {
-        content()
     }
 }
 

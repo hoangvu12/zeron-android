@@ -13,23 +13,20 @@ import sh.zeron.android.session.SessionScreenRoute
 import sh.zeron.android.settings.SettingsScreen
 import sh.zeron.android.sessions.FolderRoute
 import sh.zeron.android.sessions.FolderRouteContent
-import sh.zeron.android.sessions.SearchScreen
 import sh.zeron.android.sessions.SessionsScreen
 import sh.zeron.android.sidechats.SideChatDraftRoute
 import sh.zeron.android.sidechats.SubagentRoute
 
 /**
- * A tab's root route (android-ui-parity #26): the first entry of the
- * tab's [NavStack], what `popToRoot` returns to and what the placeholder
- * roots render until the real screens land. Ticket 49 (Search) and 46
- * (Sessions) have replaced their branches; 103 (Settings) replaces the
- * last placeholder.
+ * The phone shell's root route: the Sessions list, the first entry of
+ * [MainTabState.sessions] and what `popToRoot` returns to (iOS
+ * `MainTabController`'s `nav` root, `SessionsViewController`).
  */
-data class TabRootRoute(val tab: TabId) : NavRoute
+data object SessionsRootRoute : NavRoute
 
 /**
- * Settings pushed over the Sessions list (wave-10 37, upstream #967's
- * iPhone `showSettings`): the one-row bar's gear. The bar steps aside
+ * Settings pushed over the Sessions list (upstream #967's iPhone
+ * `showSettings`): the one-row bar's gear. The bar steps aside
  * (`hidesBottomBarWhenPushed`), the page gets the back chevron.
  */
 data object SettingsRoute : NavRoute {
@@ -38,53 +35,24 @@ data object SettingsRoute : NavRoute {
 }
 
 /**
- * A placeholder pushed page (android-ui-parity #26): "row N" of tab
- * `tab`, pushed by the placeholder roots so per-tab back stacks can be
- * exercised before the real screens exist.
- */
-data class PlaceholderDetailRoute(val tab: TabId, val row: Int) : NavRoute
-
-/**
- * The shell's route table: `when (route)` over every route a tab's stack
- * can hold. Tickets 46/103/49 add their branches (replacing the
- * `TabRootRoute` branch per tab); 45 registers the folder route; 76
- * registers the Session route; 101 registers the Licenses screen the
- * Settings "About" row pushes.
+ * The shell's route table: `when (route)` over every route the Sessions
+ * stack can hold. 45 registers the folder route; 76 registers the Session
+ * route; 101 registers the Licenses screen the Settings "About" row pushes.
  */
 @Composable
 fun ShellRouteContent(route: NavRoute) {
     when (route) {
-        is TabRootRoute -> when (route.tab) {
-            // Ticket 46: the Sessions tab's real root.
-            // Wave-10 37: the one-row bar's field filters this list in
-            // place (the sidebar's query path); "" under the tab shell.
-            TabId.Sessions -> LocalBottomBarSearch.current.let { search ->
-                SessionsScreen(query = search?.query ?: "", filters = search != null)
-            }
-            // Ticket 49: the Search tab's root — the model + list state
-            // live on the entry, so the query, results and scroll survive
-            // tab switches (29 refocuses the field on re-entry).
-            // The shell's `tab-root-<id>` tag (26's placeholder contract, kept
-            // by 46's SessionsScreen) goes on a wrapper: SearchScreen tags
-            // its own node `search-screen`, and two testTags on one node
-            // would leave only one of them.
-            TabId.Search -> Box(Modifier.fillMaxSize().testTag("tab-root-search")) {
-                SearchScreen()
-            }
-            // Ticket 103: the Settings tab's real root — the Compose
-            // port of MoreViewController (the six grouped sections under
-            // the large title). SettingsScreen tags its own node
-            // `settings-screen`, so the shell's `tab-root-<id>` tag (26's
-            // placeholder contract, kept by 46's and 49's roots) goes on a
-            // wrapper Box: two testTags on one node would leave only one.
-            TabId.Settings -> Box(Modifier.fillMaxSize().testTag("tab-root-more")) {
-                SettingsScreen()
-            }
+        // The bar's field filters this list in place (the sidebar's query
+        // path); "" when no bar is around (galleries, tests).
+        is SessionsRootRoute -> LocalBottomBarSearch.current.let { search ->
+            SessionsScreen(query = search?.query ?: "", filters = search != null)
         }
+        // SettingsScreen tags its own node `settings-screen`, so the
+        // shell's `tab-root-more` tag goes on a wrapper Box: two testTags on
+        // one node would leave only one.
         is SettingsRoute -> Box(Modifier.fillMaxSize().testTag("tab-root-more")) {
             SettingsScreen()
         }
-        is PlaceholderDetailRoute -> PlaceholderDetail(route)
         is LicensesRoute -> LicensesScreen()
         // Ticket 45: one folder's sessions (Pinned, a user section,
         // Archived). The tablet sidebar (105) renders pushed routes
