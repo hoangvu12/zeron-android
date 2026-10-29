@@ -40,6 +40,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
+import sh.zeron.android.design.ActionSheetModel
+import sh.zeron.android.design.ActionSheetPresenter
+import sh.zeron.android.design.Alerts
 import sh.zeron.android.design.Appearance
 import sh.zeron.android.design.ContextMenuHost
 import sh.zeron.android.design.Cue
@@ -125,18 +128,14 @@ class SwipeRowTest {
             calls += "rename ${row.id}"
         }
 
-        override fun newSection(engineId: String?) {
-            calls += "newSection ${engineId ?: "-"}"
+        override fun newSection() {
+            calls += "newSection"
         }
 
-        override fun sectionsFor(engineId: String): List<SectionView> = when (engineId) {
-            "eng-B" -> listOf(
-                SectionView("sec-b1", "eng-B", "B Work", collapsed = false, sessions = emptyList()),
-                SectionView("sec-b2", "eng-B", "B Home", collapsed = false, sessions = emptyList()),
-            )
-
-            else -> listOf(SectionView("sec-a1", "eng-A", "A Work", collapsed = false, sessions = emptyList()))
-        }
+        override fun sections(): List<SectionView> = listOf(
+            SectionView(id = "sec-1", name = "Work", collapsed = false, sessions = emptyList()),
+            SectionView(id = "sec-2", name = "Home", collapsed = false, sessions = emptyList()),
+        )
     }
 
     private val feedback = RecordingFeedback()
@@ -156,6 +155,7 @@ class SwipeRowTest {
         editing: () -> Boolean = { false },
         archivedRow: (String) -> Boolean = { false },
         rtl: Boolean = false,
+        commands: SessionRowCommands = cmd,
     ) {
         compose.setContent {
             CompositionLocalProvider(
@@ -167,7 +167,7 @@ class SwipeRowTest {
                         ProvideReduceMotion {
                             CompositionLocalProvider(LocalFeedback provides feedback) {
                                 val listState = rememberLazyListState()
-                                val hookup = rememberSessionRowActions(listState, cmd)
+                                val hookup = rememberSessionRowActions(listState, commands)
                                 val model = rememberSessionListModel(
                                     sections = listOf(ListSection(id = "recent", header = "Recent", rows = rows)),
                                 )
@@ -305,6 +305,61 @@ class SwipeRowTest {
         compose.onNodeWithTag("swipe-action-pin").assertDoesNotExist()
     }
 
+    // ------------------------------------------- one side at a time (#136)
+
+    @Test
+    fun anOpenLeadingRowNeverComposesTheTrailingPanes() {
+        host()
+        swipeRight(compose.onNodeWithTag("session-chat-i18n"), dpToTheRight = 40f)
+        compose.onNodeWithTag("swipe-action-pin").assertExists()
+        // The ghost Archive/Move panes that used to show through the row
+        // (and swallowed the Move tap) are gone.
+        compose.onNodeWithTag("swipe-action-archive").assertDoesNotExist()
+        compose.onNodeWithTag("swipe-action-move").assertDoesNotExist()
+    }
+
+    @Test
+    fun anOpenTrailingRowNeverComposesThePinPane() {
+        host()
+        swipeRight(compose.onNodeWithTag("session-chat-i18n"), dpToTheRight = -80f)
+        compose.onNodeWithTag("swipe-action-move").assertExists()
+        compose.onNodeWithTag("swipe-action-pin").assertDoesNotExist()
+    }
+
+    @Test
+    fun anOppositeDragClosesTheOpenSideWithoutRevealingTheOther() {
+        host()
+        swipeRight(compose.onNodeWithTag("session-chat-i18n"), dpToTheRight = 40f)
+        compose.onNodeWithTag("swipe-action-pin").assertExists()
+        // 74 dp open, dragged 200 dp left: stops at 0 and closes.
+        swipeRight(compose.onNodeWithTag("session-chat-i18n"), dpToTheRight = -200f)
+        compose.onNodeWithTag("swipe-action-pin").assertDoesNotExist()
+        compose.onNodeWithTag("swipe-action-archive").assertDoesNotExist()
+        compose.onNodeWithTag("swipe-action-move").assertDoesNotExist()
+        assertTrue(cmd.calls.isEmpty())
+        // A fresh swipe left then opens the trailing side.
+        swipeRight(compose.onNodeWithTag("session-chat-i18n"), dpToTheRight = -80f)
+        compose.onNodeWithTag("swipe-action-move").assertExists()
+    }
+
+    @Test
+    fun theMovePaneOpensTheMoveToSectionSheetThroughTheRealPrompts() {
+        val sheets = CopyOnWriteArrayList<ActionSheetModel>()
+        val presenter = object : ActionSheetPresenter {
+            override fun show(model: ActionSheetModel) {
+                sheets += model
+            }
+        }
+        val real = SessionRowCommands(RowActions.Noop, DefaultSessionPrompts(RowActions.Noop, Alerts.Noop, presenter))
+        host(commands = real)
+        swipeRight(compose.onNodeWithTag("session-chat-i18n"), dpToTheRight = -80f)
+        compose.onNodeWithTag("swipe-action-move").performClick()
+        compose.waitForIdle()
+        assertEquals(1, sheets.size)
+        assertEquals("Move to Section", sheets.single().title)
+        assertEquals(listOf("No Section"), sheets.single().actions.map { it.title })
+    }
+
     // ------------------------------------------------------ archived rows
 
     @Test
@@ -344,12 +399,15 @@ class SwipeRowTest {
     // -------------------------------------------------- one row at a time
 
     @Test
-    fun openingASecondRowClosesTheFirst() {
+    fun aSwipeOnASecondRowOnlyClosesTheFirstThenTheNextOneOpensIt() {
         host()
         swipeRight(compose.onNodeWithTag("session-chat-i18n"), dpToTheRight = 40f)
         compose.onAllNodesWithTag("swipe-action-pin").assertCountEquals(1)
         val firstTop = compose.onNodeWithTag("swipe-action-pin").getBoundsInRoot().top
         val secondTop = compose.onNodeWithTag("session-chat-downloads").getBoundsInRoot().top
+        // #136, as UITableView: the touch closes the open row, nothing opens.
+        swipeRight(compose.onNodeWithTag("session-chat-downloads"), dpToTheRight = 40f)
+        compose.onAllNodesWithTag("swipe-action-pin").assertCountEquals(0)
         swipeRight(compose.onNodeWithTag("session-chat-downloads"), dpToTheRight = 40f)
         compose.onAllNodesWithTag("swipe-action-pin").assertCountEquals(1)
         // The surviving pane belongs to the second row.
@@ -442,10 +500,9 @@ class SwipeRowTest {
     // ----------------------------------------------------- the long press
 
     @Test
-    fun theLongPressMenuDrillsIntoTheRowsEngineSections() {
-        // deploy runs on engine B: only B's sections are listed, in order,
-        // with "No Section" and "New Section…" after them.
-        host(rows = SessionListFixtures.recentRows.map { if (it.id == "chat-deploy") it.copy(engineId = "eng-B") else it })
+    fun theLongPressMenuDrillsIntoTheSections() {
+        // Every section in order, then "No Section" and "New Section…".
+        host()
         // The long-click action lives on the contextMenu wrapper, the row
         // node's semantics parent.
         compose.onNodeWithTag("session-chat-deploy").onParent()
@@ -459,16 +516,14 @@ class SwipeRowTest {
         // Drill in through the submenu row (no testTag on MenuSection).
         compose.onNodeWithText("Move to Section").performClick()
         compose.waitForIdle()
-        compose.onNodeWithTag("row-menu-section-sec-b1").assertExists()
-        compose.onNodeWithTag("row-menu-section-sec-b2").assertExists()
+        compose.onNodeWithTag("row-menu-section-sec-1").assertExists()
+        compose.onNodeWithTag("row-menu-section-sec-2").assertExists()
         compose.onNodeWithTag("row-menu-no-section").assertExists()
         compose.onNodeWithTag("row-menu-new-section").assertExists()
-        // The other engine's sections never appear.
-        compose.onNodeWithTag("row-menu-section-sec-a1").assertDoesNotExist()
-        // "New Section…" creates on the chat's engine and never moves.
+        // "New Section…" creates only and never moves.
         compose.onNodeWithTag("row-menu-new-section").performClick()
         compose.waitForIdle()
-        assertEquals(listOf("newSection eng-B"), cmd.calls)
+        assertEquals(listOf("newSection"), cmd.calls)
     }
 
     @Test
@@ -497,7 +552,8 @@ class SwipeRowTest {
         compose.onNodeWithTag("swipe-action-archive").assertLeftPositionInRootIsEqualTo(0.dp)
         compose.onNodeWithTag("swipe-action-move").assertLeftPositionInRootIsEqualTo(74.dp)
         // Physically left = leading: the Pin pane appears at the physical
-        // RIGHT edge (the start edge).
+        // RIGHT edge (the start edge). The first touch only closes i18n.
+        swipeRight(compose.onNodeWithTag("session-chat-downloads"), dpToTheRight = -40f)
         swipeRight(compose.onNodeWithTag("session-chat-downloads"), dpToTheRight = -40f)
         compose.onNodeWithTag("swipe-action-pin").assertExists()
         compose.onNodeWithTag("swipe-action-pin").assertLeftPositionInRootIsEqualTo(319.dp)

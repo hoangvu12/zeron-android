@@ -18,6 +18,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,6 +54,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.Velocity
 import kotlin.math.abs
 import kotlin.math.roundToInt
+import kotlin.math.sign
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.flow.filter
@@ -69,8 +71,9 @@ import sh.zeron.android.design.ZeronIcon
  * Compose-foundation swipe that reveals icon-only, full-height, tinted
  * action panes — leading (Pin/Unpin) and trailing (Archive, Move; only
  * Unarchive on the Archived list). The look and behaviour are
- * `SessionListController.swift:228-263`; the metrics UIKit does not
- * expose live in [SwipeTokens].
+ * `SessionListController.swift:241-276`; the metrics UIKit does not
+ * expose live in [SwipeTokens]. One side shows at a time (#136): a drag
+ * is locked to the side it opened, and only that side lays out panes.
  *
  * This file holds the gesture half. The per-list wiring (which actions
  * each row gets, the long-press menu, the hook into 41's list) is
@@ -272,7 +275,7 @@ class SwipeRowState internal constructor(
      * toast follows the slide-out); everything else performs and starts
      * the close in the same frame — no waiting for the animation (iOS
      * presents the Move sheet and calls `done(true)` together,
-     * `SessionListController.swift:256-259`).
+     * `SessionListController.swift:269-272`).
      */
     internal fun tap(action: SwipeAction, leading: Boolean) {
         if (action.destructive) {
@@ -373,6 +376,9 @@ fun SwipeRow(
     // not — `Modifier.offset { }` already mirrors x in RTL.
     val dirSign = if (LocalLayoutDirection.current == LayoutDirection.Rtl) -1f else 1f
     val showPanes = static || state.open
+    // The open side's sign; flips only when the row crosses 0, so a drag
+    // does not recompose (#136: one side at a time).
+    val openSide by remember(state) { derivedStateOf { sign(state.currentOffsetPx) } }
 
     Box(
         modifier
@@ -420,13 +426,16 @@ fun SwipeRow(
                 },
             ),
     ) {
-        // 1. The panes, only in the revealed gap (behind the content).
+        // 1. The panes of the open side only, in the revealed gap (behind
+        // the content).
         if (showPanes) {
             Box(Modifier.matchParentSize()) {
-                leadNow.value?.let { action ->
-                    SwipePanes(state, listOf(action), atLeading = true)
+                if (openSide > 0f) {
+                    leadNow.value?.let { action ->
+                        SwipePanes(state, listOf(action), atLeading = true)
+                    }
                 }
-                if (trailNow.value.isNotEmpty()) {
+                if (openSide < 0f && trailNow.value.isNotEmpty()) {
                     SwipePanes(state, trailNow.value, atLeading = false)
                 }
             }
@@ -492,7 +501,11 @@ private fun SwipePanes(
         val w = constraints.maxWidth
         val h = constraints.maxHeight
         val rtl = layoutDirection == LayoutDirection.Rtl
-        val spans = paneSpans(abs(state.currentOffsetPx), actions.size, buttonPx, state.currentArm(w.toFloat()))
+        // Only the open side lays out panes (#136): the other side's
+        // reveal is negative and places nothing, so no ghost pane shows
+        // through the translucent content or takes a tap.
+        val reveal = sideReveal(state.currentOffsetPx, atLeading)
+        val spans = paneSpans(reveal, actions.size, buttonPx, state.currentArm(w.toFloat()))
         layout(w, h) {
             measurables.forEachIndexed { i, measurable ->
                 val span = spans.getOrNull(i) ?: return@forEachIndexed
@@ -563,6 +576,14 @@ private fun SwipePane(
  *
  * The pre-slop travel counts toward the offset (`base + (now − down)`),
  * like UIKit's cell catching up to the finger.
+ *
+ * Ancestors (#135's in-app swipe-back, the list's scroll): once claimed,
+ * every move and the up are consumed in the Main pass, which reaches this
+ * child before any ancestor's Main handler, so an ancestor pan that has
+ * not claimed yet sees the drag consumed and gives the pointer up. The
+ * row claims at [SwipeTokens.LockSlop], before any ancestor's touch slop.
+ * One gesture reveals one side ([swipeSide]); a touch while another row
+ * is open never starts a swipe ([touchStartsSwipe]).
  */
 private suspend fun PointerInputScope.detectRowSwipe(
     state: SwipeRowState,
@@ -576,6 +597,9 @@ private suspend fun PointerInputScope.detectRowSwipe(
     awaitEachGesture {
         val down = awaitFirstDown(requireUnconsumed = false)
         if (!enabled.value || coordinator.listScrolling()) return@awaitEachGesture
+        // Another row is open: this touch only closes it
+        // ([swipeDismissOnTouch]), it never opens a second row (#136).
+        if (!touchStartsSwipe(coordinator.openId, state.id)) return@awaitEachGesture
 
         val slopPx = SwipeTokens.LockSlop.toPx()
         val buttonPx = SwipeTokens.ButtonWidth.toPx()
@@ -593,21 +617,23 @@ private suspend fun PointerInputScope.detectRowSwipe(
         // `state.offset.value` may lag it by a frame at release.
         var lastX = state.offset.value
 
+        // The one side this gesture may reveal, fixed at the claim (#136).
+        var side = SwipeSide.Trailing
+
         /**
-         * Clamp to the sides that exist, then follow the finger 1:1. Not
-         * `suspend`: this block's scope is `@RestrictsSuspension`, so the
-         * snap runs in the row's scope, undispatched (applied immediately
-         * when the offset's mutex is free).
+         * Clamp to the claimed side, then follow the finger 1:1. Dragging
+         * an open row the other way stops at 0 — it closes, it never
+         * crosses into the other side's actions. Not `suspend`: this
+         * block's scope is `@RestrictsSuspension`, so the snap runs in the
+         * row's scope, undispatched (applied immediately when the offset's
+         * mutex is free).
          */
         fun dragTo(x: Float) {
             val width = state.widthPx()
-            val min = if (trailing.value.isEmpty()) 0f else -width
-            val max = if (leading.value == null) 0f else width
-            val clamped = x.coerceIn(min, max)
+            val clamped = clampToSide(x, side, width)
             lastX = clamped
             state.scope.launch(start = CoroutineStart.UNDISPATCHED) { state.offset.snapTo(clamped) }
-            val nowArmed = abs(clamped) >= SwipeTokens.FullSwipeFraction * width &&
-                (if (clamped > 0f) leading.value != null else trailing.value.isNotEmpty())
+            val nowArmed = clamped != 0f && isFullSwipe(clamped, width)
             if (nowArmed != state.armed) {
                 state.armed = nowArmed
                 if (nowArmed) feedback.haptic(Haptic.Threshold)
@@ -669,6 +695,7 @@ private suspend fun PointerInputScope.detectRowSwipe(
                     LockDecision.Reject -> return@awaitEachGesture
                     LockDecision.Horizontal -> {
                         claimed = true
+                        side = swipeSide(state.offset.value, dx * dirSign)
                         state.dragStart()
                     }
                 }
