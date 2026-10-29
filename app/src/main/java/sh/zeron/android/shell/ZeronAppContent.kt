@@ -1,5 +1,7 @@
 package sh.zeron.android.shell
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -10,8 +12,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Modifier
 import sh.zeron.android.ZeronApplication
 import sh.zeron.android.auth.OrgPicker
+import sh.zeron.android.onboarding.OnboardingHost
 import sh.zeron.android.core.FontGate
 import sh.zeron.android.design.FontGateHost
 import sh.zeron.android.design.ProvideFeedback
@@ -82,11 +86,17 @@ fun ZeronAppContent(app: ZeronApplication, rootState: AppRootState) {
                         CompositionLocalProvider(LocalRowActions provides app.rowActions) {
                             // #15: "Choose an organization" over whatever started the sign-in.
                             OrgPicker(app.authSession)
-                            AppRootContent(
-                                app = app,
-                                rootState = rootState,
-                                presentations = presentations,
-                            )
+                            Box(Modifier.fillMaxSize()) {
+                                AppRootContent(
+                                    app = app,
+                                    rootState = rootState,
+                                    presentations = presentations,
+                                )
+                                // #17: onboarding over the root (Welcome before
+                                // signing in, the shell after); the root swap
+                                // under it never shows.
+                                OnboardingHost(app)
+                            }
                         }
                     }
                 }
@@ -118,9 +128,9 @@ private fun AppRootContent(
         input = input,
         state = rootState,
         presentations = presentations,
-        // TODO(#17): Get started presents onboarding (appearance step, or
+        // #17: Get started cross-dissolves into onboarding (appearance, or
         // sync when this phone has seen it); sign-in (#15) runs from there.
-        welcome = { WelcomeScreen(onGetStarted = {}) },
+        welcome = { WelcomeScreen(onGetStarted = app.onboarding::getStarted) },
         // 108: the shell-state scope above the Phone ↔ Split switch (35's
         // `shellScope`). Everything the two shells share — 26's tab state,
         // 33's split state, 105's sidebar, 106's slots and tablet router —

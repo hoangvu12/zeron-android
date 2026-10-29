@@ -21,6 +21,8 @@ import kotlinx.coroutines.launch
 import sh.zeron.android.auth.AuthSession
 import sh.zeron.android.auth.CoreAuthApi
 import sh.zeron.android.auth.PrefsPendingAuthState
+import sh.zeron.android.onboarding.OnboardingModel
+import sh.zeron.android.onboarding.SharedOnboardingPrefs
 import sh.zeron.android.background.DeliveryHold
 import sh.zeron.android.background.DeliveryService
 import sh.zeron.android.background.RunWatchController
@@ -235,6 +237,13 @@ class ZeronApplication : Application() {
      * up. Screens start it through `LocalSignIn` and read `state`; the
      * client it starts is what swaps the root to the shell.
      */
+    /**
+     * The first-run flow (#17, `OnboardingViewController`): opened from
+     * Welcome's Get started, carried across sign-in, finished once per user
+     * on this phone. `ZeronAppContent` draws it over the root.
+     */
+    val onboarding: OnboardingModel by lazy { OnboardingModel(SharedOnboardingPrefs(this)) }
+
     val authSession: AuthSession by lazy {
         AuthSession(
             scope = applicationScope,
@@ -587,6 +596,9 @@ class ZeronApplication : Application() {
                         lifecycleHooks.clientReady()
                         notifications.attachTo(client)
                     }
+                    // #17: onboarding picks up after signing in (or at a launch
+                    // with an account that hasn't finished it); a sign-out closes it.
+                    onboarding.onAccount(client?.userId(), sessionHolder.isDemo)
                 }
             }
             // Stored credentials start the client offline-first; off main:
