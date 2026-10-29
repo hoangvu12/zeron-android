@@ -335,7 +335,9 @@ class SessionHolder<C : Any>(
                         deviceId = DeviceId.read(app),
                         deviceName = DeviceLabel.read(app),
                         platform = "android",
-                        appVersion = BuildConfig.VERSION_NAME,
+                        // The Zeron version this build runs (#66: never the
+                        // release build's suffix, which hosts don't know).
+                        appVersion = BuildConfig.CORE_VERSION,
                     )
                     // The constructor never dials; then warm the likeliest chats (iOS start).
                     CoreClient(config, creds, listener).also { it.preloadSessions() }

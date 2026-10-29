@@ -41,6 +41,11 @@ val requestedAbis: List<String> = providers.gradleProperty("zeronAbis")
 // Version derivation from Zeron's workspace Cargo.toml (android-app#13): the
 // app's version is the core release it is built on.
 // ---------------------------------------------------------------------------
+// The core's own version: the load handshake (CoreLoader) and the app
+// version the core reports compare against it, so it never takes the
+// release build's suffix (#66: a `v0.2.129-2` tag ships versionName
+// 0.2.129-2 on core 0.2.129).
+val coreVersion: String = ZeronVersion.versionName(zeronDir.resolve("Cargo.toml"))
 val appVersionName: String = ZeronVersion.versionName(
     zeronDir.resolve("Cargo.toml"),
     providers.gradleProperty("zeronVersionName").orNull,
@@ -331,6 +336,7 @@ android {
         targetSdk = 36 // compile 37; target stays 36 for local-network permission
         versionCode = appVersionCode
         versionName = appVersionName
+        buildConfigField("String", "CORE_VERSION", "\"$coreVersion\"")
         // android-app#30: AndroidJUnitRunner + the in-process device filters
         // (@TabletOnly / @PhysicalDeviceOnly / @Tour / @Ignore) — see
         // ZeronTestRunner for why not a comma-separated `notAnnotation`.

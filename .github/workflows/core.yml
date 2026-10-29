@@ -8,6 +8,8 @@ name: Core
 # Runs on its own only when zeron/ or this file changes, so app-only pushes
 # never start or cancel it. The App workflow calls it (workflow_call) to get
 # the `zeron-core` artifact: a cache hit makes that a restore and an upload.
+# The Release workflow (#66) calls it with `profile: mobile-dist` (thin LTO,
+# stripped — what iOS archives) and no host build.
 
 on:
   push:
@@ -23,6 +25,15 @@ on:
       - '.github/workflows/core.yml'
   workflow_dispatch:
   workflow_call:
+    inputs:
+      profile:
+        description: The core's Cargo profile (mobile, or mobile-dist for releases).
+        type: string
+        default: mobile
+      host:
+        description: Also build the host core the JVM tests load.
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -36,7 +47,8 @@ concurrency:
 env:
   NDK_VERSION: 29.0.14206865
   ZERON_ANDROID_ABIS: arm64-v8a
-  ZERON_ANDROID_PROFILE: mobile
+  # Push / pull_request runs have no inputs: the defaults.
+  ZERON_ANDROID_PROFILE: ${{ inputs.profile || 'mobile' }}
 
 jobs:
   core:
@@ -55,7 +67,7 @@ jobs:
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: core-out
-          key: core-${{ steps.pin.outputs.sha }}-${{ env.ZERON_ANDROID_ABIS }}-${{ env.ZERON_ANDROID_PROFILE }}
+          key: core-${{ steps.pin.outputs.sha }}-${{ env.ZERON_ANDROID_ABIS }}-${{ env.ZERON_ANDROID_PROFILE }}${{ inputs.host == false && '-nohost' || '' }}
 
       - uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
         if: steps.cache.outputs.cache-hit != 'true'
@@ -88,7 +100,7 @@ jobs:
         run: bash zeron/scripts/android/build-core.sh "$GITHUB_WORKSPACE/core-out"
 
       - name: Host core (JVM tests)
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.cache.outputs.cache-hit != 'true' && inputs.host != false
         working-directory: zeron
         run: |
           cargo build --locked -p zeron-mobile --lib --profile mobile

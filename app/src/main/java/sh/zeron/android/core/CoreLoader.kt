@@ -30,9 +30,11 @@ object CoreLoader {
             System.loadLibrary("c++_shared")
             // JNA loads `libzeron_mobile.so` on the first UniFFI call.
             val version = uniffi.zeron_core.coreVersion()
-            if (version != BuildConfig.VERSION_NAME) {
-                Log.e(TAG, "core $version does not match app ${BuildConfig.VERSION_NAME}")
-                CoreStatus.Failed("core $version does not match app ${BuildConfig.VERSION_NAME}")
+            // #66: the core's version, not versionName (a release build's
+            // versionName can carry the tag's build number).
+            if (version != BuildConfig.CORE_VERSION) {
+                Log.e(TAG, "core $version does not match app ${BuildConfig.CORE_VERSION}")
+                CoreStatus.Failed("core $version does not match app ${BuildConfig.CORE_VERSION}")
             } else {
                 Log.i(TAG, "core $version loaded")
                 CoreStatus.Loaded(version)

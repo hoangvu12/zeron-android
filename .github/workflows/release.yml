@@ -1,0 +1,223 @@
+name: Release
+
+# A `v*` tag → a signed release APK on GitHub Releases (#66).
+#
+# Tags: `v<zeron version>` or `v<zeron version>-<build>`, where the Zeron
+# version is zeron/Cargo.toml's [workspace.package] version (the core this
+# app runs) and <build> is 1…999 for re-releases on the same core:
+#
+#   v0.2.129    → versionName 0.2.129,   versionCode 2129000
+#   v0.2.129-2  → versionName 0.2.129-2, versionCode 2129002
+#
+# versionCode = (major × 1 000 000 + minor × 1 000 + patch) × 1 000 + build,
+# so it only grows as Zeron's version or the build number grows (Android
+# installs a release over the previous one). A tag that doesn't match the
+# pinned core fails before anything builds.
+#
+# The core is built in the `mobile-dist` profile (thin LTO, stripped), the
+# APK for arm64-v8a with R8 (keep rules for JNA, UniFFI and WebRTC in
+# app/proguard-rules.pro). It is signed with the release key from:
+#   ZERON_RELEASE_KEYSTORE_BASE64    base64 of the PKCS12 keystore
+#   ZERON_RELEASE_KEYSTORE_PASSWORD  ZERON_RELEASE_KEY_ALIAS
+# (minted by the Release key workflow). Without them the release fails: it
+# never ships unsigned or debug-signed.
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  NDK_VERSION: 29.0.14206865
+  ZERON_ANDROID_ABIS: arm64-v8a
+
+jobs:
+  core:
+    uses: ./.github/workflows/core.yml
+    with:
+      profile: mobile-dist
+      host: false
+
+  release:
+    needs: core
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          submodules: true
+
+      - id: version
+        name: Version from the tag
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          zeron=$(awk '
+            /^\[workspace\.package\]/ { inside = 1; next }
+            /^\[/ { inside = 0 }
+            inside && /^[[:space:]]*version[[:space:]]*=/ { gsub(/.*=[[:space:]]*"|".*/, ""); print; exit }
+          ' zeron/Cargo.toml)
+          if ! [[ "$zeron" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+            echo "::error::zeron/Cargo.toml's version '$zeron' is not major.minor.patch."
+            exit 1
+          fi
+          major=${BASH_REMATCH[1]} minor=${BASH_REMATCH[2]} patch=${BASH_REMATCH[3]}
+          name="${TAG#v}"
+          if [ "$name" = "$zeron" ]; then
+            build=0
+          elif [[ "$name" =~ ^${zeron//./\\.}-([1-9][0-9]{0,2})$ ]]; then
+            build=${BASH_REMATCH[1]}
+          else
+            echo "::error::Tag '$TAG' must be v$zeron or v$zeron-<1…999> (zeron/ pins Zeron $zeron)."
+            exit 1
+          fi
+          if [ "$minor" -ge 1000 ] || [ "$patch" -ge 1000 ]; then
+            echo "::error::Zeron $zeron: minor and patch must stay below 1000 for the versionCode."
+            exit 1
+          fi
+          code=$(( (major * 1000000 + minor * 1000 + patch) * 1000 + build ))
+          if [ "$code" -gt 2100000000 ]; then
+            echo "::error::versionCode $code passes Android's limit."
+            exit 1
+          fi
+          echo "versionName $name, versionCode $code (core $zeron)"
+          {
+            echo "name=$name"
+            echo "code=$code"
+          } >> "$GITHUB_OUTPUT"
+
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: zeron-core
+          path: core-out
+
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
+
+      - name: Android SDK packages
+        run: sdkmanager --install "platforms;android-37.0" "build-tools;37.0.0" "ndk;$NDK_VERSION"
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          workspaces: tools/android-assets
+          key: android-assets
+
+      - uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
+        with:
+          cache-read-only: true
+
+      - name: Release signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ZERON_RELEASE_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ZERON_RELEASE_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ZERON_RELEASE_KEY_ALIAS }}
+        run: |
+          set -euo pipefail
+          missing=()
+          [ -n "$KEYSTORE_BASE64" ] || missing+=(ZERON_RELEASE_KEYSTORE_BASE64)
+          [ -n "$KEYSTORE_PASSWORD" ] || missing+=(ZERON_RELEASE_KEYSTORE_PASSWORD)
+          [ -n "$KEY_ALIAS" ] || missing+=(ZERON_RELEASE_KEY_ALIAS)
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "::error::Missing release secrets: ${missing[*]}. Run the Release key workflow and set them (#66); a release never ships unsigned."
+            exit 1
+          fi
+          keystore="$RUNNER_TEMP/zeron-release.p12"
+          # The same sanitising as the App workflow's debug key: a UTF-8 BOM
+          # (a secret set from a PowerShell-written file), line wrapping /
+          # CRLF, URL-safe and unpadded base64. keytool below catches
+          # anything this lets through that is not the keystore.
+          b64=$(printf '%s' "$KEYSTORE_BASE64" | LC_ALL=C tr -cd 'A-Za-z0-9+/=_-' | tr '_-' '/+')
+          while [ $(( ${#b64} % 4 )) -ne 0 ]; do b64="$b64="; done
+          if ! printf '%s' "$b64" | base64 -d > "$keystore"; then
+            # Shape only, never content.
+            bad=$(printf '%s' "$KEYSTORE_BASE64" | tr -d 'A-Za-z0-9+/=_\r\n\t -' | wc -c)
+            echo "::error::ZERON_RELEASE_KEYSTORE_BASE64 is not base64 (length ${#KEYSTORE_BASE64}, $bad characters outside the base64 alphabet)."
+            exit 1
+          fi
+          chmod 600 "$keystore"
+          clean() { printf '%s' "$1" | LC_ALL=C sed '1s/^\xEF\xBB\xBF//' | tr -d '\r\n'; }
+          KEYSTORE_PASSWORD=$(clean "$KEYSTORE_PASSWORD")
+          KEY_ALIAS=$(clean "$KEY_ALIAS")
+          echo "::add-mask::$KEYSTORE_PASSWORD"
+          if ! out=$(keytool -list -storetype PKCS12 -keystore "$keystore" -storepass "$KEYSTORE_PASSWORD" -alias "$KEY_ALIAS" 2>&1); then
+            echo "$out"
+            echo "decoded $(wc -c < "$keystore") bytes, first byte $(head -c1 "$keystore" | od -An -tx1) (PKCS12 starts with 30)"
+            echo "::error::ZERON_RELEASE_KEYSTORE_* secrets do not open a PKCS12 keystore with that alias."
+            exit 1
+          fi
+          # PKCS12 has one password: the key's is the store's.
+          {
+            echo "ZERON_ANDROID_KEYSTORE=$keystore"
+            echo "ZERON_ANDROID_KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD"
+            echo "ZERON_ANDROID_KEY_ALIAS=$KEY_ALIAS"
+            echo "ZERON_ANDROID_KEY_PASSWORD=$KEYSTORE_PASSWORD"
+          } >> "$GITHUB_ENV"
+
+      - name: Assemble release APK
+        run: >-
+          ./gradlew --stacktrace :app:assembleRelease
+          -PzeronCoreDir="$GITHUB_WORKSPACE/core-out"
+          -PzeronVersionName="${{ steps.version.outputs.name }}"
+          -PzeronVersionCode="${{ steps.version.outputs.code }}"
+
+      - name: Remove signing key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/zeron-release.p12"
+
+      - name: Verify, name and checksum
+        env:
+          VERSION: ${{ steps.version.outputs.name }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          apks=(app/build/outputs/apk/release/*arm64-v8a*.apk)
+          if [ ${#apks[@]} -ne 1 ]; then
+            echo "::error::expected one arm64-v8a release APK, found ${#apks[@]}: $(ls app/build/outputs/apk/release/)"
+            exit 1
+          fi
+          apksigner="$ANDROID_HOME/build-tools/37.0.0/apksigner"
+          # Signed with the release key (v2+), not debug, not unsigned.
+          "$apksigner" verify --print-certs "${apks[0]}" | tee signer.txt
+          if grep -qi 'CN=Android Debug' signer.txt; then
+            echo "::error::the APK is debug-signed"
+            exit 1
+          fi
+          mkdir -p dist
+          apk="zeron-android-$VERSION-arm64-v8a.apk"
+          cp "${apks[0]}" "dist/$apk"
+          (cd dist && sha256sum "$apk" > "$apk.sha256" && cat "$apk.sha256")
+          cp app/build/outputs/mapping/release/mapping.txt "dist/zeron-android-$VERSION-mapping.txt"
+
+      # The R8 mapping (de-obfuscates crash traces) stays with the run, not the release page.
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: zeron-android-${{ steps.version.outputs.name }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          VERSION: ${{ steps.version.outputs.name }}
+        run: |
+          set -euo pipefail
+          apk="dist/zeron-android-$VERSION-arm64-v8a.apk"
+          gh release create "$TAG" "$apk" "$apk.sha256" \
+            --verify-tag \
+            --title "Zeron Android $VERSION" \
+            --notes "Zeron Android $VERSION for arm64 phones, on Zeron core $(echo "$VERSION" | cut -d- -f1). Install the APK; it updates an earlier release in place. Check it with \`sha256sum -c $(basename "$apk").sha256\`."
