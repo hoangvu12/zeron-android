@@ -2,12 +2,14 @@ package sh.zeron.android.transcript.widgets
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.DashPathEffect
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
 import android.os.Handler
 import android.os.Looper
+import android.view.Choreographer
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
@@ -16,14 +18,19 @@ import androidx.compose.runtime.setValue
 import sh.zeron.android.transcript.StyleFonts
 import uniffi.zeron_core.FrameImage
 import uniffi.zeron_core.Rgba
+import uniffi.zeron_core.RowDisplay
 import uniffi.zeron_core.SurfaceFrame
+import uniffi.zeron_core.SurfaceGesture
+import uniffi.zeron_core.VisualControl
 import uniffi.zeron_core.VisualDisplay
 import uniffi.zeron_core.VisualListener
 import uniffi.zeron_core.VisualPaint
 import uniffi.zeron_core.VisualSession
 import uniffi.zeron_core.VisualShape
+import uniffi.zeron_core.WidgetKind
 import java.nio.ByteBuffer
 import kotlin.math.ceil
+import kotlin.math.max
 import kotlin.math.min
 
 /**
@@ -51,6 +58,30 @@ class TranscriptVisuals(private val lookup: (String) -> VisualSession?) {
     }
 
     /**
+     * #47: whether row-local `(xDp, yDp)` lands on a touch target of one of
+     * [d]'s visuals — a control (with its finger-sized slop) or a `drag`
+     * surface, which tracks from touch-down (iOS: its recognizer begins at
+     * once, so the row's long press never fires). The row menu's "not on a
+     * control" rule reads it. Only visuals already shown count: no lookup.
+     */
+    fun isOverTouchTarget(d: RowDisplay, xDp: Float, yDp: Float): Boolean {
+        for (w in d.widgets) {
+            val k = w.kind as? WidgetKind.Visual ?: continue
+            val shown = live[k.id]?.sink?.shown?.display ?: continue
+            val x = xDp - w.x
+            val y = yDp - w.y
+            if (shown.controls.any { ControlTarget.of(it).contains(x, y) }) return true
+            if (shown.surfaces.any { s ->
+                    s.gesture == SurfaceGesture.DRAG && x >= s.x && x < s.x + s.w && y >= s.y && y < s.y + s.h
+                }
+            ) {
+                return true
+            }
+        }
+        return false
+    }
+
+    /**
      * The transcript's teardown, before the engine closes (its `shutdown`
      * stops every worker): no lookups after this. The sessions are left to
      * their cleaner — a row still animating out may hold one for a frame.
@@ -62,17 +93,35 @@ class TranscriptVisuals(private val lookup: (String) -> VisualSession?) {
 }
 
 /**
+ * A control's touch rect in the visual's points (iOS
+ * `VisualControlView.point(inside:)`, `VisualView.swift:480-484`): the
+ * painted art plus 4 pt each side and enough above and below for a 44 pt
+ * finger target.
+ */
+internal class ControlTarget(val padX: Float, val padY: Float, val x: Float, val y: Float, val w: Float, val h: Float) {
+    fun contains(px: Float, py: Float): Boolean = px >= x && px < x + w && py >= y && py < y + h
+
+    companion object {
+        fun of(c: VisualControl): ControlTarget {
+            val padX = 4f
+            val padY = max(0f, (44f - c.h) / 2)
+            return ControlTarget(padX, padY, c.x - padX, c.y - padY, max(c.w, 0f) + padX * 2, max(c.h, 0f) + padY * 2)
+        }
+    }
+}
+
+/**
  * The platform half of one visual (iOS `VisualView` minus the view): its
  * session, the [VisualSink] that receives the worker's output at the
- * current density, and the attachment. Every host composing it
- * [acquire]s it; frames flow while at least one does (iOS: `window != nil`
- * — a visual whose row moved composes in the new row before the old one is
- * released, so counting keeps it attached across the move). Main thread
- * only.
+ * current density, and the attachment.
  *
- * TODO(#47): attach only while the row is realized **and** the app is in
- * the foreground (iOS `active && foreground`, `VisualView.swift:65-75`) —
- * today a composed visual stays attached in the background.
+ * Frames flow only while the visual can be seen (iOS `window != nil &&
+ * active && foreground`, `VisualView.swift:65-75`; port 04 F4): each host
+ * composing it reports whether it is **active** — its row on screen, its
+ * screen shown, the app started — and the worker is attached while at
+ * least one is. A visual whose row moved shows in the new row before the
+ * old one is released, so the set keeps it attached across the move.
+ * Main thread only.
  */
 @Stable
 class LiveVisual internal constructor(val session: VisualSession) {
@@ -80,40 +129,47 @@ class LiveVisual internal constructor(val session: VisualSession) {
     var sink: VisualSink? by mutableStateOf(null)
         private set
 
-    private var hosts = 0
+    private val active = HashSet<Any>()
     private var attached = false
     private var dark = false
-    private var reduceMotion = false
-
-    /** A host composed this visual: attach on the first one, carrying the appearance (`VisualView.swift:71`). */
-    fun acquire(density: Float, dark: Boolean, reduceMotion: Boolean) {
-        this.dark = dark
-        this.reduceMotion = reduceMotion
-        sinkFor(density)
-        hosts++
-        sync()
-    }
-
-    /** A host left: detach after the last one. */
-    fun release() {
-        if (hosts == 0) return
-        hosts--
-        sync()
-    }
 
     /**
-     * The host's latest density and appearance (a SideEffect): a new density
-     * rasterizes into a new sink — re-attached, which makes the worker resend
-     * everything; an appearance flip goes through `setAppearance`
-     * (`VisualView.swift:77-82`) while attached, and rides the next attach
+     * A host's state (a SideEffect, every composition): attach when the
+     * first host turns active, carrying the appearance and Reduce Motion
+     * (`VisualView.swift:71`); detach when none is. A new density rasterizes
+     * into a new sink — re-attached, which makes the worker resend
+     * everything. An appearance flip goes through `setAppearance`
+     * (`VisualView.swift:77-82`) while attached and rides the next attach
      * otherwise.
      */
-    fun update(density: Float, dark: Boolean) {
+    fun show(host: Any, isActive: Boolean, density: Float, dark: Boolean, reduceMotion: Boolean) {
         val fresh = sinkFor(density)
-        if (fresh && attached) session.attach(sink!!, dark, reduceMotion)
-        if (dark != this.dark) {
-            this.dark = dark
-            if (attached && !fresh) session.setAppearance(dark)
+        if (isActive) active.add(host) else active.remove(host)
+        val wanted = active.isNotEmpty()
+        when {
+            wanted && (!attached || fresh) -> {
+                attached = true
+                this.dark = dark
+                session.attach(sink!!, dark, reduceMotion)
+            }
+            !wanted && attached -> {
+                attached = false
+                this.dark = dark
+                session.detach()
+            }
+            dark != this.dark -> {
+                this.dark = dark
+                if (attached) session.setAppearance(dark)
+            }
+        }
+    }
+
+    /** A host left composition: detach after the last active one. */
+    fun release(host: Any) {
+        active.remove(host)
+        if (active.isEmpty() && attached) {
+            attached = false
+            session.detach()
         }
     }
 
@@ -122,13 +178,6 @@ class LiveVisual internal constructor(val session: VisualSession) {
         if (sink?.density == density) return false
         sink = VisualSink(density)
         return true
-    }
-
-    private fun sync() {
-        val wanted = hosts > 0
-        if (wanted == attached) return
-        attached = wanted
-        if (wanted) session.attach(sink!!, dark, reduceMotion) else session.detach()
     }
 }
 
@@ -172,14 +221,39 @@ class VisualSink(val density: Float) : VisualListener {
         }
     }
 
+    /**
+     * #47 (port 04 §2.6 step 9): surface frames arrive at up to 60 fps, so
+     * their bitmaps are recycled — a replaced picture goes back to the pool
+     * two frames after it left the screen ([retire]), never while it may
+     * still be drawn. Display paint (rare) is not pooled.
+     */
+    private val pool = BitmapPool()
+
     override fun frame(frame: SurfaceFrame) {
         fonts.update(frame.styles)
         val size = synchronized(lock) { sizes[frame.surface] } ?: return
-        val image = frame.image?.let(VisualPainter::image)
-        val paint = VisualPainter.render(frame.paint, size.first, size.second, density, fonts)
-        synchronized(lock) {
-            pendingFrames[frame.surface] = SurfacePicture(image, paint)
+        val image = frame.image?.let { VisualPainter.image(it, pool::take) }
+        val paint = VisualPainter.render(frame.paint, size.first, size.second, density, fonts, pool::take)
+        val replaced = synchronized(lock) {
+            val previous = pendingFrames.put(frame.surface, SurfacePicture(image, paint))
             schedule()
+            previous
+        }
+        // Superseded before main ever saw it: straight back to the pool.
+        replaced?.let { pool.give(it.image); pool.give(it.paint) }
+    }
+
+    /** Two vsyncs later the frame that last drew [old] has synced: its bitmaps are free. */
+    private fun retire(old: List<SurfacePicture>) {
+        if (old.isEmpty()) return
+        val choreographer = Choreographer.getInstance()
+        choreographer.postFrameCallback {
+            choreographer.postFrameCallback {
+                for (p in old) {
+                    pool.give(p.image)
+                    pool.give(p.paint)
+                }
+            }
         }
     }
 
@@ -202,9 +276,39 @@ class VisualSink(val density: Float) : VisualListener {
                 val live = display.display.surfaces.mapTo(HashSet()) { it.id }
                 frames.keys.retainAll(live)
             }
-            frames.putAll(latest)
+            val old = ArrayList<SurfacePicture>(latest.size)
+            for ((id, picture) in latest) frames.put(id, picture)?.let(old::add)
+            retire(old)
         }
     }
+}
+
+/**
+ * Mutable `ARGB_8888` bitmaps by size, a few each (#47). [take] runs on
+ * the worker, [give] on either thread.
+ */
+internal class BitmapPool(private val perSize: Int = 3) {
+    private val lock = Any()
+    private val free = HashMap<Long, ArrayDeque<Bitmap>>()
+
+    /** A transparent `w × h` bitmap: a recycled one when there is one. */
+    fun take(w: Int, h: Int): Bitmap {
+        val reused = synchronized(lock) { free[key(w, h)]?.removeLastOrNull() }
+        return reused?.apply { eraseColor(Color.TRANSPARENT) } ?: Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+    }
+
+    fun give(bitmap: Bitmap?) {
+        if (bitmap == null || bitmap.isRecycled || !bitmap.isMutable) return
+        synchronized(lock) {
+            val q = free.getOrPut(key(bitmap.width, bitmap.height)) { ArrayDeque() }
+            if (q.size < perSize) q.addLast(bitmap)
+        }
+    }
+
+    /** How many are waiting at `w × h` (tests). */
+    fun count(w: Int, h: Int): Int = synchronized(lock) { free[key(w, h)]?.size ?: 0 }
+
+    private fun key(w: Int, h: Int): Long = (w.toLong() shl 32) or h.toLong()
 }
 
 /**
@@ -224,19 +328,22 @@ object VisualPainter {
     /**
      * A worker frame (premultiplied BGRA, top row first) as a bitmap.
      * `ARGB_8888` stores its bytes as RGBA, so red and blue swap first — in
-     * place: the frame's array is ours.
+     * place: the frame's array is ours. [alloc] makes (or recycles) the
+     * `w × h` bitmap; every pixel is overwritten.
      */
-    fun image(frame: FrameImage): Bitmap? {
+    fun image(frame: FrameImage, alloc: (Int, Int) -> Bitmap = ::newBitmap): Bitmap? {
         val w = frame.width.toInt()
         val h = frame.height.toInt()
         val bytes = frame.bgra
         val n = w * h * 4
         if (w <= 0 || h <= 0 || bytes.size < n) return null
         swapRedBlue(bytes, n)
-        return Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888).apply {
+        return alloc(w, h).apply {
             copyPixelsFromBuffer(ByteBuffer.wrap(bytes, 0, n))
         }
     }
+
+    private fun newBitmap(w: Int, h: Int): Bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
 
     /** BGRA ↔ RGBA over the first [n] bytes, in place. */
     internal fun swapRedBlue(bytes: ByteArray, n: Int) {
@@ -249,13 +356,23 @@ object VisualPainter {
         }
     }
 
-    /** [paint] over a `width × height` pt bitmap; `null` when empty (nothing to show). */
-    fun render(paint: VisualPaint, width: Float, height: Float, density: Float, fonts: StyleFonts): Bitmap? {
+    /**
+     * [paint] over a `width × height` pt bitmap from [alloc] (transparent);
+     * `null` when empty (nothing to show).
+     */
+    fun render(
+        paint: VisualPaint,
+        width: Float,
+        height: Float,
+        density: Float,
+        fonts: StyleFonts,
+        alloc: (Int, Int) -> Bitmap = ::newBitmap,
+    ): Bitmap? {
         val w = ceil(width * density).toInt()
         val h = ceil(height * density).toInt()
         if (w <= 0 || h <= 0) return null
         if (paint.shapes.isEmpty() && paint.runs.isEmpty()) return null
-        val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+        val bitmap = alloc(w, h)
         draw(paint, Canvas(bitmap), density, fonts)
         return bitmap
     }

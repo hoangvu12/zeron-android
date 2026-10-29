@@ -125,7 +125,8 @@ internal fun rowAccessibilityLabel(kind: RowKind, copyText: String, text: String
  * #46: a visual is exposed too, ordered with the controls (iOS lists
  * `VisualView`s beside the `UIControl`s, `RowView.swift:63`). It stays
  * out of [WidgetKind.isControl], so the row menu's "not on a control" rule
- * is unchanged; TODO(#47) decides that for the visual's own controls.
+ * covers the widget kinds; the visual's own controls (and `drag`
+ * surfaces) answer through `TranscriptVisuals.isOverTouchTarget` (#47).
  */
 internal fun Modifier.widgetSemantics(kind: WidgetKind): Modifier =
     if (kind.isControl() || kind is WidgetKind.Visual) {
