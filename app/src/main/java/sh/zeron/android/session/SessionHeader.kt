@@ -48,6 +48,7 @@ import sh.zeron.android.core.Face
 import sh.zeron.android.design.Appearance
 import sh.zeron.android.design.FadingText
 import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.ZeronIcon
 import sh.zeron.android.design.ZeronIcons
 import sh.zeron.android.design.ZeronTheme
 import sh.zeron.android.design.SymbolWeight
@@ -192,6 +193,9 @@ fun SessionHeader(
     accessory: (@Composable () -> Unit)? = null,
     /** android-next #06: false drops the ⋯ (a side chat's draft has no menu). */
     showMore: Boolean = true,
+    /** #42: the trailing circle's glyph and label (the subagent screen's Copy). */
+    moreIcon: ZeronIcon = ZeronIcons.Ellipsis,
+    moreLabel: String = "More",
 ) {
     val density = LocalDensity.current
     val layoutDirection = LocalLayoutDirection.current
@@ -280,8 +284,8 @@ fun SessionHeader(
                     // padding and the button's own size, so the reported
                     // rect is the 44 circle itself, in window px.
                     GlassCircleButton(
-                        icon = ZeronIcons.Ellipsis,
-                        contentDescription = "More",
+                        icon = moreIcon,
+                        contentDescription = moreLabel,
                         onClick = { onMore(moreBounds) },
                         modifier = Modifier
                             .onGloballyPositioned { moreBounds = it.boundsInWindow() }

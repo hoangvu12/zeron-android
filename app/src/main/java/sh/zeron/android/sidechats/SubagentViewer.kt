@@ -2,14 +2,17 @@ package sh.zeron.android.sidechats
 
 import android.content.ClipboardManager
 import android.util.Log
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -38,22 +41,16 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import sh.zeron.android.ZeronApplication
-import sh.zeron.android.core.Face
 import sh.zeron.android.core.TextEngine
 import sh.zeron.android.design.LocalToaster
-import sh.zeron.android.design.LocalTypeScale
+import sh.zeron.android.design.Motion
 import sh.zeron.android.design.ZeronIcons
 import sh.zeron.android.design.ZeronTheme
 import sh.zeron.android.design.StatusGlyph
 import sh.zeron.android.design.StatusGlyphKind
 import sh.zeron.android.design.Toaster
 import sh.zeron.android.design.glass.LocalHazeState
-import sh.zeron.android.design.glass.Menu
-import sh.zeron.android.design.glass.MenuIcon
-import sh.zeron.android.design.glass.MenuItem
 import sh.zeron.android.design.glass.ProvideHazeState
-import sh.zeron.android.design.glass.rememberGlassMenuState
-import sh.zeron.android.design.uiStyle
 import sh.zeron.android.image.ImageViewerRequest
 import sh.zeron.android.image.LocalImageViewer
 import sh.zeron.android.session.SessionEventHub
@@ -77,27 +74,20 @@ import sh.zeron.android.transcript.widgets.imageTileRadius
 import uniffi.zeron_core.CoreClient
 import uniffi.zeron_core.TextSystem
 
-/** The viewer's copy, verbatim from upstream #899's `SubagentViewController`. */
+/** The viewer's copy (iOS `SubagentViewController`). */
 object SubagentCopy {
     const val Subagent = "Subagent"
-    const val NothingYet = "Nothing from this subagent yet."
     const val OpenFailed = "Couldn't open this subagent."
+    const val CopyTranscript = "Copy transcript"
+    const val TranscriptCopied = "Transcript copied"
 }
 
 /**
- * The header subtitle: iOS's `"Subagent · <parent title>"`, with the
- * Zeron addition of the live state while the subagent is not done —
- * `"Running · …"` while it works (a background subagent keeps running
- * after its spawn call resolved) and `"Failed · …"` once it failed. Pure.
+ * The spawn's record on the root chat (`SessionHandle.subagents()`),
+ * reduced to what the screen shows: its state, the "model · kind" detail
+ * and when it started.
  */
-fun subagentSubtitle(state: AgentState, parentTitle: String): String {
-    val word = when (state) {
-        AgentState.Running -> "Running"
-        AgentState.Done -> SubagentCopy.Subagent
-        AgentState.Failed -> "Failed"
-    }
-    return if (parentTitle.isBlank()) word else "$word · $parentTitle"
-}
+data class SpawnStatus(val state: AgentState, val detail: String, val startedAtMs: Long)
 
 /**
  * A subagent's transcript, read-only (android-next #06, the port of
@@ -110,10 +100,9 @@ fun subagentSubtitle(state: AgentState, parentTitle: String): String {
  * subagent finished, stops changing once it is done, and streams again if
  * it resumes. No composer: the parent agent drives the subagent.
  *
- * [state] follows the spawn chip in the transcript that opened this
- * viewer ([spawnerId]: the chat, or the subagent above for a nested
- * spawn), re-read on that transcript's `SessionChanged` — the same chip
- * the card's running dots read, so the two never disagree.
+ * [spawn] follows the spawn's record on the root chat ([rootChatId]),
+ * re-read on that chat's `SessionChanged` (iOS `observeSession(rootChatId)`
+ * → `syncStatus`); [state] is its state, or the card's until one is read.
  *
  * Built off main by [buildSubagentRoute]; the transcript state is made on
  * the first main-thread read. [start] runs on first composition and
@@ -151,8 +140,16 @@ class SubagentRoute internal constructor(
 
     override val paneTitle: String get() = title
 
-    /** The subagent's lifecycle, as its spawn chip says. Snapshot state (main). */
+    /** The subagent's lifecycle, as its spawn record says. Snapshot state (main). */
     var state: AgentState by mutableStateOf(initialState)
+        private set
+
+    /** The spawn's record on the root chat; `null` until read (or when it has none). Main. */
+    var spawn: SpawnStatus? by mutableStateOf(null)
+        private set
+
+    /** The attach returned false (the doc can't be followed): the bar says so. Main. */
+    var attachFailed: Boolean by mutableStateOf(false)
         private set
 
     private var transcriptImpl: TranscriptState? = null
@@ -169,9 +166,8 @@ class SubagentRoute internal constructor(
      * First composition (main): bind the layout engine to the subagent's
      * doc read-only (`TranscriptView.attachSubagent`, iOS
      * `SubagentViewController.swift:86`) on the serial lane, then follow
-     * the spawn chip's state.
-     *
-     * TODO(#42): the unavailable state when the attach returns false.
+     * the spawn's record. An attach that returns false (or throws) shows
+     * the unavailable bar (iOS `showUnavailable`).
      */
     internal fun start() {
         if (started || released) return
@@ -179,32 +175,36 @@ class SubagentRoute internal constructor(
         val view = transcript.engine
         val frozen = state != AgentState.Running
         appScope.launch(io) {
-            try {
-                if (!view.attachSubagent(client, spawnerId, docId, frozen)) {
-                    Log.w(TAG, "subagent transcript attach returned false")
+            val attached = try {
+                view.attachSubagent(client, spawnerId, docId, frozen).also {
+                    if (!it) Log.w(TAG, "subagent transcript attach returned false")
                 }
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (t: Throwable) {
                 Log.w(TAG, "subagent attach failed", t)
+                false
             }
+            if (!attached) withContext(Dispatchers.Main) { if (!released) attachFailed = true }
         }
-        unregister = hub.register(spawnerId) { refreshState() }
+        unregister = hub.register(rootChatId) { refreshState() }
         refreshState()
     }
 
-    /** Re-read the spawn chip off main; publish on main. */
+    /** Re-read the spawn's record on the root chat off main; publish on main. */
     private fun refreshState() {
         if (released) return
         appScope.launch(io) {
             val next = try {
                 // A fresh wrapper per read: close it here (the core keeps the
                 // session itself warm), never leave it to the GC.
-                client.session(spawnerId)?.let { spawner ->
+                client.session(rootChatId)?.let { root ->
                     try {
-                        spawner.subagents().firstOrNull { it.docId == docId }?.let { agentState(it.state) }
+                        root.subagents().firstOrNull { it.docId == docId }?.let {
+                            SpawnStatus(agentState(it.state), SubagentFormat.detail(it.model, it.kind), it.startedAtMs)
+                        }
                     } finally {
-                        spawner.close()
+                        root.close()
                     }
                 }
             } catch (cancelled: CancellationException) {
@@ -214,7 +214,10 @@ class SubagentRoute internal constructor(
                 null
             } ?: return@launch
             withContext(Dispatchers.Main) {
-                if (!released) state = next
+                if (!released) {
+                    spawn = next
+                    state = next.state
+                }
             }
         }
     }
@@ -365,25 +368,14 @@ fun rememberSubagentOpener(): SubagentOpener? {
     return remember(app, nav, entry, toaster, scope) { SubagentOpener(app, nav, entry, scope, toaster) }
 }
 
-/** The ⋯ menu: one row, Copy Transcript (`SubagentViewController`). Pure. */
-fun subagentMenu(onCopyTranscript: () -> Unit): Menu = Menu(
-    title = null,
-    children = listOf(
-        MenuItem(
-            title = "Copy Transcript",
-            icon = MenuIcon.Symbol(ZeronIcons.DocOnDoc),
-            testTag = "subagent-menu-copy",
-            action = onCopyTranscript,
-        ),
-    ),
-)
-
 /**
- * The viewer screen: the read-only transcript under the session header
- * (back, the spawn's title over [subagentSubtitle], a ⋯ with Copy
- * Transcript), with iOS's reveal — the spinner until the first row lands,
- * then the transcript; "Nothing from this subagent yet." after 8 s
- * without one. Nested spawn cards open their own viewer on top.
+ * The viewer screen (iOS `SubagentViewController`): the read-only
+ * transcript under the session header (back, the spawn's title over
+ * "Subagent · <model · kind>", a Copy circle), the 1.75× spinner until the
+ * first row lands and then a 0.2 s fade-in, and the glass status bar at the
+ * bottom with the transcript inset above it. Nothing within 10 s (or an
+ * attach that failed) turns the bar into "Waiting for its computer…".
+ * Nested spawn cards open their own viewer on top.
  */
 @Composable
 internal fun SubagentScreen(route: SubagentRoute, modifier: Modifier = Modifier) {
@@ -392,7 +384,6 @@ internal fun SubagentScreen(route: SubagentRoute, modifier: Modifier = Modifier)
     val toaster = LocalToaster.current
     val transcript = route.transcript
     val scope = rememberCoroutineScope()
-    val menuState = rememberGlassMenuState()
     val opener = rememberSubagentOpener()
 
     val statusBarTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
@@ -405,6 +396,26 @@ internal fun SubagentScreen(route: SubagentRoute, modifier: Modifier = Modifier)
         delay(GiveUpMs)
         gaveUp = true
     }
+    // iOS `UIView.animate(withDuration: 0.2)`: the transcript in, the
+    // spinner out, together.
+    val shown by animateFloatAsState(
+        if (revealed) 1f else 0f,
+        tween(RevealMs, easing = Motion.EaseInOut),
+        label = "subagentReveal",
+    )
+
+    val spawn = route.spawn
+    val unavailable = !revealed && (gaveUp || route.attachFailed)
+    val barState = if (unavailable) {
+        SubagentBarState.Unavailable
+    } else {
+        when (spawn?.state ?: route.state) {
+            AgentState.Running -> SubagentBarState.Working
+            AgentState.Done -> SubagentBarState.Done
+            AgentState.Failed -> SubagentBarState.Failed
+        }
+    }
+    val detail = spawn?.detail.orEmpty()
 
     // The transcript's actions — SessionScreen's image and link wiring
     // over this doc's host device, plus nested subagent cards.
@@ -478,58 +489,67 @@ internal fun SubagentScreen(route: SubagentRoute, modifier: Modifier = Modifier)
         ProvideHazeState {
             val haze = LocalHazeState.current
             // The transcript is always composed (rows lay out and the tail
-            // is placed while hidden); it shows with its first row.
+            // is placed while hidden); it fades in with its first row.
             Box(
                 Modifier
                     .fillMaxSize()
                     .then(if (haze != null) Modifier.hazeSource(haze) else Modifier)
-                    .graphicsLayer { alpha = if (revealed) 1f else 0f },
+                    .graphicsLayer { alpha = shown },
             ) {
                 TranscriptHost(
                     transcript,
                     actions,
                     Modifier
                         .fillMaxSize()
-                        .transcriptBottomInset(transcript.viewport, navBarBottom)
+                        // The bar covers 8 + 50 + 8 dp above the navigation bar.
+                        .transcriptBottomInset(transcript.viewport, navBarBottom + BarCovered)
                         .testTag("subagent-transcript"),
                 )
             }
-            if (!revealed) {
-                if (!gaveUp) {
-                    StatusGlyph(
-                        StatusGlyphKind.Spinner,
-                        Modifier.align(Alignment.Center).testTag("subagent-loading"),
-                        scale = 1.75f,
-                    )
-                } else {
-                    BasicText(
-                        SubagentCopy.NothingYet,
-                        Modifier.align(Alignment.Center).testTag("subagent-empty"),
-                        style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(15f), palette.secondary),
-                    )
-                }
+            if (!unavailable && shown < 1f) {
+                // Centred in the safe area, 40 dp up (iOS).
+                StatusGlyph(
+                    StatusGlyphKind.Spinner,
+                    Modifier
+                        .align(Alignment.Center)
+                        .offset(y = (statusBarTop - navBarBottom) / 2 - 40.dp)
+                        .graphicsLayer { alpha = 1f - shown }
+                        .testTag("subagent-loading"),
+                    scale = 1.75f,
+                )
             }
+            SubagentStatusBar(
+                state = barState,
+                detail = detail,
+                startedAtMs = spawn?.startedAtMs,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(start = 12.dp, end = 12.dp, bottom = navBarBottom + 8.dp),
+            )
             SessionHeader(
                 title = route.title,
-                subtitle = subagentSubtitle(route.state, route.parentTitle),
+                subtitle = SubagentFormat.subtitle(detail),
                 edgeEngaged = edgeEngaged,
-                onMore = { anchor ->
-                    menuState.open(
-                        anchor,
-                        subagentMenu(onCopyTranscript = {
-                            scope.launch {
-                                val clipboard = context.applicationContext
-                                    .getSystemService(ClipboardManager::class.java) ?: return@launch
-                                copyTranscript(transcript, clipboard, toaster)
-                            }
-                        }),
-                    )
+                onMore = {
+                    scope.launch {
+                        val clipboard = context.applicationContext
+                            .getSystemService(ClipboardManager::class.java) ?: return@launch
+                        copyTranscript(transcript, clipboard, toaster, copiedMessage = SubagentCopy.TranscriptCopied)
+                    }
                 },
                 statusBarTop = statusBarTop,
+                moreIcon = ZeronIcons.DocOnDoc,
+                moreLabel = SubagentCopy.CopyTranscript,
             )
         }
     }
 }
 
-/** iOS `asyncAfter(deadline: .now() + 8)`: the empty state replaces the spinner. */
-private const val GiveUpMs = 8_000L
+/** iOS `asyncAfter(deadline: .now() + 10)`: the bar says it's waiting for its computer. */
+private const val GiveUpMs = 10_000L
+
+/** iOS's reveal: `UIView.animate(withDuration: 0.2)`. */
+private const val RevealMs = 200
+
+/** What the status bar covers above the navigation bar: 8 dp gap, 50 dp bar, 8 dp gap (iOS `covered`). */
+private val BarCovered = 66.dp
