@@ -27,10 +27,10 @@ fun interface SessionOpener {
 }
 
 /**
- * The live [SessionOpener]. [client] is ticket 71's holder —
- * `ZeronApplication.clientOrNull()`, which delegates to
- * `CoreStartup.clientOrNull()`: null before `CoreStartState.Ready` or
- * after a failed start, so an open in that window fails exactly like
+ * The live [SessionOpener]. [client] is
+ * `ZeronApplication.clientOrNull()`, which delegates to the session
+ * holder: null while signed out or after a failed start, so an open in
+ * that window fails exactly like
  * iOS's `guard let client else { return nil }`. Anything the open
  * throws reaches the factory's catch (`AppModel.swift:528-531`).
  */

@@ -192,7 +192,7 @@ fun WorkspaceSnapshot.toSearchSource(): SearchSource = SearchSource(revision, fr
 
 /**
  * The production [SessionSearch]: whatever client `client()` holds right
- * now (null before `CoreStartState.Ready` — no hits, no error), with the
+ * now (null while signed out — no hits, no error), with the
  * FFI call itself on [Dispatchers.Default] — `CoreClient.search` blocks
  * and must never run on main. Pass `app::clientOrNull` (ticket 71's
  * seam, the same accessor tickets 42/48 resolve at call time).

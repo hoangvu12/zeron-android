@@ -113,7 +113,8 @@ object SessionHeaderDefaults {
  * the screen's plain `UINavigationBar` (`ios:Session/SessionViewController.swift:41-57`):
  * a transparent 44 dp row under the status bar (no fill, no divider,
  * `largeTitleDisplayMode = .never`), a round glass back circle at the start,
- * the centred two-line [SessionTitleView] (title over `"<project> @ <engine>"`),
+ * the centred two-line [SessionTitleView] only when [title] or [subtitle] is
+ * set (#33: a side chat's "Side chat" over its parent; a session has none),
  * and a round glass ⋯ circle at the end that opens the session menu straight
  * from a tap (the menu itself is ticket 80). The whole band is backed by
  * ticket 09's soft top scroll-edge effect: the transcript scrolls up under
@@ -304,12 +305,17 @@ fun SessionHeader(
                         accessory()
                     }
                 }
-                SessionTitleView(
-                    title = title,
-                    subtitle = subtitle,
-                    maxWidth = titleMaxWidth,
-                    modifier = Modifier.align(Alignment.Center),
-                )
+                // #33: a session's bar has no title (iOS `titleView =
+                // UIView()`); only a side chat's reads "Side chat" over its
+                // parent's title.
+                if (title.isNotEmpty() || subtitle.isNotEmpty()) {
+                    SessionTitleView(
+                        title = title,
+                        subtitle = subtitle,
+                        maxWidth = titleMaxWidth,
+                        modifier = Modifier.align(Alignment.Center),
+                    )
+                }
             }
         }
     }

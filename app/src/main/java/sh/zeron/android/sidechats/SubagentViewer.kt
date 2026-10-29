@@ -303,7 +303,7 @@ suspend fun buildSubagentRoute(
             parentTitle = request.parentTitle,
             hostDeviceId = host,
             client = client,
-            hub = app.coreStartup.sessionEvents,
+            hub = app.sessionHolder.sessionEvents,
             appScope = app.appScope,
             text = TextEngine.shared,
             initialState = if (request.frozen) AgentState.Done else AgentState.Running,

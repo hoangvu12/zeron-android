@@ -1,6 +1,5 @@
 package sh.zeron.android.composer
 
-import java.util.Locale
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -135,7 +134,7 @@ class SessionChipMenusTest {
 
     /**
      * Polls [done] for up to 5 s. awaitWrites returns when setSessionConfig
-     * itself ended on the io thread; onSettingResult and the invalidate run
+     * itself ended on the io thread; the invalidate runs
      * right after it, so assertions on them wait here first.
      */
     private fun awaitUntil(what: String, done: () -> Boolean) {
@@ -160,10 +159,7 @@ class SessionChipMenusTest {
 
     private fun fakeIo() = executor.asCoroutineDispatcher()
 
-    private fun menus(
-        core: FakeChipMenuCore,
-        onResult: (Throwable?) -> Unit = {},
-    ): SessionChipMenus = SessionChipMenus(core, io = fakeIo()).also { it.onSettingResult = onResult }
+    private fun menus(core: FakeChipMenuCore): SessionChipMenus = SessionChipMenus(core, io = fakeIo())
 
     /** Fills the snapshot (the controller-refresh side of the contract). */
     private fun fill(
@@ -472,45 +468,57 @@ class SessionChipMenusTest {
         assertTrue(core.callLog.isEmpty())
     }
 
-    // android-next #01: `context` now has a menu (the details card), but
-    // only once usage is reported — this fill has none, so it stays null.
     @Test
     fun branchContextAndUnknownChipsHaveNoMenu() {
+        // #34 (C16): iOS's context chip has no menu, even with usage reported.
         val core = FakeChipMenuCore(row = chipMenuSessionRow(branch = "main"), config = chatConfig())
         val menus = menus(core)
-        fill(menus, core)
+        fill(menus, core, contextUsage = ContextUsage(tokens = 900uL, window = 1000uL))
         val platform = RecordingPlatform()
         assertNull(menus.menu("branch", platform))
         assertNull(menus.menu("context", platform))
         assertNull(menus.menu("anything-else", platform))
         assertTrue(core.callLog.isEmpty())
+        // Only these chips get a provider (TalkBack's "Show menu").
+        assertEquals(
+            listOf("model", "effort", "pr"),
+            listOf("model", "effort", "pr", "branch", "context", "anything-else").filter(menus::hasMenu),
+        )
+    }
+
+    // ------------------------------------------- the model chip's label (#34, C12)
+
+    @Test
+    fun aModelLabelKeepsTheChipTitle() {
+        val core = FakeChipMenuCore(row = chipMenuSessionRow(), config = chatConfig(model = "claude-fable-5"))
+        val chrome = SessionChrome(chips = listOf(ComposerChip(id = "model", title = "Fable 5")))
+        assertEquals("Fable 5", fill(menus(core), core, chrome = chrome).chips.single().title)
     }
 
     @Test
-    fun theContextChipOpensTheDetailsCardWithoutACoreCall() {
-        val core = FakeChipMenuCore(row = chipMenuSessionRow(branch = "main"), config = chatConfig())
-        val menus = SessionChipMenus(core, io = fakeIo(), locale = { Locale.US })
-        fill(menus, core, contextUsage = ContextUsage(tokens = 5_417uL, window = 1_048_576uL))
-        val card = menus.menu("context", RecordingPlatform())
-        assertNotNull(card)
-        assertEquals("Context window", card!!.title)
-        val rows = card.children.map { it as MenuItem }
-        assertEquals(listOf("5,417 / 1,048,576 tokens", "1,043,159 tokens remaining"), rows.map { it.title })
-        assertEquals("1% used", rows[0].subtitle)
-        assertTrue("read-only rows", rows.all { it.informational })
-        assertTrue("menu() makes no core call", core.callLog.isEmpty())
+    fun noModelLabelNamesTheHostDefaultEvenWithAModelId() {
+        // iOS: `row.modelLabel ?? defaultModel(for: row)?.label ?? row.harnessLabel`.
+        val core = FakeChipMenuCore(row = chipMenuSessionRow(model = "claude-fable-5", modelLabel = null), config = null)
+        val chrome = SessionChrome(chips = listOf(ComposerChip(id = "model", title = "Claude Code")))
+        assertEquals("Fable 5.1", fill(menus(core), core, chrome = chrome).chips.single().title)
     }
 
     @Test
-    fun theContextCardNeedsNoRow() {
-        // The usage lives on the composer, not the workspace row, so the
-        // card skips iOS's `guard let row` that the other chips keep.
-        val core = FakeChipMenuCore(row = null, config = null)
-        val menus = SessionChipMenus(core, io = fakeIo(), locale = { Locale.US })
-        fill(menus, core, contextUsage = ContextUsage(tokens = 48_210uL, window = null))
-        val rows = menus.menu("context", RecordingPlatform())!!.children.map { it as MenuItem }
-        assertEquals(listOf("48,210 tokens used", "Context limit not reported"), rows.map { it.title })
-        assertNull("the other chips still need the row", menus.menu("model", RecordingPlatform()))
+    fun theHostsCatalogReplacesTheBuiltInDefault() {
+        val hostFirst = chipMenuModel("host-first", "Host First", null, emptyList(), null)
+        val core = FakeChipMenuCore(
+            row = chipMenuSessionRow(model = null, modelLabel = null),
+            config = null,
+            models = listOf(hostFirst),
+        )
+        val menus = menus(core)
+        var invalidations = 0
+        menus.bind { invalidations++ }
+        val chrome = SessionChrome(chips = listOf(ComposerChip(id = "model", title = "Claude Code")))
+        assertEquals("the built-in list answers at once", "Fable 5.1", fill(menus, core, chrome = chrome).chips.single().title)
+        awaitUntil("the host's catalog answered and refreshed the chrome") { invalidations == 1 }
+        assertEquals("Host First", fill(menus, core, chrome = chrome).chips.single().title)
+        assertEquals("one host load per device|harness", 1, core.methodNames().count { it.startsWith("listModels") })
     }
 
     @Test
@@ -707,21 +715,19 @@ class SessionChipMenusTest {
     @Test
     fun aModelPickWritesThePickedConfigOverTheCurrentBase() {
         val core = FakeChipMenuCore(row = chipMenuSessionRow(), config = chatConfig(reasoning = "xhigh"))
-        val results = mutableListOf<Throwable?>()
         var invalidations = 0
-        val menus = menus(core, onResult = { results += it })
+        val menus = menus(core)
         menus.bind { invalidations++ }
         fill(menus, core)
 
         val rows = loadRows(deferredOf(menus, "model"))
         rows.first { it.title == "Opus 5" }.action()
         core.awaitWrites(1)
-        awaitUntil("the result and the invalidate ran") { results.size == 1 && invalidations == 1 }
+        awaitUntil("the invalidate ran") { invalidations == 1 }
 
         // The base was the current config; the pick rule set the model and
         // kept xhigh (Opus 5 offers it).
         assertEquals(listOf(chatConfig(model = "claude-opus-5", reasoning = "xhigh")), core.setConfigs)
-        assertEquals(listOf<Throwable?>(null), results)
         assertEquals(1, invalidations)
     }
 
@@ -749,23 +755,24 @@ class SessionChipMenusTest {
     }
 
     @Test
-    fun aFailingWriteReportsTheSameThrowableThenInvalidates() {
-        val failure = IllegalStateException("Engine is offline; reconnecting")
+    fun aFailingWriteIsSilentButStillInvalidatesAndTheNextWriteRuns() {
+        // iOS `try? setSessionConfig` then `refresh()`: nothing shown.
         val core = FakeChipMenuCore(row = chipMenuSessionRow(), config = chatConfig(model = "claude-fable-5"))
-        core.setConfigFailure = failure
-        val results = mutableListOf<Throwable?>()
+        core.setConfigFailure = IllegalStateException("Engine is offline; reconnecting")
         var invalidations = 0
-        val menus = menus(core, onResult = { results += it })
+        val menus = menus(core)
         menus.bind { invalidations++ }
         fill(menus, core)
 
-        loadRows(deferredOf(menus, "model")).first { it.title == "Fable 5.1" }.action()
+        val rows = loadRows(deferredOf(menus, "model"))
+        rows.first { it.title == "Fable 5.1" }.action()
         core.awaitWrites(1)
-        awaitUntil("the result and the invalidate ran") { results.size == 1 && invalidations == 1 }
+        awaitUntil("the invalidate ran after the failure") { invalidations == 1 }
 
-        assertEquals(1, results.size)
-        assertSame("the exact throwable reaches the pill", failure, results[0])
-        assertEquals(1, invalidations)
+        core.setConfigFailure = null
+        rows.first { it.title == "Opus 5" }.action()
+        core.awaitWrites(2)
+        awaitUntil("the next write ran and invalidated") { invalidations == 2 }
     }
 
     @Test

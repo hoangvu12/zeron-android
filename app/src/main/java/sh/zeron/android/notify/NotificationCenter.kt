@@ -2,7 +2,6 @@ package sh.zeron.android.notify
 
 import android.content.Context
 import android.util.Log
-import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import sh.zeron.android.background.RunWatchController
@@ -49,8 +48,6 @@ class NotificationCenter(
     @Volatile
     var foreground: Boolean = true
 
-    private val attached = AtomicBoolean(false)
-
     /**
      * The engine count source (the app's startup state); set after
      * construction by [setEngineCountSource] because the application's
@@ -67,12 +64,12 @@ class NotificationCenter(
     // ── the app-side seams ───────────────────────────────────────────────
 
     /**
-     * Called with the freshly created client (the application's
-     * `onClientReady`). TODO(#56): start the `SessionWatcher` here.
+     * Called with every client the session holder publishes (each
+     * sign-in). TODO(#56): start the `SessionWatcher` here, replacing
+     * the previous account's.
      */
-    fun attachTo(client: uniffi.zeron_core.CoreClient) {
-        if (!attached.compareAndSet(false, true)) return
-    }
+    @Suppress("UNUSED_PARAMETER")
+    fun attachTo(client: uniffi.zeron_core.CoreClient) = Unit
 
     /** A chat was opened in the app: cancel its notification. */
     fun cancelChatFor(chatId: String) {

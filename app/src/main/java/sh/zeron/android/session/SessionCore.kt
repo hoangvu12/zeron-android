@@ -1,6 +1,7 @@
 package sh.zeron.android.session
 
 import uniffi.zeron_core.ChatConfig
+import uniffi.zeron_core.Connectivity
 import uniffi.zeron_core.CoreClient
 import uniffi.zeron_core.ComposerState
 import uniffi.zeron_core.DeviceView
@@ -36,6 +37,12 @@ interface SessionCore {
 
     /** `CoreClient.sessionRow(chatId)` — the cached workspace row, any chat. */
     fun sessionRow(): SessionRow?
+
+    /** Another chat's cached row (#33: a side chat's parent, for its bar title). */
+    fun sessionRow(chatId: String): SessionRow? = null
+
+    /** `CoreClient.connectivity()` (#28: the pill's Offline). `null` = unknown. */
+    fun connectivity(): Connectivity? = null
 
     /**
      * `CoreClient.sessionConfig(chatId)` — the chat's local run config
@@ -81,6 +88,10 @@ class CoreSessionCore(
     override fun composer(): ComposerState = handle.composer()
 
     override fun sessionRow(): SessionRow? = client.sessionRow(chatId)
+
+    override fun sessionRow(chatId: String): SessionRow? = client.sessionRow(chatId)
+
+    override fun connectivity(): Connectivity = client.connectivity()
 
     override fun sessionConfig(): ChatConfig? = client.sessionConfig(chatId)
 

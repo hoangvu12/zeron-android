@@ -11,15 +11,12 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import sh.zeron.android.background.RunWatchController
 import sh.zeron.android.composer.CoreChipMenuCore
-import sh.zeron.android.accounts.CoreAccountsCore
-import sh.zeron.android.accounts.SessionAccountUsage
 import sh.zeron.android.composer.Drafts
 import sh.zeron.android.composer.QueueChromeFiller
 import sh.zeron.android.composer.SessionChipMenus
@@ -28,11 +25,11 @@ import sh.zeron.android.core.AppearanceController
 import sh.zeron.android.core.CoreClientWorkspace
 import sh.zeron.android.core.CoreLoader
 import sh.zeron.android.core.CoreLifecycleSink
-import sh.zeron.android.core.CoreStartState
-import sh.zeron.android.core.CoreStartup
 import sh.zeron.android.core.CoreStatus
+import sh.zeron.android.core.CredentialStore
 import sh.zeron.android.core.FontGate
 import sh.zeron.android.core.Prefs
+import sh.zeron.android.core.SessionHolder
 import sh.zeron.android.core.TextEngine
 import sh.zeron.android.core.UiModeNightModeSink
 import sh.zeron.android.core.WorkspaceCore
@@ -68,9 +65,9 @@ import uniffi.zeron_core.WorkspaceSnapshot
 
 /**
  * The Zeron app shell: verifies the bundled fonts, loads the Rust mobile
- * core, then starts the client pipeline (ticket 71) — the single
+ * core, then boots the session holder (#13) — the stored account's
  * `CoreClient` is built on IO, and the splash (ticket 35) holds on
- * `CoreStartState.Loading` until the root is known.
+ * `RootInput.Loading` until the root is known.
  *
  * Property names are reserved for the parity tickets (android-ui-parity):
  * `prefs`, `workspaceFeed`, `foldState`, `frontPage` (#40, all landed
@@ -159,7 +156,7 @@ class ZeronApplication : Application() {
      * night mode after the first disk read and on every change — the
      * splash of the next cold start, the bar-icon defaults and the
      * `values-night` resources follow it. Forced in `onCreate` (before
-     * `coreStartup.start()`, order irrelevant: it waits on the DataStore
+     * `sessionHolder.boot()`, order irrelevant: it waits on the DataStore
      * read, never on the client).
      */
     private val appearanceController: AppearanceController by lazy {
@@ -206,40 +203,41 @@ class ZeronApplication : Application() {
     }
 
     /**
-     * The startup pipeline (71's `onClientReady` hook wired by ticket 35:
-     * the lifecycle hooks re-send the network state to the client it
-     * creates).
+     * Where the signed-in account and its profile are kept between
+     * launches (D5, #14): Keystore-sealed files in `noBackupFilesDir`,
+     * written synchronously. Read and written off the main thread.
      */
-    val coreStartup by lazy {
-        CoreStartup(
-            context = this,
-            scope = applicationScope,
-            onClientReady = { client ->
-                lifecycleHooks.clientReady()
-                // android-app#28: the notification driver arms as soon as
-                // the client exists (this runs on the startup pipeline's IO
-                // lane — never the main thread).
-                notifications.attachTo(client)
-            },
-        )
+    val credentials: CredentialStore by lazy { CredentialStore.create(this) }
+
+    /**
+     * The session holder (#13, SPEC §4.3 — the port of iOS's `AppModel`
+     * client lifecycle): `client` is the account's `CoreClient`, null while
+     * signed out. #15's sign-in calls `start(Credentials.WorkOs)` off main;
+     * sign-out and `AuthExpired` go through `signOutLocally`. Every
+     * app-lifetime consumer resolves the client at call time
+     * ([clientOrNull]) or follows `client` (see `onCreate`).
+     */
+    val sessionHolder: SessionHolder<CoreClient> by lazy {
+        SessionHolder.create(this, credentials)
     }
 
     /**
      * The process lifecycle / network hooks (ticket 35): foreground and
-     * background `onForeground()`/`onBackground()` and the default-network
-     * `setNetworkOnline(Boolean)` — installed **once** in `onCreate`,
-     * before the startup pipeline runs (71 relies on this order; its
-     * `onClientReady` re-sends the network state to the client it
-     * creates). Never registered from an activity (#609/#621).
+     * background `onForeground()`/`onBackground()`, the default-network
+     * `setNetworkOnline(Boolean)` and `networkPathChanged()` — installed
+     * **once** in `onCreate`, before the stored account starts, and fed
+     * the network state again for every client the holder publishes.
+     * Never registered from an activity (#609/#621).
      */
     lateinit var lifecycleHooks: AppLifecycleHooks
         private set
 
     /**
-     * The app root's input (ticket 35): `Loading` while 71's pipeline
-     * loads, `Ready`/`CoreFailed` after — derived from `coreStartup`'s
-     * state and engine list exactly as 71's Implementation states, so the
-     * splash (FirstFrameHold) holds until the engine list is known.
+     * The app root's input (ticket 35): `Loading` until the holder has
+     * started the stored account (or found none), so the splash
+     * (FirstFrameHold) holds; then `Ready(signedIn)`, following the
+     * client through sign-in, sign-out and expiry. `CoreFailed` when the
+     * native core did not load.
      */
     lateinit var rootInput: StateFlow<RootInput>
         private set
@@ -254,10 +252,10 @@ class ZeronApplication : Application() {
 
     /**
      * The workspace FFI seam, resolved at call time: whatever client
-     * `CoreStartup` holds right now (null before `Ready`).
+     * the session holder holds right now (null while signed out).
      */
     private val liveCore: WorkspaceCore by lazy {
-        CoreClientWorkspace(client = { coreStartup.clientOrNull() })
+        CoreClientWorkspace(client = { sessionHolder.clientOrNull() })
     }
 
     /**
@@ -265,17 +263,13 @@ class ZeronApplication : Application() {
      * the settled feed of this set — 27, 42, 49, 92 and 110 read it as
      * `app.workspaceFeed.snapshot` / `.devices`). Its event sink is
      * registered lazily, but `onCreate` forces this property above
-     * `coreStartup.start()` so no event is ever missed, and the first
-     * read waits for `CoreStartState.Ready` — before that there is no
-     * client to read through.
+     * `sessionHolder.boot()` so no event is ever missed; `onCreate` also
+     * resets it whenever the client changes, so one account's workspace
+     * never outlives its sign-out.
      */
     val workspaceFeed: WorkspaceFeed by lazy {
         val feed = WorkspaceFeed(core = { liveCore }, scope = applicationScope)
-        coreStartup.addEventSink { event -> feed.onEvent(event) }
-        applicationScope.launch {
-            coreStartup.state.first { it !is CoreStartState.Loading }
-            feed.start()
-        }
+        sessionHolder.addEventSink { event -> feed.onEvent(event) }
         feed
     }
 
@@ -298,7 +292,7 @@ class ZeronApplication : Application() {
      * listener with a non-blocking `tryEmit` on the Rust callback thread
      * — 64 slots of slack, and a full buffer drops rather than blocks
      * the callback. The sink is registered in [rowActions]'s lazy init,
-     * which `onCreate` forces before [coreStartup] starts, so no event
+     * which `onCreate` forces before [sessionHolder] boots, so no event
      * is ever missed.
      */
     val appEvents = MutableSharedFlow<ClientEvent>(extraBufferCapacity = 64)
@@ -333,7 +327,7 @@ class ZeronApplication : Application() {
      * `AppModel`).
      */
     val rowActions: CoreRowActions by lazy {
-        coreStartup.addEventSink { event -> appEvents.tryEmit(event) }
+        sessionHolder.addEventSink { event -> appEvents.tryEmit(event) }
         CoreRowActions(
             writes = { clientOrNull()?.asSessionWrites() },
             sections = { workspaceFeed.snapshot.value?.front?.sections.orEmpty() },
@@ -414,28 +408,24 @@ class ZeronApplication : Application() {
         // monitor, installed exactly once per process — never from an
         // Activity (#609 leaked one observer per onCreate) and never from
         // onStart/onStop (#621 redialed on every rotation). Before
-        // `coreStartup.start()`: the sink resolves the live client, and
-        // `clientReady()` (wired into CoreStartup above) re-sends the
-        // network state to the client it creates. The workspace feed
-        // re-pulls through ClientEvent after onForeground(), so
-        // `afterForeground` is a no-op (iOS's refreshWorkspace).
+        // `sessionHolder.boot()`: the sink resolves the live client, and
+        // `clientReady()` (the client follower below) re-sends the
+        // network state to every client the holder publishes. The
+        // workspace feed re-pulls through ClientEvent after onForeground(),
+        // so `afterForeground` is a no-op (iOS's refreshWorkspace).
         lifecycleHooks = AppLifecycleHooks.install(
             app = this,
             lifecycle = ProcessLifecycleOwner.get().lifecycle,
             sink = { clientOrNull()?.let(::CoreLifecycleSink) },
         )
-        // Ticket 35: the root input derives from 71's startup state and
-        // engine list; Loading holds the splash until the first root is
-        // known, so a signed-in user never sees the welcome root flash.
+        // #13: Loading holds the splash until the stored account is known,
+        // so a signed-in user never sees the welcome root flash; then the
+        // root follows the client (`SceneDelegate.showRoot`: signed out →
+        // Welcome, signed in → the shell), cross-fading on every change.
         rootInput = when (val c = core) {
             is CoreStatus.Failed -> MutableStateFlow(RootInput.CoreFailed(c.reason))
-            // TODO(#13): signed in = the session holder has a client.
-            is CoreStatus.Loaded -> coreStartup.state.map { s ->
-                when (s) {
-                    CoreStartState.Loading -> RootInput.Loading
-                    is CoreStartState.Failed -> RootInput.CoreFailed(s.reason)
-                    CoreStartState.Ready -> RootInput.Ready(hasEngines = coreStartup.clientOrNull() != null)
-                }
+            is CoreStatus.Loaded -> combine(sessionHolder.booted, sessionHolder.client) { booted, client ->
+                if (!booted) RootInput.Loading else RootInput.Ready(signedIn = client != null)
             }.distinctUntilChanged()
                 .stateIn(applicationScope, SharingStarted.Eagerly, RootInput.Loading)
         }
@@ -463,15 +453,6 @@ class ZeronApplication : Application() {
         chromeFillers.register(ChromeFillerRegistry.CHIP_MENUS) { sessionCore ->
             SessionChipMenus(CoreChipMenuCore.of(sessionCore))
         }
-        // android-next#05 (plan usage, folded into the context chip):
-        // the worse-of tint over #01's context chip and the context
-        // menu's account half (the login in use, its windows, the other
-        // logins, "Accounts & Usage…") — slot 22, after the menus. The
-        // loads and switches run on the filler's own IO scope; fill
-        // touches no FFI.
-        chromeFillers.register(ChromeFillerRegistry.USAGE_CHIP) { _ ->
-            SessionAccountUsage(CoreAccountsCore(client = ::clientOrNull))
-        }
         // Ticket 82 (queue panel): the queue mapping into
         // `SessionChrome.queue` — gate labels, `visibleText`, order —
         // registered in 76's QUEUE slot (50), so every opened route fills
@@ -488,7 +469,7 @@ class ZeronApplication : Application() {
         // the live handle is built by 75's screen from 76's route core.
         chromeFillers.register(ChromeFillerRegistry.QUESTIONS) { _ -> QuestionsChromeFiller() }
         // Ticket 76: the real session route factory. Every open runs off
-        // main through 32's `openSessionRoute`, over `coreStartup.sessionEvents`
+        // main through 32's `openSessionRoute`, over `sessionHolder.sessionEvents`
         // (51's hub — the same instance the client's events already fan out
         // into) and the filler registry above. A refused id returns null and
         // the shell shows the open-error toast: no screen, no placeholder.
@@ -498,16 +479,15 @@ class ZeronApplication : Application() {
         installSessionRoutes(
             routerHooks,
             CoreSessionOpener(::clientOrNull),
-            coreStartup.sessionEvents,
+            sessionHolder.sessionEvents,
             chromeFillers,
             onSeen = { chatId -> notifications.cancelChatFor(chatId) },
             queueScope = applicationScope,
         )
-        // Tickets 40/42/51 register their event sinks here, before start().
+        // Tickets 40/42/51 register their event sinks here, before boot().
         // #40: forcing `workspaceFeed`'s lazy init registers its sink; the
-        // start() call below only arms its drains (they skip until the
-        // client exists), and the feed's own collector re-triggers once
-        // CoreStartup leaves Loading.
+        // client follower below resets and re-reads it on every client
+        // change (its drains skip while signed out).
         // #96: arming the appearance controller pushes the stored choice
         // to the platform's per-app night mode (async: it first waits for
         // the DataStore read, so the platform's own persisted mode already
@@ -552,8 +532,22 @@ class ZeronApplication : Application() {
             prefs.stayConnected.collect { runWatch.onStayConnected(it) }
         }
         if (core is CoreStatus.Loaded) {
-            workspaceFeed.start()
-            coreStartup.start()
+            // #13: everything that follows the account's client. A new
+            // client gets the network state and the notification driver; any
+            // change (sign-in, sign-out, AuthExpired) drops the previous
+            // account's workspace lists first.
+            applicationScope.launch {
+                sessionHolder.client.collect { client ->
+                    workspaceFeed.reset()
+                    if (client != null) {
+                        lifecycleHooks.clientReady()
+                        notifications.attachTo(client)
+                    }
+                }
+            }
+            // Stored credentials start the client offline-first; off main:
+            // the store read and `CoreClient.new` touch the disk.
+            applicationScope.launch(Dispatchers.IO) { sessionHolder.boot() }
         }
     }
 
@@ -571,8 +565,8 @@ class ZeronApplication : Application() {
         )
     }
 
-    /** The live client, or null before `CoreStartState.Ready`. */
-    fun clientOrNull(): CoreClient? = coreStartup.clientOrNull()
+    /** The live client; null while signed out (or before the stored account started). */
+    fun clientOrNull(): CoreClient? = sessionHolder.clientOrNull()
 }
 
 /**

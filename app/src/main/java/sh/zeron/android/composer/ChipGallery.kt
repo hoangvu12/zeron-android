@@ -38,10 +38,7 @@ import sh.zeron.android.design.glass.Menu
 import sh.zeron.android.design.glass.MenuItem
 import sh.zeron.android.design.glass.ProvideHazeState
 import sh.zeron.android.design.uiStyle
-import sh.zeron.android.session.ContextReading
 import sh.zeron.android.session.contextChip
-import sh.zeron.android.session.contextUsageCard
-import java.util.Locale
 
 /**
  * The "Composer chips" page of the debug design gallery (android-ui-parity
@@ -56,10 +53,10 @@ import java.util.Locale
  * the section wraps itself in one, and the host makes the window's content
  * the haze source its menu panels blur) drawn on a 26 dp-radius glass card
  * over the gallery backdrop: A the session row, B the four PR states, C
- * the four context-usage cases (android-next #01), D the new-session
+ * the two visible context-usage cases (#34), D the new-session
  * row, F the 240 dp overflow strip at rest / 12 dp in / scrolled to the end, G the locations-rail
  * sample on the low-level chip, H the live wiring (tap "model" for the
- * glass menu, "3% context" for the context card, "branch" for the toast).
+ * glass menu, "branch" or the context chip for the toast).
  */
 
 // ---------------------------------------------------------------------------
@@ -88,20 +85,17 @@ internal fun chipFixturePrStrips(): List<List<ComposerChip>> = listOf(
 )
 
 /**
- * C — context usage (android-next #01: always shown), built by the real
- * rule so the gallery cannot drift from it: low, mid, high (`warning` from
- * 85 %) and a harness that never reported a window. Grouped in en-US so
- * the goldens do not follow the host locale.
+ * C — context usage (#34: shown from 50 %, `warning` from 85 %), built by
+ * the real rule so the gallery cannot drift from it. Below half the
+ * window there is no chip, so only the two visible cases are drawn.
  */
-internal val chipFixtureContextReadings: List<Pair<String, ContextReading>> = listOf(
-    "low (3%)" to ContextReading.Measured(tokens = 6_000uL, window = 200_000uL),
-    "mid (62%)" to ContextReading.Measured(tokens = 620uL, window = 1000uL),
-    "high (91%)" to ContextReading.Measured(tokens = 910uL, window = 1000uL),
-    "window not reported" to ContextReading.TokensOnly(tokens = 48_210uL),
+internal val chipFixtureContextUsages: List<Pair<String, Pair<ULong, ULong>>> = listOf(
+    "mid (62%)" to (620uL to 1000uL),
+    "high (91%)" to (910uL to 1000uL),
 )
 
 internal fun chipFixtureContextStrips(): List<List<ComposerChip>> =
-    chipFixtureContextReadings.map { (_, reading) -> listOf(contextChip(reading, Locale.US)) }
+    chipFixtureContextUsages.map { (_, usage) -> listOfNotNull(contextChip(usage.first, usage.second)) }
 
 /** D — the new-session canvas row (`ios:Session/NewSessionViewController.swift:247-258`). */
 internal fun chipFixtureNewSession(): List<ComposerChip> = listOf(
@@ -157,7 +151,7 @@ fun ChipStripGallerySection() {
                     }
 
                     chipFixtureContextStrips().forEachIndexed { index, chips ->
-                        ChipCard("C — context usage ${chipFixtureContextReadings[index].first}") {
+                        ChipCard("C — context usage ${chipFixtureContextUsages[index].first}") {
                             ChipStrip(chips, emptyMap(), onChipTap = {})
                         }
                     }
@@ -202,17 +196,13 @@ fun ChipStripGallerySection() {
 
                     Caption(
                         "H — live: tap \u201Cmodel\u201D for the glass menu (anchored to the chip), " +
-                            "\u201C3% context\u201D for the context card, \u201Cbranch\u201D for a toast.",
+                            "\u201Cbranch\u201D or \u201C62% context\u201D (no menu) for a toast.",
                         uiStyle(Face.Sans, typeScale.fixed(13f), palette.secondary),
                     )
                     ChipCard("H — live wiring") {
-                        val low = chipFixtureContextReadings[0].second
                         ChipStrip(
-                            chipFixtureSession() + contextChip(low, Locale.US),
-                            chipMenus = mapOf(
-                                "model" to { chipModelMenu() },
-                                "context" to { contextUsageCard(low, Locale.US) },
-                            ),
+                            chipFixtureSession() + chipFixtureContextStrips()[0],
+                            chipMenus = mapOf("model" to { chipModelMenu() }),
                             onChipTap = { id -> toaster.show("onChipTap: $id") },
                         )
                     }

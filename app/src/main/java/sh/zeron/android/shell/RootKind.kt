@@ -7,29 +7,31 @@ import androidx.compose.ui.unit.dp
  * The three window roots (android-ui-parity #35): which one is on screen
  * is a pure function of the app state and the window width —
  * [chooseRoot]. The swap between the two *groups* is the 350 ms
- * cross-fade; Phone ↔ Split is an in-place switch inside the shell group
- * (ticket 108's collapse, `SplitRootController.swift:15-16,49`).
+ * cross-fade (`SceneDelegate.showRoot`); Phone ↔ Split is an in-place
+ * switch inside the shell group (ticket 108's collapse,
+ * `SplitRootController.swift:15-16,49`).
  */
 enum class RootKind { Welcome, Phone, Split }
 
 /**
- * What the app root needs from the app model (ticket 35, derived in
- * `ZeronApplication` from #13's [sh.zeron.android.core.CoreStatus] and
- * 71's `CoreStartup`):
+ * What the app root needs from the app model, derived in
+ * `ZeronApplication` from the core load and the session holder:
  *
  * - [Loading] — nothing is drawn, the platform splash is held
- *   (`FirstFrameHold`); Android loads asynchronously, and a signed-in
- *   user must not see the welcome root flash before the state is known
- *   (iOS reads the Keychain synchronously in `AppModel.init`);
+ *   (`FirstFrameHold`); Android reads the stored account asynchronously,
+ *   and a signed-in user must not see the welcome root flash before the
+ *   state is known (iOS reads the Keychain synchronously in
+ *   `AppModel.init`);
  * - [CoreFailed] — the native core could not be loaded; the diagnostic
  *   screen replaces the app;
- * - [Ready] — startup finished; [Ready.hasEngines] is "signed in" (a
- *   `CoreClient` exists). TODO(#13): renamed with the session holder.
+ * - [Ready] — the stored account is known; [Ready.signedIn] is "a
+ *   `CoreClient` exists" (`AppModel.isSignedIn`), and flips with sign-in,
+ *   sign-out and `AuthExpired`.
  */
 sealed interface RootInput {
     data object Loading : RootInput
     data class CoreFailed(val reason: String) : RootInput
-    data class Ready(val hasEngines: Boolean) : RootInput
+    data class Ready(val signedIn: Boolean) : RootInput
 }
 
 /**
@@ -53,14 +55,14 @@ val SplitBreakpoint: Dp = 744.dp
 val CompactHeight: Dp = 480.dp
 
 /**
- * The root on screen. `!hasEngines` wins over the size: the welcome root
+ * The root on screen. Signed out wins over the size: the welcome root
  * never splits. A compact-height window (a landscape
  * phone) stays on the phone layout; otherwise the width decides. Both are
  * re-evaluated live (fold, multi-window resize, rotation) — a change never
  * goes through the cross-fade.
  */
-fun chooseRoot(hasEngines: Boolean, width: Dp, height: Dp = Dp.Infinity): RootKind = when {
-    !hasEngines -> RootKind.Welcome
+fun chooseRoot(signedIn: Boolean, width: Dp, height: Dp = Dp.Infinity): RootKind = when {
+    !signedIn -> RootKind.Welcome
     height < CompactHeight -> RootKind.Phone
     width >= SplitBreakpoint -> RootKind.Split
     else -> RootKind.Phone

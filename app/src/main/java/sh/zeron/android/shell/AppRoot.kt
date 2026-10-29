@@ -50,9 +50,9 @@ class AppRootState {
  * - [RootInput.Loading]: nothing drawn; the splash stays ([FirstFrameHold]
  *   holds the first frame, and this box matches the launch background);
  * - [RootInput.CoreFailed]: the diagnostic screen ([CoreUnavailableScreen]);
- * - [RootInput.Ready]: the welcome root with no engines, the phone
- *   tab shell (26) under 840 dp, the tablet split (33) at 840 dp and
- *   wider — [chooseRoot] over this composable's real constraints.
+ * - [RootInput.Ready]: the welcome root when signed out, the phone
+ *   tab shell (26) below [SplitBreakpoint], the tablet split (33) at it
+ *   and wider — [chooseRoot] over this composable's real constraints.
  *
  * Welcome ↔ Shell swaps through [RootCrossfade]: the presentations are
  * dismissed instantly first, then the old root fades out **on top** of
@@ -115,7 +115,7 @@ fun AppRoot(
             }
 
             is RootInput.Ready -> {
-                val kind = chooseRoot(input.hasEngines, maxWidth, maxHeight)
+                val kind = chooseRoot(input.signedIn, maxWidth, maxHeight)
                 SideEffect { state.kind = kind }
                 RootCrossfade(
                     target = kind.group,
@@ -136,7 +136,7 @@ fun AppRoot(
                             // shell group, with no fade (108 owns the
                             // carry-over). The shell scope wraps the switch,
                             // so the hoisted shell state survives it.
-                            val shellKind = chooseRoot(hasEngines = true, width = maxWidth, height = maxHeight)
+                            val shellKind = chooseRoot(signedIn = true, width = maxWidth, height = maxHeight)
                             shellScope(shellKind) {
                                 if (shellKind == RootKind.Split) {
                                     Box(
@@ -244,7 +244,7 @@ private fun AppRootPreviewBody(appearance: Appearance) {
     ZeronTheme(appearance) {
         val palette = ZeronTheme.palette
         AppRoot(
-            input = RootInput.Ready(hasEngines = true),
+            input = RootInput.Ready(signedIn = true),
             state = remember { AppRootState() },
             presentations = remember { RootPresentations() },
             welcome = { FakeRoot("Welcome", palette.accent, palette.text) },

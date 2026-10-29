@@ -42,11 +42,11 @@ interface WorkspaceCore {
 
 /**
  * The [WorkspaceCore] over the live [CoreClient], resolved at call time:
- * `ZeronApplication` builds this over `clientOrNull()` (ticket 71) so the
- * feed and the fold state work from the moment `CoreStartup` flips to
- * `Ready`, without holding a client a failed start never produced. Before
- * `Ready` the calls refuse like an unreachable engine — nothing in the UI
- * can reach them that early (there is no snapshot to draw sections from).
+ * `ZeronApplication` builds this over the session holder's
+ * `clientOrNull()`, so the feed and the fold state always reach the
+ * current account's client and never hold one that was signed out. While
+ * signed out the calls refuse like an unreachable engine — nothing in the
+ * UI can reach them then (there is no snapshot to draw sections from).
  */
 class CoreClientWorkspace(private val client: () -> CoreClient?) : WorkspaceCore {
 
@@ -138,7 +138,22 @@ class WorkspaceFeed(
     }
 
     /**
-     * The app's [ClientEvent] sink — registered before `CoreStartup.start()`
+     * The client changed (sign-in, sign-out, `AuthExpired`): drop the old
+     * account's lists, then read the new client's, if any. On the serial
+     * lane, so a read of the old client already in flight lands before
+     * the clear, never after it.
+     */
+    fun reset() {
+        scope.launch(serial) {
+            _snapshot.value = null
+            _devices.value = emptyList()
+            _connectivity.value = null
+            start()
+        }
+    }
+
+    /**
+     * The app's [ClientEvent] sink — registered before `SessionHolder.boot()`
      * so it sees every event; called on a Rust runtime thread, so it only
      * conflates and returns.
      */

@@ -34,8 +34,8 @@ import javax.crypto.spec.GCMParameterSpec
 class KeystoreSecretCipher(private val context: Context) : SecretCipher {
 
     companion object {
-        /** Also the AAD prefix — one constant, no new naming surface. */
-        const val ALIAS = "zeron.engine-credentials.v1"
+        /** The WorkOS credential key (#14); nothing was ever stored under Roboco's alias. */
+        const val ALIAS = "sh.zeron.android.credentials.v1"
         private const val TAG = "Zeron"
         private const val PROVIDER = "AndroidKeyStore"
         private const val TRANSFORMATION = "AES/GCM/NoPadding"

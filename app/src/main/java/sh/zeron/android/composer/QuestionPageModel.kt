@@ -63,6 +63,8 @@ class QuestionPageActions(
     val onBack: () -> Unit,
     /** iOS `advance()` (`:159`) — ticket 91 adds the CONFIRM haptic on submit. */
     val onNext: () -> Unit,
+    /** The corner close (iOS `dismissUnanswered()`, `:249-255`, #32): submits no answers. */
+    val onClose: () -> Unit = {},
 )
 
 /**
@@ -86,6 +88,9 @@ object QuestionCardText {
 
     /** The prominent title on the last page (`:144`). */
     const val SUBMIT = "Submit"
+
+    /** The corner close's accessibility label (`:77`, #32). */
+    const val CLOSE = "Close without answering"
 
     /**
      * `header.isEmpty() ? "Question" : header` — one page shows the header
@@ -119,6 +124,9 @@ object QuestionCardTags {
 
     /** The Next/Submit button (`:67`). */
     const val NEXT = "question-next"
+
+    /** The corner close (`:78`, #32). */
+    const val CLOSE = "question-close"
 
     /** Android-only: the glass card itself, for geometry tests. */
     const val CARD = "question-card"

@@ -27,7 +27,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.chrisbanes.haze.rememberHazeState
-import java.util.Locale
 import kotlinx.coroutines.delay
 import sh.zeron.android.composer.ChipIcon
 import sh.zeron.android.composer.ChipMenuCore
@@ -46,10 +45,8 @@ import sh.zeron.android.design.glass.MenuLine
 import sh.zeron.android.design.glass.flattenLevel
 import sh.zeron.android.design.uiStyle
 import sh.zeron.android.session.ChromeInput
-import sh.zeron.android.session.ContextReading
 import sh.zeron.android.session.SessionChrome
 import sh.zeron.android.session.contextChip
-import sh.zeron.android.session.contextUsageCard
 import uniffi.zeron_core.ChatConfig
 import uniffi.zeron_core.ChatIndicator
 import uniffi.zeron_core.ComposerState
@@ -83,12 +80,11 @@ import uniffi.zeron_core.SessionRow
  *   "Fail writes" toggle makes the write throw, and the caption under
  *   the strip shows the last write's outcome. The real
  *   [rememberChipMenuPlatform] opens the PR's Custom Tab. The `context`
- *   chip (android-next #01) opens the read-only details card.
+ *   chip has no menu (#34).
  * - the **static panels** M1 (model, resolved), M2 (model, loading), E
  *   (reasoning effort) and P (pull request), each a stateless
  *   [GlassMenuPanel] of the flattened lines — the same fixtures the
- *   Roborazzi goldens capture (`ChipMenuScreenshotTest`) — plus the
- *   context cards C1 (measured) and C2 (window not reported).
+ *   Roborazzi goldens capture (`ChipMenuScreenshotTest`).
  *
  * No Material controls anywhere: plain `BasicText` and rows.
  */
@@ -113,12 +109,11 @@ fun ChipMenuGallerySection() {
                 modelLabel = galleryModels().firstOrNull { it.id == next.model }?.label ?: modelLabel
             },
             failWrites = { failWrites },
+            // The gallery's own caption: the app shows nothing (iOS `try?`).
+            onResult = { t -> lastWrite = if (t == null) "Saved" else "Write failed: ${t.message}" },
         )
     }
-    val menus = remember(core) { SessionChipMenus(core, locale = { Locale.US }) }
-    menus.onSettingResult = { t ->
-        lastWrite = if (t == null) "Saved" else "Couldn't change session settings: ${t.message}"
-    }
+    val menus = remember(core) { SessionChipMenus(core) }
     // The controller-refresh side of the contract: one fill with the
     // snapshot the provider reads (row + config + host device).
     menus.fill(
@@ -141,8 +136,7 @@ fun ChipMenuGallerySection() {
             symbol = "gauge.with.dots.needle.67percent",
         ),
         ComposerChip(id = "pr", title = "1234", icon = ChipIcon.PullRequest, tint = ChipTint.PrOpen),
-        contextChip(GALLERY_CONTEXT_MEASURED, Locale.US),
-    )
+    ) + listOfNotNull(contextChip(GALLERY_CONTEXT_TOKENS, GALLERY_CONTEXT_WINDOW))
 
     GlassMenuHost(hazeState = haze) {
         Box(Modifier.fillMaxSize()) {
@@ -176,7 +170,6 @@ fun ChipMenuGallerySection() {
                         "model" to { menus.menu("model", platform) },
                         "effort" to { menus.menu("effort", platform) },
                         "pr" to { menus.menu("pr", platform) },
-                        "context" to { menus.menu("context", platform) },
                     ),
                     onChipTap = {},
                     modifier = Modifier.width(376.dp),
@@ -196,8 +189,6 @@ fun ChipMenuGallerySection() {
                 ChipMenuStaticPanel("M2 — model, loading", chipMenuM2Lines())
                 ChipMenuStaticPanel("E — reasoning effort", chipMenuELines())
                 ChipMenuStaticPanel("P — pull request", chipMenuPLines())
-                ChipMenuStaticPanel("C1 — context card", chipMenuContextLines(GALLERY_CONTEXT_MEASURED))
-                ChipMenuStaticPanel("C2 — context, window not reported", chipMenuContextLines(GALLERY_CONTEXT_NO_WINDOW))
                 Spacer(Modifier.height(24.dp))
             }
         }
@@ -364,7 +355,7 @@ private fun galleryComposerState(): ComposerState = ComposerState(
     openInput = null,
     queueError = null,
     lastSubmittedMessageId = null,
-    contextUsage = ContextUsage(tokens = GALLERY_CONTEXT_MEASURED.tokens, window = GALLERY_CONTEXT_MEASURED.window),
+    contextUsage = ContextUsage(tokens = GALLERY_CONTEXT_TOKENS, window = GALLERY_CONTEXT_WINDOW),
 )
 
 internal fun gallerySessionRow(config: ChatConfig, modelLabel: String): SessionRow = SessionRow(
@@ -420,6 +411,7 @@ private class GalleryChipMenuCore(
     private val modelLabel: () -> String,
     private val onConfig: (ChatConfig) -> Unit,
     private val failWrites: () -> Boolean,
+    private val onResult: (Throwable?) -> Unit,
 ) : ChipMenuCore {
     override fun sessionRow(): SessionRow = gallerySessionRow(config(), modelLabel())
 
@@ -435,8 +427,13 @@ private class GalleryChipMenuCore(
     override fun reasoningLabel(level: String): String = galleryReasoningLabel(level)
 
     override suspend fun setSessionConfig(config: ChatConfig) {
-        if (failWrites()) throw IllegalStateException("Engine is offline; reconnecting")
+        if (failWrites()) {
+            val failure = IllegalStateException("Engine is offline; reconnecting")
+            onResult(failure)
+            throw failure
+        }
         onConfig(config)
+        onResult(null)
     }
 }
 
@@ -498,17 +495,9 @@ fun chipMenuPLines(): List<MenuLine> = flattenLevel(
     backTitle = null,
 )
 
-/** C1's numbers: desktop's worked example (`5,417 / 1,048,576 tokens`). */
-private val GALLERY_CONTEXT_MEASURED = ContextReading.Measured(tokens = 5_417uL, window = 1_048_576uL)
-
-/** C2: a harness that reports tokens but never a window. */
-private val GALLERY_CONTEXT_NO_WINDOW = ContextReading.TokensOnly(tokens = 48_210uL)
-
-/** C1 / C2 — the context details card (android-next #01), grouped in en-US. */
-fun chipMenuContextLines(reading: ContextReading): List<MenuLine> {
-    val card = contextUsageCard(reading, Locale.US)
-    return flattenLevel(card.title, card.children, resolved = { null }, isRoot = true, backTitle = null)
-}
+/** The live demo's context usage: 62 %, so the chip shows (#34: from 50 %, no menu). */
+private const val GALLERY_CONTEXT_TOKENS = 650_000uL
+private const val GALLERY_CONTEXT_WINDOW = 1_048_576uL
 
 // ---------------------------------------------------------------------------
 // Previews (step 10): M1 + E + P, light and dark.

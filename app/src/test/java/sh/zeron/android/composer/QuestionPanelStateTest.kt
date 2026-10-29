@@ -26,7 +26,7 @@ import sh.zeron.android.session.SessionChrome
  * (bound to its page, restarted by a second pick, cancelled by Back and
  * configure), the F1 auto-submit and the F2 flow (option order), the
  * multi-select deselect, the double-submit guard and its re-arm, the
- * no-request / no-canWrite guards, and [buildAnswers]'s worked
+ * no-request guard, the corner close (#32), and [buildAnswers]'s worked
  * examples.
  *
  * The auto-advance timing runs on the [TestScope] scheduler
@@ -223,22 +223,17 @@ class QuestionPanelStateTest {
     }
 
     @Test
-    fun nextEnabledGatesOnAnsweredAndOnCanWriteForSubmitOnly() = runTest {
+    fun nextEnabledGatesOnAnswered() = runTest {
         val s = newState()
         s.configure(QuestionPanelFixtures.F2)
         assertFalse("an unanswered page disables Next", s.nextEnabled)
         s.pick(0, "Event-driven fold with coalesced commits")
         assertTrue("an answered page enables Next", s.nextEnabled)
-        s.canWrite = false
-        assertTrue("Next (not Submit) stays enabled while offline", s.nextEnabled)
-        s.canWrite = true
         advanceTimeBy(220)
         runCurrent() // page 1 (q-gates, multi)
+        assertFalse("the new page starts unanswered", s.nextEnabled)
         s.pick(1, "Unit tests")
-        s.canWrite = false
-        assertFalse("Submit is disabled while the engine is offline", s.nextEnabled)
-        s.canWrite = true
-        assertTrue("Submit re-arms without losing the picks", s.nextEnabled)
+        assertTrue("one pick enables Submit", s.nextEnabled)
         advanceUntilIdle()
     }
 
@@ -391,28 +386,59 @@ class QuestionPanelStateTest {
         advanceUntilIdle()
     }
 
+    // ------------------------------------------------------------ the close (#32)
+
     @Test
-    fun canWriteFalseDisablesSubmitAndTheKeptPicksSubmitWhenItReturns() = runTest {
+    fun closeSubmitsNoAnswersOnceWithNoHaptic() = runTest {
         val s = newState()
         s.configure(QuestionPanelFixtures.F2)
-        s.pick(0, "Event-driven fold with coalesced commits")
-        s.next()
-        s.pick(1, "Unit tests")
-        s.canWrite = false
-        assertFalse(s.nextEnabled)
-        s.next() // the auto-advance / Done path while offline: nothing
-        assertTrue("no submit while offline", submits.calls.isEmpty())
-        assertEquals("no Confirm while offline", 0, haptics.fired.count { it == Haptic.Confirm })
-        s.canWrite = true
-        assertTrue(s.nextEnabled)
-        s.next()
-        assertEquals(
-            listOf(
-                QuestionAnswer("q-sync", listOf("Event-driven fold with coalesced commits")),
-                QuestionAnswer("q-gates", listOf("Unit tests")),
-            ),
-            submits.calls.single().second,
-        )
+        s.dismiss()
+        s.dismiss() // a second tap: the shared guard
+        assertEquals(listOf("r2" to emptyList<QuestionAnswer>()), submits.calls)
+        assertTrue(s.submitted)
+        assertTrue("iOS plays no haptic on close", haptics.fired.isEmpty())
+        advanceUntilIdle()
+    }
+
+    @Test
+    fun closeMidSetDropsThePicksAndCancelsThePendingAdvance() = runTest {
+        val s = newState()
+        s.configure(QuestionPanelFixtures.F1)
+        s.pick(0, "Yes, both platforms") // schedules the auto-submit
+        s.dismiss()
+        advanceUntilIdle()
+        assertEquals("only the decline went out", listOf("r1" to emptyList<QuestionAnswer>()), submits.calls)
+        assertEquals("the pick's Select only, never a Confirm", listOf(Haptic.Select), haptics.fired)
+    }
+
+    @Test
+    fun closeAfterSubmitOrWithoutARequestDoesNothing() = runTest {
+        val s = newState()
+        s.configure(QuestionPanelFixtures.F1)
+        s.pick(0, "Yes, both platforms")
+        advanceTimeBy(220)
+        runCurrent() // submitted
+        s.dismiss()
+        assertEquals(1, submits.calls.size)
+        assertEquals(listOf(QuestionAnswer("q1", listOf("Yes, both platforms"))), submits.calls.single().second)
+
+        val t = newState()
+        t.configure(QuestionPanelFixtures.F2)
+        t.configure(null) // the request resolved elsewhere
+        t.dismiss()
+        assertEquals("no decline without a live request", 1, submits.calls.size)
+        advanceUntilIdle()
+    }
+
+    @Test
+    fun aFailedCloseReArmsLikeAFailedSubmit() = runTest {
+        val s = newState()
+        s.configure(QuestionPanelFixtures.F2)
+        s.dismiss()
+        s.onSubmitFailed("r2")
+        assertFalse(s.submitted)
+        s.dismiss()
+        assertEquals(2, submits.calls.size)
         advanceUntilIdle()
     }
 
