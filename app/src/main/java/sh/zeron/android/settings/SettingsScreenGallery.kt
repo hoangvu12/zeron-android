@@ -105,7 +105,17 @@ private fun SettingsScreenGalleryContent(listState: LazyListState, live: Boolean
     val wallpaper = if (live) rememberGalleryWallpaperSectionState() else null
     val sessionsStrings = sessionsSettingsStrings()
     SettingsScreenContent(listState, topInset = 24.dp) {
-        galleryAgentAccountsSection()
+        // #49: the Agents section with Cloud offered (a fixed snapshot).
+        agentsSection(
+            agentsRows(
+                AgentsCloud(available = true, githubAccount = "octocat", credits = 41_250.0, planName = "Pro"),
+                demo = false,
+                demoCloud = false,
+                // No core call: the IDE preview has no JNA host.
+                credits = { "%,d".format(it.toLong()) },
+            ),
+            onOpen = {},
+        )
         devicesSection(devices)
         notificationRowsSection(
             rows = notificationRows(
@@ -124,96 +134,6 @@ private fun SettingsScreenGalleryContent(listState: LazyListState, live: Boolean
         sessionsSettingsSection(sessionsStrings, { true }, {}, {})
     }
 }
-
-/**
- * The fixture's Agent Accounts section (android-next#05): the pure row
- * builder over a fixed snapshot — Claude Code with two logins (the
- * Session 42 % / Week 8 % meters) and Codex at 91 % (the amber mini
- * meter). Static like the wallpaper stand-in: no core, no loads.
- */
-private fun LazyListScope.galleryAgentAccountsSection() {
-    val rows = sh.zeron.android.accounts.agentAccountsRows(
-        deviceId = "device-e1",
-        deviceName = "MacBook Pro",
-        snapshot = galleryAccountsSnapshot(),
-        loadMessage = null,
-        unsupported = false,
-        // No core call: the IDE preview has no JNA host (the wallpaper
-        // stand-in's rule).
-        harnessLabel = { harness ->
-            mapOf("claude-code" to "Claude Code", "codex" to "Codex")[harness] ?: harness
-        },
-    ) ?: return
-    groupedSection(
-        key = "agent-accounts",
-        header = sh.zeron.android.accounts.AgentAccountsSectionCopy.Header,
-        items = rows,
-        itemKey = { it.id },
-        footer = sh.zeron.android.accounts.AccountsCopy.planUsageOn("MacBook Pro"),
-    ) { spec, position ->
-        sh.zeron.android.accounts.AgentAccountsRow(spec, position, onClick = {})
-    }
-}
-
-/** The section's fixture snapshot — pure records, no FFI. */
-private fun galleryAccountsSnapshot(): sh.zeron.android.accounts.AgentAccountsSnapshot =
-    sh.zeron.android.accounts.AgentAccountsSnapshot(
-        accounts = listOf(
-            galleryAccount(
-                id = "alice-slot",
-                harness = "claude-code",
-                email = "alice@example.com",
-                planLabel = "Max 20\u00d7",
-                active = true,
-                organization = "Test Org",
-                usage = listOf(
-                    UsageWindowInfo(label = "Session", usedFraction = 0.42f, resetsAtMs = null),
-                    UsageWindowInfo(label = "Week", usedFraction = 0.08f, resetsAtMs = null),
-                ),
-            ),
-            galleryAccount(
-                id = "bob-slot",
-                harness = "claude-code",
-                email = "bob@example.com",
-                planLabel = "Pro",
-                active = false,
-            ),
-            galleryAccount(
-                id = "codex-slot",
-                harness = "codex",
-                email = "dev@example.com",
-                planLabel = "Plus",
-                active = true,
-                usage = listOf(
-                    UsageWindowInfo(label = "Session", usedFraction = 0.91f, resetsAtMs = null),
-                ),
-            ),
-        ),
-    )
-
-/** One fixture login; every field the section doesn't read is neutral. */
-private fun galleryAccount(
-    id: String,
-    harness: String,
-    email: String,
-    planLabel: String,
-    active: Boolean,
-    organization: String? = null,
-    usage: List<UsageWindowInfo> = emptyList(),
-): sh.zeron.android.accounts.AgentAccount = sh.zeron.android.accounts.AgentAccount(
-    id = id,
-    harness = harness,
-    email = email,
-    displayName = null,
-    planLabel = planLabel,
-    active = active,
-    switchable = true,
-    apiKey = false,
-    organization = organization,
-    provider = null,
-    usage = usage,
-    usageError = null,
-)
 
 /**
  * The wallpaper section over a gallery-local fake store (like 97's live

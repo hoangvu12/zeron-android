@@ -39,12 +39,6 @@ object AccountsCopy {
     /** The row that opens the page (the chip menu's last row). */
     const val OpenPage = "Accounts & Usage\u2026"
 
-    /** The Settings section's header. */
-    const val SectionHeader = "Agent Accounts"
-
-    /** The ⋯ menu's row on the session screen. */
-    const val SessionMenuRow = "Account & Usage"
-
     /** The page's pending row. */
     const val Loading = "Loading accounts\u2026"
 

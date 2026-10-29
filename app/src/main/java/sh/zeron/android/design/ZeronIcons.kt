@@ -318,6 +318,15 @@ object ZeronIcons {
     /** SF `bubble.left.and.text.bubble.right` — the session ⋯ "New Side Chat". */
     val BubbleLeftAndTextBubbleRight = ZeronIcon.Vector(R.drawable.zi_chat_round_line)
 
+    /** SF `cpu` — Settings → Agents "Providers" (#49). */
+    val Cpu = ZeronIcon.Vector(R.drawable.zi_cpu)
+
+    /** SF `cloud` — Settings → Agents "Cloud" (#49). */
+    val Cloud = ZeronIcon.Vector(R.drawable.zi_cloud)
+
+    /** SF `creditcard` — Settings → Agents "Billing" (#49). */
+    val CreditCard = ZeronIcon.Vector(R.drawable.zi_creditcard)
+
     /** SF `bubble.left.and.bubble.right` — the companion strip's side chats chip (#40). */
     val BubbleLeftAndBubbleRight = ZeronIcon.Vector(R.drawable.zi_bubble_left_and_bubble_right)
 
@@ -482,6 +491,9 @@ object ZeronIcons {
         ),
         RegistryEntry("Terminal", listOf("apple.terminal"), Terminal),
         RegistryEntry("BubbleLeftAndBubbleRight", listOf("bubble.left.and.bubble.right"), BubbleLeftAndBubbleRight),
+        RegistryEntry("Cpu", listOf("cpu"), Cpu),
+        RegistryEntry("Cloud", listOf("cloud"), Cloud),
+        RegistryEntry("CreditCard", listOf("creditcard"), CreditCard),
         RegistryEntry("PersonCropCircle", listOf("person.crop.circle"), PersonCropCircle),
         RegistryEntry(
             "RectanglePortraitAndArrowRight",
