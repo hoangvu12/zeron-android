@@ -1,30 +1,21 @@
 package sh.zeron.android.cloud
 
 import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -35,7 +26,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
@@ -47,6 +37,7 @@ import sh.zeron.android.core.CloudStore
 import sh.zeron.android.core.Face
 import sh.zeron.android.design.AlertButton
 import sh.zeron.android.design.AlertButtonRole
+import sh.zeron.android.design.FilledSearchField
 import sh.zeron.android.design.GroupedAccessory
 import sh.zeron.android.design.GroupedFooter
 import sh.zeron.android.design.GroupedPosition
@@ -56,7 +47,6 @@ import sh.zeron.android.design.Icon
 import sh.zeron.android.design.LocalAlerts
 import sh.zeron.android.design.LocalFeedback
 import sh.zeron.android.design.LocalTypeScale
-import sh.zeron.android.design.SymbolWeight
 import sh.zeron.android.design.ZeronAlert
 import sh.zeron.android.design.ZeronIcons
 import sh.zeron.android.design.ZeronTheme
@@ -122,7 +112,8 @@ fun CloudRepoPickerSheet(onDismissed: () -> Unit, onCreated: (String) -> Unit = 
     val alerts = LocalAlerts.current
     val feedback = LocalFeedback.current
     val scope = rememberCoroutineScope()
-    var query by remember { mutableStateOf("") }
+    // #62: the field's state (the headless UnstyledTextField is state-based).
+    val search = rememberTextFieldState()
     var creating by remember { mutableStateOf<String?>(null) }
     // The repository read is in flight (`cloud.repos` stays null on failure).
     var loading by remember { mutableStateOf(false) }
@@ -152,9 +143,9 @@ fun CloudRepoPickerSheet(onDismissed: () -> Unit, onCreated: (String) -> Unit = 
         header = { SheetHeader(RepoPickerCopy.Title, leading = SheetLeading.Close) },
     ) { bottomInset ->
         val sheet = this
-        val rows = repoPickerRows(cloud.repos, query)
+        val rows = repoPickerRows(cloud.repos, search.text.toString())
         Column(Modifier.fillMaxSize()) {
-            SearchField(query) { query = it }
+            SearchField(search, resultCount = rows.size)
             if (rows.isEmpty()) {
                 EmptyState(
                     repoPickerEmpty(cloud.repos, loading, cloud.githubConnected),
@@ -218,49 +209,22 @@ private fun RowSpinner() {
     Box(Modifier.padding(end = 16.dp)) { ActivitySpinner(ZeronTheme.palette.secondary) }
 }
 
-/** The pinned search field ("Search repositories"). */
+/**
+ * The pinned search field ("Search repositories"). #62 (D7 variant 2): the
+ * shared [FilledSearchField] on the headless `UnstyledTextField` — #63's
+ * search keyboard and label, plus Escape, a "Clear text" button and the
+ * spoken row count. The look is the field's own from before.
+ */
 @Composable
-private fun SearchField(query: String, onQuery: (String) -> Unit) {
-    val palette = ZeronTheme.palette
-    val ts = LocalTypeScale.current
-    Row(
-        Modifier
-            .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 4.dp)
-            .fillMaxWidth()
-            .height(38.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(palette.controlFill)
-            .padding(horizontal = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(ZeronIcons.Magnifyingglass, palette.secondary, 14f, SymbolWeight.Medium)
-        Spacer(Modifier.width(8.dp))
-        val keyboard = LocalSoftwareKeyboardController.current
-        BasicTextField(
-            value = query,
-            onValueChange = onQuery,
-            singleLine = true,
-            // #63: a search keyboard; its Search key only puts it away (the
-            // list filters as you type), and a label for TalkBack.
-            keyboardOptions = KeyboardOptions(
-                capitalization = KeyboardCapitalization.None,
-                autoCorrectEnabled = false,
-                imeAction = ImeAction.Search,
-            ),
-            keyboardActions = KeyboardActions(onSearch = { keyboard?.hide() }),
-            textStyle = uiStyle(Face.Sans, ts.fixed(16f), palette.text),
-            cursorBrush = SolidColor(palette.accent),
-            modifier = Modifier.weight(1f).semantics { contentDescription = RepoPickerCopy.Search }.testTag("repo-search"),
-            decorationBox = { inner ->
-                Box(contentAlignment = Alignment.CenterStart) {
-                    if (query.isEmpty()) {
-                        BasicText(RepoPickerCopy.Search, style = uiStyle(Face.Sans, ts.fixed(16f), palette.tertiary), maxLines = 1)
-                    }
-                    inner()
-                }
-            },
-        )
-    }
+private fun SearchField(search: TextFieldState, resultCount: Int) {
+    FilledSearchField(
+        state = search,
+        placeholder = RepoPickerCopy.Search,
+        textPt = 16f,
+        fieldTag = "repo-search",
+        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 4.dp),
+        resultCount = resultCount,
+    )
 }
 
 /** The empty page: a spinner; the failed read with Try again; or the tile and copy (and Connect GitHub). */

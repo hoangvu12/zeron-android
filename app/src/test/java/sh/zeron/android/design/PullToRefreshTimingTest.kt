@@ -4,6 +4,7 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.TestMonotonicFrameClock
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
@@ -32,8 +33,11 @@ import org.junit.Test
  *
  * `android.util.Log` is swapped out via [pullRefreshLogW] — it is not
  * mocked outside Robolectric (the same seam as `FoldState.foldLogW`).
+ *
+ * Revived from the M0 quarantine by #62 (SPEC §4.4): the control it pins
+ * is unchanged by D7's variant 2 (only its semantics moved).
  */
-@OptIn(ExperimentalTestApi::class)
+@OptIn(ExperimentalTestApi::class, ExperimentalCoroutinesApi::class)
 class PullToRefreshTimingTest {
 
     private var savedLog: ((String, Throwable?) -> Unit)? = null

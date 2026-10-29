@@ -5,6 +5,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.foundation.focusable
 import androidx.compose.runtime.withFrameNanos
 import sh.zeron.android.design.onEscape
+import sh.zeron.android.design.InWindowModal
 import sh.zeron.android.design.RegisterModalOverlay
 import sh.zeron.android.design.bottomChrome
 import android.content.res.Configuration
@@ -234,11 +235,12 @@ interface GlassSheetScope {
  * medium/large detents, a grabber, drag/fling/back dismissal, the IME
  * grow-to-large rule and a nav-bar header.
  *
- * This is a plain composable overlay in the same window as the presenting
- * content — no `Dialog`/`Popup` (ticket 31 scales that content behind the
- * sheet, and glass must sample it). The caller hosts it above the app
- * content in a window-sized `Box`; on its own it fills the parent it is
- * given.
+ * This is an overlay in the same window as the presenting content — no
+ * platform window (ticket 31 scales that content behind the sheet, and
+ * glass must sample it). #62: it is presented through Compose Unstyled's
+ * `Modal` ([InWindowModal]), so it fills the nearest modal host's layer —
+ * the window, wherever the caller composes it; with no host mounted it
+ * fills the parent it is given.
  *
  * Dismissal paths: a drag or fling past [GlassSheetDefaults.DismissFraction]
  * of the way to hidden (or faster than [GlassSheetDefaults.FlingVelocity]),
@@ -286,249 +288,256 @@ fun GlassSheet(
     // UIKit's presentation resigns the presenter's first responder too.
     RegisterModalOverlay()
     val sheetFocus = remember { FocusRequester() }
-    LaunchedEffect(Unit) {
-        withFrameNanos { }
-        runCatching { sheetFocus.requestFocus() }
-    }
 
-    BoxWithConstraints(modifier.fillMaxSize()) {
-        val parentHeightPx = constraints.maxHeight.toFloat()
-        val statusBarPx = WindowInsets.statusBars.getTop(density).toFloat()
-        val flingVelocityPx = with(density) { GlassSheetDefaults.FlingVelocity.toPx() }
-        val detents = state.detents
-
-        // -------------------------------------------------------- anchors
-        // Large = sb + 10, Medium = H × 0.5 or the fitted height (dropped
-        // on tiny windows), Hidden = H. Keep the current detent; if it is
-        // no longer present (Medium dropped), fall back to Large.
-        val largeHeightPx = parentHeightPx - statusBarPx - with(density) { GlassSheetDefaults.LargeTopGap.toPx() }
-        val fitPx by remember(state, largeHeightPx) {
-            derivedStateOf { state.fit?.invoke(largeHeightPx)?.let { round(it) } }
+    // #62 (decision D7): presented through Compose Unstyled's `Modal`, in
+    // the nearest modal host's layer (the one `RootHosts` mounts for sheets:
+    // above the screens and their chrome, below the image viewer, menus and
+    // toasts; inline in its parent when no host is mounted).
+    InWindowModal {
+        LaunchedEffect(Unit) {
+            withFrameNanos { }
+            runCatching { sheetFocus.requestFocus() }
         }
-        LaunchedEffect(parentHeightPx, statusBarPx, detents, fitPx) {
-            val anchors = sheetAnchors(parentHeightPx, statusBarPx, density, detents, fitPx)
-            val keep = state.draggable.settledValue
-            val target = if (anchors.hasPositionFor(keep)) keep else SheetDetent.Large
-            // A settled fitted sheet glides to its new height (UIKit's
-            // `animateChanges { invalidateDetents() }`); a present or drag
-            // in flight just retargets.
-            val from = state.offset
-            val glide = target == SheetDetent.Medium && state.fit != null &&
-                !from.isNaN() && !state.draggable.isAnimationRunning
-            state.draggable.updateAnchors(anchors, target)
-            if (glide && abs(state.offset - from) > 0.5f) {
-                state.draggable.anchoredDrag { dragTo(from) }
-                state.animateTo(SheetDetent.Medium)
+
+        BoxWithConstraints(modifier.fillMaxSize()) {
+            val parentHeightPx = constraints.maxHeight.toFloat()
+            val statusBarPx = WindowInsets.statusBars.getTop(density).toFloat()
+            val flingVelocityPx = with(density) { GlassSheetDefaults.FlingVelocity.toPx() }
+            val detents = state.detents
+
+            // -------------------------------------------------------- anchors
+            // Large = sb + 10, Medium = H × 0.5 or the fitted height (dropped
+            // on tiny windows), Hidden = H. Keep the current detent; if it is
+            // no longer present (Medium dropped), fall back to Large.
+            val largeHeightPx = parentHeightPx - statusBarPx - with(density) { GlassSheetDefaults.LargeTopGap.toPx() }
+            val fitPx by remember(state, largeHeightPx) {
+                derivedStateOf { state.fit?.invoke(largeHeightPx)?.let { round(it) } }
             }
-        }
-
-        // -------------------------------------------------------- present
-        // First composition: Hidden → the smallest visible detent,
-        // animated. A restored saved detent skips the replay: snap to it.
-        LaunchedEffect(state) {
-            val smallest =
-                if (state.anchors.hasPositionFor(SheetDetent.Medium)) SheetDetent.Medium else SheetDetent.Large
-            val settled = state.current
-            if (settled != SheetDetent.Hidden && state.anchors.hasPositionFor(settled)) {
-                state.snapTo(settled)
-            } else {
-                state.animateTo(smallest)
-            }
-        }
-
-        // ------------------------------------------------------------ IME
-        // The keyboard shown while at Medium grows the sheet to Large
-        // (UIKit does the same to make room).
-        val imeVisible = WindowInsets.isImeVisible
-        LaunchedEffect(imeVisible, state) {
-            if (imeVisible && state.current == SheetDetent.Medium && SheetDetent.Large in state.detents) {
-                state.animateTo(SheetDetent.Large)
-            }
-        }
-
-        // ------------------------------------------------- predictive back
-        PredictiveBackHandler(enabled = state.current != SheetDetent.Hidden && !dismissal.dismissing) { events ->
-            val startDetent = state.current
-            val startOffset = state.offset
-            val hiddenOffset = state.anchors.positionOf(SheetDetent.Hidden)
-            try {
-                events.collect { event ->
-                    // 25 % of the way to hidden at progress 1, the same
-                    // travel ticket 31's PageSheet uses.
-                    val offset = startOffset + GlassSheetDefaults.PredictiveBackTravel *
-                        (hiddenOffset - startOffset) * event.progress
-                    state.draggable.anchoredDrag { dragTo(offset) }
+            LaunchedEffect(parentHeightPx, statusBarPx, detents, fitPx) {
+                val anchors = sheetAnchors(parentHeightPx, statusBarPx, density, detents, fitPx)
+                val keep = state.draggable.settledValue
+                val target = if (anchors.hasPositionFor(keep)) keep else SheetDetent.Large
+                // A settled fitted sheet glides to its new height (UIKit's
+                // `animateChanges { invalidateDetents() }`); a present or drag
+                // in flight just retargets.
+                val from = state.offset
+                val glide = target == SheetDetent.Medium && state.fit != null &&
+                    !from.isNaN() && !state.draggable.isAnimationRunning
+                state.draggable.updateAnchors(anchors, target)
+                if (glide && abs(state.offset - from) > 0.5f) {
+                    state.draggable.anchoredDrag { dragTo(from) }
+                    state.animateTo(SheetDetent.Medium)
                 }
-                // Released to commit: spring the rest of the way, then
-                // dismiss (in the composition scope — this coroutine ends).
-                dismissal.dismiss()
-            } catch (e: CancellationException) {
-                // Gesture abandoned: spring back to the detent it came
-                // from, in the composition scope (this coroutine is
-                // already cancelling and cannot suspend).
-                if (!dismissal.dismissing) {
-                    scope.launch { state.animateTo(startDetent) }
-                }
-                throw e
             }
-        }
 
-        // -------------------------------------------------- drag machinery
-        val onSettled: (SheetDetent) -> Unit = { detent ->
-            if (detent == SheetDetent.Hidden) dismissal.settledAtHidden()
-        }
-        val nestedScrollConnection = remember(state, flingVelocityPx, dismissal) {
-            SheetNestedScroll(state, flingVelocityPx, onSettled)
-        }
-        val fling = remember(state, flingVelocityPx, dismissal) {
-            SheetFling(state, flingVelocityPx, onSettled)
-        }
-
-        // ---------------------------------------------------------- scrim
-        // Black at 0.25 (light) / 0.45 (dark) × presentFraction, read at
-        // draw time so drags never recompose. A tap dismisses only while
-        // settled at Medium (UIKit dismisses on a tap above a medium
-        // sheet; ticket 31 chose "do nothing" at Large so both sheet
-        // implementations agree). The scrim consumes every gesture in
-        // both cases, so nothing behind the sheet is ever reachable.
-        val scrimAlpha =
-            if (ZeronTheme.isDark) GlassSheetDefaults.ScrimAlphaDark else GlassSheetDefaults.ScrimAlphaLight
-        if (scrim) {
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .drawBehind { drawRect(Color.Black, alpha = scrimAlpha * state.presentFraction) }
-                    .clearAndSetSemantics { testTag = "glass-sheet-scrim" }
-                    .pointerInput(Unit) {
-                        awaitEachGesture {
-                            val down = awaitFirstDown(requireUnconsumed = false)
-                            down.consume()
-                            val up = waitForUpOrCancellation()
-                            if (up != null) {
-                                up.consume()
-                                if (state.current == SheetDetent.Medium) dismissal.dismiss()
-                            }
-                        }
-                    },
-            )
-        } else {
-            // No dimming, but still an input-consuming layer: ticket 31
-            // may draw its own dimming, and the content behind a sheet
-            // without one is never clickable through it.
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .clearAndSetSemantics { }
-                    .pointerInput(Unit) {
-                        awaitEachGesture {
-                            val down = awaitFirstDown(requireUnconsumed = false)
-                            down.consume()
-                            var released = false
-                            while (!released) {
-                                val event = awaitPointerEvent()
-                                for (change in event.changes) if (!change.isConsumed) change.consume()
-                                released = event.changes.all { !it.pressed }
-                            }
-                        }
-                    },
-            )
-        }
-
-        // --------------------------------------------------- sheet surface
-        // Height H − min(offset, offsetOf(settled)): dragging down from a
-        // detent keeps the height and slides the bottom off screen;
-        // expanding up grows it, so the bottom never gaps. Read through
-        // derivedStateOf so re-layout happens only while the height value
-        // actually changes (while expanding), never on a plain drag.
-        // Before the anchors exist the offset is NaN: a sheet that enters
-        // the composition through a recomposition (an overlay request, a
-        // keyed swap) is measured and placed in that same frame, before the
-        // anchors effect above has run. It lays out as Hidden — zero height,
-        // parked at the parent's bottom — until the anchors land.
-        val sheetHeightPx: State<Float> = remember(state, parentHeightPx) {
-            derivedStateOf {
-                if (state.offset.isNaN()) return@derivedStateOf 0f
-                val settledPosition = state.anchors.positionOf(state.current)
-                val cap = if (settledPosition.isNaN()) state.offset else settledPosition
-                (parentHeightPx - min(state.offset, cap)).coerceAtLeast(0f)
+            // -------------------------------------------------------- present
+            // First composition: Hidden → the smallest visible detent,
+            // animated. A restored saved detent skips the replay: snap to it.
+            LaunchedEffect(state) {
+                val smallest =
+                    if (state.anchors.hasPositionFor(SheetDetent.Medium)) SheetDetent.Medium else SheetDetent.Large
+                val settled = state.current
+                if (settled != SheetDetent.Hidden && state.anchors.hasPositionFor(settled)) {
+                    state.snapTo(settled)
+                } else {
+                    state.animateTo(smallest)
+                }
             }
-        }
-        val shape = remember(cornerRadius) { SmoothTopRoundedShape(cornerRadius) }
-        Box(
-            Modifier
-                .offset {
-                    val offset = state.offset
-                    IntOffset(0, if (offset.isNaN()) parentHeightPx.roundToInt() else offset.roundToInt())
+
+            // ------------------------------------------------------------ IME
+            // The keyboard shown while at Medium grows the sheet to Large
+            // (UIKit does the same to make room).
+            val imeVisible = WindowInsets.isImeVisible
+            LaunchedEffect(imeVisible, state) {
+                if (imeVisible && state.current == SheetDetent.Medium && SheetDetent.Large in state.detents) {
+                    state.animateTo(SheetDetent.Large)
                 }
-                .fillMaxWidth()
-                .sheetHeight { sheetHeightPx.value }
-                .clip(shape)
-                .background(palette.background)
-                .consumeWindowInsets(WindowInsets.statusBars)
-                .anchoredDraggable(state.draggable, Orientation.Vertical, flingBehavior = fling)
-                // Taps on the sheet itself never reach the scrim (this
-                // node processes the Main pass before the scrim's).
-                .pointerInput(Unit) { detectTapGestures { } }
-                .testTag("glass-sheet")
-                .semantics {
-                    paneTitle = title ?: "Sheet"
-                    isTraversalGroup = true
-                    dismiss(label = "Dismiss") {
-                        dismissal.dismiss()
-                        true
+            }
+
+            // ------------------------------------------------- predictive back
+            PredictiveBackHandler(enabled = state.current != SheetDetent.Hidden && !dismissal.dismissing) { events ->
+                val startDetent = state.current
+                val startOffset = state.offset
+                val hiddenOffset = state.anchors.positionOf(SheetDetent.Hidden)
+                try {
+                    events.collect { event ->
+                        // 25 % of the way to hidden at progress 1, the same
+                        // travel ticket 31's PageSheet uses.
+                        val offset = startOffset + GlassSheetDefaults.PredictiveBackTravel *
+                            (hiddenOffset - startOffset) * event.progress
+                        state.draggable.anchoredDrag { dragTo(offset) }
                     }
+                    // Released to commit: spring the rest of the way, then
+                    // dismiss (in the composition scope — this coroutine ends).
+                    dismissal.dismiss()
+                } catch (e: CancellationException) {
+                    // Gesture abandoned: spring back to the detent it came
+                    // from, in the composition scope (this coroutine is
+                    // already cancelling and cannot suspend).
+                    if (!dismissal.dismissing) {
+                        scope.launch { state.animateTo(startDetent) }
+                    }
+                    throw e
                 }
-                .focusRequester(sheetFocus)
-                .focusable()
-                .onEscape { dismissal.dismiss() },
-        ) {
-            ProvideHazeState {
-                // The sheet's children. The content slot below is the sheet's
-                // own haze source, and the header's glass circles and the
-                // grabber are **siblings after it**, never inside it
-                // (ticket 07's feedback rule).
-                Box(Modifier.fillMaxSize()) {
-                    Box(
-                        Modifier
-                            .fillMaxSize()
-                            .padding(top = if (header != null) GlassSheetDefaults.HeaderHeight else 0.dp)
-                            .nestedScroll(nestedScrollConnection)
-                            .imePadding()
-                            .hazeSource(LocalHazeState.current!!),
-                    ) {
-                        val bottomInset = with(density) {
-                            WindowInsets.bottomChrome.exclude(WindowInsets.ime).getBottom(density).toDp()
-                        }
-                        content(sheetScope, bottomInset)
-                    }
-                    if (header != null) {
-                        Box(Modifier.fillMaxWidth().height(GlassSheetDefaults.HeaderHeight)) {
-                            header(sheetScope)
-                        }
-                    }
-                    if (glass != null) {
-                        Box(Modifier.fillMaxSize()) { glass(sheetScope) }
-                    }
-                    if (grabber) {
-                        val twoDetents =
-                            SheetDetent.Medium in detents && SheetDetent.Large in detents
-                        SheetGrabber(
-                            modifier = Modifier.align(Alignment.TopCenter),
-                            onClick = if (twoDetents) {
-                                {
-                                    val next =
-                                        if (state.current == SheetDetent.Medium) SheetDetent.Large else SheetDetent.Medium
-                                    scope.launch { state.animateTo(next) }
+            }
+
+            // -------------------------------------------------- drag machinery
+            val onSettled: (SheetDetent) -> Unit = { detent ->
+                if (detent == SheetDetent.Hidden) dismissal.settledAtHidden()
+            }
+            val nestedScrollConnection = remember(state, flingVelocityPx, dismissal) {
+                SheetNestedScroll(state, flingVelocityPx, onSettled)
+            }
+            val fling = remember(state, flingVelocityPx, dismissal) {
+                SheetFling(state, flingVelocityPx, onSettled)
+            }
+
+            // ---------------------------------------------------------- scrim
+            // Black at 0.25 (light) / 0.45 (dark) × presentFraction, read at
+            // draw time so drags never recompose. A tap dismisses only while
+            // settled at Medium (UIKit dismisses on a tap above a medium
+            // sheet; ticket 31 chose "do nothing" at Large so both sheet
+            // implementations agree). The scrim consumes every gesture in
+            // both cases, so nothing behind the sheet is ever reachable.
+            val scrimAlpha =
+                if (ZeronTheme.isDark) GlassSheetDefaults.ScrimAlphaDark else GlassSheetDefaults.ScrimAlphaLight
+            if (scrim) {
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .drawBehind { drawRect(Color.Black, alpha = scrimAlpha * state.presentFraction) }
+                        .clearAndSetSemantics { testTag = "glass-sheet-scrim" }
+                        .pointerInput(Unit) {
+                            awaitEachGesture {
+                                val down = awaitFirstDown(requireUnconsumed = false)
+                                down.consume()
+                                val up = waitForUpOrCancellation()
+                                if (up != null) {
+                                    up.consume()
+                                    if (state.current == SheetDetent.Medium) dismissal.dismiss()
                                 }
-                            } else {
-                                null
-                            },
-                            stateDescription = if (twoDetents) {
-                                if (state.current == SheetDetent.Medium) "Half screen" else "Full screen"
-                            } else {
-                                null
-                            },
-                        )
+                            }
+                        },
+                )
+            } else {
+                // No dimming, but still an input-consuming layer: ticket 31
+                // may draw its own dimming, and the content behind a sheet
+                // without one is never clickable through it.
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .clearAndSetSemantics { }
+                        .pointerInput(Unit) {
+                            awaitEachGesture {
+                                val down = awaitFirstDown(requireUnconsumed = false)
+                                down.consume()
+                                var released = false
+                                while (!released) {
+                                    val event = awaitPointerEvent()
+                                    for (change in event.changes) if (!change.isConsumed) change.consume()
+                                    released = event.changes.all { !it.pressed }
+                                }
+                            }
+                        },
+                )
+            }
+
+            // --------------------------------------------------- sheet surface
+            // Height H − min(offset, offsetOf(settled)): dragging down from a
+            // detent keeps the height and slides the bottom off screen;
+            // expanding up grows it, so the bottom never gaps. Read through
+            // derivedStateOf so re-layout happens only while the height value
+            // actually changes (while expanding), never on a plain drag.
+            // Before the anchors exist the offset is NaN: a sheet that enters
+            // the composition through a recomposition (an overlay request, a
+            // keyed swap) is measured and placed in that same frame, before the
+            // anchors effect above has run. It lays out as Hidden — zero height,
+            // parked at the parent's bottom — until the anchors land.
+            val sheetHeightPx: State<Float> = remember(state, parentHeightPx) {
+                derivedStateOf {
+                    if (state.offset.isNaN()) return@derivedStateOf 0f
+                    val settledPosition = state.anchors.positionOf(state.current)
+                    val cap = if (settledPosition.isNaN()) state.offset else settledPosition
+                    (parentHeightPx - min(state.offset, cap)).coerceAtLeast(0f)
+                }
+            }
+            val shape = remember(cornerRadius) { SmoothTopRoundedShape(cornerRadius) }
+            Box(
+                Modifier
+                    .offset {
+                        val offset = state.offset
+                        IntOffset(0, if (offset.isNaN()) parentHeightPx.roundToInt() else offset.roundToInt())
+                    }
+                    .fillMaxWidth()
+                    .sheetHeight { sheetHeightPx.value }
+                    .clip(shape)
+                    .background(palette.background)
+                    .consumeWindowInsets(WindowInsets.statusBars)
+                    .anchoredDraggable(state.draggable, Orientation.Vertical, flingBehavior = fling)
+                    // Taps on the sheet itself never reach the scrim (this
+                    // node processes the Main pass before the scrim's).
+                    .pointerInput(Unit) { detectTapGestures { } }
+                    .testTag("glass-sheet")
+                    .semantics {
+                        paneTitle = title ?: "Sheet"
+                        isTraversalGroup = true
+                        dismiss(label = "Dismiss") {
+                            dismissal.dismiss()
+                            true
+                        }
+                    }
+                    .focusRequester(sheetFocus)
+                    .focusable()
+                    .onEscape { dismissal.dismiss() },
+            ) {
+                ProvideHazeState {
+                    // The sheet's children. The content slot below is the sheet's
+                    // own haze source, and the header's glass circles and the
+                    // grabber are **siblings after it**, never inside it
+                    // (ticket 07's feedback rule).
+                    Box(Modifier.fillMaxSize()) {
+                        Box(
+                            Modifier
+                                .fillMaxSize()
+                                .padding(top = if (header != null) GlassSheetDefaults.HeaderHeight else 0.dp)
+                                .nestedScroll(nestedScrollConnection)
+                                .imePadding()
+                                .hazeSource(LocalHazeState.current!!),
+                        ) {
+                            val bottomInset = with(density) {
+                                WindowInsets.bottomChrome.exclude(WindowInsets.ime).getBottom(density).toDp()
+                            }
+                            content(sheetScope, bottomInset)
+                        }
+                        if (header != null) {
+                            Box(Modifier.fillMaxWidth().height(GlassSheetDefaults.HeaderHeight)) {
+                                header(sheetScope)
+                            }
+                        }
+                        if (glass != null) {
+                            Box(Modifier.fillMaxSize()) { glass(sheetScope) }
+                        }
+                        if (grabber) {
+                            val twoDetents =
+                                SheetDetent.Medium in detents && SheetDetent.Large in detents
+                            SheetGrabber(
+                                modifier = Modifier.align(Alignment.TopCenter),
+                                onClick = if (twoDetents) {
+                                    {
+                                        val next =
+                                            if (state.current == SheetDetent.Medium) SheetDetent.Large else SheetDetent.Medium
+                                        scope.launch { state.animateTo(next) }
+                                    }
+                                } else {
+                                    null
+                                },
+                                stateDescription = if (twoDetents) {
+                                    if (state.current == SheetDetent.Medium) "Half screen" else "Full screen"
+                                } else {
+                                    null
+                                },
+                            )
+                        }
                     }
                 }
             }

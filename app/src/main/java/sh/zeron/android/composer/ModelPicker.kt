@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListLayoutInfo
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
@@ -28,7 +26,6 @@ import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.TextStyle
@@ -42,6 +39,10 @@ import kotlin.math.roundToInt
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filterNotNull
+import com.composeunstyled.Tab
+import com.composeunstyled.TabList
+import com.composeunstyled.TabListScope
+import com.composeunstyled.UnstyledTabGroup
 import sh.zeron.android.design.IosSpring
 import sh.zeron.android.design.LocalReduceMotion
 import androidx.compose.foundation.clickable
@@ -65,7 +66,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
@@ -95,6 +96,7 @@ import sh.zeron.android.core.Face
 import sh.zeron.android.design.CapsuleShape
 import sh.zeron.android.design.Haptic
 import sh.zeron.android.design.HarnessMark
+import sh.zeron.android.design.FilledSearchField
 import sh.zeron.android.design.Icon
 import sh.zeron.android.design.LocalFeedback
 import sh.zeron.android.design.LocalTypeScale
@@ -525,8 +527,18 @@ private fun ModelPickerHeader(subtitle: String, harness: String?, hostSymbol: St
  * from the second provider to the third). When the names don't all fit,
  * the others shrink to their logos and the chosen one keeps its name;
  * when even that doesn't fit, the track scrolls, keeps the chosen one in
- * the middle and fades out at the edges with more to see. A tab group to
- * accessibility: each segment is a [Role.Tab], selected on [selected].
+ * the middle and fades out at the edges with more to see.
+ *
+ * #62 / D7: the tabs sit on Compose Unstyled's `UnstyledTabGroup` /
+ * `TabList` / `Tab` (the Component Lab's variant 2). The primitive gives
+ * each segment `Role.Tab` + selected, the list a `selectableGroup` (TalkBack
+ * reads "n of m"), a focus group that Tab enters on the chosen provider,
+ * and ←/→ (wrapping) / Home / End between providers, which select as they
+ * focus (`activateOnFocus`) and so page the pager like a tap. The look,
+ * the measured variable-width frames, the scrolling track and the thumb
+ * interpolating between the frames on the pager's fractional [position]
+ * (audit 03 row 71) stay ours; the primitive's tabs are placed on our
+ * frames, never laid out at equal widths.
  */
 @Composable
 private fun ProviderSwitcher(
@@ -552,72 +564,86 @@ private fun ProviderSwitcher(
     }
     val natural = remember(nameWidths) { nameWidths.map(::segmentNaturalWidth) }
     val scroll = rememberScrollState()
-    BoxWithConstraints(
-        Modifier
-            .padding(start = 20.dp, end = 20.dp, top = 14.dp)
-            .fillMaxWidth()
-            .height(SwitcherMetrics.Height.dp)
-            .clip(CapsuleShape)
-            .background(palette.controlFill)
-            .testTag("model-picker-switcher"),
+    // The primitive's tab keys: the providers' harness ids, in page order.
+    val keys = remember(tabs) { tabs.map { it.harness } }
+    val latestOnSelect by rememberUpdatedState(onSelect)
+    UnstyledTabGroup(
+        selectedTab = keys[selected.coerceIn(0, keys.lastIndex)],
+        // A tap, or a key that moved focus (activate on focus): the page's
+        // index, through the sheet's one pager-driving path.
+        onSelectedTabChange = { harness: String ->
+            val ix = keys.indexOf(harness)
+            if (ix >= 0) latestOnSelect(ix)
+        },
+        tabs = keys,
+        modifier = Modifier.fillMaxWidth(),
     ) {
-        val width = maxWidth.value
-        val available = width - SwitcherMetrics.Inset * 2
-        val compact = switcherCompact(natural, available)
-        val p = position().coerceIn(0f, tabs.lastIndex.toFloat())
-        val lower = floor(p).toInt().coerceIn(0, tabs.lastIndex)
-        val upper = min(tabs.lastIndex, lower + 1)
-        val t = (p - lower).coerceIn(0f, 1f)
-        val a = switcherFrames(natural, available, lower)
-        val b = switcherFrames(natural, available, upper)
-        val frames = a.indices.map { lerpFrame(a[it], b[it], t) }
-        val thumb = lerpFrame(a[lower], b[upper], t)
-        val content = max(width, frames.last().end + SwitcherMetrics.Inset)
-        // Keep the chosen provider in the middle of the track.
-        val centred = (thumb.x + thumb.width / 2 - width / 2).coerceIn(0f, max(0f, content - width))
-        val centredPx = with(density) { centred.dp.roundToPx() }
-        LaunchedEffect(centredPx) { scroll.scrollTo(centredPx) }
-        val segmentHeight = (SwitcherMetrics.Height - SwitcherMetrics.Inset * 2).dp
-        Box(
+        BoxWithConstraints(
             Modifier
-                .fillMaxSize()
-                .switcherEdges(scroll)
-                .horizontalScroll(scroll),
+                .padding(start = 20.dp, end = 20.dp, top = 14.dp)
+                .fillMaxWidth()
+                .height(SwitcherMetrics.Height.dp)
+                .clip(CapsuleShape)
+                .background(palette.controlFill)
+                .testTag("model-picker-switcher"),
         ) {
+            val width = maxWidth.value
+            val available = width - SwitcherMetrics.Inset * 2
+            val compact = switcherCompact(natural, available)
+            val p = position().coerceIn(0f, tabs.lastIndex.toFloat())
+            val lower = floor(p).toInt().coerceIn(0, tabs.lastIndex)
+            val upper = min(tabs.lastIndex, lower + 1)
+            val t = (p - lower).coerceIn(0f, 1f)
+            val a = switcherFrames(natural, available, lower)
+            val b = switcherFrames(natural, available, upper)
+            val frames = a.indices.map { lerpFrame(a[it], b[it], t) }
+            val thumb = lerpFrame(a[lower], b[upper], t)
+            val content = max(width, frames.last().end + SwitcherMetrics.Inset)
+            // Keep the chosen provider in the middle of the track.
+            val centred = (thumb.x + thumb.width / 2 - width / 2).coerceIn(0f, max(0f, content - width))
+            val centredPx = with(density) { centred.dp.roundToPx() }
+            LaunchedEffect(centredPx) { scroll.scrollTo(centredPx) }
+            val segmentHeight = (SwitcherMetrics.Height - SwitcherMetrics.Inset * 2).dp
             Box(
                 Modifier
-                    .width(content.dp)
-                    .fillMaxHeight()
-                    .selectableGroup(),
+                    .fillMaxSize()
+                    .switcherEdges(scroll)
+                    .horizontalScroll(scroll),
             ) {
-                Box(
+                // The primitive's tab list (its `selectableGroup`, focus
+                // group and arrow keys) spans the scrolled content.
+                TabList(
                     Modifier
-                        .offset(x = thumb.x.dp, y = SwitcherMetrics.Inset.dp)
-                        .size(thumb.width.dp, segmentHeight)
-                        .then(
-                            if (dark) {
-                                Modifier
-                            } else {
-                                Modifier.shadow(3.dp, CapsuleShape, ambientColor = ThumbShadow, spotColor = ThumbShadow)
-                            },
-                        )
-                        .clip(CapsuleShape)
-                        .background(thumbColor),
-                )
-                tabs.forEachIndexed { k, tab ->
-                    SwitcherSegment(
-                        harness = tab.harness,
-                        title = titles[k],
-                        frame = frames[k],
-                        height = segmentHeight,
-                        nameWidth = nameWidths[k],
-                        nameVisibility = if (compact) lerp(if (k == lower) 1f else 0f, if (k == upper) 1f else 0f, t) else 1f,
-                        emphasis = max(0f, 1f - abs(p - k)),
-                        selected = k == selected,
-                        fullStyle = fullStyle,
-                        mutedStyle = mutedStyle,
-                        onClick = { onSelect(k) },
+                        .width(content.dp)
+                        .fillMaxHeight(),
+                ) {
+                    Box(
+                        Modifier
+                            .offset(x = thumb.x.dp, y = SwitcherMetrics.Inset.dp)
+                            .size(thumb.width.dp, segmentHeight)
+                            .then(
+                                if (dark) {
+                                    Modifier
+                                } else {
+                                    Modifier.shadow(3.dp, CapsuleShape, ambientColor = ThumbShadow, spotColor = ThumbShadow)
+                                },
+                            )
+                            .clip(CapsuleShape)
+                            .background(thumbColor),
                     )
+                    tabs.forEachIndexed { k, tab ->
+                        SwitcherSegment(
+                            harness = tab.harness,
+                            title = titles[k],
+                            frame = frames[k],
+                            height = segmentHeight,
+                            nameWidth = nameWidths[k],
+                            nameVisibility = if (compact) lerp(if (k == lower) 1f else 0f, if (k == upper) 1f else 0f, t) else 1f,
+                            emphasis = max(0f, 1f - abs(p - k)),
+                            fullStyle = fullStyle,
+                            mutedStyle = mutedStyle,
+                        )
+                    }
                 }
             }
         }
@@ -652,9 +678,13 @@ private fun Modifier.switcherEdges(scroll: ScrollState): Modifier = this
  * (shown by [nameVisibility] in compact mode); two stacked names, muted
  * and full, cross-fade with [emphasis] so the colour follows the finger
  * too. A press scales it to 0.96 and dims the logo.
+ *
+ * #62: the segment is the tab list's `Tab` (keyed by [harness]); the
+ * primitive owns its click, selected state, focus and keys, and our
+ * modifiers place it on its measured [frame].
  */
 @Composable
-private fun SwitcherSegment(
+private fun TabListScope<String>.SwitcherSegment(
     harness: String,
     title: String,
     frame: SegmentFrame,
@@ -662,10 +692,8 @@ private fun SwitcherSegment(
     nameWidth: Float,
     nameVisibility: Float,
     emphasis: Float,
-    selected: Boolean,
     fullStyle: TextStyle,
     mutedStyle: TextStyle,
-    onClick: () -> Unit,
 ) {
     val palette = ZeronTheme.palette
     val interaction = remember { MutableInteractionSource() }
@@ -677,8 +705,11 @@ private fun SwitcherSegment(
     )
     val contentWidth = SwitcherMetrics.Logo + (SwitcherMetrics.Gap + nameWidth) * nameVisibility
     val x0 = ((frame.width - contentWidth) / 2).roundToInt().toFloat()
-    Box(
-        Modifier
+    // The primitive appends its focus handling and `selectable(role = Tab)`
+    // after these; our press source drives the scale and the logo dim.
+    Tab(
+        key = harness,
+        modifier = Modifier
             .offset(x = frame.x.dp, y = SwitcherMetrics.Inset.dp)
             .size(frame.width.dp, height)
             .graphicsLayer {
@@ -686,15 +717,10 @@ private fun SwitcherSegment(
                 scaleY = scale
             }
             .clipToBounds()
-            .selectable(
-                selected = selected,
-                interactionSource = interaction,
-                indication = null,
-                role = Role.Tab,
-                onClick = onClick,
-            )
             .semantics { contentDescription = title }
             .testTag("model-picker-tab-$harness"),
+        indication = null,
+        interactionSource = interaction,
         contentAlignment = Alignment.CenterStart,
     ) {
         HarnessMark(
@@ -734,7 +760,9 @@ private fun ModelPickerPage(
 ) {
     val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
-    var query by remember(tab.harness) { mutableStateOf("") }
+    // #62: the search field's state (the headless UnstyledTextField is state-based).
+    val search = remember(tab.harness) { TextFieldState() }
+    val query = search.text.toString()
     val visible = rows?.let { filterModels(it, query) }.orEmpty()
     val listState = rememberLazyListState()
     val reportHeight by rememberUpdatedState(onContentHeight)
@@ -754,7 +782,7 @@ private fun ModelPickerPage(
     ) {
         if (rows != null && showsModelSearch(rows)) {
             item(key = "search") {
-                ModelSearchField(query, { query = it }, ModelPickerCopy.searchPlaceholder(tab.label))
+                ModelSearchField(search, ModelPickerCopy.searchPlaceholder(tab.label), resultCount = visible.size)
             }
         }
         if (notice != null) {
@@ -875,41 +903,20 @@ private fun ModelSkeletonRow(seed: Int) {
     }
 }
 
-/** The page's search field, once the list is long. */
+/**
+ * The page's search field, once the list is long. #62 (D7 variant 2): the
+ * shared [FilledSearchField] on the headless `UnstyledTextField` — labelled
+ * with its placeholder, the search keyboard, Escape, a "Clear text" button
+ * and the spoken model count; the look is the field's own from before.
+ */
 @Composable
-private fun ModelSearchField(query: String, onQuery: (String) -> Unit, placeholder: String) {
-    val palette = ZeronTheme.palette
-    val typeScale = LocalTypeScale.current
-    val style = uiStyle(Face.Sans, typeScale.fixed(15f), palette.text)
-    Row(
-        Modifier
-            .padding(start = 8.dp, end = 8.dp, top = 2.dp, bottom = 8.dp)
-            .fillMaxWidth()
-            .height(38.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(palette.controlFill)
-            .padding(horizontal = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(ZeronIcons.Magnifyingglass, palette.secondary, 14f, SymbolWeight.Medium)
-        Spacer(Modifier.width(8.dp))
-        BasicTextField(
-            value = query,
-            onValueChange = onQuery,
-            singleLine = true,
-            textStyle = style,
-            cursorBrush = SolidColor(palette.accent),
-            modifier = Modifier
-                .weight(1f)
-                .testTag("model-picker-search"),
-            decorationBox = { inner ->
-                Box(contentAlignment = Alignment.CenterStart) {
-                    if (query.isEmpty()) {
-                        BasicText(placeholder, style = uiStyle(Face.Sans, typeScale.fixed(15f), palette.tertiary), maxLines = 1)
-                    }
-                    inner()
-                }
-            },
-        )
-    }
+private fun ModelSearchField(search: TextFieldState, placeholder: String, resultCount: Int) {
+    FilledSearchField(
+        state = search,
+        placeholder = placeholder,
+        textPt = 15f,
+        fieldTag = "model-picker-search",
+        modifier = Modifier.padding(start = 8.dp, end = 8.dp, top = 2.dp, bottom = 8.dp),
+        resultCount = resultCount,
+    )
 }

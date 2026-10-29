@@ -7,9 +7,6 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.focusable
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -45,12 +42,9 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -68,6 +62,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.composeunstyled.DialogPanel
+import com.composeunstyled.DialogProperties
+import com.composeunstyled.UnstyledDialog
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
@@ -99,8 +96,9 @@ import sh.zeron.android.design.glass.LocalHazeState
  * This file owns the data model, the imperative presenter
  * ([ActionSheetPresenter] / [LocalActionSheet], like iOS `present(sheet)`),
  * the in-window host ([ActionSheetHost]) and the stateless visual
- * ([ActionSheetPanel]). No `Dialog`/`Popup` — Haze cannot blur across
- * windows — and no Material components anywhere.
+ * ([ActionSheetPanel]). No platform window — Haze cannot blur across
+ * windows — and no Material components anywhere: the overlay is Compose
+ * Unstyled's `UnstyledDialog` rendered in-window (#62, decision D7).
  *
  * Callers own the copy; the component's one string of its own is the default
  * `cancelTitle` "Cancel" (verbatim iOS).
@@ -208,8 +206,13 @@ val LocalActionSheet = staticCompositionLocalOf<ActionSheetPresenter> { ActionSh
  * The in-window action-sheet host (ticket 19): wraps a window's content,
  * provides [LocalActionSheet] and draws the scrim + cards **above** it,
  * owning back, hardware Escape, the scrim tap, the one-shot guard and the
- * present/dismiss animation. No `Dialog`/`Popup` window — Haze samples its
- * own window only, and the in-window host keeps the sheet below toasts.
+ * present/dismiss animation. No platform window — Haze samples its own
+ * window only. #62 (decision D7): the sheet is a Compose Unstyled
+ * `UnstyledDialog` + `DialogPanel` (the `dialog()` role, focus moved into
+ * the cards on open, the outside tap), portalled into the nearest
+ * [ZeronModalHost] — `RootHosts` mounts the one for action sheets inside
+ * `ToastHost`, which keeps the sheet below toasts; [EnsureModalHost] mounts
+ * a local one in the gallery and tests.
  *
  * The wrapped content is this host's own `hazeSource` (the cards blur it);
  * screens inside keep their per-screen `ProvideHazeState` sources (ticket
@@ -230,24 +233,27 @@ fun ActionSheetHost(
 ) {
     val haze = rememberHazeState()
     CompositionLocalProvider(LocalActionSheet provides state) {
-        Box(Modifier.fillMaxSize()) {
-            // 1. The wrapped content: the window-level haze source, hidden
-            //    from TalkBack while a sheet is up, its focus restored when
-            //    the sheet closes (#63).
-            val background = modalBackground(overlayUp = state.current != null)
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .hazeSource(haze)
-                    .then(background),
-            ) {
-                content()
-            }
-            // 2. The sheet itself, keyed by the model: each presentation
-            //    gets fresh animation state.
-            state.current?.let { model ->
-                key(model) {
-                    ActionSheetOverlay(model = model, hazeState = haze, onGone = state::clear)
+        EnsureModalHost {
+            Box(Modifier.fillMaxSize()) {
+                // 1. The wrapped content: the window-level haze source, hidden
+                //    from TalkBack while a sheet is up, its focus restored when
+                //    the sheet closes (#63).
+                val background = modalBackground(overlayUp = state.current != null)
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .hazeSource(haze)
+                        .then(background),
+                ) {
+                    content()
+                }
+                // 2. The sheet itself, keyed by the model: each presentation
+                //    gets fresh animation state. It portals into the modal
+                //    host's layer.
+                state.current?.let { model ->
+                    key(model) {
+                        ActionSheetOverlay(model = model, hazeState = haze, onGone = state::clear)
+                    }
                 }
             }
         }
@@ -270,8 +276,9 @@ fun ActionSheetHost(
  *
  * [finishing] is the one-shot guard: after the first row / Cancel / scrim /
  * back / Escape, every further input is ignored until the sheet is gone —
- * an action can never fire twice. The scrim keeps consuming every touch
- * through the exit animation, so nothing underneath is reachable.
+ * an action can never fire twice. The dialog's modal root keeps consuming
+ * every touch through the exit animation, so nothing underneath is
+ * reachable.
  *
  * Glass stays `visible = true` — fully formed from frame 0 (the cards
  * slide in already shaped, as on iOS); the scrim is **not** part of the
@@ -296,7 +303,6 @@ private fun ActionSheetOverlay(
     var stackHeightPx by remember { mutableStateOf(0f) }
     val reduce = LocalReduceMotion.current
     val scope = rememberCoroutineScope()
-    val focusRequester = remember { FocusRequester() }
     var backProgress by remember { mutableFloatStateOf(0f) }
 
     /**
@@ -317,138 +323,109 @@ private fun ActionSheetOverlay(
     }
 
     LaunchedEffect(Unit) {
-        // Hardware keys reach focused nodes only; the overlay root is it.
-        focusRequester.requestFocus()
+        // Hardware keys reach focused nodes only: `DialogPanel` moves focus
+        // into the cards on open (the first row).
         progress.animateTo(1f, if (reduce) Motion.actionSheetFade() else Motion.ActionSheetRise.spec())
     }
 
-    // Composed after the screens' handlers, so it wins while the sheet is up.
-    // #63: predictive — the cards sink with the gesture, the commit cancels.
-    ModalBackHandler(
-        enabled = !finishing,
-        onProgress = { backProgress = it },
-        onBack = { finish(model.onCancel) },
-    )
-
-    BoxWithConstraints(
-        Modifier
-            .fillMaxSize()
-            .testTag("action-sheet")
-            .semantics {
-                model.title?.let { paneTitle = it }
-                isTraversalGroup = true
-                // #63: TalkBack's dismiss action cancels, like back.
-                dismiss { finish(model.onCancel); true }
-            }
-            .focusRequester(focusRequester)
-            .focusable()
-            .onEscape { finish(model.onCancel) },
+    // UnstyledDialog: the `dialog()` modal root; a tap outside the cards
+    // cancels. Its own back is off: ours below is predictive.
+    UnstyledDialog(
+        visible = true,
+        onDismissRequest = { finish(model.onCancel) },
+        properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = true),
     ) {
-        val stackWidth = actionSheetWidth(maxWidth.value, maxHeight.value).dp
-        val bottomGap = actionSheetBottomGap(navBottom).dp
-        val bottomGapPx = with(density) { bottomGap.toPx() }
-        val maxCardHeight = actionSheetMaxCardHeight(maxHeight.value, statusTop, navBottom).dp
+        // Composed after the screens' handlers, so it wins while the sheet is
+        // up. #63: predictive — the cards sink with the gesture, the commit
+        // cancels.
+        ModalBackHandler(
+            enabled = !finishing,
+            onProgress = { backProgress = it },
+            onBack = { finish(model.onCancel) },
+        )
 
-        // The scrim: full window, black @0.2 × progress, unreachable by
-        // TalkBack, consuming every touch (also through the exit).
-        Scrim(progress) { finish(model.onCancel) }
-
-        // The stack: Cancel card's bottom edge at window − max(navBottom, 8).
-        // graphicsLayer (never offset): the slide never relayouts, and the
-        // two cards move as one.
-        Box(
+        BoxWithConstraints(
             Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = bottomGap)
-                .width(stackWidth)
-                .onSizeChanged { stackHeightPx = it.height.toFloat() }
-                .graphicsLayer {
-                    if (reduce) {
-                        alpha = progress.value
-                    } else {
-                        // #63: a predictive back gesture sinks the cards up
-                        // to a quarter of the way out before it commits.
-                        val shown = progress.value * (1f - 0.25f * backProgress)
-                        translationY = (1f - shown) * (size.height + bottomGapPx)
+                .fillMaxSize()
+                .testTag("action-sheet")
+                .semantics {
+                    model.title?.let { paneTitle = it }
+                    isTraversalGroup = true
+                    // #63: TalkBack's dismiss action cancels, like back.
+                    dismiss { finish(model.onCancel); true }
+                }
+                // Focus sits in the panel below, so the key passes through.
+                .onEscape { finish(model.onCancel) },
+        ) {
+            val stackWidth = actionSheetWidth(maxWidth.value, maxHeight.value).dp
+            val bottomGap = actionSheetBottomGap(navBottom).dp
+            val bottomGapPx = with(density) { bottomGap.toPx() }
+            val maxCardHeight = actionSheetMaxCardHeight(maxHeight.value, statusTop, navBottom).dp
+
+            // The scrim: full window, black @0.2 × progress, unreachable by
+            // TalkBack. The dialog's root under it owns the taps.
+            Scrim(progress)
+
+            // The stack: Cancel card's bottom edge at window − max(navBottom, 8).
+            // graphicsLayer (never offset): the slide never relayouts, and the
+            // two cards move as one. `DialogPanel` takes focus on open and
+            // swallows the taps on the cards' own background, so they never
+            // count as outside taps (rows and the rows' scroll process the
+            // Main pass first and are unaffected).
+            // (The placement is on a wrapper: the panel sits inside the
+            // primitive's AnimatedVisibility, which ignores `align`.)
+            Box(
+                Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = bottomGap)
+                    .width(stackWidth),
+            ) {
+                DialogPanel(
+                    modifier = Modifier
+                        .onSizeChanged { stackHeightPx = it.height.toFloat() }
+                        .graphicsLayer {
+                            if (reduce) {
+                                alpha = progress.value
+                            } else {
+                                // #63: a predictive back gesture sinks the cards up
+                                // to a quarter of the way out before it commits.
+                                val shown = progress.value * (1f - 0.25f * backProgress)
+                                translationY = (1f - shown) * (size.height + bottomGapPx)
+                            }
+                        },
+                ) {
+                    Box {
+                        ActionSheetPanel(
+                            model = model,
+                            hazeState = hazeState,
+                            onAction = { index -> finish(model.actions[index].onSelect) },
+                            onCancel = { finish(model.onCancel) },
+                            maxCardHeight = maxCardHeight,
+                            enabled = !finishing,
+                        )
+                        ActionSheetOverlaySemantics(progress, reduce, { stackHeightPx }, bottomGapPx)
                     }
                 }
-                // The cards' own background must not fall through to the scrim
-                // below (children — rows, the rows' scroll — process the Main
-                // pass first and are unaffected).
-                .swallowPanelTaps(),
-        ) {
-            ActionSheetPanel(
-                model = model,
-                hazeState = hazeState,
-                onAction = { index -> finish(model.actions[index].onSelect) },
-                onCancel = { finish(model.onCancel) },
-                maxCardHeight = maxCardHeight,
-                enabled = !finishing,
-            )
-            ActionSheetOverlaySemantics(progress, reduce, { stackHeightPx }, bottomGapPx)
+            }
         }
     }
 }
 
 /**
  * The scrim: a full-window black @0.2 (its layer alpha is the present
- * progress), clear of semantics, and it swallows every pointer gesture —
- * nothing under the sheet can start a gesture, and taps keep being consumed
- * through the 250 ms exit. A tap (down + up outside the cards — the panel's
- * tap swallower has already consumed downs that land on the cards) fires
- * [onScrimTap].
+ * progress), clear of semantics. Visual only — `UnstyledDialog`'s modal
+ * root under it owns the taps (#62).
  */
 @Composable
-private fun Scrim(progress: Animatable<Float, AnimationVector1D>, onScrimTap: () -> Unit) {
+private fun Scrim(progress: Animatable<Float, AnimationVector1D>) {
     Box(
         Modifier
             .fillMaxSize()
             .graphicsLayer { alpha = progress.value }
             .background(rgba(0x000000, 0.2))
             .clearAndSetSemantics { }
-            .testTag("action-sheet-scrim")
-            .pointerInput(Unit) {
-                awaitEachGesture {
-                    val down = awaitFirstDown(requireUnconsumed = false)
-                    val onScrim = !down.isConsumed
-                    if (!down.isConsumed) down.consume()
-                    var released = false
-                    while (!released) {
-                        val event = awaitPointerEvent()
-                        for (change in event.changes) {
-                            if (!change.isConsumed) change.consume()
-                        }
-                        released = event.changes.all { !it.pressed }
-                    }
-                    if (onScrim) onScrimTap()
-                }
-            },
+            .testTag("action-sheet-scrim"),
     )
-}
-
-/**
- * Makes the cards a hit target and consumes the **down** that lands on
- * them (Main pass, after the children): a tap on the header never reaches
- * the scrim's tap detector, which treats a consumed down as "inside the
- * cards".
- *
- * Downs only, never moves or ups. A row's `clickable` re-checks every
- * intermediate event on the Final pass and cancels its tap when an
- * ancestor consumed it (`waitForUpOrCancellation`), and a real finger's tap
- * carries a few ACTION_MOVEs between down and up. Consuming those here
- * dropped option taps on phones: the press showed and nothing happened
- * (user report on the 3bd01174 debug APK, the Wallpaper Effect sheet).
- * A still test tap has no moves, which is why no test saw it.
- */
-private fun Modifier.swallowPanelTaps(): Modifier = pointerInput(Unit) {
-    awaitPointerEventScope {
-        while (true) {
-            val event = awaitPointerEvent()
-            for (change in event.changes) {
-                if (change.pressed && !change.previousPressed && !change.isConsumed) change.consume()
-            }
-        }
-    }
 }
 
 // ---------------------------------------------------------------------------

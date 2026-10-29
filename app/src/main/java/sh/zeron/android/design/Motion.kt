@@ -192,9 +192,6 @@ object Motion {
     /** Section header chevron rotation 0 ↔ −π/2. ios:Threads/SessionCell.swift:284 (39) */
     val SectionChevron = IosSpring("sectionChevron", 0.30, 0.85f)
 
-    /** Tab bar minimize-on-scroll morph. ios:Shell/MainTabController.swift:22 (system minimize; values from android-app#19) */
-    val TabBarMinimize = IosSpring("tabBarMinimize", 0.40, 0.85f)
-
     /**
      * Interactive IME dismiss settle (ticket 133): the standard iOS
      * keyboard animation duration (`UIKeyboardAnimationDurationUserInfoKey`,
@@ -213,9 +210,9 @@ object Motion {
 
     /** Every spring of ticket 04's Motion table, in table order (MotionTest pins
      * this list). Later tickets' springs stay out and are pinned by their own
-     * tickets' tests — except ui-parity#28's [TabBarMinimize] and
-     * ui-parity#133's [ImeSettle], which their tickets explicitly add here
-     * (18's AlertScaleIn remains out).
+     * tickets' tests — except ui-parity#133's [ImeSettle], which its ticket
+     * explicitly adds here (18's AlertScaleIn remains out). #62 removed
+     * ui-parity#28's `TabBarMinimize` with the tab-bar minimize (#22).
      */
     val allSprings: List<IosSpring> = listOf(
         ComposerMorph,
@@ -227,7 +224,6 @@ object Motion {
         BottomStackReflow,
         AccessoryRelayout,
         SectionChevron,
-        TabBarMinimize,
         ImeSettle,
     )
 
@@ -282,17 +278,6 @@ object Motion {
     /** Session reveal: list alpha 1, loader alpha 0. ios:Session/SessionViewController.swift:273 */
     const val SessionRevealMs = 180
     fun <T> sessionReveal(): TweenSpec<T> = tween(SessionRevealMs, easing = EaseOut)
-
-    /** Accessory content fade after leaving Search (0.12 s delayed). ios:Shell/MainTabController.swift:72-80 */
-    const val AccessoryContentReturnMs = 250
-    const val AccessoryContentReturnDelayMs = 120
-    // Named arguments: NoPlatformEasingTest requires every tween call to name
-    // its easing, and a positional third argument hides it from the scan.
-    fun <T> accessoryContentReturn(): TweenSpec<T> = tween(
-        durationMillis = AccessoryContentReturnMs,
-        delayMillis = AccessoryContentReturnDelayMs,
-        easing = EaseOut,
-    )
 
     /** Sidebar show/hide (⌘B). ios:Shell/SplitRootController.swift:64 */
     const val SidebarToggleMs = 300

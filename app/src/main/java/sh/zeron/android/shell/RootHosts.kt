@@ -13,6 +13,7 @@ import sh.zeron.android.design.ContextMenuHost
 import sh.zeron.android.design.LocalContextMenuHost
 import sh.zeron.android.design.ToasterState
 import sh.zeron.android.design.ToastHost
+import sh.zeron.android.design.ZeronModalHost
 import sh.zeron.android.design.glass.GlassMenuHost
 import sh.zeron.android.image.ImageViewerHost
 import sh.zeron.android.image.rememberImageViewerState
@@ -38,6 +39,13 @@ import sh.zeron.android.newsession.HandoffOverlayHost
  *   `GlassMenuHost`, outside the sheet): the full-screen image viewer
  *   covers the session screen, the tab chrome and any sheet, while
  *   alerts, action sheets and toasts stay above it.
+ * - #62 (decision D7): the overlays are Compose Unstyled `Modal`s, which
+ *   render in-window through the nearest `ModalHost`'s Portal. Three
+ *   [ZeronModalHost] layers keep the order above: the root one (alerts,
+ *   the context menu — above everything), one inside `ToastHost` (action
+ *   sheets, glass menus — below toasts) and one around `SheetHost` (glass
+ *   sheets — below the image viewer, the handoff overlays, menus and
+ *   toasts).
  *
  * Every host that owns a root presentation registers its instant-dismiss
  * call with [presentations], so one `dismissAllInstantly()` — same frame,
@@ -69,10 +77,12 @@ fun RootHosts(
     val sheets = rememberSheetHostState() // 31
     val menuHaze = rememberHazeState() // 07 / 15
     CompositionLocalProvider(LocalRootPresentations provides presentations) {
+        ZeronModalHost { // #62: alerts and the context menu portal here
         ContextMenuHost { // 16: outermost inside ZeronTheme
             val lift = LocalContextMenuHost.current
             AlertHost(alertState) { // 18: outside ToastHost
                 ToastHost(state = toaster) { // 14: outside ActionSheetHost
+                    ZeronModalHost { // #62: action sheets and glass menus, below toasts
                     ActionSheetHost(actionSheets) { // 19
                         GlassMenuHost(menuHaze) { // 15
                             // 125: inside the menu host, outside the sheet —
@@ -83,12 +93,15 @@ fun RootHosts(
                             ImageViewerHost(viewer) {
                                 HandoffOverlayHost { // 95: above the app root and the (hidden) sheet,
                                     // below menus, alerts and toasts — the handoff overlays
+                                    ZeronModalHost { // #62: glass sheets, below all of the above
                                     SheetHost(sheets) { // 31: recession scales the roots
                                         content()
+                                    }
                                     }
                                 }
                             }
                         }
+                    }
                     }
                 }
             }
@@ -106,6 +119,7 @@ fun RootHosts(
                 )
                 onDispose { handles.forEach { handle -> handle() } }
             }
+        }
         }
     }
 }

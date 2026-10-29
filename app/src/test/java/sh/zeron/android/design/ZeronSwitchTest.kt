@@ -24,6 +24,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.captureToImage
@@ -56,6 +57,9 @@ import org.robolectric.annotation.GraphicsMode
  * tap / drag / scroll / RTL interactions, the haptic moments, the
  * caller-driven change, reduced-motion snapping and the press lens — all
  * on the ticket's `w402dp` phone at xxhdpi (1 dp = 3 px), font scale 1.
+ * #62 / D7 revived it with the switch on `UnstyledSwitch`; the last section
+ * covers the labelled (standalone) mode, where the primitive's toggleable
+ * owns the tap and the drag must never also click.
  *
  * Pixel probes host the switch on a padded `elevated` box (the white card
  * of the acceptance list) and capture that box, so the points outside the
@@ -562,5 +566,80 @@ class ZeronSwitchTest {
         assertEquals(listOf(true, false), values)
         assertEquals(listOf(Haptic.ToggleOn, Haptic.ToggleOff), feedback.haptics)
         node.assertIsOff()
+    }
+
+    // ------------------------------------- labelled: the primitive's contract
+
+    /** A labelled switch (#62 / D7): `UnstyledSwitch`'s toggleable owns the interaction. */
+    private fun hostLabelledSwitch(checked: MutableState<Boolean>, onCheckedChange: (Boolean) -> Unit, enabled: Boolean = true) {
+        compose.setContent {
+            ZeronTheme(Appearance.Light) {
+                CompositionLocalProvider(LocalFeedback provides feedback) {
+                    Box(Modifier.fillMaxSize().background(ZeronTheme.palette.background)) {
+                        ZeronSwitch(
+                            checked.value,
+                            onCheckedChange,
+                            testTag = "toggle-x",
+                            enabled = enabled,
+                            accessibilityLabel = "Notifications",
+                        )
+                    }
+                }
+            }
+        }
+        compose.waitForIdle()
+    }
+
+    @Test
+    fun aLabelledSwitchIsItsOwnNamedSwitchAndATapFlipsItOnce() {
+        val on = stateOf(false)
+        val values = mutableListOf<Boolean>()
+        hostLabelledSwitch(on, { on.value = it; values += it })
+        val node = compose.onNodeWithTag("toggle-x")
+        node.assertIsOff()
+        val config = node.fetchSemanticsNode().config
+        assertEquals(Role.Switch, config[SemanticsProperties.Role])
+        assertEquals(listOf("Notifications"), config[SemanticsProperties.ContentDescription])
+        bounds63By28()
+
+        // The primitive's tap and the drag's tap path must not both fire.
+        node.performClick()
+        compose.waitForIdle()
+        assertEquals(listOf(true), values)
+        assertEquals(listOf(Haptic.ToggleOn), feedback.haptics)
+        node.assertIsOn()
+    }
+
+    @Test
+    fun aLabelledSwitchDragCommitsOnceAndNeverAlsoClicks() {
+        val on = stateOf(false)
+        val values = mutableListOf<Boolean>()
+        hostLabelledSwitch(on, { on.value = it; values += it })
+        compose.onNodeWithTag("toggle-x").performTouchInput {
+            down(Offset(20.dp.toPx(), 14.dp.toPx()))
+            repeat(3) { moveBy(Offset(10.dp.toPx(), 0f)) }
+            up()
+        }
+        compose.waitForIdle()
+        assertEquals("the drag commits; the primitive's tap is cancelled", listOf(true), values)
+        assertEquals(listOf(Haptic.ToggleOn), feedback.haptics)
+    }
+
+    @Test
+    fun aDisabledLabelledSwitchSaysDisabledAndRefusesTaps() {
+        val values = mutableListOf<Boolean>()
+        hostLabelledSwitch(stateOf(false), { values += it }, enabled = false)
+        val node = compose.onNodeWithTag("toggle-x")
+        node.assertIsNotEnabled()
+        node.performClick()
+        compose.waitForIdle()
+        assertEquals(emptyList<Boolean>(), values)
+        assertEquals(emptyList<Haptic>(), feedback.haptics)
+    }
+
+    private fun bounds63By28() {
+        val bounds = compose.onNodeWithTag("toggle-x").getUnclippedBoundsInRoot()
+        assertDp(widthOf(bounds), 63.dp, "labelled switch width", 0.5f)
+        assertDp(heightOf(bounds), 28.dp, "labelled switch height", 0.5f)
     }
 }

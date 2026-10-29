@@ -17,11 +17,11 @@ class MotionLabTest {
 
     @Test
     fun groupsHaveTheTicketSizesAndUniqueNames() {
-        // Ticket 22 listed 9; ui-parity#28 explicitly added TabBarMinimize to
-        // Motion.allSprings and ui-parity#133 added ImeSettle (which
-        // springs() mirrors, and MotionTest pins).
-        assertEquals(11, MotionLab.springs().size)
-        assertEquals(21, MotionLab.tweens().size)
+        // Ticket 22 listed 9; ui-parity#133 added ImeSettle to
+        // Motion.allSprings (which springs() mirrors, and MotionTest pins);
+        // #62 removed TabBarMinimize and accessoryContentReturn.
+        assertEquals(10, MotionLab.springs().size)
+        assertEquals(20, MotionLab.tweens().size)
         assertEquals(2, MotionLab.repeats().size)
         assertEquals(5, MotionLab.handoff(false).size)
         assertEquals(5, MotionLab.handoff(true).size)
@@ -50,7 +50,6 @@ class MotionLabTest {
     fun tweenLabelsReadDurationDelayAndEasing() {
         val tweens = MotionLab.tweens()
         assertEquals("350ms EaseInOut", tweens.first { it.name == "rootSwap" }.label)
-        assertEquals("250ms +120ms EaseOut", tweens.first { it.name == "accessoryContentReturn" }.label)
         assertEquals("360ms ExpoOut", tweens.first { it.name == "toolRowReveal" }.label)
         assertEquals("480ms QuintOut", tweens.first { it.name == "railConnector" }.label)
         assertEquals("140ms EaseOut", tweens.first { it.name == "fold" }.label)

@@ -45,8 +45,6 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.semantics.CustomAccessibilityAction
-import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.hideFromAccessibility
 import androidx.compose.ui.semantics.isTraversalGroup
@@ -75,6 +73,7 @@ import sh.zeron.android.design.LocalTypeScale
 import sh.zeron.android.design.Motion
 import sh.zeron.android.design.PullToRefreshIndicator
 import sh.zeron.android.design.PullToRefreshState
+import sh.zeron.android.design.pullToRefreshSemantics
 import sh.zeron.android.design.ZeronIcons
 import sh.zeron.android.design.ZeronTheme
 import sh.zeron.android.design.SymbolWeight
@@ -154,9 +153,6 @@ object LargeTitleDefaults {
  * dialog insets) are the providers.
  */
 val LocalPrefersLargeTitles = staticCompositionLocalOf { true }
-
-/** The list's accessibility action that runs a pull to refresh (#23). */
-const val PullToRefreshActionLabel = "Refresh"
 
 /**
  * The insets this scaffold's host already guarantees (android-ui-parity
@@ -496,15 +492,9 @@ fun LargeTitleScaffold(
                             .onSizeChanged { pull.viewportPx = it.height.toFloat() }
                             .offset { IntOffset(0, pull.offsetPx.roundToInt()) }
                             // #23: the gesture has no accessibility path of
-                            // its own — the list offers "Refresh" instead.
-                            .semantics {
-                                customActions = listOf(
-                                    CustomAccessibilityAction(PullToRefreshActionLabel) {
-                                        pull.refresh()
-                                        true
-                                    },
-                                )
-                            }
+                            // its own — the list offers "Refresh" instead
+                            // (the shared control's, #62).
+                            .pullToRefreshSemantics(pull)
                             .observeFingerForSnap(snapGate, listState)
                     } else {
                         Modifier.fillMaxSize().observeFingerForSnap(snapGate, listState)

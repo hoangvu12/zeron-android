@@ -6,9 +6,6 @@ import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,9 +29,7 @@ import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.semantics.SemanticsPropertyKey
@@ -45,6 +40,9 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import com.composeunstyled.DialogPanel
+import com.composeunstyled.DialogProperties
+import com.composeunstyled.UnstyledDialog
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
@@ -266,10 +264,18 @@ class AlertHostState : Alerts {
 /**
  * The in-window alert host (ticket 18): wraps a window's content, draws the
  * scrim and the card **above** it, and owns back handling, IME placement,
- * the present/dismiss animation and the FIFO queue. No `Dialog`/`Popup`
- * window — Haze cannot blur across windows, and the in-window host is what
- * makes the glass real; the card sits above everything in its window
- * (list, tab pill, in-window sheets, action sheets, toasts).
+ * the present/dismiss animation and the FIFO queue. No platform window —
+ * Haze cannot blur across windows, and the in-window host is what makes
+ * the glass real; the card sits above everything in its window (list, tab
+ * pill, in-window sheets, action sheets, toasts).
+ *
+ * #62 (decision D7): each alert is a Compose Unstyled `UnstyledDialog` +
+ * `DialogPanel` — the `dialog()` role, focus moved into the panel on open,
+ * the outside-tap rule — rendered in-window through the nearest
+ * [ZeronModalHost]'s Portal ([EnsureModalHost] mounts one when the app root
+ * has none). The predictive back, Escape, the scrim and the animations stay
+ * ours: the library's back only listens for a `Key.Back` event, which
+ * `enableOnBackInvokedCallback` stops delivering.
  *
  * Screens inside keep their own per-screen `LocalHazeState` sources
  * (ticket 07's convention); this host adds a window-level source around the
@@ -288,29 +294,32 @@ class AlertHostState : Alerts {
 fun AlertHost(state: AlertHostState = remember { AlertHostState() }, content: @Composable () -> Unit) {
     val hostHaze = rememberHazeState()
     CompositionLocalProvider(LocalAlerts provides state) {
-        Box(Modifier.fillMaxSize()) {
-            // 1. The wrapped content: the window-level haze source, hidden
-            //    from TalkBack while an alert is up so it stays inside the
-            //    alert, its focus restored when the alert closes (#63).
-            val background = modalBackground(overlayUp = state.current != null)
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .hazeSource(hostHaze)
-                    .then(background),
-            ) {
-                content()
-            }
-            // 2. The alert itself, key fresh per presentation: each alert
-            //    gets fresh field state and animations.
-            state.current?.let { p ->
-                key(p.id) {
-                    PresentedAlert(
-                        presented = p,
-                        hazeState = hostHaze,
-                        dismissRequested = state.dismissRequested == p.id,
-                        onRemoved = state::removed,
-                    )
+        EnsureModalHost {
+            Box(Modifier.fillMaxSize()) {
+                // 1. The wrapped content: the window-level haze source, hidden
+                //    from TalkBack while an alert is up so it stays inside the
+                //    alert, its focus restored when the alert closes (#63).
+                val background = modalBackground(overlayUp = state.current != null)
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .hazeSource(hostHaze)
+                        .then(background),
+                ) {
+                    content()
+                }
+                // 2. The alert itself, key fresh per presentation: each alert
+                //    gets fresh field state and animations. It portals into
+                //    the modal host's layer, above this box.
+                state.current?.let { p ->
+                    key(p.id) {
+                        PresentedAlert(
+                            presented = p,
+                            hazeState = hostHaze,
+                            dismissRequested = state.dismissRequested == p.id,
+                            onRemoved = state::removed,
+                        )
+                    }
                 }
             }
         }
@@ -349,9 +358,6 @@ private fun PresentedAlert(
     val alpha = remember { Animatable(0f) }
     val scale = remember { Animatable(if (reduce) 1f else 1.1f) }
     val focusRequester = remember { FocusRequester() }
-    // #63: the alert root takes focus when there is no field, so a hardware
-    // Escape reaches it; the field holds it otherwise (Escape bubbles up).
-    val rootFocus = remember { FocusRequester() }
     var backProgress by remember { mutableFloatStateOf(0f) }
     val focusManager = LocalFocusManager.current
     val keyboard = LocalSoftwareKeyboardController.current
@@ -360,15 +366,14 @@ private fun PresentedAlert(
     LaunchedEffect(Unit) {
         launch { alpha.animateTo(1f, Motion.alertFadeIn()) }
         if (!reduce) launch { scale.animateTo(1f, Motion.AlertScaleIn.spec()) }
+        // Without a field, `DialogPanel` moves focus into the card on open
+        // (its first button), so a hardware Escape reaches the alert.
         if (hasField) {
             // One frame after composition: the node is attached, so focus
             // and the keyboard land (pr621's recipe, minus the dialog hack).
             withFrameNanos { }
             focusRequester.requestFocus()
             keyboard?.show()
-        } else {
-            withFrameNanos { }
-            runCatching { rootFocus.requestFocus() }
         }
     }
 
@@ -400,29 +405,29 @@ private fun PresentedAlert(
         if (dismissRequested) resolve(null)
     }
 
-    // Composed after the screens' handlers, so it wins while the alert is up.
-    // #63: predictive — the card shrinks with the gesture; the commit runs
-    // the back rule: the cancel action, or a plain dismiss when there is none.
-    ModalBackHandler(
-        enabled = !resolved,
-        onProgress = { backProgress = it },
-        onBack = { resolve(cancelActionIndex(alert.buttons)) },
-    )
-
-    Box(
-        Modifier
-            .fillMaxSize()
-            .focusRequester(rootFocus)
-            .focusable()
-            // #63: hardware Escape is the back rule too.
-            .onEscape { if (!resolved) resolve(cancelActionIndex(alert.buttons)) },
+    // UnstyledDialog: the `dialog()` modal root in the host's layer, whose
+    // full-window tap target is the outside-tap rule — run the cancel
+    // action; no cancel action → the tap is ignored (the alert stays), like
+    // iOS. It also swallows every other gesture there, so nothing under the
+    // alert can start one, through the 200 ms dismiss too. Its own back is
+    // off: ours below is predictive, and Escape is the back rule, not the
+    // outside-tap rule.
+    UnstyledDialog(
+        visible = true,
+        onDismissRequest = { cancelActionIndex(alert.buttons)?.let { resolve(it) } },
+        properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = true),
+        overlay = { Scrim(alpha) },
     ) {
-        // The scrim: full window, fixed black @0.20, fading with the card.
-        Scrim(alpha) {
-            // Outside-tap rule: run the cancel action; no cancel action → the
-            // tap is ignored (the alert stays), like iOS.
-            cancelActionIndex(alert.buttons)?.let { resolve(it) }
-        }
+        // Composed after the screens' handlers, so it wins while the alert
+        // is up. #63: predictive — the card shrinks with the gesture; the
+        // commit runs the back rule: the cancel action, or a plain dismiss
+        // when there is none.
+        ModalBackHandler(
+            enabled = !resolved,
+            onProgress = { backProgress = it },
+            onBack = { resolve(cancelActionIndex(alert.buttons)) },
+        )
+
         // The card: centred in the window minus the system bars, the cutout
         // and the IME (so it re-centres as the keyboard animates), minus 16.
         Box(
@@ -432,104 +437,63 @@ private fun PresentedAlert(
                 .padding(16.dp),
             contentAlignment = Alignment.Center,
         ) {
-            ZeronAlertCard(
-                alert = alert,
-                fieldValue = fieldValue,
-                onFieldValueChange = { fieldValue = it },
-                onButton = { i ->
-                    if (isEnabled(alert.buttons[i], hasField, fieldValue.text)) resolve(i)
-                },
-                onImeDone = {
-                    val primary = primaryIndex(alert.buttons)
-                    if (primary != null && isEnabled(alert.buttons[primary], hasField, fieldValue.text)) {
-                        resolve(primary)
-                    }
-                },
-                hazeState = hazeState,
-                fieldFocusRequester = focusRequester,
-                modifier = Modifier
-                    .graphicsLayer {
-                        this.alpha = alpha.value
-                        scaleX = scale.value * modalBackScale(backProgress)
-                        scaleY = scale.value * modalBackScale(backProgress)
-                    }
-                    // Taps on the card's own background must not reach the
-                    // scrim below it (children process the Main pass first).
-                    .swallowCardTaps()
-                    .semantics {
-                        dismiss {
-                            // The back rule, for accessibility services.
-                            resolve(cancelActionIndex(alert.buttons))
-                            true
+            // The panel takes focus on open and swallows the taps that land
+            // on the card, so they never count as outside taps. The card
+            // carries the pane title itself.
+            DialogPanel(
+                // #63: hardware Escape is the back rule too (focus sits in
+                // the panel, so the key passes through here).
+                modifier = Modifier.onEscape { if (!resolved) resolve(cancelActionIndex(alert.buttons)) },
+            ) {
+                ZeronAlertCard(
+                    alert = alert,
+                    fieldValue = fieldValue,
+                    onFieldValueChange = { fieldValue = it },
+                    onButton = { i ->
+                        if (isEnabled(alert.buttons[i], hasField, fieldValue.text)) resolve(i)
+                    },
+                    onImeDone = {
+                        val primary = primaryIndex(alert.buttons)
+                        if (primary != null && isEnabled(alert.buttons[primary], hasField, fieldValue.text)) {
+                            resolve(primary)
                         }
                     },
-            )
+                    hazeState = hazeState,
+                    fieldFocusRequester = focusRequester,
+                    modifier = Modifier
+                        .graphicsLayer {
+                            this.alpha = alpha.value
+                            scaleX = scale.value * modalBackScale(backProgress)
+                            scaleY = scale.value * modalBackScale(backProgress)
+                        }
+                        .semantics {
+                            dismiss {
+                                // The back rule, for accessibility services.
+                                resolve(cancelActionIndex(alert.buttons))
+                                true
+                            }
+                        },
+                )
+            }
             AlertProgressSemantics(alpha, scale)
         }
     }
 }
 
 /**
- * The scrim: a full-window `#33000000` that fades with the card and
- * swallows every pointer gesture — nothing under the alert can start a
- * gesture, and taps keep being consumed through the 200 ms dismiss (the
- * composable only leaves when the fade ends).
- *
- * A tap (down + up, anywhere outside the card) fires [onScrimTap]; the
- * gesture runs on the Main pass, where this node precedes the wrapped
- * content, so the app never sees an unconsumed change.
+ * The scrim: a full-window `#33000000` that fades with the card, clear of
+ * semantics. Visual only — `UnstyledDialog`'s modal root under it owns the
+ * taps (#62).
  */
 @Composable
-private fun Scrim(alpha: Animatable<Float, AnimationVector1D>, onScrimTap: () -> Unit) {
+private fun Scrim(alpha: Animatable<Float, AnimationVector1D>) {
     Box(
         Modifier
             .fillMaxSize()
             .graphicsLayer { this.alpha = alpha.value }
             .background(rgba(0x000000, 0.2))
-            .clearAndSetSemantics { }
-            .pointerInput(Unit) {
-                awaitEachGesture {
-                    // The card's tap swallower has already consumed downs that
-                    // land on the card (it processes the Main pass first); a
-                    // consumed down means "inside the card" — never fire.
-                    val down = awaitFirstDown(requireUnconsumed = false)
-                    val onScrim = !down.isConsumed
-                    if (!down.isConsumed) down.consume()
-                    var released = false
-                    while (!released) {
-                        val event = awaitPointerEvent()
-                        for (change in event.changes) {
-                            if (!change.isConsumed) change.consume()
-                        }
-                        released = event.changes.all { !it.pressed }
-                    }
-                    if (onScrim) onScrimTap()
-                }
-            },
+            .clearAndSetSemantics { },
     )
-}
-
-/**
- * Makes the card a hit target and consumes the **down** that lands on it
- * (Main pass, after the children): a tap on the card's padding never
- * reaches the scrim's tap detector, which treats a consumed down as
- * "inside the card".
- *
- * Downs only, never moves or ups. A button's `clickable` re-checks every
- * intermediate event on the Final pass and cancels its tap when an
- * ancestor consumed it (`waitForUpOrCancellation`), and a real finger's tap
- * carries a few ACTION_MOVEs: consuming them here dropped button taps on
- * phones (the ActionSheet's identical swallower did, round 44).
- */
-private fun Modifier.swallowCardTaps(): Modifier = pointerInput(Unit) {
-    awaitPointerEventScope {
-        while (true) {
-            val event = awaitPointerEvent()
-            for (change in event.changes) {
-                if (change.pressed && !change.previousPressed && !change.isConsumed) change.consume()
-            }
-        }
-    }
 }
 
 // ---------------------------------------------------------------------------

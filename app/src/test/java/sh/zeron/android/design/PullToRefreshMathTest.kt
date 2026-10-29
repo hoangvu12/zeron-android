@@ -16,6 +16,8 @@ import org.junit.Test
  * no Material import in either new file.
  *
  * Plain JUnit: `PullToRefreshMath` is pure and touches nothing Android.
+ * Revived from the M0 quarantine by #62 (SPEC §4.4): D7's variant 2 keeps
+ * this control's own scroll handling, so the numbers still hold.
  */
 class PullToRefreshMathTest {
 

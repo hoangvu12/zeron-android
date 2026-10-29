@@ -542,6 +542,12 @@ dependencies {
     // POM licence automatically.
     implementation(libs.reorderable)
 
+    // Decision D7 (#62): headless, accessible primitives under every
+    // component (dialog, modal + portal, dropdown keyboard model, switch,
+    // radio group, tab group, text field). Compose foundation only, no
+    // Material; MIT. ModalHost keeps every overlay in-window (glass blur).
+    implementation(libs.composeunstyled)
+
     implementation(libs.kotlinx.coroutines.android)
     // Engine-credential storage (ticket 71): no-backup Preferences DataStore.
     // androidx.security:security-crypto is deliberately absent (deprecated
@@ -556,11 +562,6 @@ dependencies {
     // JankStats, the lab bench's cross-check (ui-parity #136): debug only —
     // the lab code that imports it lives in src/debug.
     debugImplementation(libs.androidx.metrics.performance)
-    // The component lab (#12, decision D7): Compose Unstyled's headless
-    // primitives and stock Material 3 as the behaviour reference. Debug
-    // only — the lab lives in src/debug and release merges neither.
-    debugImplementation(libs.composeunstyled)
-    debugImplementation(libs.compose.material3)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
