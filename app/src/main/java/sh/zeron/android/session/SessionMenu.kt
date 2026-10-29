@@ -270,6 +270,8 @@ internal suspend fun copyTranscript(
     toaster: Toaster,
     sdkInt: Int = Build.VERSION.SDK_INT,
     work: CoroutineDispatcher = Dispatchers.Default,
+    /** #42: the subagent screen says "Transcript copied" (iOS `Toast.show`). */
+    copiedMessage: String = "Copied",
 ) {
     // Both reads happen on main; never read the snapshot-state
     // `transcript.frame` off main.
@@ -295,7 +297,7 @@ internal suspend fun copyTranscript(
         clipboard.setPrimaryClip(ClipData.newPlainText("Transcript", text))
         // Android 12/12L has no copy confirmation of its own; Android 13+
         // shows its overlay and a second toast would duplicate it.
-        if (sdkInt <= Build.VERSION_CODES.S_V2) toaster.show("Copied")
+        if (sdkInt <= Build.VERSION_CODES.S_V2) toaster.show(copiedMessage)
     } catch (e: RuntimeException) {
         Log.w("Zeron", "copy transcript failed: $e")
         toaster.show("Could not copy the transcript.")
