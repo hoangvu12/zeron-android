@@ -47,8 +47,9 @@ tablet/foldable layouts, notifications.
    platform wherever the system owns the experience: photo/file/camera
    pickers, share sheet, Auth Tab / Custom Tab, permission prompts,
    notifications, IME insets, text selection, predictive back, TalkBack,
-   window size classes and folding features. Swapping a custom component for
-   a restyled Material one is a per-component owner decision (D7).
+   window size classes and folding features. Components follow the
+   Radix/shadcn model: our look on headless, accessible primitives (Compose
+   Foundation, Compose Unstyled), each meeting an accessibility contract (D7).
 4. **No core patches.** Adapt in Kotlin.
 5. **Nothing builds locally.** All compilation, tests and screenshot renders
    run on GitHub Actions; the owner's machine needs only git + gh.
@@ -123,11 +124,11 @@ docs/port/      the five iOS → Android gap audits (row IDs referenced by ticke
 | D4 | Sign-in: `workosAuthorizeUrl` → Auth Tab (fallback Custom Tab) → `zeron://callback` → `parseAuthCallback` (state check) → `authExchangeCode` → `authListOrgs` (picker if >1) → `authRefresh` → `CoreClient(Credentials.WorkOs)` | proposed |
 | D5 | Credentials: Roboco's `KeystoreSecretCipher` (AES-GCM, non-exportable) under a small `CredentialStore` with **synchronous** writes (Zeron Android's async `apply()` can lose a rotated refresh token) | proposed |
 | D6 | Notifications: no push (the edge is APNs-only). A Kotlin `SessionWatcher` applies the edge's done / needs-input / failed rule to workspace snapshots; Roboco's `Notifier` + `RunWatchService` deliver; Zeron's `DeliveryService` holds the process after a send | proposed |
-| D7 (#1) | Custom vs Material components: decided per component after the component lab renders (custom / Material restyled / stock side by side) | **owner decision** |
-| D8 (#2) | "Stay connected in background" (Roboco's opt-in foreground service): keep as an Android-only setting, because without push it is the only way to hear about runs started on the desktop while the phone is idle | **owner decision** |
-| D9 (#3) | Real Android push: propose FCM and/or UnifiedPush support to upstream (edge only, no core patch) — later, separate track | **owner decision** |
-| D10 (#4) | Open-source licences page: needs a home since iOS has no About section | **owner decision** |
-| D11 (#5) | Android-only extras kept or dropped: launcher shortcuts (`zeron://new|settings|search`), empty/no-results copy, the "● N agents" pill, iOS scroll physics vs platform fling | **owner decision** |
+| D7 (#1) | Components: our look on headless, accessible primitives (Compose Foundation, Compose Unstyled), each with an accessibility contract (role, label, state, focus, keyboard, predictive back, IME). Glass surfaces stay in-window (separate-window Dialog/Popup can't blur behind). Per-component choices after the component lab renders | direction decided (owner); per component pending |
+| D8 (#2) | "Stay connected in background": **dropped** (iOS has none). Without push, desktop-started runs notify only once the app is opened | decided (owner) |
+| D9 (#3) | Real Android push upstream: **not planned** | decided (owner) |
+| D10 (#4) | Licences page: **none** (iOS has none); licence texts ship inside the APK assets | decided (owner) |
+| D11 (#5) | Keep iOS scroll physics (rubber band, iOS fling). Drop Android-only extras: launcher shortcuts, empty/no-results/loading copy, the "● N" running-agents pill on session rows | decided (owner) |
 | D12 | Demo, dev credentials and routes are debug launch extras only, as on iOS (no "Explore the demo" button) | proposed |
 | D13 | Voice in scope: WebRTC (`io.github.webrtc-sdk:android`), microphone foreground service + CallStyle notification as the Live Activity stand-in | proposed |
 | D14 | Visual shaders/3D need Vulkan; devices without it get the core's software fallback / error state | proposed |
@@ -149,7 +150,7 @@ GitHub issues in this repo.
 | **M7 Cloud & providers** | CloudStore, Providers + agent accounts, Cloud settings/GitHub/repos/billing, Cloud in new session and sessions, Cloud onboarding steps |
 | **M8 Notifications** | SessionWatcher, RunWatch on snapshots, delivery hold, notification settings |
 | **M9 Voice** | Voice core and UI, settings, call notification |
-| **M10 Polish & release** | Component swaps (D7), accessibility pass, parity screenshot board, licences, signed releases |
+| **M10 Polish & release** | Component swaps (D7), accessibility pass, parity screenshot board, signed releases |
 
 ## 7. Ticket conventions
 
