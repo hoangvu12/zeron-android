@@ -42,6 +42,8 @@ data class ModelChoice(
     val id: String,
     val label: String,
     val efforts: List<String>,
+    /** The picker row's second line (`ModelInfo.description`), `null` when the catalog has none. */
+    val detail: String? = null,
 )
 
 /** The options the New Session / New Project pickers offer. */
@@ -59,7 +61,7 @@ data class NewSessionOptions(
  */
 fun WorkspaceSnapshot.toNewSessionOptions(): NewSessionOptions {
     fun deviceNameOf(id: String): String =
-        devices.firstOrNull { it.id == id }?.name ?: "Unknown device"
+        devices.firstOrNull { it.id == id }?.name ?: UNKNOWN_DEVICE
     return NewSessionOptions(
         projects = projects.map { p ->
             ProjectOption(

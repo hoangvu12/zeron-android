@@ -18,14 +18,14 @@ import org.junit.Before
 import org.junit.Test
 import sh.zeron.android.design.glass.Menu
 import sh.zeron.android.design.glass.MenuElement
-import sh.zeron.android.design.glass.MenuIcon
 import sh.zeron.android.design.glass.MenuItem
 import sh.zeron.android.design.glass.MenuSection
 import uniffi.zeron_core.CoreException
 import uniffi.zeron_core.RepoRef
 
 /**
- * The checkout / model / effort menu content (android-ui-parity #114) —
+ * The checkout / effort menu content (android-ui-parity #114; the model
+ * chip opens the picker since #37, see [NewSessionModelPickerTest]) —
  * the ticket's acceptance table on the plain JVM: the pure builders, the
  * branch deferred's load and cache, [CoreRefSource]'s sort and error
  * rules, and every pick's draft transform. No native library is loaded:
@@ -34,10 +34,7 @@ import uniffi.zeron_core.RepoRef
  * variants construct without JNA).
  *
  * `io` is a single-thread executor named `fake-io`, so the branch load's
- * dispatcher hop is asserted by thread name. The Robolectric behaviour
- * (menus over the real strip and host) lives in
- * [CheckoutModelEffortMenusUiTest]; the goldens in
- * [CheckoutModelEffortMenusScreenshotTest].
+ * dispatcher hop is asserted by thread name.
  */
 class CheckoutModelEffortMenusTest {
 
@@ -49,7 +46,7 @@ class CheckoutModelEffortMenusTest {
     /** `catalog.rs` CODEX XHIGH_LADDER — 4 levels. */
     private val codexLadder = listOf("low", "medium", "high", "xhigh")
 
-    /** The M fixture: Codex first, so the section sort is under test. */
+    /** The catalog fixture: Codex first. */
     private val models = listOf(
         ModelChoice("codex", "Codex", "gpt-5.5", "GPT-5.5", codexLadder),
         ModelChoice("codex", "Codex", "gpt-5.4", "GPT-5.4", codexLadder),
@@ -98,11 +95,7 @@ class CheckoutModelEffortMenusTest {
         val menus = CheckoutModelEffortMenus(
             draft = { draft },
             project = { project },
-            models = { models },
-            selectedModel = {
-                models.firstOrNull { m -> m.harness == draft.harness && m.id == draft.model }
-                    ?: models.firstOrNull { m -> m.harness == draft.harness }
-            },
+            selectedModel = { draftModel(models, draft) },
             update = { t -> draft = t(draft) },
             refSource = refSource,
             io = fakeIo,
@@ -139,10 +132,6 @@ class CheckoutModelEffortMenusTest {
 
     /** `children[0]` as the "New worktree" row. */
     private fun worktreeRowOf(menu: Menu): MenuItem = menu.children[0] as MenuItem
-
-    /** The model menu's rows, flattened across its inline sections. */
-    private fun modelRowsOf(menu: Menu): List<MenuItem> =
-        menu.children.map { it as MenuSection }.flatMap { section -> section.children.map { c -> c as MenuItem } }
 
     private fun rowTitles(rows: List<MenuElement>): List<String> = rows.map { (it as MenuItem).title }
 
@@ -280,8 +269,8 @@ class CheckoutModelEffortMenusTest {
         val third = branchDeferredOf(page.menus.checkout())
         assertNotSame("a branch pick drops the cache", second, third)
 
-        // A model pick.
-        modelRowsOf(page.menus.model()).first { m -> m.title == "GPT-5.5" }.action()
+        // A model pick (the picker's, #37).
+        page.draft = applyNewSessionModelPick(page.draft, "codex", "gpt-5.5")
         val fourth = branchDeferredOf(page.menus.checkout())
         assertNotSame("a model pick drops the cache", third, fourth)
 
@@ -298,7 +287,6 @@ class CheckoutModelEffortMenusTest {
         val menus = CheckoutModelEffortMenus(
             draft = { draft },
             project = { current },
-            models = { models },
             selectedModel = { null },
             update = { t -> draft = t(draft) },
             refSource = RecordingRefSource(),
@@ -315,7 +303,6 @@ class CheckoutModelEffortMenusTest {
         val refs = RecordingRefSource()
         val page = MenusPage(NewSessionDraft(projectId = "p1"), refSource = refs)
         page.menus.checkout()
-        page.menus.model()
         page.menus.effort()
         assertEquals("building the menus asks no engine", 0, refs.calls)
         runBlocking { branchDeferredOf(page.menus.checkout()).load() }
@@ -359,73 +346,6 @@ class CheckoutModelEffortMenusTest {
         } catch (expected: CancellationException) {
             // rethrown, never cached, never read as "no branches"
         }
-    }
-
-    // ── model() ────────────────────────────────────────────────────────
-
-    @Test
-    fun theModelMenuSortsItsSectionsByHarnessIdAndListsRowsInInputOrder() {
-        val page = MenusPage(NewSessionDraft(projectId = "p1", harness = "claude-code", model = "claude-opus-5-5"))
-        val menu = page.menus.model()
-        assertEquals("Model", menu.title)
-        assertEquals(2, menu.children.size)
-
-        val claude = menu.children[0] as MenuSection
-        assertEquals("Claude Code", claude.title)
-        assertEquals(MenuIcon.Brand("claude-code"), claude.icon)
-        assertTrue(claude.inline)
-        assertEquals(listOf("Fable 5.1", "Opus 5.5", "Haiku 4.5"), claude.children.map { (it as MenuItem).title })
-
-        val codex = menu.children[1] as MenuSection
-        assertEquals("Codex", codex.title)
-        assertEquals(MenuIcon.Brand("codex"), codex.icon)
-        assertTrue(codex.inline)
-        assertEquals(listOf("GPT-5.5", "GPT-5.4"), codex.children.map { (it as MenuItem).title })
-    }
-
-    @Test
-    fun theModelCheckIsTheDraftsHarnessAndIdPairOnly() {
-        val picked = MenusPage(NewSessionDraft(projectId = "p1", harness = "claude-code", model = "claude-opus-5-5"))
-        val rows = modelRowsOf(picked.menus.model())
-        // Menu order, not input order: sections sort by harness id, so the
-        // rows are Fable, Opus, Haiku, GPT-5.5, GPT-5.4 (as the test above
-        // pins) and Opus 5.5 is row 1.
-        assertEquals(listOf(false, true, false, false, false), rows.map { it.checked })
-        assertEquals("new-session-menu-model-claude-code-claude-opus-5-5", rows[1].testTag)
-
-        // A model id that belongs to another harness checks nothing.
-        val mixed = MenusPage(NewSessionDraft(projectId = "p1", harness = "codex", model = "claude-opus-5-5"))
-        assertEquals(0, modelRowsOf(mixed.menus.model()).count { it.checked })
-
-        // Nothing picked: nothing checked, even though the chip names a model.
-        val none = MenusPage(NewSessionDraft(projectId = "p1"))
-        assertEquals(0, modelRowsOf(none.menus.model()).count { it.checked })
-    }
-
-    @Test
-    fun aModelPickSetsTheHarnessAndModelAndClearsTheEffort() {
-        val page = MenusPage(
-            NewSessionDraft(
-                projectId = "p1",
-                hostId = null,
-                branch = "main",
-                worktree = true,
-                harness = "claude-code",
-                model = "claude-opus-5-5",
-                effort = "max",
-            ),
-        )
-        val gpt = modelRowsOf(page.menus.model()).first { m -> m.title == "GPT-5.5" }
-        assertEquals("new-session-menu-model-codex-gpt-5.5", gpt.testTag)
-        gpt.action()
-        val d = page.draft
-        assertEquals("codex", d.harness)
-        assertEquals("gpt-5.5", d.model)
-        assertNull("the new model's ladder decides the default (109)", d.effort)
-        assertEquals("main", d.branch)
-        assertTrue(d.worktree)
-        assertEquals("p1", d.projectId)
-        assertNull(d.hostId)
     }
 
     // ── effort() ───────────────────────────────────────────────────────

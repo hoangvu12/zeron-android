@@ -37,8 +37,8 @@ import sh.zeron.android.design.uiStyle
  * `uiStyle(Face.SansMedium, fixed(12))` in `secondary`) above a 400 dp
  * wide ticket 59 [ChipStrip] on `Palette.elevated` in a 26 dp-radius
  * rounded box — A's full row pins the order, titles, icons and the
- * `Xhigh` default effort; B the offline warning tint and the worktree
- * title; C the non-git row (no branch, no effort); D the projectless
+ * `Xhigh` default effort; B an offline engine (no tint, #37) and the
+ * worktree title; C the non-git row (no branch, no effort); D the projectless
  * pair over an offline host; E the nothing-paired `Choose host` row.
  * The strip itself (capsule, tone washes, fades) is 59's — this page
  * only pins what 109 decides: which chips, in which order, with which
@@ -95,7 +95,7 @@ internal fun newSessionChipsFixtureA(): List<ComposerChip> = newSessionChips(
     labels = GalleryLabels,
 )
 
-/** B — offline engine, worktree: the host chip's warning tint. */
+/** B — offline engine, worktree: the host chip reads as usual (iOS has no offline tint). */
 internal fun newSessionChipsFixtureB(): List<ComposerChip> = newSessionChips(
     draft = NewSessionDraft(
         projectId = "p1",
