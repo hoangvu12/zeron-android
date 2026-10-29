@@ -64,9 +64,8 @@ import uniffi.zeron_core.FileMatch
  * `SessionController`); the chips come straight from [sessionChips].
  * Try it live:
  *
- *  - **running / canSteer / canWrite** flip the chrome fields the
- *    composer renders (the action button's Send/Queue/Stop looks, the
- *    offline grey-out);
+ *  - **running / canSteer** flip the chrome fields the composer renders
+ *    (the action button's Send/Queue/Stop looks);
  *  - **context** cycles none → 62 % (calm) → 91 % (warning wash);
  *  - **PR** cycles none → open → merged (accent wash) → closed, replacing
  *    the branch chip exactly like a session row;
@@ -90,7 +89,6 @@ fun SessionComposerGallerySection() {
 
     var running by remember { mutableStateOf(false) }
     var canSteer by remember { mutableStateOf(false) }
-    var canWrite by remember { mutableStateOf(true) }
     var contextStep by remember { mutableIntStateOf(0) }
     var prStep by remember { mutableIntStateOf(0) }
     var failSends by remember { mutableStateOf(false) }
@@ -108,7 +106,6 @@ fun SessionComposerGallerySection() {
         subtitle = "zeron @ Vu-PC",
         running = running,
         canSteer = canSteer,
-        canWrite = canWrite,
         placeholder = "Message Claude Code",
         chips = chips,
     )
@@ -149,7 +146,6 @@ fun SessionComposerGallerySection() {
         // The toggles (foundation rows only — no Material controls).
         GalleryToggleRow("running", onOff(running)) { running = !running }
         GalleryToggleRow("canSteer", onOff(canSteer)) { canSteer = !canSteer }
-        GalleryToggleRow("canWrite", onOff(canWrite)) { canWrite = !canWrite }
         GalleryToggleRow("context", listOf("none", "62%", "91%")[contextStep]) {
             contextStep = (contextStep + 1) % 3
         }

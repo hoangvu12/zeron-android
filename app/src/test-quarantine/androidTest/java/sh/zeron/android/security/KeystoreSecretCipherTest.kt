@@ -1,4 +1,4 @@
-package sh.zeron.android.pairing
+package sh.zeron.android.security
 
 import android.content.Context
 import androidx.test.ext.junit.runners.AndroidJUnit4

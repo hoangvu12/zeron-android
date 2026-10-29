@@ -1,4 +1,4 @@
-package sh.zeron.android.pairing
+package sh.zeron.android.security
 
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals

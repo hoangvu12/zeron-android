@@ -46,7 +46,7 @@ private enum class SearchDemo(val label: String) {
  * (android-ui-parity #49): the ticket's four [SearchResults] states over
  * [SearchFixtures], switched by a segmented control of plain `BasicText`
  * buttons, each shown in the full 412 × 700 dp phone frame the goldens
- * use (scaled down to fit the body, like the pairing root's frame) with
+ * use (scaled down to fit the body, like the app root's frame) with
  * the shell's chrome insets (`BottomChromeInsets(24.dp, 150.dp)`) and a
  * fixed 24 dp status bar. The list state is remembered, so switching the
  * fixture keeps the scroll — the review can check the title/scroll

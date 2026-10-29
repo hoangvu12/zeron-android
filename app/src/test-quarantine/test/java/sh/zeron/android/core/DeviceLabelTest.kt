@@ -1,4 +1,4 @@
-package sh.zeron.android.pairing
+package sh.zeron.android.core
 
 import android.content.Context
 import android.provider.Settings

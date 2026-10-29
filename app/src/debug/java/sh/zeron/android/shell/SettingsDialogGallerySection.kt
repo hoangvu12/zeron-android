@@ -62,9 +62,9 @@ import sh.zeron.android.sessions.rememberSessionListOpener
  *   ([SettingsDialogFakeRoot]): ticket 70's grouped fixture rows with the
  *   iOS copy (`MoreViewController.swift:132,200-202,205,214-215`) plus the
  *   two demo rows — **"Push detail"** (pushes 24's `DemoRoute("Engine")`
- *   inside the card) and **"Stack page sheet"** (presents the demo Pair
- *   page over the card through [LocalEnclosingSheet], exactly like 72/140
- *   stack on the real card);
+ *   inside the card) and **"Stack page sheet"** (presents a demo page
+ *   over the card through [LocalEnclosingSheet], as a real stacked sheet
+ *   would);
  * - "Archived Sessions" routes through 41's real session-list opener, so
  *   the Zeron adaptation (a session tap goes to the app router, not the
  *   card's stack) can be tried live;
@@ -289,9 +289,9 @@ internal fun SettingsDialogFakeRoot(
                         { nav.push(DemoRoute("Engine")) }
                     }
                     else -> {
-                        // The Pair page's shape: a page sheet stacked over
-                        // the card through the enclosing scope (72's `over`).
-                        { enclosing?.present("demo-pair", SheetStyle.Page(grabber = true)) { DemoPairPage(this) } }
+                        // A page sheet stacked over the card through the
+                        // enclosing scope.
+                        { enclosing?.present("demo-page", SheetStyle.Page(grabber = true)) { DemoStackedPage(this) } }
                     }
                 },
             )
@@ -309,18 +309,18 @@ private data class FakeSettingsRow(
 
 /** The placeholder page the "Stack page sheet" row presents over the card. */
 @Composable
-private fun DemoPairPage(sheetScope: PageSheetScope) {
+private fun DemoStackedPage(sheetScope: PageSheetScope) {
     val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
     Column(Modifier.fillMaxSize()) {
         SheetHeaderRow(
-            title = "Pair an engine",
+            title = "Stacked page",
             leading = SheetLeading.Close,
             onLeading = { sheetScope.dismiss(true) },
         )
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             BasicText(
-                "Pair page placeholder",
+                "Stacked page placeholder",
                 style = uiStyle(Face.Sans, typeScale.fixed(15f), palette.secondary),
             )
         }

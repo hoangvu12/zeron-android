@@ -295,7 +295,7 @@ private fun ProjectMenusLiveDemo() {
             style = uiStyle(Face.SansMedium, typeScale.fixed(12f), palette.secondary),
         )
         Box(Modifier.width(376.dp)) {
-            ChipStrip(chips = chips, chipMenus = menus, canWrite = true, onChipTap = {})
+            ChipStrip(chips = chips, chipMenus = menus, onChipTap = {})
         }
         BasicText(
             "draft · projectId=${draft.projectId ?: "—"} · hostId=${draft.hostId ?: "—"} · branch=${draft.branch ?: "—"}",

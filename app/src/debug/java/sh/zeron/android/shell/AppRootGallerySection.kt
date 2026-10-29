@@ -38,7 +38,7 @@ import sh.zeron.android.design.uiStyle
  * A framed [AppRoot] with the fake roots (the fills differ so the fade is
  * visible), plus the ticket's three levers:
  *
- * - **"Paired"** toggles `Ready(hasEngines)` — the Pairing ↔ Shell swap,
+ * - **"Signed in"** toggles `Ready(hasEngines)` — the Welcome ↔ Shell swap,
  *   the 350 ms cross-fade, and the instant dismissal: the fake sheet
  *   below vanishes in the same frame the swap starts (it is registered
  *   with [RegisterRootPresentation]);
@@ -54,7 +54,7 @@ import sh.zeron.android.design.uiStyle
 @Composable
 fun AppRootGallerySection() {
     val typeScale = LocalTypeScale.current
-    var paired by remember { mutableStateOf(false) }
+    var signedIn by remember { mutableStateOf(false) }
     var frameWidth by remember { mutableStateOf(320.dp) }
     var sheetUp by remember { mutableStateOf(false) }
     val presentations = remember { RootPresentations() }
@@ -64,13 +64,13 @@ fun AppRootGallerySection() {
             Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(24.dp),
         ) {
-            Toggle(if (paired) "Paired" else "Unpaired", paired) { paired = !paired }
+            Toggle(if (signedIn) "Signed in" else "Signed out", signedIn) { signedIn = !signedIn }
             Toggle("393", frameWidth == 393.dp) { frameWidth = 393.dp }
             Toggle("900", frameWidth == 900.dp) { frameWidth = 900.dp }
             Toggle("Present fake sheet", sheetUp) { sheetUp = !sheetUp }
         }
         BasicText(
-            "Toggling Paired with the sheet up removes it instantly, then cross-fades.",
+            "Toggling Signed in with the sheet up removes it instantly, then cross-fades.",
             style = uiStyle(Face.Mono, typeScale.fixed(11f), ZeronTheme.palette.secondary),
             modifier = Modifier.padding(vertical = 8.dp),
         )
@@ -84,7 +84,7 @@ fun AppRootGallerySection() {
                     FramedAppRoot(
                         frameWidth = frameWidth,
                         scale = scale,
-                        paired = paired,
+                        signedIn = signedIn,
                         sheetUp = sheetUp,
                         presentations = presentations,
                         onSheetDismiss = { sheetUp = false },
@@ -100,7 +100,7 @@ fun AppRootGallerySection() {
 private fun FramedAppRoot(
     frameWidth: Dp,
     scale: Float,
-    paired: Boolean,
+    signedIn: Boolean,
     sheetUp: Boolean,
     presentations: RootPresentations,
     onSheetDismiss: () -> Unit,
@@ -116,10 +116,10 @@ private fun FramedAppRoot(
             },
     ) {
         AppRoot(
-            input = RootInput.Ready(hasEngines = paired),
+            input = RootInput.Ready(hasEngines = signedIn),
             state = remember { AppRootState() },
             presentations = presentations,
-            pairing = { FakeRoot("Pairing", palette.accent, palette.text) },
+            welcome = { FakeRoot("Welcome", palette.accent, palette.text) },
             phone = { FakeRoot("Phone", palette.background, palette.text) },
             split = { FakeRoot("Split", palette.codeBackground, palette.text) },
         )

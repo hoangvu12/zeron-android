@@ -44,7 +44,7 @@ import sh.zeron.android.session.SessionChrome
  *    row, Move Up / Move Down swap with the neighbour, Send Now removes
  *    the row (the fixture source has no engine behind it), and Edit
  *    stands in for ticket 83 with a toast. "Add row" / "Add long row" /
- *    "Clear" / "Writable" drive the state.
+ *    "Clear" drive the state.
  *
  * The live panel's glass mirrors ticket 74: `glassVisible =
  * list.isNotEmpty()` with `animateGlass = false` on the first composition
@@ -117,8 +117,8 @@ private fun QueueFixtureStage(
 
 /**
  * The live panel: a local list mutated by the panel's own actions (the
- * fixture source's rules) plus the Add / Add long row / Clear / Writable
- * chips and an action log.
+ * fixture source's rules) plus the Add / Add long row / Clear chips and
+ * an action log.
  */
 @Composable
 private fun QueueLiveDemo(hazeState: HazeState) {
@@ -127,7 +127,6 @@ private fun QueueLiveDemo(hazeState: HazeState) {
     val toaster = LocalToaster.current
 
     var items by remember { mutableStateOf(QueuePanelFixtures.F3) }
-    var writable by remember { mutableStateOf(true) }
     var log by remember { mutableStateOf("(no action yet)") }
     var nextId by remember { mutableIntStateOf(6) }
     // Ticket 74's rule: glass animates only after the first composition.
@@ -160,7 +159,6 @@ private fun QueueLiveDemo(hazeState: HazeState) {
                     items = items,
                     glassVisible = items.isNotEmpty(),
                     animateGlass = animateGlass,
-                    writable = writable,
                     onAction = { id, action -> act(id, action) },
                 )
             }
@@ -183,7 +181,6 @@ private fun QueueLiveDemo(hazeState: HazeState) {
                 nextId++
             }
             QueueGalleryChip("Clear") { items = emptyList() }
-            QueueGalleryChip("Writable ${if (writable) "on" else "off"}") { writable = !writable }
         }
         QueueGalleryCaption(log, uiStyle(Face.Mono, typeScale.fixed(11f), palette.secondary))
     }
