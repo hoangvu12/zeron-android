@@ -106,11 +106,15 @@ fun ZeronAppContent(app: ZeronApplication, rootState: AppRootState) {
                             // #60: the call's prompt, screen wake, haptics and failure toast.
                             VoiceHost(app.voice, app.appToaster)
                             Box(Modifier.fillMaxSize()) {
-                                AppRootContent(
-                                    app = app,
-                                    rootState = rootState,
-                                    presentations = presentations,
-                                )
+                                // #63: the app under the call stage is hidden
+                                // from TalkBack while the stage is up.
+                                Box(Modifier.fillMaxSize().then(sh.zeron.android.design.modalBackground(overlayUp = voiceStage.showing))) {
+                                    AppRootContent(
+                                        app = app,
+                                        rootState = rootState,
+                                        presentations = presentations,
+                                    )
+                                }
                                 // #61: the call stage, over the shell and under
                                 // onboarding; its transcript button opens the chat.
                                 VoiceStageHost(app.voice, voiceStage) { chatId ->

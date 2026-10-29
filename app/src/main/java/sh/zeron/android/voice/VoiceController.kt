@@ -223,6 +223,53 @@ class VoiceController(
         }
     }
 
+    // ── G31: the debug preview ─────────────────────────────────────────────
+
+    private var preview: Runnable? = null
+
+    /**
+     * The debug `voice-preview` extra (iOS `-voice-preview`, G31): a scripted
+     * call for screenshots and UI work — the orb walks through listening,
+     * speaking, working and waiting with synthetic levels while the caption
+     * streams in. No audio, host or relay is involved; End stops it.
+     */
+    fun preview() {
+        if (live) return
+        generation++
+        val generation = generation
+        val now = SystemClock.elapsedRealtime()
+        _snapshot.value = VoiceSnapshot(
+            live = true,
+            hostName = "Fedora",
+            activeSince = now - 83_000,
+            activeSinceWall = System.currentTimeMillis() - 83_000,
+            styles = _snapshot.value.styles,
+        )
+        val main = Handler(Looper.getMainLooper())
+        var step = 0
+        val tick = object : Runnable {
+            override fun run() {
+                if (this@VoiceController.generation != generation || !live) return
+                _snapshot.update { it.copy(state = VoicePreviewScript.state(step, it.muted)) }
+                step++
+                main.postDelayed(this, 100)
+            }
+        }
+        preview = tick
+        main.post(tick)
+    }
+
+    /** The outputs the call can use right now (the stage's route menu, #63); empty without call audio. */
+    fun audioRoutes(): List<VoiceAudioRoute> = media?.routes().orEmpty()
+
+    /** Plays the call on [route] (the route menu's pick). */
+    fun selectRoute(route: VoiceAudioRoute) {
+        val media = media ?: return
+        media.pick(route)
+        if (route.kind != VoiceRoute.External) _snapshot.update { it.copy(speakerOn = route.kind == VoiceRoute.Speaker) }
+        haptic(Haptic.Select)
+    }
+
     /** The user hangs up. Local capture stops before any remote control. */
     fun stop() {
         if (!live) return
@@ -252,6 +299,8 @@ class VoiceController(
 
     private fun finish(reason: VoiceEndReason?) {
         generation++
+        preview?.let { Handler(Looper.getMainLooper()).removeCallbacks(it) }
+        preview = null
         val s = _snapshot.value
         // A hang-up or a connected call ending sounds; a failure to connect only explains itself.
         val sounds = call != null && (s.activeSince != null || reason == null)

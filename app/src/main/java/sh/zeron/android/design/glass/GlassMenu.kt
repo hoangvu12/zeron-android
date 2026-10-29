@@ -1261,7 +1261,7 @@ private fun MenuSubmenuLine(
     val section = line.section
     MenuRowLayout(
         title = section.title ?: "",
-        subtitle = null,
+        subtitle = section.subtitle,
         icon = section.icon,
         checked = false,
         destructive = false,

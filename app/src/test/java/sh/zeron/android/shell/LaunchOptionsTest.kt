@@ -170,6 +170,17 @@ class LaunchOptionsTest {
     }
 
     @Test
+    fun voicePreviewAndItsStage() {
+        val preview = LaunchOptions.parse(mapOf("voice-preview" to true), debuggable = true)
+        assertTrue(preview.voicePreview)
+        assertFalse(preview.voiceStage)
+        assertTrue(LaunchOptions.parse(mapOf("voice-preview" to "true", "voice-stage" to true), debuggable = true).voiceStage)
+        // The stage alone needs the preview (iOS nests it).
+        assertFalse(LaunchOptions.parse(mapOf("voice-stage" to true), debuggable = true).voiceStage)
+        assertFalse(preview.touchesAccount)
+    }
+
+    @Test
     fun nonDebuggableIgnoresEveryDebugExtra() {
         val extras = mapOf(
             "wallpaper" to "/x/a.png",
@@ -184,6 +195,8 @@ class LaunchOptionsTest {
             "edge" to "http://evil",
             "workos" to "client_evil",
             "remote-voice" to true,
+            "voice-preview" to true,
+            "voice-stage" to true,
         )
         assertEquals(LaunchOptions(), LaunchOptions.parse(extras, debuggable = false))
         assertFalse(LaunchOptions.parse(extras, debuggable = false).touchesAccount)

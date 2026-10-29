@@ -124,6 +124,13 @@ internal class VoiceMedia(
         if (!closed) peer.setSpeaker(on)
     }
 
+    /** The outputs the call can use (#63's route menu). */
+    fun routes(): List<VoiceAudioRoute> = if (closed) emptyList() else peer.routes()
+
+    fun pick(route: VoiceAudioRoute) {
+        if (!closed) peer.pick(route)
+    }
+
     fun close() {
         if (closed) return
         closed = true

@@ -358,14 +358,14 @@ class SettingsDialogPresenter internal constructor(
      * search field). Main thread only (31 checks the looper).
      */
     @MainThread
-    fun present(): Boolean {
+    fun present(pages: List<NavRoute> = emptyList()): Boolean {
         if (sheetHost.entries.isNotEmpty()) {
             Log.w(TAG, "already presenting")
             return false
         }
         beforePresent()
         return sheetHost.present(key = SettingsDialogDefaults.Key, style = SettingsFormSheetStyle) {
-            SettingsDialogContent(scope = this, locals = locals, root = root, routeScreen = routeScreen)
+            SettingsDialogContent(scope = this, locals = locals, root = root, routeScreen = routeScreen, pages = pages)
         }
     }
 
@@ -458,6 +458,8 @@ internal fun SettingsDialogContent(
     locals: () -> CompositionLocalContext,
     root: @Composable (done: @Composable RowScope.() -> Unit) -> Unit,
     routeScreen: @Composable (NavEntry) -> Unit,
+    /** #63: pages already pushed over the root when the card appears (a debug route). */
+    pages: List<NavRoute> = emptyList(),
 ) {
     CompositionLocalProvider(locals()) {
         val router = LocalAppRouter.current
@@ -473,7 +475,11 @@ internal fun SettingsDialogContent(
         ) {
             // A fresh stack per presentation: no state survives a reopen
             // (SplitRootController builds a new nav controller each time).
-            val stack = remember { NavStack(SettingsDialogRootRoute) }
+            val stack = remember {
+                NavStack(SettingsDialogRootRoute).apply {
+                    if (pages.isNotEmpty()) setRoutes(listOf(SettingsDialogRootRoute) + pages)
+                }
+            }
             // The whole card goes away → close every entry, no lifecycle
             // callbacks (iOS deallocates the controller and every screen).
             DisposableEffect(stack) { onDispose { stack.closeAll() } }

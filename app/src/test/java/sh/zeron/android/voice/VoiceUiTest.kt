@@ -63,6 +63,7 @@ class VoiceUiTest {
         val voice = menu.children[1] as MenuSection
         assertEquals("Voice", voice.title)
         assertFalse("a drill-in submenu", voice.inline)
+        assertEquals("the current style as its subtitle", "Ember", voice.subtitle)
         val styles = voice.children.map { it as MenuItem }
         assertEquals(listOf("Codex default", "Alloy", "Ember"), styles.map { it.title })
         assertEquals(listOf(false, false, true), styles.map { it.checked })
@@ -84,6 +85,7 @@ class VoiceUiTest {
         val none = voiceMenu(emptyList(), live = false, null, emptyList(), null, {}, {}, {})
         assertEquals(2, none.children.size)
         assertEquals("Voice", (none.children[0] as MenuSection).title)
+        assertEquals("Codex default", (none.children[0] as MenuSection).subtitle)
     }
 
     @Test

@@ -125,6 +125,11 @@ class MainActivity : ComponentActivity() {
         val debuggable = (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
         LaunchOptions.current = LaunchOptions.parse(intent.extras.toExtrasMap(), debuggable)
         if (LaunchOptions.current.remoteVoice) app.voice.forced = true
+        // G31: the scripted call, once per launch (not on a recreation).
+        if (LaunchOptions.current.voicePreview && savedInstanceState == null) {
+            app.voice.preview()
+            if (LaunchOptions.current.voiceStage) app.voice.requestStage()
+        }
         if (savedInstanceState == null && !intent.isFromHistory()) {
             // Fresh launch only: a rotation or a Recents relaunch must not
             // re-import the wallpaper (bumping the store's generation) or

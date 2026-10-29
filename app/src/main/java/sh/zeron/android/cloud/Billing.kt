@@ -10,8 +10,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -62,9 +65,13 @@ import sh.zeron.android.design.ZeronAlert
 import sh.zeron.android.design.ZeronIcons
 import sh.zeron.android.design.ZeronTheme
 import sh.zeron.android.design.glass.ActivitySpinner
+import sh.zeron.android.design.glass.GlassCircleButton
 import sh.zeron.android.design.uiStyle
 import sh.zeron.android.onboarding.Capsule
 import sh.zeron.android.shell.LargeTitleScaffold
+import sh.zeron.android.shell.LocalNavEntry
+import sh.zeron.android.shell.LocalNavStack
+import sh.zeron.android.shell.largeTitleDefaultTopInset
 import sh.zeron.android.shell.NavRoute
 import sh.zeron.android.shell.TitleMode
 import uniffi.zeron_core.BillingInfo
@@ -189,7 +196,14 @@ object BillingRules {
  * or the credits change — Checkout lands through a webhook).
  */
 @Composable
-fun BillingScreen(modifier: Modifier = Modifier) {
+fun BillingScreen(
+    modifier: Modifier = Modifier,
+    /**
+     * Set when Billing is a presented sheet (#63, iOS `openBilling`): no back
+     * chevron, a Done circle that calls this, and the sheet's own insets.
+     */
+    onDone: (() -> Unit)? = null,
+) {
     val context = LocalContext.current
     val app = context.applicationContext as ZeronApplication
     val cloud = app.cloud
@@ -250,7 +264,27 @@ fun BillingScreen(modifier: Modifier = Modifier) {
         modifier = modifier.testTag("billing"),
         mode = TitleMode.InlineOnly,
         listState = rememberLazyListState(),
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = chrome.contentPadding + 32.dp),
+        topInset = if (onDone != null) 0.dp else largeTitleDefaultTopInset(),
+        contentPadding = PaddingValues(
+            start = 16.dp,
+            end = 16.dp,
+            top = 8.dp,
+            bottom = (if (onDone != null) WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() else chrome.contentPadding) + 32.dp,
+        ),
+        showBack = if (onDone != null) false else LocalNavStack.current.entries.firstOrNull()?.id != LocalNavEntry.current.id,
+        onBack = if (onDone != null) ({}) else LocalNavStack.current.let { stack -> { stack.pop() } },
+        trailing = {
+            if (onDone != null) {
+                GlassCircleButton(
+                    icon = ZeronIcons.Checkmark,
+                    contentDescription = "Done",
+                    onClick = onDone,
+                    modifier = Modifier.testTag("billing-done"),
+                    filled = ZeronTheme.palette.text,
+                    ink = ZeronTheme.palette.background,
+                )
+            }
+        },
         content = {
             if (billing == null) {
                 item(key = "loading") {

@@ -162,7 +162,8 @@ fun voiceHostPicker(controller: VoiceController, onStarted: () -> Unit, openSett
  * The long-press menu of a voice control (iOS `voiceMenu`,
  * `VoiceStageViewController.swift:406-427`): host and style for the next
  * call — "Codex runs on" (inline, ✓ the remembered host, disabled during a
- * call), the "Voice" submenu ("Codex default" and the host's styles), and
+ * call), the "Voice" submenu (subtitled with the current style; "Codex default"
+ * and the host's styles), and
  * Voice Settings. Built fresh on every open.
  */
 fun voiceMenu(
@@ -197,6 +198,7 @@ fun voiceMenu(
                 title = "Voice",
                 icon = MenuIcon.Symbol(ZeronIcons.PersonWave2),
                 inline = false,
+                subtitle = voiceStyleLabel(selectedStyle),
                 children = (listOf<String?>(null) + styles).map { style ->
                     MenuItem(title = voiceStyleLabel(style), checked = style == selectedStyle) { onSelectStyle(style) }
                 },

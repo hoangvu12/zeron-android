@@ -10,9 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import sh.zeron.android.design.LocalFeedback
 import sh.zeron.android.design.Haptic
-import sh.zeron.android.shell.LocalAppRouter
 import sh.zeron.android.cloud.CloudCreditsNotice
-import sh.zeron.android.cloud.CloudRoutes
 import sh.zeron.android.cloud.CreditsNoticeState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
@@ -423,7 +421,7 @@ fun SessionScreen(
     val cloudOutOfCredits = controller.sessionRow?.isCloud == true && cloudApp?.cloud?.outOfCredits == true
     val creditsNotice = remember { CreditsNoticeState() }
     val noticeFeedback = LocalFeedback.current
-    val noticeRouter = LocalAppRouter.current
+    val openBilling = sh.zeron.android.cloud.rememberBillingOpener()
     val latestOutOfCredits by rememberUpdatedState(cloudOutOfCredits)
     if (composerBinding != null) {
         SideEffect {
@@ -615,7 +613,7 @@ fun SessionScreen(
                     // #53: the credits notice above the pill row (iOS's
                     // bottom stack order: notice, pill row, queue, …).
                     if (model.noticeShown) {
-                        CloudCreditsNotice(creditsNotice, onAddCredits = { CloudRoutes.openBilling(noticeRouter) })
+                        CloudCreditsNotice(creditsNotice, onAddCredits = openBilling)
                     }
                     // 73: the shown banner (83's editing overlay folded in); 74
                     // shows and hides the row from the same model.
