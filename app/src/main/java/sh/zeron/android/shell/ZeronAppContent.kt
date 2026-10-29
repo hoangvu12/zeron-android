@@ -115,7 +115,9 @@ private fun AppRootContent(
         input = input,
         state = rootState,
         presentations = presentations,
-        welcome = { WelcomePlaceholder() },
+        // TODO(#17): Get started presents onboarding (appearance step, or
+        // sync when this phone has seen it); sign-in (#15) runs from there.
+        welcome = { WelcomeScreen(onGetStarted = {}) },
         // 108: the shell-state scope above the Phone ↔ Split switch (35's
         // `shellScope`). Everything the two shells share — 26's tab state,
         // 33's split state, 105's sidebar, 106's slots and tablet router —
