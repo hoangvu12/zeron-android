@@ -66,9 +66,9 @@ fun newSessionModelPicker(
     models: List<ModelChoice>,
     draft: NewSessionDraft,
     hostName: String,
-    update: ((NewSessionDraft) -> NewSessionDraft) -> Unit,
     /** #53: `cloud` for a draft that runs on Cloud. */
     hostSymbol: String = sh.zeron.android.composer.HOST_SYMBOL_COMPUTER,
+    update: ((NewSessionDraft) -> NewSessionDraft) -> Unit,
 ): ModelPickerRequest = ModelPickerRequest(
     tabs = newSessionPickerTabs(models, draft.harness),
     harness = draft.harness,
