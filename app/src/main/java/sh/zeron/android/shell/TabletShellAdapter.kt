@@ -101,6 +101,20 @@ internal class TabletShellAdapter(
         state.setDetailRoot(DetailRoot.Empty)
     }
 
+    override fun releaseDetailSession(): NavEntry? {
+        val root = detailStack.entries.first()
+        if (root.route !is SessionRoute) return null
+        detailStack.release(root, replacement = EmptyDetailRoute)
+        state.setDetailRoot(DetailRoot.Empty)
+        return root
+    }
+
+    override fun adoptDetailSession(entry: NavEntry) {
+        val route = entry.route as? SessionRoute ?: return
+        detailStack.adopt(entry, asRoot = true)
+        state.setDetailRoot(DetailRoot.Session(route.chatId))
+    }
+
     override fun dismissPresented(animated: Boolean) {
         // 18, then 19 (iOS `dismiss` removes a presented action sheet too),
         // then 31 — every SheetHost entry, 104's Settings card included; no

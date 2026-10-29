@@ -490,6 +490,59 @@ class NavStack(root: NavRoute) {
     }
 
     /**
+     * Takes [entry] off this stack **without** closing it or delivering any
+     * disappear callback, for another stack to [adopt] — iOS moving a
+     * controller between navigation controllers (`releaseSession` with
+     * `session.relocating = true`, #981): the same page, its retained state
+     * and its live session go along. The entries above it are closed
+     * (close-only, as `popToRoot` intermediates). When [entry] is the root,
+     * [replacement] becomes the new root. Returns false when [entry] is not
+     * on this stack.
+     */
+    @MainThread
+    internal fun release(entry: NavEntry, replacement: NavRoute? = null): Boolean {
+        finishInFlight()
+        val index = entryList.indexOf(entry)
+        if (index < 0) return false
+        require(index > 0 || replacement != null) { "releasing the root needs a replacement root" }
+        val above = entryList.subList(index + 1, entryList.size).toList()
+        while (entryList.size > index) entryList.removeAt(entryList.size - 1)
+        if (entryList.isEmpty()) entryList.add(NavEntry(navEntryIds.incrementAndGet(), replacement!!))
+        for (e in above.asReversed()) e.close()
+        return true
+    }
+
+    /**
+     * Puts an entry another stack [release]d on this one, unanimated: on top
+     * (iOS `adoptSession`'s `pushViewController(session, animated: false)`),
+     * or — [asRoot] — as the whole stack (`setViewControllers([session])`,
+     * the old entries close as in [setRoutes]). An ordinary unanimated push
+     * transition, so the appear callbacks run as for any push.
+     */
+    @MainThread
+    internal fun adopt(entry: NavEntry, asRoot: Boolean = false) {
+        require(!entry.isClosed) { "a closed entry cannot be adopted" }
+        finishInFlight()
+        val oldTop = entryList.last()
+        val removed = if (asRoot) entryList.toList() else emptyList()
+        if (asRoot) {
+            entryList.clear()
+            leaving.addAll(removed)
+        }
+        entryList.add(entry)
+        startTransition(
+            NavTransition(
+                kind = NavKind.Push,
+                from = oldTop,
+                to = entry,
+                removing = removed,
+                animated = false,
+                interactive = false,
+            ),
+        )
+    }
+
+    /**
      * Finishes whatever transition is running. A non-interactive one snaps to
      * its target and completes synchronously (all callbacks fire, its commit
      * happens); an interactive one (finger still down) is abandoned and

@@ -11,6 +11,9 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+/** The chat a session page shows. */
+private val NavEntry.chatId: String get() = (route as SessionRoute).chatId
+
 /**
  * The carry-over state machine (android-ui-parity #108) — every case of
  * the ticket's Verification list, plain JUnit + `kotlinx-coroutines-test`
@@ -95,6 +98,25 @@ class CarryOverTest {
             shownChatId = null
             isEmpty = false
         }
+
+        /** The live session page the column holds (#26), or null. */
+        var page: NavEntry? = null
+
+        override fun releaseSession(): NavEntry? {
+            val p = page ?: return null
+            log += "detail.release(${p.chatId})"
+            page = null
+            shownChatId = null
+            isEmpty = true
+            return p
+        }
+
+        override fun adoptSession(entry: NavEntry) {
+            log += "detail.adopt(${entry.chatId})"
+            page = entry
+            shownChatId = entry.chatId
+            isEmpty = false
+        }
     }
 
     /** The tab shell: logs every call. */
@@ -110,6 +132,74 @@ class CarryOverTest {
         override fun popAllToRoot() {
             log += "tabs.popAll"
         }
+
+        /** The live session page pushed on the phone (#26), or null. */
+        var page: NavEntry? = null
+
+        override fun releaseSession(): NavEntry? {
+            val p = page ?: return null
+            log += "tabs.release(${p.chatId})"
+            page = null
+            return p
+        }
+
+        override fun adoptSession(entry: NavEntry) {
+            log += "tabs.adopt(${entry.chatId})"
+            page = entry
+        }
+    }
+
+    /** A session page: an entry whose route is a [SessionRoute]. */
+    private class PageRoute(override val chatId: String) : SessionRoute, NavRoute {
+        @androidx.compose.runtime.Composable
+        override fun Content() {}
+        override fun prepareArrival() {}
+        override fun finishArrival() {}
+        override fun discard() {}
+    }
+
+    private fun page(chatId: String) = NavEntry(1L, PageRoute(chatId))
+
+    // ------------------------------------------------ #26: the page moves
+
+    @Test
+    fun collapse_movesTheDetailsPageIntoTheTabs() = runTest {
+        val r = Rig(currentChatId = "c1", isCollapsed = true, shownChatId = "c1")
+        val p = page("c1")
+        r.detail.page = p
+        r.frameGate.complete(Unit)
+        r.carryOver.onShellKindChanged(RootKind.Split, RootKind.Phone)
+        // iOS #981: the same page moves — no clear, no fence, no reopen.
+        assertEquals(listOf("frame", "detail.release(c1)", "tabs.adopt(c1)"), r.log)
+        assertTrue(r.tabs.page === p)
+        assertFalse(p.isClosed)
+    }
+
+    @Test
+    fun expand_movesThePhonesPageIntoTheDetail() = runTest {
+        val r = Rig(currentChatId = "c0", isCollapsed = false, detailIsEmpty = true)
+        val p = page("c2")
+        r.tabs.page = p
+        r.frameGate.complete(Unit)
+        r.carryOver.onShellKindChanged(RootKind.Phone, RootKind.Split)
+        assertEquals(listOf("frame", "tabs.release(c2)", "detail.adopt(c2)"), r.log)
+        assertTrue(r.detail.page === p)
+        // The moved page is the open session.
+        assertEquals("c2", r.selection.currentChatId)
+    }
+
+    @Test
+    fun foldUnfoldRoundTripKeepsOnePage() = runTest {
+        val r = Rig(currentChatId = "c1", isCollapsed = true, shownChatId = "c1")
+        val p = page("c1")
+        r.detail.page = p
+        r.frameGate.complete(Unit)
+        r.carryOver.onShellKindChanged(RootKind.Split, RootKind.Phone)
+        r.selection.isCollapsed = false
+        r.carryOver.onShellKindChanged(RootKind.Phone, RootKind.Split)
+        assertTrue(r.detail.page === p)
+        assertNull(r.tabs.page)
+        assertTrue(r.log.none { it.startsWith("tabs.open") || it.startsWith("detail.show") })
     }
 
     // ------------------------------------------------- Split → Phone
