@@ -67,7 +67,7 @@ data class SectionHeaderState(
 )
 
 /** Which front-page kind a section is — ticket 46's header long-press menus read it. */
-enum class FrontSectionKind { Pinned, User, Recent, ProjectGroup }
+enum class FrontSectionKind { Pinned, User, Recent, ProjectGroup, DeviceGroup }
 
 /**
  * What the front page knows about one emitted section: its [kind], its

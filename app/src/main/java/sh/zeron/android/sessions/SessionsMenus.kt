@@ -4,7 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import sh.zeron.android.ZeronApplication
+import sh.zeron.android.core.SessionGrouping
 import sh.zeron.android.design.LocalFeedback
+import sh.zeron.android.design.ZeronIcon
 import sh.zeron.android.design.ZeronIcons
 import sh.zeron.android.design.glass.Menu
 import sh.zeron.android.design.glass.MenuIcon
@@ -22,7 +24,7 @@ import sh.zeron.android.shell.LocalNavStack
  * Both are **pure**: they build the menu from the [SessionsScreenActions]
  * seam and invoke nothing until a row is picked. They are built at
  * **trigger time** (the ⋯ tap, the long press) — never during
- * composition — so the Group-by-Project check and the section names are
+ * composition — so the grouping checks and the section names are
  * read at open time, exactly as iOS's `UIDeferredMenuElement.uncached`
  * and its `headerMenu(_:)` override do.
  */
@@ -35,14 +37,15 @@ import sh.zeron.android.shell.LocalNavStack
 interface SessionsScreenActions {
 
     /**
-     * The Group-by-Project pref, read at **menu-open time** (iOS's
-     * uncached deferred element reads `app.groupByProject` when the menu
-     * opens, `:425-429`). A getter: every access reads the live value.
+     * The grouping mode (#131; iOS's Group-by-Project flag), read at
+     * **menu-open time** (iOS's uncached deferred element reads
+     * `app.groupByProject` when the menu opens, `:425-429`). A getter:
+     * every access reads the live value.
      */
-    val groupByProject: Boolean
+    val grouping: SessionGrouping
 
-    /** Flips the pref (40's `Prefs.setGroupByProject`; Settings 100 flips the same one). */
-    fun setGroupByProject(on: Boolean)
+    /** Sets the mode (`Prefs.setGrouping`; Settings 100's switch writes the same pref). */
+    fun setGrouping(mode: SessionGrouping)
 
     /** ⋯ "New Section…" → 43's "from ⋯" flow (no fixed engine; the chooser is 43's). */
     fun newSection()
@@ -80,15 +83,17 @@ interface SessionsScreenActions {
 }
 
 /**
- * The ⋯ options menu (`SessionListController.swift:411-434`): four rows,
+ * The ⋯ options menu (`SessionListController.swift:411-434`): five rows,
  * one flat list, no title, no separators. Every row uses a ticket 06
- * `MenuIcon.Symbol`.
+ * `MenuIcon.Symbol`. "Group by Device" (#131) sits beside iOS's
+ * "Group by Project" and works the same way; the two are exclusive.
  *
- * The Group-by-Project check is read **here** — the moment the menu is
- * built (open time) — never inside the action, and the toggle reads the
- * live pref again when it runs, so a Settings change made while the menu
- * was open is never undone (`app.groupByProject.toggle()` flips the live
- * value on iOS).
+ * The grouping checks are read **here** — the moment the menu is built
+ * (open time) — never inside the action, and a toggle reads the live
+ * mode again when it runs, so a Settings change made while the menu was
+ * open is never undone (`app.groupByProject.toggle()` flips the live
+ * value on iOS): picking the current mode turns grouping off, picking
+ * the other mode switches to it.
  */
 fun sessionsOptionsMenu(actions: SessionsScreenActions): Menu = Menu(
     children = listOf(
@@ -106,15 +111,20 @@ fun sessionsOptionsMenu(actions: SessionsScreenActions): Menu = Menu(
         // app.groupByProject ? .on : .off) …]) } — `done` runs
         // synchronously, so a plain MenuItem read at build time is the
         // same result (the ticket's ADAPT).
-        run {
-            val grouped = actions.groupByProject
-            MenuItem(
-                title = "Group by Project",
-                icon = MenuIcon.Symbol(ZeronIcons.SquareStack3dUp),
-                checked = grouped,
-                testTag = "sessions-options-group-by-project",
-            ) { actions.setGroupByProject(!actions.groupByProject) }
-        },
+        groupingItem(
+            actions,
+            SessionGrouping.Project,
+            "Group by Project",
+            ZeronIcons.SquareStack3dUp,
+            "sessions-options-group-by-project",
+        ),
+        groupingItem(
+            actions,
+            SessionGrouping.Device,
+            "Group by Device",
+            ZeronIcons.Desktopcomputer,
+            "sessions-options-group-by-device",
+        ),
         MenuItem(
             title = "Archived",
             icon = MenuIcon.Symbol(ZeronIcons.Archivebox),
@@ -123,13 +133,28 @@ fun sessionsOptionsMenu(actions: SessionsScreenActions): Menu = Menu(
     ),
 )
 
+/** One grouping row: checked when [mode] is on; picking it again turns grouping off. */
+private fun groupingItem(
+    actions: SessionsScreenActions,
+    mode: SessionGrouping,
+    title: String,
+    icon: ZeronIcon,
+    testTag: String,
+): MenuItem = MenuItem(
+    title = title,
+    icon = MenuIcon.Symbol(icon),
+    checked = actions.grouping == mode,
+    testTag = testTag,
+) { actions.setGrouping(if (actions.grouping == mode) SessionGrouping.None else mode) }
+
 /**
  * A section header's long-press menu (`SessionListController.swift:383-398`),
  * classified by the header id with the iOS rules (the same answer as 40's
  * `FrontPageUi.meta[id].kind`):
  *
  * - `"recent"` → **null** (no menu, no lift, no haptic; a tap still folds);
- * - a project group (`project:…` / `home:…`) or an unknown id → **null**
+ * - a project group (`project:…` / `home:…`), a device group
+ *   (`device:…` / `cloud` / `other`, #131) or an unknown id → **null**
  *   (iOS `guard let folder = app.frontPage.folders.first(where: …)` fails);
  * - `"pinned"` → "Open" + "Reorder…" (both push the merged Pinned page —
  *   "Reorder…" never turns on Edit mode; the user taps Edit there, 47);
@@ -203,10 +228,10 @@ internal fun rememberSessionsActions(navStack: NavStack): SessionsScreenActions 
     val feedback = LocalFeedback.current
     return remember(navStack, frontPage, prefs, feed, prompts, rowActions, feedback) {
         object : SessionsScreenActions {
-            override val groupByProject: Boolean
-                get() = prefs.groupByProject.value
+            override val grouping: SessionGrouping
+                get() = prefs.grouping.value
 
-            override fun setGroupByProject(on: Boolean) = prefs.setGroupByProject(on)
+            override fun setGrouping(mode: SessionGrouping) = prefs.setGrouping(mode)
 
             override fun newSection() = prompts.newSection()
 

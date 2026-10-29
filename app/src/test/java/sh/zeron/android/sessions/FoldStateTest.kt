@@ -64,7 +64,10 @@ class FoldStateTest {
     fun everyKindOfIdFoldsTheSameLocalWay() = runTest {
         val h = harness()
         advanceUntilIdle()
-        val ids = listOf("pinned", "recent", "backend", "project:github.com/acme/api", "home:mac")
+        val ids = listOf(
+            "pinned", "recent", "backend", "project:github.com/acme/api", "home:mac",
+            "device:mac", "cloud", "other",
+        )
         ids.forEach { h.fold.toggle(it, RecordingFeedback()) }
         advanceUntilIdle()
         assertEquals(ids.toSet(), h.fold.state.value.local)

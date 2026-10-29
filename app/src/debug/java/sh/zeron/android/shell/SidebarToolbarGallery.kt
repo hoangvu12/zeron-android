@@ -35,6 +35,7 @@ import sh.zeron.android.design.glass.GlassMenuHost
 import sh.zeron.android.design.glass.LocalHazeState
 import sh.zeron.android.design.glass.rememberGlassMenuState
 import sh.zeron.android.design.uiStyle
+import sh.zeron.android.core.SessionGrouping
 import sh.zeron.android.sessions.SessionsScreenActions
 import sh.zeron.android.sessions.sessionsOptionsMenu
 
@@ -237,9 +238,9 @@ private fun MenuFrame() {
  */
 private class RecordingActions : SessionsScreenActions {
     val calls = mutableStateListOf<String>()
-    override val groupByProject: Boolean = false
-    override fun setGroupByProject(on: Boolean) {
-        calls += "setGroupByProject($on)"
+    override val grouping: SessionGrouping = SessionGrouping.None
+    override fun setGrouping(mode: SessionGrouping) {
+        calls += "setGrouping($mode)"
     }
     override fun newSection() {
         calls += "newSection()"

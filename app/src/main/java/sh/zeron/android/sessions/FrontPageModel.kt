@@ -39,7 +39,7 @@ data class FrontPageUi(
 
 /**
  * The front page's model (ticket 40) — the `AppModel` front-page half:
- * it combines the workspace feed, the `groupByProject` preference and
+ * it combines the workspace feed, the grouping mode (#131) and
  * the fold state into [ui], and routes the two front-page actions
  * (`toggleSection`, `collapseAll`) into [FoldState].
  *
@@ -63,10 +63,10 @@ class FrontPageModel(
         emitAll(
             combine(
                 feed.snapshot.filterNotNull(),
-                prefs.groupByProject,
+                prefs.grouping,
                 fold.state,
-            ) { ws, groupByProject, f ->
-                val built = FrontPageSections.build(ws.front, ws.projects, groupByProject)
+            ) { ws, grouping, f ->
+                val built = FrontPageSections.build(ws.front, ws.projects, ws.devices, grouping)
                 FrontPageUi(
                     revision = ws.revision,
                     synced = ws.synced,
@@ -116,7 +116,7 @@ class FrontPageModel(
      */
     fun collapseAll(feedback: Feedback) {
         val ws = feed.snapshot.value ?: return
-        for (id in FrontPageSections.collapsibleIds(ws.front, ws.projects, prefs.groupByProject.value)) {
+        for (id in FrontPageSections.collapsibleIds(ws.front, ws.projects, ws.devices, prefs.grouping.value)) {
             if (!fold.isCollapsed(id)) fold.toggle(id, feedback)
         }
     }

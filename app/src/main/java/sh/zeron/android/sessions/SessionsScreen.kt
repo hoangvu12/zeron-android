@@ -372,8 +372,8 @@ private fun SessionsOptionsButton(actions: SessionsScreenActions) {
 
 /** The previews' recorder: the fixture's user-section names, nothing else. */
 private object PreviewSessionsActions : SessionsScreenActions {
-    override val groupByProject: Boolean get() = false
-    override fun setGroupByProject(on: Boolean) {}
+    override val grouping: SessionGrouping get() = SessionGrouping.None
+    override fun setGrouping(mode: SessionGrouping) {}
     override fun newSection() {}
     override fun collapseAll() {}
     override fun toggleSection(id: String) {}

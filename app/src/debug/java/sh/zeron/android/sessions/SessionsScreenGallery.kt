@@ -23,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import java.util.Locale
 import sh.zeron.android.core.Face
+import sh.zeron.android.core.SessionGrouping
 import sh.zeron.android.design.AlertHost
 import sh.zeron.android.design.Appearance
 import sh.zeron.android.design.LocalTypeScale
@@ -42,20 +43,20 @@ import sh.zeron.android.shell.SessionsRootRoute
  * The gallery's recorder: every call logs one line under the frame (the
  * "Last result" readout, e.g. `deleteSection(sec-p0)`), the pushes land
  * on the gallery's own [NavStack] (so "Open" actually navigates to 45's
- * folder page), and the toggle flips the demo flag the menu check reads.
+ * folder page), and the grouping rows set the demo mode the menu checks read.
  */
 private class GallerySessionsActions(
     private val stack: NavStack,
-    private val isGrouped: () -> Boolean,
-    private val setGrouped: (Boolean) -> Unit,
+    private val mode: () -> SessionGrouping,
+    private val setMode: (SessionGrouping) -> Unit,
     private val log: (String) -> Unit,
 ) : SessionsScreenActions {
 
-    override val groupByProject: Boolean get() = isGrouped()
+    override val grouping: SessionGrouping get() = mode()
 
-    override fun setGroupByProject(on: Boolean) {
-        setGrouped(on)
-        log("setGroupByProject($on)")
+    override fun setGrouping(mode: SessionGrouping) {
+        setMode(mode)
+        log("setGrouping($mode)")
     }
 
     override fun newSection() = log("newSection()")
@@ -94,8 +95,9 @@ private class GallerySessionsActions(
  *
  * - the "Wallpaper" toggle (the fixture hero on/off — off emits no node,
  *   like "no wallpaper set");
- * - the "Group by Project" toggle (the `1-off` ↔ `3-on` section sets; the
- *   recorder's flag follows it, so the ⋯ menu's check does too);
+ * - the "Grouping" toggle, cycling None → Project → Device (the `1-off`,
+ *   `3-on` and #131's device section sets; the recorder's mode follows
+ *   it, so the ⋯ menu's checks do too);
  * - a live caption of the hero's `travel` / `scrollFade` (debug only),
  *   so the fade can be checked by scrolling the list;
  * - the live ⋯ and header menus wired to the recorder, whose last line
@@ -120,13 +122,13 @@ fun SessionsScreenGallerySection() {
     val listState = rememberLazyListState()
 
     var wallpaper by remember { mutableStateOf(true) }
-    var grouped by remember { mutableStateOf(false) }
+    var grouping by remember { mutableStateOf(SessionGrouping.None) }
     var result by remember { mutableStateOf("—") }
     var fade by remember { mutableStateOf(1f) }
     var heroHDp by remember { mutableStateOf(0f) }
     val stack = remember { NavStack(SessionsRootRoute) }
     val actions = remember(stack) {
-        GallerySessionsActions(stack, { grouped }, { grouped = it }, { result = it })
+        GallerySessionsActions(stack, { grouping }, { grouping = it }, { result = it })
     }
 
     GlassMenuHost {
@@ -139,10 +141,10 @@ fun SessionsScreenGallerySection() {
                     style = labelStyle,
                 ) { wallpaper = !wallpaper }
                 GalleryRow(
-                    text = if (grouped) "Group by Project: on" else "Group by Project: off",
-                    selected = grouped,
+                    text = "Grouping: ${grouping.name}",
+                    selected = grouping != SessionGrouping.None,
                     style = labelStyle,
-                ) { grouped = !grouped }
+                ) { grouping = SessionGrouping.entries[(grouping.ordinal + 1) % SessionGrouping.entries.size] }
                 // The live fade readout (debug only): derived from the
                 // hero's scrollFade captures, with the travel back-solved
                 // over the frame's own hero height.
@@ -166,10 +168,10 @@ fun SessionsScreenGallerySection() {
                     val route = entry.route
                     if (route is SessionsRootRoute) {
                         SessionsScreenContent(
-                            sections = if (grouped) {
-                                SessionsScreenFixtures.groupedSections()
-                            } else {
-                                SessionsScreenFixtures.sections()
+                            sections = when (grouping) {
+                                SessionGrouping.None -> SessionsScreenFixtures.sections()
+                                SessionGrouping.Project -> SessionsScreenFixtures.groupedSections()
+                                SessionGrouping.Device -> SessionsScreenFixtures.deviceSections()
                             },
                             collapsedIds = emptySet(),
                             actions = actions,
