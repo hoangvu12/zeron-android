@@ -53,20 +53,20 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <!-- zeron:// deep links (ticket 36). No autoVerify: custom
-                 scheme. One filter: scheme × the hosts, any path. `callback`
-                 is the WorkOS redirect when the browser has no Auth Tab
-                 (#15); the other hosts are #19's to rework. -->
+            <!-- zeron:// return URLs (#19, iOS Info.plist's one scheme). No
+                 autoVerify: custom scheme. One filter: scheme × the hosts,
+                 any path. `callback` is the WorkOS redirect when the browser
+                 has no Auth Tab (#15), `signed-in` the provider/device
+                 login's done page, `voice` the call notification (#61).
+                 Notification taps are explicit intents, not links. -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="zeron" />
                 <data android:host="callback" />
-                <data android:host="chat" />
-                <data android:host="new" />
-                <data android:host="settings" />
-                <data android:host="search" />
+                <data android:host="signed-in" />
+                <data android:host="voice" />
             </intent-filter>
         </activity>
         <!-- android-app#28 + ADR 0010: the run-watching foreground service.

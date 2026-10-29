@@ -6,7 +6,7 @@ package sh.zeron.android.notify
  * types so its tests are plain JVM).
  */
 data class WorkingRun(
-    /** The engine-scoped chat id (the deep link's id). */
+    /** The chat id, as plain as the core returns it (the tap's `chatId` extra). */
     val chatId: String,
     val title: String,
     val engineName: String,

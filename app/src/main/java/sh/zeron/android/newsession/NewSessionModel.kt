@@ -130,7 +130,7 @@ class NewSessionModel(
             }
         }
         // The late store load (the tablet launch page, 106, and a
-        // `zeron://new` cold start can open the page before `warm()`
+        // `route new` cold start can open the page before `warm()`
         // finished): once it lands, an untouched page takes over the
         // stored draft; a touched one keeps the user's pick.
         if (!store.isLoaded) {

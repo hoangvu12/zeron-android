@@ -9,11 +9,12 @@ import uniffi.zeron_core.DeviceView
 /**
  * The pure half of the Settings Devices section: [deviceConnectionLabel]
  * and [devicesRows] over Zeron's [DeviceView] (the workspace feed's
- * `devices`, #20). Plain JVM — the generated record touches no JNA.
+ * `devices`, #20): execution devices only, iOS's "Online"/"Offline"
+ * (#35). Plain JVM — the generated record touches no JNA.
  */
 class DevicesRowsTest {
 
-    private fun device(id: String, name: String, online: Boolean = true) = DeviceView(
+    private fun device(id: String, name: String, online: Boolean = true, host: Boolean = true) = DeviceView(
         id = id,
         name = name,
         platform = "macos",
@@ -21,14 +22,14 @@ class DevicesRowsTest {
         lastSeenMs = null,
         version = null,
         capabilities = emptyList(),
-        isExecutionHost = true,
+        isExecutionHost = host,
         isSelf = false,
         sessionCount = 0u,
     )
 
     @Test
     fun presenceMapsToItsVerbatimLabel() {
-        assertEquals("Connected", deviceConnectionLabel(true))
+        assertEquals("Online", deviceConnectionLabel(true))
         assertEquals("Offline", deviceConnectionLabel(false))
     }
 
@@ -53,7 +54,7 @@ class DevicesRowsTest {
         assertEquals("Offline", studio.label)
         assertFalse(studio.connected)
         val mac = rows[1] as DevicesRowSpec.Device
-        assertEquals("Connected", mac.label)
+        assertEquals("Online", mac.label)
         assertTrue(mac.connected)
     }
 
@@ -61,5 +62,16 @@ class DevicesRowsTest {
     fun aBlankNameFallsBackToTheId() {
         val rows = devicesRows(listOf(device(id = "d1", name = "  ")))
         assertEquals("d1", (rows[0] as DevicesRowSpec.Device).title)
+    }
+
+    @Test
+    fun onlyExecutionDevicesAreListed() {
+        val rows = devicesRows(
+            listOf(
+                device(id = "phone", name = "Pixel", host = false),
+                device(id = "mac", name = "MacBook Pro"),
+            ),
+        )
+        assertEquals(listOf("device:mac"), rows.map { it.id })
     }
 }

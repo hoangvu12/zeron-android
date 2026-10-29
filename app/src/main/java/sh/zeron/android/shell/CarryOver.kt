@@ -191,6 +191,8 @@ class CarryOver(
     private val tabs: TabsColumn,
     private val awaitFrame: suspend () -> Unit,
     private val awaitDetached: suspend (chatId: String) -> Unit,
+    /** #45: the split is folding — the inspector gives the sidebar back and rides along as a sheet. */
+    private val onCollapse: () -> Unit = {},
 ) {
 
     /**
@@ -207,8 +209,9 @@ class CarryOver(
                 // One frame: the split has left composition, so the page
                 // moves between two stacks with no host attached to the old.
                 awaitFrame()
-                // TODO(#45): the companions panel rides along — folded,
-                // iOS shows the inspector as a sheet over the tab shell.
+                // #45 (iOS `:295-301`): the companions panel rides along —
+                // folded, the inspector shows as a sheet over the tab shell.
+                onCollapse()
                 // iOS `:302-307`: the page itself moves; nothing to open.
                 val page = detail.releaseSession()
                 if (page != null) return tabs.adoptSession(page)

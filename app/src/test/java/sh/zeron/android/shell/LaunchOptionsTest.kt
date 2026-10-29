@@ -220,6 +220,18 @@ class LaunchOptionsTest {
         assertNull(LaunchOptions.route(mapOf("route" to "gallery")))
     }
 
+    @Test
+    fun debugRoutesNeedADebuggableBuild() {
+        val extras = mapOf<String, Any?>("route" to "providers:cloud")
+        assertNull(LaunchOptions.route(extras))
+        assertEquals(
+            DeepLink.Debug(DebugRoute.Providers("cloud")),
+            LaunchOptions.route(extras, debuggable = true),
+        )
+        // Debuggable, a debug route counts as a route (#18's demo).
+        assertEquals(LaunchOptions(route = true), LaunchOptions.parse(extras, debuggable = true))
+    }
+
     // ------------------------------------------------------ applyWallpaper
 
     @Test

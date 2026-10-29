@@ -10,7 +10,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
-import sh.zeron.android.core.CoreStatus
 import sh.zeron.android.core.WallpaperStore
 import sh.zeron.android.design.ActionSheetHost
 import sh.zeron.android.design.Appearance
@@ -46,12 +45,9 @@ import uniffi.zeron_core.WallpaperEffect
  *  - **Sessions** — Group by Project **on**, fixed (the real preference
  *    would fight the app's own state; 100's own gallery page has the
  *    live toggle);
- *  - **About** — `0.1.0 (1) · core 0.1.0`.
  *
- * Tapping "Licenses" really pushes [LicensesRoute] on a gallery
- * [NavStack] (the pushed screen renders through the real `LicensesScreen`
- * — the debug app has the licence assets). The engine rows' taps and the
- * pair row are no-ops here (102's own gallery page demos them live).
+ * Account, Voice, Math and Sign Out are left out of the fixture (their
+ * rows need the app's live account, or belong to #36/#61).
  *
  * [live] drops the wallpaper state's launcher (which needs an
  * `ActivityResultRegistryOwner` the IDE preview has no host for): the
@@ -78,7 +74,6 @@ fun SettingsScreenGallerySection(
     NavStackHost(stack = stack, active = true) { entry ->
         when (val route = entry.route) {
             SettingsGalleryRoot -> SettingsScreenGalleryContent(listState, live)
-            LicensesRoute -> LicensesScreen()
             else -> Unit
         }
     }
@@ -106,11 +101,6 @@ private fun SettingsScreenGalleryContent(listState: LazyListState, live: Boolean
         appearance = remember { MutableStateFlow(Appearance.System) },
         onPick = {},
     )
-    val about = rememberAboutSectionState(
-        versionName = "0.1.0",
-        versionCode = 1L,
-        core = CoreStatus.Loaded("0.1.0"),
-    )
     // Composable reads happen here, not inside the LazyList DSL lambda.
     val wallpaper = if (live) rememberGalleryWallpaperSectionState() else null
     val sessionsStrings = sessionsSettingsStrings()
@@ -132,7 +122,6 @@ private fun SettingsScreenGalleryContent(listState: LazyListState, live: Boolean
             galleryStaticWallpaperSection()
         }
         sessionsSettingsSection(sessionsStrings, { true }, {}, {})
-        aboutSection(about)
     }
 }
 

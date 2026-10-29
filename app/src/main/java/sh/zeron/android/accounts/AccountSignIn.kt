@@ -72,7 +72,9 @@ class CoreAccountSignIn(
     private companion object {
         /**
          * Where the host's sign-in page lands when it is done (Zeron's
-         * `doneUrl`). TODO(#50): close the Auth Tab when it opens.
+         * `doneUrl`). The manifest routes it back to `MainActivity` (#19),
+         * whose `singleTask` closes the Custom Tab. TODO(#50): an Auth Tab
+         * with `signed-in` as its redirect.
          */
         const val DONE_URL = "zeron://signed-in"
     }

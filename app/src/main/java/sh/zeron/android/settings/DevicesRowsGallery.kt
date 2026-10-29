@@ -60,7 +60,7 @@ fun DevicesRowsGallerySection() {
  * reports presence only, so a row reads Connected or Offline.
  */
 private val devicesGalleryFixture = listOf(
-    DevicesRowSpec.Device("e1", "MacBook Pro", DevicesCopy.Connected, connected = true),
+    DevicesRowSpec.Device("e1", "MacBook Pro", DevicesCopy.Online, connected = true),
     DevicesRowSpec.Device("e2", "Studio", DevicesCopy.Offline, connected = false),
 )
 

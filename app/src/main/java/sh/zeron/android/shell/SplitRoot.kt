@@ -27,6 +27,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.MeasurePolicy
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -84,6 +86,11 @@ import sh.zeron.android.design.ZeronTheme
  *   only decides *where* it sits.
  * @param router the shell's router; defaults to [LocalAppRouter] (the
  *   tablet implementation is ticket 106).
+ * @param inspector #45: the companions column at the trailing edge (iOS
+ *   `.inspector`, 400 dp), sliding in and out with [InspectorState.shown];
+ *   `null` = none
+ * @param inspectorContent the column's content (the inspector stack),
+ *   composed only while it shows or slides
  */
 @Composable
 fun SplitRoot(
@@ -92,9 +99,25 @@ fun SplitRoot(
     detail: @Composable (root: DetailRoot) -> Unit,
     modifier: Modifier = Modifier,
     router: AppRouter = LocalAppRouter.current,
+    inspector: InspectorState? = null,
+    inspectorContent: @Composable () -> Unit = {},
 ) {
     val palette = ZeronTheme.palette
     val focusManager = LocalFocusManager.current
+    val density = LocalDensity.current
+
+    // #45: the inspector slides like the sidebar (`show(.inspector)`).
+    if (inspector != null) {
+        LaunchedEffect(inspector) {
+            inspector.progress.snapTo(if (inspector.shown) 1f else 0f)
+            snapshotFlow { inspector.shown }
+                .drop(1)
+                .collectLatest { shown -> inspector.progress.animateTo(if (shown) 1f else 0f, Motion.sidebarToggle()) }
+        }
+    }
+    val inspectorComposed by remember(inspector) {
+        derivedStateOf { inspector != null && (inspector.shown || inspector.progress.value > 0f) }
+    }
 
     // The sidebar position follows `sidebarVisible`: snap on (re)composition
     // so a change made while this composable was not on screen (or a
@@ -200,9 +223,16 @@ fun SplitRoot(
             shell.sidebarVisible,
             gapPx = columns.detailGap.dp.roundToPx(),
         )
+        // #45: the inspector takes its width off the detail's trailing side.
+        val inspectorPx = if (inspector != null) min(InspectorWidth.roundToPx(), width / 2) else 0
+        val inspectorShownPx = if (inspector != null) (inspector.progress.value.coerceIn(0f, 1f) * inspectorPx).toInt() else 0
+        val inspectorTargetPx = if (inspector?.shown == true) inspectorPx else 0
         val sidebarChild = measurables[0].measure(Constraints.fixed(min(sidebarPx, width), height))
-        val paneBackground = measurables[1].measure(Constraints.fixed(geometry.paneWidth, height))
-        val detailChild = measurables[2].measure(Constraints.fixed(geometry.contentWidth, height))
+        val paneBackground = measurables[1].measure(Constraints.fixed((geometry.paneWidth - inspectorShownPx).coerceAtLeast(0), height))
+        val detailChild = measurables[2].measure(
+            Constraints.fixed((geometry.contentWidth - inspectorTargetPx).coerceAtLeast(0), height),
+        )
+        val inspectorChild = if (inspector != null) measurables[3].measure(Constraints.fixed(inspectorPx, height)) else null
         layout(width, height) {
             // Draw order is the child order: the sidebar, then the detail on
             // top. They never overlap (the sidebar's trailing edge is exactly
@@ -212,6 +242,7 @@ fun SplitRoot(
             }
             paneBackground.placeRelative(geometry.paneX, 0)
             detailChild.placeRelative(geometry.contentX, 0)
+            inspectorChild?.placeRelative(width - inspectorShownPx, 0)
         }
     }
 
@@ -221,6 +252,7 @@ fun SplitRoot(
         modifier = modifier
             .testTag("split-root")
             .fillMaxSize()
+            .onSizeChanged { shell.windowWidthDp = with(density) { it.width.toDp().value } }
             .background(palette.background)
             .clipToBounds()
             .then(rememberShellShortcuts(router, shell)),
@@ -252,6 +284,22 @@ fun SplitRoot(
                     },
                 ) {
                     detail(shell.detailRoot)
+                }
+            }
+            // 4. #45: the inspector column, a hairline on its leading edge.
+            if (inspector != null) {
+                Box(
+                    Modifier
+                        .testTag("split-inspector")
+                        .background(palette.background)
+                        .consumeWindowInsets(WindowInsets.safeDrawing.only(WindowInsetsSides.Start))
+                        .drawWithContent {
+                            drawContent()
+                            val x = if (layoutDirection == LayoutDirection.Rtl) size.width - 1f else 0f
+                            drawRect(palette.hairline, topLeft = Offset(x, 0f), size = Size(1f, size.height))
+                        },
+                ) {
+                    if (inspectorComposed) inspectorContent()
                 }
             }
         },

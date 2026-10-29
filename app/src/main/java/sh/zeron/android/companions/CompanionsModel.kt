@@ -67,7 +67,8 @@ sealed interface PanelItem {
  * The panel's rows (iOS `reload`): Agents only when there are any, live
  * first then newest; Side chats always — its rows, or the empty line with
  * New side chat and Fork this chat; Terminals always — for now the empty
- * line and New terminal (TODO(#43): the terminal store's tabs). Pure.
+ * line and New terminal (TODO(#44): the terminal store's tabs, `app.terminals`, with
+ * the terminal screen that opens them). Pure.
  */
 fun panelItems(ui: SideChatsUi): List<PanelItem> = buildList {
     val agents = ui.running + ui.finished

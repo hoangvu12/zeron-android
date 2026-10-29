@@ -175,9 +175,9 @@ fun CompanionsOverlay(
     }
 }
 
-/** The sheet's bar: the chat's title over the subtitle, centred; Close trailing (iOS `.close`). */
+/** The sheet's bar: the chat's title over the subtitle, centred; Close trailing (iOS `.close`) when [onClose] is set. */
 @Composable
-private fun CompanionsHeader(title: String, subtitle: String, onClose: () -> Unit) {
+internal fun CompanionsHeader(title: String, subtitle: String, onClose: (() -> Unit)?) {
     Box(Modifier.fillMaxWidth().height(GlassSheetDefaults.HeaderHeight)) {
         SessionTitleView(
             title = title,
@@ -185,15 +185,18 @@ private fun CompanionsHeader(title: String, subtitle: String, onClose: () -> Uni
             maxWidth = 240.dp,
             modifier = Modifier.align(Alignment.Center).semantics { heading() },
         )
-        GlassCircleButton(
-            icon = ZeronIcons.Xmark,
-            contentDescription = CompanionsCopy.Close,
-            onClick = onClose,
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(end = 16.dp)
-                .testTag("companions-close"),
-        )
+        // #45: the inspector column has none (its nav item toggles it).
+        if (onClose != null) {
+            GlassCircleButton(
+                icon = ZeronIcons.Xmark,
+                contentDescription = CompanionsCopy.Close,
+                onClick = onClose,
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 16.dp)
+                    .testTag("companions-close"),
+            )
+        }
     }
 }
 
