@@ -152,7 +152,7 @@ fun rememberSessionRowCommands(): SessionRowCommands {
 
 /**
  * The swipe actions of one row — `leadingSwipe`/`trailingSwipe`
- * (`SessionListController.swift:228-263`) as a `(leading?, trailing)` pair,
+ * (`SessionListController.swift:241-276`) as a `(leading?, trailing)` pair,
  * trailing **outermost first** (Archive at the edge, Move next to the
  * content). The Archived list has no leading action and one trailing
  * (Unarchive).
@@ -218,7 +218,7 @@ fun sessionSwipeActions(
 // ---------------------------------------------------------------------------
 
 /**
- * The row's context menu (`SessionListController.swift:265-296`), built
+ * The row's context menu (`SessionListController.swift:278-300`), built
  * at long-press time from the row, vm and sections the caller holds then
  * — never stale. Pure: invokes nothing until a menu item is picked.
  *

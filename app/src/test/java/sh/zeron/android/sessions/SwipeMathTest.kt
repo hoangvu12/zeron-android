@@ -52,6 +52,57 @@ class SwipeMathTest {
         assertEquals(LockDecision.Reject, lockDecision(40f, 0f, 8f) { false })
     }
 
+    // ---------------------------------------------- one side at a time (#136)
+
+    @Test
+    fun aClosedRowTakesTheSideOfTheClaimingTravel() {
+        assertEquals(SwipeSide.Leading, swipeSide(base = 0f, logicalDx = 30f))
+        assertEquals(SwipeSide.Trailing, swipeSide(base = 0f, logicalDx = -30f))
+    }
+
+    @Test
+    fun anOpenRowKeepsItsSideWhicheverWayTheDragGoes() {
+        // Leading open, dragged left: still the leading side (it closes).
+        assertEquals(SwipeSide.Leading, swipeSide(base = 200f, logicalDx = -500f))
+        assertEquals(SwipeSide.Trailing, swipeSide(base = -400f, logicalDx = 900f))
+    }
+
+    @Test
+    fun anOppositeDragClosesTheOpenSideAndStopsAtZero() {
+        // Leading open at 200, dragged 500 left: 0, never −300 (no
+        // trailing actions peeking in the same gesture).
+        assertEquals(0f, clampToSide(200f - 500f, SwipeSide.Leading, 1000f))
+        assertEquals(0f, clampToSide(-400f + 900f, SwipeSide.Trailing, 1000f))
+        // Within the side the finger is followed 1:1, up to the row width.
+        assertEquals(120f, clampToSide(120f, SwipeSide.Leading, 1000f))
+        assertEquals(-1000f, clampToSide(-1300f, SwipeSide.Trailing, 1000f))
+    }
+
+    @Test
+    fun onlyTheOpenSideLaysOutPanes() {
+        // Leading open: the trailing side sees a negative reveal → no panes.
+        assertTrue(paneSpans(sideReveal(148f, atLeading = false), 2, 74f, 0f).isEmpty())
+        assertEquals(1, paneSpans(sideReveal(74f, atLeading = true), 1, 74f, 0f).size)
+        // Trailing open: the leading side places nothing.
+        assertTrue(paneSpans(sideReveal(-148f, atLeading = true), 1, 74f, 0f).isEmpty())
+        assertEquals(2, paneSpans(sideReveal(-148f, atLeading = false), 2, 74f, 0f).size)
+    }
+
+    @Test
+    fun aTouchOnAnotherRowWhileOneIsOpenNeverStartsASwipe() {
+        assertTrue(touchStartsSwipe(openId = null, id = "a"))
+        assertTrue(touchStartsSwipe(openId = "a", id = "a"))
+        assertEquals(false, touchStartsSwipe(openId = "a", id = "b"))
+    }
+
+    @Test
+    fun theFullSwipeThresholdIsSixtyPercentOfTheWidth() {
+        assertTrue(isFullSwipe(600f, 1000f))
+        assertTrue(isFullSwipe(-600f, 1000f))
+        assertEquals(false, isFullSwipe(599f, 1000f))
+        assertEquals(false, isFullSwipe(-599f, 1000f))
+    }
+
     // --------------------------------------------------------- the release
 
     private fun release(

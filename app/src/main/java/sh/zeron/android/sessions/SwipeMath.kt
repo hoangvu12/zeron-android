@@ -47,7 +47,7 @@ object SwipeTokens {
 
     /**
      * The Move pane's literal background —
-     * `UIColor(hex: 0x5E6AD2)` (`SessionListController.swift:261`),
+     * `UIColor(hex: 0x5E6AD2)` (`SessionListController.swift:274`),
      * opaque and the same in light and dark.
      */
     val MoveTint = Color(0xFF5E6AD2)
@@ -86,6 +86,50 @@ fun lockDecision(dx: Float, dy: Float, slopPx: Float, canGo: (dxSign: Int) -> Bo
     }
     return LockDecision.Reject
 }
+
+// ---------------------------------------------------------------------------
+// One side at a time (#136)
+// ---------------------------------------------------------------------------
+
+/** The side a claimed drag may reveal — `UITableView` shows one at a time. */
+enum class SwipeSide { Leading, Trailing }
+
+/**
+ * The side a drag claimed at offset [base] (logical px) is locked to for
+ * the whole gesture: an open row keeps its open side, so dragging the
+ * other way only closes it (it stops at 0, like `UITableView`); a closed
+ * row takes the side of the claiming travel [logicalDx] (+ = leading).
+ */
+fun swipeSide(base: Float, logicalDx: Float): SwipeSide = when {
+    base > 0f -> SwipeSide.Leading
+    base < 0f -> SwipeSide.Trailing
+    logicalDx > 0f -> SwipeSide.Leading
+    else -> SwipeSide.Trailing
+}
+
+/** Clamps a dragged-to offset [x] to [side], never past the row width. */
+fun clampToSide(x: Float, side: SwipeSide, widthPx: Float): Float = when (side) {
+    SwipeSide.Leading -> x.coerceIn(0f, widthPx)
+    SwipeSide.Trailing -> x.coerceIn(-widthPx, 0f)
+}
+
+/**
+ * Whether a touch on row [id] may start a swipe while [openId] is open.
+ * A touch on another row only closes the open one (`UITableView` swallows
+ * it), so only one row is ever open in the list.
+ */
+fun touchStartsSwipe(openId: String?, id: String): Boolean = openId == null || openId == id
+
+/**
+ * The reveal one side's panes lay out from: the logical offset seen from
+ * that side, negative when the other side is the open one (no panes —
+ * [paneSpans] answers empty). Before #136 both sides drew `|offset|`, so
+ * the closed side's panes showed through the translucent row content.
+ */
+fun sideReveal(offset: Float, atLeading: Boolean): Float = if (atLeading) offset else -offset
+
+/** Whether |[x]| has passed the full-swipe fraction of [widthPx] (the row arms). */
+fun isFullSwipe(x: Float, widthPx: Float): Boolean = abs(x) >= SwipeTokens.FullSwipeFraction * widthPx
 
 // ---------------------------------------------------------------------------
 // The release decision
