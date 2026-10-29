@@ -121,9 +121,14 @@ internal fun rowAccessibilityLabel(kind: RowKind, copyText: String, text: String
  * other kind is cleared outright, matching iOS's `isUserInteractionEnabled
  * = false` views, which VoiceOver never sees. The same predicate decides
  * both halves — no second list.
+ *
+ * #46: a visual is exposed too, ordered with the controls (iOS lists
+ * `VisualView`s beside the `UIControl`s, `RowView.swift:63`). It stays
+ * out of [WidgetKind.isControl], so the row menu's "not on a control" rule
+ * is unchanged; TODO(#47) decides that for the visual's own controls.
  */
 internal fun Modifier.widgetSemantics(kind: WidgetKind): Modifier =
-    if (kind.isControl()) {
+    if (kind.isControl() || kind is WidgetKind.Visual) {
         semantics {
             isTraversalGroup = true
             traversalIndex = 0f

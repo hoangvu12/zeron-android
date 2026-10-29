@@ -62,6 +62,13 @@ interface SessionCore {
      */
     fun attachTranscript(view: TranscriptView): Boolean
 
+    /**
+     * #46: `TranscriptView.setVisualSource(client, deviceId, pixelScale)` —
+     * agent visuals load their scripts from the chat's host. A no-op by
+     * default, so fakes need not care.
+     */
+    fun setVisualSource(view: TranscriptView, deviceId: String, pixelScale: Float) {}
+
     /** `SessionHandle.setViewAttached(attached)`. */
     fun setViewAttached(attached: Boolean)
 
@@ -98,6 +105,9 @@ class CoreSessionCore(
     override fun engine(): DeviceView? = client.devices().firstOrNull { it.id == engineId }
 
     override fun attachTranscript(view: TranscriptView): Boolean = view.attach(client, chatId)
+
+    override fun setVisualSource(view: TranscriptView, deviceId: String, pixelScale: Float) =
+        view.setVisualSource(client, deviceId, pixelScale)
 
     override fun setViewAttached(attached: Boolean) = handle.setViewAttached(attached)
 

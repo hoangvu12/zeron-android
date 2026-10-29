@@ -166,11 +166,14 @@ class SubagentRoute internal constructor(
     /**
      * First composition (main): bind the layout engine to the subagent's
      * doc read-only (`TranscriptView.attachSubagent`, iOS
-     * `SubagentViewController.swift:86`) on the serial lane, then follow
-     * the spawn's record. An attach that returns false (or throws) shows
-     * the unavailable bar (iOS `showUnavailable`).
+     * `SubagentViewController.swift:86`) on the serial lane, point its
+     * agent visuals at the root chat's host (#46,
+     * `SubagentViewController.swift:89-91`: frames at [visualScale], iOS
+     * `max(2, displayScale)`), then follow the spawn's record. An attach
+     * that returns false (or throws) shows the unavailable bar (iOS
+     * `showUnavailable`).
      */
-    internal fun start() {
+    internal fun start(visualScale: Float = 2f) {
         if (started || released) return
         started = true
         val view = transcript.engine
@@ -179,6 +182,7 @@ class SubagentRoute internal constructor(
             val attached = try {
                 view.attachSubagent(client, spawnerId, docId, frozen).also {
                     if (!it) Log.w(TAG, "subagent transcript attach returned false")
+                    if (hostDeviceId.isNotEmpty()) view.setVisualSource(client, hostDeviceId, visualScale)
                 }
             } catch (cancelled: CancellationException) {
                 throw cancelled
@@ -254,8 +258,9 @@ class SubagentRoute internal constructor(
                 }
             }
         }
+        val visualScale = maxOf(2f, LocalDensity.current.density)
         remember(entry) {
-            start()
+            start(visualScale)
             true
         }
         SubagentScreen(this)

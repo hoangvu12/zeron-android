@@ -21,6 +21,7 @@ import sh.zeron.android.transcript.widgets.ToolStatusWidget
 import sh.zeron.android.transcript.widgets.ToolToggleTarget
 import sh.zeron.android.transcript.widgets.TranscriptIcon
 import sh.zeron.android.transcript.widgets.UploadRing
+import sh.zeron.android.transcript.widgets.VisualWidget
 import sh.zeron.android.transcript.widgets.WorkingIndicator
 import sh.zeron.android.transcript.widgets.isPendingReference
 import uniffi.zeron_core.ColorRole
@@ -69,8 +70,9 @@ internal fun RowWidget(ctx: RowContext, w: Widget) {
             failed = k.failed,
             onOpen = k.docId?.let { docId -> { ctx.actions().openSubagent(docId, k.title, !k.running) } },
         )
-        // TODO(#46): the agent visual host.
-        is WidgetKind.Visual -> Unit
+        // #46 (agent visuals): the transcript's live visual for the id,
+        // kept across row reuse; the model is the lookup's retry token.
+        is WidgetKind.Visual -> VisualWidget(ctx.state, ctx.model, k.id)
         // ticket 123 (status glyphs): running beats failed; the Working /
         // Writing flip reuses this slot (same `#working` row key), so the
         // ticker's remember survives and the clock never restarts — no

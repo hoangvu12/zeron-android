@@ -198,6 +198,8 @@ fun SessionScreen(
     //    (iOS :167-170). Once per screen state; the listener is never
     //    removed here — 85's `close()` clears it.
     val context = LocalContext.current
+    // #46: agent visuals' frames at `max(2, displayScale)` (CoreSessionSource.swift:53).
+    val visualScale = maxOf(2f, LocalDensity.current.density)
     DisposableEffect(state) {
         if (!state.started) {
             state.started = true
@@ -212,7 +214,7 @@ fun SessionScreen(
                 state.onFrameApplied(applied.rowCount().toLong(), applied.buildMicros().toLong())
                     ?.let { OpenProbe.emit(appContext, it) }
             }
-            controller.attach(transcript.engine)
+            controller.attach(transcript.engine, visualScale)
             controller.markSeen()
         }
         onDispose { } // never detach here (ticket 85 does, on pop commit)
