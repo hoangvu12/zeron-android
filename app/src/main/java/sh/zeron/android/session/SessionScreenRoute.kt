@@ -4,6 +4,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isAltPressed
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -25,13 +33,13 @@ import sh.zeron.android.sidechats.FreshSideChats
 import sh.zeron.android.sidechats.SideChatCopy
 import sh.zeron.android.sidechats.SideChatFork
 import sh.zeron.android.companions.CompanionsButton
+import sh.zeron.android.companions.CompanionsOverlay
+import sh.zeron.android.companions.CompanionsPanelController
+import sh.zeron.android.sessions.ActionOutcome
 import sh.zeron.android.sidechats.SideChatsModel
-import sh.zeron.android.sidechats.SideChatsOverlay
-import sh.zeron.android.sidechats.SideChatsSheetController
 import sh.zeron.android.sidechats.SideChatsUi
 import sh.zeron.android.sidechats.SubagentOpenRequest
 import sh.zeron.android.sidechats.rememberSubagentOpener
-import sh.zeron.android.sidechats.sideChatsSupported
 import sh.zeron.android.shell.LocalNavEntry
 import sh.zeron.android.shell.LocalNavStack
 import sh.zeron.android.shell.NavRoute
@@ -290,7 +298,7 @@ class SessionScreenRoute internal constructor(
             true
         }
         val sideUi = sideChatsModel?.ui?.collectAsState()?.value ?: SideChatsUi()
-        val sheet = remember(entry) { entry.retain(SideChatsSheetKey) { SideChatsSheetController() } }
+        val sheet = remember(entry) { entry.retain(SideChatsSheetKey) { CompanionsPanelController() } }
         val subagentOpener = rememberSubagentOpener()
         val openChat = rememberSessionListOpener()
         val app = LocalContext.current.applicationContext as? ZeronApplication
@@ -308,10 +316,6 @@ class SessionScreenRoute internal constructor(
                     )
                 }
             }
-        }
-        // Read at tap time: an engine that predates side chats offers none.
-        val sideChatsOffered: () -> Boolean = {
-            sideChatsModel != null && fork != null && sideChatsSupported(controller.engineVersion)
         }
         val isTopAndIdle: () -> Boolean = { stack.top === entry && stack.transition == null }
         // #39 (iOS `createSideChat`): the side chat is made at once under
@@ -357,21 +361,53 @@ class SessionScreenRoute internal constructor(
             )
         }
         // #40: the companions item, always shown, badged while agents run;
-        // it and the strip's chips open the panel.
-        // TODO(#41): open the panel at the chip's section.
+        // it opens the panel, a strip chip opens it at its section (#41).
         val companions = sideUi.companions
         val companionsButton: @Composable () -> Unit = {
             CompanionsButton(companions.runningAgents, onClick = { sheet.open() })
         }
+        // #41: the panel's fork keeps the sheet up ("Forking…" on its row),
+        // then puts it away and opens the fork (iOS `perform(.fork)`).
+        val panelFork: () -> Unit = {
+            // TODO(#71): the `.success` notification haptic once it lands.
+            fork?.start(controller.chatId) { forkId ->
+                sideChatsModel?.invalidate()
+                sheet.closeThen { if (isTopAndIdle()) openChat(forkId) }
+            }
+        }
+        val chatTitle = controller.chrome.collectAsState().value.title
         val sideChatsOverlay: @Composable () -> Unit = {
-            SideChatsOverlay(
+            CompanionsOverlay(
                 controller = sheet,
+                chatTitle = chatTitle,
                 ui = sideUi,
-                canAdd = sideChatsOffered(),
+                forking = fork?.forking == true,
                 onOpenChat = openChat,
                 onOpenAgent = { agent -> agent.docId?.let { openSubagent(it, agent.title, !agent.running) } },
-                onNew = { newSideChat(true) },
-                onFork = forkSideChat,
+                onNewSideChat = { newSideChat(true) },
+                onFork = panelFork,
+                // TODO(#43): open a new terminal (iOS `TerminalViewController(tab: nil)`).
+                onNewTerminal = {},
+                onArchive = { id, onAccepted ->
+                    val actions = app?.rowActions
+                    if (actions == null) {
+                        onAccepted(false)
+                    } else {
+                        actions.archive(id) { outcome ->
+                            onAccepted(outcome == ActionOutcome.Ok)
+                            sideChatsModel?.invalidate()
+                        }
+                    }
+                },
+                onAppear = {
+                    // A terminal may be a tap away: pair with the session's computer now.
+                    val live = core as? CoreSessionCore
+                    if (live != null && app != null) {
+                        app.appScope.launch(Dispatchers.IO) {
+                            runCatching { live.client.warmDirect(controller.chatId) }
+                        }
+                    }
+                },
             )
         }
         // #33: the ⋯ menu's companion group, always offered as on iOS.
@@ -410,8 +446,18 @@ class SessionScreenRoute internal constructor(
                 onOpenSubagent = openSubagent,
                 headerAccessory = companionsButton,
                 companions = companions,
-                onCompanionTap = { _ -> sheet.open() },
+                onCompanionTap = { section -> sheet.open(section) },
                 overlay = sideChatsOverlay,
+                // #41 (iOS ⌘⌥0, Ctrl on Android): the companions panel.
+                // TODO(#44): Ctrl+J, the chat's terminal.
+                modifier = Modifier.onPreviewKeyEvent { e ->
+                    if (e.type == KeyEventType.KeyDown && e.isCtrlPressed && e.isAltPressed && e.key == Key.Zero) {
+                        sheet.open()
+                        true
+                    } else {
+                        false
+                    }
+                },
             )
         }
     }
