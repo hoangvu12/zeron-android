@@ -27,40 +27,35 @@ import sh.zeron.android.shell.LocalNavStack
 import sh.zeron.android.shell.TitleMode
 
 /**
- * The Settings screen (android-ui-parity #103): the Compose port of
- * `MoreViewController` — a thin assembly. [LargeTitleScaffold]'s large
- * "Settings" title (25) over one `LazyColumn` that stacks the eight
- * section emitters, in this order: **Agent Accounts (android-next#05),
- * Devices (102), Notifications (99), Background (ADR 0010's Stay
- * connected), Appearance (96), Wallpaper (97), Sessions (100), About
- * (101)**. The design gallery and its goldens still show the seven iOS
- * sections; Background is Android-only and joins them when the goldens
- * are next recorded on CI.
- * Every row's look is ticket 70's; every row's behaviour is its section
- * ticket's; this screen owns only:
+ * The Settings screen: the Compose port of `MoreViewController` — a thin
+ * assembly. [LargeTitleScaffold]'s large "Settings" title over one
+ * `LazyColumn` that stacks the section emitters in iOS's order
+ * (`MoreViewController.swift:185-248`, #35):
  *
- *  - the section order (the order of the six emitter calls below **is**
- *    the spec — [SettingsSection] documents it, it is not derived from
- *    it);
+ * **Account · Agents · Devices · Voice · Notifications · Appearance ·
+ * Wallpaper · Math · Sessions · (untitled) Sign Out**
+ *
+ * Agents, Voice and Math are later tickets' (see the `TODO`s in
+ * [SettingsScreen]); Roboco's Background ("Stay connected", D8) and
+ * About/updater/Licences (D10) sections are gone, as on iOS.
+ *
+ * Every row's look is ticket 70's; every row's behaviour is its section's;
+ * this screen owns only:
+ *
+ *  - the section order (the order of the emitter calls below **is** the
+ *    spec — [SettingsSection] documents it);
  *  - the screen-level hoisting of the section states, so the permission
  *    and photo-picker launchers and the dialog hosts survive scrolling;
  *  - the **one** `ON_RESUME` re-read of the notification status
- *    (99 §Pitfalls installs none of its own — `willEnterForeground` /
- *    `viewWillAppear`, `MoreViewController.swift:99-111`);
- *  - the wiring of 100's rows to 40's `groupByProject` preference and
- *    `openArchived`;
- *  - the bottom scroll inset under the chrome group (30's
- *    `contentPadding` + a trailing margin, never a constant).
+ *    (`willEnterForeground` / `viewWillAppear`, `MoreViewController.swift:99-111`);
+ *  - the wiring of the Sessions rows to the `groupByProject` preference
+ *    and `openArchived`, and of Sign Out to its confirm sheet;
+ *  - the bottom scroll inset under the chrome group.
  *
- * The reload story is iOS's `reload()` turned inside out: every source is
- * a `StateFlow` or snapshot state, so recomposition **is** the reload, and
- * rows appear and disappear instantly (`animatingDifferences: false` —
- * never an item placement animation anywhere in Settings). Only the
- * notification status cannot be observed, hence the lifecycle effect.
- *
- * #18 adds iOS's **Account** section first and its untitled **Sign Out**
- * section last (`AccountRows.kt`); Voice is still missing, and the full
- * iOS order is #35's.
+ * Every source is a `StateFlow` or snapshot state, so recomposition **is**
+ * iOS's `reload()`, and rows appear and disappear instantly
+ * (`animatingDifferences: false`). Only the notification status cannot be
+ * observed, hence the lifecycle effect.
  */
 
 /** `MoreViewController.swift:31`: the title, verbatim (drawn by ticket 25). */
@@ -80,28 +75,26 @@ object SettingsScreenTokens {
 }
 
 /**
- * The sections, in display order = declaration order (iOS
- * `MoreViewController.swift:183-220` minus Account/Voice/Sign-Out, plus
- * Zeron's About in the Sign-Out slot; android-next#05 adds Agent
- * Accounts where PR #578 put Provider Accounts — ahead of the
- * computers). The [key]s are the `groupedSection` keys — they must stay
- * unique across the screen (70 prefixes them `grouped:<key>:…`).
+ * The sections, in display order = declaration order — iOS's
+ * (`MoreViewController.swift:185-248`). The [key]s are the
+ * `groupedSection` keys; they must stay unique across the screen (70
+ * prefixes them `grouped:<key>:…`). Voice and Math have no rows yet
+ * (#61, #36), so they emit nothing.
  */
 enum class SettingsSection(val key: String) {
-    /** #18: iOS's first section. */
     Account("account"),
+
+    /** iOS "Agents" (Providers / Cloud / Billing); Roboco's Agent Accounts until #49. */
     AgentAccounts("agent-accounts"),
     Devices("devices"),
+    Voice("voice"),
     Notifications("notifications"),
-
-    /** ADR 0010's "Stay connected in background" (Android-only, no iOS slot). */
-    Background("background"),
     Appearance("appearance"),
     Wallpaper("wallpaper"),
+    Math("math"),
     Sessions("sessions"),
-    About("about"),
 
-    /** #18: iOS's untitled last section. */
+    /** iOS's untitled last section. */
     SignOut("signout"),
 }
 
@@ -123,8 +116,8 @@ private val SettingsDeviceIdPrefix = DevicesRowIds.device("")
  * for an unknown id. The prefixes are the section tickets' row ids:
  * `agent-account:`/`agent-accounts:` (android-next#05),
  * `engine:`/`device:` rows (102), `notify:` (99),
- * `appearance:` (96), `wallpaper:` (97), 100's two rows, `about:` (101).
- * `account` and `signout` are #18's rows; `voice` (not ported) maps to null.
+ * `appearance:` (96), `wallpaper:` (97), `math:` (#36), 100's two rows;
+ * `account` and `signout` are #18's rows, `voice` #61's.
  */
 fun settingsSectionFor(id: String): SettingsSection? = when {
     id == AccountRowIds.Account -> SettingsSection.Account
@@ -136,14 +129,14 @@ fun settingsSectionFor(id: String): SettingsSection? = when {
     id.startsWith(SettingsEngineIdPrefix) ||
         id.startsWith(SettingsDeviceIdPrefix) -> SettingsSection.Devices
 
+    id == "voice" -> SettingsSection.Voice
     id.startsWith("notify:") -> SettingsSection.Notifications
-    id.startsWith("background:") -> SettingsSection.Background
     id.startsWith("appearance:") -> SettingsSection.Appearance
     id.startsWith("wallpaper:") -> SettingsSection.Wallpaper
+    id.startsWith("math:") -> SettingsSection.Math
     id == SessionsSettingsRow.GroupByProject.id ||
         id == SessionsSettingsRow.Archived.id -> SettingsSection.Sessions
 
-    id.startsWith("about:") -> SettingsSection.About
     else -> null
 }
 
@@ -198,18 +191,12 @@ fun SettingsScreen(
         (LocalContext.current.applicationContext as ZeronApplication).prefs.groupByProject,
     onGroupByProjectChange: (Boolean) -> Unit =
         (LocalContext.current.applicationContext as ZeronApplication).prefs::setGroupByProject,
-    about: AboutSectionState = rememberAboutSectionState(),
-    stayConnected: StateFlow<Boolean> =
-        (LocalContext.current.applicationContext as ZeronApplication).prefs.stayConnected,
-    onStayConnectedChange: (Boolean) -> Unit =
-        (LocalContext.current.applicationContext as ZeronApplication).prefs::setStayConnected,
     account: StateFlow<AccountIdentity> =
         (LocalContext.current.applicationContext as ZeronApplication).account,
     onSignOut: () -> Unit =
         (LocalContext.current.applicationContext as ZeronApplication)::signOut,
 ) {
     val listState = rememberLazyListState()
-    // #18: Account first, Sign Out last; the rest of the order is #35's.
     val identity by account.collectAsState()
     val signOut by rememberUpdatedState(onSignOut)
     val sheets = LocalActionSheet.current
@@ -221,21 +208,23 @@ fun SettingsScreen(
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { notifications.refreshStatus() }
     val group by groupByProject.collectAsState()
     val onGroup by rememberUpdatedState(onGroupByProjectChange)
-    val stay by stayConnected.collectAsState()
-    val onStay by rememberUpdatedState(onStayConnectedChange)
     val nav = LocalNavStack.current
     val sessionsStrings = sessionsSettingsStrings()
     SettingsScreenContent(listState, modifier, topInset, trailing) {
         accountSection(identity)
+        // TODO(#49): iOS's "Agents" section — Providers, then Cloud and
+        // Billing when the account is offered Cloud (`MoreViewController.swift:197-209`).
+        // Roboco's Agent Accounts summary holds the slot until then.
         agentAccountsSection(accounts)
         devicesSection(devices)
+        // TODO(#61): the "Voice" section, only while voice is available
+        // (`MoreViewController.swift:213-216`).
+        // TODO(#57): the notification settings follow-ups.
         notificationSection(notifications)
-        backgroundSettingsSection(
-            stayConnected = { stay },
-            onStayConnectedChange = { onStay(it) },
-        )
         appearanceSection(appearance)
         wallpaperSection(wallpaper)
+        // TODO(#36): the "Math" section — Render Math, Math Font, Math Size
+        // (`MoreViewController.swift:233-241`).
         sessionsSettingsSection(
             sessionsStrings,
             // The value is read inside the row item (100's rule: the lazy
@@ -244,7 +233,6 @@ fun SettingsScreen(
             onGroupByProjectChange = { onGroup(it) },
             onOpenArchived = { openArchived(nav) },
         )
-        aboutSection(about)
         signOutSection { sheets.show(signOutSheet { signOut() }) }
     }
 }

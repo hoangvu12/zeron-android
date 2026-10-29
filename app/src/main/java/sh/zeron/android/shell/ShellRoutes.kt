@@ -7,8 +7,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import sh.zeron.android.accounts.AgentAccountsRoute
 import sh.zeron.android.accounts.AgentAccountsScreen
-import sh.zeron.android.settings.LicensesRoute
-import sh.zeron.android.settings.LicensesScreen
 import sh.zeron.android.session.SessionScreenRoute
 import sh.zeron.android.settings.SettingsScreen
 import sh.zeron.android.sessions.FolderRoute
@@ -36,7 +34,7 @@ data object SettingsRoute : NavRoute {
 /**
  * The shell's route table: `when (route)` over every route the Sessions
  * stack can hold. 45 registers the folder route; 76 registers the Session
- * route; 101 registers the Licenses screen the Settings "About" row pushes.
+ * route.
  */
 @Composable
 fun ShellRouteContent(route: NavRoute) {
@@ -52,7 +50,6 @@ fun ShellRouteContent(route: NavRoute) {
         is SettingsRoute -> Box(Modifier.fillMaxSize().testTag("tab-root-more")) {
             SettingsScreen()
         }
-        is LicensesRoute -> LicensesScreen()
         // Ticket 45: one folder's sessions (Pinned, a user section,
         // Archived). The tablet sidebar (105) renders pushed routes
         // through this same table, so one branch serves both hosts.
