@@ -18,7 +18,7 @@ import sh.zeron.android.session.SessionEventHub
 import sh.zeron.android.sessions.SessionRowVM
 import uniffi.zeron_core.CoreClient
 import uniffi.zeron_core.SessionHandle
-import uniffi.zeron_core.SubagentInfo
+import uniffi.zeron_core.SubagentRow
 import uniffi.zeron_core.SubagentState
 
 /** Where a subagent stands — its spawn chip's lifecycle, never `resolved` alone. */
@@ -26,7 +26,7 @@ enum class AgentState { Running, Done, Failed }
 
 /**
  * One subagent of an open chat, as the sheet lists it (the port of
- * upstream #899's `SubagentInfo`). A plain mirror of the FFI record so
+ * upstream #899's `SubagentInfo`; Zeron's `SubagentRow`). A plain mirror of the FFI record so
  * the sheet and its tests never touch the generated types.
  */
 @Immutable
@@ -46,14 +46,21 @@ data class SideChatsAgent(
     val running: Boolean get() = state == AgentState.Running
 
     companion object {
-        fun from(info: SubagentInfo): SideChatsAgent = SideChatsAgent(
-            docId = info.docId,
-            title = info.title,
-            state = agentState(info.state),
-            tail = info.tail,
-            model = info.model,
-            spawnedAtMs = info.spawnedAtMs,
-        )
+        /**
+         * Null while the subagent has no transcript doc yet (Zeron's
+         * `SubagentRow.docId` is optional): there is nothing to open.
+         * TODO(#40): the companions model lists those too.
+         */
+        fun from(info: SubagentRow): SideChatsAgent? = info.docId?.let { docId ->
+            SideChatsAgent(
+                docId = docId,
+                title = info.title,
+                state = agentState(info.state),
+                tail = info.tail,
+                model = info.model,
+                spawnedAtMs = info.startedAtMs,
+            )
+        }
     }
 }
 
@@ -132,7 +139,7 @@ class CoreSideChatsSource(
     private val client: () -> CoreClient?,
     private val handle: SessionHandle,
 ) : SideChatsSource {
-    override fun agents(): List<SideChatsAgent> = handle.subagents().map { SideChatsAgent.from(it) }
+    override fun agents(): List<SideChatsAgent> = handle.subagents().mapNotNull { SideChatsAgent.from(it) }
 
     override fun children(parentChatId: String): List<SessionRowVM> =
         client()?.childSessions(parentChatId).orEmpty()

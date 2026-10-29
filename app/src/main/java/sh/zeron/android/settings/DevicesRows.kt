@@ -19,55 +19,36 @@ import sh.zeron.android.design.GroupedRow
 import sh.zeron.android.design.ZeronIcons
 import sh.zeron.android.design.groupedSection
 import sh.zeron.android.design.settingsTag
-import uniffi.zeron_core.EngineState
-import uniffi.zeron_core.EngineView
-import uniffi.zeron_core.ParkReason
+import uniffi.zeron_core.DeviceView
 
 /**
  * The Settings "Devices" section (android-ui-parity #102): the port of
  * `MoreViewController.swift:189-190` — one informational row per device
- * (iOS lists cloud execution hosts; this still lists `CoreClient.engines()`
- * until the core swap). Rows don't open anything, as on iOS.
+ * in Zeron's `devices()`. Rows don't open anything, as on iOS.
+ * TODO(#35): the iOS Settings restructure (which devices it lists).
  *
  * Every visual — geometry, fonts, colours, the 8 dp dot, the chevron,
  * separators, the pressed highlight — comes from ticket 70's
  * [GroupedRow]; this file sets no dp, font or colour of its own. It adds
- * the row data, the connection-label mapping (the web's
- * `settings-engine.ts:71-87` vocabulary plus the typed `ParkReason`s)
- * and nothing else.
+ * the row data, the online/offline label and nothing else.
  *
- * Rows follow the live engine registry flow (ticket 71's
- * [ZeronApplication.coreStartup] `engines`) with **no extra delay**: a
+ * Rows follow the live device flow ([ZeronApplication.workspaceFeed]
+ * `devices`) with **no extra delay**: a
  * rename or connection change shows up on the next frame, with no
  * debounce and no grace — iOS reloads `apply(s, animatingDifferences:
  * false)` at once (`MoreViewController.swift:219`).
  */
 
-/** The section's copy, verbatim from the ticket's table. The ellipses are U+2026. */
+/** The section's copy, verbatim from the ticket's table. */
 object DevicesCopy {
     /** `MoreViewController.swift:189`. */
     const val Header = "Devices"
 
-    /** `settings-engine.ts:73` (the registry entry is still pending). */
-    const val Starting = "Starting\u2026"
-
     /** `settings-engine.ts:77`. */
     const val Connected = "Connected"
 
-    /** `settings-engine.ts:79`. */
-    const val Reconnecting = "Reconnecting\u2026"
-
-    /** `MoreViewController.swift:190` (the phone has no network). */
+    /** `MoreViewController.swift:190`. */
     const val Offline = "Offline"
-
-    /** `settings-engine.ts:83` (`Parked(IDENTITY_CHANGED)`). */
-    const val EngineChanged = "Engine changed"
-
-    /** `settings-engine.ts:83` (`Parked(REVOKED)`). */
-    const val SessionRevoked = "Session revoked"
-
-    /** `Parked(INCOMPATIBLE)` with no `lastError`. */
-    const val UpdateRequired = "Update required"
 }
 
 /**
@@ -84,7 +65,7 @@ object DevicesRowIds {
 /**
  * One row of the section, pure data: the [GroupedRow] inputs plus the
  * click's subject. Built only by [devicesRows]; the gallery builds them
- * from a fixed fixture instead of `EngineView`s.
+ * from a fixed fixture instead of `DeviceView`s.
  */
 @Immutable
 sealed interface DevicesRowSpec {
@@ -101,45 +82,24 @@ sealed interface DevicesRowSpec {
     }
 }
 
-/**
- * The connection label of [state] — `settings-engine.ts:71-87` (the web
- * engine row vocabulary) plus the typed states the web lacks:
- * [EngineState.Offline] (the OS reports no network) and the
- * [ParkReason]s behind the web's `lastError.includes("identity")` string
- * test. Every non-connected state is a plain word; only
- * [ParkReason.INCOMPATIBLE] shows `lastError` (the engine-too-old /
- * app-too-old sentence) — transport errors belong in logs, never in the
- * row. The `when` is exhaustive
- * with no `else`, so a new Rust state is a compile error, not a silent
- * label.
- */
-fun engineConnectionLabel(state: EngineState, lastError: String?): String = when (state) {
-    is EngineState.Connecting -> DevicesCopy.Starting
-    is EngineState.Connected -> DevicesCopy.Connected
-    is EngineState.Reconnecting -> DevicesCopy.Reconnecting
-    is EngineState.Offline -> DevicesCopy.Offline
-    is EngineState.Parked -> when (state.reason) {
-        ParkReason.IDENTITY_CHANGED -> DevicesCopy.EngineChanged
-        ParkReason.REVOKED -> DevicesCopy.SessionRevoked
-        ParkReason.INCOMPATIBLE ->
-            lastError?.trim().takeUnless { it.isNullOrEmpty() } ?: DevicesCopy.UpdateRequired
-    }
-}
+/** The row's label: Zeron reports presence only (`DeviceView.online`). */
+fun deviceConnectionLabel(online: Boolean): String =
+    if (online) DevicesCopy.Connected else DevicesCopy.Offline
 
 /**
  * The section's rows, `MoreViewController.swift:189-190` adapted: one
- * [DevicesRowSpec.Engine] per engine **in `engines()` order** (never
- * sorted). `null` (the core not `Ready` yet) is an empty list. The title guard
- * `name.trim().ifEmpty { host }` only stops an empty title line if
+ * [DevicesRowSpec.Engine] per device **in `devices()` order** (never
+ * sorted). `null` (no client yet) is an empty list. The title guard
+ * `name.trim().ifEmpty { id }` only stops an empty title line if
  * Rust's non-blank name guarantee ever breaks.
  */
-fun devicesRows(engines: List<EngineView>?): List<DevicesRowSpec> =
-    engines.orEmpty().map { e ->
+fun devicesRows(devices: List<DeviceView>?): List<DevicesRowSpec> =
+    devices.orEmpty().map { d ->
         DevicesRowSpec.Engine(
-            engineId = e.engineId,
-            title = e.name.trim().ifEmpty { e.host },
-            label = engineConnectionLabel(e.state, e.lastError),
-            connected = e.state is EngineState.Connected,
+            engineId = d.id,
+            title = d.name.trim().ifEmpty { d.id },
+            label = deviceConnectionLabel(d.online),
+            connected = d.online,
         )
     }
 
@@ -150,7 +110,7 @@ fun devicesRows(engines: List<EngineView>?): List<DevicesRowSpec> =
  */
 @Stable
 class DevicesSectionState internal constructor(
-    private val current: State<List<EngineView>?>,
+    private val current: State<List<DeviceView>?>,
 ) {
     /** The rows for the current engine list — a snapshot read. */
     val rows: List<DevicesRowSpec> by derivedStateOf { devicesRows(current.value) }
@@ -162,16 +122,16 @@ class DevicesSectionState internal constructor(
  * `LazyColumn` item.
  *
  * `collectAsState()` on the [StateFlow] starts from its current value, so
- * the first frame already shows the engines (no empty flash). Never call
- * `CoreClient.engines()` here or in composition: ticket 71's collector
+ * the first frame already shows the devices (no empty flash). Never call
+ * `CoreClient.devices()` here or in composition: the workspace feed
  * already reads it off the main thread.
  */
 @Composable
 fun rememberDevicesSectionState(
-    engines: StateFlow<List<EngineView>?> =
-        (LocalContext.current.applicationContext as ZeronApplication).coreStartup.engines,
+    devices: StateFlow<List<DeviceView>?> =
+        (LocalContext.current.applicationContext as ZeronApplication).workspaceFeed.devices,
 ): DevicesSectionState {
-    val current = engines.collectAsState()
+    val current = devices.collectAsState()
     return remember(current) { DevicesSectionState(current) }
 }
 

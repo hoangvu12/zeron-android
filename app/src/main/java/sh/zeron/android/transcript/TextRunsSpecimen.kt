@@ -156,6 +156,7 @@ private fun fixtureModel(fonts: StyleFonts, d: Float): RowModel {
             height = 200f,
             text = SpecimenText,
             runs = runs,
+            glyphs = emptyList(),
             boxes = emptyList(),
             links = emptyList(),
             scrollers = emptyList(),

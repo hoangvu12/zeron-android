@@ -5,9 +5,6 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.roundToInt
-import uniffi.zeron_core.AgentAccount
-import uniffi.zeron_core.AgentAccountsSnapshot
-import uniffi.zeron_core.AgentUsageWindow
 import uniffi.zeron_core.CoreException
 
 /**
@@ -186,22 +183,6 @@ fun resetText(
         "Resets " + zoned.format(DateTimeFormatter.ofPattern("EEE h:mm a", locale))
     } else {
         "Resets " + zoned.format(DateTimeFormatter.ofPattern("MMM d", locale))
-    }
-}
-
-/**
- * `"Usage updated just now"` / `"Usage updated 4 minutes ago"` for the
- * newest probe behind the snapshot's windows (`null` when no window was
- * ever probed).
- */
-fun updatedText(snapshot: AgentAccountsSnapshot, nowMs: Long): String? {
-    val at = snapshot.accounts.mapNotNull { it.usageFetchedAtMs }.maxOrNull() ?: return null
-    val age = nowMs - at
-    return when {
-        age < 60_000 -> "Usage updated just now"
-        age < 60 * 60_000 -> "Usage updated ${age / 60_000} minutes ago"
-        age < 24 * 60 * 60_000 -> "Usage updated ${age / 3_600_000} hours ago"
-        else -> "Usage updated ${age / 86_400_000} days ago"
     }
 }
 

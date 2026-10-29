@@ -11,10 +11,8 @@ import uniffi.zeron_core.CoreClient
 /**
  * What a pull-to-refresh does (android-ui-parity #48): the Android
  * reading of iOS's "redial the registry and rooms and re-probe health"
- * (`ios:App/AppModel.swift:292-318`) is android-app#06's
- * `CoreClient.refresh()` — it reconnects non-parked engines that are down
- * and probes every connected feed, resolving on fresh data or failure
- * with the core's own 3 s cap. The 0.6 s floor and the UI-side 3 s
+ * (`ios:App/AppModel.swift:292-318`). Zeron's core has no `refresh()`;
+ * [coreRefresher] nudges it with `onForeground()`. The 0.6 s floor and the UI-side 3 s
  * backstop live in `design/PullToRefresh.kt`'s [holdRefresh][sh.zeron.android.design.holdRefresh],
  * which wraps this — never call it directly from a screen.
  */
@@ -31,17 +29,18 @@ fun interface Refresher {
 val LocalRefresher = staticCompositionLocalOf<Refresher> { Refresher { } }
 
 /**
- * Production: android-app#06/#10's `CoreClient.refresh()`. A null client
- * (not paired yet / torn down) returns at once, so the spinner holds only
- * the 0.6 s floor — iOS spins for the full 3 s there; Zeron's shorter
- * hold is harmless. The call runs off main on [Dispatchers.IO] (ticket
+ * Production: `CoreClient.onForeground()`, which redials and re-pulls the
+ * workspace. It returns at once, so the spinner holds only the 0.6 s
+ * floor. TODO(#23): hold until the next `WorkspaceChanged` /
+ * `ConnectivityChanged`, as iOS `AppModel.refresh` does. A null client
+ * (signed out / torn down) returns at once too. The call runs off main on [Dispatchers.IO] (ticket
  * 42's FFI threading rule: no `CoreClient` call on the main thread — JNA
  * entry and android-app#06's re-entrant listener callbacks stay off it),
  * and `withContext` is cancellable, so `holdRefresh`'s 3 s backstop still
  * cuts it. Never wrap it in `runBlocking`.
  */
 fun coreRefresher(client: () -> CoreClient?): Refresher =
-    Refresher { withContext(Dispatchers.IO) { client()?.refresh() } }
+    Refresher { withContext(Dispatchers.IO) { client()?.onForeground() } }
 
 /**
  * One [PullToRefreshState] for a session-list screen (tickets 45, 46, 49;

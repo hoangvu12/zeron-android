@@ -18,6 +18,7 @@ import kotlinx.coroutines.launch
 import sh.zeron.android.core.Prefs
 import sh.zeron.android.core.WorkspaceFeed
 import sh.zeron.android.design.Feedback
+import uniffi.zeron_core.ConnectivityState
 
 /**
  * What the Sessions tab draws (ticket 40) — the `AppModel.frontPage`
@@ -27,8 +28,8 @@ import sh.zeron.android.design.Feedback
  * `buildSessionListItems` folds via [collapsedIds] and de-duplicates.
  *
  * The rebuild keys on the snapshot **revision** (not iOS's VM equality),
- * the grouping flag, the fold state and the engine names — see the
- * rebuild rule in the ticket.
+ * the grouping flag and the fold state — see the rebuild rule in the
+ * ticket.
  */
 data class FrontPageUi(
     val revision: ULong,
@@ -36,7 +37,7 @@ data class FrontPageUi(
     val sections: List<ListSection>,
     /** Headed ids whose effective fold is true — never a header-less section. */
     val collapsedIds: Set<String>,
-    /** Per-id section metadata (kind, unsuffixed name, engine). */
+    /** Per-id section metadata (kind, raw name). */
     val meta: Map<String, FrontSectionMeta>,
     /**
      * Section id → live value that replaces 41's row-derived one. Nothing
@@ -73,10 +74,8 @@ class FrontPageModel(
                 feed.snapshot.filterNotNull().distinctUntilChangedBy { it.revision },
                 prefs.groupByProject,
                 fold.state,
-                feed.engines.map { engineViews -> engineViews.associate { it.engineId to it.name } }
-                    .distinctUntilChanged(),
-            ) { ws, groupByProject, f, engineNames ->
-                val built = FrontPageSections.build(ws.front, groupByProject, engineNames)
+            ) { ws, groupByProject, f ->
+                val built = FrontPageSections.build(ws.front, groupByProject)
                 val sectionsById = ws.front.sections.associateBy { it.id }
                 FrontPageUi(
                     revision = ws.revision,
@@ -107,14 +106,14 @@ class FrontPageModel(
         .stateIn(scope, SharingStarted.Eagerly, null)
 
     init {
-        // Reconcile on every new snapshot revision and every engines-list
+        // Reconcile on every new snapshot revision and every connectivity
         // change: stale pendings drop, overrides push.
         scope.launch {
             combine(
                 feed.snapshot.filterNotNull().distinctUntilChangedBy { it.revision },
-                feed.engines,
-            ) { ws, engines -> ws to engines }
-                .collect { (ws, engines) -> fold.reconcile(ws, engines) }
+                feed.connectivity.map { it?.state == ConnectivityState.CONNECTED }.distinctUntilChanged(),
+            ) { ws, connected -> ws to connected }
+                .collect { (ws, connected) -> fold.reconcile(ws, connected) }
         }
     }
 

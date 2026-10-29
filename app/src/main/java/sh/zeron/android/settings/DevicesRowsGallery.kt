@@ -28,12 +28,9 @@ import sh.zeron.android.design.uiStyle
  *  1. "MacBook Pro", "Connected", a `success` dot (the side-by-side
  *     partner of `2-settings.png`'s "Choose Wallpaper…" row: same 68 dp
  *     two-line row, icon at x 32…56, title at x 72, then the dot);
- *  2. "Studio", "Reconnecting…", a `tertiary` dot;
- *  3. "Mac mini", "Session revoked";
- *  4. "Build box", the incompatible sentence as a multi-line subtitle —
- *     titles and subtitles wrap freely, so the row grows taller.
+ *  2. "Studio", "Offline", a `tertiary` dot.
  *
- * The fixture is built from [DevicesRowSpec]s directly — no `EngineView`
+ * The fixture is built from [DevicesRowSpec]s directly — no `DeviceView`
  * (no core, no FFI), so the page renders in any host. Registered in
  * ticket 22's `design/Gallery.kt` (debug source set) as
  * `GallerySection("Devices rows", screenshotHeightDp = 900)
@@ -59,20 +56,12 @@ fun DevicesRowsGallerySection() {
 }
 
 /**
- * The step-8 fixture, `DevicesRowSpec`s directly (no `EngineView`): the
- * `…` is U+2026, the incompatible sentence android-app#06 always sets as
- * `lastError` for `INCOMPATIBLE`.
+ * The step-8 fixture, `DevicesRowSpec`s directly (no `DeviceView`): Zeron
+ * reports presence only, so a row reads Connected or Offline.
  */
 private val devicesGalleryFixture = listOf(
-    DevicesRowSpec.Engine("e1", "MacBook Pro", "Connected", connected = true),
-    DevicesRowSpec.Engine("e2", "Studio", "Reconnecting\u2026", connected = false),
-    DevicesRowSpec.Engine("e3", "Mac mini", "Session revoked", connected = false),
-    DevicesRowSpec.Engine(
-        "e4",
-        "Build box",
-        "Build box needs a newer Zeron app. Update the app to connect.",
-        connected = false,
-    ),
+    DevicesRowSpec.Engine("e1", "MacBook Pro", DevicesCopy.Connected, connected = true),
+    DevicesRowSpec.Engine("e2", "Studio", DevicesCopy.Offline, connected = false),
 )
 
 /** The block caption: Geist 12 fixed, secondary, at the header's inset. */

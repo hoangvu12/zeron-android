@@ -23,7 +23,6 @@ import sh.zeron.android.composer.DraftKey
 import sh.zeron.android.composer.Drafts
 import sh.zeron.android.composer.StagedImage
 import sh.zeron.android.shell.LaunchOptions
-import uniffi.zeron_core.WorkspaceSnapshot
 
 /**
  * The New Session page's sticky state, app-wide (android-ui-parity #92) —
@@ -212,26 +211,6 @@ class NewSessionDraftStore(
         ModelCatalogCache.remove(deviceIds)
         // Re-assign so the stripped draft lands on the mirror and the disk.
         lastDraft = synchronized(lock) { mirror }
-    }
-
-    /**
-     * Convenience for ticket 140: the ids of [engineId] taken from
-     * [before] — the snapshot read **before** forgetting (android-app#07
-     * adds `engineId` to both records, so the scoped ids are never parsed
-     * in Kotlin).
-     */
-    fun forgetEngine(engineId: String, before: WorkspaceSnapshot?, enginesLeft: Int) {
-        val projectIds = before?.projects
-            ?.filter { it.engineId == engineId }
-            ?.map { it.id }
-            ?.toSet()
-            ?: emptySet()
-        val deviceIds = before?.devices
-            ?.filter { it.engineId == engineId }
-            ?.map { it.id }
-            ?.toSet()
-            ?: emptySet()
-        forgetEngine(projectIds, deviceIds, enginesLeft)
     }
 
     /**

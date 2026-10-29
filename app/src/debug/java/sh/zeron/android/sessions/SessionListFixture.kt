@@ -187,7 +187,6 @@ internal object SessionListFixtures {
         timeLabel: String = "now",
     ): SessionRow = SessionRow(
         id = id,
-        engineId = "A",
         revision = 1uL,
         title = title,
         hasTitle = true,
@@ -196,7 +195,7 @@ internal object SessionListFixtures {
         deviceId = "device-A",
         deviceName = deviceName,
         deviceOnline = true,
-        engineOnline = true,
+        isCloud = false,
         harness = harness,
         harnessLabel = null,
         model = null,
@@ -217,5 +216,6 @@ internal object SessionListFixtures {
         pullRequest = pullRequest,
         sendState = null,
         parentChatId = null,
+        roomGen = 0u,
     )
 }

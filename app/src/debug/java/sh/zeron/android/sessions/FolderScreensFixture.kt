@@ -38,7 +38,6 @@ internal object FolderFixtures {
         sectionId: String? = SECTION_ID,
     ): SessionRow = SessionRow(
         id = id,
-        engineId = "eng1",
         revision = 1uL,
         title = title,
         hasTitle = true,
@@ -47,7 +46,7 @@ internal object FolderFixtures {
         deviceId = "device-eng1",
         deviceName = deviceName,
         deviceOnline = true,
-        engineOnline = true,
+        isCloud = false,
         harness = "claude-code",
         harnessLabel = null,
         model = null,
@@ -68,6 +67,7 @@ internal object FolderFixtures {
         pullRequest = null,
         sendState = null,
         parentChatId = null,
+        roomGen = 0u,
     )
 
     /** "Streaming veil on transcript rows" (project "zeron", branch "main"). */
@@ -125,29 +125,28 @@ internal object FolderFixtures {
         front = FrontPage(
             pinned = emptyList(),
             sections = listOf(
-                SectionView(id = SECTION_ID, engineId = "eng1", name = name, collapsed = false, sessions = rows),
+                SectionView(id = SECTION_ID, name = name, collapsed = false, sessions = rows),
             ),
             recent = emptyList(),
-            groups = emptyList(),
         ),
         archived = emptyList(),
     )
 
     /** The Pinned folder with [rows] (2 by default; `emptyList()` = empty Pinned). */
     fun pinnedWorkspace(rows: List<SessionRow> = pinnedRows): WorkspaceSnapshot = workspace(
-        front = FrontPage(pinned = rows, sections = emptyList(), recent = emptyList(), groups = emptyList()),
+        front = FrontPage(pinned = rows, sections = emptyList(), recent = emptyList()),
         archived = emptyList(),
     )
 
     /** The Archived folder with [rows] (2 by default; `emptyList()` = the empty archive). */
     fun archivedWorkspace(rows: List<SessionRow> = archivedRows): WorkspaceSnapshot = workspace(
-        front = FrontPage(pinned = emptyList(), sections = emptyList(), recent = emptyList(), groups = emptyList()),
+        front = FrontPage(pinned = emptyList(), sections = emptyList(), recent = emptyList()),
         archived = rows,
     )
 
     /** The section gone entirely (deleted elsewhere): an empty list, the screen stays. */
     fun noSectionWorkspace(): WorkspaceSnapshot = workspace(
-        front = FrontPage(pinned = emptyList(), sections = emptyList(), recent = listOf(veil, models, launchPost), groups = emptyList()),
+        front = FrontPage(pinned = emptyList(), sections = emptyList(), recent = listOf(veil, models, launchPost)),
         archived = emptyList(),
     )
 }

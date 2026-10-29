@@ -50,9 +50,6 @@ object SessionPromptCopy {
     /** `:504`. */
     const val DeleteSectionAction = "Delete Section"
 
-    /** Zeron's engine-chooser message (android-app#20:237); iOS has no equivalent. */
-    const val CreateOnMessage = "Create on"
-
     /** `:304`, `:312`, `:323`, `:403`, `:493`, `:509`. */
     const val Cancel = "Cancel"
 
@@ -138,19 +135,14 @@ fun renameSectionAlert(currentName: String, onRename: (String) -> Unit): ZeronAl
     ),
 )
 
-/** One row of the Move to Section sheet: a section of the chat's engine. */
+/** One row of the Move to Section sheet: a user section. */
 data class SectionChoice(val id: String, val name: String)
 
-/** One engine of the "Create on" chooser (or the new-section pre-check). */
-data class EngineChoice(val engineId: String, val name: String, val connected: Boolean)
-
 /**
- * "Move to Section" (`:298-307`): one default row per **user section of the
- * chat's engine** in snapshot order, then "No Section" — always last, even
- * when the chat is in no section. No checkmark on the current section (the
- * pr621 Android port adds one; iOS does not), no "New Section…" row.
- * Zeron scopes the list to one engine because a cross-engine assign is
- * refused (`InvalidArgument`).
+ * "Move to Section" (`:298-307`): one default row per **user section** in
+ * snapshot order, then "No Section" — always last, even when the chat is
+ * in no section. No checkmark on the current section (the pr621 Android
+ * port adds one; iOS does not), no "New Section…" row.
  */
 fun moveToSectionSheet(sections: List<SectionChoice>, onMove: (sectionId: String?) -> Unit): ActionSheetModel =
     ActionSheetModel(
@@ -190,59 +182,3 @@ fun deleteSessionAlert(title: String, onDelete: () -> Unit): ZeronAlert = ZeronA
         AlertButton(SessionPromptCopy.Delete, role = AlertButtonRole.Destructive) { onDelete() },
     ),
 )
-
-/**
- * The "Create on" engine chooser (Zeron's step before the New Section
- * alert when several engines are connected, android-app#20:237): one
- * default row per **connected** engine in registry order. Duplicate engine
- * names list as-is; no source defines a disambiguation.
- */
-fun createOnSheet(engines: List<EngineChoice>, onPick: (engineId: String) -> Unit): ActionSheetModel =
-    ActionSheetModel(
-        title = SessionPromptCopy.NewSectionTitle,
-        message = SessionPromptCopy.CreateOnMessage,
-        actions = engines.map { engine ->
-            ActionSheetAction(engine.name) { onPick(engine.engineId) }
-        },
-    )
-
-/**
- * What ⋯/row "New Section…" should do first (android-app#20:235-239):
- * an explicit engine id wins when that engine is connected (an unknown id
- * counts as not connected); `null` decides by the connected count — none
- * → toast, one → straight to the alert, several → the chooser.
- */
-sealed interface NewSectionTarget {
-    /** No connected engine: the caller toasts "Engine not connected" and shows nothing. */
-    data object NoneConnected : NewSectionTarget
-
-    /** Exactly one candidate engine: show the New Section alert for it. */
-    data class Engine(val engineId: String) : NewSectionTarget
-
-    /** Two or more connected engines, in registry order: show the "Create on" sheet. */
-    data class Choose(val engines: List<EngineChoice>) : NewSectionTarget
-}
-
-/**
- * The decision for "New Section…": `explicitEngineId != null` → that engine
- * when connected, else [NewSectionTarget.NoneConnected]; `null` → by the
- * connected count (0 → [NewSectionTarget.NoneConnected], 1 →
- * [NewSectionTarget.Engine], else [NewSectionTarget.Choose] over the
- * connected engines in list order).
- */
-fun newSectionTarget(explicitEngineId: String?, engines: List<EngineChoice>): NewSectionTarget {
-    if (explicitEngineId != null) {
-        val engine = engines.firstOrNull { it.engineId == explicitEngineId }
-        return if (engine?.connected == true) {
-            NewSectionTarget.Engine(explicitEngineId)
-        } else {
-            NewSectionTarget.NoneConnected
-        }
-    }
-    val connected = engines.filter { it.connected }
-    return when (connected.size) {
-        0 -> NewSectionTarget.NoneConnected
-        1 -> NewSectionTarget.Engine(connected.single().engineId)
-        else -> NewSectionTarget.Choose(connected)
-    }
-}

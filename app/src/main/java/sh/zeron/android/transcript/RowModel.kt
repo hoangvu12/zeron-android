@@ -159,6 +159,10 @@ class RowModel(val display: RowDisplay) {
      * density plumbing) and the element painters mutate shared scratch.
      * [palette] is read per call — theme switches only repaint, the model
      * is never rebuilt. [layer] out of range is a no-op, not a crash.
+     *
+     * TODO(#29): `display.glyphs` (math) are not painted yet; they go
+     * between the runs and the fades, and the veil passes need
+     * `BoxPrim.start` / `GlyphPrim.start`.
      */
     fun draw(
         layer: Int,

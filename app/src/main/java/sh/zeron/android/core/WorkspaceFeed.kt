@@ -12,7 +12,7 @@ import uniffi.zeron_core.ClientEvent
 import uniffi.zeron_core.Connectivity
 import uniffi.zeron_core.CoreClient
 import uniffi.zeron_core.CoreException
-import uniffi.zeron_core.EngineView
+import uniffi.zeron_core.DeviceView
 import uniffi.zeron_core.WorkspaceSnapshot
 
 /**
@@ -29,8 +29,8 @@ interface WorkspaceCore {
     /** The whole derived workspace. */
     fun workspace(): WorkspaceSnapshot
 
-    /** Every engine, in registry order. */
-    fun engines(): List<EngineView>
+    /** Every device in the org (Zeron's `devices()`; Roboco's `engines()`). */
+    fun devices(): List<DeviceView>
 
     /** The aggregate connectivity posture (ticket 50 reads it). */
     fun connectivity(): Connectivity
@@ -57,7 +57,7 @@ class CoreClientWorkspace(private val client: () -> CoreClient?) : WorkspaceCore
 
     override fun workspace(): WorkspaceSnapshot = live().workspace()
 
-    override fun engines(): List<EngineView> = live().engines()
+    override fun devices(): List<DeviceView> = live().devices()
 
     override fun connectivity(): Connectivity = live().connectivity()
 
@@ -76,8 +76,8 @@ class CoreClientWorkspace(private val client: () -> CoreClient?) : WorkspaceCore
  * a read only when the revision moved, the read itself publishes only when
  * the fetched revision differs, and bursts conflate to at most one pending
  * read per in-flight one — a burst of N events costs at most two
- * `workspace()` calls. Engine views refresh the same way on
- * `EnginesChanged`/`ConnectivityChanged`.
+ * `workspace()` calls. Device views and connectivity refresh the same way
+ * on `WorkspaceChanged`/`ConnectivityChanged`.
  *
  * The FFI never runs on the caller's thread: both drains run on one serial
  * lane over [io], and `onEvent` (called from a Rust runtime thread) only
@@ -91,15 +91,15 @@ class WorkspaceFeed(
 
     private val serial = io.limitedParallelism(1)
     private val workspaceDirty = Channel<Unit>(Channel.CONFLATED)
-    private val enginesDirty = Channel<Unit>(Channel.CONFLATED)
+    private val devicesDirty = Channel<Unit>(Channel.CONFLATED)
 
     private val _snapshot = MutableStateFlow<WorkspaceSnapshot?>(null)
     /** The merged workspace; null until the first read. */
     val snapshot: StateFlow<WorkspaceSnapshot?> = _snapshot.asStateFlow()
 
-    private val _engines = MutableStateFlow<List<EngineView>>(emptyList())
-    /** Every paired engine; empty until the first read. */
-    val engines: StateFlow<List<EngineView>> = _engines.asStateFlow()
+    private val _devices = MutableStateFlow<List<DeviceView>>(emptyList())
+    /** Every device in the org; empty until the first read. */
+    val devices: StateFlow<List<DeviceView>> = _devices.asStateFlow()
 
     private val _connectivity = MutableStateFlow<Connectivity?>(null)
     /** The aggregate connectivity posture; null until the first read (ticket 50). */
@@ -117,15 +117,14 @@ class WorkspaceFeed(
             }
         }
         scope.launch(serial) {
-            for (trigger in enginesDirty) {
+            for (trigger in devicesDirty) {
                 val c = core() ?: continue
-                val engineViews = try { c.engines() } catch (e: CoreException) { continue }
-                if (engineViews != _engines.value) _engines.value = engineViews
+                val deviceViews = try { c.devices() } catch (e: CoreException) { continue }
+                if (deviceViews != _devices.value) _devices.value = deviceViews
                 // Ticket 50: the aggregate connectivity posture, read on
-                // the same drain — `EnginesChanged` and
-                // `ConnectivityChanged` both trigger it, so the engines
-                // and the posture never disagree. Off the main thread,
-                // like the engines read above it.
+                // the same drain, so the devices and the posture never
+                // disagree. Off the main thread, like the devices read
+                // above it.
                 val conn = try { c.connectivity() } catch (e: CoreException) { continue }
                 if (conn != _connectivity.value) _connectivity.value = conn
             }
@@ -135,7 +134,7 @@ class WorkspaceFeed(
     /** Triggers a first read of both lists; safe to call before the client exists. */
     fun start() {
         workspaceDirty.trySend(Unit)
-        enginesDirty.trySend(Unit)
+        devicesDirty.trySend(Unit)
     }
 
     /**
@@ -145,10 +144,14 @@ class WorkspaceFeed(
      */
     fun onEvent(event: ClientEvent) {
         when (event) {
-            is ClientEvent.WorkspaceChanged ->
+            // Zeron has no `EnginesChanged`: device presence rides on the
+            // workspace (`WorkspaceSnapshot.devices`), so a workspace change
+            // re-reads the devices too.
+            is ClientEvent.WorkspaceChanged -> {
                 if (event.revision != _snapshot.value?.revision) workspaceDirty.trySend(Unit)
-            ClientEvent.EnginesChanged, is ClientEvent.ConnectivityChanged ->
-                enginesDirty.trySend(Unit)
+                devicesDirty.trySend(Unit)
+            }
+            is ClientEvent.ConnectivityChanged -> devicesDirty.trySend(Unit)
             else -> {}
         }
     }

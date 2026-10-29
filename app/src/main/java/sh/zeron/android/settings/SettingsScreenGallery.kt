@@ -21,9 +21,8 @@ import sh.zeron.android.notify.NotificationStatus
 import sh.zeron.android.shell.NavRoute
 import sh.zeron.android.shell.NavStack
 import sh.zeron.android.shell.NavStackHost
-import uniffi.zeron_core.EngineDiagnostics
-import uniffi.zeron_core.EngineState
-import uniffi.zeron_core.EngineView
+import uniffi.zeron_core.DeviceView
+import uniffi.zeron_core.UsageWindowInfo
 import uniffi.zeron_core.WallpaperEffect
 
 /**
@@ -101,7 +100,7 @@ private data object SettingsGalleryRoot : NavRoute {
 @Composable
 private fun SettingsScreenGalleryContent(listState: LazyListState, live: Boolean) {
     val devices = rememberDevicesSectionState(
-        engines = remember { MutableStateFlow(listOf(galleryEngine())) },
+        devices = remember { MutableStateFlow(listOf(galleryDevice())) },
     )
     val appearance = rememberAppearanceSectionState(
         appearance = remember { MutableStateFlow(Appearance.System) },
@@ -161,82 +160,71 @@ private fun LazyListScope.galleryAgentAccountsSection() {
         header = sh.zeron.android.accounts.AgentAccountsSectionCopy.Header,
         items = rows,
         itemKey = { it.id },
-        footer = sh.zeron.android.accounts.AccountsCopy.planUsageOn("MacBook Pro") +
-            " Usage updated just now.",
+        footer = sh.zeron.android.accounts.AccountsCopy.planUsageOn("MacBook Pro"),
     ) { spec, position ->
         sh.zeron.android.accounts.AgentAccountsRow(spec, position, onClick = {})
     }
 }
 
 /** The section's fixture snapshot — pure records, no FFI. */
-private fun galleryAccountsSnapshot(): uniffi.zeron_core.AgentAccountsSnapshot =
-    uniffi.zeron_core.AgentAccountsSnapshot(
+private fun galleryAccountsSnapshot(): sh.zeron.android.accounts.AgentAccountsSnapshot =
+    sh.zeron.android.accounts.AgentAccountsSnapshot(
         accounts = listOf(
-            uniffi.zeron_core.AgentAccount(
+            galleryAccount(
                 id = "alice-slot",
                 harness = "claude-code",
                 email = "alice@example.com",
                 planLabel = "Max 20\u00d7",
                 active = true,
-                usageWindows = listOf(
-                    uniffi.zeron_core.AgentUsageWindow(
-                        label = "Session",
-                        usedFraction = 0.42f,
-                        resetsAtMs = null,
-                    ),
-                    uniffi.zeron_core.AgentUsageWindow(
-                        label = "Week",
-                        usedFraction = 0.08f,
-                        resetsAtMs = null,
-                    ),
-                ),
-                usageFetchedAtMs = null,
-                usageError = null,
-                displayName = null,
                 organization = "Test Org",
-                apiKey = false,
-                switchable = true,
-                provider = null,
+                usage = listOf(
+                    UsageWindowInfo(label = "Session", usedFraction = 0.42f, resetsAtMs = null),
+                    UsageWindowInfo(label = "Week", usedFraction = 0.08f, resetsAtMs = null),
+                ),
             ),
-            uniffi.zeron_core.AgentAccount(
+            galleryAccount(
                 id = "bob-slot",
                 harness = "claude-code",
                 email = "bob@example.com",
                 planLabel = "Pro",
                 active = false,
-                usageWindows = emptyList(),
-                usageFetchedAtMs = null,
-                usageError = null,
-                displayName = null,
-                organization = null,
-                apiKey = false,
-                switchable = true,
-                provider = null,
             ),
-            uniffi.zeron_core.AgentAccount(
+            galleryAccount(
                 id = "codex-slot",
                 harness = "codex",
                 email = "dev@example.com",
                 planLabel = "Plus",
                 active = true,
-                usageWindows = listOf(
-                    uniffi.zeron_core.AgentUsageWindow(
-                        label = "Session",
-                        usedFraction = 0.91f,
-                        resetsAtMs = null,
-                    ),
+                usage = listOf(
+                    UsageWindowInfo(label = "Session", usedFraction = 0.91f, resetsAtMs = null),
                 ),
-                usageFetchedAtMs = null,
-                usageError = null,
-                displayName = null,
-                organization = null,
-                apiKey = false,
-                switchable = true,
-                provider = null,
             ),
         ),
-        warnings = emptyList(),
     )
+
+/** One fixture login; every field the section doesn't read is neutral. */
+private fun galleryAccount(
+    id: String,
+    harness: String,
+    email: String,
+    planLabel: String,
+    active: Boolean,
+    organization: String? = null,
+    usage: List<UsageWindowInfo> = emptyList(),
+): sh.zeron.android.accounts.AgentAccount = sh.zeron.android.accounts.AgentAccount(
+    id = id,
+    harness = harness,
+    email = email,
+    displayName = null,
+    planLabel = planLabel,
+    active = active,
+    switchable = true,
+    apiKey = false,
+    organization = organization,
+    provider = null,
+    usage = usage,
+    usageError = null,
+)
 
 /**
  * The wallpaper section over a gallery-local fake store (like 97's live
@@ -290,33 +278,20 @@ private fun LazyListScope.galleryStaticWallpaperSection() {
 }
 
 /**
- * The fixture's one paired engine ("MacBook Pro", `Connected`): the fields
- * 102's section reads, every other field a neutral value — pure data, no
- * FFI (the same shape as 102's test fixture, in the main source set so
- * the gallery can build the real `DevicesSectionState`).
+ * The fixture's one device ("MacBook Pro", online): the fields 102's
+ * section reads, every other field a neutral value — pure data, no FFI.
  */
-private fun galleryEngine(): EngineView = EngineView(
-    engineId = "e1",
+private fun galleryDevice(): DeviceView = DeviceView(
+    id = "e1",
     name = "MacBook Pro",
-    host = "studio.local:27655",
-    baseUrl = "https://studio.local:27655",
-    deviceId = "device-e1",
     platform = "windows",
+    online = true,
+    lastSeenMs = null,
     version = "1.2.3",
-    state = EngineState.Connected,
-    lastError = null,
-    retryAtMs = null,
-    lastConnectedMs = null,
     capabilities = emptyList(),
-    notice = null,
-    fromCache = false,
-    diagnostics = EngineDiagnostics(
-        repairedRows = 0u,
-        skippedRows = 0u,
-        lastDecodeError = null,
-        missingStreams = emptyList(),
-        generation = 0uL,
-    ),
+    isExecutionHost = true,
+    isSelf = false,
+    sessionCount = 0u,
 )
 
 // ---------------------------------------------------------------------------

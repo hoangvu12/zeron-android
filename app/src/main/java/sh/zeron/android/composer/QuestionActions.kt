@@ -24,11 +24,14 @@ fun interface QuestionPort {
 
 /** The live [QuestionPort] over one open session's handle. */
 class CoreQuestionPort(private val handle: SessionHandle) : QuestionPort {
+    // Zeron's `respondInput` is synchronous: keep it off main.
     override suspend fun respondInput(requestId: String, answers: List<QuestionAnswer>): Unit =
-        handle.respondInput(
-            requestId,
-            answers.map { UserInputAnswer(questionId = it.questionId, labels = it.labels) },
-        )
+        withContext(Dispatchers.IO) {
+            handle.respondInput(
+                requestId,
+                answers.map { UserInputAnswer(questionId = it.questionId, labels = it.labels) },
+            )
+        }
 }
 
 /**

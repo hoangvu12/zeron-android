@@ -21,14 +21,15 @@ import sh.zeron.android.session.ChromeInput
 import sh.zeron.android.session.CONTEXT_WARNING_SYMBOL
 import sh.zeron.android.session.SessionChipIds
 import sh.zeron.android.session.SessionChrome
-import uniffi.zeron_core.AgentAccount
-import uniffi.zeron_core.AgentAccountsSnapshot
 
 /**
  * The composer's plan usage (android-next#05) — the port of PR #578's
  * `refreshUsage` half of `CoreSessionSource`, folded into android-next
  * #01's context chip (user decision, 2026-10-15: no separate usage
  * chip). This filler owns the account side only:
+ *
+ * TODO(#33): Roboco-only (docs/port/05 I1/I2; the iOS context chip has no
+ * menu). Kept compiling on the Zeron account adapter until #33 removes it.
  *
  * - the **tint**: the context chip keeps its context reading ("12%
  *   context" / tokens); its tint becomes the **worse** of the context

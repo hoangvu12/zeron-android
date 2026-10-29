@@ -42,38 +42,8 @@ import uniffi.zeron_core.SectionView
 import uniffi.zeron_core.SessionRow
 
 /**
- * The fake [SessionPromptBackend] for the gallery: the three engines of
- * the ticket's fixture — `studio` "Studio Mac" and `linux` "Linux box"
- * connected, `windows` "Windows desktop" offline — with [setConnected] so
- * the ⋯ buttons can re-shape the list before each launch (the launchers
- * read it at invocation time, so no recomposition is needed).
- */
-private class FakeSessionPromptBackend : SessionPromptBackend {
-
-    private val engines = mutableListOf(
-        EngineChoice("studio", "Studio Mac", true),
-        EngineChoice("linux", "Linux box", true),
-        EngineChoice("windows", "Windows desktop", false),
-    )
-
-    override fun engines(): List<EngineChoice> = engines.toList()
-
-    /** Restores the two-connected default the ⋯ buttons start from. */
-    fun reset() {
-        setConnected("studio", true)
-        setConnected("linux", true)
-        setConnected("windows", false)
-    }
-
-    fun setConnected(engineId: String, connected: Boolean) {
-        val index = engines.indexOfFirst { it.engineId == engineId }
-        if (index >= 0) engines[index] = engines[index].copy(connected = connected)
-    }
-}
-
-/**
  * The gallery's [RowActions] fake: every call logs to [log] (the "Last
- * result" line, e.g. `createSection(Infra 2, linux)`), `onResult` fires
+ * result" line, e.g. `createSection(Infra 2)`), `onResult` fires
  * synchronously, and [failMode] imitates ticket 42's offline row for the
  * **section** writes only — the "Engine not connected" toast and
  * [ActionOutcome.EngineOffline] — so "Delete fails (offline)" shows a
@@ -85,11 +55,11 @@ private class LoggingRowActions(
     private val log: (String) -> Unit,
 ) : RowActions {
 
-    /** The ticket's fixture: Backend + Design review on Studio Mac, Infra on Linux box. */
-    private val sections = listOf(
-        SectionView(id = "backend", engineId = "studio", name = "Backend", collapsed = false, sessions = emptyList()),
-        SectionView(id = "design", engineId = "studio", name = "Design review", collapsed = false, sessions = emptyList()),
-        SectionView(id = "infra", engineId = "linux", name = "Infra", collapsed = false, sessions = emptyList()),
+    /** The ticket's fixture: Backend, Design review and Infra. */
+    private val fixtureSections = listOf(
+        SectionView(id = "backend", name = "Backend", collapsed = false, sessions = emptyList()),
+        SectionView(id = "design", name = "Design review", collapsed = false, sessions = emptyList()),
+        SectionView(id = "infra", name = "Infra", collapsed = false, sessions = emptyList()),
     )
 
     private fun ok(onResult: (ActionOutcome) -> Unit) = onResult(ActionOutcome.Ok)
@@ -141,10 +111,9 @@ private class LoggingRowActions(
 
     override fun createSection(
         name: String,
-        engineId: String?,
         onResult: (ActionOutcome) -> Unit,
         onCreated: (sectionId: String) -> Unit,
-    ) = sectionWrite("createSection($name, $engineId)", onResult) { onCreated("gallery:s1") }
+    ) = sectionWrite("createSection($name)", onResult) { onCreated("gallery:s1") }
 
     override fun renameSection(sectionId: String, name: String, onResult: (ActionOutcome) -> Unit) =
         sectionWrite("renameSection($sectionId, $name)", onResult)
@@ -152,26 +121,25 @@ private class LoggingRowActions(
     override fun deleteSection(sectionId: String, onResult: (ActionOutcome) -> Unit) =
         sectionWrite("deleteSection($sectionId)", onResult)
 
-    override fun sectionsFor(engineId: String): List<SectionView> = sections.filter { it.engineId == engineId }
+    override fun sections(): List<SectionView> = fixtureSections
 
     override fun report(error: Throwable) {
         log("report($error)")
     }
 }
 
-/** The row the launchers take (44 passes the live record): id, engine and displayed title. */
-private fun galleryRow(id: String, engineId: String, title: String): SessionRow = SessionRow(
+/** The row the launchers take (44 passes the live record): id and displayed title. */
+private fun galleryRow(id: String, title: String): SessionRow = SessionRow(
     id = id,
-    engineId = engineId,
     revision = 1uL,
     title = title,
     hasTitle = true,
     preview = null,
     project = null,
-    deviceId = "device-$engineId",
+    deviceId = "device-studio",
     deviceName = null,
     deviceOnline = true,
-    engineOnline = true,
+    isCloud = false,
     harness = null,
     harnessLabel = null,
     model = null,
@@ -192,21 +160,22 @@ private fun galleryRow(id: String, engineId: String, title: String): SessionRow 
     pullRequest = null,
     sendState = null,
     parentChatId = null,
+    roomGen = 0u,
 )
 
 /**
  * The "Session Prompts" page of the debug design gallery
  * (android-ui-parity #43): the five prompt launchers over fakes — the
  * nine buttons of the ticket's step 6, the fail-mode switch, and the last
- * result line the fake [RowActions] writes (`createSection(Infra 2,
- * linux)`, `renamed: API`, `popped`, …).
+ * result line the fake [RowActions] writes (`createSection(Infra 2)`,
+ * `renamed: API`, `popped`, …).
  *
  * The gallery's `GalleryProviders` already wraps every section in
  * `ContextMenuHost { AlertHost { ToastHost { … } } }`, so this section
  * adds only the innermost [ActionSheetHost] — together exactly ticket
  * 35's mount order, and the alerts/toasts of the launchers draw over the
- * sheets. It also provides the [FakeSessionPromptBackend] and the
- * [LoggingRowActions] as the locals [rememberSessionPrompts] reads.
+ * sheets. It also provides the [LoggingRowActions] as the local
+ * [rememberSessionPrompts] reads.
  *
  * Fill layout (like every section that owns an in-window sheet host): the
  * `ActionSheetHost` needs the body's bounded height — the Scroll frame's
@@ -227,15 +196,11 @@ fun SessionPromptsGallerySection() {
 
     var result by remember { mutableStateOf("—") }
     var failMode by remember { mutableStateOf(false) }
-    val backend = remember { FakeSessionPromptBackend() }
     val actions = remember { LoggingRowActions(toaster, { failMode }) { result = it } }
-    val c1 = remember { galleryRow("c1", "studio", "Fix flaky test") }
+    val c1 = remember { galleryRow("c1", "Fix flaky test") }
 
     ActionSheetHost(state = sheets) {
-        CompositionLocalProvider(
-            LocalSessionPromptBackend provides backend,
-            LocalRowActions provides actions,
-        ) {
+        CompositionLocalProvider(LocalRowActions provides actions) {
             Box(Modifier.fillMaxSize()) {
                 GalleryBackdrop(Modifier.matchParentSize())
                 Column(
@@ -255,9 +220,8 @@ fun SessionPromptsGallerySection() {
                         uiStyle(Face.SansSemibold, typeScale.fixed(17f), palette.text),
                     )
                     PromptLabel(
-                        "The five prompts over fakes: Studio Mac and Linux box connected, " +
-                            "Windows desktop offline; sections Backend + Design review (studio), " +
-                            "Infra (linux); row \"Fix flaky test\" on studio.",
+                        "The five prompts over fakes: sections Backend, Design review and " +
+                            "Infra; row \"Fix flaky test\".",
                         uiStyle(Face.Sans, typeScale.fixed(13f), palette.secondary),
                     )
                     PromptLabel(
@@ -272,41 +236,7 @@ fun SessionPromptsGallerySection() {
 
                     val buttonStyle = uiStyle(Face.SansMedium, typeScale.fixed(14f), palette.accent)
                     PromptLabel("Rename Session", buttonStyle, Modifier.clickable { prompts.renameSession(c1) })
-                    PromptLabel(
-                        "New Section (⋯, 2 connected)",
-                        buttonStyle,
-                        Modifier.clickable {
-                            backend.reset()
-                            prompts.newSection()
-                        },
-                    )
-                    PromptLabel(
-                        "New Section (⋯, 1 connected)",
-                        buttonStyle,
-                        Modifier.clickable {
-                            backend.reset()
-                            backend.setConnected("linux", false) // Linux box offline first
-                            prompts.newSection()
-                        },
-                    )
-                    PromptLabel(
-                        "New Section (⋯, none)",
-                        buttonStyle,
-                        Modifier.clickable {
-                            backend.reset()
-                            backend.setConnected("studio", false)
-                            backend.setConnected("linux", false)
-                            prompts.newSection()
-                        },
-                    )
-                    PromptLabel(
-                        "New Section (row, offline engine)",
-                        buttonStyle,
-                        Modifier.clickable {
-                            backend.reset()
-                            prompts.newSection("windows")
-                        },
-                    )
+                    PromptLabel("New Section", buttonStyle, Modifier.clickable { prompts.newSection() })
                     PromptLabel(
                         "Rename Section",
                         buttonStyle,

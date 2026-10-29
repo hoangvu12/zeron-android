@@ -23,8 +23,8 @@ enum class RootKind { Welcome, Phone, Split }
  *   (iOS reads the Keychain synchronously in `AppModel.init`);
  * - [CoreFailed] — the native core could not be loaded; the diagnostic
  *   screen replaces the app;
- * - [Ready] — the engine list is known; [Ready.hasEngines] is
- *   `engines().isNotEmpty()`, parked (revoked) engines included.
+ * - [Ready] — startup finished; [Ready.hasEngines] is "signed in" (a
+ *   `CoreClient` exists). TODO(#13): renamed with the session holder.
  */
 sealed interface RootInput {
     data object Loading : RootInput

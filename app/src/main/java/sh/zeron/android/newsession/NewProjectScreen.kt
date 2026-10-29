@@ -152,16 +152,14 @@ fun NewProjectScreen(
             FolderList(controller, nav)
             // 111's bottom stack, overlaid bottom-centre on the list (no
             // background — rows scroll underneath; 110's 160 dp bottom
-            // content padding keeps the last row reachable). 112's
-            // typed-path state overrides the status and the Use button;
-            // `null` keeps 111's own values.
+            // content padding keeps the last row reachable).
             FolderBrowserBottomBar(
-                status = nav.statusOverride ?: controller.status,
-                useTitle = nav.useOverride?.title ?: actions.useTitle,
-                useEnabled = (nav.useOverride?.enabled ?: actions.canAct) || actions.creatingProject,
+                status = controller.status,
+                useTitle = actions.useTitle,
+                useEnabled = actions.canAct || actions.creatingProject,
                 useBusy = actions.creatingProject,
                 newFolderEnabled = actions.canAct,
-                onUse = nav.useOverride?.onClick ?: actions::createProject,
+                onUse = actions::createProject,
                 onNewFolder = { actions.promptForFolder() },
                 modifier = Modifier.align(Alignment.BottomCenter),
             )
@@ -442,12 +440,12 @@ internal fun PageSheetScope.NewProjectSheetBody(onCreated: (String) -> Unit) {
     val writeApi = remember { CoreProjectWriteApi({ app.clientOrNull() }) }
     val actions = rememberFolderBrowserActions(
         controller = controller,
-        paths = FfiHostPaths,
+        paths = HostPaths,
         api = writeApi,
         onCreated = onCreated,
         dismissSheet = { dismiss(animated = true) },
     )
-    val calls = remember { CoreFolderCalls({ app.clientOrNull() }, writeApi, FfiHostPaths) }
+    val calls = remember { CoreFolderCalls(HostPaths) }
     val nav = rememberFolderNavState(controller, actions, calls)
     NewProjectScreen(sheet = this, controller = controller, actions = actions, nav = nav)
 }

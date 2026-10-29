@@ -67,8 +67,10 @@ fun PinnedReorderGallerySection() {
     // engine B — the clamp keeps the two blocks apart.
     val rows = remember { pinnedReorderGalleryRows() }
     val listState = rememberLazyListState()
-    val engineById = remember(rows) { rows.associate { r -> r.id to r.engineId } }
-    val keys = remember(rows) { rows.map { r -> PinKey(r.id, r.engineId) } }
+    // Production puts every pin in WORKSPACE_PIN_BLOCK; the gallery keys
+    // the blocks by device so the clamp still has something to show.
+    val engineById = remember(rows) { rows.associate { r -> r.id to r.deviceId } }
+    val keys = remember(rows) { rows.map { r -> PinKey(r.id, r.deviceId) } }
     val reorderState = remember { PinReorderState(keys) }
     LaunchedEffect(keys) { reorderState.adopt(keys) }
     val lazyState = rememberReorderableLazyListState(
@@ -127,8 +129,8 @@ private fun pinnedReorderGalleryRows(): List<SessionRow> = listOf(
     SessionListFixtures.recentRows[0],
     SessionListFixtures.recentRows[1],
     SessionListFixtures.recentRows[2],
-    SessionListFixtures.currentRow.copy(engineId = "B", deviceId = "device-B", pinned = true),
-    SessionListFixtures.recentRows[3].copy(engineId = "B", deviceId = "device-B", pinned = true),
+    SessionListFixtures.currentRow.copy(deviceId = "device-B", pinned = true),
+    SessionListFixtures.recentRows[3].copy(deviceId = "device-B", pinned = true),
 )
 
 /** A toggle row: the label in `accent` when on, `secondary` when off. */
@@ -180,13 +182,12 @@ private class PinnedReorderGalleryActions(
     override fun rename(chatId: String, title: String, onResult: (ActionOutcome) -> Unit) {}
     override fun createSection(
         name: String,
-        engineId: String?,
         onResult: (ActionOutcome) -> Unit,
         onCreated: (sectionId: String) -> Unit,
     ) {}
     override fun renameSection(sectionId: String, name: String, onResult: (ActionOutcome) -> Unit) {}
     override fun deleteSection(sectionId: String, onResult: (ActionOutcome) -> Unit) {}
-    override fun sectionsFor(engineId: String): List<SectionView> = emptyList()
+    override fun sections(): List<SectionView> = emptyList()
     override fun report(error: Throwable) {}
 }
 

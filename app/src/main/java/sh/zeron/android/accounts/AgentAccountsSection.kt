@@ -29,8 +29,6 @@ import sh.zeron.android.design.groupedSection
 import sh.zeron.android.design.settingsTag
 import sh.zeron.android.shell.LocalNavEntry
 import sh.zeron.android.shell.LocalNavStack
-import uniffi.zeron_core.AgentAccountsSnapshot
-import uniffi.zeron_core.AgentUsageWindow
 import uniffi.zeron_core.DeviceView
 import uniffi.zeron_core.WorkspaceSnapshot
 
@@ -198,10 +196,6 @@ class AgentAccountsSectionState internal constructor(
     /** The unsupported-engine rule: the section hides, never asks again. */
     var unsupported: Boolean by mutableStateOf(false)
         private set
-
-    /** The newest probe's wording, for the section's footer. */
-    val updatedText: String?
-        get() = snapshot?.let { sh.zeron.android.accounts.updatedText(it, nowMs()) }
 
     /** The section's device id (the click's subject). */
     internal val deviceId: String? get() = device()?.id
@@ -459,7 +453,6 @@ private fun sectionFooter(
     if (rows.none { it is AgentAccountsRowSpec.Harness }) return null
     val parts = buildList {
         add(AccountsCopy.planUsageOn(state.deviceName))
-        state.updatedText?.let { add("$it.") }
     }
     return parts.joinToString(" ")
 }

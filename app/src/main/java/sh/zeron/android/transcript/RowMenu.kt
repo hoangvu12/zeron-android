@@ -192,7 +192,7 @@ fun rememberRowMenuPerformer(actions: () -> TranscriptActions): RowMenuPerformer
  */
 internal fun WidgetKind.isControl(): Boolean =
     this is WidgetKind.CopyCode || this is WidgetKind.Disclosure || this is WidgetKind.ToolToggle ||
-        this is WidgetKind.Detail || this is WidgetKind.Image || this is WidgetKind.SubagentLink ||
+        this is WidgetKind.Detail || this is WidgetKind.Image || this is WidgetKind.Subagent ||
         this is WidgetKind.Action
 
 /**

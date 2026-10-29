@@ -14,7 +14,9 @@ sealed interface CoreStatus {
 
 /**
  * Loads the Rust mobile core (`libzeron_mobile.so` via UniFFI/JNA) and
- * checks the version handshake.
+ * checks the version handshake: `coreVersion()` is the `zeron-mobile`
+ * crate version, and the app's `versionName` comes from the same
+ * `zeron/Cargo.toml`, so a mismatch means stale jniLibs or bindings.
  */
 object CoreLoader {
 
@@ -22,6 +24,11 @@ object CoreLoader {
 
     fun load(): CoreStatus {
         return try {
+            // The core links the NDK's shared C++ runtime; load it first so
+            // a missing `libc++_shared.so` fails here by name, not as an
+            // opaque dlopen error from JNA.
+            System.loadLibrary("c++_shared")
+            // JNA loads `libzeron_mobile.so` on the first UniFFI call.
             val version = uniffi.zeron_core.coreVersion()
             if (version != BuildConfig.VERSION_NAME) {
                 Log.e(TAG, "core $version does not match app ${BuildConfig.VERSION_NAME}")

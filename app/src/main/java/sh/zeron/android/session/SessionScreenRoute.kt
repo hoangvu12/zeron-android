@@ -89,13 +89,13 @@ class SessionScreenRoute internal constructor(
      * Ticket 66's attachment reader over the live client (the ticket's
      * "once 66 lands" line): one stable instance per route, so
      * SessionScreen's `remember(controller, attachments)` never re-keys.
-     * The engine resolves any image reference (`readImage`), relative ones
-     * against this chat's cwd. Null for a test fake core without a client.
+     * The host reads the attachment by path (`readAttachment`). Null for a
+     * test fake core without a client.
      */
     private val attachments: AttachmentReader? = (core as? CoreSessionCore)?.let { live ->
         object : AttachmentReader {
             override suspend fun read(engineDeviceId: String, reference: String): ByteArray =
-                live.client.readImage(engineDeviceId, reference, live.chatId)
+                live.client.readAttachment(engineDeviceId, reference)
         }
     }
 

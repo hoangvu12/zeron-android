@@ -11,8 +11,6 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,7 +21,8 @@ import uniffi.zeron_core.ClientEvent
 import uniffi.zeron_core.ClientListener
 import uniffi.zeron_core.CoreClient
 import uniffi.zeron_core.CoreConfig
-import uniffi.zeron_core.EngineView
+import uniffi.zeron_core.Credentials
+import uniffi.zeron_core.authProductionEdgeUrl
 
 /** The startup pipeline's state; the splash (ticket 35) holds on `Loading`. */
 sealed interface CoreStartState {
@@ -43,13 +42,15 @@ fun interface ClientEventSink {
 
 /**
  * The app's startup (ticket 71, the port of `AppModel.init`/`start`):
- * build the single [CoreClient], publish its engine views, then flip
- * [state] to `Ready`. The credentials it starts from arrive with sign-in
- * (#10 swaps this onto the Zeron core's `CoreClient(config, credentials,
- * listener)`).
+ * build the single [CoreClient] from the stored [credentials], then flip
+ * [state] to `Ready`. With no stored credentials it flips to `Ready`
+ * without a client (the signed-out Welcome root).
  *
- * Also owns the app's single [ClientListener]: `EnginesChanged`
- * refreshes [engines] through a coalescing flow, every event fans
+ * TODO(#13): replaced by the session holder (`StateFlow<CoreClient?>`,
+ * `start(credentials)`, `signOutLocally`, per-account core dir); the
+ * credentials come from #14's `CredentialStore`.
+ *
+ * Also owns the app's single [ClientListener]: every event fans
  * out to the [ClientEventSink]s other tickets register (40/42) —
  * register them before [start] to see every event — and every event
  * hops to the [sessionEvents] hub (51) for the session controllers.
@@ -61,9 +62,10 @@ class CoreStartup(
     private val context: Context,
     private val scope: CoroutineScope,
     private val io: CoroutineDispatcher = Dispatchers.IO,
-    private val compute: CoroutineDispatcher = Dispatchers.Default,
-    private val newClient: (CoreConfig, ClientListener) -> CoreClient = { config, listener ->
-        CoreClient(config, emptyList(), emptyList(), listener)
+    /** TODO(#14): the `CredentialStore` read; nothing is stored before sign-in (#15). */
+    private val credentials: () -> Credentials? = { null },
+    private val newClient: (CoreConfig, Credentials, ClientListener) -> CoreClient = { config, credentials, listener ->
+        CoreClient(config, credentials, listener)
     },
     private val onClientReady: (CoreClient) -> Unit = {},
     /**
@@ -78,18 +80,9 @@ class CoreStartup(
     private val _state = MutableStateFlow<CoreStartState>(CoreStartState.Loading)
     val state: StateFlow<CoreStartState> = _state.asStateFlow()
 
-    /** Null until `Ready`; then `engines()`, re-read on every `EnginesChanged`. */
-    private val _engines = MutableStateFlow<List<EngineView>?>(null)
-    val engines: StateFlow<List<EngineView>?> = _engines.asStateFlow()
-
     private val clientRef = AtomicReference<CoreClient?>(null)
     private val started = AtomicBoolean(false)
     private val sinks = CopyOnWriteArrayList<ClientEventSink>()
-
-    private val enginesDirty = MutableSharedFlow<Unit>(
-        extraBufferCapacity = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST,
-    )
 
     /** The listener handed to `CoreClient`; tests deliver events through it. */
     @VisibleForTesting
@@ -97,41 +90,41 @@ class CoreStartup(
         override fun onEvent(event: ClientEvent) = routeClientEvent(event)
     }
 
-    init {
-        scope.launch(compute) {
-            enginesDirty.collect { clientRef.get()?.let { _engines.value = it.engines() } }
-        }
-    }
-
     /** Idempotent: the second call does nothing. */
     fun start() {
         if (!started.compareAndSet(false, true)) return
         scope.launch(io) {
             try {
-                // 1. The device label is read once per process.
+                // 1. Signed out: the Welcome root, no client.
+                val stored = credentials()
+                if (stored == null) {
+                    _state.value = CoreStartState.Ready
+                    return@launch
+                }
+                // 2. The device label and id are read once per process.
                 val dataDir = File(context.noBackupFilesDir, "core").apply { mkdirs() }
                 val config = CoreConfig(
+                    edgeUrl = authProductionEdgeUrl(),
                     dataDir = dataDir.path,
+                    deviceId = DeviceId.read(context),
                     deviceName = DeviceLabel.read(context),
                     platform = "android",
                     appVersion = BuildConfig.VERSION_NAME,
-                    showMockHarness = BuildConfig.DEBUG,
                 )
-                // 2. The constructor never dials.
+                // 3. The constructor never dials.
                 val client = try {
-                    newClient(config, listener)
+                    newClient(config, stored, listener)
                 } catch (error: Throwable) {
                     if (error is CancellationException) throw error
                     Log.e(TAG, "core start failed", error)
                     _state.value = CoreStartState.Failed(error.message ?: error.javaClass.simpleName)
                     return@launch
                 }
-                // 3. Order matters: engines published before Ready, so
-                //    anyone who sees Ready sees a non-null list.
+                // 4. Order matters: the client is set before Ready, so
+                //    anyone who sees Ready sees it.
                 clientRef.set(client)
-                _engines.value = client.engines()
                 _state.value = CoreStartState.Ready
-                // 4.
+                // 5.
                 onClientReady(client)
             } catch (cancelled: CancellationException) {
                 throw cancelled
@@ -152,10 +145,6 @@ class CoreStartup(
         // controllers. Qualified on purpose — a bare `onEvent(event)`
         // here would re-post every event forever (#621).
         sessionEvents.onClientEvent(event)
-        when (event) {
-            ClientEvent.EnginesChanged -> enginesDirty.tryEmit(Unit)
-            else -> {}
-        }
         for (sink in sinks) {
             try {
                 sink.onClientEvent(event)

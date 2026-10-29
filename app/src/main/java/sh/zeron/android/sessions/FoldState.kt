@@ -21,41 +21,38 @@ import sh.zeron.android.core.WorkspaceCore
 import sh.zeron.android.design.Feedback
 import sh.zeron.android.design.Haptic
 import uniffi.zeron_core.CoreException
-import uniffi.zeron_core.EngineState
-import uniffi.zeron_core.EngineView
 import uniffi.zeron_core.SectionView
 import uniffi.zeron_core.WorkspaceSnapshot
 
 /**
- * One offline fold override, persisted as
- * `"<1|0>|<engineId>|<sectionId>"` under `sectionFoldOverrides` (1 =
- * collapsed). The desired value — not an XOR against the engine's — so a
- * desktop-side flip while the phone was offline cannot silently invert
- * it, and the engine id lets the push wait for **that** engine's
- * `Connected` state without parsing scoped ids. `|` never occurs in a
- * UUID or in a base64url scoped id.
+ * One offline fold override, persisted as `"<1|0>|<sectionId>"` under
+ * `sectionFoldOverrides` (1 = collapsed). The desired value — not an XOR
+ * against the synced one — so a desktop-side flip while the phone was
+ * offline cannot silently invert it. Zeron's sections are workspace-wide,
+ * so the push waits for the client to be connected, not for one engine.
+ *
+ * TODO(#21): iOS keeps every fold phone-local and never calls
+ * `setSectionCollapsed`; this synced path goes with that ticket.
  */
 data class SectionFoldOverride(
     val sectionId: String,
-    val engineId: String,
     val collapsed: Boolean,
 ) {
-    fun encode(): String = "${if (collapsed) "1" else "0"}|$engineId|$sectionId"
+    fun encode(): String = "${if (collapsed) "1" else "0"}|$sectionId"
 
     companion object {
-        /** `null` on malformed input — the loader drops it. */
+        /** `null` on malformed input (including Roboco's engine-scoped form) — the loader drops it. */
         fun decode(s: String): SectionFoldOverride? {
-            val parts = s.split('|', limit = 3)
-            if (parts.size != 3) return null
+            val parts = s.split('|', limit = 2)
+            if (parts.size != 2) return null
             val collapsed = when (parts[0]) {
                 "1" -> true
                 "0" -> false
                 else -> return null
             }
-            val engineId = parts[1]
-            val sectionId = parts[2]
-            if (engineId.isEmpty() || sectionId.isEmpty()) return null
-            return SectionFoldOverride(sectionId = sectionId, engineId = engineId, collapsed = collapsed)
+            val sectionId = parts[1]
+            if (sectionId.isEmpty() || '|' in sectionId) return null
+            return SectionFoldOverride(sectionId = sectionId, collapsed = collapsed)
         }
     }
 }
@@ -107,9 +104,9 @@ private const val TAG = "ZeronFold"
  * fires on the calling thread before any IO is launched, so the chevron
  * (39) turns in the same frame. The engine write then runs on a serial
  * lane (in call order, never on main); a refusal while the engine is
- * offline becomes a persisted override pushed by [reconcile] once that
- * engine is `Connected` again — the phone's value wins (last write wins
- * in the engine store).
+ * offline becomes a persisted override pushed by [reconcile] once the
+ * client is connected again — the phone's value wins (last write wins
+ * in the store).
  */
 class FoldState(
     private val store: DataStore<Preferences>,
@@ -192,13 +189,13 @@ class FoldState(
     }
 
     /**
-     * Runs on every new snapshot revision and every engines-list change:
-     * drops stale pendings, then pushes offline overrides whose engine is
-     * `Connected`. Everything (the state reads, the FFI, the persists)
-     * happens on the serial lane, so it can never interleave with a tap's
-     * write.
+     * Runs on every new snapshot revision and every connectivity change:
+     * drops stale pendings, then pushes the offline overrides while
+     * [connected] (`Connectivity.state == CONNECTED`). Everything (the
+     * state reads, the FFI, the persists) happens on the serial lane, so
+     * it can never interleave with a tap's write.
      */
-    fun reconcile(snapshot: WorkspaceSnapshot, engines: List<EngineView>) {
+    fun reconcile(snapshot: WorkspaceSnapshot, connected: Boolean) {
         scope.launch(serial) {
             val sectionsById = snapshot.front.sections.associateBy { it.id }
 
@@ -219,17 +216,10 @@ class FoldState(
                 }
             }
 
-            // 2. Offline overrides: push once the engine can take them.
-            val engineById = engines.associateBy { it.engineId }
+            // 2. Offline overrides: push once the client can take them.
             var droppedAny = false
             for ((id, override) in _state.value.offline.entries.toList()) {
-                val engine = engineById[override.engineId]
-                if (engine == null) { // the engine was forgotten
-                    dropOverride(id)
-                    droppedAny = true
-                    continue
-                }
-                if (engine.state !is EngineState.Connected) continue // keep it, skip
+                if (!connected) break // keep them, skip
                 val section = sectionsById[id]
                 if (section != null && section.collapsed == override.collapsed) {
                     dropOverride(id) // already there, no call
@@ -316,9 +306,7 @@ class FoldState(
      * `HostUnavailable`/`Unsupported`: the engine refused the write while
      * (probably) offline. A tap that lands back on the engine's own value
      * just removes any override; one that keeps the phone's value persists
-     * an override to push on reconnect. No toast — a later background
-     * failure arrives as `ClientEvent.Notice` and is toasted by the shell
-     * (42), not here.
+     * an override to push on reconnect. No toast.
      */
     private fun writeRefused(id: String, section: SectionView, desired: Boolean) {
         _state.update { fold ->
@@ -327,7 +315,7 @@ class FoldState(
                     fold.offline - id
                 } else {
                     fold.offline +
-                        (id to SectionFoldOverride(sectionId = id, engineId = section.engineId, collapsed = desired))
+                        (id to SectionFoldOverride(sectionId = id, collapsed = desired))
                 }
             fold.copy(pending = fold.pending - id, offline = offline)
         }

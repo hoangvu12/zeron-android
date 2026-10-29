@@ -114,72 +114,66 @@ fun SessionsScreen(
     filters: Boolean = pinnedAccessory != null,
 ) {
     val app = LocalContext.current.applicationContext as ZeronApplication
-    // 43: the prompts' engine list comes from the live client; provided
-    // here for everything under this screen (46's own actions pass it
-    // explicitly; 44's row commands read the ambient).
-    val backend = remember(app) { CoreSessionPromptBackend(app::clientOrNull) }
-    CompositionLocalProvider(LocalSessionPromptBackend provides backend) {
-        val actions = rememberSessionsActions(LocalNavStack.current)
-        // 44: the swipe/menu hookup for every row, and the touch that
-        // closes an open swipe anywhere on the screen (taps above the nav
-        // row — the ⋯ — are never swallowed).
-        val hookup = rememberSessionRowActions(listState)
-        val ui by app.frontPage.ui.collectAsState()
-        val engines by app.workspaceFeed.engines.collectAsState()
-        val density = LocalDensity.current
-        val swallowTopPx = remember(density, topInset) {
-            { with(density) { (topInset + LargeTitleDefaults.NavRowHeight).toPx() } }
-        }
-
-        // 105: the sidebar's query filter. The model is retained per nav
-        // entry (the query, the results and the scroll survive tab
-        // switches and the sidebar being hidden), and reads the raw text
-        // through rememberUpdatedState — 49's `mapLatest` makes the latest
-        // query win and keeps the previous value on screen while a newer
-        // search runs. The FFI never runs in composition: the search runs
-        // on Dispatchers.Default inside the model.
-        val fixture = LocalSidebarFixtures.current
-        val queryState = rememberUpdatedState(query)
-        val searching = query.searchTrim().isNotEmpty()
-        val results: SearchResults? = if (filters) {
-            val entry = LocalNavEntry.current
-            val model = entry.retain("sidebar-search-model") {
-                val source: Flow<SearchSource?> = if (fixture != null) {
-                    flowOf(fixture.workspace.toSearchSource())
-                } else {
-                    app.workspaceFeed.snapshot.map { it?.toSearchSource() }
-                }
-                SearchModel(
-                    query = snapshotFlow { queryState.value },
-                    source = source,
-                    search = if (fixture != null) fixture.search else coreSessionSearch(app::clientOrNull),
-                    scope = entry.scope,
-                )
-            }
-            if (searching) model.results.collectAsStateWithLifecycle().value else null
-        } else {
-            null
-        }
-        val content = sidebarListContent(query, results)
-
-        SessionsScreenContent(
-            sections = if (fixture != null) fixture.sections else ui?.sections.orEmpty(),
-            collapsedIds = if (fixture != null) fixture.collapsedIds else ui?.collapsedIds.orEmpty(),
-            loading = fixture == null && (ui == null || sessionsLoading(engines)),
-            actions = actions,
-            showsNavOptions = showsNavOptions,
-            currentChatId = currentChatId,
-            listState = listState,
-            bottomPadding = LocalBottomChrome.current.contentPadding,
-            liveOverrides = if (fixture != null) emptyMap() else ui?.liveOverrides.orEmpty(),
-            modifier = modifier.sessionRowActions(hookup, swallowTopPx = swallowTopPx),
-            rowWrapper = hookup.rowWrapper,
-            content = content,
-            topInset = topInset,
-            pinnedAccessory = pinnedAccessory,
-            pinnedAccessoryHeight = pinnedAccessoryHeight,
-        )
+    val actions = rememberSessionsActions(LocalNavStack.current)
+    // 44: the swipe/menu hookup for every row, and the touch that
+    // closes an open swipe anywhere on the screen (taps above the nav
+    // row — the ⋯ — are never swallowed).
+    val hookup = rememberSessionRowActions(listState)
+    val ui by app.frontPage.ui.collectAsState()
+    val workspace by app.workspaceFeed.snapshot.collectAsState()
+    val density = LocalDensity.current
+    val swallowTopPx = remember(density, topInset) {
+        { with(density) { (topInset + LargeTitleDefaults.NavRowHeight).toPx() } }
     }
+
+    // 105: the sidebar's query filter. The model is retained per nav
+    // entry (the query, the results and the scroll survive tab
+    // switches and the sidebar being hidden), and reads the raw text
+    // through rememberUpdatedState — 49's `mapLatest` makes the latest
+    // query win and keeps the previous value on screen while a newer
+    // search runs. The FFI never runs in composition: the search runs
+    // on Dispatchers.Default inside the model.
+    val fixture = LocalSidebarFixtures.current
+    val queryState = rememberUpdatedState(query)
+    val searching = query.searchTrim().isNotEmpty()
+    val results: SearchResults? = if (filters) {
+        val entry = LocalNavEntry.current
+        val model = entry.retain("sidebar-search-model") {
+            val source: Flow<SearchSource?> = if (fixture != null) {
+                flowOf(fixture.workspace.toSearchSource())
+            } else {
+                app.workspaceFeed.snapshot.map { it?.toSearchSource() }
+            }
+            SearchModel(
+                query = snapshotFlow { queryState.value },
+                source = source,
+                search = if (fixture != null) fixture.search else coreSessionSearch(app::clientOrNull),
+                scope = entry.scope,
+            )
+        }
+        if (searching) model.results.collectAsStateWithLifecycle().value else null
+    } else {
+        null
+    }
+    val content = sidebarListContent(query, results)
+
+    SessionsScreenContent(
+        sections = if (fixture != null) fixture.sections else ui?.sections.orEmpty(),
+        collapsedIds = if (fixture != null) fixture.collapsedIds else ui?.collapsedIds.orEmpty(),
+        loading = fixture == null && (ui == null || sessionsLoading(workspace)),
+        actions = actions,
+        showsNavOptions = showsNavOptions,
+        currentChatId = currentChatId,
+        listState = listState,
+        bottomPadding = LocalBottomChrome.current.contentPadding,
+        liveOverrides = if (fixture != null) emptyMap() else ui?.liveOverrides.orEmpty(),
+        modifier = modifier.sessionRowActions(hookup, swallowTopPx = swallowTopPx),
+        rowWrapper = hookup.rowWrapper,
+        content = content,
+        topInset = topInset,
+        pinnedAccessory = pinnedAccessory,
+        pinnedAccessoryHeight = pinnedAccessoryHeight,
+    )
 }
 
 /**

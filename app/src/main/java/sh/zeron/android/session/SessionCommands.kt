@@ -1,5 +1,7 @@
 package sh.zeron.android.session
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import sh.zeron.android.composer.DeliveryMode
 import sh.zeron.android.composer.StagedImage
 import uniffi.zeron_core.BusyPolicy
@@ -12,17 +14,17 @@ import uniffi.zeron_core.SessionHandle
 /**
  * The FFI the composer needs (android-ui-parity #78): send, interrupt
  * and the `@file` search — the port of `CoreSessionSource.swift:110-131,
- * 247-249`. All suspend, all called **off main** by
- * [SessionComposerBinding], and fakeable in tests and the gallery.
+ * 247-249`. All suspend and fakeable in tests and the gallery; the live
+ * implementation runs Zeron's synchronous `send`/`interrupt` on IO.
  *
- * iOS's `send` is synchronous and returns `Bool`; Zeron's is an engine
- * round trip, so it is `suspend` and reports failures by throwing (the
+ * iOS's `send` returns `Bool`; this one reports failures by throwing (the
  * binding turns that into the send-failure pill and a kept draft).
  */
 interface SessionCommands {
     /**
-     * Exactly one `SessionHandle.send` per call (see [busyPolicyFor]);
-     * the `SendOutcome` is ignored, as on iOS.
+     * One `SessionHandle.send` per call (see [busyPolicyFor]), preceded
+     * by `interrupt()` for "Stop and send" while a turn runs; the
+     * `SendOutcome` is ignored, as on iOS.
      */
     suspend fun send(text: String, images: List<StagedImage>, mode: DeliveryMode)
 
@@ -34,16 +36,14 @@ interface SessionCommands {
 }
 
 /**
- * The delivery mode → `BusyPolicy` table (android-app#08 §Send rule 6).
- * **Never interrupt-then-send**: "Stop and send" is one send with
- * [BusyPolicy.INTERRUPT] — Zeron's `interrupt` pauses the queue and
- * cancels held sends, so the iOS order would strand the message
- * (upstream #609/#621's trap).
+ * The delivery mode → `BusyPolicy` table (`CoreSessionSource.swift:173`):
+ * Zeron has no interrupting policy, so "Stop and send" interrupts the
+ * running turn first and then queues, as iOS does.
  */
 internal fun busyPolicyFor(mode: DeliveryMode): BusyPolicy = when (mode) {
     DeliveryMode.Queue -> BusyPolicy.QUEUE
     DeliveryMode.Steer -> BusyPolicy.STEER
-    DeliveryMode.Interrupt -> BusyPolicy.INTERRUPT
+    DeliveryMode.Interrupt -> BusyPolicy.QUEUE
 }
 
 /**
@@ -64,7 +64,9 @@ class CoreSessionCommands(
     private val hostDeviceId: () -> String,
 ) : SessionCommands {
 
-    override suspend fun send(text: String, images: List<StagedImage>, mode: DeliveryMode) {
+    override suspend fun send(text: String, images: List<StagedImage>, mode: DeliveryMode) = withContext(Dispatchers.IO) {
+        // iOS `CoreSessionSource.swift:172`.
+        if (mode == DeliveryMode.Interrupt && handle.composer().live.turnRunning) handle.interrupt()
         handle.send(
             SendRequest(
                 text = text,
@@ -80,9 +82,10 @@ class CoreSessionCommands(
                 busy = busyPolicyFor(mode),
             ),
         )
+        Unit
     }
 
-    override suspend fun interrupt() = handle.interrupt()
+    override suspend fun interrupt() = withContext(Dispatchers.IO) { handle.interrupt() }
 
     override suspend fun searchFiles(query: String): List<FileMatch> =
         client.searchFiles(deviceId = hostDeviceId(), chatId = chatId, spaceId = null, query = query)

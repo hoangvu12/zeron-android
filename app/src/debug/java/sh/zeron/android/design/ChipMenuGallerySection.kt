@@ -345,6 +345,7 @@ private fun galleryComposerState(): ComposerState = ComposerState(
             queueEditLease = true,
             queuedAttachments = true,
             midTurnSteering = null,
+            providerSwitch = false,
         ),
     ),
     live = LiveStatus(
@@ -368,7 +369,6 @@ private fun galleryComposerState(): ComposerState = ComposerState(
 
 internal fun gallerySessionRow(config: ChatConfig, modelLabel: String): SessionRow = SessionRow(
     id = "gallery-session",
-    engineId = "engine:v1:alpha",
     revision = 1uL,
     title = "Session",
     hasTitle = true,
@@ -377,7 +377,7 @@ internal fun gallerySessionRow(config: ChatConfig, modelLabel: String): SessionR
     deviceId = "device-1",
     deviceName = null,
     deviceOnline = true,
-    engineOnline = true,
+    isCloud = false,
     harness = "claude-code",
     harnessLabel = "Claude Code",
     model = config.model,
@@ -406,6 +406,7 @@ internal fun gallerySessionRow(config: ChatConfig, modelLabel: String): SessionR
     ),
     sendState = null,
     parentChatId = null,
+    roomGen = 0u,
 )
 
 /**

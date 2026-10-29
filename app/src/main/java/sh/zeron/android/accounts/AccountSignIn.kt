@@ -2,8 +2,6 @@ package sh.zeron.android.accounts
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import uniffi.zeron_core.AgentAccount
-import uniffi.zeron_core.AgentAccountsSnapshot
 import uniffi.zeron_core.AgentLoginRules
 import uniffi.zeron_core.CoreClient
 import uniffi.zeron_core.CoreException
@@ -55,13 +53,13 @@ class CoreAccountSignIn(
         withContext(Dispatchers.IO) { live().setHarnessEnabled(deviceId, harness, enabled) }
 
     override suspend fun start(deviceId: String, harness: String, provider: String?): DeviceLoginInfo =
-        withContext(Dispatchers.IO) { live().deviceLoginStart(deviceId, harness, provider) }
+        withContext(Dispatchers.IO) { live().deviceLoginStart(deviceId, harness, provider, DONE_URL) }
 
     override suspend fun poll(deviceId: String, loginId: String): DeviceLoginPollInfo =
-        withContext(Dispatchers.IO) { live().deviceLoginPoll(deviceId, loginId) }
+        withContext(Dispatchers.IO) { live().deviceLoginPoll(deviceId, loginId, DONE_URL) }
 
     override suspend fun complete(deviceId: String, loginId: String, code: String): AgentAccountsSnapshot =
-        withContext(Dispatchers.IO) { live().deviceLoginComplete(deviceId, loginId, code) }
+        withContext(Dispatchers.IO) { AgentAccountsSnapshot(live().deviceLoginComplete(deviceId, loginId, code)) }
 
     override fun cancel(deviceId: String, loginId: String) {
         client()?.deviceLoginCancel(deviceId, loginId)
@@ -70,6 +68,14 @@ class CoreAccountSignIn(
     override fun rules(harness: String): AgentLoginRules = uniffi.zeron_core.agentLoginRules(harness)
 
     private fun live(): CoreClient = client() ?: throw CoreException.Closed()
+
+    private companion object {
+        /**
+         * Where the host's sign-in page lands when it is done (Zeron's
+         * `doneUrl`). TODO(#50): close the Auth Tab when it opens.
+         */
+        const val DONE_URL = "zeron://signed-in"
+    }
 }
 
 /** The sign-in's copy (upstream #966's iPhone strings, "Zeron" → "Zeron"). */

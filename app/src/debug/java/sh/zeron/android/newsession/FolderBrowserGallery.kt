@@ -255,9 +255,8 @@ private fun FixtureToggle(label: String, selected: Boolean, onSelect: () -> Unit
  * answers immediately, and the paths come from [FakeHostPaths]. 111 adds
  * the write actions over [FakeProjectWriteApi] (New Folder… browses into
  * the fake new folder; Use calls the fake create and dismisses the sheet
- * — a fixture pick re-presents it settled), and 112 the locations rail
- * and the search/typed-path field over [FakeFolderCalls] (the fixture's
- * drives; a typed path probes the fake, so `Create and add` shows).
+ * — a fixture pick re-presents it settled), and 112 the Home-only
+ * locations rail and the search/typed-path field over [FakeFolderCalls].
  */
 @Composable
 internal fun PageSheetScope.FolderBrowserFixtureSheetPage(fixture: FolderBrowserFixtureId) {
@@ -273,10 +272,7 @@ internal fun PageSheetScope.FolderBrowserFixtureSheetPage(fixture: FolderBrowser
         onCreated = {},
         dismissSheet = { dismiss(animated = true) },
     )
-    val drives = remember(fixture) { fixtureDrives(fixture) }
-    val calls = remember(fixture) {
-        FakeFolderCalls(hosts.associate { it.id to drives })
-    }
+    val calls = remember(fixture) { FakeFolderCalls() }
     val nav = rememberFolderNavState(controller, actions, calls)
     NewProjectScreen(sheet = this, controller = controller, actions = actions, nav = nav)
 }

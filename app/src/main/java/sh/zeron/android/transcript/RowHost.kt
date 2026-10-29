@@ -254,6 +254,9 @@ internal fun rowTag(kind: RowKind): String = when (kind) {
     RowKind.NOTICE -> "row-notice"
     RowKind.IMAGE -> "row-image"
     RowKind.WORKING -> "row-working"
+    // TODO(#46): a placeholder — the row paints its (empty) display at
+    // the core's height until the visual host lands.
+    RowKind.VISUAL -> "row-visual"
 }
 
 /**

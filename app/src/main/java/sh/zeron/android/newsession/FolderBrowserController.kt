@@ -23,9 +23,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uniffi.zeron_core.CoreClient
 import uniffi.zeron_core.FolderListing
-import uniffi.zeron_core.hostPathJoin
-import uniffi.zeron_core.hostPathName
-import uniffi.zeron_core.hostPathParent
 
 /**
  * The folder browser's browsing brain (android-ui-parity #110): the load
@@ -45,7 +42,11 @@ import uniffi.zeron_core.hostPathParent
 // A plain interface: a fun interface's abstract method may not declare
 // a default (showHidden), and nothing builds a source from a SAM lambda.
 interface FolderBrowserSource {
-    /** `showHidden` also lists `.`-folders (the engine's only switch, `query: "."`) — ticket 112 turns it on. */
+    /**
+     * `showHidden` also lists `.`-folders — ticket 112 turns it on. Zeron's
+     * `listFolders` has no such switch, so the live source ignores it
+     * (TODO(#27): the iOS page has no hidden-folder toggle).
+     */
     suspend fun listFolders(deviceId: String, path: String?, showHidden: Boolean = false): FolderListing?
 }
 
@@ -67,7 +68,7 @@ class CoreFolderBrowserSource(
     ): FolderListing? {
         val c = client() ?: return null
         return try {
-            withContext(io) { c.listFolders(deviceId = deviceId, path = path, showHidden = showHidden) }
+            withContext(io) { c.listFolders(deviceId = deviceId, path = path) }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
@@ -75,31 +76,6 @@ class CoreFolderBrowserSource(
             null
         }
     }
-}
-
-/**
- * Seam over the Rust host-path helpers so JVM tests do not need the
- * native library: one level up, a join, the last component. The rules
- * live in android-app#09 (`crates/mobile-client/src/host_paths.rs`);
- * `pr621:apps/android/app/src/main/java/sh/zeron/android/ui/FolderBrowser.kt:57-130`
- * is the logic reference.
- */
-interface HostPathOps {
-    /** `C:\Users` → `C:\`; `C:\` → null; `/home` → `/`; `/` → null; `\\srv\share\x` → `\\srv\share`. */
-    fun parent(path: String): String?
-
-    /** `\` on a Windows base, `/` otherwise; no separator if the base ends in one. */
-    fun join(base: String, name: String): String
-
-    /** The last component, or the path itself for a root (`C:\`, `/`). */
-    fun name(path: String): String
-}
-
-/** The real host-path helpers: android-app#09's free functions over the FFI. */
-object FfiHostPaths : HostPathOps {
-    override fun parent(path: String): String? = hostPathParent(path)
-    override fun join(base: String, name: String): String = hostPathJoin(base, name)
-    override fun name(path: String): String = hostPathName(path)
 }
 
 /** One row of the folder list: `".."` (the parent) or a directory from the listing. */
@@ -411,7 +387,7 @@ class FolderBrowserController(
 fun rememberFolderBrowserController(
     hosts: StateFlow<List<HostOption>?>,
     source: FolderBrowserSource,
-    paths: HostPathOps = FfiHostPaths,
+    paths: HostPathOps = HostPaths,
 ): FolderBrowserController {
     val scope = rememberCoroutineScope()
     val controller = remember { FolderBrowserController(source, paths, scope, initialHosts = hosts.value) }

@@ -2,15 +2,11 @@ package sh.zeron.android.sessions
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.staticCompositionLocalOf
 import sh.zeron.android.design.ActionSheetPresenter
 import sh.zeron.android.design.Alerts
 import sh.zeron.android.design.LocalActionSheet
 import sh.zeron.android.design.LocalAlerts
-import sh.zeron.android.design.LocalToaster
-import sh.zeron.android.design.Toaster
 import uniffi.zeron_core.CoreClient
-import uniffi.zeron_core.EngineState
 import uniffi.zeron_core.SessionRow
 
 /**
@@ -19,7 +15,7 @@ import uniffi.zeron_core.SessionRow
  * gestures (44), the folder page (45), the front page menus (46) and the
  * tablet sidebar (105/107) can make from click handlers. Launchers take
  * the **live** record or name the caller already holds — nothing is looked
- * up except the engine list.
+ * up.
  *
  * All writes go through ticket 42's [RowActions]; this class never calls a
  * [CoreClient] write and never catches a [uniffi.zeron_core.CoreException]
@@ -30,47 +26,6 @@ import uniffi.zeron_core.SessionRow
  * `onDeleted` arrive asynchronously — callers must not assume they ran
  * before the launcher returns.
  */
-
-/**
- * The only thing the prompts read that 42 doesn't provide: the engine
- * list (android-app#06). `engines()` is an in-memory read (every
- * engine in registry order), fine on the main thread.
- */
-interface SessionPromptBackend {
-
-    /** Every engine, registry order, as a chooser row's data. */
-    fun engines(): List<EngineChoice>
-}
-
-/**
- * The [SessionPromptBackend] over the live [CoreClient] —
- * `engines()` maps the [uniffi.zeron_core.EngineView] records to
- * [EngineChoice]s, resolved at call time like 42's `writes` seam so a
- * re-created client is picked up.
- */
-class CoreSessionPromptBackend(private val client: () -> CoreClient?) : SessionPromptBackend {
-
-    override fun engines(): List<EngineChoice> =
-        client()?.engines().orEmpty().map { view ->
-            EngineChoice(
-                engineId = view.engineId,
-                name = view.name,
-                connected = view.state is EngineState.Connected,
-            )
-        }
-}
-
-/**
- * The ambient backend. Default: no engines, so ⋯ "New Section…" toasts
- * "Engine not connected" — what an unmounted host amounts to. The app root
- * (ticket 35) or the sessions tab (46, if it lands first) provides
- * [CoreSessionPromptBackend] where it provides [LocalRowActions].
- */
-val LocalSessionPromptBackend = staticCompositionLocalOf<SessionPromptBackend> {
-    object : SessionPromptBackend {
-        override fun engines(): List<EngineChoice> = emptyList()
-    }
-}
 
 /**
  * The five prompt launchers, as an interface so 44/45/46 can pass a
@@ -87,13 +42,12 @@ interface SessionPrompts {
     fun renameSession(row: SessionRow)
 
     /**
-     * "New Section…". The ⋯ menu calls this with `engineId = null`
-     * (connected-count routing: toast / alert / "Create on" chooser); the
-     * row menu passes the chat's engine id, which skips the chooser and
-     * toasts up front when that engine is not connected. Creates the
-     * section only — it never moves the chat into it (iOS `:292-294`).
+     * "New Section…": the name alert, then [RowActions.createSection]
+     * (Zeron's sections are workspace-wide, so there is no engine to
+     * pick). Creates the section only — it never moves the chat into it
+     * (iOS `:292-294`).
      */
-    fun newSection(engineId: String? = null)
+    fun newSection()
 
     /**
      * "Rename Section": pre-fills `currentName` (the raw section name);
@@ -104,7 +58,7 @@ interface SessionPrompts {
 
     /**
      * "Move to Section" from the row's trailing Move swipe: the sheet
-     * lists 42's [RowActions.sectionsFor] of the chat's engine plus
+     * lists 42's [RowActions.sections] plus
      * "No Section"; a pick calls [RowActions.move].
      */
     fun moveToSection(row: SessionRow)
@@ -130,7 +84,7 @@ interface SessionPrompts {
         /** Previews and tests: every launcher is a no-op. */
         val Noop: SessionPrompts = object : SessionPrompts {
             override fun renameSession(row: SessionRow) {}
-            override fun newSection(engineId: String?) {}
+            override fun newSection() {}
             override fun renameSection(sectionId: String, currentName: String, onRenamed: ((String) -> Unit)?) {}
             override fun moveToSection(row: SessionRow) {}
             override fun confirmDeleteSection(sectionId: String, name: String, onDeleted: () -> Unit) {}
@@ -141,15 +95,12 @@ interface SessionPrompts {
 
 /**
  * The default launchers. Everything runs on main: the hosts' `show` calls
- * are main-thread, 42's writes leave from main, and the toast is a
- * same-frame `Toaster.show`.
+ * are main-thread and 42's writes leave from main.
  */
 internal class DefaultSessionPrompts(
-    private val backend: SessionPromptBackend,
     private val rowActions: RowActions,
     private val alerts: Alerts,
     private val sheets: ActionSheetPresenter,
-    private val toaster: Toaster,
 ) : SessionPrompts {
 
     override fun renameSession(row: SessionRow) {
@@ -158,20 +109,8 @@ internal class DefaultSessionPrompts(
         })
     }
 
-    override fun newSection(engineId: String?) {
-        when (val target = newSectionTarget(engineId, backend.engines())) {
-            NewSectionTarget.NoneConnected -> toaster.show(SessionPromptCopy.EngineNotConnected)
-            is NewSectionTarget.Engine ->
-                alerts.show(newSectionAlert { name -> rowActions.createSection(name, target.engineId) })
-            is NewSectionTarget.Choose ->
-                sheets.show(
-                    createOnSheet(target.engines) { picked ->
-                        // Ticket 19 runs onSelect after the sheet has cleared,
-                        // so the alert presents from a clean host — no delay.
-                        alerts.show(newSectionAlert { name -> rowActions.createSection(name, picked) })
-                    },
-                )
-        }
+    override fun newSection() {
+        alerts.show(newSectionAlert { name -> rowActions.createSection(name) })
     }
 
     override fun renameSection(sectionId: String, currentName: String, onRenamed: ((String) -> Unit)?) {
@@ -185,7 +124,7 @@ internal class DefaultSessionPrompts(
     }
 
     override fun moveToSection(row: SessionRow) {
-        val choices = rowActions.sectionsFor(row.engineId).map { section ->
+        val choices = rowActions.sections().map { section ->
             SectionChoice(id = section.id, name = section.name)
         }
         sheets.show(
@@ -225,13 +164,11 @@ internal class DefaultSessionPrompts(
  */
 @Composable
 fun rememberSessionPrompts(
-    backend: SessionPromptBackend = LocalSessionPromptBackend.current,
     rowActions: RowActions = LocalRowActions.current,
 ): SessionPrompts {
     val alerts = LocalAlerts.current
     val sheets = LocalActionSheet.current
-    val toaster = LocalToaster.current
-    return remember(backend, rowActions, alerts, sheets, toaster) {
-        DefaultSessionPrompts(backend, rowActions, alerts, sheets, toaster)
+    return remember(rowActions, alerts, sheets) {
+        DefaultSessionPrompts(rowActions, alerts, sheets)
     }
 }
