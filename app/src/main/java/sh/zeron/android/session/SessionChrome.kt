@@ -49,12 +49,17 @@ data class SessionChrome(
     val uploadProgress: Double? = null,
     /** `composer.queueError`. Derived for iOS parity but never rendered (decision COMPOSER-D2). */
     val error: String? = null,
+    /**
+     * A side chat's parent title (#33, iOS `syncCompanions`,
+     * `SessionViewController.swift:319-324`): the bar reads "Side chat"
+     * over it. `null` = not a side chat; `""` = the parent row is not
+     * known yet.
+     */
+    val sideChatParent: String? = null,
 ) {
     /**
-     * Zeron's banner set (android-app#22 §Status pill) instead of iOS's
-     * `offline` / `reconnecting(in:)`. Ticket 73 owns precedence, copy
-     * and taps and may refine the payloads — nothing in this ticket
-     * depends on the variants beyond value equality.
+     * iOS `SessionChrome.Banner` (`SessionSource.swift`), derived in
+     * [deriveBanner] by `CoreSessionSource.refresh`'s precedence (#28).
      */
     sealed interface Banner {
         data object None : Banner
@@ -73,16 +78,16 @@ data class SessionChrome(
 
         data object Editing : Banner
 
-        /** Shape used by ticket 73's status pill. */
-        data class EngineParked(val reason: ParkedReason, val engineId: String) : Banner
+        /** The device has no network: sends wait in the outbox. */
+        data object Offline : Banner
 
-        data object EngineOff : Banner
-
-        data object Reconnecting : Banner
+        /**
+         * The chat's room is down and redials at [retryAtMs] (epoch ms).
+         * iOS stores the seconds left at refresh; the pill counts down
+         * from the deadline instead, so an equal chrome stays equal.
+         */
+        data class Reconnecting(val retryAtMs: Long) : Banner
     }
-
-    /** Mirrors android-app#06's `ParkReason` (SCREAMING_SNAKE over FFI, CamelCase here). */
-    enum class ParkedReason { Revoked, IdentityChanged, Incompatible }
 
     /** iOS `SessionChrome.Question` (`SessionSource.swift:17-26`), field for field. */
     data class Question(
@@ -121,24 +126,28 @@ data class SessionChrome(
  * This ticket's fill — `CoreSessionSource.refresh` lines 42-49, 88 and
  * 103, verbatim:
  * - `project` = `row?.project?.name ?: "No project"`;
- * - `subtitle` = `"<project> @ <device>"` when the host has a name
+ * - `subtitle` = `"<project> @ <host>"` when the host has a name
  *   (one space, `@`, one space; an empty but non-null name still yields
- *   `"<project> @ "`), else just the project;
+ *   `"<project> @ "`), else just the project. A Cloud chat's host is the
+ *   row's device name ("Cloud"), not its machine's;
  * - `placeholder` = `"Message " + (row?.harnessLabel ?: "the agent")`;
  * - `running` / `canSteer` / `uploadProgress` / `error` straight from
- *   the composer state.
+ *   the composer state;
+ * - `sideChatParent` = [parentTitle] for a side chat (#33).
  *
  * Pure; unit-tested against the ticket's worked-examples table.
  */
-internal fun baseChrome(c: ComposerState, row: SessionRow?): SessionChrome {
+internal fun baseChrome(c: ComposerState, row: SessionRow?, parentTitle: String? = null): SessionChrome {
     val project = row?.project?.name ?: "No project"
+    val hostName = if (row?.isCloud == true) row.deviceName else c.host.name
     return SessionChrome(
         title = c.title,
-        subtitle = c.host.name?.let { "$project @ $it" } ?: project,
+        subtitle = hostName?.let { "$project @ $it" } ?: project,
         running = c.live.turnRunning,
         canSteer = c.host.capabilities.midTurnSteering ?: false,
         placeholder = "Message ${row?.harnessLabel ?: "the agent"}",
         uploadProgress = c.transferProgress,
         error = c.queueError,
+        sideChatParent = if (row?.parentChatId != null) parentTitle.orEmpty() else null,
     )
 }

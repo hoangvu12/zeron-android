@@ -303,6 +303,12 @@ object ZeronIcons {
     /** SF `arrow.triangle.branch` — core slash-command/branch chip. */
     val ArrowTriangleBranch = ZeronIcon.Vector(R.drawable.zi_git_branch)
 
+    /** SF `bubble.left.and.text.bubble.right` — the session ⋯ "New Side Chat". */
+    val BubbleLeftAndTextBubbleRight = ZeronIcon.Vector(R.drawable.zi_chat_round_line)
+
+    /** SF `apple.terminal` — the session ⋯ "Terminal". */
+    val Terminal = ZeronIcon.Vector(R.drawable.zi_terminal)
+
     /** SF `command` — core slash-command chip. */
     val Command = ZeronIcon.Vector(R.drawable.zi_command)
 
@@ -431,6 +437,12 @@ object ZeronIcons {
         RegistryEntry("InfoCircle", listOf("info.circle"), InfoCircle),
         RegistryEntry("ArrowTriangleBranch", listOf("arrow.triangle.branch"), ArrowTriangleBranch),
         RegistryEntry("Command", listOf("command"), Command),
+        RegistryEntry(
+            "BubbleLeftAndTextBubbleRight",
+            listOf("bubble.left.and.text.bubble.right"),
+            BubbleLeftAndTextBubbleRight,
+        ),
+        RegistryEntry("Terminal", listOf("apple.terminal"), Terminal),
         // Zeron extras.
         RegistryEntry("TabChat", emptyList(), TabChat),
         RegistryEntry("TabSettings", emptyList(), TabSettings),

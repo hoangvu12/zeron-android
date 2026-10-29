@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import uniffi.zeron_core.ChatConfig
 import uniffi.zeron_core.ComposerState
+import uniffi.zeron_core.Connectivity
 import uniffi.zeron_core.DeviceView
 import uniffi.zeron_core.SessionRow
 import uniffi.zeron_core.TranscriptView
@@ -35,6 +36,8 @@ data class ChromeInput(
     // config-first selection the menus' deferred loads re-read. Read once
     // per refresh next to the row, so the provider never calls FFI.
     val config: ChatConfig? = null,
+    /** #28: the device's connectivity (`CoreClient.connectivity()`), for the pill's Offline. */
+    val connectivity: Connectivity? = null,
 )
 
 /**
@@ -356,8 +359,11 @@ class SessionController private constructor(
                 row = row,
                 engine = engine,
                 config = core.sessionConfig(),
+                connectivity = core.connectivity(),
             )
-            var next = baseChrome(c, row)
+            // #33: a side chat's bar reads "Side chat" over its parent's title.
+            val parentTitle = row?.parentChatId?.let { core.sessionRow(it)?.title }
+            var next = baseChrome(c, row, parentTitle)
             for (filler in fillers) next = filler.fill(next, input)
             _chrome.value = next
         } catch (cancelled: CancellationException) {
