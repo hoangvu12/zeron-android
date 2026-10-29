@@ -54,8 +54,6 @@ import sh.zeron.android.transcript.firstUserBubbleInRoot
 import sh.zeron.android.transcript.rememberLinkRouter
 import sh.zeron.android.transcript.transcriptBottomInset
 import sh.zeron.android.transcript.widgets.imageTileRadius
-import sh.zeron.android.accounts.SessionAccountUsage
-import sh.zeron.android.design.LocalToaster
 
 /**
  * The Session screen (android-ui-parity #75) — the composition that stacks
@@ -438,48 +436,21 @@ fun SessionScreen(
     //     at tap time (ticket 59), never during composition. The provider
     //     reads only the controller-refresh snapshot — no FFI on main;
     //     the loads and writes hop to IO inside [SessionChipMenus].
-    //     android-next #05: this route's usage filler is handed to 89 as
-    //     the context chip's account half (the tint filler and the menu
-    //     rows), and its open action + toast are injected here where the
-    //     nav stack and the app toaster live.
+    //     A failed setting change stays silent, as iOS's `try?
+    //     setSessionConfig` (#28 drops the setting-failure pill).
     // Wave-10 38: the tabbed model picker the model chip opens (hosted
     // over the screen below, with the side-chats overlay).
     val modelPicker = remember(controller) { sh.zeron.android.composer.ModelPickerController() }
     composerBinding?.let { binding ->
         val chipMenus = remember(controller) { controller.filler<SessionChipMenus>() }
-        val usage = remember(controller) { controller.filler<SessionAccountUsage>() }
-        val banner = remember(controller) { controller.filler<StatusBanner>() }
         val platform = rememberChipMenuPlatform()
-        val usageStack = LocalNavStack.current
-        val usageEntry = LocalNavEntry.current
-        val usageToaster = LocalToaster.current
         SideEffect {
             chipMenus?.let { menus ->
-                menus.onSettingResult = { t ->
-                    if (t == null) banner?.noteSettingSucceeded() else banner?.noteSettingFailed(t)
-                }
-                // android-next #05: fold the account rows into the context
-                // chip's menu (the plain context card without accounts).
-                menus.accounts = usage
                 menus.modelPicker = modelPicker
                 // iOS render :488-491: the provider map is rebuilt on
                 // every chrome change (the chips it decorates are).
                 binding.chipMenus = { chips ->
                     chips.associate { chip -> chip.id to { menus.menu(chip.id, platform) } }
-                }
-            }
-            usage?.let { model ->
-                model.toaster = usageToaster
-                model.onOpenAccounts = {
-                    if (usageStack.top.id == usageEntry.id) {
-                        usageStack.push(
-                            sh.zeron.android.accounts.AgentAccountsRoute(
-                                deviceId = controller.hostDeviceId.ifEmpty { null },
-                                focusHarness = controller.harness,
-                            ),
-                            animated = true,
-                        )
-                    }
                 }
             }
             binding.apply(chrome)
@@ -501,9 +472,15 @@ fun SessionScreen(
     SessionScaffold(
         reveal = state.reveal,
         header = {
+            // #33: no bar title — the title and "project @ device" head the
+            // ⋯ menu instead; a side chat reads "Side chat" over its
+            // parent's title (iOS :50-53, 319-324).
+            // TODO(#40): the companions bar item (with its running badge).
+            // TODO(#61): the voice call bar item.
+            val sideParent = chrome.sideChatParent
             SessionHeader(
-                title = chrome.title,
-                subtitle = chrome.subtitle,
+                title = if (sideParent != null) "Side chat" else "",
+                subtitle = sideParent.orEmpty(),
                 edgeEngaged = edgeEngaged,
                 onMore = onMore,
                 statusBarTop = statusBarTop,
@@ -562,7 +539,7 @@ fun SessionScreen(
                 StatusPillRow(
                     shownBanner(chrome.banner, editing),
                     onTap = { banner -> statusBanner?.onTap(banner) },
-                    tapEnabled = { banner -> bannerTapAction(banner, true) != BannerTap.None },
+                    tapEnabled = { banner -> bannerTapAction(banner) != BannerTap.None },
                 )
             },
             queue = {

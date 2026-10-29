@@ -77,13 +77,13 @@ enum class PillGlyph {
     /** The 3×3 animated trailer (Sending, Working). */
     Trailer,
 
-    /** One 7 dp `Palette.danger` dot (NotDelivered, Failed, EngineParked). */
+    /** One 7 dp `Palette.danger` dot (NotDelivered, Failed). */
     DotDanger,
 
     /** One 7 dp `StatusTone.input` dot (Editing). */
     DotInput,
 
-    /** One 7 dp `StatusTone.idle` dot (EngineOff, Reconnecting). */
+    /** One 7 dp `StatusTone.idle` dot (Offline, Reconnecting). */
     DotIdle,
 }
 
@@ -99,6 +99,9 @@ data class PillContent(val glyph: PillGlyph, val text: String)
  * `Working` truncates toward zero, like `Int(Date().timeIntervalSince($0))`:
  * `secs = ((nowMs − sinceMs) / 1000).toInt()`, `secs > 0` →
  * `"<word> · <elapsed>"`, else `"<word>…"`.
+ *
+ * `Reconnecting` counts down to its deadline, never below 1 (iOS
+ * `max(1, Int((retry - now) / 1000))`, `CoreSessionSource.swift:144`).
  */
 fun pillContent(banner: SessionChrome.Banner, nowMs: Long): PillContent = when (banner) {
     is SessionChrome.Banner.Working -> {
@@ -112,17 +115,11 @@ fun pillContent(banner: SessionChrome.Banner, nowMs: Long): PillContent = when (
     SessionChrome.Banner.NotDelivered -> PillContent(PillGlyph.DotDanger, "Not delivered · Tap to retry")
     is SessionChrome.Banner.Failed -> PillContent(PillGlyph.DotDanger, banner.message)
     SessionChrome.Banner.Editing -> PillContent(PillGlyph.DotInput, "Editing queued message · Tap to cancel")
-    is SessionChrome.Banner.EngineParked -> when (banner.reason) {
-        SessionChrome.ParkedReason.Revoked ->
-            PillContent(PillGlyph.DotDanger, "Session revoked")
-        SessionChrome.ParkedReason.IdentityChanged ->
-            PillContent(PillGlyph.DotDanger, "Engine changed")
-        // Never derived (Incompatible maps to EngineOff); defensive only.
-        SessionChrome.ParkedReason.Incompatible ->
-            PillContent(PillGlyph.DotIdle, "Engine off")
+    SessionChrome.Banner.Offline -> PillContent(PillGlyph.DotIdle, "Offline — sends are saved")
+    is SessionChrome.Banner.Reconnecting -> {
+        val secs = maxOf(1L, (banner.retryAtMs - nowMs) / 1000L)
+        PillContent(PillGlyph.DotIdle, "Reconnecting in ${secs}s")
     }
-    SessionChrome.Banner.EngineOff -> PillContent(PillGlyph.DotIdle, "Engine off")
-    SessionChrome.Banner.Reconnecting -> PillContent(PillGlyph.DotIdle, "Reconnecting…")
     SessionChrome.Banner.None -> error("None has no pill content")
 }
 
@@ -140,12 +137,12 @@ fun pillContent(banner: SessionChrome.Banner, nowMs: Long): PillContent = when (
  * - **Taps:** a live pill consumes every tap (`detectTapGestures`, like the
  *   `UIControl`) and dispatches [onTap]; it exposes a semantics click
  *   action only while [tapEnabled] is true for the banner (the screen
- *   passes `{ b -> bannerTapAction(b, true) != BannerTap.None }`). No
+ *   passes `{ b -> bannerTapAction(b) != BannerTap.None }`). No
  *   ripple, no highlight, no scale — ever.
- * - **The 1 s elapsed ticker** runs only for a live `Working` banner
- *   ([Motion.StatusTickMs]); it stops the moment the live banner is no
- *   longer `Working` or the pill leaves composition (iOS stops the timer
- *   when the view leaves the window).
+ * - **The 1 s ticker** runs only for a live `Working` or `Reconnecting`
+ *   banner ([Motion.StatusTickMs]); it stops the moment the live banner
+ *   changes or the pill leaves composition (iOS stops the timer when the
+ *   view leaves the window).
  * - **Content swaps are instant** — glyph and label re-render in the same
  *   frame, no crossfade; the row's show/hide spring belongs to ticket 74.
  */
@@ -164,11 +161,12 @@ fun StatusPill(
     val display = if (banner != SessionChrome.Banner.None) banner else lastShown.value ?: return
     val live = banner != SessionChrome.Banner.None
 
-    // The elapsed ticker — only for the LIVE Working banner (display may
-    // be a stale Working banner whose label then stays frozen, like iOS).
+    // The ticker — only for a LIVE Working / Reconnecting banner (display
+    // may be a stale one whose label then stays frozen, like iOS).
     var now by remember { mutableLongStateOf(nowMs()) }
     LaunchedEffect(banner) {
-        if (banner is SessionChrome.Banner.Working) {
+        now = nowMs()
+        if (banner is SessionChrome.Banner.Working || banner is SessionChrome.Banner.Reconnecting) {
             while (true) {
                 now = nowMs()
                 delay(Motion.StatusTickMs)
@@ -274,9 +272,10 @@ val SessionChrome.Banner.showsPill: Boolean
  * The ticket's screenshot fixture (Step 12): one column, 390 dp wide, 12 dp
  * side padding, 8 dp between rows, `Palette.background` behind, a **fixed**
  * clock (`nowMs = 1_000_000L`) so the Working row reads
- * `Working · 1m 15s` deterministically. Eleven rows: Sending, Working,
- * NotDelivered, the two Failed texts, Editing, both EngineParked reasons,
- * EngineOff, Reconnecting and the over-long Failed label (truncation).
+ * `Working · 1m 15s` deterministically. Nine rows: Sending, Working,
+ * NotDelivered, the send failure, Queued ("host offline — will send"),
+ * Editing, Offline, Reconnecting (`in 4s`) and the over-long Failed label
+ * (truncation).
  */
 @Composable
 internal fun StatusPillFixtureColumn(nowMs: () -> Long = { 1_000_000L }) {
@@ -298,19 +297,13 @@ internal fun StatusPillFixtureColumn(nowMs: () -> Long = { 1_000_000L }) {
             nowMs = nowMs,
         )
         StatusPillRow(
-            SessionChrome.Banner.Failed("Couldn't change session settings: unknown model"),
+            SessionChrome.Banner.Failed("MacBook Pro is offline — will send when it's back"),
             onTap = {},
             nowMs = nowMs,
         )
         StatusPillRow(SessionChrome.Banner.Editing, onTap = {}, nowMs = nowMs)
-        StatusPillRow(SessionChrome.Banner.EngineParked(SessionChrome.ParkedReason.Revoked, "e1"), onTap = {}, nowMs = nowMs)
-        StatusPillRow(
-            SessionChrome.Banner.EngineParked(SessionChrome.ParkedReason.IdentityChanged, "e1"),
-            onTap = {},
-            nowMs = nowMs,
-        )
-        StatusPillRow(SessionChrome.Banner.EngineOff, onTap = {}, nowMs = nowMs)
-        StatusPillRow(SessionChrome.Banner.Reconnecting, onTap = {}, nowMs = nowMs)
+        StatusPillRow(SessionChrome.Banner.Offline, onTap = {}, nowMs = nowMs)
+        StatusPillRow(SessionChrome.Banner.Reconnecting(1_004_000L), onTap = {}, nowMs = nowMs)
         StatusPillRow(
             SessionChrome.Banner.Failed("Couldn't send: " + "a very long error message ".repeat(6)),
             onTap = {},

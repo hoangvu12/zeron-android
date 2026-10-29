@@ -33,6 +33,7 @@ import sh.zeron.android.design.glass.GlassMenuHost
 import sh.zeron.android.design.glass.LocalHazeState
 import sh.zeron.android.design.glass.ProvideHazeState
 import sh.zeron.android.design.glass.rememberGlassMenuState
+import sh.zeron.android.session.CompanionMenuRows
 import sh.zeron.android.session.SessionHeader
 import sh.zeron.android.session.copyTranscript
 import sh.zeron.android.session.sessionMenu
@@ -142,8 +143,8 @@ fun SessionMenuGallerySection() {
                         GalleryBackdrop(Modifier.matchParentSize().hazeSource(LocalHazeState.current!!))
                         val menuState = rememberGlassMenuState()
                         SessionHeader(
-                            title = "Fix the deploy script",
-                            subtitle = "zeron @ studio",
+                            title = "",
+                            subtitle = "",
                             edgeEngaged = true,
                             onMore = { anchor ->
                                 menuState.open(
@@ -159,7 +160,6 @@ fun SessionMenuGallerySection() {
                                                 copyTranscript(transcript, clipboard, toaster)
                                             }
                                         },
-                                        onShowAccounts = {},
                                         onArchive = {
                                             actions.archive("c1") { outcome ->
                                                 // 80's leave: only a
@@ -170,6 +170,14 @@ fun SessionMenuGallerySection() {
                                                 }
                                             }
                                         },
+                                        onDelete = { log += "delete" },
+                                        companions = CompanionMenuRows(
+                                            onNewSideChat = { log += "new side chat" },
+                                            onForkSideChat = { log += "fork" },
+                                            onTerminal = { log += "terminal" },
+                                        ),
+                                        title = "Fix the deploy script",
+                                        subtitle = "zeron @ studio",
                                     ),
                                 )
                             },

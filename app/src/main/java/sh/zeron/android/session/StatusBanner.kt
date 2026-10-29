@@ -6,129 +6,68 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import uniffi.zeron_core.ConnectivityState
 import uniffi.zeron_core.CoreException
-import uniffi.zeron_core.HostInfo
 import uniffi.zeron_core.SendState
 
-/** The lite copy of the FFI `SendState` (android-ui-parity #73): no UniFFI types in the pure derivation. */
+/** The lite copy of the FFI `SendState`: no UniFFI types in the pure derivation. */
 enum class SendLite { Sending, Queued, Failed }
 
-/** The lite copy of the FFI `PendingSend`: creation order, `sentAtMs` (the phone's clock) and `state`. */
-data class PendingLite(val sentAtMs: Long, val state: SendLite)
-
-/**
- * The owning engine's connection state as the banner derivation needs it
- * (a lite copy of the FFI `EngineView.state` plus the engine id, with one
- * extra state the FFI cannot express: the engine record is gone).
- */
-sealed interface EngineLink {
-    data object Connected : EngineLink
-    data object Connecting : EngineLink
-    data object Reconnecting : EngineLink
-
-    /** `EngineState.Offline` — the OS reports no network. */
-    data object NoNetwork : EngineLink
-
-    /** `Parked(reason, engineId)`: revoked / identity changed / incompatible. */
-    data class Parked(val reason: SessionChrome.ParkedReason, val engineId: String) : EngineLink
-
-    /** `ChromeInput.engine == null` — the engine is forgotten or unknown. */
-    data object Missing : EngineLink
-}
-
-/** Everything [deriveBanner] reads (a lite copy of a [ChromeInput] plus the filler's sticky failures). */
+/** Everything [deriveBanner] reads (a lite copy of a [ChromeInput] plus the filler's sticky failure). */
 data class BannerInputs(
-    /** Ticket 78's sticky send failure; set until the next successful send. */
+    /** The last send threw; set until the next successful send. */
     val sendFailure: String? = null,
-    /** Ticket 89's sticky setting failure (upstream PR #664); set until the next successful change. */
-    val settingFailure: String? = null,
     /** `ComposerState.sendState` (the oldest pending send's headline state). */
     val sendState: SendLite? = null,
-    val link: EngineLink = EngineLink.Connected,
-    /** `ComposerState.pendingSends`, creation order. */
-    val pendingSends: List<PendingLite> = emptyList(),
-    /** `ComposerState.live.workingSinceMs` (the engine's clock, not the phone's). */
-    val workingSinceMs: Long? = null,
+    /** `SessionRow.isCloud`: a Cloud chat's queued send waits for its machine, silently. */
+    val isCloud: Boolean = false,
+    /** `ComposerState.host.name`. */
+    val hostName: String? = null,
+    /** `CoreClient.connectivity().state == OFFLINE`. */
+    val offline: Boolean = false,
+    /** `ComposerState.room.connected`. */
+    val roomConnected: Boolean = true,
+    /** `ComposerState.room.retryAtMs`: the next redial, epoch ms. */
+    val roomRetryAtMs: Long? = null,
 )
 
 /**
- * The send→turn bridge (android-ui-parity #73, the port of the web's
- * `sendingBridge`, `web/packages/app/src/lib/transcript.ts:1279-1292`):
- * the pill shows `Sending to host…` only while a send of **this device** is in
- * flight and the engine has not yet reported the turn it started.
+ * The one chrome banner per refresh (#28) — `CoreSessionSource.refresh`'s
+ * precedence (`ios:Session/CoreSessionSource.swift:129-145`), first match
+ * wins:
  *
- * `turnStarted <= sendStarted` counts as bridged (the turn at or before
- * the send is the one the send started); a turn that started *after* the
- * send means the engine adopted it and the tail's Working row takes over.
- * The two clocks (phone/engine) are compared as-is, like the web — do not
- * "fix" skew.
- */
-fun sendingBridge(sendStarted: Long?, turnStarted: Long?): Boolean =
-    sendStarted != null && (turnStarted == null || turnStarted <= sendStarted)
-
-/**
- * Derives the one chrome banner per refresh (the port of
- * `ios:Session/CoreSessionSource.swift:75-87`, adapted per the ticket's
- * precedence table — first match wins):
- *
- * 1. `Failed(sendFailure)` — the last send threw, sticky until the next successful send;
- * 2. `NotDelivered` — `sendState == FAILED` **and** the engine is `Connected` (a degraded
- *    engine never shows a false "Not delivered", the web's rule);
- * 3. `Failed(settingFailure)` — the last `setSessionConfig` threw (upstream PR #664);
- * 4. `EngineParked(reason, engineId)` — `Parked(REVOKED)` / `Parked(IDENTITY_CHANGED)`;
- * 5. `EngineOff` — the engine record is missing, or `Parked(INCOMPATIBLE)` (a version
- *    mismatch is not recoverable from the phone);
- * 6. `Reconnecting` — the engine is `Connecting`, `Reconnecting` or `Offline`;
- * 7. `Sending` — (the engine is `Connected` here by construction) the send→turn bridge
- *    over the **first** `SENDING` pending send's `sentAtMs`;
- * 8. `None`.
+ * 1. `Failed(sendFailure)` — the last send threw, sticky until the next send;
+ * 2. `NotDelivered` — `sendState == FAILED`;
+ * 3. `QUEUED` — `"<host> is offline — will send when it's back"`; a Cloud
+ *    chat shows nothing (the transcript's setup step says it);
+ * 4. `Sending` — `sendState == SENDING`;
+ * 5. `Offline` — the device has no network (sends are saved);
+ * 6. `Reconnecting(retryAtMs)` — the chat's room is down with a redial due;
+ * 7. `None`.
  *
  * Pure. Never returns `Editing` (a display overlay, [shownBanner]) and
- * never `Working` (the transcript tail owns it,
- * `CoreSessionSource.swift:89`). iOS's `.queued` / `.offline` relay-outbox
- * banners are dropped: Zeron refuses writes to a non-connected engine.
+ * never `Working` (the transcript tail owns it).
  */
-fun deriveBanner(i: BannerInputs): SessionChrome.Banner {
-    // 1 — the sticky send failure wins over everything.
-    i.sendFailure?.let { return SessionChrome.Banner.Failed(it) }
-    // 2 — only while the engine is connected; a retry would be skipped otherwise.
-    if (i.sendState == SendLite.Failed && i.link == EngineLink.Connected) {
-        return SessionChrome.Banner.NotDelivered
-    }
-    // 3 — the sticky setting failure (upstream PR #664's precedence: after NotDelivered).
-    i.settingFailure?.let { return SessionChrome.Banner.Failed(it) }
-    // 4–6 — the engine link decides.
-    when (val l = i.link) {
-        // 4 — parked for a recoverable reason.
-        is EngineLink.Parked -> when (l.reason) {
-            SessionChrome.ParkedReason.Revoked,
-            SessionChrome.ParkedReason.IdentityChanged,
-            -> return SessionChrome.Banner.EngineParked(l.reason, l.engineId)
-
-            // 5 — a version mismatch is not recoverable from the phone.
-            SessionChrome.ParkedReason.Incompatible -> return SessionChrome.Banner.EngineOff
+fun deriveBanner(i: BannerInputs): SessionChrome.Banner = when {
+    i.sendFailure != null -> SessionChrome.Banner.Failed(i.sendFailure)
+    i.sendState == SendLite.Failed -> SessionChrome.Banner.NotDelivered
+    i.sendState == SendLite.Queued ->
+        if (i.isCloud) {
+            SessionChrome.Banner.None
+        } else {
+            SessionChrome.Banner.Failed("${i.hostName ?: "Host"} is offline — will send when it's back")
         }
-        // 5 — the engine record is missing (forgotten / unknown).
-        EngineLink.Missing -> return SessionChrome.Banner.EngineOff
-        // 6 — known engine, no live connection: reads stay possible, writes are refused.
-        EngineLink.Connecting,
-        EngineLink.Reconnecting,
-        EngineLink.NoNetwork,
-        -> return SessionChrome.Banner.Reconnecting
-        // 7 — connected: fall through to the send→turn bridge.
-        EngineLink.Connected -> Unit
-    }
-    // 7 — the first SENDING pending send in creation order.
-    val sendStart = i.pendingSends.firstOrNull { it.state == SendLite.Sending }?.sentAtMs
-    return if (sendingBridge(sendStart, i.workingSinceMs)) SessionChrome.Banner.Sending else SessionChrome.Banner.None
+    i.sendState == SendLite.Sending -> SessionChrome.Banner.Sending
+    i.offline -> SessionChrome.Banner.Offline
+    !i.roomConnected && i.roomRetryAtMs != null -> SessionChrome.Banner.Reconnecting(i.roomRetryAtMs)
+    else -> SessionChrome.Banner.None
 }
 
 /**
- * The banner the pill **displays** — iOS `render` (`SessionViewController.swift:501`):
- * `self.pill.banner = editing ? .editing : c.banner`. [editing] is ticket
- * 83's queue-edit lease flag (`editingId != null`); the chrome banner
- * itself never holds `Editing`, which is what lets ticket 74 treat
- * editing toggles as non-structural (they snap, like iOS `:432-433`).
+ * The banner the pill **displays** — iOS `render`
+ * (`SessionViewController.swift:765`): `editingQueueId != nil ? .editing : c.banner`.
+ * The chrome banner itself never holds `Editing`, so editing toggles stay
+ * non-structural (they snap).
  */
 fun shownBanner(chromeBanner: SessionChrome.Banner, editing: Boolean): SessionChrome.Banner =
     if (editing) SessionChrome.Banner.Editing else chromeBanner
@@ -138,28 +77,25 @@ sealed interface BannerTap {
     /** Nothing runs (the tap is still consumed at the hit-test level). */
     data object None : BannerTap
 
-    /** Cancel the queued-message edit (ticket 83's `cancelEdit()`, iOS `endEdit(commit: nil)`). */
+    /** Cancel the queued-message edit (iOS `endEdit(commit: nil)`). */
     data object CancelEdit : BannerTap
 
-    /** `retryDelivery()` on the IO scope, errors logged and swallowed (iOS `:197-199`). */
+    /** `retryDelivery()` on the IO scope, errors logged and swallowed (iOS `try?`). */
     data object RetryDelivery : BannerTap
 }
 
 /**
- * The tap dispatch table: `Editing` cancels the edit; `NotDelivered`
- * retries — but only when [engineConnected] (the engine state at the last
- * fill; the web skips the retry when the engine is not connected,
- * `chat-page.tsx:1251-1254`). Every other banner
+ * The tap dispatch table (iOS `pill.onTap`, `SessionViewController.swift:173-179`):
+ * `Editing` cancels the edit, `NotDelivered` retries. Every other banner
  * consumes the tap without doing anything, like the iOS `UIControl`.
  */
-fun bannerTapAction(banner: SessionChrome.Banner, engineConnected: Boolean): BannerTap =
+fun bannerTapAction(banner: SessionChrome.Banner): BannerTap =
     when (banner) {
         SessionChrome.Banner.Editing -> BannerTap.CancelEdit
-        SessionChrome.Banner.NotDelivered -> if (engineConnected) BannerTap.RetryDelivery else BannerTap.None
-        is SessionChrome.Banner.EngineParked,
+        SessionChrome.Banner.NotDelivered -> BannerTap.RetryDelivery
         is SessionChrome.Banner.Failed,
-        SessionChrome.Banner.EngineOff,
-        SessionChrome.Banner.Reconnecting,
+        SessionChrome.Banner.Offline,
+        is SessionChrome.Banner.Reconnecting,
         SessionChrome.Banner.Sending,
         is SessionChrome.Banner.Working,
         SessionChrome.Banner.None,
@@ -167,17 +103,12 @@ fun bannerTapAction(banner: SessionChrome.Banner, engineConnected: Boolean): Ban
     }
 
 /**
- * The `<error>` text of a failed send / setting change — iOS prints Swift
- * reflection (`HostUnavailable(message: "…")`); Zeron prints the
- * exception's `reason` (the Rust `#[error]` text).
+ * The `<error>` text of a failed send — iOS prints Swift reflection;
+ * Zeron prints the exception's `reason` (the Rust `#[error]` text).
  *
- * For a `CoreException` an exhaustive `when` over the generated variants
- * returns each `reason` (`HostUnavailable` → `Engine is offline;
- * reconnecting`, so the pill reads `Couldn't send: Engine is offline;
- * reconnecting`). **Never read `CoreException.message`**: depending on the
- * pinned UniFFI version the generated override returns `reason` or
- * `"reason=<value>"`. `Closed` has no payload and maps to the Rust
- * `#[error]` text (`mob:client_ffi/types.rs:37-38`). Any other
+ * **Never read `CoreException.message`**: depending on the pinned UniFFI
+ * version the generated override returns `reason` or `"reason=<value>"`.
+ * `Closed` has no payload and maps to the Rust `#[error]` text. Any other
  * `Throwable` yields its message, or its class name when blank/null.
  */
 fun errorText(t: Throwable): String = when (t) {
@@ -196,31 +127,17 @@ fun errorText(t: Throwable): String = when (t) {
 }
 
 /**
- * The banner `ChromeFiller` (android-ui-parity #73): owns the sticky
- * `sendFailure` / `settingFailure` state and the tap dispatch that the
- * pill drives. Registered once per route (see the wiring contract below).
+ * The banner `ChromeFiller`: owns the sticky `sendFailure` and the tap
+ * dispatch that the pill drives. Registered once per route in the
+ * registry's BANNER slot (`ZeronApplication`).
  *
  * **Threading:** [fill] runs on the controller's IO lane (it touches no
  * FFI, only the lite copy); the `note*` setters and [onTap] run on main.
  * Every shared field is `@Volatile`.
  *
- * **Wiring contract for the sibling tickets** (this ticket implements only
- * this side):
- * - **Registration (76):** `chromeFillers.register(ChromeFillerRegistry.BANNER) { core ->
- *   StatusBanner(retryDelivery = { (core as CoreSessionCore).handle.retryDelivery() }) }`
- *   — never a second banner filler; 78 must not register its fallback
- *   `SendFailureFiller` (78 step 3's "feed 73's filler" option).
- * - **From the screen (75/76):** `controller.filler<StatusBanner>()` (declared by ticket 51).
- * - **75/74 placement:** `StatusPillRow(shownBanner(chrome.banner, editing),
- *   onTap = banner::onTap, tapEnabled = { b -> bannerTapAction(b, true) != BannerTap.None })`
- *   where `editing` is ticket 83's flag.
- * - **78 (send):** after `handle.send(...)` returns → `noteSendSucceeded()`; when it throws
- *   (not `CancellationException`) → `noteSendFailed(t)` — through the [SendReporter]
- *   interface the binding holds.
- * - **89 (chip menus):** `noteSettingSucceeded()` / `noteSettingFailed(t)` around
- *   `setSessionConfig` (89's `onSettingResult`).
- * - **83 (queue edit):** `banner.onEditingTap = { queueEdit.cancelEdit() }` (iOS
- *   `endEdit(commit: nil)`).
+ * - **Send:** after `handle.send(...)` returns → `noteSendSucceeded()`; when it
+ *   throws (not `CancellationException`) → `noteSendFailed(t)`, through [SendReporter].
+ * - **Queue edit:** `banner.onEditingTap = { queueEdit.cancelEdit() }`.
  */
 class StatusBanner(
     /** The chat's `retryDelivery` (runs on [io], never main — upstream #609's trap). */
@@ -230,7 +147,7 @@ class StatusBanner(
         android.util.Log.w("ZeronSession", message, error)
     },
 ) : ChromeFiller, SendReporter {
-    /** Ticket 83: cancels the queued-message edit. Main thread. */
+    /** Cancels the queued-message edit. Main thread. */
     @Volatile
     var onEditingTap: (() -> Unit)? = null
 
@@ -238,26 +155,17 @@ class StatusBanner(
     @Volatile
     private var sendFailure: String? = null
 
-    /** The last `setSessionConfig`'s failure text, or null. Sticky until the next successful one. */
-    @Volatile
-    private var settingFailure: String? = null
-
-    /** The engine state of the last [fill]; gates the retry tap. */
-    @Volatile
-    private var lastConnected = false
-
     /** The invalidate handle [bind] stores; the controller's coalescing trigger. */
     @Volatile
     private var invalidate: () -> Unit = {}
 
     /**
      * The retry lane. Never cancelled: a retry may finish (and invalidate)
-     * after the screen closed, exactly like iOS's synchronous call
-     * (`CoreSessionSource.swift:197-199`).
+     * after the screen closed, exactly like iOS's synchronous call.
      */
     private val scope = CoroutineScope(SupervisorJob() + io)
 
-    /** Ticket 78: a send returned normally — clears the sticky send failure. */
+    /** A send returned normally — clears the sticky send failure. */
     override fun noteSendSucceeded() {
         if (sendFailure != null) {
             sendFailure = null
@@ -265,28 +173,12 @@ class StatusBanner(
         }
     }
 
-    /** Ticket 78: `handle.send` threw — holds `Couldn't send: <errorText>` until the next success. */
+    /** `handle.send` threw — holds `Couldn't send: <errorText>` until the next success. */
     override fun noteSendFailed(error: Throwable) {
         replaceSendFailure("Couldn't send: " + errorText(error))
     }
 
-    /** Ticket 89: `setSessionConfig` returned normally — clears the sticky setting failure. */
-    fun noteSettingSucceeded() {
-        if (settingFailure != null) {
-            settingFailure = null
-            invalidate()
-        }
-    }
-
-    /** Ticket 89: `setSessionConfig` threw — holds `Couldn't change session settings: <errorText>`. */
-    fun noteSettingFailed(error: Throwable) {
-        replaceSettingFailure("Couldn't change session settings: " + errorText(error))
-    }
-
-    /**
-     * Ticket 83's recovery copy into the sticky send-failure slot,
-     * **verbatim** (no `Couldn't send: ` prefix).
-     */
+    /** The queue edit's recovery copy into the sticky send-failure slot, **verbatim**. */
     fun noteFailureMessage(message: String) {
         replaceSendFailure(message)
     }
@@ -302,9 +194,9 @@ class StatusBanner(
         }
     }
 
-    /** The pill's tap. Main thread; uses the engine state of the last [fill]. */
+    /** The pill's tap. Main thread. */
     fun onTap(banner: SessionChrome.Banner) {
-        when (val action = bannerTapAction(banner, lastConnected)) {
+        when (bannerTapAction(banner)) {
             BannerTap.None -> Unit
             BannerTap.CancelEdit -> onEditingTap?.invoke()
             BannerTap.RetryDelivery -> scope.launch {
@@ -325,16 +217,9 @@ class StatusBanner(
         this.invalidate = invalidate
     }
 
-    /**
-     * Derives the banner from the lite inputs and the sticky failures; no
-     * FFI (everything it needs is already in [input]). Caches the engine's
-     * connected state for the retry-tap guard.
-     */
-    override fun fill(chrome: SessionChrome, input: ChromeInput): SessionChrome {
-        val inputs = bannerInputs(input, sendFailure, settingFailure)
-        lastConnected = inputs.link == EngineLink.Connected
-        return chrome.copy(banner = deriveBanner(inputs))
-    }
+    /** Derives the banner from the lite inputs and the sticky failure; no FFI. */
+    override fun fill(chrome: SessionChrome, input: ChromeInput): SessionChrome =
+        chrome.copy(banner = deriveBanner(bannerInputs(input, sendFailure)))
 
     /** Sets the sticky send failure; invalidates only when the text changed. */
     private fun replaceSendFailure(next: String?) {
@@ -343,48 +228,31 @@ class StatusBanner(
             invalidate()
         }
     }
-
-    /** Sets the sticky setting failure; invalidates only when the text changed. */
-    private fun replaceSettingFailure(next: String?) {
-        if (settingFailure != next) {
-            settingFailure = next
-            invalidate()
-        }
-    }
 }
 
 /** The FFI `SendState` → [SendLite]. */
-private fun SendState.toSendLite(): SendLite = when (this) {
+internal fun SendState.toSendLite(): SendLite = when (this) {
     SendState.SENDING -> SendLite.Sending
     SendState.QUEUED -> SendLite.Queued
     SendState.FAILED -> SendLite.Failed
 }
 
 /**
- * The chat's host (`ComposerState.host`) → [EngineLink]. Zeron has no
- * per-engine connection state or park reasons: an online host is
- * `Connected`, an offline one `Reconnecting`.
+ * Maps a [ChromeInput] (uniffi records) plus the filler's sticky failure
+ * into the pure [BannerInputs] (internal so the tests can drive it).
  *
- * TODO(#28): re-derive the pill from `connectivity()` + `room.retryAtMs`
- * (CSS:129-145) and drop [EngineLink.Parked] / [EngineLink.Missing].
+ * TODO(#53): a Cloud chat's "Not delivered" becomes nothing when out of
+ * credits, or "Cloud machine: … · Tap to retry" (iOS `cloudBanner`).
  */
-private fun HostInfo.toEngineLink(): EngineLink =
-    if (online) EngineLink.Connected else EngineLink.Reconnecting
-
-/**
- * Maps a [ChromeInput] (uniffi records) plus the filler's sticky failures
- * into the pure [BannerInputs] (internal so the tests can drive it
- * directly). `pendingSends` keeps its creation order; the `when`s are
- * exhaustive over the FFI enums.
- */
-internal fun bannerInputs(input: ChromeInput, sendFailure: String?, settingFailure: String?): BannerInputs {
+internal fun bannerInputs(input: ChromeInput, sendFailure: String?): BannerInputs {
     val composer = input.composer
     return BannerInputs(
         sendFailure = sendFailure,
-        settingFailure = settingFailure,
         sendState = composer.sendState?.toSendLite(),
-        link = composer.host.toEngineLink(),
-        pendingSends = composer.pendingSends.map { PendingLite(sentAtMs = it.sentAtMs, state = it.state.toSendLite()) },
-        workingSinceMs = composer.live.workingSinceMs,
+        isCloud = input.row?.isCloud == true,
+        hostName = composer.host.name,
+        offline = input.connectivity?.state == ConnectivityState.OFFLINE,
+        roomConnected = composer.room.connected,
+        roomRetryAtMs = composer.room.retryAtMs,
     )
 }

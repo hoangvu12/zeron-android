@@ -25,7 +25,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import sh.zeron.android.composer.ACCOUNT_USAGE_ROW
 import sh.zeron.android.design.Appearance
 import sh.zeron.android.design.LocalToaster
 import sh.zeron.android.design.ZeronIcons
@@ -50,44 +49,33 @@ import sh.zeron.android.transcript.TranscriptState
 import uniffi.zeron_core.LayoutFrame
 
 /**
- * The header's ⋯ pull-down (android-ui-parity #80) — the port of
- * `sessionMenu()` (`ios:Session/SessionViewController.swift:523-544`):
- * three rows in one untitled group, **Pin/Unpin, Copy Transcript,
- * Archive** (destructive). Everything visual belongs to ticket 15's
- * [Menu]/[MenuItem]/[GlassMenuPanel]; this file owns only the content,
- * the three actions and the one router hook the Archive action needs.
+ * The header's ⋯ pull-down (#33) — the port of `sessionMenu(title:subtitle:)`
+ * (`ios:Session/SessionViewController.swift:800-833`). Everything visual
+ * belongs to [Menu]/[MenuItem]/[GlassMenuPanel]; this file owns only the
+ * content, the actions and the one router hook Archive and Delete need.
  *
  * The menu is **rebuilt on every open** (iOS
  * `UIDeferredMenuElement.uncached`): [rememberSessionMenu] builds a fresh
- * [Menu] inside the click lambda, so the pin title and the disabled flags
- * are always current, never cached in composition.
+ * [Menu] inside the click lambda, so the pin title is always current,
+ * never cached in composition.
  *
- * Zeron adaptations (42/22): the leave after Archive happens only on
- * `Ok`/`Gone` outcomes;
- * Copy Transcript builds the string off main and handles Binder's
- * transaction limit with a failure toast.
+ * Zeron adaptations: the leave after Archive happens only on `Ok`/`Gone`
+ * outcomes; Copy Transcript builds the string off main and handles
+ * Binder's transaction limit with a failure toast.
  */
 
 /**
- * Pure: the ⋯ menu for one open. iOS `SessionViewController.sessionMenu()`
- * (PR #578 adds the fourth row) — no `Menu` title, one group, no
- * separators, rows in order:
- *
- * - row 1: "Pin" (SF `pin`) / "Unpin" (SF `pin.slash`) by [pinned],
- *   `app.setPinned(chatId, !pinned)`;
- * - row 2: "Copy Transcript" (SF `doc.on.doc`) — it reads only the local
- *   transcript;
- * - row 3: "Account & Usage" (android-next#05, PR #578's SF
- *   `gauge.with.dots.needle.33percent` — the app's `Gauge` glyph) — it
- *   only reads cached state and pushes a page;
- * - row 4: "Archive" (SF `archivebox`) — no longer destructive (#967);
- * - row 5: "Delete" (SF `trash`), destructive — upstream #967, after the
- *   "Delete session?" confirm. `null`
- *   [onDelete] (galleries, older tests) leaves the row out.
- *
- * Upstream #967 also heads the menu with the session's title over
+ * Pure: the ⋯ menu for one open, headed by the session's title over
  * "project @ device" ([title]/[subtitle], one wrapped `Menu.title`; blank
- * = no title line). Zeron keeps the header bar's two-line title as well.
+ * = no header). Rows in iOS order:
+ *
+ * - an inline group: "New Side Chat" (SF `bubble.left.and.text.bubble.right`),
+ *   "Fork Into Side Chat" (SF `arrow.triangle.branch`), "Terminal"
+ *   (SF `apple.terminal`) — [companions];
+ * - "Pin" (SF `pin`) / "Unpin" (SF `pin.slash`) by [pinned];
+ * - "Copy Transcript" (SF `doc.on.doc`);
+ * - "Archive" (SF `archivebox`);
+ * - "Delete" (SF `trash`), destructive, after the "Delete session?" confirm.
  *
  * Keep it pure: no `@Composable`, no state reads. [rememberSessionMenu]
  * calls this once per open, from the click lambda.
@@ -96,15 +84,15 @@ fun sessionMenu(
     pinned: Boolean,
     onSetPinned: (Boolean) -> Unit,
     onCopyTranscript: () -> Unit,
-    onShowAccounts: () -> Unit,
     onArchive: () -> Unit,
-    sideChats: SideChatMenuRows? = null,
-    onDelete: (() -> Unit)? = null,
+    onDelete: () -> Unit,
+    companions: CompanionMenuRows = CompanionMenuRows(),
     title: String = "",
     subtitle: String = "",
 ): Menu = Menu(
     title = sessionMenuHeader(title, subtitle),
-    children = listOfNotNull(
+    children = listOf(
+        companionSection(companions),
         MenuItem(
             title = if (pinned) "Unpin" else "Pin",
             icon = MenuIcon.Symbol(if (pinned) ZeronIcons.PinSlash else ZeronIcons.Pin),
@@ -117,28 +105,19 @@ fun sessionMenu(
             testTag = "session-menu-copy",
             action = onCopyTranscript,
         ),
-        sideChats?.let { sideChatSection(it) },
-        MenuItem(
-            title = ACCOUNT_USAGE_ROW,
-            icon = MenuIcon.Symbol(ZeronIcons.Gauge),
-            testTag = "session-menu-accounts",
-            action = onShowAccounts,
-        ),
         MenuItem(
             title = "Archive",
             icon = MenuIcon.Symbol(ZeronIcons.Archivebox),
             testTag = "session-menu-archive",
             action = onArchive,
         ),
-        onDelete?.let {
-            MenuItem(
-                title = "Delete",
-                icon = MenuIcon.Symbol(ZeronIcons.Trash),
-                destructive = true,
-                testTag = "session-menu-delete",
-                action = it,
-            )
-        },
+        MenuItem(
+            title = "Delete",
+            icon = MenuIcon.Symbol(ZeronIcons.Trash),
+            destructive = true,
+            testTag = "session-menu-delete",
+            action = onDelete,
+        ),
     ),
 )
 
@@ -155,34 +134,34 @@ internal fun sessionMenuHeader(title: String, subtitle: String): String? = when 
     else -> "$title\n$subtitle"
 }
 
-/**
- * android-next #06's ⋯ rows (upstream #899's inline group between Copy
- * Transcript and Archive): New Side Chat and Fork into Side Chat. `null`
- * — an engine without side chats — leaves the menu as it was. [forking]
- * disables the fork while one is in flight (one at a time).
- */
-class SideChatMenuRows(
-    val forking: Boolean,
-    val onNew: () -> Unit,
-    val onFork: () -> Unit,
+/** The actions of the ⋯ menu's first, inline group (the companions). */
+class CompanionMenuRows(
+    val onNewSideChat: () -> Unit = {},
+    val onForkSideChat: () -> Unit = {},
+    val onTerminal: () -> Unit = {},
 )
 
-/** The inline group (hairlines above and below). */
-private fun sideChatSection(rows: SideChatMenuRows): MenuSection = MenuSection(
+/** The inline group (hairlines above and below), always shown as on iOS. */
+private fun companionSection(rows: CompanionMenuRows): MenuSection = MenuSection(
     inline = true,
     children = listOf(
         MenuItem(
             title = "New Side Chat",
-            icon = MenuIcon.Symbol(ZeronIcons.QuestionmarkBubble),
+            icon = MenuIcon.Symbol(ZeronIcons.BubbleLeftAndTextBubbleRight),
             testTag = "session-menu-new-side-chat",
-            action = rows.onNew,
+            action = rows.onNewSideChat,
         ),
         MenuItem(
-            title = "Fork into Side Chat",
+            title = "Fork Into Side Chat",
             icon = MenuIcon.Symbol(ZeronIcons.ArrowTriangleBranch),
-            disabled = rows.forking,
             testTag = "session-menu-fork-side-chat",
-            action = rows.onFork,
+            action = rows.onForkSideChat,
+        ),
+        MenuItem(
+            title = "Terminal",
+            icon = MenuIcon.Symbol(ZeronIcons.Terminal),
+            testTag = "session-menu-terminal",
+            action = rows.onTerminal,
         ),
     ),
 )
@@ -200,9 +179,7 @@ private fun sideChatSection(rows: SideChatMenuRows): MenuSection = MenuSection(
  * app-scoped [LocalToaster] (14) — both outlive this screen, so the
  * "Archived · Undo" toast still works after the pop. Copy runs in the
  * composition scope: if the screen leaves mid-copy the copy is cancelled
- * (acceptable — the menu is closed and the user is gone). android-next
- * #05's "Account & Usage" pushes the Accounts & Usage page scoped to
- * this session's harness and computer (PR #578's `showAccounts`).
+ * (acceptable — the menu is closed and the user is gone).
  *
  * Requires [sh.zeron.android.shell.LocalNavStack] /
  * [sh.zeron.android.shell.LocalNavEntry] (any screen inside a
@@ -212,10 +189,10 @@ private fun sideChatSection(rows: SideChatMenuRows): MenuSection = MenuSection(
 fun rememberSessionMenu(
     controller: SessionController,
     transcript: TranscriptState,
-    /** android-next #06: the side-chat rows, read at open time; `null` result = none. */
-    sideChats: () -> SideChatMenuRows? = { null },
+    /** The companion group's actions, read at open time. */
+    companions: () -> CompanionMenuRows = { CompanionMenuRows() },
 ): (anchorInWindow: Rect) -> Unit {
-    val currentSideChats by rememberUpdatedState(sideChats)
+    val currentCompanions by rememberUpdatedState(companions)
     val menuState = rememberGlassMenuState()
     val actions = LocalRowActions.current
     val router = LocalAppRouter.current
@@ -241,20 +218,6 @@ fun rememberSessionMenu(
                     pop = { nav.pop(animated = true) },
                 )
             }
-            // android-next #05: the session's harness and computer scope
-            // the Accounts & Usage page (a mid-transition guard like the
-            // Devices section's).
-            val showAccounts = {
-                if (nav.top.id == entry.id) {
-                    nav.push(
-                        sh.zeron.android.accounts.AgentAccountsRoute(
-                            deviceId = controller.hostDeviceId.ifEmpty { null },
-                            focusHarness = controller.harness,
-                        ),
-                        animated = true,
-                    )
-                }
-            }
             val menu = sessionMenu(
                 pinned = controller.pinned,
                 onSetPinned = { pinned -> actions.setPinned(chatId, pinned) },
@@ -265,14 +228,14 @@ fun rememberSessionMenu(
                         copyTranscript(transcript, clipboard, toaster)
                     }
                 },
-                onShowAccounts = showAccounts,
                 onArchive = {
                     actions.archive(chatId) { outcome ->
                         if (outcome == ActionOutcome.Ok || outcome == ActionOutcome.Gone) leave()
                     }
                 },
-                sideChats = currentSideChats(),
+                // TODO(#53): a Cloud chat's confirm adds "and its Cloud machine…".
                 onDelete = { prompts.confirmDeleteSession(chatId, chrome.title, onDeleted = leave) },
+                companions = currentCompanions(),
                 title = chrome.title,
                 subtitle = chrome.subtitle,
             )
@@ -385,7 +348,6 @@ private fun SessionMenuOpenPreview(pinned: Boolean) {
                     pinned = pinned,
                     onSetPinned = {},
                     onCopyTranscript = {},
-                    onShowAccounts = {},
                     onArchive = {},
                     onDelete = {},
                 ).children,

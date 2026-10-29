@@ -16,7 +16,6 @@ import sh.zeron.android.composer.QuestionPort
 import sh.zeron.android.composer.QueueActions
 import sh.zeron.android.composer.QueueEditController
 import sh.zeron.android.composer.QueueEditPort
-import sh.zeron.android.accounts.SessionAccountUsage
 import sh.zeron.android.composer.SessionChipMenus
 import sh.zeron.android.composer.sessionDraftSaver
 import sh.zeron.android.design.LocalToaster
@@ -152,11 +151,9 @@ class SessionScreenRoute internal constructor(
      */
     fun release() {
         // Ticket 89: the chip-menu loads resolve empty after this (the
-        // in-flight writes still finish — never cancelled). android-next
-        // #05: same rule for the usage chip's loads.
+        // in-flight writes still finish — never cancelled).
         controller.filler<SessionChipMenus>()?.dispose()
         sideChats?.stop()
-        controller.filler<SessionAccountUsage>()?.dispose()
         val lifecycle = navLifecycle
         if (lifecycle != null) {
             // Ticket 85: detach + mark seen, then the layout engine.
@@ -295,6 +292,9 @@ class SessionScreenRoute internal constructor(
             if (row != null && isTopAndIdle()) stack.push(SideChatDraftRoute(SideChatParent.of(row)), animated = true)
         }
         val forkSideChat: () -> Unit = {
+            // iOS `fork()`: "Forking…" first, then the fork.
+            // TODO(#71): the `.success` notification haptic once it lands.
+            if (fork != null && !fork.forking) toaster.show("Forking…")
             fork?.start(controller.chatId) { forkId ->
                 sideChatsModel?.invalidate()
                 // iOS opens the fork only while this screen is still shown.
@@ -329,12 +329,16 @@ class SessionScreenRoute internal constructor(
                 onFork = forkSideChat,
             )
         }
+        // #33: the ⋯ menu's companion group, always offered as on iOS.
         val onMore = rememberSessionMenu(controller, transcript) {
-            if (sideChatsOffered()) {
-                SideChatMenuRows(forking = fork?.forking == true, onNew = newSideChat, onFork = forkSideChat)
-            } else {
-                null
-            }
+            CompanionMenuRows(
+                // TODO(#39): create the side chat at once (`createSideChat`,
+                // a sibling from a side chat) and open it as a companion.
+                onNewSideChat = newSideChat,
+                onForkSideChat = forkSideChat,
+                // TODO(#44): open the chat's live terminal tab (iOS `openTerminal`).
+                onTerminal = {},
+            )
         }
         // Ticket 85: the push/pop choreography (the stack and jump
         // multipliers) and the will/did lifecycle wiring around the
@@ -391,7 +395,6 @@ class SessionScreenRoute internal constructor(
         // Ticket 89: same rule as release — later loads resolve empty.
         controller.filler<SessionChipMenus>()?.dispose()
         sideChats?.stop()
-        controller.filler<SessionAccountUsage>()?.dispose()
         controller.dispose()
         if (state.transcriptCreated) state.transcript.close()
     }
