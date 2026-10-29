@@ -11,22 +11,16 @@ import kotlinx.coroutines.launch
 import sh.zeron.android.design.Toaster
 import uniffi.zeron_core.CoreException
 
-/** The fork's failure copy, verbatim from upstream #899's `AppModel.forkSideChat`. */
+/** The fork's failure copy (#39, iOS `CompanionsViewController.forkError`). */
 object SideChatForkCopy {
-    const val Failed = "Couldn't fork this session."
-    const val Unsupported = "This engine doesn't support side chats. Update it to fork."
-
-    fun unreachable(reason: String): String = "The host is unreachable ($reason)."
+    const val Failed = "Couldn't fork this chat"
+    const val Unreachable = "Its computer isn't reachable right now"
+    const val Unsupported = "Its computer needs a newer Zeron to fork"
 }
 
-/**
- * The toast for a failed fork (iOS: the host's reason for a `HostError` —
- * "nothing to fork yet" when no reply has completed —, "The host is
- * unreachable (…)" offline, else the generic line). Pure.
- */
+/** The toast for a failed fork: offline, too old, or anything else. Pure. */
 fun forkErrorText(error: Throwable): String = when (error) {
-    is CoreException.HostException -> error.reason.ifBlank { SideChatForkCopy.Failed }
-    is CoreException.HostUnavailable -> SideChatForkCopy.unreachable(error.reason)
+    is CoreException.HostUnavailable -> SideChatForkCopy.Unreachable
     is CoreException.Unsupported -> SideChatForkCopy.Unsupported
     else -> SideChatForkCopy.Failed
 }

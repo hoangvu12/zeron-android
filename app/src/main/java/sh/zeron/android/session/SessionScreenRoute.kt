@@ -6,6 +6,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import sh.zeron.android.ZeronApplication
 import sh.zeron.android.composer.CoreQueueEditPort
@@ -19,9 +20,9 @@ import sh.zeron.android.composer.QueueEditPort
 import sh.zeron.android.composer.SessionChipMenus
 import sh.zeron.android.composer.sessionDraftSaver
 import sh.zeron.android.design.LocalToaster
-import sh.zeron.android.newsession.SideChatParent
 import sh.zeron.android.sessions.rememberSessionListOpener
-import sh.zeron.android.sidechats.SideChatDraftRoute
+import sh.zeron.android.sidechats.FreshSideChats
+import sh.zeron.android.sidechats.SideChatCopy
 import sh.zeron.android.sidechats.SideChatFork
 import sh.zeron.android.sidechats.SideChatsButton
 import sh.zeron.android.sidechats.SideChatsModel
@@ -154,6 +155,19 @@ class SessionScreenRoute internal constructor(
         // in-flight writes still finish — never cancelled).
         controller.filler<SessionChipMenus>()?.dispose()
         sideChats?.stop()
+        // #39 (iOS `teardown`): a side chat started here and left without
+        // a word goes. The draft was saved by the leave before this.
+        fresh?.let { f ->
+            f.closed(controller.chatId)
+            val live = core as? CoreSessionCore
+            if (live != null) {
+                f.closeUnused(controller.chatId, draftEmpty = draftEmpty()) {
+                    val t = live.handle.transcriptStatus()
+                    t.entryCount == 0u && t.pendingCount == 0u && live.handle.composer().queue.isEmpty()
+                }
+            }
+        }
+        fresh = null
         val lifecycle = navLifecycle
         if (lifecycle != null) {
             // Ticket 85: detach + mark seen, then the layout engine.
@@ -173,6 +187,12 @@ class SessionScreenRoute internal constructor(
      */
     private var navLifecycle: SessionNavLifecycle? = null
 
+    /** #39: the app's fresh side chats, set once the screen composed (it counts as open until [release]). */
+    private var fresh: FreshSideChats? = null
+
+    /** #39: whether this chat's saved draft is empty, read at [release]. */
+    private var draftEmpty: () -> Boolean = { true }
+
     @Composable
     override fun Content() {
         val entry = LocalNavEntry.current
@@ -186,6 +206,15 @@ class SessionScreenRoute internal constructor(
         // saver (the same retain key `SessionScreen` created it under),
         // both at leave() time, never at composition time.
         val drafts = LocalDrafts.current
+        val freshSideChats = (LocalContext.current.applicationContext as? ZeronApplication)?.freshSideChats
+        remember(entry) {
+            if (freshSideChats != null && fresh == null) {
+                fresh = freshSideChats
+                freshSideChats.opened(controller.chatId)
+            }
+            draftEmpty = { drafts.peek(DraftKey.Chat(core.engineId, controller.chatId)).isBlank() }
+            true
+        }
         val lifecycle = remember(entry) {
             entry.retain(SessionNavLifecycleKey) {
                 SessionNavLifecycle(
@@ -285,11 +314,26 @@ class SessionScreenRoute internal constructor(
             sideChatsModel != null && fork != null && sideChatsSupported(controller.engineVersion)
         }
         val isTopAndIdle: () -> Boolean = { stack.top === entry && stack.transition == null }
-        val newSideChat: () -> Unit = {
-            // iOS `newSideChat()`: the draft pushed on top, seeded from the
-            // row the last refresh cached (no FFI on main).
-            val row = controller.sessionRow
-            if (row != null && isTopAndIdle()) stack.push(SideChatDraftRoute(SideChatParent.of(row)), animated = true)
+        // #39 (iOS `createSideChat`): the side chat is made at once under
+        // the root (from a side chat, a sibling), recorded as fresh, and
+        // opened while this screen is still shown. The panel says when it
+        // couldn't be made; the menu stays silent, as on iOS. On the app
+        // scope (main), so a Back right after still records it as fresh.
+        val newSideChat: (Boolean) -> Unit = { toastOnFailure ->
+            val root = controller.sessionRow?.parentChatId ?: controller.chatId
+            val live = app
+            if (live != null) {
+                live.appScope.launch {
+                    val id = live.freshSideChats.create(root)
+                    when {
+                        id == null -> if (toastOnFailure) toaster.show(SideChatCopy.StartFailed)
+                        else -> {
+                            sideChatsModel?.invalidate()
+                            if (isTopAndIdle()) openChat(id)
+                        }
+                    }
+                }
+            }
         }
         val forkSideChat: () -> Unit = {
             // iOS `fork()`: "Forking…" first, then the fork.
@@ -325,16 +369,14 @@ class SessionScreenRoute internal constructor(
                 canAdd = sideChatsOffered(),
                 onOpenChat = openChat,
                 onOpenAgent = { agent -> openSubagent(agent.docId, agent.title, !agent.running) },
-                onNew = newSideChat,
+                onNew = { newSideChat(true) },
                 onFork = forkSideChat,
             )
         }
         // #33: the ⋯ menu's companion group, always offered as on iOS.
         val onMore = rememberSessionMenu(controller, transcript) {
             CompanionMenuRows(
-                // TODO(#39): create the side chat at once (`createSideChat`,
-                // a sibling from a side chat) and open it as a companion.
-                onNewSideChat = newSideChat,
+                onNewSideChat = { newSideChat(false) },
                 onForkSideChat = forkSideChat,
                 // TODO(#44): open the chat's live terminal tab (iOS `openTerminal`).
                 onTerminal = {},

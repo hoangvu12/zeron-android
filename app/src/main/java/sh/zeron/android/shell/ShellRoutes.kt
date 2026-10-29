@@ -14,7 +14,6 @@ import sh.zeron.android.settings.SettingsScreen
 import sh.zeron.android.sessions.FolderRoute
 import sh.zeron.android.sessions.FolderRouteContent
 import sh.zeron.android.sessions.SessionsScreen
-import sh.zeron.android.sidechats.SideChatDraftRoute
 import sh.zeron.android.sidechats.SubagentRoute
 
 /**
@@ -66,9 +65,6 @@ fun ShellRouteContent(route: NavRoute) {
         // android-next #06: a subagent's read-only transcript, pushed from
         // a spawn card or the Side Chats & Agents sheet.
         is SubagentRoute -> route.Content()
-        // android-next #06: a new side chat's draft, pushed from the ⋯ or
-        // the sheet's +; its first send swaps the chat in for it.
-        is SideChatDraftRoute -> route.Content()
         // android-next #05: the Accounts & Usage page — the Settings →
         // Agent Accounts row, the usage chip's "Accounts & Usage…" row
         // and the session ⋯ menu's "Account & Usage" push it.
