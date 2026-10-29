@@ -16,8 +16,9 @@ import uniffi.zeron_core.BoxStyle
  *
  * Boxes keep the colour's own alpha (several roles are translucent) and
  * paint in list order, before any text of their layer; the caller
- * ([RowModel.draw]) resolves the role against the appearance and skips the
- * whole pass in [RowModel.Pass.Range].
+ * ([RowModel.draw]) resolves the role against the appearance and picks
+ * which boxes a veil pass paints (settled ones in [RowModel.Pass.Chrome],
+ * a formula's fills with its text in [RowModel.Pass.Range]).
  *
  * The scratch [Paint]s and [RectF] live in this object, so it is drawing
  * (main) thread only — never touched from [RowModel] construction.

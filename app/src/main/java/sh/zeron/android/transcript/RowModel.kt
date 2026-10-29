@@ -1,10 +1,14 @@
 package sh.zeron.android.transcript
 
 import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.RectF
+import android.graphics.fonts.Font
 import android.util.Log
 import sh.zeron.android.core.FontChain
 import sh.zeron.android.design.color
 import uniffi.zeron_core.FadeEdge
+import uniffi.zeron_core.GlyphPrim
 import uniffi.zeron_core.RowDisplay
 
 /**
@@ -36,15 +40,23 @@ class RowModel(val display: RowDisplay) {
      * difference is that fades paint before settled text instead of
      * after, which is invisible because fade runs and plain runs are
      * disjoint.
+     *
+     * A formula is one placeholder (U+FFFC) in the text, so it veils whole
+     * (#29, RM:185-251): its glyphs and its fills (`BoxPrim.start != null`)
+     * belong to the text passes, never to [Chrome].
      */
     sealed interface Pass {
-        /** Boxes, every non-faded run, fades. */
+        /** Boxes, every non-faded run, glyphs, fades. */
         data object All : Pass
 
-        /** Boxes and fades only; the text comes from [Range] passes. */
+        /** Settled boxes (no `start`) and fades only; the text comes from [Range] passes. */
         data object Chrome : Pass
 
-        /** Only text in `[from, to)` (UTF-16), clipped at glyph edges; no boxes, no fades. */
+        /**
+         * Only text in `[from, to)` (UTF-16), clipped at glyph edges, plus
+         * the formula fills and glyphs whose placeholder is in the range,
+         * unclipped; no settled boxes, no fades.
+         */
         data class Range(val from: Int, val to: Int) : Pass {
             init { require(from in 0..to) { "bad range [$from, $to)" } }
         }
@@ -58,6 +70,17 @@ class RowModel(val display: RowDisplay) {
 
     /** Box indices per layer, ascending. */
     val boxesByLayer: Array<IntArray>
+
+    /** Math glyph indices per layer, ascending (#29). */
+    val glyphsByLayer: Array<IntArray>
+
+    /**
+     * The math fonts the glyphs name, by table index — resolved here, off
+     * main on the prefetch path (a face's first use copies ~1–2 MB out of
+     * the core), so drawing only reads loaded fonts (iOS `mathFonts`). A
+     * glyph whose font is missing draws nothing.
+     */
+    private val mathFonts: Map<Int, Font>
 
     /** Per layer, in display order: each fade and the runs it masks. */
     val fadesByLayer: Array<Array<FadeGroup>>
@@ -115,6 +138,17 @@ class RowModel(val display: RowDisplay) {
 
         runsByLayer = group(display.runs.size) { layerOf(display.runs[it].scroller) }
         boxesByLayer = group(display.boxes.size) { layerOf(display.boxes[it].scroller) }
+        glyphsByLayer = group(display.glyphs.size) { layerOf(display.glyphs[it].scroller) }
+
+        val fonts = HashMap<Int, Font>()
+        val unknown = HashSet<Int>()
+        for (g in display.glyphs) {
+            val index = g.font.toInt()
+            if (index in fonts || index in unknown) continue
+            val font = MathFonts.get(g.font)
+            if (font != null) fonts[index] = font else unknown.add(index)
+        }
+        mathFonts = fonts
 
         // Fade assignment, iOS RowModel.swift:43-54. Fades are visited in
         // display order, runs in index order within the fade's own layer;
@@ -151,18 +185,14 @@ class RowModel(val display: RowDisplay) {
     /**
      * Paints one layer (0 = the row's top-left, n = scroller n−1's content
      * top-left — the host applies the scroller offset) onto a plain [Canvas]
-     * in px, in the fixed order boxes → non-faded runs → fades (each fade
-     * then paints its own masked runs).
+     * in px, in the fixed order boxes → non-faded runs → math glyphs →
+     * fades (each fade then paints its own masked runs), iOS RM:185-253.
      *
      * Drawing (main) thread only: the first statement syncs [fonts] to
      * [density] (one float compare when unchanged, so hosts pass no other
      * density plumbing) and the element painters mutate shared scratch.
      * [palette] is read per call — theme switches only repaint, the model
      * is never rebuilt. [layer] out of range is a no-op, not a crash.
-     *
-     * TODO(#29): `display.glyphs` (math) are not painted yet; they go
-     * between the runs and the fades, and the veil passes need
-     * `BoxPrim.start` / `GlyphPrim.start`.
      */
     fun draw(
         layer: Int,
@@ -191,12 +221,11 @@ class RowModel(val display: RowDisplay) {
             TextRunPainter.draw(canvas, display.text, run, font, palette.color(run.color), density, widePlan(i, font))
         }
 
-        // 1. Boxes (never in a Range pass: Range is text-only).
-        if (pass !is Pass.Range) {
-            for (i in boxesByLayer[layer]) {
-                val box = display.boxes[i]
-                BoxPainter.draw(canvas, box, palette.color(box.color), density)
-            }
+        // 1. Boxes: settled ones in Chrome, a formula's fills with its text.
+        for (i in boxesByLayer[layer]) {
+            val box = display.boxes[i]
+            if (!paintsBox(box.start, pass)) continue
+            BoxPainter.draw(canvas, box, palette.color(box.color), density)
         }
 
         // 2. Non-faded runs (never in a Chrome pass: text comes from Range).
@@ -236,7 +265,16 @@ class RowModel(val display: RowDisplay) {
             }
         }
 
-        // 3. Fades with their masked runs (never in a Range pass).
+        // 3. Math glyphs. A formula is one placeholder in the text: it
+        //    veils whole, never split by the range.
+        for (i in glyphsByLayer[layer]) {
+            val g = display.glyphs[i]
+            if (!paintsGlyph(g.start, pass)) continue
+            val font = mathFonts[g.font.toInt()] ?: continue
+            GlyphPainter.draw(canvas, g, font, palette.color(g.color), density)
+        }
+
+        // 4. Fades with their masked runs (never in a Range pass).
         if (pass !is Pass.Range) {
             for (g in fadesByLayer[layer]) {
                 if (g.runs.isEmpty()) continue // a fade that claimed nothing draws nothing
@@ -248,6 +286,43 @@ class RowModel(val display: RowDisplay) {
         }
     }
 
+    /**
+     * Unions into [out] (px, row-local, padded 2 dp) the bounds of the
+     * layer-0 formula glyphs and fills whose placeholder is in
+     * `[from, to)` — the part of a veil chunk's layer that runs don't
+     * cover. Returns whether there was any; [out] is left alone if not.
+     * Drawing (main) thread only (the glyph paint is shared scratch).
+     */
+    internal fun formulaBounds(from: Int, to: Int, density: Float, out: RectF): Boolean {
+        val range = Pass.Range(from, to)
+        var have = false
+        fun add(l: Float, t: Float, r: Float, b: Float) {
+            val pad = 2f * density
+            if (!have) {
+                out.set(l - pad, t - pad, r + pad, b + pad)
+                have = true
+            } else {
+                out.union(l - pad, t - pad, r + pad, b + pad)
+            }
+        }
+        for (i in boxesByLayer[0]) {
+            val b = display.boxes[i]
+            if (!paintsBox(b.start, range)) continue
+            add(b.x * density, b.y * density, (b.x + b.w) * density, (b.y + b.h) * density)
+        }
+        for (i in glyphsByLayer[0]) {
+            val g = display.glyphs[i]
+            if (!paintsGlyph(g.start, range)) continue
+            val font = mathFonts[g.font.toInt()] ?: continue
+            GlyphPainter.bounds(g, font, density, scratch)
+            add(scratch.left, scratch.top, scratch.right, scratch.bottom)
+        }
+        return have
+    }
+
+    /** [formulaBounds]' per-glyph scratch; allocated on first use (drawing thread). */
+    private val scratch by lazy(LazyThreadSafetyMode.NONE) { RectF() }
+
     /** Two counting passes into per-layer [IntArray]s, ascending index order. */
     private fun group(n: Int, layerAt: (Int) -> Int): Array<IntArray> {
         val counts = IntArray(layers)
@@ -258,10 +333,66 @@ class RowModel(val display: RowDisplay) {
         return out
     }
 
-    private companion object {
-        const val TAG = "ZeronTranscript"
+    internal companion object {
+        private const val TAG = "ZeronTranscript"
 
         /** Half-extent of a Range split: ±100 000 px spans any row (iOS uses ±10 000 pt). */
-        const val CLIP_EXTENT = 100_000f
+        private const val CLIP_EXTENT = 100_000f
+
+        /**
+         * Whether [pass] paints a box whose formula placeholder is [start]
+         * (`null`: a settled box). iOS RM:189-195.
+         */
+        fun paintsBox(start: UInt?, pass: Pass): Boolean = when (pass) {
+            Pass.All -> true
+            Pass.Chrome -> start == null
+            is Pass.Range -> start != null && inRange(start, pass)
+        }
+
+        /** Whether [pass] paints a glyph of the formula placeholder at [start]. iOS RM:243-249. */
+        fun paintsGlyph(start: UInt, pass: Pass): Boolean = when (pass) {
+            Pass.All -> true
+            Pass.Chrome -> false
+            is Pass.Range -> inRange(start, pass)
+        }
+
+        private fun inRange(start: UInt, range: Pass.Range): Boolean =
+            start.toLong() >= range.from && start.toLong() < range.to
+    }
+}
+
+/**
+ * Draws and measures one math [GlyphPrim] (#29, iOS `drawGlyph`,
+ * RM:100-118). The scratch [Paint] and arrays live in this object, so it
+ * is drawing (main) thread only — never touched from [RowModel]
+ * construction, like [BoxPainter].
+ */
+internal object GlyphPainter {
+
+    private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val ids = IntArray(1)
+    private val positions = FloatArray(2)
+    private val bounds = RectF()
+
+    /**
+     * The glyph at its baseline origin (`x`, `y`), the font at `size`
+     * (iOS draws its reference-size font scaled; same thing). `y` is
+     * already the baseline in a y-down space, so no flip.
+     */
+    fun draw(canvas: Canvas, g: GlyphPrim, font: Font, color: Int, density: Float) {
+        paint.color = color
+        paint.textSize = g.size * density
+        ids[0] = g.glyph.toInt()
+        positions[0] = g.x * density
+        positions[1] = g.y * density
+        canvas.drawGlyphs(ids, 0, positions, 0, 1, font, paint)
+    }
+
+    /** The glyph's ink bounds in px, row-local, into [out]. */
+    fun bounds(g: GlyphPrim, font: Font, density: Float, out: RectF) {
+        paint.textSize = g.size * density
+        font.getGlyphBounds(g.glyph.toInt(), paint, bounds)
+        out.set(bounds)
+        out.offset(g.x * density, g.y * density)
     }
 }

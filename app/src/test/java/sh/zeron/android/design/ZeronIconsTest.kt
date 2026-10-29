@@ -84,6 +84,9 @@ class ZeronIconsTest {
         "bell",
         "questionmark.bubble",
         "exclamationmark.triangle",
+        "exclamationmark.triangle.fill",
+        "bubble.left",
+        "arrow.left.arrow.right",
         "exclamationmark.circle",
         "info.circle",
         "arrow.triangle.branch",
@@ -112,6 +115,11 @@ class ZeronIconsTest {
             "square",
             "questionmark.bubble",
             "exclamationmark.triangle",
+            // #30: the error card, the sender caption without a harness,
+            // the provider-switch seam (rows.rs:922, 989, 1070).
+            "exclamationmark.triangle.fill",
+            "bubble.left",
+            "arrow.left.arrow.right",
             "arrow.triangle.branch",
             "command",
             "wand.and.stars",
@@ -176,8 +184,9 @@ class ZeronIconsTest {
         // 68 SF constants + 1 alias (pin.slash.fill) + 7 Zeron extras.
         // android-next#04 added Refresh (`arrow.clockwise`, the About
         // "Check for Updates" row; the approved design allows one new glyph).
-        assertEquals(69, ZeronIcons.bySfName.size)
-        assertEquals(75, ZeronIcons.entries.size)
+        // #30 added the core's three new names.
+        assertEquals(72, ZeronIcons.bySfName.size)
+        assertEquals(78, ZeronIcons.entries.size)
         assertEquals(
             "constant names are unique",
             ZeronIcons.entries.size,
@@ -281,6 +290,9 @@ class ZeronIconsTest {
             ZeronIcons.Bell to R.drawable.zi_bell,
             ZeronIcons.QuestionmarkBubble to R.drawable.zi_chat_round_line,
             ZeronIcons.ExclamationmarkTriangle to R.drawable.zi_danger_triangle,
+            ZeronIcons.ExclamationmarkTriangleFill to R.drawable.zi_danger_triangle_fill, // #30
+            ZeronIcons.BubbleLeft to R.drawable.zi_bubble_left, // #30
+            ZeronIcons.ArrowLeftArrowRight to R.drawable.zi_arrow_left_arrow_right, // #30
             ZeronIcons.ExclamationmarkCircle to R.drawable.zi_exclamation_circle,
             ZeronIcons.InfoCircle to R.drawable.zi_info_circle,
             ZeronIcons.ArrowTriangleBranch to R.drawable.zi_git_branch,

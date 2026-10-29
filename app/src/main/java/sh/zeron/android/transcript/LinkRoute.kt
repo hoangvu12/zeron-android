@@ -17,6 +17,12 @@ sealed interface LinkRoute {
     /** An image chip (`zeron-preview://image?ref=…`) — the viewer, from the row. */
     data class Preview(val reference: String) : LinkRoute
 
+    /**
+     * A sender or recipient caption (`zeron-chat://open?id=…`, #30): open
+     * that chat (TLV:710-717); the session screen ignores its own id.
+     */
+    data class Chat(val chatId: String) : LinkRoute
+
     /** Any other recognized scheme — `Intent(ACTION_VIEW)`, as iOS's `UIApplication.open`. */
     data class External(val url: String) : LinkRoute
 
@@ -37,7 +43,7 @@ private const val PercentByte: Byte = 0x25
  * Routes a link URL (the Rust `LinkHit.url`, the markdown destination
  * verbatim). The rows are checked in the ticket's order: empty and
  * `#anchor` (row 1), `http`/`https` (2), `zeron-preview` (3),
- * `zeron-invoke`/`zeron-file`/`file` (4–6, the decision
+ * `zeron-chat` (3b, #30), `zeron-invoke`/`zeron-file`/`file` (4–6, the decision
  * TRANSCRIPT-D4 no-ops), a Windows drive path (7, before the scheme
  * row), any other scheme (8, the system), and anything scheme-less (9).
  * Scheme matching is ASCII case-insensitive (RFC 3986; iOS's
@@ -59,6 +65,10 @@ fun routeLink(url: String): LinkRoute {
         scheme == "http" || scheme == "https" -> LinkRoute.Web(raw)
         scheme == "zeron-preview" -> previewRef(raw)?.let { LinkRoute.Preview(it) }
             ?: LinkRoute.Ignore
+        scheme == "zeron-chat" -> queryItem(raw, "id")?.let { LinkRoute.Chat(it) }
+            ?: LinkRoute.Ignore
+        // A skill or command mention: iOS hands it to the system, which
+        // has no handler for it, so nothing happens.
         scheme == "zeron-invoke" -> LinkRoute.Ignore
         else -> LinkRoute.External(raw)
     }
@@ -77,17 +87,19 @@ internal fun namesImageFile(link: String): Boolean {
     return dot > 0 && name.substring(dot + 1).lowercase(Locale.ROOT) in ImageExtensions
 }
 
+/** The `ref` of an image-chip link (`zeron-preview://image?ref=…`); see [queryItem]. */
+internal fun previewRef(url: String): String? = queryItem(url, "ref")
+
 /**
- * The `ref` value of an image-chip link (`zeron-preview://image?ref=…`),
- * percent-decoded, or `null` when there is none, it is empty, or it does
- * not decode. Hand-rolled on purpose: `Uri.getQueryParameter` and
- * `URLDecoder` both turn `+` into a space, and iOS's
- * `URLComponents.queryItems` does not. The query is the text after the
- * first `?` up to the first `#`; the first item named `ref` (its name
- * percent-decoded) that contains `=` wins, and its value is decoded with
- * [percentDecodeUtf8] and must be non-empty.
+ * The [name] query item of [url], percent-decoded, or `null` when there
+ * is none, it is empty, or it does not decode. Hand-rolled on purpose:
+ * `Uri.getQueryParameter` and `URLDecoder` both turn `+` into a space,
+ * and iOS's `URLComponents.queryItems` does not. The query is the text
+ * after the first `?` up to the first `#`; the first item named [name]
+ * (its name percent-decoded) that contains `=` wins, and its value is
+ * decoded with [percentDecodeUtf8] and must be non-empty.
  */
-internal fun previewRef(url: String): String? {
+internal fun queryItem(url: String, name: String): String? {
     val queryStart = url.indexOf('?')
     if (queryStart < 0) return null
     var query = url.substring(queryStart + 1)
@@ -96,8 +108,8 @@ internal fun previewRef(url: String): String? {
     for (item in query.split('&')) {
         val eq = item.indexOf('=')
         if (eq < 0) continue
-        val name = percentDecodeUtf8(item.substring(0, eq)) ?: continue
-        if (name != "ref") continue
+        val key = percentDecodeUtf8(item.substring(0, eq)) ?: continue
+        if (key != name) continue
         return percentDecodeUtf8(item.substring(eq + 1))?.takeIf { it.isNotEmpty() }
     }
     return null

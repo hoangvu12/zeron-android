@@ -133,6 +133,8 @@ class LinkRouter(
     private val loadFull: suspend (reference: String) -> ImageBitmap?,
     private val showImage: (reference: String, source: Rect, bitmap: ImageBitmap) -> Unit,
     private val launcher: LinkLauncher,
+    /** #30: a `zeron-chat` caption — open that chat (the screen ignores its own id). */
+    private val openChat: (chatId: String) -> Unit = {},
 ) {
     /** The in-flight preview load; a new tap replaces it. */
     private var pending: Job? = null
@@ -141,6 +143,7 @@ class LinkRouter(
         when (val r = routeLink(tap.url)) {
             is LinkRoute.Web -> if (!launcher.customTab(r.url, isDark())) launcher.view(r.url)
             is LinkRoute.Preview -> showFull(r.reference, tap.rowBounds)
+            is LinkRoute.Chat -> openChat(r.chatId)
             is LinkRoute.External -> launcher.view(r.url)
             LinkRoute.Ignore -> Unit
         }
@@ -168,17 +171,22 @@ class LinkRouter(
  * [showImage] are kept fresh through `rememberUpdatedState`, the dark
  * flag follows the app appearance, and the scope is the composition's —
  * cancelled on leave, so an in-flight preview load dies with the screen.
+ * [openChat] is kept fresh the same way; screens without a chat route
+ * (the subagent viewer) leave the default no-op, as iOS's unset
+ * `onOpenChat`.
  */
 @Composable
 fun rememberLinkRouter(
     loadFull: suspend (reference: String) -> ImageBitmap?,
     showImage: (reference: String, source: Rect, bitmap: ImageBitmap) -> Unit,
+    openChat: (chatId: String) -> Unit = {},
 ): LinkRouter {
     val context = LocalContext.current
     val dark by rememberUpdatedState(LocalIsDark.current)
     val scope = rememberCoroutineScope()
     val currentLoadFull by rememberUpdatedState(loadFull)
     val currentShowImage by rememberUpdatedState(showImage)
+    val currentOpenChat by rememberUpdatedState(openChat)
     return remember(context) {
         LinkRouter(
             scope = scope,
@@ -186,6 +194,7 @@ fun rememberLinkRouter(
             loadFull = { reference -> currentLoadFull(reference) },
             showImage = { reference, source, bitmap -> currentShowImage(reference, source, bitmap) },
             launcher = PlatformLinkLauncher(context),
+            openChat = { id -> currentOpenChat(id) },
         )
     }
 }

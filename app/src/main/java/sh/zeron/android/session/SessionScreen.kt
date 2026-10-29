@@ -38,6 +38,7 @@ import sh.zeron.android.composer.QueueEditPort
 import sh.zeron.android.composer.QueuePanel
 import sh.zeron.android.composer.SessionDraftEffect
 import sh.zeron.android.composer.sessionDraftSaver
+import sh.zeron.android.sessions.rememberSessionListOpener
 import sh.zeron.android.shell.LocalNavEntry
 import sh.zeron.android.shell.LocalNavStack
 import sh.zeron.android.shell.NavEntryEffect
@@ -250,7 +251,12 @@ fun SessionScreen(
     // `openImage` below: the source is the row (iOS presents the whole
     // RowView), so no corner radius, and the bitmap it passes is already
     // full size, so no second `loadFull` read (66's has no cache).
+    // #30: a sender caption opens the chat that sent the message — pushed
+    // on the phone, the router's detail beside the sidebar — never this one
+    // (SVC:104-114).
+    val openSessionList = rememberSessionListOpener()
     val router = rememberLinkRouter(
+        openChat = { id -> if (id != controller.chatId) openSessionList(id) },
         loadFull = { reference -> binding?.loadFull(reference) },
         showImage = { reference, source, bitmap ->
             viewer?.show(
