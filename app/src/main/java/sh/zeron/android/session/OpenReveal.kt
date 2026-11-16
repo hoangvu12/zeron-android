@@ -36,6 +36,7 @@ import androidx.compose.ui.geometry.Offset
  * | [onLanded] (the push transition completed) | `landed = true`, try reveal |
  * | [onFirstRows] (a frame with rows was applied) | first call: `reportedOpen = true`, try reveal, `true`; later calls `false` |
  * | [giveUp] (8 s after landing, still holding) | `reportedOpen = true`, try reveal |
+ * | [onEmptyNotice] (an empty-transcript notice showed, still holding) | `reportedOpen = true`, try reveal |
  * | [finishReveal] (the tween ended, or reduce motion) | progress 1, `Shown` |
  */
 @Stable
@@ -128,6 +129,18 @@ class OpenReveal {
      * suppresses the probe for this screen, by design.
      */
     fun giveUp() {
+        if (phase != Phase.Holding) return
+        reportedOpen = true
+        tryReveal()
+    }
+
+    /**
+     * An empty-transcript notice showed (`SessionViewController.renderEmptyNotice`):
+     * it is the answer the loader was holding out for — there are no rows
+     * to wait for. Like [giveUp], a no-op unless the hold is on, and no
+     * OPEN probe for this screen.
+     */
+    fun onEmptyNotice() {
         if (phase != Phase.Holding) return
         reportedOpen = true
         tryReveal()

@@ -3,6 +3,7 @@ package sh.zeron.android.session
 import sh.zeron.android.composer.ComposerChip
 import uniffi.zeron_core.ComposerState
 import uniffi.zeron_core.SessionRow
+import uniffi.zeron_core.TranscriptLoad
 
 /**
  * Composer-facing state of one open session (android-ui-parity #51) —
@@ -56,7 +57,41 @@ data class SessionChrome(
      * known yet.
      */
     val sideChatParent: String? = null,
+    /** What to say in place of an empty transcript (`composer.transcriptLoad`), if anything. */
+    val emptyNotice: EmptyNotice? = null,
 ) {
+    /**
+     * iOS `SessionChrome.EmptyNotice` (`SessionSource.swift`): a chat this
+     * device has nothing of. Anything it has stored always shows (the core
+     * reports `READY`). The strings are the desktop's, verbatim
+     * (docs/design/relay-mobile.md "Show the new state").
+     */
+    enum class EmptyNotice(val text: String) {
+        Syncing("Syncing…"),
+        Reconnecting("Reconnecting…"),
+        Offline("Offline — this chat loads when you're back online"),
+        HostAway("This chat lives on another device — it loads when that device is back online"),
+        ;
+
+        /**
+         * Waiting on something this app is doing: a spinner. Otherwise a
+         * spinner would promise progress that isn't happening, and it gets
+         * the warning dot.
+         */
+        val isWorking: Boolean get() = this == Syncing || this == Reconnecting
+
+        companion object {
+            /** `CoreSessionSource.refresh`'s switch. */
+            fun of(load: TranscriptLoad): EmptyNotice? = when (load) {
+                TranscriptLoad.READY -> null
+                TranscriptLoad.SYNCING -> Syncing
+                TranscriptLoad.RECONNECTING -> Reconnecting
+                TranscriptLoad.OFFLINE -> Offline
+                TranscriptLoad.HOST_AWAY -> HostAway
+            }
+        }
+    }
+
     /**
      * iOS `SessionChrome.Banner` (`SessionSource.swift`), derived in
      * [deriveBanner] by `CoreSessionSource.refresh`'s precedence (#28).
@@ -134,7 +169,8 @@ data class SessionChrome(
  * - `running` = `turnRunning && canInterrupt` (Stop shows only when a
  *   stop can land);
  * - `canSteer` / `uploadProgress` / `error` straight from the composer state;
- * - `sideChatParent` = [parentTitle] for a side chat (#33).
+ * - `sideChatParent` = [parentTitle] for a side chat (#33);
+ * - `emptyNotice` from `transcriptLoad` (`CoreSessionSource.swift:167-173`).
  *
  * Pure; unit-tested against the ticket's worked-examples table.
  */
@@ -152,5 +188,6 @@ internal fun baseChrome(c: ComposerState, row: SessionRow?, parentTitle: String?
         uploadProgress = c.transferProgress,
         error = c.queueError,
         sideChatParent = if (row?.parentChatId != null) parentTitle.orEmpty() else null,
+        emptyNotice = SessionChrome.EmptyNotice.of(c.transcriptLoad),
     )
 }

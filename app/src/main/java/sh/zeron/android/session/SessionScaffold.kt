@@ -17,7 +17,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -33,8 +35,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -177,6 +184,9 @@ fun SessionScaffold(
  * Composed inside 74's body box, which is the only `hazeSource`; this
  * composable never adds a second one.
  *
+ * - **Layer 3 — the empty notice**: [emptyNotice] (`transcriptLoad`),
+ *   centred where the loader sits; its arrival ends the hold.
+ *
  * @param transcriptAlpha 77's arrival multiplier; read in the draw phase
  *   only (`OpenRevealLayers` reads it inside the `graphicsLayer` lambda)
  * @param statusBarTop / [navBarBottom] the window insets in dp; parameters
@@ -187,6 +197,7 @@ fun OpenRevealLayers(
     reveal: OpenReveal,
     modifier: Modifier = Modifier,
     transcriptAlpha: () -> Float = { 1f },
+    emptyNotice: SessionChrome.EmptyNotice? = null,
     statusBarTop: Dp = WindowInsets.statusBars.asPaddingValues().calculateTopPadding(),
     navBarBottom: Dp = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
     transcript: @Composable () -> Unit,
@@ -239,6 +250,64 @@ fun OpenRevealLayers(
                     .graphicsLayer { alpha = reveal.loaderAlpha }
                     .testTag("session-loading"),
                 scale = 1.75f,
+            )
+        }
+        // Layer 3: why a transcript with nothing in it has nothing in it,
+        // centred where the loader sits (`renderEmptyNotice`). Showing one
+        // ends the loader's hold: there are no rows to wait for.
+        LaunchedEffect(reveal, emptyNotice != null) {
+            if (emptyNotice != null) reveal.onEmptyNotice()
+        }
+        if (emptyNotice != null) {
+            val centreY = emptyNoticeCentreY(maxHeight.value, statusBarTop.value, navBarBottom.value)
+            EmptyTranscriptNotice(
+                emptyNotice,
+                Modifier
+                    .fillMaxWidth()
+                    .layout { measurable, constraints ->
+                        val p = measurable.measure(constraints)
+                        val y = (centreY.dp.roundToPx() - p.height / 2).coerceAtLeast(0)
+                        layout(constraints.maxWidth, constraints.maxHeight) { p.place(0, y) }
+                    },
+            )
+        }
+    }
+}
+
+/**
+ * The empty notice's centre in dp: the safe area's y centre minus 40, the
+ * loader's (`SessionViewController.makeEmptyNotice`:
+ * `stack.centerY = safeArea.centerY - 40`; the same safe area as
+ * [loaderTopLeft]).
+ */
+internal fun emptyNoticeCentreY(height: Float, statusBarTop: Float, navBarBottom: Float, bar: Float = 44f, lift: Float = 40f): Float =
+    (statusBarTop + bar + height - navBarBottom) / 2f - lift
+
+/**
+ * iOS `makeEmptyNotice`: a 12 × 12 [StatusGlyph] (a spinner while the app is
+ * doing something, else the warning dot), 8 dp, then Geist 14 in
+ * `Palette.tertiary`, centred, wrapping, at least 32 dp from either edge.
+ * Not interactive; TalkBack announces it politely.
+ */
+@Composable
+private fun EmptyTranscriptNotice(notice: SessionChrome.EmptyNotice, modifier: Modifier = Modifier) {
+    val palette = ZeronTheme.palette
+    Box(modifier.padding(horizontal = 32.dp), contentAlignment = Alignment.Center) {
+        Row(
+            Modifier
+                .testTag("session-empty-notice")
+                .semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite },
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            StatusGlyph(
+                if (notice.isWorking) StatusGlyphKind.Spinner else StatusGlyphKind.Dot(palette.warning),
+                Modifier.size(12.dp),
+            )
+            Spacer(Modifier.width(8.dp))
+            BasicText(
+                notice.text,
+                style = uiStyle(Face.Sans, LocalTypeScale.current.fixed(14f), palette.tertiary)
+                    .copy(textAlign = TextAlign.Center),
             )
         }
     }
