@@ -183,6 +183,20 @@ class LaunchOptionsTest {
     }
 
     @Test
+    fun activityAndFreshDemo() {
+        // iOS 1.0.2 `-activity on|off`: absent says nothing.
+        assertEquals(true, LaunchOptions.parse(mapOf("activity" to "on"), debuggable = true).activity)
+        assertEquals(false, LaunchOptions.parse(mapOf("activity" to "off"), debuggable = true).activity)
+        assertEquals(true, LaunchOptions.parse(mapOf("activity" to true), debuggable = true).activity)
+        assertNull(LaunchOptions.parse(emptyMap(), debuggable = true).activity)
+        assertTrue(LaunchOptions.parse(mapOf("fresh-demo" to true), debuggable = true).freshDemo)
+        assertFalse(LaunchOptions.parse(emptyMap(), debuggable = true).freshDemo)
+        // Debug builds only.
+        assertNull(LaunchOptions.parse(mapOf("activity" to "on"), debuggable = false).activity)
+        assertFalse(LaunchOptions.parse(mapOf("fresh-demo" to true), debuggable = false).freshDemo)
+    }
+
+    @Test
     fun voicePreviewAndItsStage() {
         val preview = LaunchOptions.parse(mapOf("voice-preview" to true), debuggable = true)
         assertTrue(preview.voicePreview)

@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -459,6 +460,14 @@ class ZeronApplication : Application() {
         )
     }
 
+    /** iOS 1.0.2 `openChatIds`: the Session screens showing now (never auto-archived). */
+    val openChats: sh.zeron.android.sessions.OpenChats = sh.zeron.android.sessions.OpenChats()
+
+    /** iOS 1.0.2 `sweepIdle`: Activity's auto-archive of idle chats. */
+    val activitySweep: sh.zeron.android.sessions.ActivitySweep by lazy {
+        sh.zeron.android.sessions.ActivitySweep(prefs, openChats) { id -> rowActions.autoArchive(id) }
+    }
+
     /**
      * The app's notification centre (android-app#28): the `NotificationSink`
      * the core calls, the delivery gates, and the posting. Its scope hops
@@ -553,6 +562,19 @@ class ZeronApplication : Application() {
         // `refreshWorkspace` → `sweepFreshSideChats`).
         applicationScope.launch {
             workspaceFeed.snapshot.collect { if (it != null) freshSideChats.sweep() }
+        }
+        // iOS 1.0.2: every workspace read sweeps idle chats into Archived
+        // (at most once a minute; Activity's settings re-arm it at once,
+        // and re-read the workspace, as iOS's `settingsChanged`).
+        applicationScope.launch {
+            prefs.awaitLoaded()
+            launch {
+                workspaceFeed.reads.collect { workspaceFeed.snapshot.value?.let(activitySweep::sweep) }
+            }
+            prefs.activity.drop(1).collect {
+                activitySweep.settingsChanged()
+                workspaceFeed.refresh()
+            }
         }
         // #20: iOS's 30 s workspace clock (docs/port/01 A13), while the
         // app is in the foreground — iOS timers don't fire suspended.
@@ -822,6 +844,17 @@ class ZeronApplication : Application() {
      */
     internal fun applyLaunchAccount(options: LaunchOptions) {
         if (!options.touchesAccount || core !is CoreStatus.Loaded) return
+        if (options.demo) {
+            // iOS 1.0.2: the demo (and its UI tests) start Activity as asked
+            // (`activity on`), off otherwise — one run's choice must not
+            // seed the next. A launch that says how Activity starts says
+            // how the list folds too: nothing folded.
+            prefs.resetActivityForLaunch(on = options.activity == true)
+            foldState.resetForLaunch(collapsed = options.activity != null)
+        }
+        // `fresh-demo`: the demo from its fixtures alone, none of an
+        // earlier run's writes (sleeps, archives) carried over.
+        sessionHolder.freshDemo = options.freshDemo
         launchPending.value = true
         applicationScope.launch(Dispatchers.IO) {
             try {

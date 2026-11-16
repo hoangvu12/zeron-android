@@ -95,6 +95,14 @@ data class LaunchOptions(
      * client the stored account already booted.
      */
     val noRelayLayer: Boolean = false,
+    /**
+     * iOS 1.0.2 `-activity on|off`: how the demo starts Activity — `null`
+     * when not given (the demo starts it off, the folds kept); on / off
+     * also unfold the list.
+     */
+    val activity: Boolean? = null,
+    /** iOS 1.0.2 `-fresh-demo`: the demo from its fixtures alone (its store deleted first). */
+    val freshDemo: Boolean = false,
 ) {
 
     /** Any extra that changes which account (or edge, or client config) this launch runs. */
@@ -202,6 +210,12 @@ data class LaunchOptions(
                 terminal = flag("terminal") || flag("terminal-demo"),
                 terminalDemo = flag("terminal-demo"),
                 noRelayLayer = flag("no-relay-layer"),
+                activity = when (val value = extras["activity"]) {
+                    is Boolean -> value
+                    is String -> value.trim().let { it.equals("on", ignoreCase = true) || it.equals("true", ignoreCase = true) }
+                    else -> null
+                },
+                freshDemo = flag("fresh-demo"),
             )
         }
 
