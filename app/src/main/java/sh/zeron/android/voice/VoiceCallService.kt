@@ -132,7 +132,11 @@ class VoiceCallService : Service() {
     private fun post() {
         val snapshot = controller.snapshot.value
         if (!snapshot.live) return
-        lastKey = Key(snapshot)
+        // Nothing the notification shows changed: no re-post (the system
+        // rate-limits a package's notify() calls and drops updates).
+        val key = Key(snapshot)
+        if (key == lastKey) return
+        lastKey = key
         try {
             NotificationManagerCompat.from(this).notify(NOTIFICATION, build(snapshot))
         } catch (_: SecurityException) {

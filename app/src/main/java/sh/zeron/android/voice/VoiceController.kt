@@ -344,8 +344,11 @@ class VoiceController(
         if (becameActive) {
             setProximityMonitoring(true)
             haptic(Haptic.Success)
+            // Going live answers at once (iOS `urgent`); every other state
+            // frame — the core sends one per level tick, ~10 a second —
+            // reaches the notification through its ≤1/s observer.
+            VoiceCallService.refresh()
         }
-        VoiceCallService.refresh()
     }
 
     internal fun closed(reason: VoiceEndReason?, generation: Long) {
