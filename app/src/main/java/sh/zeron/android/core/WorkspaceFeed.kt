@@ -12,8 +12,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import sh.zeron.android.transcript.reconnects as risingEdges
 import uniffi.zeron_core.ClientEvent
 import uniffi.zeron_core.Connectivity
@@ -144,6 +146,20 @@ class WorkspaceFeed(
     /** Re-reads the workspace (iOS `refreshWorkspace`); safe from any thread, before any client. */
     fun refresh() {
         dirty.trySend(Unit)
+    }
+
+    /**
+     * iOS `createProject`'s `refreshWorkspace()` (`AppModel.swift:888-898`),
+     * which is synchronous there: re-read, then wait (at most [timeout])
+     * until the snapshot holds the project [spaceId], so the page that
+     * picks it never draws "No project" for a frame, nor drops the id as
+     * stale on an older snapshot.
+     */
+    suspend fun refreshUntilProject(spaceId: String, timeout: Duration = 2.seconds) {
+        refresh()
+        withTimeoutOrNull(timeout) {
+            snapshot.first { ws -> ws?.projects?.any { it.id == spaceId } == true }
+        }
     }
 
     /**

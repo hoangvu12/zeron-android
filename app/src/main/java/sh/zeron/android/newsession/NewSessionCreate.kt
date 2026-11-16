@@ -211,6 +211,9 @@ class NewSessionCreator(
                 // once from the session (`FreshSideChats.create`, #39).
                 val chatId = core.createSession(NewSessionRequests.newSession(d, target, projects))
                 core.sendFirst(chatId, NewSessionRequests.sendRequest(d, text, images, projects))
+                // iOS `createSession`'s `refreshWorkspace()` (AppModel.swift:970):
+                // the new chat's row is in the lists at once.
+                core.refreshWorkspace()
                 chatId
             } catch (cancelled: CancellationException) {
                 throw cancelled

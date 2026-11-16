@@ -16,6 +16,7 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 import sh.zeron.android.sessions.testConnectivity
 import sh.zeron.android.sessions.testDevice
+import sh.zeron.android.sessions.testProject
 import sh.zeron.android.sessions.testRow
 import sh.zeron.android.sessions.testWorkspace
 import uniffi.zeron_core.ClientEvent
@@ -90,6 +91,30 @@ class WorkspaceFeedTest {
         advanceUntilIdle()
         assertEquals(2, h.core.reads)
         assertEquals(2uL, h.feed.snapshot.value?.revision)
+        h.scope.cancel()
+    }
+
+    @Test
+    fun refreshUntilProjectReturnsOnceTheSnapshotHoldsIt() = runTest {
+        val h = harness()
+        h.feed.refresh()
+        advanceUntilIdle()
+        h.core.ws = testWorkspace(2uL, projects = listOf(testProject("p-new", "g", "g")))
+        var done = false
+        launch { h.feed.refreshUntilProject("p-new"); done = true }
+        advanceUntilIdle()
+        assertEquals(true, done)
+        assertEquals(listOf("p-new"), h.feed.snapshot.value?.projects?.map { it.id })
+        h.scope.cancel()
+    }
+
+    @Test
+    fun refreshUntilProjectGivesUpAfterItsTimeout() = runTest {
+        val h = harness()
+        var done = false
+        launch { h.feed.refreshUntilProject("never", timeout = kotlin.time.Duration.parse("1s")); done = true }
+        advanceUntilIdle()
+        assertEquals(true, done)
         h.scope.cancel()
     }
 

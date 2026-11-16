@@ -369,7 +369,9 @@ internal fun PageSheetScope.NewProjectSheetBody(onCreated: (String) -> Unit) {
     }
     val source = remember { CoreFolderBrowserSource({ app.clientOrNull() }) }
     val controller = rememberFolderBrowserController(hosts, source)
-    val writeApi = remember { CoreProjectWriteApi({ app.clientOrNull() }) }
+    val writeApi = remember {
+        CoreProjectWriteApi({ app.clientOrNull() }, workspaceChanged = { id -> app.workspaceFeed.refreshUntilProject(id) })
+    }
     val actions = rememberFolderBrowserActions(
         controller = controller,
         paths = HostPaths,
