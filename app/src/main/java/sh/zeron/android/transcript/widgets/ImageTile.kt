@@ -6,10 +6,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.animation.core.animate
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -19,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.LayoutCoordinates
@@ -82,7 +86,17 @@ private class TileState {
     var status by mutableStateOf(ImageTileStatus.Loading)
     var attempt by mutableIntStateOf(0)
     var failures by mutableIntStateOf(0)
+
+    /**
+     * The picture's alpha: 1 for a cache hit (shown in the first frame),
+     * faded in from 0 over [FadeInMs] when a load lands (iOS
+     * `CoreSessionSource.swift:432`, a 0.2 s cross-dissolve).
+     */
+    var alpha by mutableFloatStateOf(1f)
 }
+
+/** iOS `UIView.transition(with:duration: 0.2, options: .transitionCrossDissolve)`. */
+private const val FadeInMs = 200
 
 /**
  * The picture tile of a `WidgetKind.Image` widget (tickets 66 → 137; iOS
@@ -94,9 +108,9 @@ private class TileState {
  * The state machine (137): **Loading** (spinner + "Loading image" in full
  * mode, spinner only in compact mode ≤ 120 dp) on a cache miss; **Loaded**
  * on a sync hit — visible in the first frame, no blink — or a successful
- * load, an **instant** swap (137 removed 66's 200 ms cross-fade), the
- * picture aspect-**fit** (137 changed it from fill) and centred; **Failed**
- * ("Image unavailable … Tap to retry." / warning glyph) once every image
+ * load, faded in over 0.2 s like iOS's cross-dissolve, the picture
+ * aspect-**fill** (iOS `.scaleAspectFill`) and centred; **Failed**
+ * ("Image unavailable / Tap to retry." / warning glyph) once every image
  * source failed, or for a blank reference (set synchronously, no RPC).
  * Failures are never cached, and a Failed tile retries by itself: at once
  * when [TranscriptActions.imageRetries] fires (the engine reconnected),
@@ -144,6 +158,7 @@ fun ImageTile(
         st.claimed = reference
         st.failures = 0
         val hit = if (fetchable) currentActions.cachedImage(reference, sidePx) else null
+        if (hit != null) st.alpha = 1f
         st.bitmap = hit
         st.status = when {
             hit != null -> ImageTileStatus.Loaded
@@ -153,7 +168,10 @@ fun ImageTile(
     }
 
     LaunchedEffect(reference, sidePx, st.attempt) {
-        if (st.status == ImageTileStatus.Loaded && st.bitmap != null) return@LaunchedEffect // cache hit already shown
+        if (st.status == ImageTileStatus.Loaded && st.bitmap != null) {
+            st.alpha = 1f // a fade cut short by a re-key ends shown
+            return@LaunchedEffect // cache hit already shown
+        }
         if (!fetchable) {
             st.status = ImageTileStatus.Failed
             return@LaunchedEffect
@@ -164,9 +182,17 @@ fun ImageTile(
         // reads afresh (failures are never cached).
         val img = currentActions.loadImage(reference, sidePx)
         if (st.claimed != reference) return@LaunchedEffect // the claim check (iOS :279)
+        if (img != null) st.alpha = 0f
         st.bitmap = img
         st.status = if (img != null) ImageTileStatus.Loaded else ImageTileStatus.Failed
         st.failures = if (img != null) 0 else st.failures + 1
+        if (img != null) {
+            try {
+                animate(0f, 1f, animationSpec = tween(FadeInMs)) { value, _ -> st.alpha = value }
+            } finally {
+                st.alpha = 1f
+            }
+        }
     }
 
     // The automatic retry: a Failed tile waits for the engine to come back
@@ -255,11 +281,13 @@ fun ImageTile(
             },
     ) {
         if (loaded) {
+            // iOS `.scaleAspectFill` (RowView.swift:242): the picture covers
+            // the tile, centred, the overflow clipped by the shape above.
             Image(
                 bmp,
                 contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Fit,
+                modifier = Modifier.fillMaxSize().graphicsLayer { alpha = st.alpha },
+                contentScale = ContentScale.Crop,
                 alignment = Alignment.Center,
             )
         } else {

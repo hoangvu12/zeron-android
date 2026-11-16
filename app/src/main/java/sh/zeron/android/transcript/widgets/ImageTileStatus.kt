@@ -33,11 +33,12 @@ import sh.zeron.android.design.uiStyle
 enum class ImageTileStatus { Loading, Loaded, Failed }
 
 /**
- * The tile's copy (ticket 137, verbatim from iOS except the one ADAPT:
- * "Check the **engine** connection." — Zeron names the paired machine an
- * engine). [RetryActionLabel] is the TalkBack `onClick` label ("Retry",
- * because TalkBack prefixes "Double-tap to"); the verbatim iOS hint
- * [FailedHint] is kept for tests through [ImageTileHintKey].
+ * The tile's copy. iOS has no loading or failed text (an image that
+ * doesn't load leaves its tile blank); Android keeps its states (ticket
+ * 137) in neutral words — no Roboco "engine" or "project folder" advice.
+ * [RetryActionLabel] is the TalkBack `onClick` label ("Retry", because
+ * TalkBack prefixes "Double-tap to"); the hint [FailedHint] is kept for
+ * tests through [ImageTileHintKey].
  */
 object ImageTileCopy {
     /** The label fallback when the Rust payload is null (`w.payload ?? "Image"`). */
@@ -52,11 +53,10 @@ object ImageTileCopy {
     /** Loaded a11y hint (also the TalkBack action label). */
     const val LoadedHint = "Open image preview"
 
-    /** Failed status text (spans three lines) and a11y value. */
-    const val Failed =
-        "Image unavailable\nCheck the engine connection. Use an image in the project folder.\nTap to retry."
+    /** Failed status text (two lines) and a11y value. */
+    const val Failed = "Image unavailable\nTap to retry."
 
-    /** Failed a11y hint (verbatim iOS; [RetryActionLabel] is the action label). */
+    /** Failed a11y hint ([RetryActionLabel] is the action label). */
     const val FailedHint = "Tap to retry."
 
     /** TalkBack's action label for a failed tile's tap. */
@@ -100,7 +100,7 @@ internal fun imageStatusPlacement(tileH: Int, labelH: Int, spinnerH: Int, gapPx:
  * (the iOS `.medium` `UIActivityIndicatorView`, 20 dp) sits horizontally
  * centred with its bottom 8 dp above the label's top. **Compact mode**:
  * the 20 dp spinner (Loading) or warning glyph (Failed) centred, no
- * label — a 76 dp thumbnail cannot hold the three-line text. Draws
+ * label — a 76 dp thumbnail cannot hold the two-line text. Draws
  * nothing when Loaded.
  *
  * The root clears its semantics (iOS `isAccessibilityElement = false`):

@@ -37,21 +37,20 @@ data class ImageKey(val engineDeviceId: String, val reference: String, val chatI
 
 /**
  * Where engine-served bytes come from ([ImageSource.Engine]). Production
- * is `AttachmentReader { d, r -> core.client.readImage(d, r, chatId) }`
- * (the engine's `ReadImageChunk`, falling back to `ReadAttachmentChunk`
- * on older engines; android-app#08: a UniFFI `suspend` fn that throws
- * `CoreException` and runs on the Rust runtime — call it directly, never
- * inside `runBlocking`).
+ * is `AttachmentReader { d, r -> client.readAttachment(d, r) }` (the
+ * host's `ReadAttachmentChunk`, as iOS `CoreSessionSource.image`; a UniFFI
+ * `suspend` fn that throws `CoreException` and runs on the Rust runtime —
+ * call it directly, never inside `runBlocking`).
  */
 fun interface AttachmentReader {
     suspend fun read(engineDeviceId: String, reference: String): ByteArray
 }
 
 /**
- * Bytes → bitmap. [sidePx] > 0 asks for a tile whose **longer** side is
- * exactly `sidePx` px (downsampled, never upscaled; ticket 137: the tile
- * is aspect-fit, so the picture must fit the whole source inside the
- * square, not crop it); `0` asks for the full image with the long side
+ * Bytes → bitmap. [sidePx] > 0 asks for a tile whose **shorter** side is
+ * `sidePx` px (downsampled, never upscaled; the tile is aspect-fill like
+ * iOS, so the picture must cover the whole square — [tileTargetSize]);
+ * `0` asks for the full image with the long side
  * capped at [FullSideCap]. Throws on failure — the loader turns that
  * into a null result.
  */
@@ -71,8 +70,8 @@ internal const val FullSideCap = 4096
 
 /**
  * The real decoder (ticket 66 step 1): `ImageDecoder` with EXIF
- * orientation applied, integer ceil-division downsampling so the **longer**
- * source side lands on exactly `sidePx` (ticket 137's fit rule — a float
+ * orientation applied, integer ceil-division downsampling so the **shorter**
+ * source side lands on `sidePx` ([tileTargetSize]; a float
  * `ceil(w·scale)` can overshoot by 1 px) and the long side capped at
  * [FullSideCap] for full loads. `ALLOCATOR_DEFAULT` may hand back a
  * `HARDWARE` bitmap — it draws in Compose but its pixels cannot be read;
@@ -89,9 +88,9 @@ internal class PlatformImageDecode(
             val w = info.size.width
             val h = info.size.height
             if (sidePx > 0) {
-                val long = maxOf(w, h)
-                if (long > sidePx) {
-                    d.setTargetSize(ceilDiv(w, long, sidePx), ceilDiv(h, long, sidePx))
+                val (tw, th) = tileTargetSize(w, h, sidePx)
+                if (tw < w || th < h) {
+                    d.setTargetSize(tw, th)
                     full = false
                 }
             } else if (maxOf(w, h) > FullSideCap) {
@@ -101,6 +100,23 @@ internal class PlatformImageDecode(
             }
         }
         return DecodedImage(bmp.asImageBitmap(), full)
+    }
+}
+
+/**
+ * A tile decode's target size: the tile is aspect-**fill** (iOS
+ * `RowView.swift:242`, `.scaleAspectFill`), so the **shorter** source side
+ * lands on `sidePx` (downsampled, never upscaled), with the longer side
+ * still capped at [FullSideCap] so a very thin image can't blow up.
+ */
+internal fun tileTargetSize(w: Int, h: Int, sidePx: Int): Pair<Int, Int> {
+    val short = minOf(w, h)
+    val long = maxOf(w, h)
+    if (short <= sidePx) return w to h
+    return if (ceilDiv(long, short, sidePx) > FullSideCap) {
+        ceilDiv(w, long, FullSideCap) to ceilDiv(h, long, FullSideCap)
+    } else {
+        ceilDiv(w, short, sidePx) to ceilDiv(h, short, sidePx)
     }
 }
 
@@ -125,7 +141,6 @@ class TranscriptImageLoader(
     maxBytes: Int = defaultMaxBytes(),
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate),
     private val decodeDispatcher: CoroutineDispatcher = Dispatchers.Default.limitedParallelism(2),
-    private val web: WebImageFetcher = PlatformWebImageFetcher,
 ) : ComponentCallbacks2 {
 
     private val lru = object : LruCache<ImageKey, DecodedImage>(maxBytes) {
@@ -139,17 +154,21 @@ class TranscriptImageLoader(
     /**
      * Main-thread safe, no I/O: the usable entry per the hit rule — a
      * `full` entry always serves, a downsampled one only when its
-     * **longer** side is still ≥ `sidePx` (137: the tile is aspect-fit).
+     * **shorter** side still covers `sidePx` (the tile is aspect-fill) or
+     * its longer side hit [FullSideCap] ([tileTargetSize]'s cap).
      * Otherwise null (a re-decode follows).
      */
     fun cached(key: ImageKey, sidePx: Int): ImageBitmap? =
-        lru.get(key)?.takeIf { it.full || maxOf(it.bitmap.width, it.bitmap.height) >= sidePx }?.bitmap
+        lru.get(key)?.takeIf {
+            val b = it.bitmap
+            it.full || minOf(b.width, b.height) >= sidePx || maxOf(b.width, b.height) >= FullSideCap
+        }?.bitmap
 
     /**
      * Cache → in-flight deferred → [fetchAndDecode]. Null on any failure
      * (not cached; a later call tries again). The engine read runs
-     * wherever the [AttachmentReader] decides (the Rust runtime), the web
-     * fetch on IO, the decode on [decodeDispatcher] — never on main.
+     * wherever the [AttachmentReader] decides (the Rust runtime), the
+     * decode on [decodeDispatcher] — never on main.
      */
     suspend fun load(key: ImageKey, sidePx: Int, reader: AttachmentReader): ImageBitmap? {
         cached(key, sidePx)?.let { return it }
@@ -193,8 +212,8 @@ class TranscriptImageLoader(
 
     /**
      * Try each of the reference's [imageSources] in order — the bytes
-     * *and* their decode, so an SVG the phone fetched itself (undecodable
-     * here) still gets the engine's PNG rendering — and throw the last
+     * *and* their decode, so a source whose bytes can't be decoded here
+     * falls through to the next one — and throw the last
      * failure when none works. The engine is skipped while no engine id is
      * known.
      */
@@ -204,7 +223,6 @@ class TranscriptImageLoader(
             try {
                 val bytes = when (source) {
                     ImageSource.Inline -> decodeDataUri(key.reference) ?: throw IOException("malformed data: URI")
-                    ImageSource.Web -> web.fetch(key.reference)
                     ImageSource.Engine -> {
                         if (key.engineDeviceId.isBlank()) throw IOException("no engine for ${key.reference}")
                         reader.read(key.engineDeviceId, key.reference)
@@ -298,7 +316,7 @@ class TranscriptImageLoader(
  * references resolve against its cwd) and [retries], which fires when that
  * engine reconnects so failed tiles try again at once. Only a blank
  * reference short-circuits; a blank engine id (no host yet) still lets
- * `data:` and web images load — only the engine source is skipped.
+ * `data:` images load — only the engine source is skipped.
  */
 class TranscriptImageBinding(
     private val loader: TranscriptImageLoader,
