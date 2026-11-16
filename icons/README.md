@@ -33,7 +33,8 @@ https://creativecommons.org/licenses/by/4.0/), unmodified except for
 removing `width`/`height`. `pin-fill`, `pin-slash`, `square`, `circle-half`,
 `text-cursor`, `arrow-turn-down-right`, `arrow-turn-left-up`,
 `arrow-left-arrow-right`, `bubble-left-and-bubble-right`, `cpu`, `creditcard`, `lock`, `book-closed`, `arrow-up-right-square`, `iphone-arrow-forward`, and #61's voice glyphs
-`waveform`, `ear`, `person-wave` are drawn for Zeron in the Solar Linear style (24
+`waveform`, `ear`, `person-wave`, and the terminal menu's `textformat-size-smaller`,
+`textformat-size-larger`, `clear` are drawn for Zeron in the Solar Linear style (24
 grid, stroke 1.5, round caps). `bubble-left` is Solar's `chat-round-line`
 without its two text lines; `danger-triangle-fill` is Solar's
 `danger-triangle` outline filled, with the exclamation mark knocked out
