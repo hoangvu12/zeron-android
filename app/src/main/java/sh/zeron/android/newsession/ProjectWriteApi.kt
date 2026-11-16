@@ -37,10 +37,17 @@ interface ProjectWriteApi {
 class CoreProjectWriteApi(
     private val client: () -> CoreClient?,
     private val io: CoroutineDispatcher = Dispatchers.IO,
+    /**
+     * iOS `refreshWorkspace()` right after the create (`AppModel.swift:888-898`):
+     * the workspace re-read, awaited until it holds the new project.
+     */
+    private val workspaceChanged: suspend (spaceId: String) -> Unit = {},
 ) : ProjectWriteApi {
 
     override suspend fun createProject(deviceId: String, path: String, gitDetected: Boolean): String {
         val c = client() ?: throw IllegalStateException("Zeron is disconnected.")
-        return withContext(io) { c.createProject(deviceId, path, gitDetected) }
+        val id = withContext(io) { c.createProject(deviceId, path, gitDetected) }
+        workspaceChanged(id)
+        return id
     }
 }

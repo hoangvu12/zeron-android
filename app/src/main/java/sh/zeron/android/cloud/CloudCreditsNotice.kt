@@ -35,6 +35,7 @@ import sh.zeron.android.design.LocalTypeScale
 import sh.zeron.android.design.SymbolWeight
 import sh.zeron.android.design.ZeronIcons
 import sh.zeron.android.design.ZeronTheme
+import sh.zeron.android.design.glass.GlassSurface
 import sh.zeron.android.design.uiStyle
 
 /** A refused send's nudge counter: each [nudge] shakes the notice once (iOS `nudge()`). */
@@ -75,39 +76,45 @@ fun CloudCreditsNotice(state: CreditsNoticeState, onAddCredits: () -> Unit, modi
             },
         )
     }
-    Row(
+    // iOS draws it on `Glass.surface()`, like the status pill beside it.
+    GlassSurface(
         modifier
             .fillMaxWidth()
             .graphicsLayer { translationX = shake.value * density }
-            .clip(CapsuleShape)
-            .background(palette.elevated)
-            .padding(start = 14.dp, end = 6.dp, top = 6.dp, bottom = 6.dp)
             .testTag("cloud-credits-notice"),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        shape = CapsuleShape,
+        interactive = false,
     ) {
-        Icon(ZeronIcons.ExclamationmarkTriangleFill, palette.danger, 13f, SymbolWeight.Semibold)
-        BasicText(
-            "Out of Cloud credits",
-            // #63: announced when it appears (and again on a kept send's nudge).
-            Modifier.weight(1f).semantics { liveRegion = LiveRegionMode.Polite },
-            style = uiStyle(Face.SansMedium, ts.fixed(14f), palette.text),
-            maxLines = 1,
-        )
-        BasicText(
-            "Add credits",
+        Row(
             Modifier
-                .clip(CapsuleShape)
-                .background(palette.text)
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    role = Role.Button,
-                    onClick = onAddCredits,
-                )
-                .padding(horizontal = 12.dp, vertical = 6.dp)
-                .testTag("add-credits"),
-            style = uiStyle(Face.SansSemibold, ts.fixed(13f), palette.background),
-        )
+                .fillMaxWidth()
+                .padding(start = 14.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Icon(ZeronIcons.ExclamationmarkTriangleFill, palette.danger, 13f, SymbolWeight.Semibold)
+            BasicText(
+                "Out of Cloud credits",
+                // #63: announced when it appears (and again on a kept send's nudge).
+                Modifier.weight(1f).semantics { liveRegion = LiveRegionMode.Polite },
+                style = uiStyle(Face.SansMedium, ts.fixed(14f), palette.text),
+                maxLines = 1,
+            )
+            BasicText(
+                "Add credits",
+                Modifier
+                    .clip(CapsuleShape)
+                    .background(palette.text)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        role = Role.Button,
+                        onClick = onAddCredits,
+                    )
+                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                    .testTag("add-credits"),
+                style = uiStyle(Face.SansSemibold, ts.fixed(13f), palette.background),
+            )
+        }
     }
 }

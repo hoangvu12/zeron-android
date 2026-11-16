@@ -71,8 +71,8 @@ import uniffi.zeron_core.WorkspaceSnapshot
  *   ticket 15's glass menu with "Rename Section…" and "Delete Section",
  *   wired to ticket 43's [SessionPrompts] launchers;
  * - **Archived** — no trailing item, the rows use the archived variants
- *   (`archivedRows = true`), and an empty archive shows 41's
- *   "No archived sessions" (a Zeron addition; iOS shows a blank list).
+ *   (`archivedRows = true`), and an empty archive is a blank list, as on
+ *   iOS.
  *
  * This ticket makes **no core calls**: 43's launchers own the prompts, 42's
  * [RowActions] own the writes, and the title updates / the pop only happen

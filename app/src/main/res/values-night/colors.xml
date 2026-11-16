@@ -1,4 +1,7 @@
 <resources>
     <color name="launch_background">#000000</color>
     <color name="accent">#8B7CF6</color>
+    <!-- Zeron's dark adaptive icon: ivory on ink (upstream 2a2212c70). -->
+    <color name="icon_background">#141418</color>
+    <color name="icon_foreground">#F4F1EA</color>
 </resources>

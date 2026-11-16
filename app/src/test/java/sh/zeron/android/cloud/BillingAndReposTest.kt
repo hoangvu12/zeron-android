@@ -46,9 +46,9 @@ class BillingAndReposTest {
 
     @Test
     fun hoursAreCreditsOverSixtyRounded() {
-        assertEquals("about 100 hours", BillingRules.hours(6000.0))
-        assertEquals("about 1 hours", BillingRules.hours(89.0))
-        assertEquals("about 0 hours", BillingRules.hours(10.0))
+        assertEquals("about 100 small-machine hours", BillingRules.hours(6000.0))
+        assertEquals("about 1 small-machine hours", BillingRules.hours(89.0))
+        assertEquals("about 0 small-machine hours", BillingRules.hours(10.0))
         assertEquals("credit", BillingRules.unit(1.0))
         assertEquals("credits", BillingRules.unit(0.0))
     }

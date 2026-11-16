@@ -63,6 +63,10 @@ class NewSessionSendHandlerTest {
             lanes += currentCoroutineContext()[ContinuationInterceptor] as? CoroutineDispatcher
             sendError?.let { throw it }
         }
+
+        override fun refreshWorkspace() {
+            events += "refreshWorkspace"
+        }
     }
 
     /** 92's page fake: records both calls onto the shared timeline. */
@@ -152,11 +156,12 @@ class NewSessionSendHandlerTest {
 
         assertEquals(SendResult.Sent, outcome)
         assertEquals(
-            "persist → createSession → sendFirst → markCreated → ask → capture → onCreated",
+            "persist → createSession → sendFirst → refreshWorkspace → markCreated → ask → capture → onCreated",
             listOf(
                 "persistBeforeCreate",
                 "createSession",
                 "sendFirst",
+                "refreshWorkspace",
                 "markCreated",
                 "ask",
                 "capture",
@@ -205,7 +210,7 @@ class NewSessionSendHandlerTest {
         assertEquals(SendResult.Sent, result)
         assertEquals(1, askCount)
         assertEquals(
-            listOf("persistBeforeCreate", "createSession", "sendFirst", "markCreated", "ask", "capture", "onCreated"),
+            listOf("persistBeforeCreate", "createSession", "sendFirst", "refreshWorkspace", "markCreated", "ask", "capture", "onCreated"),
             events,
         )
         assertEquals(listOf("chat-1" to FakeHandoff), created)

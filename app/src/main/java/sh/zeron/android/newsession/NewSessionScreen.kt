@@ -3,7 +3,6 @@ package sh.zeron.android.newsession
 import sh.zeron.android.design.modalLayerBackground
 import sh.zeron.android.design.ModalLayer
 import androidx.activity.ComponentActivity
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -12,7 +11,6 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.dp
@@ -24,9 +22,12 @@ import sh.zeron.android.core.Face
 import sh.zeron.android.design.CapsuleShape
 import sh.zeron.android.design.LocalFeedback
 import sh.zeron.android.design.LocalToaster
+import sh.zeron.android.design.ToastAnchorState
+import sh.zeron.android.design.toastAnchorTop
 import sh.zeron.android.design.LocalTypeScale
 import sh.zeron.android.design.ZeronTheme
 import sh.zeron.android.design.glass.ActivitySpinner
+import sh.zeron.android.design.glass.GlassSurface
 import sh.zeron.android.design.uiStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -148,6 +149,9 @@ internal fun NewSessionScreenBody(
     val toaster = LocalToaster.current
     val feedback = LocalFeedback.current
     val openBilling by rememberUpdatedState(rememberBillingOpener())
+    // iOS `showOutOfCredits(…, above: composer)`: the toast floats over the
+    // composer instead of covering it.
+    val composerAnchor = remember { ToastAnchorState() }
     val handler = remember {
         val core = CoreNewSessionCore(client = { app.clientOrNull() }, workspaceChanged = { app.workspaceFeed.refresh() })
         NewSessionSendHandler(
@@ -160,7 +164,7 @@ internal fun NewSessionScreenBody(
             capture = capture::capture,
             onCreated = { chatId, handoff -> latestOnCreated(chatId, handoff) },
             cloudCreator = CloudSessionCreator(core),
-            onOutOfCredits = { CloudRoutes.showOutOfCredits(toaster, feedback) { openBilling() } },
+            onOutOfCredits = { CloudRoutes.showOutOfCredits(toaster, feedback, above = composerAnchor) { openBilling() } },
         )
     }
 
@@ -252,6 +256,7 @@ internal fun NewSessionScreenBody(
                         morph,
                         Modifier
                             .testTag("new-session-composer")
+                            .toastAnchorTop(composerAnchor)
                             .handoffComposer(capture)
                             .then(if (ns.cloudStarting) Modifier.lockedForCloud() else Modifier),
                         textHidden = capture.textHidden,
@@ -388,20 +393,22 @@ private fun Modifier.lockedForCloud(): Modifier = pointerInput(Unit) {
     }
 }
 
-/** "Starting on Cloud…" above the composer while the machine is minted (iOS `CloudStartingHUD`). */
+/**
+ * "Starting on Cloud…" above the composer while the machine is minted
+ * (iOS `CloudStartingHUD`, NewSessionViewController.swift:598-631): a
+ * glass capsule (`Glass.surface()`), spinner and Medium 14.
+ */
 @Composable
 internal fun CloudStartingHud(modifier: Modifier = Modifier) {
     val palette = ZeronTheme.palette
-    Row(
-        modifier
-            .clip(CapsuleShape)
-            .background(palette.elevated)
-            .padding(horizontal = 16.dp, vertical = 10.dp)
-            .testTag("cloud-starting"),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        ActivitySpinner(palette.secondary)
-        BasicText("Starting on Cloud…", style = uiStyle(Face.SansMedium, LocalTypeScale.current.fixed(14f), palette.text))
+    GlassSurface(modifier.testTag("cloud-starting"), shape = CapsuleShape, interactive = false) {
+        Row(
+            Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            ActivitySpinner(palette.secondary)
+            BasicText("Starting on Cloud…", style = uiStyle(Face.SansMedium, LocalTypeScale.current.fixed(14f), palette.text))
+        }
     }
 }

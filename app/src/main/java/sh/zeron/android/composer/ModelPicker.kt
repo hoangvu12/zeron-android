@@ -1,6 +1,17 @@
 package sh.zeron.android.composer
 
 import androidx.compose.foundation.background
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.withInfiniteAnimationFrameMillis
+import androidx.compose.foundation.interaction.DragInteraction
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.stateDescription
+import kotlinx.coroutines.flow.filterIsInstance
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ScrollState
@@ -190,11 +201,34 @@ object ModelPickerCopy {
     const val NoMatches = "No matches"
     const val Close = "Close"
 
+    /** The current model's spoken state (iOS `accessibilityValue = "Current"`). */
+    const val CurrentState = "Current"
+
     fun searchPlaceholder(label: String) = "Search $label models"
 }
 
 /** The subtitle's host symbol for a computer (iOS `desktopcomputer`). */
 const val HOST_SYMBOL_COMPUTER = "desktopcomputer"
+
+/** One way of the skeleton's breath (iOS `pulse.duration = 0.9`). */
+internal const val SkeletonPulseMs = 900L
+
+/** Each skeleton row starts this long after the one above (iOS `seed * 0.12`). */
+internal const val SkeletonStaggerMs = 120L
+
+private val SkeletonEasing = CubicBezierEasing(0.42f, 0f, 0.58f, 1f)
+
+/**
+ * The skeleton bars' opacity [elapsedMs] into their breath: 1 before the
+ * row's start, then 1 → 0.4 → 1 every 2 × [SkeletonPulseMs], ease in-out
+ * each way (`CABasicAnimation` autoreverses, `easeInEaseOut`). Pure.
+ */
+internal fun skeletonPulseAlpha(elapsedMs: Long): Float {
+    if (elapsedMs <= 0L) return 1f
+    val cycle = elapsedMs % (2 * SkeletonPulseMs)
+    val way = if (cycle < SkeletonPulseMs) cycle else 2 * SkeletonPulseMs - cycle
+    return 1f - 0.6f * SkeletonEasing.transform(way.toFloat() / SkeletonPulseMs)
+}
 
 /** A list longer than this gets a search field (OpenCode can offer hundreds). */
 const val MODEL_SEARCH_THRESHOLD = 12
@@ -495,6 +529,8 @@ private fun ModelPickerHeader(subtitle: String, harness: String?, hostSymbol: St
             BasicText(
                 ModelPickerCopy.Title,
                 style = uiStyle(Face.SansSemibold, typeScale.fixed(22f), palette.text),
+                // iOS gives the title the header trait.
+                modifier = Modifier.semantics { heading() },
             )
             Spacer(Modifier.height(3.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -766,66 +802,113 @@ private fun ModelPickerPage(
     val visible = rows?.let { filterModels(it, query) }.orEmpty()
     val listState = rememberLazyListState()
     val reportHeight by rememberUpdatedState(onContentHeight)
+    val showsSearch = rows != null && showsModelSearch(rows)
+    val searchShown by rememberUpdatedState(showsSearch)
+    // The pinned search field's height (px), counted into the fit.
+    var searchHeight by remember { mutableFloatStateOf(0f) }
     LaunchedEffect(listState) {
-        snapshotFlow { lazyContentHeight(listState.layoutInfo) }
+        snapshotFlow { lazyContentHeight(listState.layoutInfo)?.plus(if (searchShown) searchHeight else 0f) }
             .filterNotNull()
             .distinctUntilChanged()
             .collect { reportHeight(it) }
     }
-    LazyColumn(
-        Modifier
-            .fillMaxSize()
-            .testTag("model-picker-list-${tab.harness}"),
-        state = listState,
-        contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 10.dp, bottom = bottomInset + 20.dp),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
-    ) {
-        if (rows != null && showsModelSearch(rows)) {
-            item(key = "search") {
+    // iOS `keyboardDismissMode = .onDrag`: dragging the list puts the
+    // search keyboard away.
+    val focus = LocalFocusManager.current
+    LaunchedEffect(listState) {
+        listState.interactionSource.interactions
+            .filterIsInstance<DragInteraction.Start>()
+            .collect { focus.clearFocus() }
+    }
+    Column(Modifier.fillMaxSize()) {
+        // iOS pins the search field above the list, so it never scrolls away.
+        if (showsSearch) {
+            Box(
+                Modifier
+                    .padding(start = 12.dp, end = 12.dp, top = 10.dp)
+                    .onSizeChanged { searchHeight = it.height.toFloat() },
+            ) {
                 ModelSearchField(search, ModelPickerCopy.searchPlaceholder(tab.label), resultCount = visible.size)
             }
         }
-        if (notice != null) {
-            item(key = "notice") { ModelPickerNotice(notice) }
-        }
-        if (rows == null) {
-            items(4, key = { "skeleton-$it" }) { ix -> ModelSkeletonRow(ix) }
-        } else if (visible.isEmpty()) {
-            item(key = "empty") {
-                BasicText(
-                    modelEmptyText(query),
-                    style = uiStyle(Face.Sans, typeScale.fixed(15f), palette.tertiary),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 40.dp)
-                        .testTag("model-picker-empty"),
-                )
+        LazyColumn(
+            Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .testTag("model-picker-list-${tab.harness}"),
+            state = listState,
+            contentPadding = PaddingValues(
+                start = 12.dp,
+                end = 12.dp,
+                top = if (showsSearch) 0.dp else 10.dp,
+                bottom = bottomInset + 20.dp,
+            ),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            if (notice != null) {
+                item(key = "notice") { ModelPickerNotice(notice) }
             }
-        } else {
-            items(visible, key = { "model:${it.id}" }) { row ->
-                ModelRow(
-                    row = row,
-                    current = current.first == tab.harness && current.second == row.id,
-                    onClick = { onPick(row) },
-                )
+            if (rows == null) {
+                items(4, key = { "skeleton-$it" }) { ix -> ModelSkeletonRow(ix) }
+            } else if (visible.isEmpty()) {
+                item(key = "empty") {
+                    BasicText(
+                        modelEmptyText(query),
+                        style = uiStyle(Face.Sans, typeScale.fixed(15f), palette.tertiary),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 40.dp)
+                            .testTag("model-picker-empty"),
+                    )
+                }
+            } else {
+                items(visible, key = { "model:${it.id}" }) { row ->
+                    ModelRow(
+                        row = row,
+                        current = current.first == tab.harness && current.second == row.id,
+                        onClick = { onPick(row) },
+                    )
+                }
             }
         }
     }
 }
 
-/** A model: its name over one or two lines of what it's for; the current one tinted and checked. */
+/**
+ * A model: its name over one or two lines of what it's for; the current
+ * one tinted and checked (iOS `ModelCell`). A press dims a control-fill
+ * plate in and shrinks it to 0.985 (0.06 s in, 0.3 s out); TalkBack reads
+ * "Current" on the current one.
+ */
 @Composable
 private fun ModelRow(row: ModelPickerRow, current: Boolean, onClick: () -> Unit) {
     val palette = ZeronTheme.palette
     val typeScale = LocalTypeScale.current
+    val interaction = remember { MutableInteractionSource() }
+    val pressed by interaction.collectIsPressedAsState()
+    val plateMs = if (pressed) 60 else 300
+    val plate by animateColorAsState(
+        when {
+            current -> palette.accentSoft
+            pressed -> palette.controlFill
+            else -> palette.controlFill.copy(alpha = 0f)
+        },
+        animationSpec = tween(plateMs),
+        label = "model-row-plate",
+    )
+    val plateScale by animateFloatAsState(if (pressed) 0.985f else 1f, tween(plateMs), label = "model-row-scale")
     Row(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp))
-            .background(if (current) palette.accentSoft else Color.Transparent)
-            .clickable(onClick = onClick)
+            .drawBehind {
+                scale(plateScale) { drawRoundRect(plate, cornerRadius = CornerRadius(18.dp.toPx())) }
+            }
+            .clickable(interactionSource = interaction, indication = null, onClick = onClick)
             .padding(start = 14.dp, end = 16.dp, top = 12.dp, bottom = 12.dp)
-            .semantics { selected = current }
+            .semantics(mergeDescendants = true) {
+                selected = current
+                if (current) stateDescription = ModelPickerCopy.CurrentState
+            }
             .testTag("model-picker-row-${row.id}"),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -851,7 +934,7 @@ private fun ModelRow(row: ModelPickerRow, current: Boolean, onClick: () -> Unit)
                 ZeronIcons.Checkmark,
                 palette.accent,
                 14f,
-                SymbolWeight.Semibold,
+                SymbolWeight.Bold,
                 Modifier.alpha(if (current) 1f else 0f),
             )
         }
@@ -878,13 +961,38 @@ private fun ModelPickerNotice(text: String) {
     }
 }
 
-/** A loading row: two soft bars (static — no infinite animation to keep tests idle). */
+/**
+ * A loading row: two soft bars that breathe until the models arrive (iOS
+ * `SkeletonCell`: opacity 1 → 0.4 and back, 0.9 s each way, ease in-out,
+ * each row 0.12 s after the one above; none under Reduce Motion). The
+ * frames come from [withInfiniteAnimationFrameMillis], like
+ * [ActivitySpinner]'s, so a ui-test's infinite-animation policy stops it
+ * and a frozen test clock leaves it at full opacity.
+ */
 @Composable
 private fun ModelSkeletonRow(seed: Int) {
     val palette = ZeronTheme.palette
     val title = listOf(0.3f, 0.38f, 0.26f, 0.34f)[seed % 4]
     val detail = listOf(0.6f, 0.48f, 0.55f, 0.42f)[seed % 4]
-    Column(Modifier.fillMaxWidth().padding(start = 14.dp, top = 16.dp, bottom = 16.dp)) {
+    val reduceMotion = LocalReduceMotion.current
+    var pulse by remember { mutableFloatStateOf(1f) }
+    LaunchedEffect(reduceMotion, seed) {
+        if (reduceMotion) {
+            pulse = 1f
+            return@LaunchedEffect
+        }
+        val start = withInfiniteAnimationFrameMillis { it }
+        while (true) {
+            val now = withInfiniteAnimationFrameMillis { it }
+            pulse = skeletonPulseAlpha(now - start - seed * SkeletonStaggerMs)
+        }
+    }
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .padding(start = 14.dp, top = 16.dp, bottom = 16.dp)
+            .graphicsLayer { alpha = pulse },
+    ) {
         Box(
             Modifier
                 .fillMaxWidth(title)

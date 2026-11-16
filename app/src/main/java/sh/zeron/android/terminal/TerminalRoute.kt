@@ -143,9 +143,12 @@ fun rememberChatTerminals(chatId: String): List<TerminalTab> {
 /** The live tab iOS `openTerminal` reopens (the first live one), or null for a new shell. */
 fun List<TerminalTab>.liveTerminalId(): String? = firstOrNull { it.isLive }?.ref?.id
 
-/** A device's display name (iOS `app.deviceName`), or "Computer". */
+/** A device's display name, never its id (iOS `app.deviceName`): "Unknown device" when it isn't known. */
 fun ZeronApplication.deviceName(deviceId: String): String =
-    workspaceFeed.devices.value.firstOrNull { it.id == deviceId }?.name ?: "Computer"
+    workspaceFeed.devices.value.firstOrNull { it.id == deviceId }?.name ?: UNKNOWN_DEVICE_NAME
+
+/** iOS AppModel.deviceName's fallback (AppModel.swift:850-852). */
+const val UNKNOWN_DEVICE_NAME = "Unknown device"
 
 /** The panel row for a tab (iOS `CompanionCell.configure(terminal:host:)`). */
 fun TerminalTab.panelRow(host: String): PanelTerminal = PanelTerminal(

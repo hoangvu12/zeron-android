@@ -1,9 +1,10 @@
 <resources>
     <color name="launch_background">#EDEDED</color>
     <color name="accent">#5B43E8</color>
-    <!-- #140: the adaptive icon's background, Zeron's Android app's. -->
-    <color name="icon_background">#12052B</color>
-    <!-- #140: the Zeron icon's lit purple (the head samples around
-         #7C1AF9), the notification accent. -->
+    <!-- The adaptive icon's tile and mark, Zeron's Android app's (upstream
+         2a2212c70): ink on ivory here, ivory on ink in values-night. -->
+    <color name="icon_background">#F4F1EA</color>
+    <color name="icon_foreground">#141418</color>
+    <!-- #140: the notification accent (the old icon's lit purple). -->
     <color name="brand_accent">#7C1AF9</color>
 </resources>

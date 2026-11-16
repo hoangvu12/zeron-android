@@ -61,6 +61,7 @@ import sh.zeron.android.shell.SessionRoute
 import sh.zeron.android.terminal.LiveComposers
 import sh.zeron.android.terminal.TerminalDemoScript
 import sh.zeron.android.terminal.TerminalRoute
+import sh.zeron.android.terminal.UNKNOWN_DEVICE_NAME
 import sh.zeron.android.terminal.appendBlock
 import sh.zeron.android.terminal.deviceName
 import sh.zeron.android.terminal.liveTerminalId
@@ -485,7 +486,7 @@ class SessionScreenRoute internal constructor(
                 onFork = panelFork,
                 // #44 (iOS `TerminalViewController(tab: nil)`): a new shell.
                 onNewTerminal = { openTerminal(null, emptyList()) },
-                terminals = chatTerminals.map { it.panelRow(app?.deviceName(it.ref.deviceId) ?: "Computer") },
+                terminals = chatTerminals.map { it.panelRow(app?.deviceName(it.ref.deviceId) ?: UNKNOWN_DEVICE_NAME) },
                 onOpenTerminal = { id -> openTerminal(id, emptyList()) },
                 onCloseTerminal = { id ->
                     chatTerminals.firstOrNull { it.ref.id == id }?.let { app?.terminals?.close(it) }

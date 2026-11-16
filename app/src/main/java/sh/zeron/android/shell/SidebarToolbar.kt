@@ -213,7 +213,8 @@ internal fun SidebarToolbarContent(
                 GlassGroupItem(
                     icon = ZeronIcons.Ellipsis,
                     contentDescription = stringResource(R.string.sidebar_options),
-                    testTag = "sidebar-options",
+                    // iOS gives it the phone ⋯'s id (SplitRootController.swift:411).
+                    testTag = "sessions-options",
                     interactionSource = optionsSource,
                 ) { onOptions(it) },
             ),

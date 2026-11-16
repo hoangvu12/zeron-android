@@ -1,6 +1,5 @@
 package sh.zeron.android.transcript
 
-import android.graphics.BitmapFactory
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,7 +20,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import sh.zeron.android.R
 import sh.zeron.android.core.Face
 import sh.zeron.android.design.LocalGalleryCapture
 import sh.zeron.android.design.LocalTypeScale
@@ -30,6 +28,7 @@ import sh.zeron.android.design.uiStyle
 import sh.zeron.android.image.ImageViewerHost
 import sh.zeron.android.image.ImageViewerRequest
 import sh.zeron.android.image.rememberImageViewerState
+import sh.zeron.android.notify.launcherIconBitmap
 
 /**
  * The "Transcript links" section of the debug design gallery (ticket
@@ -43,7 +42,7 @@ import sh.zeron.android.image.rememberImageViewerState
  * readout at the bottom shows the last [LinkRoute], so `Ignore` taps are
  * visible as taps.
  *
- * The router's `loadFull` decodes a bundled PNG (the launcher art) for
+ * The router's `loadFull` draws the launcher icon for
  * any reference ending in `.png` and returns `null` otherwise, and
  * `showImage` opens the section's own [ImageViewerHost] the same way the
  * session screen does: the row's bounds as the zoom source, corner
@@ -75,8 +74,7 @@ fun TranscriptLinksGallerySection() {
         loadFull = { reference ->
             if (!reference.endsWith(".png")) null
             else withContext(Dispatchers.Default) {
-                BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher_foreground)
-                    ?.asImageBitmap()
+                launcherIconBitmap(context, sizePx = 1024)?.asImageBitmap()
             }
         },
         showImage = { reference, source, bitmap ->

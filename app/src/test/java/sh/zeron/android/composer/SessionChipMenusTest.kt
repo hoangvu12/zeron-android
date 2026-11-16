@@ -271,6 +271,40 @@ class SessionChipMenusTest {
     }
 
     @Test
+    fun aCloudChatOffersCloudsAgentsNotWhatItsMachineReports() {
+        // iOS `providers(cloud:)`: Cloud runs Claude Code and Codex, whatever
+        // the (possibly asleep) machine would answer.
+        val core = object : ChipMenuCoreDelegate(
+            FakeChipMenuCore(
+                row = chipMenuSessionRow().copy(isCloud = true),
+                config = chatConfig(model = "claude-fable-5"),
+                harnesses = listOf(harness("claude-code", "Claude Code"), harness("pi", "Pi")),
+            ),
+        ) {
+            override fun fallbackHarnesses(): List<HarnessInfo> = listOf(
+                harness("claude-code", "Claude Code"),
+                harness("codex", "Codex"),
+                harness("opencode", "OpenCode"),
+            )
+        }
+        val menus = SessionChipMenus(core, io = fakeIo())
+        val shown = mutableListOf<ModelPickerRequest>()
+        menus.modelPicker = ModelPickerPresenter { shown += it }
+        fill(menus, core.fake, providerSwitch = true)
+
+        menus.menu("model", RecordingPlatform())
+        val request = shown.single()
+        assertEquals(listOf("claude-code", "codex"), request.tabs.map { it.harness })
+        assertEquals("Your next message continues this chat with Codex.", request.tabs[1].footer)
+        assertEquals("Cloud", request.hostName)
+        Thread.sleep(50)
+        assertTrue("the machine is not asked", core.fake.methodNames().none { it.startsWith("listHarnesses") })
+    }
+
+    /** A [ChipMenuCore] over [fake] whose members a test can override one by one. */
+    private open class ChipMenuCoreDelegate(val fake: FakeChipMenuCore) : ChipMenuCore by fake
+
+    @Test
     fun midTurnOrOnAnOlderHostOnlyTheOwnProviderWithTheRightNote() {
         val core = FakeChipMenuCore(row = chipMenuSessionRow(), config = chatConfig(model = "claude-fable-5"))
         val menus = menus(core)

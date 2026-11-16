@@ -366,7 +366,20 @@ class CloudStore(
         fun price(cents: UInt): String =
             if (cents % 100u == 0u) "$${cents / 100u}" else String.format(Locale.US, "$%.2f", cents.toDouble() / 100)
 
-        fun shortDate(ms: Long): String = SimpleDateFormat("MMM d", Locale.getDefault()).format(Date(ms))
+        /**
+         * "Nov 16" / "16 Nov": iOS `CloudUI.shortDate` builds it from the
+         * localised template "MMM d", so the locale orders it. Plain-JVM
+         * tests have no platform pattern and keep the template.
+         */
+        fun shortDate(ms: Long): String {
+            val locale = Locale.getDefault()
+            val pattern = try {
+                android.text.format.DateFormat.getBestDateTimePattern(locale, "MMMd")
+            } catch (_: RuntimeException) {
+                "MMM d"
+            }
+            return SimpleDateFormat(pattern, locale).format(Date(ms))
+        }
     }
 }
 

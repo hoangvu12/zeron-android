@@ -84,4 +84,15 @@ class ModelPickerRulesTest {
         assertEquals(120f + 7 * SwitcherMetrics.LogoWidth + 3f, wide.last().end, 0.01f)
         assertTrue(switcherFrames(emptyList(), 300f, 0).isEmpty())
     }
+
+    @Test
+    fun theSkeletonBreathesFromOneToFourTenthsAndBack() {
+        // iOS SkeletonCell: 1 → 0.4 over 0.9 s, autoreversed; not before the row's start.
+        assertEquals(1f, skeletonPulseAlpha(-SkeletonStaggerMs), 1e-4f)
+        assertEquals(1f, skeletonPulseAlpha(0L), 1e-4f)
+        assertEquals(0.7f, skeletonPulseAlpha(SkeletonPulseMs / 2), 1e-3f)
+        assertEquals(0.4f, skeletonPulseAlpha(SkeletonPulseMs), 1e-4f)
+        assertEquals(1f, skeletonPulseAlpha(2 * SkeletonPulseMs), 1e-4f)
+        assertEquals(skeletonPulseAlpha(300L), skeletonPulseAlpha(2 * SkeletonPulseMs - 300L), 1e-4f)
+    }
 }

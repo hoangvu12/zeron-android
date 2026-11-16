@@ -5,8 +5,13 @@ import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.heading
+import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.Context
+import android.content.ContextWrapper
+import android.content.Intent
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -170,6 +175,8 @@ fun GitHubConnectSheet(onDismissed: () -> Unit, onConnected: (String?) -> Unit =
     val feedback = LocalFeedback.current
     val model = remember { GitHubConnectModel(CoreGitHubFlowApi(app::clientOrNull)) }
     val connectedCallback by rememberUpdatedState(onConnected)
+    // Read only from the connect effect and the button, both on main.
+    var openedTab by remember { mutableStateOf(false) }
     GlassSheet(
         onDismiss = onDismissed,
         modifier = Modifier.testTag("github-connect"),
@@ -181,6 +188,13 @@ fun GitHubConnectSheet(onDismissed: () -> Unit, onConnected: (String?) -> Unit =
         val sheet = this
         LaunchedEffect(model) {
             if (model.run()) {
+                // iOS dismisses its Safari sheet on connect; here the
+                // Custom Tab sits above us in our task, so coming back to
+                // the front (singleTask) closes it.
+                if (openedTab) {
+                    openedTab = false
+                    bringToFront(context)
+                }
                 feedback.haptic(Haptic.Success)
                 app.cloud.refreshGitHub()
                 delay(900)
@@ -195,10 +209,30 @@ fun GitHubConnectSheet(onDismissed: () -> Unit, onConnected: (String?) -> Unit =
                     context.getSystemService(ClipboardManager::class.java)
                         ?.setPrimaryClip(ClipData.newPlainText("Code", f.userCode))
                     openInCustomTab(context, f.verificationUri, dark)
+                    openedTab = true
                 }
             },
             modifier = Modifier.padding(bottom = bottomInset + 24.dp),
         )
+    }
+}
+
+/**
+ * Brings the app's activity back over the browser it opened: `MainActivity`
+ * is `singleTask`, so a plain start clears what sits above it in its task
+ * (the Custom Tab) and arrives in `onNewIntent` as a no-op. A start the
+ * system blocks from the background just leaves the browser up.
+ */
+private fun bringToFront(context: Context) {
+    var c: Context? = context
+    while (c is ContextWrapper && c !is Activity) c = c.baseContext
+    val activity = c as? Activity ?: return
+    try {
+        activity.startActivity(
+            Intent(activity, activity.javaClass).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
+        )
+    } catch (e: RuntimeException) {
+        Log.w("GitHubConnect", "could not return from the browser", e)
     }
 }
 

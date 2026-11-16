@@ -58,9 +58,8 @@ private fun choice(h: HarnessInfo, m: ModelInfo): ModelChoice = ModelChoice(
  * The FFI never throws by contract — `CoreClient.listHarnesses` /
  * `listModels` fall back live → disk cache → static inside the core
  * (`ListHarnesses` 30 s, `ListModels` 100 s RPC timeouts,
- * android-app#08) — so there is no Kotlin fallback to fake; the
- * [CoreException] guard is only a belt-and-braces against a contract
- * break.
+ * android-app#08). Should a call throw anyway, [fetchCatalog] falls back
+ * per call, as iOS does, rather than dropping the whole fresh list.
  */
 class CoreModelCatalogSource(
     private val client: () -> CoreClient?,
@@ -94,20 +93,44 @@ class CoreModelCatalogSource(
 
     override suspend fun fetch(deviceId: String): List<ModelChoice> {
         val c = client() ?: return emptyList()
-        return try {
-            val harnesses = c.listHarnesses(deviceId)
-            val out = ArrayList<ModelChoice>(harnesses.size * 4)
-            for (h in harnesses) {
-                if (!h.offered) continue
-                for (m in c.listModels(deviceId, h.id)) out += choice(h, m)
-            }
-            out
-        } catch (cancelled: CancellationException) {
-            throw cancelled
-        } catch (e: CoreException) {
-            emptyList()
-        }
+        return fetchCatalog(
+            listHarnesses = { c.listHarnesses(deviceId) },
+            listModels = { h -> c.listModels(deviceId, h) },
+            fallbackHarnesses = ::fallbackHarnesses,
+            fallbackModels = ::fallbackModels,
+        )
     }
+}
+
+/**
+ * iOS `AppModel.models(for:)` (`AppModel.swift:854-863`): the host's
+ * providers (the built-in list when that read fails), and for each offered
+ * one its models (that provider's built-in models when its own read fails),
+ * so one failing provider never drops the others' fresh lists. Pure over
+ * its four calls, for the tests.
+ */
+internal suspend fun fetchCatalog(
+    listHarnesses: suspend () -> List<HarnessInfo>,
+    listModels: suspend (harness: String) -> List<ModelInfo>,
+    fallbackHarnesses: () -> List<HarnessInfo>,
+    fallbackModels: (harness: String) -> List<ModelInfo>,
+): List<ModelChoice> {
+    val harnesses = orFallback({ listHarnesses() }, fallbackHarnesses)
+    val out = ArrayList<ModelChoice>(harnesses.size * 4)
+    for (h in harnesses) {
+        if (!h.offered) continue
+        for (m in orFallback({ listModels(h.id) }) { fallbackModels(h.id) }) out += choice(h, m)
+    }
+    return out
+}
+
+/** Swift's `(try? await read()) ?? fallback()`, cancellation kept. */
+private suspend fun <T> orFallback(read: suspend () -> T, fallback: () -> T): T = try {
+    read()
+} catch (cancelled: CancellationException) {
+    throw cancelled
+} catch (e: CoreException) {
+    fallback()
 }
 
 /**

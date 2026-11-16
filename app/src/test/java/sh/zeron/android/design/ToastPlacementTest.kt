@@ -48,6 +48,16 @@ class ToastPlacementTest {
     }
 
     @Test
+    fun aHigherAboveControlLiftsTheAnchorALowerOneDoesNot() {
+        // iOS `above:` (Toast.swift:22-24): New Session's composer at 620
+        // over the hidden tab chrome at 734.
+        assertEquals(620f, toastAnchor(852f, 734f, aboveTop = 620f), 1e-4f)
+        assertEquals(620f, toastAnchor(852f, Float.NaN, aboveTop = 620f), 1e-4f)
+        assertEquals(734f, toastAnchor(852f, 734f, aboveTop = 800f), 1e-4f)
+        assertEquals(734f, toastAnchor(852f, 734f, aboveTop = Float.NaN), 1e-4f)
+    }
+
+    @Test
     fun maxWidthCapsAtWindowMinus48() {
         assertEquals(345f, toastMaxWidth(393f), 1e-4f)
     }

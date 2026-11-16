@@ -346,7 +346,7 @@ class SidebarToolbarTest {
         assertEquals(dp(60f), gear.right, 1f)
         assertEquals(dp(38f), gear.center.x, 1f)
 
-        val options = compose.onNodeWithTag("sidebar-options").pxBounds()
+        val options = compose.onNodeWithTag("sessions-options").pxBounds()
         assertEquals(dp(60f), options.left, 1f)
         assertEquals(dp(104f), options.right, 1f)
         assertEquals(dp(82f), options.center.x, 1f)
@@ -359,7 +359,7 @@ class SidebarToolbarTest {
 
         // All three are 44 × 44 and vertically centred in the row
         // (row 744 → 788, centre 766).
-        for (tag in listOf("sidebar-settings", "sidebar-options", "new-session")) {
+        for (tag in listOf("sidebar-settings", "sessions-options", "new-session")) {
             val b = compose.onNodeWithTag(tag).pxBounds()
             assertEquals("$tag width", dp(44f), b.width, 1f)
             assertEquals("$tag height", dp(44f), b.height, 1f)
@@ -377,7 +377,7 @@ class SidebarToolbarTest {
         assertEquals(dp(344f), gear.right, 1f)
         assertEquals(dp(322f), gear.center.x, 1f)
 
-        val options = compose.onNodeWithTag("sidebar-options").pxBounds()
+        val options = compose.onNodeWithTag("sessions-options").pxBounds()
         assertEquals(dp(256f), options.left, 1f)
         assertEquals(dp(300f), options.right, 1f)
         assertEquals(dp(278f), options.center.x, 1f)
@@ -415,7 +415,7 @@ class SidebarToolbarTest {
         gear.assert(hasContentDescription("Settings"))
         gear.assert(hasButtonRole())
 
-        val options = compose.onNodeWithTag("sidebar-options")
+        val options = compose.onNodeWithTag("sessions-options")
         options.assert(hasContentDescription("Options"))
         options.assert(hasButtonRole())
 
@@ -436,7 +436,7 @@ class SidebarToolbarTest {
     fun theEllipsisOpensTheOptionsMenuAnchoredToTheSlot() {
         mountToolbar()
 
-        compose.onNodeWithTag("sidebar-options").performClick()
+        compose.onNodeWithTag("sessions-options").performClick()
         compose.waitForIdle()
         compose.mainClock.advanceTimeBy(400) // the open spring
         compose.waitForIdle()
@@ -461,7 +461,7 @@ class SidebarToolbarTest {
         // window bottom − max(navigation bars, ime) − 12) — no insets in
         // Robolectric, so both are 788 dp.
         val panel = compose.onNodeWithTag("glass-menu").pxBounds()
-        val slot = compose.onNodeWithTag("sidebar-options").pxBounds()
+        val slot = compose.onNodeWithTag("sessions-options").pxBounds()
         assertEquals("the panel's left edge aligns to the slot", slot.left, panel.left, 1f)
         assertEquals(dp(788f), panel.bottom, 1f)
         assertEquals(dp(788f), slot.bottom, 1f)
@@ -480,7 +480,7 @@ class SidebarToolbarTest {
     fun theGroupByProjectCheckIsReadAtTapTimeAndFlipsBetweenOpens() {
         mountToolbar()
 
-        compose.onNodeWithTag("sidebar-options").performClick()
+        compose.onNodeWithTag("sessions-options").performClick()
         compose.waitForIdle()
         assertFalse("unchecked while the pref is off", selected("sessions-options-group-by-project"))
 
@@ -489,7 +489,7 @@ class SidebarToolbarTest {
         assertFalse(actions.calls.isEmpty())
 
         // Reopened: the check was rebuilt at tap time, so it shows on.
-        compose.onNodeWithTag("sidebar-options").performClick()
+        compose.onNodeWithTag("sessions-options").performClick()
         compose.waitForIdle()
         assertTrue("checked after the flip", selected("sessions-options-group-by-project"))
 
@@ -501,7 +501,7 @@ class SidebarToolbarTest {
     fun archivedPushesOntoTheSidebarStackAndHidesTheToolbarUntilPop() {
         mountToolbar()
 
-        compose.onNodeWithTag("sidebar-options").performClick()
+        compose.onNodeWithTag("sessions-options").performClick()
         compose.waitForIdle()
         pickRow("sessions-options-archived")
 
@@ -604,7 +604,7 @@ class SidebarToolbarTest {
                 optionsSource = source,
             )
         }
-        val sizeBefore = compose.onNodeWithTag("sidebar-options").fetchSemanticsNode().size
+        val sizeBefore = compose.onNodeWithTag("sessions-options").fetchSemanticsNode().size
 
         val press = PressInteraction.Press(Offset.Zero)
         source.tryEmit(press)
@@ -615,11 +615,11 @@ class SidebarToolbarTest {
         // in this ticket — and the measured size never changes.
         assertEquals(
             Glass.PressScale,
-            compose.onNodeWithTag("sidebar-options").fetchSemanticsNode()
+            compose.onNodeWithTag("sessions-options").fetchSemanticsNode()
                 .config[GlassPressModifierScaleKey],
             0.005f,
         )
-        assertEquals(sizeBefore, compose.onNodeWithTag("sidebar-options").fetchSemanticsNode().size)
+        assertEquals(sizeBefore, compose.onNodeWithTag("sessions-options").fetchSemanticsNode().size)
 
         // The capsule stays still: no interactive GlassSurface anywhere in
         // the toolbar (the group's surface is interactive = false), and the
@@ -636,7 +636,7 @@ class SidebarToolbarTest {
         compose.mainClock.advanceTimeBy(600) // release + the small overshoot
         assertEquals(
             1f,
-            compose.onNodeWithTag("sidebar-options").fetchSemanticsNode()
+            compose.onNodeWithTag("sessions-options").fetchSemanticsNode()
                 .config[GlassPressModifierScaleKey],
             0.005f,
         )
