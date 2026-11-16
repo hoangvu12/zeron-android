@@ -6,6 +6,7 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 import uniffi.zeron_core.ChatIndicator
 import uniffi.zeron_core.ComposerState
+import uniffi.zeron_core.TranscriptLoad
 import uniffi.zeron_core.Connectivity
 import uniffi.zeron_core.ConnectivityState
 import uniffi.zeron_core.HostCapabilities
@@ -105,6 +106,7 @@ class SessionChromeTest {
         turnRunning: Boolean = false,
         canInterrupt: Boolean = false,
     ): ComposerState = ComposerState(
+        transcriptLoad = TranscriptLoad.READY,
         chatId = "chat-a",
         revision = 1uL,
         title = "T",
@@ -180,5 +182,8 @@ class SessionChromeTest {
         sendState = null,
         parentChatId = parentChatId,
         roomGen = 2u,
+        sleepUntilMs = null,
+        wokeAtMs = null,
+        waitsOnProcess = false,
     )
 }

@@ -374,6 +374,9 @@ private object FolderPreviewFixtures {
         sendState = null,
         parentChatId = null,
         roomGen = 0u,
+        sleepUntilMs = null,
+        wokeAtMs = null,
+        waitsOnProcess = false,
     )
 
     private val veil = row("chat-veil", "Streaming veil on transcript rows")

@@ -293,6 +293,9 @@ private fun ffRow(
     sendState = null,
     parentChatId = null,
     roomGen = 0u,
+    sleepUntilMs = null,
+    wokeAtMs = null,
+    waitsOnProcess = false,
 )
 
 // ---------------------------------------------------------------------------
