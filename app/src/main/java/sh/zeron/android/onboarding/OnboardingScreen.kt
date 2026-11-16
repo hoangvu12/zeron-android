@@ -69,6 +69,7 @@ import sh.zeron.android.auth.SignInState
 import sh.zeron.android.core.Face
 import sh.zeron.android.design.CapsuleShape
 import sh.zeron.android.design.Icon
+import sh.zeron.android.design.LocalReduceMotion
 import sh.zeron.android.design.LocalTypeScale
 import sh.zeron.android.design.SymbolWeight
 import sh.zeron.android.design.WallpaperHero
@@ -151,10 +152,13 @@ private fun Onboarding(app: ZeronApplication, screen: OnboardingScreen) {
                 Spacer(Modifier.height(14.dp))
                 Progress(screen.step)
                 Spacer(Modifier.height(18.dp))
+                // iOS swaps the page instantly under Reduce Motion
+                // (OnboardingViewController `isReduceMotionEnabled` guard).
+                val reduceMotion = LocalReduceMotion.current
                 AnimatedContent(
                     targetState = screen.step,
                     transitionSpec = {
-                        if (initialState == targetState) {
+                        if (initialState == targetState || reduceMotion) {
                             EnterTransition.None togetherWith ExitTransition.None
                         } else {
                             (fadeIn(tween(PageMillis, easing = EaseOut)) +
