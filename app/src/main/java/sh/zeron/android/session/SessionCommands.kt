@@ -66,8 +66,9 @@ class CoreSessionCommands(
 ) : SessionCommands {
 
     override suspend fun send(text: String, images: List<StagedImage>, mode: DeliveryMode) = withContext(Dispatchers.IO) {
-        // iOS `CoreSessionSource.swift:172`.
-        if (mode == DeliveryMode.Interrupt && handle.composer().live.turnRunning) handle.interrupt()
+        // iOS `CoreSessionSource.swift:184`: `chrome.running`, i.e. only
+        // when a stop can reach the turn.
+        if (mode == DeliveryMode.Interrupt && handle.composer().live.let { it.turnRunning && it.canInterrupt }) handle.interrupt()
         handle.send(
             SendRequest(
                 text = text,

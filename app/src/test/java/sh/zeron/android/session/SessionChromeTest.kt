@@ -56,6 +56,15 @@ class SessionChromeTest {
     }
 
     @Test
+    fun runningNeedsATurnAStopCanReach() {
+        // iOS `CoreSessionSource.swift:101`: `turnRunning && canInterrupt`.
+        assertEquals(true, baseChrome(composer(turnRunning = true, canInterrupt = true), null).running)
+        assertEquals(false, baseChrome(composer(turnRunning = true, canInterrupt = false), null).running)
+        assertEquals(false, baseChrome(composer(turnRunning = false, canInterrupt = true), null).running)
+        assertEquals(false, baseChrome(composer(), null).running)
+    }
+
+    @Test
     fun bannerInputsReadTheComposerTheRowAndConnectivity() {
         val input = ChromeInput(
             chatId = "c",
@@ -93,6 +102,8 @@ class SessionChromeTest {
         hostName: String? = null,
         sendState: SendState? = null,
         room: RoomState = RoomState(connected = true, retryAtMs = null, degraded = false),
+        turnRunning: Boolean = false,
+        canInterrupt: Boolean = false,
     ): ComposerState = ComposerState(
         chatId = "chat-a",
         revision = 1uL,
@@ -114,10 +125,10 @@ class SessionChromeTest {
         ),
         live = LiveStatus(
             indicator = ChatIndicator.IDLE,
-            turnRunning = false,
+            turnRunning = turnRunning,
             workingSinceMs = null,
             streaming = false,
-            canInterrupt = false,
+            canInterrupt = canInterrupt,
         ),
         queue = emptyList(),
         pendingSends = emptyList(),

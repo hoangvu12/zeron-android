@@ -31,7 +31,7 @@ data class SessionChrome(
     val title: String = "",
     /** `"<project> @ <engine device>"`, or just the project (`CoreSessionSource.swift:45-46`). */
     val subtitle: String = "",
-    /** `composer.live.turnRunning`. */
+    /** `composer.live.turnRunning && composer.live.canInterrupt`. */
     val running: Boolean = false,
     /** `composer.host.capabilities.midTurnSteering ?: false`. */
     val canSteer: Boolean = false,
@@ -131,8 +131,9 @@ data class SessionChrome(
  *   `"<project> @ "`), else just the project. A Cloud chat's host is the
  *   row's device name ("Cloud"), not its machine's;
  * - `placeholder` = `"Message " + (row?.harnessLabel ?: "the agent")`;
- * - `running` / `canSteer` / `uploadProgress` / `error` straight from
- *   the composer state;
+ * - `running` = `turnRunning && canInterrupt` (Stop shows only when a
+ *   stop can land);
+ * - `canSteer` / `uploadProgress` / `error` straight from the composer state;
  * - `sideChatParent` = [parentTitle] for a side chat (#33).
  *
  * Pure; unit-tested against the ticket's worked-examples table.
@@ -143,7 +144,9 @@ internal fun baseChrome(c: ComposerState, row: SessionRow?, parentTitle: String?
     return SessionChrome(
         title = c.title,
         subtitle = hostName?.let { "$project @ $it" } ?: project,
-        running = c.live.turnRunning,
+        // A turn only counts as running while a stop can reach it
+        // (`CoreSessionSource.swift:101`): otherwise Stop would land on a later turn.
+        running = c.live.turnRunning && c.live.canInterrupt,
         canSteer = c.host.capabilities.midTurnSteering ?: false,
         placeholder = "Message ${row?.harnessLabel ?: "the agent"}",
         uploadProgress = c.transferProgress,
