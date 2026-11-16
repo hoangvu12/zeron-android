@@ -48,6 +48,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -617,6 +618,14 @@ fun GroupedRow(
     previewPressed: Boolean = false,
     /** #50: a leading view in the icon's 20 dp slot (a brand mark) instead of [icon]. */
     leading: (@Composable () -> Unit)? = null,
+    /**
+     * Out of reach for now (iOS `Row.disabled`, `MoreViewController.swift:19-20`):
+     * the title turns `tertiary`, the row reads as disabled and takes no
+     * tap. A switch accessory takes its own `enabled = false`.
+     */
+    disabled: Boolean = false,
+    /** The subtitle's colour; `Palette.secondary` by default. */
+    subtitleColor: Color? = null,
 ) {
     // The Value accessory caps at 50 % of the card's inner width, which is
     // only known from the row's incoming constraints: a BoxWithConstraints
@@ -638,11 +647,13 @@ fun GroupedRow(
                 accessories = accessories,
                 titleStyle = titleStyle,
                 testTag = testTag,
-                onClick = onClick,
-                onLongClick = onLongClick,
+                onClick = onClick.takeUnless { disabled },
+                onLongClick = onLongClick.takeUnless { disabled },
                 onLongClickLabel = onLongClickLabel,
                 previewPressed = previewPressed,
                 leading = leading,
+                disabled = disabled,
+                subtitleColor = subtitleColor,
             )
         }
     } else {
@@ -658,11 +669,13 @@ fun GroupedRow(
             accessories = accessories,
             titleStyle = titleStyle,
             testTag = testTag,
-            onClick = onClick,
-            onLongClick = onLongClick,
+            onClick = onClick.takeUnless { disabled },
+            onLongClick = onLongClick.takeUnless { disabled },
             onLongClickLabel = onLongClickLabel,
             previewPressed = previewPressed,
             leading = leading,
+            disabled = disabled,
+            subtitleColor = subtitleColor,
         )
     }
 }
@@ -685,12 +698,14 @@ private fun GroupedRowBody(
     onLongClickLabel: String?,
     previewPressed: Boolean,
     leading: (@Composable () -> Unit)? = null,
+    disabled: Boolean = false,
+    subtitleColor: Color? = null,
 ) {
     val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
     GroupedRowContainer(
         position = position,
-        modifier = modifier,
+        modifier = if (disabled) modifier.semantics { disabled() } else modifier,
         separatorStart = if (icon != null || leading != null) GroupedListTokens.TextStartWithIcon else GroupedListTokens.ContentStart,
         testTag = testTag,
         onClick = onClick,
@@ -716,10 +731,18 @@ private fun GroupedRowBody(
             BasicText(
                 title,
                 style = titleStyle
-                    ?: uiStyle(Face.SansMedium, ts.fixed(16f), if (destructive) palette.danger else palette.text),
+                    ?: uiStyle(
+                        Face.SansMedium,
+                        ts.fixed(16f),
+                        when {
+                            destructive -> palette.danger
+                            disabled -> palette.tertiary
+                            else -> palette.text
+                        },
+                    ),
             )
             if (subtitle != null) {
-                BasicText(subtitle, style = uiStyle(Face.Sans, ts.fixed(13f), palette.secondary))
+                BasicText(subtitle, style = uiStyle(Face.Sans, ts.fixed(13f), subtitleColor ?: palette.secondary))
             }
         }
         AccessoryGroup(accessories, maxValueWidth)
