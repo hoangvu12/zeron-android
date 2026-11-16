@@ -24,8 +24,15 @@ import sh.zeron.android.design.Haptic
  * project groups alike — in one phone-local set under the iOS key
  * `collapsedSections` (`SessionListController.swift:39, 202-207`). Never
  * pruned, so a fold survives its section or group reappearing.
+ *
+ * Activity's shelves ([ActivityList.Section.shelves]) are the exception
+ * (iOS `isCollapsed`/`setCollapsed`): folded **until opened**, the opened
+ * ones kept apart in [openShelves] (`activity.openShelves`).
  */
-data class Fold(val local: Set<String> = emptySet())
+data class Fold(
+    val local: Set<String> = emptySet(),
+    val openShelves: Set<String> = emptySet(),
+)
 
 /**
  * The one fold-state owner per process (iOS loads `collapsed` per list
@@ -53,13 +60,29 @@ class FoldState(
 
     private val loaded = CompletableDeferred<Unit>()
 
+    /** A launch reset ([resetForLaunch]) before the load lands wins over the disk. */
+    @Volatile
+    private var reset = false
+
+    /** A shelves-only launch reset before the load lands: the stored folds stay, the opened shelves don't. */
+    @Volatile
+    private var resetShelves = false
+
     init {
         scope.launch(serial) {
             val preferences = store.data.catch { emit(emptyPreferences()) }.first()
-            val stored = preferences[PrefKeys.COLLAPSED_SECTIONS] ?: emptySet()
-            // A tap before the load lands is kept: it flipped against an
-            // empty set, so apply it on top of the stored one.
-            _state.update { fold -> Fold(stored.toMutableSet().apply { flipAll(fold.local) }) }
+            if (!reset) {
+                val stored = preferences[PrefKeys.COLLAPSED_SECTIONS] ?: emptySet()
+                val open = if (resetShelves) emptySet() else preferences[PrefKeys.ACTIVITY_OPEN_SHELVES] ?: emptySet()
+                // A tap before the load lands is kept: it flipped against an
+                // empty set, so apply it on top of the stored one.
+                _state.update { fold ->
+                    Fold(
+                        stored.toMutableSet().apply { flipAll(fold.local) },
+                        open.toMutableSet().apply { flipAll(fold.openShelves) },
+                    )
+                }
+            }
             if (preferences.contains(PrefKeys.SECTION_FOLD_OVERRIDES)) {
                 // Roboco/#10's synced-fold overrides: obsolete now.
                 store.edit { it.remove(PrefKeys.SECTION_FOLD_OVERRIDES) }
@@ -76,31 +99,73 @@ class FoldState(
     /** Whether [id] is folded right now. */
     fun isCollapsed(id: String): Boolean = isCollapsedIn(state.value, id)
 
-    /** Whether [id] is folded in [fold] — pure, so the model's rebuild is race-free. */
-    fun isCollapsedIn(fold: Fold, id: String): Boolean = id in fold.local
+    /**
+     * Whether [id] is folded in [fold] — pure, so the model's rebuild is
+     * race-free: as the person left it, Activity's shelves folded until
+     * opened.
+     */
+    fun isCollapsedIn(fold: Fold, id: String): Boolean =
+        if (id in ActivityList.Section.shelves) id !in fold.openShelves else id in fold.local
 
     /** A header tap (`SessionListController.toggleSection`): flip, persist, haptic. */
     fun toggle(id: String, feedback: Feedback) {
-        _state.update { fold -> Fold(if (id in fold.local) fold.local - id else fold.local + id) }
-        persist()
+        setCollapsed(id, !isCollapsed(id))
         feedback.haptic(Haptic.Select)
     }
 
     /**
      * Opens [id] if folded — a drop into a folded section (iOS
-     * `performDropWith` removes it from `collapsed` and persists; the
-     * drop's own haptic is the only one).
+     * `performDropWith` opens it and persists; the drop's own haptic is
+     * the only one).
      */
     fun expand(id: String) {
-        if (id !in _state.value.local) return
-        _state.update { fold -> Fold(fold.local - id) }
+        if (isCollapsed(id)) setCollapsed(id, false)
+    }
+
+    /**
+     * Folds every still-open id of [ids] with one selection haptic — the
+     * ⋯ menu's Collapse All while Activity is on.
+     */
+    fun foldAll(ids: List<String>, feedback: Feedback) {
+        for (id in ids) if (!isCollapsed(id)) setCollapsed(id, true)
+        feedback.haptic(Haptic.Select)
+    }
+
+    /** iOS `setCollapsed`: shelves in [Fold.openShelves], the rest in [Fold.local]. */
+    fun setCollapsed(id: String, folded: Boolean) {
+        _state.update { fold ->
+            if (id in ActivityList.Section.shelves) {
+                fold.copy(openShelves = if (folded) fold.openShelves - id else fold.openShelves + id)
+            } else {
+                fold.copy(local = if (folded) fold.local + id else fold.local - id)
+            }
+        }
+        persist()
+    }
+
+    /**
+     * The demo's launch (iOS `AppModel.init` with `-demo`): the shelves
+     * folded again; and, when the launch says how Activity starts
+     * (`-activity`, [collapsed]), nothing else folded either.
+     */
+    fun resetForLaunch(collapsed: Boolean = true) {
+        if (collapsed) {
+            reset = true
+            _state.value = Fold()
+        } else {
+            resetShelves = true
+            _state.update { it.copy(openShelves = emptySet()) }
+        }
         persist()
     }
 
     private fun persist() {
         scope.launch(serial) {
             loaded.await()
-            store.edit { preferences -> preferences[PrefKeys.COLLAPSED_SECTIONS] = _state.value.local }
+            store.edit { preferences ->
+                preferences[PrefKeys.COLLAPSED_SECTIONS] = _state.value.local
+                preferences[PrefKeys.ACTIVITY_OPEN_SHELVES] = _state.value.openShelves
+            }
         }
     }
 

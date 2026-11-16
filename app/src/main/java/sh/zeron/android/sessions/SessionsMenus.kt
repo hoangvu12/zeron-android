@@ -11,6 +11,9 @@ import sh.zeron.android.design.ZeronIcons
 import sh.zeron.android.design.glass.Menu
 import sh.zeron.android.design.glass.MenuIcon
 import sh.zeron.android.design.glass.MenuItem
+import sh.zeron.android.design.glass.MenuSection
+import sh.zeron.android.settings.ActivitySettingsRoute
+import sh.zeron.android.shell.LocalAppRouter
 import sh.zeron.android.shell.NavStack
 import sh.zeron.android.shell.LocalNavStack
 
@@ -80,6 +83,21 @@ interface SessionsScreenActions {
      * group, an unknown id) — the iOS `guard let folder = …` rule.
      */
     fun userSectionName(id: String): String?
+
+    /**
+     * Activity is on (iOS `app.activityOn`), read at menu-open and drop
+     * time. A getter: every access reads the live value.
+     */
+    val activityOn: Boolean get() = false
+
+    /** ⋯ "Activity": turns the view on or off (iOS `app.activityOn.toggle()`). */
+    fun toggleActivity() {}
+
+    /** ⋯ "Activity Settings…": phone push, a card over the sidebar on a tablet. */
+    fun openActivitySettings() {}
+
+    /** "Show N more" at the foot of Activity's Archived. */
+    fun showMore(sectionId: String) {}
 }
 
 /**
@@ -97,9 +115,29 @@ interface SessionsScreenActions {
  */
 fun sessionsOptionsMenu(actions: SessionsScreenActions): Menu = Menu(
     children = listOf(
+        // iOS 1.0.2: Activity, and the way to its settings, first, inline.
+        // What Activity stands aside from (sections, grouping) is out of
+        // reach while it's on.
+        MenuSection(
+            inline = true,
+            children = listOf(
+                MenuItem(
+                    title = "Activity",
+                    icon = MenuIcon.Symbol(ZeronIcons.TrayFull),
+                    checked = actions.activityOn,
+                    testTag = "sessions-options-activity",
+                ) { actions.toggleActivity() },
+                MenuItem(
+                    title = "Activity Settings\u2026",
+                    icon = MenuIcon.Symbol(ZeronIcons.Gearshape),
+                    testTag = "sessions-options-activity-settings",
+                ) { actions.openActivitySettings() },
+            ),
+        ),
         MenuItem(
             title = "New Section\u2026",
             icon = MenuIcon.Symbol(ZeronIcons.FolderBadgePlus),
+            disabled = actions.activityOn,
             testTag = "sessions-options-new-section",
         ) { actions.newSection() },
         MenuItem(
@@ -144,6 +182,8 @@ private fun groupingItem(
     title = title,
     icon = MenuIcon.Symbol(icon),
     checked = actions.grouping == mode,
+    // Activity keeps one list of its own: grouping stands aside.
+    disabled = actions.activityOn,
     testTag = testTag,
 ) { actions.setGrouping(if (actions.grouping == mode) SessionGrouping.None else mode) }
 
@@ -164,7 +204,8 @@ private fun groupingItem(
  *   page's ⋯ asks first, 45).
  */
 internal fun sessionHeaderMenu(id: String, actions: SessionsScreenActions): Menu? {
-    if (id == FrontPageSections.RECENT) return null
+    // Activity's list and shelves have none (iOS `id.hasPrefix("activity")`).
+    if (id == FrontPageSections.RECENT || id.startsWith(ActivityList.Section.LIST)) return null
     if (id == FrontPageSections.PINNED) {
         return Menu(
             children = listOf(
@@ -226,7 +267,8 @@ internal fun rememberSessionsActions(navStack: NavStack): SessionsScreenActions 
     val prompts = rememberSessionPrompts()
     val rowActions = LocalRowActions.current
     val feedback = LocalFeedback.current
-    return remember(navStack, frontPage, prefs, feed, prompts, rowActions, feedback) {
+    val router = LocalAppRouter.current
+    return remember(navStack, frontPage, prefs, feed, prompts, rowActions, feedback, router) {
         object : SessionsScreenActions {
             override val grouping: SessionGrouping
                 get() = prefs.grouping.value
@@ -260,6 +302,18 @@ internal fun rememberSessionsActions(navStack: NavStack): SessionsScreenActions 
 
             override fun userSectionName(id: String): String? =
                 feed.snapshot.value?.front?.sections?.firstOrNull { it.id == id }?.name
+
+            override val activityOn: Boolean
+                get() = prefs.activity.value.on
+
+            override fun toggleActivity() = prefs.toggleActivity()
+
+            // iPhone: pushed over the list, the bar stepping aside; iPad:
+            // over the sidebar with Done (here the Settings card, the
+            // Activity page on top) — the router's page push does both.
+            override fun openActivitySettings() = router.showDebugPages(listOf(ActivitySettingsRoute))
+
+            override fun showMore(sectionId: String) = frontPage.showMore(sectionId)
         }
     }
 }

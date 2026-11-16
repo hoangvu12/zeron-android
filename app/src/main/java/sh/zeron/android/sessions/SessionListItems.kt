@@ -89,6 +89,16 @@ sealed interface SessionListItem {
         override val key: String = "s:${vm.id}"
         override val contentType: String = "session"
     }
+
+    /**
+     * "Show N more" at a section's foot (iOS `Item.more`, Activity's
+     * Archived): [count] rows not shown yet.
+     */
+    @Immutable
+    data class More(val sectionId: String, val count: Int) : SessionListItem {
+        override val key: String = "m:$sectionId"
+        override val contentType: String = "more"
+    }
 }
 
 /**
@@ -132,7 +142,7 @@ fun buildSessionListItems(
     val headersSeen = HashSet<String>()
     val foldersSeen = HashSet<String>()
     for (s in sections) {
-        val vms = s.rows.map(toVm)
+        val vms = s.vms?.takeIf { it.size == s.rows.size } ?: s.rows.map(toVm)
         val title = s.header
         if (title != null) {
             if (!headersSeen.add(s.id)) {
@@ -162,6 +172,7 @@ fun buildSessionListItems(
         s.rows.forEachIndexed { i, r ->
             if (sessionsSeen.add(r.id)) out += SessionListItem.Session(s.id, r, vms[i])
         }
+        if (s.more > 0) out += SessionListItem.More(s.id, s.more)
     }
     return out
 }

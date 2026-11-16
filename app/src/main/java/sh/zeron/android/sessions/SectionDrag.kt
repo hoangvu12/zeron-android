@@ -53,7 +53,7 @@ fun dragEntries(items: List<SessionListItem>): List<DragEntry> = items.mapNotNul
         is SessionListItem.Header -> DragEntry(item.key, item.state.id, isHeader = true)
         is SessionListItem.PlainHeader -> DragEntry(item.key, item.sectionId, isHeader = true)
         is SessionListItem.Session -> DragEntry(item.key, item.sectionId, isHeader = false)
-        is SessionListItem.Folder -> null
+        is SessionListItem.Folder, is SessionListItem.More -> null
     }
 }
 
@@ -310,7 +310,14 @@ class SectionDragHookup(
  * `SessionsViewController.dropTarget`): Pinned, Recent or a user section;
  * a project group or anything else takes no sessions.
  */
-internal fun frontDropTarget(sectionId: String, actions: SessionsScreenActions): SessionDropTarget? = when (sectionId) {
+internal fun frontDropTarget(sectionId: String, actions: SessionsScreenActions): SessionDropTarget? = when {
+    // Activity orders itself: only Pinned is a place a session is put
+    // (iOS `dropTarget`, `SessionListController.swift:709-714`).
+    actions.activityOn -> if (sectionId == FrontPageSections.PINNED) SessionDropTarget.Pinned else null
+    else -> classicDropTarget(sectionId, actions)
+}
+
+private fun classicDropTarget(sectionId: String, actions: SessionsScreenActions): SessionDropTarget? = when (sectionId) {
     FrontPageSections.PINNED -> SessionDropTarget.Pinned
     FrontPageSections.RECENT -> SessionDropTarget.Recent
     else -> if (actions.userSectionName(sectionId) != null) SessionDropTarget.Section(sectionId) else null
