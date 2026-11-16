@@ -34,6 +34,7 @@ import sh.zeron.android.composer.sessionDraftSaver
 import sh.zeron.android.design.Haptic
 import sh.zeron.android.design.LocalFeedback
 import sh.zeron.android.design.LocalToaster
+import sh.zeron.android.sessions.LocalSessionListOpener
 import sh.zeron.android.sessions.rememberSessionListOpener
 import sh.zeron.android.sidechats.FreshSideChats
 import sh.zeron.android.sidechats.SideChatCopy
@@ -42,7 +43,6 @@ import sh.zeron.android.companions.CompanionsButton
 import sh.zeron.android.companions.CompanionSection
 import sh.zeron.android.shell.LocalCompanionsPresenter
 import sh.zeron.android.shell.LocalRouterHooks
-import sh.zeron.android.shell.OPEN_ERROR_TOAST
 import sh.zeron.android.shell.openSessionRoute
 import sh.zeron.android.sidechats.SubagentCopy
 import sh.zeron.android.sidechats.buildSubagentRoute
@@ -352,14 +352,22 @@ class SessionScreenRoute internal constructor(
         // panel; anywhere else a side chat is pushed and the panel is a sheet.
         val presenter = LocalCompanionsPresenter.current
         val hooks = LocalRouterHooks.current
+        val listOpener = LocalSessionListOpener.current
+        // iOS `openSideChat` (SVC:337-344): a side chat that can't be opened
+        // says so in place ("Couldn't open the side chat"); it never falls
+        // back to the router's "Couldn't open session" and its pop to root.
         val openSideChat: (String) -> Unit = { id ->
             val companions = presenter
-            if (companions == null) {
-                openChat(id)
-            } else {
-                app?.appScope?.launch {
+            when {
+                companions == null && listOpener != null -> openChat(id)
+                else -> app?.appScope?.launch {
                     val route = hooks.openSessionRoute(id)
-                    if (route == null) toaster.show(OPEN_ERROR_TOAST) else companions.show(route as NavRoute, controller.chatId)
+                    when {
+                        route == null -> toaster.show(SideChatCopy.OpenFailed)
+                        companions != null -> companions.show(route as NavRoute, controller.chatId)
+                        isTopAndIdle() -> stack.push(route as NavRoute, animated = true)
+                        else -> route.discard()
+                    }
                 }
             }
         }
@@ -475,7 +483,7 @@ class SessionScreenRoute internal constructor(
                 // iOS `perform(.fork)`: the `.success` notification.
                 feedback.haptic(Haptic.Success)
                 sideChatsModel?.invalidate()
-                sheet.closeThen { if (isTopAndIdle()) openChat(forkId) }
+                sheet.closeThen { if (isTopAndIdle()) openSideChat(forkId) }
             }
         }
         val chatTitle = controller.chrome.collectAsState().value.title
@@ -485,7 +493,8 @@ class SessionScreenRoute internal constructor(
                 chatTitle = chatTitle,
                 ui = sideUi,
                 forking = fork?.forking == true,
-                onOpenChat = openChat,
+                // iOS `hub.openSideChat` → `openSideChat` (SVC:366-369).
+                onOpenChat = openSideChat,
                 onOpenAgent = { agent -> agent.docId?.let { openSubagent(it, agent.title, !agent.running) } },
                 onNewSideChat = { newSideChat(true) },
                 onFork = panelFork,

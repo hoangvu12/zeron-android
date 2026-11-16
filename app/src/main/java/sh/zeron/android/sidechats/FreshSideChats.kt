@@ -37,6 +37,9 @@ class CoreSideChatCore(private val client: CoreClient) : SideChatCore {
 /** The copy (iOS `CompanionsViewController.perform`, `openSideChat`). */
 object SideChatCopy {
     const val StartFailed = "Couldn't start a side chat"
+
+    /** iOS `openSideChat` (`SessionViewController.swift:339`). */
+    const val OpenFailed = "Couldn't open the side chat"
 }
 
 /**

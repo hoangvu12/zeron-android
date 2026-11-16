@@ -36,7 +36,6 @@ import sh.zeron.android.shell.LocalNavEntry
 import sh.zeron.android.shell.LocalNavStack
 import sh.zeron.android.shell.LocalRouterHooks
 import sh.zeron.android.shell.NavRoute
-import sh.zeron.android.shell.OPEN_ERROR_TOAST
 import sh.zeron.android.shell.openSessionRoute
 import sh.zeron.android.sidechats.SideChatCopy
 import sh.zeron.android.sidechats.SideChatFork
@@ -156,7 +155,7 @@ private fun CompanionsInspectorScreen(route: CompanionsInspectorRoute) {
         scope.launch {
             val session = hooks.openSessionRoute(id)
             when {
-                session == null -> toaster.show(OPEN_ERROR_TOAST)
+                session == null -> toaster.show(SideChatCopy.OpenFailed)
                 !isTop() -> session.discard()
                 else -> nav.push(session as NavRoute, animated = true)
             }
