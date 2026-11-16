@@ -287,7 +287,12 @@ class SessionScreenRoute internal constructor(
         val commands: SessionCommands? = remember(entry) {
             (core as? CoreSessionCore)?.let { c ->
                 entry.retain(CommandsKey) {
-                    CoreSessionCommands(c.client, c.handle, c.chatId) { controller.hostDeviceId }
+                    CoreSessionCommands(
+                        c.client,
+                        c.handle,
+                        c.chatId,
+                        onAccepted = { freshSideChats?.forget(c.chatId) },
+                    ) { controller.hostDeviceId }
                 }
             }
         }
