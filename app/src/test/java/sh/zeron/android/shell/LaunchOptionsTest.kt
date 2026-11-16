@@ -170,6 +170,19 @@ class LaunchOptionsTest {
     }
 
     @Test
+    fun noRelayLayerTakesEitherBooleanFormAndRebuildsTheClient() {
+        assertTrue(LaunchOptions.parse(mapOf("no-relay-layer" to true), debuggable = true).noRelayLayer)
+        assertTrue(LaunchOptions.parse(mapOf("no-relay-layer" to "true"), debuggable = true).noRelayLayer)
+        assertFalse(LaunchOptions.parse(emptyMap(), debuggable = true).noRelayLayer)
+        // The client is built at boot with the layer on: the launch rebuilds it.
+        assertTrue(LaunchOptions.parse(mapOf("no-relay-layer" to true), debuggable = true).touchesAccount)
+        // It never picks another account.
+        assertNull(LaunchOptions(noRelayLayer = true).launchCredentials(hasStored = true))
+        // Debug builds only.
+        assertFalse(LaunchOptions.parse(mapOf("no-relay-layer" to true), debuggable = false).noRelayLayer)
+    }
+
+    @Test
     fun voicePreviewAndItsStage() {
         val preview = LaunchOptions.parse(mapOf("voice-preview" to true), debuggable = true)
         assertTrue(preview.voicePreview)

@@ -45,8 +45,9 @@ internal var launchOptionsLog: (String) -> Unit = { message ->
  *   endpoint overrides (`Endpoints`). `remote-voice` (#60) offers voice
  *   before any host advertises it; `voice-preview` plays a scripted call
  *   (`voice-stage` also shows its stage, G31). `terminal` / `terminal-demo` open the
- *   first session's terminal (#44). Booleans take `--ez x true` or
- *   `--es x true`.
+ *   first session's terminal (#44). `no-relay-layer` builds the client
+ *   without the relay layer (docs/design/relay-mobile.md). Booleans take
+ *   `--ez x true` or `--es x true`.
  *
  * Wrong types (an `Int` where a `String` is expected) read as absent;
  * blank strings read as null.
@@ -87,11 +88,18 @@ data class LaunchOptions(
      */
     val terminal: Boolean = false,
     val terminalDemo: Boolean = false,
+    /**
+     * iOS `-no-relay-layer`, upstream Android `no-relay-layer`: the client
+     * is built with `relayLayer = false`, as a build without the relay
+     * layer is — an old phone in an account of new devices. Rebuilds a
+     * client the stored account already booted.
+     */
+    val noRelayLayer: Boolean = false,
 ) {
 
-    /** Any extra that changes which account (or edge) this launch runs. */
+    /** Any extra that changes which account (or edge, or client config) this launch runs. */
     val touchesAccount: Boolean
-        get() = signedOut || dev != null || demo || route || edge != null || workos != null
+        get() = signedOut || dev != null || demo || route || edge != null || workos != null || noRelayLayer
 
     /**
      * The account this launch starts instead of the stored one, iOS
@@ -193,6 +201,7 @@ data class LaunchOptions(
                 voiceStage = flag("voice-preview") && flag("voice-stage"),
                 terminal = flag("terminal") || flag("terminal-demo"),
                 terminalDemo = flag("terminal-demo"),
+                noRelayLayer = flag("no-relay-layer"),
             )
         }
 

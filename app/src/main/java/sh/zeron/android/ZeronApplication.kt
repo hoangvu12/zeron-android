@@ -819,6 +819,8 @@ class ZeronApplication : Application() {
                 val edgeChanged = Endpoints.applyLaunch(options.edge, options.workos)
                 sessionHolder.relaunch(
                     clearStored = options.signedOut || edgeChanged,
+                    // no-relay-layer: the booted client was built with the layer on.
+                    restart = options.noRelayLayer,
                     choose = options::launchCredentials,
                 )
             } finally {
