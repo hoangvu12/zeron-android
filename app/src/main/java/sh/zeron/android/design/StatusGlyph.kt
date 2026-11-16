@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -46,6 +47,13 @@ sealed interface StatusGlyphKind {
 
     /** The stroked tick (`check.svg` on a 16 grid) in the caller's colour (never animates). */
     data class Check(val color: Color) : StatusGlyphKind
+
+    /**
+     * A symbol at the glyph's size (iOS `.symbol(name, color)`, Activity's
+     * woke `alarm`): 11 pt semibold, centred in the box grown by 2 dp on
+     * every side (`bounds.insetBy(dx: -2, dy: -2)`). Never animates.
+     */
+    data class Symbol(val icon: ZeronIcon, val color: Color) : StatusGlyphKind
 }
 
 /** `glyphTints` row 0/1/2, light (`StatusGlyph.swift:54-59`). Private on iOS; ticket 01 leaves them here. */
@@ -237,6 +245,19 @@ object StatusGlyphMath {
  */
 @Composable
 fun StatusGlyph(kind: StatusGlyphKind, modifier: Modifier = Modifier, scale: Float = 1f) {
+    if (kind is StatusGlyphKind.Symbol) {
+        // The symbol's frame overhangs the 12-dp box by 2 dp on each side,
+        // unclipped; layout keeps the box's own size.
+        Box(modifier.size(12.dp * scale), contentAlignment = Alignment.Center) {
+            Box(
+                Modifier.requiredSize(16.dp * scale),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(kind.icon, kind.color, 11f * scale, SymbolWeight.Semibold)
+            }
+        }
+        return
+    }
     val reduce = LocalReduceMotion.current
     val dark = LocalIsDark.current
     val animated = !reduce && (kind == StatusGlyphKind.Spinner || kind == StatusGlyphKind.Trailer)
@@ -329,6 +350,9 @@ fun StatusGlyph(kind: StatusGlyphKind, modifier: Modifier = Modifier, scale: Flo
                         )
                         onDrawBehind { drawPath(path, color, style = stroke) }
                     }
+
+                    // Drawn by the early return above.
+                    is StatusGlyphKind.Symbol -> onDrawBehind { }
                 }
             },
     )
