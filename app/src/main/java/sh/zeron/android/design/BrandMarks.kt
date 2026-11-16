@@ -34,7 +34,7 @@ import kotlin.math.min
  * (`crates/ui/assets/icons/<name>-mark.svg`), parsed once with androidx's
  * [PathParser] after [SvgPathTokens.normalize] splits packed arc flags, and
  * drawn as a tinted glyph — Claude Code and `mock` keep the desktop's Claude
- * orange, every other mark takes the caller's tint.
+ * orange and Muse its blue; every other mark takes the caller's tint.
  */
 enum class BrandMark(
     /** `crates/ui/assets/icons/<svgName>-mark.svg` (tests use it). */
@@ -53,7 +53,8 @@ enum class BrandMark(
     HERMES("hermes", 24f, 24f, true, HERMES_PATH_DATA),
     PI("pi", 800f, 800f, true, PI_PATH_DATA),
     OPENCODE("opencode", 24f, 30f, true, OPENCODE_PATH_DATA),
-    ANTIGRAVITY("antigravity", 24f, 24f, true, ANTIGRAVITY_PATH_DATA);
+    ANTIGRAVITY("antigravity", 24f, 24f, true, ANTIGRAVITY_PATH_DATA),
+    MUSE("muse", 287.56f, 191f, false, MUSE_PATH_DATA);
 
     /**
      * Parsed once (thread-safe lazy) and never mutated afterwards: shared by
@@ -79,12 +80,17 @@ enum class BrandMark(
             "pi" -> PI
             "opencode" -> OPENCODE
             "antigravity" -> ANTIGRAVITY
+            "muse" -> MUSE
             else -> CLAUDE   // claude-code + mock share the mark, like the desktop
         }
+
+        /** Muse's (Meta's) brand blue, `ios:Design/BrandMarks.swift:85`. */
+        val MUSE_BLUE = Color(0xFF0081FB)
 
         /** The mark's own colour, or null when it takes the caller's tint. */
         fun brandTint(harness: String): Color? = when (harness) {
             "claude-code", "mock" -> CLAUDE_ORANGE
+            "muse" -> MUSE_BLUE
             else -> null
         }
     }

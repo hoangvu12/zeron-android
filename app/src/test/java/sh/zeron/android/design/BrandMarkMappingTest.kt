@@ -41,6 +41,8 @@ class BrandMarkMappingTest {
         assertRow("pi", BrandMark.PI, null)
         assertRow("opencode", BrandMark.OPENCODE, null)
         assertRow("antigravity", BrandMark.ANTIGRAVITY, null)
+        // iOS BrandMarks.swift:76, 85: Meta's mark in its own blue.
+        assertRow("muse", BrandMark.MUSE, Color(0xFF0081FB))
     }
 
     @Test
