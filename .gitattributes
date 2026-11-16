@@ -1,0 +1,3 @@
+# Applied with git apply / run with bash on any checkout: keep LF.
+core-patches/*.patch -text
+*.sh text eol=lf
