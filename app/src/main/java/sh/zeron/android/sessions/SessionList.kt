@@ -306,6 +306,7 @@ fun LazyListScope.sessionListItems(
     headerWrapper: SectionHeaderWrapper = PassThroughHeaderWrapper,
     reorder: SessionListReorder? = null,
     sectionDrag: SectionDragHookup? = null,
+    onShowMore: (sectionId: String) -> Unit = {},
 ) {
     // 47: while a drag (or its commit) is in flight the local order — not
     // the model — positions the session items; the read is in the content
@@ -351,6 +352,12 @@ fun LazyListScope.sessionListItems(
             is SessionListItem.PlainHeader -> item(key = entry.key, contentType = entry.contentType) {
                 Box(itemAnimation(model.animate).fillMaxWidth().height(PlainHeaderHeight)) {
                     PlainSectionHeader(entry.title)
+                }
+            }
+
+            is SessionListItem.More -> item(key = entry.key, contentType = entry.contentType) {
+                Box(itemAnimation(model.animate).fillMaxWidth()) {
+                    ShowMoreRow(entry) { onShowMore(entry.sectionId) }
                 }
             }
 
@@ -743,6 +750,29 @@ private fun sessionItemsInOrder(
     val queue = ArrayDeque<SessionListItem.Session>(ordered)
     return items.map { item ->
         if (item is SessionListItem.Session) queue.removeFirst() else item
+    }
+}
+
+/**
+ * "Show N more" (iOS `moreReg`, `SessionListController.swift:95-107`): 14
+ * medium scaled in `secondary`, 10/20 margins, clear background, a button,
+ * `more-<id>`. Tapping it shows the next few.
+ */
+@Composable
+private fun ShowMoreRow(entry: SessionListItem.More, onClick: () -> Unit) {
+    val ts = LocalTypeScale.current
+    val palette = ZeronTheme.palette
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .clickable(role = Role.Button, onClick = onClick)
+            .semantics { testTag = "more-${entry.sectionId}" }
+            .padding(horizontal = 20.dp, vertical = 10.dp),
+    ) {
+        BasicText(
+            "Show ${entry.count} more",
+            style = uiStyle(Face.SansMedium, ts.scaled(14f), palette.secondary),
+        )
     }
 }
 

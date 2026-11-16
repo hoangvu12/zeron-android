@@ -98,6 +98,8 @@ fun ZeronAppContent(app: ZeronApplication, rootState: AppRootState) {
                         val voiceStage = remember { VoiceStagePresenter() }
                         CompositionLocalProvider(
                             LocalRowActions provides app.rowActions,
+                            // iOS 1.0.2: the row gestures follow Activity.
+                            sh.zeron.android.sessions.LocalActivityOn provides app.prefs.activityOn,
                             LocalVoiceController provides app.voice,
                             LocalVoiceStage provides voiceStage,
                         ) {

@@ -3,6 +3,7 @@ package sh.zeron.android.sessions
 import androidx.compose.ui.graphics.Color
 import sh.zeron.android.design.Palette
 import sh.zeron.android.design.StatusGlyphKind
+import sh.zeron.android.design.ZeronIcons
 
 /**
  * What the title line's right corner shows — the discriminant of
@@ -18,6 +19,9 @@ enum class RowCorner(val word: String) {
     Input("Input"),
     Failed("Failed"),
     Done("Done"),
+
+    /** Activity's woken chat, not looked at since (SessionCell.swift:116). */
+    Woke("Woke"),
 }
 
 /**
@@ -34,6 +38,7 @@ fun corner(vm: SessionRowVM): RowCorner? {
         SessionRowVM.Status.Errored -> RowCorner.Failed
         SessionRowVM.Status.Completed -> if (vm.unseen) RowCorner.Done else null
         SessionRowVM.Status.Idle -> null
+        SessionRowVM.Status.Woke -> RowCorner.Woke
     }
 }
 
@@ -44,6 +49,7 @@ fun RowCorner.color(p: Palette): Color = when (this) {
     RowCorner.Input -> p.status.input
     RowCorner.Failed -> p.status.failed
     RowCorner.Done -> p.status.done
+    RowCorner.Woke -> p.status.input
 }
 
 /**
@@ -57,4 +63,5 @@ fun RowCorner.glyph(p: Palette): StatusGlyphKind = when (this) {
     RowCorner.Input -> StatusGlyphKind.Dot(p.status.input)
     RowCorner.Failed -> StatusGlyphKind.Dot(p.status.failed)
     RowCorner.Done -> StatusGlyphKind.Check(p.status.done)
+    RowCorner.Woke -> StatusGlyphKind.Symbol(ZeronIcons.Alarm, p.status.input)
 }

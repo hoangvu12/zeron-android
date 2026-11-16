@@ -56,8 +56,18 @@ import sh.zeron.android.shell.NavStack
  * [settingsTag] of these: `settings-groupByProject`, `settings-archived`.
  */
 enum class SessionsSettingsRow(val id: String) {
+    /** iOS 1.0.2: "Activity", pushing Settings → Activity. */
+    Activity("activity"),
     GroupByProject("groupByProject"),
     Archived("archived"),
+}
+
+/** The Activity rows' copy, verbatim from iOS (`MoreViewController.swift:247-249`). */
+object SessionsActivityCopy {
+    const val Title = "Activity"
+    const val On = "On — the chats that need you, in one list"
+    const val Off = "Off"
+    const val GroupingAside = "Not while Activity is on"
 }
 
 /**
@@ -128,6 +138,10 @@ fun LazyListScope.sessionsSettingsSection(
     groupByProject: () -> Boolean,
     onGroupByProjectChange: (Boolean) -> Unit,
     onOpenArchived: () -> Unit,
+    /** Activity is on (iOS `app.activityOn`), read inside the rows like [groupByProject]. */
+    activityOn: () -> Boolean = { false },
+    /** The Activity row's tap: push Settings → Activity. */
+    onOpenActivity: () -> Unit = {},
 ) {
     groupedSection(
         key = "sessions",
@@ -142,6 +156,8 @@ fun LazyListScope.sessionsSettingsSection(
             groupByProject = groupByProject(),
             onGroupByProjectChange = onGroupByProjectChange,
             onOpenArchived = onOpenArchived,
+            activityOn = activityOn(),
+            onOpenActivity = onOpenActivity,
         )
     }
 }
@@ -166,11 +182,24 @@ fun SessionsSettingsRowContent(
     onGroupByProjectChange: (Boolean) -> Unit,
     onOpenArchived: () -> Unit,
     previewPressed: Boolean = false,
+    activityOn: Boolean = false,
+    onOpenActivity: () -> Unit = {},
 ) {
     when (row) {
+        SessionsSettingsRow.Activity -> GroupedRow(
+            title = SessionsActivityCopy.Title,
+            subtitle = if (activityOn) SessionsActivityCopy.On else SessionsActivityCopy.Off,
+            icon = ZeronIcons.TrayFull,
+            position = position,
+            accessories = listOf(GroupedAccessory.Disclosure),
+            testTag = settingsTag(row.id),
+            onClick = onOpenActivity,
+        )
+
+        // (Activity keeps one list of its own: grouping stands aside.)
         SessionsSettingsRow.GroupByProject -> GroupedRow(
             title = strings.groupByProject,
-            subtitle = strings.groupByProjectSubtitle,
+            subtitle = if (activityOn) SessionsActivityCopy.GroupingAside else strings.groupByProjectSubtitle,
             icon = ZeronIcons.SquareStack3dUp,
             position = position,
             accessories = listOf(
@@ -179,6 +208,7 @@ fun SessionsSettingsRowContent(
                         checked = groupByProject,
                         onCheckedChange = onGroupByProjectChange,
                         testTag = toggleTag(row.id),
+                        enabled = !activityOn,
                     )
                 },
             ),
@@ -186,6 +216,7 @@ fun SessionsSettingsRowContent(
             // iOS `default: break`: the row body is not tappable, so a row
             // tap neither flips the switch nor shows the press highlight.
             onClick = null,
+            disabled = activityOn,
         )
 
         SessionsSettingsRow.Archived -> GroupedRow(

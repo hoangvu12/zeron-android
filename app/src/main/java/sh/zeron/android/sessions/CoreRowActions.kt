@@ -34,6 +34,14 @@ interface SessionWrites {
     fun createSection(name: String): String
     fun renameSection(sectionId: String, name: String)
     fun deleteSection(sectionId: String)
+
+    /** Activity's Sleep (`untilMs`) and Wake (`null`) — iOS 1.0.2. Fakes may leave it out. */
+    fun sleepSession(chatId: String, untilMs: Long?): Unit =
+        throw UnsupportedOperationException("sleepSession")
+
+    /** Stop waiting on the chat's background process (asked of its host). Fakes may leave it out. */
+    suspend fun stopWaiting(chatId: String): Boolean =
+        throw UnsupportedOperationException("stopWaiting")
 }
 
 /**
@@ -62,7 +70,16 @@ fun CoreClient.asSessionWrites(): SessionWrites = object : SessionWrites {
     override fun renameSection(sectionId: String, name: String) =
         this@asSessionWrites.renameSection(sectionId, name)
     override fun deleteSection(sectionId: String) = this@asSessionWrites.deleteSection(sectionId)
+    override fun sleepSession(chatId: String, untilMs: Long?) =
+        this@asSessionWrites.sleepSession(chatId, untilMs)
+    override suspend fun stopWaiting(chatId: String): Boolean =
+        this@asSessionWrites.stopWaiting(chatId)
 }
+
+/** Activity's failure toasts, verbatim (`ios:App/AppModel.swift:676-705`). */
+internal const val SLEEP_FAILED_TOAST = "Couldn't put this chat to sleep"
+internal const val WAKE_FAILED_TOAST = "Couldn't wake this chat"
+internal const val STOP_WAITING_FAILED_TOAST = "Couldn't stop waiting"
 
 /** The archive toast pair (`ios:App/AppModel.swift:535-539`). */
 internal const val ARCHIVED_TOAST = "Archived"
@@ -200,6 +217,35 @@ class CoreRowActions(
         dispatch("delete section", onResult) { it.deleteSection(sectionId) }
     }
 
+    /**
+     * Activity's auto-archive (iOS `attempt("auto-archive")`): the plain
+     * archive call — no toast, no Undo; a failure is only logged.
+     */
+    fun autoArchive(chatId: String) {
+        dispatch("auto-archive", onResult = {}) { it.archiveSession(chatId) }
+    }
+
+    // iOS 1.0.2's Activity writes: unlike the rest, a thrown error toasts
+    // (`AppModel.sleep/wake/stopWaiting`); no client stays silent.
+
+    override fun sleep(chatId: String, untilMs: Long, onResult: (ActionOutcome) -> Unit) {
+        dispatch("sleep", onResult, onError = { toaster.show(SLEEP_FAILED_TOAST) }) {
+            it.sleepSession(chatId, untilMs)
+        }
+    }
+
+    override fun wake(chatId: String, onResult: (ActionOutcome) -> Unit) {
+        dispatch("wake", onResult, onError = { toaster.show(WAKE_FAILED_TOAST) }) {
+            it.sleepSession(chatId, null)
+        }
+    }
+
+    override fun stopWaiting(chatId: String, onResult: (ActionOutcome) -> Unit) {
+        dispatch("stop waiting", onResult, onError = { toaster.show(STOP_WAITING_FAILED_TOAST) }) {
+            it.stopWaiting(chatId)
+        }
+    }
+
     // ------------------------------------------------------------------ reads
 
     override fun sections(): List<SectionView> = readSections()
@@ -216,7 +262,8 @@ class CoreRowActions(
         label: String,
         onResult: (ActionOutcome) -> Unit,
         onOk: (T) -> Unit = {},
-        call: (SessionWrites) -> T,
+        onError: () -> Unit = {},
+        call: suspend (SessionWrites) -> T,
     ) {
         scope.launch(main) {
             val w = writes() ?: run {
@@ -233,6 +280,7 @@ class CoreRowActions(
                 onFailure = { e ->
                     val outcome = classify(e) // rethrows CancellationException
                     log("$label failed: $e")
+                    onError()
                     onResult(outcome)
                 },
             )

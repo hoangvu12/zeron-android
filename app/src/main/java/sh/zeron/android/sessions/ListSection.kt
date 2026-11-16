@@ -38,6 +38,17 @@ data class ListSection(
     val header: String?,
     val folders: List<FolderRowVM> = emptyList(),
     val rows: List<SessionRow>,
+    /**
+     * The rows as drawn, one per [rows] entry, when the section draws them
+     * otherwise than [SessionRowVM.from] (Activity's decorated rows: the
+     * woke alarm, an asleep row's wake-in corner); null = map [rows].
+     */
+    val vms: List<SessionRowVM>? = null,
+    /**
+     * Rows not shown yet: a "Show N more" item at the section's foot when
+     * above 0 and the section is open (Activity's Archived shelf).
+     */
+    val more: Int = 0,
 )
 
 /**
@@ -67,7 +78,7 @@ data class SectionHeaderState(
 )
 
 /** Which front-page kind a section is — ticket 46's header long-press menus read it. */
-enum class FrontSectionKind { Pinned, User, Recent, ProjectGroup, DeviceGroup }
+enum class FrontSectionKind { Pinned, User, Recent, ProjectGroup, DeviceGroup, Activity }
 
 /**
  * What the front page knows about one emitted section: its [kind], its

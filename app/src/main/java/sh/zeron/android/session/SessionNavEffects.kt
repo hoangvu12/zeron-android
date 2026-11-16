@@ -8,6 +8,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
+import sh.zeron.android.ZeronApplication
 import sh.zeron.android.shell.LocalAppRouter
 import sh.zeron.android.shell.NavEntry
 import sh.zeron.android.shell.NavEntryEffect
@@ -47,15 +48,26 @@ import sh.zeron.android.shell.NavEntryEffect
 fun SessionNavEffects(lifecycle: SessionNavLifecycle, entry: NavEntry) {
     val router by rememberUpdatedState(LocalAppRouter.current)
     val activity = LocalContext.current.findActivity()
+    // iOS 1.0.2 `app.openChatIds`: on screen = never auto-archived. In from
+    // the first composition (a little early beats a little late), out on
+    // every disappearance, back on every appearance.
+    val openChats = (LocalContext.current.applicationContext as? ZeronApplication)?.openChats
 
     NavEntryEffect(
         onWillAppear = { _ -> lifecycle.onWillAppear(entry.hasAppeared) },
-        onDidAppear = { _ -> lifecycle.onDidAppear(router) },
+        onDidAppear = { _ ->
+            openChats?.open(lifecycle, lifecycle.chatId)
+            lifecycle.onDidAppear(router)
+        },
         onWillDisappear = { _, _ -> lifecycle.leave() },
-        onDidDisappear = { removed -> if (removed) lifecycle.closeAfterPop(router) },
+        onDidDisappear = { removed ->
+            openChats?.close(lifecycle)
+            if (removed) lifecycle.closeAfterPop(router)
+        },
     )
 
     DisposableEffect(lifecycle, entry) {
+        openChats?.open(lifecycle, lifecycle.chatId)
         // Re-entering composition after the first appearance = iOS
         // viewWillAppear/viewDidAppear on tab return (the first push
         // composes with hasAppeared == false: 75 attached already).
@@ -64,6 +76,7 @@ fun SessionNavEffects(lifecycle: SessionNavLifecycle, entry: NavEntry) {
             lifecycle.onDidAppear(router)
         }
         onDispose {
+            openChats?.close(lifecycle)
             if (activity?.isChangingConfigurations == true) {
                 lifecycle.onConfigurationDispose()
             } else {

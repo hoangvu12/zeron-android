@@ -39,12 +39,27 @@ data class SessionRowVM(
     val unseen: Boolean,
     val pinned: Boolean,
     val sendFailed: Boolean,
+    /**
+     * Waiting on background work that will wake its agent (drawn as
+     * Working: [status] reads [Status.Working]).
+     */
+    val waiting: Boolean = false,
+    /** …on a process its agent said it waits on: Stop Waiting is offered. */
+    val canStopWaiting: Boolean = false,
+    /** Asleep until then, Unix ms (Activity's Asleep). */
+    val sleepUntilMs: Long? = null,
+    /** Woke from sleep then, Unix ms, and not seen since. */
+    val wokeAtMs: Long? = null,
+    /** Its last move, Unix ms (Activity's recency sort key). */
+    val lastActivityMs: Long = 0L,
 ) {
     /**
-     * `SessionRowVM.Status` (`SessionCell.swift:4-6`). Not the FFI enum:
-     * [from] maps [ChatIndicator] into it via [statusOf].
+     * `SessionRowVM.Status` (`SessionCell.swift:4-13`). Not the FFI enum:
+     * [from] maps [ChatIndicator] into it via [statusOf]. [Woke] is
+     * Activity's alone (woken from sleep and not looked at since), set
+     * only while Activity is on by [ActivityList.decorate].
      */
-    enum class Status { Idle, Completed, Working, Awaiting, Errored }
+    enum class Status { Idle, Completed, Working, Awaiting, Errored, Woke }
 
     companion object {
         /**
@@ -76,6 +91,11 @@ data class SessionRowVM(
                 sendFailed = r.sendState == SendState.FAILED,
                 // Zeron's SessionRow has no running-subagent count; D11
                 // drops the "● N" pill, so it stays 0.
+                waiting = r.indicator == ChatIndicator.WAITING,
+                canStopWaiting = r.waitsOnProcess,
+                sleepUntilMs = r.sleepUntilMs,
+                wokeAtMs = r.wokeAtMs,
+                lastActivityMs = r.lastActivityMs,
             )
     }
 }

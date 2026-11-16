@@ -12,6 +12,10 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.collectAsState
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import sh.zeron.android.R
 import sh.zeron.android.design.ContextMenuLiftState
 import sh.zeron.android.design.LiftHighlight
@@ -79,7 +83,36 @@ interface SessionRowCommands {
 
     /** The user sections, in snapshot order, empty ones included (42's `sections`). */
     fun sections(): List<SectionView>
+
+    /**
+     * iOS 1.0.2: Activity is on — the swipes trade Move for Sleep/Wake and
+     * the menu drops Move to Section for Sleep. Off by default (fakes).
+     */
+    val activityOn: StateFlow<Boolean> get() = ActivityOff
+
+    /** Activity's Sleep at a preset (`AppModel.sleep`). */
+    fun sleep(chatId: String, untilMs: Long) {}
+
+    /** Activity's Wake (`AppModel.wake`). */
+    fun wake(chatId: String) {}
+
+    /** Stop waiting on the chat's background process (`AppModel.stopWaiting`). */
+    fun stopWaiting(chatId: String) {}
+
+    /** The Sleep swipe: the "Sleep Until" action sheet for [row]. */
+    fun sleepSheet(row: SessionRow) {}
+
+    /** The menu's Custom…: the "Sleep Until" picker for [row]. */
+    fun customSleep(row: SessionRow) {}
+
+    /** Sleep's times from now, for the menu's Sleep ▸. */
+    fun sleepPresets(): List<ActivityList.Preset> = emptyList()
 }
+
+private val ActivityOff: StateFlow<Boolean> = MutableStateFlow(false).asStateFlow()
+
+/** The row's title for Sleep's prompts — `null` when untitled ("This chat"). */
+private fun SessionRow.sleepTitle(): String? = if (hasTitle) title else null
 
 /**
  * The production adapter: one-line delegations, with `archive` mapping
@@ -92,8 +125,34 @@ fun SessionRowCommands(
     actions: RowActions,
     prompts: SessionPrompts,
     onDeleted: (chatId: String) -> Unit = {},
+    activity: StateFlow<Boolean> = ActivityOff,
+    sleepPrompts: SleepPrompts? = null,
 ): SessionRowCommands =
     object : SessionRowCommands {
+        override val activityOn: StateFlow<Boolean> = activity
+
+        override fun sleep(chatId: String, untilMs: Long) {
+            actions.sleep(chatId, untilMs)
+        }
+
+        override fun wake(chatId: String) {
+            actions.wake(chatId)
+        }
+
+        override fun stopWaiting(chatId: String) {
+            actions.stopWaiting(chatId)
+        }
+
+        override fun sleepSheet(row: SessionRow) {
+            sleepPrompts?.sleepSheet(row.id, row.sleepTitle())
+        }
+
+        override fun customSleep(row: SessionRow) {
+            sleepPrompts?.customSleep(row.id, row.sleepTitle())
+        }
+
+        override fun sleepPresets(): List<ActivityList.Preset> = sleepPrompts?.presets().orEmpty()
+
         override fun setPinned(chatId: String, pinned: Boolean) {
             actions.setPinned(chatId, pinned)
         }
@@ -141,10 +200,25 @@ fun rememberSessionRowCommands(): SessionRowCommands {
     val actions = LocalRowActions.current
     val prompts = rememberSessionPrompts()
     val router = LocalAppRouter.current
-    return remember(actions, prompts, router) {
-        SessionRowCommands(actions, prompts) { chatId -> router.leaveDeletedSession(chatId) }
+    val sleepPrompts = rememberSleepPrompts(actions)
+    val activityOn = LocalActivityOn.current
+    return remember(actions, prompts, router, sleepPrompts, activityOn) {
+        SessionRowCommands(
+            actions,
+            prompts,
+            onDeleted = { chatId -> router.leaveDeletedSession(chatId) },
+            activity = activityOn,
+            sleepPrompts = sleepPrompts,
+        )
     }
 }
+
+/**
+ * Whether Activity is on, for the row gestures (iOS reads `app.activityOn`
+ * per swipe and per menu). The app root provides `Prefs.activity`'s `on`;
+ * off where nothing does (galleries, tests).
+ */
+val LocalActivityOn = staticCompositionLocalOf { ActivityOff }
 
 // ---------------------------------------------------------------------------
 // The swipe actions
@@ -175,6 +249,8 @@ fun sessionSwipeActions(
     accent: Color,
     secondary: Color,
     strings: (Int) -> String,
+    activity: Boolean = false,
+    dark: Boolean = false,
 ): Pair<SwipeAction?, List<SwipeAction>> {
     if (archivedList) {
         return null to listOf(
@@ -203,6 +279,31 @@ fun sessionSwipeActions(
         testTag = "swipe-action-archive",
         perform = { onAccepted -> cmd.archive(row().id, onAccepted) },
     )
+    // Activity (iOS 1.0.2): Sleep (or, asleep, Wake) where Move stands — it
+    // lists no sections to move into. A chat under way isn't archived (as
+    // the desktop's Archive: stop it first).
+    if (activity) {
+        val v = vm()
+        val underWay = v.status == SessionRowVM.Status.Working
+        val pane = if (v.sleepUntilMs != null) {
+            SwipeAction(
+                title = SleepCopy.Wake,
+                icon = ZeronIcons.SunMaxFill,
+                background = SwipeTokens.wakeTint(dark),
+                testTag = "swipe-action-wake",
+                perform = { cmd.wake(row().id) },
+            )
+        } else {
+            SwipeAction(
+                title = SleepCopy.Sleep,
+                icon = ZeronIcons.MoonFill,
+                background = SwipeTokens.sleepTint(dark),
+                testTag = "swipe-action-sleep",
+                perform = { cmd.sleepSheet(row()) },
+            )
+        }
+        return pin to if (underWay) listOf(pane) else listOf(archive, pane)
+    }
     val move = SwipeAction(
         title = strings(R.string.swipe_move),
         icon = ZeronIcons.FolderFill,
@@ -235,6 +336,8 @@ fun sessionRowMenu(
     sections: List<SectionView>,
     cmd: SessionRowCommands,
     strings: (Int) -> String,
+    activity: Boolean = false,
+    presets: () -> List<ActivityList.Preset> = { emptyList() },
 ): Menu {
     if (archivedList) {
         return Menu(
@@ -260,6 +363,44 @@ fun sessionRowMenu(
         icon = MenuIcon.Symbol(if (pinned) ZeronIcons.PinSlash else ZeronIcons.Pin),
         testTag = if (pinned) "row-menu-unpin" else "row-menu-pin",
     ) { cmd.setPinned(row.id, !pinned) }
+    val renameItem = MenuItem(
+        title = strings(R.string.menu_rename),
+        icon = MenuIcon.Symbol(ZeronIcons.Pencil),
+        testTag = "row-menu-rename",
+    ) { cmd.renameSession(row) }
+    if (activity) {
+        // Activity lists no sections (nothing to move into); Sleep or
+        // Wake, and Stop Waiting on a process it waits on.
+        val group = buildList<sh.zeron.android.design.glass.MenuElement> {
+            add(sleepMenu(row, vm, cmd, presets))
+            if (vm.canStopWaiting) {
+                add(
+                    MenuItem(
+                        title = SleepCopy.StopWaiting,
+                        icon = MenuIcon.Symbol(ZeronIcons.XmarkCircle),
+                        testTag = "row-menu-stop-waiting",
+                    ) { cmd.stopWaiting(row.id) },
+                )
+            }
+        }
+        val working = vm.status == SessionRowVM.Status.Working
+        return Menu(
+            title = null,
+            children = listOf(
+                pinItem,
+                renameItem,
+                MenuSection(inline = true, children = group),
+                MenuItem(
+                    title = strings(R.string.swipe_archive),
+                    subtitle = if (working) SleepCopy.ArchiveWorking else null,
+                    icon = MenuIcon.Symbol(ZeronIcons.Archivebox),
+                    disabled = working,
+                    testTag = "row-menu-archive",
+                ) { if (!working) cmd.archive(row.id) { } },
+                deleteRowItem(row, cmd, strings),
+            ),
+        )
+    }
     val moveSection = MenuSection(
         title = strings(R.string.menu_move_to_section),
         icon = MenuIcon.Symbol(ZeronIcons.Folder),
@@ -301,6 +442,45 @@ fun sessionRowMenu(
                 // No slide: the row just disappears when the snapshot drops it.
             ) { cmd.archive(row.id) { } },
             deleteRowItem(row, cmd, strings),
+        ),
+    )
+}
+
+/**
+ * Sleep's times (each saying when it wakes as its subtitle) and Custom…,
+ * or, asleep, Wake (iOS `sleepMenu`).
+ */
+private fun sleepMenu(
+    row: SessionRow,
+    vm: SessionRowVM,
+    cmd: SessionRowCommands,
+    presets: () -> List<ActivityList.Preset>,
+): sh.zeron.android.design.glass.MenuElement {
+    if (vm.sleepUntilMs != null) {
+        return MenuItem(
+            title = SleepCopy.Wake,
+            icon = MenuIcon.Symbol(ZeronIcons.SunMax),
+            testTag = "row-menu-wake",
+        ) { cmd.wake(row.id) }
+    }
+    val times = presets().map { p ->
+        MenuItem(title = p.title, subtitle = p.detail, testTag = "row-menu-sleep-${p.id}") {
+            cmd.sleep(row.id, p.untilMs)
+        }
+    }
+    return MenuSection(
+        title = SleepCopy.Sleep,
+        icon = MenuIcon.Symbol(ZeronIcons.Moon),
+        inline = false,
+        children = times + MenuSection(
+            inline = true,
+            children = listOf(
+                MenuItem(
+                    title = SleepCopy.Custom,
+                    icon = MenuIcon.Symbol(ZeronIcons.Calendar),
+                    testTag = "row-menu-sleep-custom",
+                ) { cmd.customSleep(row) },
+            ),
         ),
     )
 }
@@ -384,8 +564,17 @@ internal fun sessionRowWrapper(coordinator: SwipeCoordinator, cmd: SessionRowCom
         val palette = ZeronTheme.palette
         val res = LocalContext.current.resources
         val strings: (Int) -> String = { id -> res.getString(id) }
-        val (lead, trail) = remember(ctx.archived, ctx.vm.pinned, palette) {
-            sessionSwipeActions({ rec }, { vm }, ctx.archived, cmd, palette.accent, palette.secondary, strings)
+        val activity by cmd.activityOn.collectAsState()
+        // Activity's panes follow the row: Sleep or Wake, and no Archive
+        // while it's under way.
+        val asleep = ctx.vm.sleepUntilMs != null
+        val underWay = ctx.vm.status == SessionRowVM.Status.Working
+        val (lead, trail) = remember(ctx.archived, ctx.vm.pinned, palette, activity, asleep, underWay) {
+            sessionSwipeActions(
+                { rec }, { vm }, ctx.archived, cmd, palette.accent, palette.secondary, strings,
+                activity = activity,
+                dark = palette.isDark,
+            )
         }
         val liftState = rememberContextMenuLiftState()
         CompositionLocalProvider(LocalSwipeCoordinator provides coordinator) {
@@ -401,7 +590,11 @@ internal fun sessionRowWrapper(coordinator: SwipeCoordinator, cmd: SessionRowCom
                         // At long-press time: close any swipe, then build
                         // the menu from the current row/vm/sections.
                         coordinator.closeAll()
-                        sessionRowMenu(rec, vm, ctx.archived, cmd.sections(), cmd, strings)
+                        sessionRowMenu(
+                            rec, vm, ctx.archived, cmd.sections(), cmd, strings,
+                            activity = cmd.activityOn.value,
+                            presets = cmd::sleepPresets,
+                        )
                     },
                 ) {
                     CompositionLocalProvider(LocalRowLiftState provides liftState) {

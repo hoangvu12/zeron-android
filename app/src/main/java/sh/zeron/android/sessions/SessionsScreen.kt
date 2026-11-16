@@ -211,6 +211,10 @@ internal fun SessionsScreenContent(
     val density = LocalDensity.current
     val travel = remember { ScrollTravel() }
     val latestActions by rememberUpdatedState(actions)
+    val activityArchived = remember(sections) {
+        sections.firstOrNull { it.id == ActivityList.Section.ARCHIVED }?.rows?.mapTo(HashSet()) { it.id }
+            ?: emptySet()
+    }
     val model = rememberSessionListModel(
         sections = sections,
         collapsible = true,
@@ -334,6 +338,10 @@ internal fun SessionsScreenContent(
                 rowWrapper = rowWrapper,
                 headerWrapper = headerWrapper,
                 sectionDrag = sectionDrag,
+                // Activity's Archived shelf: its rows swipe and hold as
+                // archived ones (Unarchive), and "Show N more" adds 25.
+                archivedRow = { id -> id in activityArchived },
+                onShowMore = { id -> latestActions.showMore(id) },
             )
         }
     }

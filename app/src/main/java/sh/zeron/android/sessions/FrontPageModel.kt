@@ -3,6 +3,7 @@ package sh.zeron.android.sessions
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -12,6 +13,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import sh.zeron.android.core.Prefs
 import sh.zeron.android.core.WorkspaceFeed
 import sh.zeron.android.design.Feedback
@@ -25,7 +27,8 @@ import sh.zeron.android.design.Feedback
  *
  * The rebuild runs on every published snapshot (the feed publishes only
  * when it differs — a 30 s clock read with the same revision still
- * carries new time labels), the grouping flag and the fold state.
+ * carries new time labels), the grouping flag, the fold state and the
+ * Activity settings.
  */
 data class FrontPageUi(
     val revision: ULong,
@@ -35,13 +38,16 @@ data class FrontPageUi(
     val collapsedIds: Set<String>,
     /** Per-id section metadata (kind, raw name). */
     val meta: Map<String, FrontSectionMeta>,
+    /** Activity is on: [sections] are Activity's (iOS `app.activityOn`). */
+    val activity: Boolean = false,
 )
 
 /**
  * The front page's model (ticket 40) — the `AppModel` front-page half:
- * it combines the workspace feed, the grouping mode (#131) and
- * the fold state into [ui], and routes the two front-page actions
- * (`toggleSection`, `collapseAll`) into [FoldState].
+ * it combines the workspace feed, the grouping mode (#131), the fold
+ * state and the Activity settings into [ui], and routes the front-page
+ * actions (`toggleSection`, `collapseAll`, Activity's "Show N more") into
+ * [FoldState] and its own state.
  *
  * `null` until [Prefs] and [FoldState] have loaded from disk **and** a
  * first snapshot exists — no flash of expanded sections, none of Recent
@@ -55,7 +61,14 @@ class FrontPageModel(
     private val fold: FoldState,
     scope: CoroutineScope,
     compute: CoroutineDispatcher = Dispatchers.Default,
+    private val now: () -> Long = System::currentTimeMillis,
 ) {
+
+    /**
+     * Activity's Archived shows its first 10, then 25 more a tap
+     * (iOS `archivedShown`, the desktop's shelf).
+     */
+    private val archivedShown = MutableStateFlow(FrontPageSections.ARCHIVED_FIRST)
 
     val ui: StateFlow<FrontPageUi?> = flow {
         prefs.awaitLoaded()
@@ -65,8 +78,14 @@ class FrontPageModel(
                 feed.snapshot.filterNotNull(),
                 prefs.grouping,
                 fold.state,
-            ) { ws, grouping, f ->
-                val built = FrontPageSections.build(ws.front, ws.projects, ws.devices, grouping)
+                prefs.activity,
+                archivedShown,
+            ) { ws, grouping, f, activity, shown ->
+                val built = if (activity.on) {
+                    FrontPageSections.activity(ws.front, ws.archived, activity.workingShelf, now(), shown)
+                } else {
+                    FrontPageSections.build(ws.front, ws.projects, ws.devices, grouping)
+                }
                 FrontPageUi(
                     revision = ws.revision,
                     synced = ws.synced,
@@ -77,6 +96,7 @@ class FrontPageModel(
                         fold.isCollapsedIn(f, id)
                     },
                     meta = built.meta,
+                    activity = activity.on,
                 )
             },
         )
@@ -113,11 +133,24 @@ class FrontPageModel(
      * path, so persistence and haptics behave identically
      * (one `Haptic.Select` per toggled id; ticket 05's gate makes the
      * burst feel like one tick on device).
+     *
+     * With Activity on (iOS 1.0.2): Pinned, the list and the three shelves,
+     * with one selection haptic.
      */
     fun collapseAll(feedback: Feedback) {
+        if (prefs.activity.value.on) {
+            fold.foldAll(FrontPageSections.activityCollapsibleIds, feedback)
+            return
+        }
         val ws = feed.snapshot.value ?: return
         for (id in FrontPageSections.collapsibleIds(ws.front, ws.projects, ws.devices, prefs.grouping.value)) {
             if (!fold.isCollapsed(id)) fold.toggle(id, feedback)
         }
+    }
+
+    /** "Show N more" on Activity's Archived: 25 more (iOS `showMore`). */
+    fun showMore(sectionId: String) {
+        if (sectionId != ActivityList.Section.ARCHIVED) return
+        archivedShown.update { it + FrontPageSections.ARCHIVED_STEP }
     }
 }

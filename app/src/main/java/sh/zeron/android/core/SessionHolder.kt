@@ -117,6 +117,14 @@ class SessionHolder<C : Any>(
 
     private val coreDir get() = File(root, CORE_DIR)
 
+    /**
+     * iOS 1.0.2 `-fresh-demo` (the debug `fresh-demo` extra): the demo
+     * starts from its fixtures alone — its store is deleted first, so none
+     * of an earlier run's writes (sleeps, archives) carry over.
+     */
+    @Volatile
+    var freshDemo: Boolean = false
+
     fun clientOrNull(): C? = _client.value
 
     /** Registers an event sink; do this before [boot] to see every event. */
@@ -196,6 +204,7 @@ class SessionHolder<C : Any>(
         val demo = credentials is Credentials.Demo
         val dir = if (demo) File(root, DEMO_DIR) else coreDir
         if (!demo) claimCoreDir(credentials)
+        if (demo && freshDemo) dir.deleteRecursively()
         dir.mkdirs()
         // Persisted before the client exists, so a refresh racing the
         // constructor updates these tokens instead of being overwritten.

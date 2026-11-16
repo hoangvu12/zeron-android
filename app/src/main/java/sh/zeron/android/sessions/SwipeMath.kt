@@ -51,6 +51,12 @@ object SwipeTokens {
      * opaque and the same in light and dark.
      */
     val MoveTint = Color(0xFF5E6AD2)
+
+    /** Activity's Sleep pane: UIKit `.systemIndigo` (light / dark). */
+    fun sleepTint(dark: Boolean): Color = if (dark) Color(0xFF5E5CE6) else Color(0xFF5856D6)
+
+    /** Activity's Wake pane: UIKit `.systemOrange` (light / dark). */
+    fun wakeTint(dark: Boolean): Color = if (dark) Color(0xFFFF9F0A) else Color(0xFFFF9500)
 }
 
 // ---------------------------------------------------------------------------

@@ -20,6 +20,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import kotlinx.coroutines.flow.StateFlow
 import sh.zeron.android.ZeronApplication
+import sh.zeron.android.core.ActivitySettings
 import sh.zeron.android.core.CloudStore
 import sh.zeron.android.core.Endpoints
 import sh.zeron.android.shell.LaunchOptions
@@ -141,7 +142,8 @@ fun settingsSectionFor(id: String): SettingsSection? = when {
     id.startsWith("appearance:") -> SettingsSection.Appearance
     id.startsWith("wallpaper:") -> SettingsSection.Wallpaper
     id.startsWith("math:") -> SettingsSection.Math
-    id == SessionsSettingsRow.GroupByProject.id ||
+    id == SessionsSettingsRow.Activity.id ||
+        id == SessionsSettingsRow.GroupByProject.id ||
         id == SessionsSettingsRow.Archived.id -> SettingsSection.Sessions
 
     else -> null
@@ -200,6 +202,9 @@ fun SettingsScreen(
         (LocalContext.current.applicationContext as ZeronApplication).prefs.groupByProject,
     onGroupByProjectChange: (Boolean) -> Unit =
         (LocalContext.current.applicationContext as ZeronApplication).prefs::setGroupByProject,
+    /** iOS 1.0.2: Activity's settings — the Activity row's subtitle, Group by Project's dimming. */
+    activitySettings: StateFlow<ActivitySettings> =
+        (LocalContext.current.applicationContext as ZeronApplication).prefs.activity,
     account: StateFlow<AccountIdentity> =
         (LocalContext.current.applicationContext as ZeronApplication).account,
     onSignOut: () -> Unit =
@@ -225,6 +230,7 @@ fun SettingsScreen(
     // injected hand-built NotificationSectionState gets the same re-reads.
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { notifications.refreshStatus() }
     val group by groupByProject.collectAsState()
+    val activity by activitySettings.collectAsState()
     val onGroup by rememberUpdatedState(onGroupByProjectChange)
     val nav = LocalNavStack.current
     // #49 (iOS `cloud.refresh()` on load): the Cloud rows read the store's
@@ -256,6 +262,8 @@ fun SettingsScreen(
             groupByProject = { group },
             onGroupByProjectChange = { onGroup(it) },
             onOpenArchived = { openArchived(nav) },
+            activityOn = { activity.on },
+            onOpenActivity = { openActivitySettings(nav) },
         )
         signOutSection { sheets.show(signOutSheet { signOut() }) }
     }

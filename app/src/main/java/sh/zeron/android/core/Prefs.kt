@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import sh.zeron.android.design.Appearance
+import sh.zeron.android.sessions.ActivityList
 import sh.zeron.android.transcript.MathSettings
 
 /**
@@ -65,7 +66,37 @@ object PrefKeys {
 
     /** iOS `MathSettings.size` (`mathSize`): percent of the surrounding text; absent = 100. */
     val MATH_SIZE = intPreferencesKey("mathSize")
+
+    /** iOS `AppModel.activityOn` (`activity.on`): absent = off. */
+    val ACTIVITY_ON = booleanPreferencesKey(ActivityList.Keys.ON)
+
+    /** iOS `activityWorkingShelf` (`activity.workingShelf`): absent = on. */
+    val ACTIVITY_WORKING_SHELF = booleanPreferencesKey(ActivityList.Keys.WORKING_SHELF)
+
+    /** iOS `activityArchiveAfter` (`activity.archiveAfter`): days, absent = 0 (never). */
+    val ACTIVITY_ARCHIVE_AFTER = intPreferencesKey(ActivityList.Keys.ARCHIVE_AFTER)
+
+    /**
+     * iOS `activity.unarchived` (id → Unix seconds): chats brought back
+     * from Archived, as `"<id>=<seconds>"` entries.
+     */
+    val ACTIVITY_UNARCHIVED = stringSetPreferencesKey(ActivityList.Keys.UNARCHIVED)
+
+    /** iOS `activity.openShelves`: the Activity shelves opened (they start folded). */
+    val ACTIVITY_OPEN_SHELVES = stringSetPreferencesKey(ActivityList.Keys.OPEN_SHELVES)
 }
+
+/**
+ * The Activity view's settings (iOS `AppModel.activityOn`,
+ * `activityWorkingShelf`, `activityArchiveAfter`): this phone's, off by
+ * default, working chats folded into Working by default, never archiving
+ * by default.
+ */
+data class ActivitySettings(
+    val on: Boolean = false,
+    val workingShelf: Boolean = true,
+    val archiveAfterDays: Int = 0,
+)
 
 /**
  * How the Sessions tab groups Recent (#131): not at all, by project
@@ -159,6 +190,37 @@ class Prefs(
     @Volatile
     private var mathTouched = false
 
+    private val _activity = MutableStateFlow(ActivitySettings())
+
+    /**
+     * The Activity view's settings — the defaults until the disk read
+     * lands. The Sessions ⋯ menu and Settings → Activity both write it;
+     * every change redraws the list and re-runs the sweep at once.
+     */
+    val activity: StateFlow<ActivitySettings> = _activity.asStateFlow()
+
+    private val _activityOn = MutableStateFlow(false)
+
+    /** [activity]'s `on` alone — the row gestures follow it (Sleep/Wake vs Move). */
+    val activityOn: StateFlow<Boolean> = _activityOn.asStateFlow()
+
+    private fun publishActivity(values: ActivitySettings) {
+        _activity.value = values
+        _activityOn.value = values.on
+    }
+
+    /** Same rule as [setAppearance]: a change before the load wins. */
+    @Volatile
+    private var activityTouched = false
+
+    private val _unarchived = MutableStateFlow<Map<String, Long>>(emptyMap())
+
+    /** iOS `activity.unarchived`: chats brought back from Archived → when (Unix seconds). */
+    val activityUnarchived: StateFlow<Map<String, Long>> = _unarchived.asStateFlow()
+
+    @Volatile
+    private var unarchivedTouched = false
+
     private val loaded = CompletableDeferred<Unit>()
 
     /** Set by the first [setGrouping]: the user's choice beats a later-arriving first read. */
@@ -186,6 +248,18 @@ class Prefs(
                     face = MathSettings.faceOf(preferences[PrefKeys.MATH_FONT]),
                     sizePercent = preferences[PrefKeys.MATH_SIZE] ?: 100,
                 )
+            }
+            if (!activityTouched) {
+                publishActivity(
+                    ActivitySettings(
+                        on = preferences[PrefKeys.ACTIVITY_ON] ?: false,
+                        workingShelf = preferences[PrefKeys.ACTIVITY_WORKING_SHELF] ?: true,
+                        archiveAfterDays = preferences[PrefKeys.ACTIVITY_ARCHIVE_AFTER] ?: 0,
+                    ),
+                )
+            }
+            if (!unarchivedTouched) {
+                _unarchived.value = decodeUnarchived(preferences[PrefKeys.ACTIVITY_UNARCHIVED])
             }
             loaded.complete(Unit)
             if (preferences.contains(PrefKeys.GROUP_BY_PROJECT)) {
@@ -280,5 +354,74 @@ class Prefs(
                 it[PrefKeys.MATH_SIZE] = v.sizePercent
             }
         }
+    }
+
+    /** iOS `activityOn = …`: no-op when unchanged. */
+    fun setActivityOn(on: Boolean) = setActivity(_activity.value.copy(on = on))
+
+    /** The ⋯ menu's "Activity" (iOS `app.activityOn.toggle()` on the live value). */
+    fun toggleActivity() = setActivityOn(!_activity.value.on)
+
+    /** iOS `activityWorkingShelf = …`. */
+    fun setActivityWorkingShelf(on: Boolean) = setActivity(_activity.value.copy(workingShelf = on))
+
+    /** iOS `activityArchiveAfter = …` (days, 0 = never). */
+    fun setActivityArchiveAfter(days: Int) = setActivity(_activity.value.copy(archiveAfterDays = days))
+
+    /** The [setMath] shape: no-op when unchanged, the StateFlow at once, every key from the current value. */
+    fun setActivity(values: ActivitySettings) {
+        if (values == _activity.value) return
+        activityTouched = true
+        publishActivity(values)
+        scope.launch(io) {
+            store.edit {
+                val v = _activity.value
+                it[PrefKeys.ACTIVITY_ON] = v.on
+                it[PrefKeys.ACTIVITY_WORKING_SHELF] = v.workingShelf
+                it[PrefKeys.ACTIVITY_ARCHIVE_AFTER] = v.archiveAfterDays
+            }
+        }
+    }
+
+    /**
+     * The demo's launch (iOS `AppModel.init` with `-demo`): Activity starts
+     * as the launch asks ([on]), every other Activity key forgotten — one
+     * run's choice must not seed the next.
+     */
+    fun resetActivityForLaunch(on: Boolean) {
+        activityTouched = true
+        unarchivedTouched = true
+        publishActivity(ActivitySettings(on = on))
+        _unarchived.value = emptyMap()
+        scope.launch(io) {
+            store.edit {
+                it[PrefKeys.ACTIVITY_ON] = _activity.value.on
+                it.remove(PrefKeys.ACTIVITY_WORKING_SHELF)
+                it.remove(PrefKeys.ACTIVITY_ARCHIVE_AFTER)
+                it.remove(PrefKeys.ACTIVITY_UNARCHIVED)
+            }
+        }
+    }
+
+    /** The sweep's memory of chats brought back from Archived (iOS `activity.unarchived`). */
+    fun setActivityUnarchived(back: Map<String, Long>) {
+        if (back == _unarchived.value) return
+        unarchivedTouched = true
+        _unarchived.value = back
+        scope.launch(io) {
+            store.edit { it[PrefKeys.ACTIVITY_UNARCHIVED] = encodeUnarchived(_unarchived.value) }
+        }
+    }
+
+    internal companion object {
+        fun encodeUnarchived(back: Map<String, Long>): Set<String> =
+            back.mapTo(HashSet()) { (id, s) -> "$id=$s" }
+
+        fun decodeUnarchived(stored: Set<String>?): Map<String, Long> =
+            stored.orEmpty().mapNotNull { entry ->
+                val i = entry.lastIndexOf('=')
+                if (i <= 0) return@mapNotNull null
+                entry.substring(i + 1).toLongOrNull()?.let { entry.substring(0, i) to it }
+            }.toMap()
     }
 }

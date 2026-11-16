@@ -267,6 +267,24 @@ object ZeronIcons {
     /** SF `moon` — Settings appearance Dark (fill-only path). */
     val Moon = ZeronIcon.Vector(R.drawable.zi_moon)
 
+    /** SF `moon.fill` — Activity's Sleep swipe pane. */
+    val MoonFill = ZeronIcon.Vector(R.drawable.zi_moon_fill)
+
+    /** SF `sun.max.fill` — Activity's Wake swipe pane. */
+    val SunMaxFill = ZeronIcon.Vector(R.drawable.zi_sun_fill)
+
+    /** SF `alarm` — Activity's Woke corner glyph. */
+    val Alarm = ZeronIcon.Vector(R.drawable.zi_alarm)
+
+    /** SF `tray.full` — Activity (the ⋯ menu, Settings). */
+    val TrayFull = ZeronIcon.Vector(R.drawable.zi_tray_full)
+
+    /** SF `circle.dashed` — Settings → Activity's Working fold. */
+    val CircleDashed = ZeronIcon.Vector(R.drawable.zi_circle_dashed)
+
+    /** SF `calendar` — Sleep's Custom…. */
+    val Calendar = ZeronIcon.Vector(R.drawable.zi_calendar)
+
     /** SF `circle.lefthalf.filled` — appearance System, context-usage chip. */
     val CircleLeftHalfFilled = ZeronIcon.Vector(R.drawable.zi_circle_half)
 
@@ -445,7 +463,7 @@ object ZeronIcons {
     /** #51: "Choose on GitHub". */
     val ArrowUpRightSquare = ZeronIcon.Vector(R.drawable.zi_arrow_up_right_square)
 
-    /** SF `xmark.circle` — the terminal's Close Terminal. */
+    /** SF `xmark.circle` — the terminal's Close Terminal; Activity's Stop Waiting. */
     val XmarkCircle = ZeronIcon.Vector(R.drawable.zi_close_circle)
 
     /** SF `textformat.size.smaller` — the terminal's Text Size: Smaller. */
@@ -529,6 +547,12 @@ object ZeronIcons {
         RegistryEntry("WandAndStars", listOf("wand.and.stars"), WandAndStars),
         RegistryEntry("SunMax", listOf("sun.max"), SunMax),
         RegistryEntry("Moon", listOf("moon"), Moon),
+        RegistryEntry("MoonFill", listOf("moon.fill"), MoonFill),
+        RegistryEntry("SunMaxFill", listOf("sun.max.fill"), SunMaxFill),
+        RegistryEntry("Alarm", listOf("alarm"), Alarm),
+        RegistryEntry("TrayFull", listOf("tray.full"), TrayFull),
+        RegistryEntry("CircleDashed", listOf("circle.dashed"), CircleDashed),
+        RegistryEntry("Calendar", listOf("calendar"), Calendar),
         RegistryEntry("CircleLeftHalfFilled", listOf("circle.lefthalf.filled"), CircleLeftHalfFilled),
         RegistryEntry("SquareStack3dUp", listOf("square.stack.3d.up"), SquareStack3dUp),
         RegistryEntry("SquareAndArrowUp", listOf("square.and.arrow.up"), SquareAndArrowUp),

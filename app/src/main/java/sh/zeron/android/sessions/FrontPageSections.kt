@@ -107,6 +107,63 @@ object FrontPageSections {
     }
 
     /**
+     * Activity's sections (iOS `SessionsViewController.activitySections`):
+     * Pinned above (decorated), then one "Activity" list (every other chat,
+     * Recent and every user section's, de-duped, the one back last first),
+     * then its shelves at the foot — Working and Asleep when they hold any,
+     * Archived when anything is archived, its first [archivedShown] rows
+     * and a "Show N more" for the rest. Grouping stands aside.
+     *
+     * The rows carry their drawn view models ([ListSection.vms]): the woke
+     * alarm, an asleep row's wake-in corner.
+     */
+    fun activity(
+        front: FrontPage,
+        archived: List<SessionRow>,
+        workingShelf: Boolean,
+        nowMs: Long,
+        archivedShown: Int,
+        toVm: (SessionRow) -> SessionRowVM = { SessionRowVM.from(it) },
+    ): Built {
+        val raw = ArrayList<RawSection>(5)
+        if (front.pinned.isNotEmpty()) {
+            raw += RawSection(
+                id = PINNED, title = PINNED_TITLE, rows = front.pinned,
+                kind = FrontSectionKind.Pinned, rawName = null,
+                vms = front.pinned.map { ActivityList.decorate(toVm(it), nowMs) },
+            )
+        }
+        val rows = front.recent + front.sections.flatMap { it.sessions }
+        val byId = HashMap<String, SessionRow>(rows.size)
+        for (r in rows) byId.putIfAbsent(r.id, r)
+        val page = ActivityList.page(rows.map(toVm), workingShelf, nowMs)
+        fun shelf(id: String, title: String, vms: List<SessionRowVM>) = RawSection(
+            id = id, title = title, rows = vms.map { byId.getValue(it.id) },
+            kind = FrontSectionKind.Activity, rawName = null, vms = vms,
+        )
+        raw += shelf(ActivityList.Section.LIST, ActivityList.LIST_TITLE, page.list)
+        if (page.working.isNotEmpty()) raw += shelf(ActivityList.Section.WORKING, ActivityList.WORKING_TITLE, page.working)
+        if (page.asleep.isNotEmpty()) raw += shelf(ActivityList.Section.ASLEEP, ActivityList.ASLEEP_TITLE, page.asleep)
+        if (archived.isNotEmpty()) {
+            raw += RawSection(
+                id = ActivityList.Section.ARCHIVED, title = ActivityList.ARCHIVED_TITLE,
+                rows = archived.take(archivedShown),
+                kind = FrontSectionKind.Activity, rawName = null,
+                more = (archived.size - archivedShown).coerceAtLeast(0),
+            )
+        }
+        return built(raw)
+    }
+
+    /** Collapse All while Activity is on: Pinned, the list and the three shelves. */
+    val activityCollapsibleIds: List<String> =
+        listOf(PINNED, ActivityList.Section.LIST) + ActivityList.Section.shelves
+
+    /** Activity's Archived shows its first 10, then 25 more a tap (the desktop's shelf). */
+    const val ARCHIVED_FIRST = 10
+    const val ARCHIVED_STEP = 25
+
+    /**
      * iOS `AppModel.projectGroups` (`App/AppModel.swift:442-468`), like the
      * desktop's grouping: checkouts of one repository share a group
      * (`project:<groupKey>`, named `groupName`); a project the snapshot
@@ -220,7 +277,7 @@ object FrontPageSections {
     private const val OFFLINE_TITLE = "Offline"
 
     private fun built(raw: List<RawSection>) = Built(
-        sections = raw.map { r -> ListSection(id = r.id, header = r.title, rows = r.rows) },
+        sections = raw.map { r -> ListSection(id = r.id, header = r.title, rows = r.rows, vms = r.vms, more = r.more) },
         meta = raw.associate { r -> r.id to FrontSectionMeta(kind = r.kind, rawName = r.rawName) },
     )
 
@@ -231,5 +288,7 @@ object FrontPageSections {
         val rows: List<SessionRow>,
         val kind: FrontSectionKind,
         val rawName: String?,
+        val vms: List<SessionRowVM>? = null,
+        val more: Int = 0,
     )
 }

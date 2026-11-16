@@ -14,6 +14,8 @@ import sh.zeron.android.cloud.BillingScreen
 import sh.zeron.android.cloud.CloudSettingsRoute
 import sh.zeron.android.cloud.CloudSettingsScreen
 import sh.zeron.android.session.SessionScreenRoute
+import sh.zeron.android.settings.ActivitySettingsRoute
+import sh.zeron.android.settings.ActivitySettingsScreen
 import sh.zeron.android.settings.SettingsScreen
 import sh.zeron.android.sessions.FolderRoute
 import sh.zeron.android.sessions.FolderRouteContent
@@ -83,6 +85,9 @@ fun ShellRouteContent(route: NavRoute) {
         // #61: Voice settings — Settings' Voice row and a voice control's
         // menu or host picker push it.
         is VoiceSettingsRoute -> VoiceSettingsScreen()
+        // iOS 1.0.2: Settings → Activity — Settings' Activity row and the
+        // Sessions ⋯ menu's "Activity Settings…" push it.
+        is ActivitySettingsRoute -> ActivitySettingsScreen()
         // #52: Settings → Billing.
         is BillingRoute -> BillingScreen()
         else -> Unit
