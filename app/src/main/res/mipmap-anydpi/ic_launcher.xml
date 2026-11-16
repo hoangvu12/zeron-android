@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Zeron's adaptive icon (upstream 2a2212c70): flat, ink on ivory in light
+     mode and ivory on ink in dark, the mark and the tile separate layers so
+     launchers can animate them; Android 13+ themed icons draw the mark. -->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@color/icon_background" />
-    <foreground android:drawable="@drawable/ic_launcher_inset" />
-    <!-- #140: Android 13+ themed icons draw Zeron's logo mark. -->
-    <monochrome android:drawable="@drawable/ic_launcher_monochrome" />
+    <foreground android:drawable="@drawable/ic_launcher_foreground" />
+    <monochrome android:drawable="@drawable/ic_launcher_foreground" />
 </adaptive-icon>

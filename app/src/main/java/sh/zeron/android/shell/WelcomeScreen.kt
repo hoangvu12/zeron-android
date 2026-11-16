@@ -1,6 +1,6 @@
 package sh.zeron.android.shell
 
-import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -24,16 +24,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import kotlin.math.min
+import sh.zeron.android.R
 import sh.zeron.android.core.Face
 import sh.zeron.android.design.CapsuleShape
 import sh.zeron.android.design.LocalTypeScale
@@ -75,7 +75,8 @@ fun WelcomeScreen(onGetStarted: () -> Unit, modifier: Modifier = Modifier) {
                     .padding(horizontal = 32.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                ZeronMark(palette.text, Modifier.size(width = 46.dp, height = 53.dp))
+                // SignInVC:70: 53 × 53 (the square mark of upstream 2a2212c70).
+                ZeronMark(palette.text, Modifier.size(53.dp))
                 Spacer(Modifier.height(26.dp))
                 BasicText(
                     "Welcome to Zeron",
@@ -138,39 +139,18 @@ private fun WelcomePrimaryButton(title: String, onClick: () -> Unit, modifier: M
 
 /**
  * `CloudUI.zeronMark`: the `zeron-logo` template image
- * (`ios:Assets.xcassets/zeron-logo.imageset/zeron-logo.svg`), tinted and
- * aspect-fitted into the frame.
+ * (`ios:Assets.xcassets/zeron-logo.imageset/zeron-logo.svg`, the 780 × 780
+ * app-icon mark since upstream 2a2212c70), tinted and aspect-fitted into
+ * the frame. Drawn from `zi_zeron`, generated from the same mark
+ * (`icons/zeron.svg`).
  */
 @Composable
 internal fun ZeronMark(tint: Color, modifier: Modifier = Modifier) {
-    Canvas(modifier) {
-        val scale = min(size.width / ZeronMarkGeometry.WIDTH, size.height / ZeronMarkGeometry.HEIGHT)
-        val origin = Offset(
-            (size.width - ZeronMarkGeometry.WIDTH * scale) / 2f,
-            (size.height - ZeronMarkGeometry.HEIGHT * scale) / 2f,
-        )
-        val cell = Size(ZeronMarkGeometry.CELL * scale, ZeronMarkGeometry.CELL * scale)
-        val radius = CornerRadius(ZeronMarkGeometry.RADIUS * scale)
-        for ((x, y) in ZeronMarkGeometry.cells) {
-            drawRoundRect(tint, topLeft = origin + Offset(x * scale, y * scale), size = cell, cornerRadius = radius)
-        }
-    }
-}
-
-/** The mark's SVG: an 820 × 940 view box of 100-unit squares, corner radius 16. */
-internal object ZeronMarkGeometry {
-    const val WIDTH = 820f
-    const val HEIGHT = 940f
-    const val CELL = 100f
-    const val RADIUS = 16f
-
-    /** Each square's top-left, in the SVG's order (one sits at y 380, off the 120 grid, as drawn). */
-    val cells: List<Pair<Float, Float>> = listOf(
-        0f to 600f, 0f to 720f, 240f to 840f, 240f to 720f, 120f to 840f, 120f to 600f,
-        240f to 600f, 0f to 480f, 0f to 360f, 480f to 840f, 480f to 720f, 120f to 360f,
-        120f to 240f, 240f to 360f, 600f to 720f, 480f to 600f, 360f to 360f, 240f to 240f,
-        600f to 600f, 720f to 600f, 720f to 480f, 240f to 120f, 600f to 380f, 720f to 240f,
-        720f to 0f, 480f to 240f, 480f to 0f, 120f to 480f, 240f to 480f, 360f to 840f,
-        360f to 720f, 360f to 600f, 360f to 480f, 120f to 720f,
+    Image(
+        painter = painterResource(R.drawable.zi_zeron),
+        contentDescription = null,
+        modifier = modifier,
+        contentScale = ContentScale.Fit,
+        colorFilter = ColorFilter.tint(tint),
     )
 }

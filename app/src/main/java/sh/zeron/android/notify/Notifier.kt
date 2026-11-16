@@ -7,7 +7,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
+import android.graphics.Canvas
 import android.media.AudioAttributes
 import android.net.Uri
 import android.util.Log
@@ -26,6 +26,23 @@ import sh.zeron.android.shell.DeepLinks
  * (`PushNotifications.swift:18-20`) is both the row title and the banner
  * body.
  */
+/**
+ * Zeron's adaptive launcher icon (`R.mipmap.ic_launcher`: the ivory or ink
+ * tile under the vector mark, upstream 2a2212c70) drawn into a [sizePx]
+ * square bitmap; `null` if it cannot be drawn. There is no raster artwork
+ * any more, so `BitmapFactory` can't decode it.
+ */
+fun launcherIconBitmap(context: Context, sizePx: Int = 256): Bitmap? = try {
+    ContextCompat.getDrawable(context, R.mipmap.ic_launcher)?.let { icon ->
+        Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888).also { bitmap ->
+            icon.setBounds(0, 0, sizePx, sizePx)
+            icon.draw(Canvas(bitmap))
+        }
+    }
+} catch (_: RuntimeException) {
+    null
+}
+
 object NotifyCopy {
     const val BudgetTitle = "Background updates paused"
     const val BudgetText = "Open Zeron to resume."
@@ -273,17 +290,11 @@ class Notifier(private val context: Context) {
             .apply { largeIcon?.let { setLargeIcon(it) } }
 
     /**
-     * The launcher artwork, decoded once per [Notifier] (Zeron's
-     * `ic_launcher_foreground`); `null` if it cannot be decoded, and the
-     * notification simply goes without a large icon.
+     * The launcher icon (its tile and mark), drawn once per [Notifier];
+     * `null` if it cannot be drawn, and the notification simply goes
+     * without a large icon.
      */
-    private val largeIcon: Bitmap? by lazy {
-        try {
-            BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher_foreground)
-        } catch (_: RuntimeException) {
-            null
-        }
-    }
+    private val largeIcon: Bitmap? by lazy { launcherIconBitmap(context) }
 
     private fun notify(tag: String, notification: Notification) {
         try {
