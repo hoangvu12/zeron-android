@@ -10,6 +10,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import sh.zeron.android.core.CloudStore
 import sh.zeron.android.design.Feedback
 import sh.zeron.android.design.Haptic
+import sh.zeron.android.design.ToastAnchorState
 import sh.zeron.android.design.Toaster
 import sh.zeron.android.shell.AppRouter
 import sh.zeron.android.shell.LocalAppRouter
@@ -27,10 +28,19 @@ object CloudRoutes {
     /** The fallback when no sheet can be presented: the router's Billing page (the phone's Settings tab, the split's Settings card). */
     fun openBilling(router: AppRouter) = router.showDebugPages(listOf(BillingRoute))
 
-    /** iOS `showOutOfCredits`: the warning haptic and "Out of Cloud credits" with "Add credits". */
-    fun showOutOfCredits(toaster: Toaster, feedback: Feedback, openBilling: () -> Unit) {
+    /**
+     * iOS `showOutOfCredits`: the warning haptic and "Out of Cloud credits"
+     * with "Add credits", floating over [above] (New Session's composer)
+     * when given.
+     */
+    fun showOutOfCredits(
+        toaster: Toaster,
+        feedback: Feedback,
+        above: ToastAnchorState? = null,
+        openBilling: () -> Unit,
+    ) {
         feedback.haptic(Haptic.Attention)
-        toaster.show(CloudStore.OUT_OF_CREDITS, action = "Add credits") { openBilling() }
+        toaster.show(CloudStore.OUT_OF_CREDITS, action = "Add credits", above = above) { openBilling() }
     }
 }
 

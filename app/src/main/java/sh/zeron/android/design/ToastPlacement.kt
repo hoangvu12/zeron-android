@@ -20,11 +20,16 @@ const val ToastGapDp = 12f
 
 /**
  * The anchor top: the safe-area bottom, or the bottom chrome's top when
- * chrome is on screen — whichever is **higher** (the smaller y).
+ * chrome is on screen — whichever is **higher** (the smaller y) — and,
+ * iOS `above:` (`Toast.swift:22-24`), the screen's own control the toast
+ * was shown over when that is higher still.
  * @param chromeTop the chrome top in dp; `Float.NaN` = no chrome on screen.
+ * @param aboveTop the `above:` control's top in dp; `Float.NaN` = none.
  */
-fun toastAnchor(safeBottom: Float, chromeTop: Float): Float =
-    if (chromeTop.isNaN()) safeBottom else minOf(safeBottom, chromeTop)
+fun toastAnchor(safeBottom: Float, chromeTop: Float, aboveTop: Float = Float.NaN): Float {
+    val chrome = if (chromeTop.isNaN()) safeBottom else minOf(safeBottom, chromeTop)
+    return if (aboveTop.isNaN()) chrome else minOf(chrome, aboveTop)
+}
 
 /** The capsule's rest y (its **top** edge, dp): `anchor − 12 − capsuleHeight`. `Toast.swift:19,22` */
 fun toastRestY(safeBottom: Float, chromeTop: Float, capsuleHeight: Float): Float =

@@ -120,6 +120,15 @@ interface Toaster {
      */
     fun show(text: String, action: String? = null, onAction: (() -> Unit)? = null)
 
+    /**
+     * iOS `Toast.show(…, above:)`: float over a control of the screen's own
+     * ([above], e.g. New Session's composer) when it sits higher than the
+     * tab chrome, instead of covering it. Toasters without placement (test
+     * fakes, [Noop]) show it as usual.
+     */
+    fun show(text: String, action: String?, above: ToastAnchorState?, onAction: (() -> Unit)?) =
+        show(text, action, onAction)
+
     companion object {
         /** Default when no [ToastHost] is mounted (previews): logs a warning, shows nothing. */
         val Noop: Toaster = object : Toaster {
@@ -137,7 +146,30 @@ data class ToastModel(
     val text: String,
     val action: String?,
     val onAction: (() -> Unit)?,
+    /** The screen's own control to float over (iOS `above:`), or `null` for the chrome alone. */
+    val above: ToastAnchorState? = null,
 )
+
+/**
+ * The live top edge (dp from the window top) of a control a toast may
+ * float over — iOS's `above:` view. The screen writes [top] from the
+ * control's placed bounds and resets it to [Dp.Unspecified] when the
+ * control leaves ([toastAnchorTop]).
+ */
+@Stable
+class ToastAnchorState {
+    var top: Dp by mutableStateOf(Dp.Unspecified)
+}
+
+/** Writes this node's top edge into [anchor] while it is placed (and clears it on leave). */
+@Composable
+fun Modifier.toastAnchorTop(anchor: ToastAnchorState): Modifier {
+    val density = LocalDensity.current
+    DisposableEffect(anchor) { onDispose { anchor.top = Dp.Unspecified } }
+    return onGloballyPositioned { coordinates ->
+        anchor.top = with(density) { coordinates.boundsInRoot().top.toDp() }
+    }
+}
 
 /**
  * The one-at-a-time state behind [ToastHost]: [current] is the whole
@@ -154,19 +186,22 @@ class ToasterState : Toaster {
     private var nextId = 0L // main thread only
     private val mainHandler = Handler(Looper.getMainLooper())
 
-    override fun show(text: String, action: String?, onAction: (() -> Unit)?) {
+    override fun show(text: String, action: String?, onAction: (() -> Unit)?) =
+        show(text, action, above = null, onAction = onAction)
+
+    override fun show(text: String, action: String?, above: ToastAnchorState?, onAction: (() -> Unit)?) {
         // Off the main thread: post to the main looper (callers in tickets 42
         // and 80 may be on Dispatchers.Default). On main: apply now, so
         // tests and same-frame double shows stay synchronous.
         if (Looper.myLooper() == Looper.getMainLooper()) {
-            applyShow(text, action, onAction)
+            applyShow(text, action, above, onAction)
         } else {
-            mainHandler.post { applyShow(text, action, onAction) }
+            mainHandler.post { applyShow(text, action, above, onAction) }
         }
     }
 
-    private fun applyShow(text: String, action: String?, onAction: (() -> Unit)?) {
-        current = ToastModel(++nextId, text, action, onAction)
+    private fun applyShow(text: String, action: String?, above: ToastAnchorState?, onAction: (() -> Unit)?) {
+        current = ToastModel(++nextId, text, action, onAction, above)
     }
 
     /** Clears the toast with [id] — a no-op if it was already replaced by a newer one. */
@@ -230,9 +265,11 @@ fun ToastHost(
                         BoxWithConstraints(Modifier.fillMaxSize()) {
                             val safeBottom = rememberSafeBottom(maxHeight)
                             val chromeTop = chromeTopState.top
+                            val aboveTop = model.above?.top ?: Dp.Unspecified
                             val anchorTop = toastAnchor(
                                 safeBottom.value,
                                 if (chromeTop.isSpecified) chromeTop.value else Float.NaN,
+                                if (aboveTop.isSpecified) aboveTop.value else Float.NaN,
                             )
                             ToastCapsule(
                                 model = model,
