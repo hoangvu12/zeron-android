@@ -59,6 +59,9 @@ interface ChipMenuCore {
      */
     fun fallbackHarnesses(): List<HarnessInfo> = emptyList()
 
+    /** The core's display label for a harness id (iOS `HarnessNames.label`). */
+    fun harnessLabel(harness: String): String = harness
+
     /** The core's static fallback when [listModels] fails outright. */
     fun fallbackModels(harness: String): List<ModelInfo>
 
@@ -93,6 +96,8 @@ class CoreChipMenuCore(
         client.listHarnesses(deviceId)
 
     override fun fallbackHarnesses(): List<HarnessInfo> = uniffi.zeron_core.fallbackHarnesses()
+
+    override fun harnessLabel(harness: String): String = uniffi.zeron_core.harnessLabel(harness)
 
     override fun fallbackModels(harness: String): List<ModelInfo> =
         uniffi.zeron_core.fallbackModels(harness)
@@ -220,6 +225,8 @@ class SessionChipMenus(
         val running: Boolean = false,
         /** A send is still on its way (its turn starts on the current provider). */
         val sendPending: Boolean = false,
+        /** The own page's label when the row has none (`harnessLabel(id)`, read on IO). */
+        val harnessLabel: String? = null,
     ) {
         /** Not mid-turn, and no send on its way (upstream's `canSwitchProvider`). */
         val canSwitch: Boolean get() = hostSwitches && !running && !sendPending
@@ -247,6 +254,8 @@ class SessionChipMenus(
             hostSwitches = input.composer.host.capabilities.providerSwitch,
             running = input.composer.live.turnRunning,
             sendPending = sendState == SendState.SENDING || sendState == SendState.QUEUED,
+            harnessLabel = input.row?.takeIf { it.harnessLabel == null }
+                ?.let { core.harnessLabel(it.harness ?: DEFAULT_HARNESS) },
         )
         snapshot = next
         if (next.canSwitch) {
@@ -396,7 +405,8 @@ class SessionChipMenus(
         model: String?,
     ): ModelPickerRequest {
         val deviceId = s.deviceId
-        val own = ModelPickerTab(harness = harness, label = row.harnessLabel ?: harness)
+        // iOS `row.harnessLabel ?? HarnessNames.label(harness)`, never the raw id.
+        val own = ModelPickerTab(harness = harness, label = row.harnessLabel ?: s.harnessLabel ?: harness)
         // Wave-10 39: the other providers the host offers, only when it can
         // switch now; until its list is in, only the chat's own. A Cloud
         // chat's are Cloud's agents (iOS `providers(cloud:)`).
