@@ -91,6 +91,28 @@ interface RowActions {
         onResult(ActionOutcome.Skipped)
     }
 
+    /**
+     * Activity's Sleep (iOS 1.0.2 `AppModel.sleep`): asleep until [untilMs],
+     * on every device. A thrown error toasts "Couldn't put this chat to
+     * sleep". Default: [ActionOutcome.Skipped].
+     */
+    fun sleep(chatId: String, untilMs: Long, onResult: (ActionOutcome) -> Unit = {}) {
+        onResult(ActionOutcome.Skipped)
+    }
+
+    /** Activity's Wake: awake now ("Couldn't wake this chat"). Default: [ActionOutcome.Skipped]. */
+    fun wake(chatId: String, onResult: (ActionOutcome) -> Unit = {}) {
+        onResult(ActionOutcome.Skipped)
+    }
+
+    /**
+     * Stop waiting on the background process the chat's agent waits on
+     * (asked of its host; "Couldn't stop waiting"). Default: [ActionOutcome.Skipped].
+     */
+    fun stopWaiting(chatId: String, onResult: (ActionOutcome) -> Unit = {}) {
+        onResult(ActionOutcome.Skipped)
+    }
+
     /** Rename a chat; a blank trimmed title is skipped. */
     fun rename(chatId: String, title: String, onResult: (ActionOutcome) -> Unit = {})
 
