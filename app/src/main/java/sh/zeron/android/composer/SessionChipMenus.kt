@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import sh.zeron.android.core.CloudStore
 import sh.zeron.android.design.ZeronIcons
 import sh.zeron.android.design.glass.Menu
 import sh.zeron.android.design.glass.MenuElement
@@ -52,6 +53,12 @@ interface ChipMenuCore {
      */
     suspend fun listHarnesses(deviceId: String): List<HarnessInfo> = emptyList()
 
+    /**
+     * The core's built-in providers (`fallbackHarnesses()`, a static read):
+     * a Cloud chat's other picker pages are Cloud's agents among them.
+     */
+    fun fallbackHarnesses(): List<HarnessInfo> = emptyList()
+
     /** The core's static fallback when [listModels] fails outright. */
     fun fallbackModels(harness: String): List<ModelInfo>
 
@@ -84,6 +91,8 @@ class CoreChipMenuCore(
 
     override suspend fun listHarnesses(deviceId: String): List<HarnessInfo> =
         client.listHarnesses(deviceId)
+
+    override fun fallbackHarnesses(): List<HarnessInfo> = uniffi.zeron_core.fallbackHarnesses()
 
     override fun fallbackModels(harness: String): List<ModelInfo> =
         uniffi.zeron_core.fallbackModels(harness)
@@ -173,6 +182,15 @@ class SessionChipMenus(
     @Volatile
     private var hostHarnesses: Pair<String, List<HarnessInfo>>? = null
 
+    /**
+     * Cloud's agents (Claude Code, Codex) from the built-in catalog, read
+     * once on IO by [fill]: a Cloud chat moves between these, not what its
+     * machine reports (an asleep machine answers nothing; an awake one may
+     * list agents Cloud has no account for). iOS `providers(cloud:)`.
+     */
+    @Volatile
+    private var cloudHarnesses: List<HarnessInfo>? = null
+
     /** The write lane: never cancelled — an in-flight write always finishes, like iOS's synchronous call. */
     private val writeScope = CoroutineScope(SupervisorJob() + io)
 
@@ -231,7 +249,15 @@ class SessionChipMenus(
             sendPending = sendState == SendState.SENDING || sendState == SendState.QUEUED,
         )
         snapshot = next
-        if (next.canSwitch) readAheadHarnesses(next.deviceId)
+        if (next.canSwitch) {
+            if (input.row?.isCloud == true) {
+                if (cloudHarnesses == null) {
+                    cloudHarnesses = core.fallbackHarnesses().filter { it.id in CloudStore.harnesses }
+                }
+            } else {
+                readAheadHarnesses(next.deviceId)
+            }
+        }
         // Wave-10 39 (I2): a chat with no model label names the model it
         // runs (the host's default), never the bare agent name.
         val row = input.row ?: return chrome
@@ -372,10 +398,16 @@ class SessionChipMenus(
         val deviceId = s.deviceId
         val own = ModelPickerTab(harness = harness, label = row.harnessLabel ?: harness)
         // Wave-10 39: the other providers the host offers, only when it can
-        // switch now; until its list is in, only the chat's own.
+        // switch now; until its list is in, only the chat's own. A Cloud
+        // chat's are Cloud's agents (iOS `providers(cloud:)`).
         val others = if (s.canSwitch) {
-            hostHarnesses?.takeIf { it.first == deviceId }?.second.orEmpty()
-                .filter { it.offered && it.id != harness }
+            val providers = if (row.isCloud) {
+                cloudHarnesses.orEmpty()
+            } else {
+                hostHarnesses?.takeIf { it.first == deviceId }?.second.orEmpty().filter { it.offered }
+            }
+            providers
+                .filter { it.id != harness }
                 .map { h -> ModelPickerTab(h.id, h.label, footer = providerSwitchFooter(h.label)) }
         } else {
             emptyList()
