@@ -8,6 +8,7 @@ import uniffi.zeron_core.ChatIndicator.AWAITING_INPUT
 import uniffi.zeron_core.ChatIndicator.COMPLETED
 import uniffi.zeron_core.ChatIndicator.ERRORED
 import uniffi.zeron_core.ChatIndicator.IDLE
+import uniffi.zeron_core.ChatIndicator.WAITING
 import uniffi.zeron_core.ChatIndicator.WORKING
 
 /**
@@ -71,6 +72,37 @@ class SessionWatcherTest {
         step(row(WORKING, workingSinceMs = 1_000L))
         assertTrue(kinds(row(WORKING, workingSinceMs = 1_000L)).isEmpty())
         assertEquals(listOf(NotificationKind.Done), kinds(row(WORKING, workingSinceMs = 9_000L)))
+    }
+
+    @Test
+    fun waitingToCompletedIsDone() {
+        // A parent waiting on its child chats (or a background command) ends.
+        step(row(WAITING))
+        assertEquals(listOf(NotificationKind.Done), kinds(row(COMPLETED)))
+    }
+
+    @Test
+    fun workingThroughWaitingToCompletedIsDoneOnce() {
+        step(row(WORKING, workingSinceMs = 1_000L))
+        assertTrue(kinds(row(WAITING)).isEmpty())
+        assertTrue(kinds(row(WAITING)).isEmpty())
+        // The wait resolves into another turn: still the same work.
+        assertTrue(kinds(row(WORKING, workingSinceMs = 9_000L)).isEmpty())
+        assertTrue(kinds(row(WAITING)).isEmpty())
+        assertEquals(listOf(NotificationKind.Done), kinds(row(COMPLETED)))
+        assertTrue(kinds(row(COMPLETED)).isEmpty())
+    }
+
+    @Test
+    fun waitingToAwaitingInputIsInput() {
+        step(row(WAITING))
+        assertEquals(listOf(NotificationKind.Input), kinds(row(AWAITING_INPUT)))
+    }
+
+    @Test
+    fun waitingToIdleIsSilent() {
+        step(row(WAITING))
+        assertTrue(kinds(row(IDLE)).isEmpty())
     }
 
     @Test
