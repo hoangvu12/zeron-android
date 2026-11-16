@@ -71,6 +71,9 @@ class DeliveryService : Service() {
         /** In the foreground state (stopping one that hasn't got there yet is an error). */
         @Volatile private var running = false
 
+        /** The hold is up: the core keeps its sockets until it ends. */
+        val holding: Boolean get() = running
+
         fun hold(context: Context, ms: Long = DeliveryHold.HOLD_MS) {
             val intent = Intent(context, DeliveryService::class.java).putExtra(EXTRA_MS, ms)
             try {
