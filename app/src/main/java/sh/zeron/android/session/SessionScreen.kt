@@ -59,6 +59,8 @@ import sh.zeron.android.shell.LocalNavEntry
 import sh.zeron.android.shell.LocalNavStack
 import sh.zeron.android.shell.NavEntryEffect
 import sh.zeron.android.shell.NavKind
+import sh.zeron.android.sheets.TextSheetOverlay
+import sh.zeron.android.sheets.rememberTextSheetController
 import sh.zeron.android.transcript.AttachmentReader
 import sh.zeron.android.transcript.LocalTranscriptTapGate
 import sh.zeron.android.transcript.TranscriptActions
@@ -321,7 +323,10 @@ fun SessionScreen(
             if (action == "sign-in" && target != null) accountsSheet.open(target)
         }
     }
-    val actions = remember(controller, attachments, viewer, router, performAction) {
+    // iOS TLV:784-834 / RV:265-276: the row menu's "Select Text" (and its
+    // TalkBack action) and a Detail widget open a text sheet over the screen.
+    val textSheet = rememberTextSheetController()
+    val actions = remember(controller, attachments, viewer, router, performAction, textSheet) {
         val openImage: (String, Rect, ImageBitmap?, String?) -> Unit = { reference, source, bitmap, label ->
             viewer?.show(
                 ImageViewerRequest(
@@ -349,9 +354,17 @@ fun SessionScreen(
                 imageRetries = binding.retries,
                 openSubagent = openSubagent,
                 perform = performAction,
+                showDetail = { title, text -> textSheet.showDetail(title, text) },
+                selectText = { text -> textSheet.selectText(text) },
             )
         } else {
-            TranscriptActions(openLink = router::open, openSubagent = openSubagent, perform = performAction)
+            TranscriptActions(
+                openLink = router::open,
+                openSubagent = openSubagent,
+                perform = performAction,
+                showDetail = { title, text -> textSheet.showDetail(title, text) },
+                selectText = { text -> textSheet.selectText(text) },
+            )
         }
     }
 
@@ -683,6 +696,7 @@ fun SessionScreen(
     }
     sh.zeron.android.composer.ModelPickerOverlay(modelPicker)
     overlay()
+    TextSheetOverlay(textSheet)
     // #55: the error card's accounts sheet, over everything.
     sh.zeron.android.accounts.AccountsSheet(accountsSheet)
     }

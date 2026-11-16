@@ -58,6 +58,8 @@ import sh.zeron.android.session.SessionEventHub
 import sh.zeron.android.session.SessionHeader
 import sh.zeron.android.session.SessionHeaderDefaults
 import sh.zeron.android.session.copyTranscript
+import sh.zeron.android.sheets.TextSheetOverlay
+import sh.zeron.android.sheets.rememberTextSheetController
 import sh.zeron.android.shell.LocalNavEntry
 import sh.zeron.android.shell.LocalNavStack
 import sh.zeron.android.shell.NavEntry
@@ -452,7 +454,9 @@ internal fun SubagentScreen(route: SubagentRoute, modifier: Modifier = Modifier)
             )
         },
     )
-    val actions = remember(route, viewer, router, opener) {
+    // The row menu's "Select Text" (and its TalkBack action), as in a session.
+    val textSheet = rememberTextSheetController()
+    val actions = remember(route, viewer, router, opener, textSheet) {
         val openImage: (String, Rect, ImageBitmap?, String?) -> Unit = { reference, source, bitmap, label ->
             viewer?.show(
                 ImageViewerRequest(
@@ -485,6 +489,8 @@ internal fun SubagentScreen(route: SubagentRoute, modifier: Modifier = Modifier)
                     ),
                 )
             },
+            showDetail = { title, text -> textSheet.showDetail(title, text) },
+            selectText = { text -> textSheet.selectText(text) },
         )
     }
 
@@ -550,6 +556,7 @@ internal fun SubagentScreen(route: SubagentRoute, modifier: Modifier = Modifier)
                 moreLabel = SubagentCopy.CopyTranscript,
             )
         }
+        TextSheetOverlay(textSheet)
     }
 }
 
