@@ -132,8 +132,8 @@ data class PlanAction(val title: String, val tone: BillingTone, val enabled: Boo
 
 /** The rules of the page, pure (unit-tested). */
 object BillingRules {
-    /** iOS `hours`: "about 750 hours" of the default machine. */
-    fun hours(credits: Double): String = "about ${CloudStore.credits((credits / 60).roundToLong().toDouble())} hours"
+    /** iOS `hours` (upstream 84f24f36a): "about 750 small-machine hours" — a credit is a minute of a small machine. */
+    fun hours(credits: Double): String = "about ${CloudStore.credits((credits / 60).roundToLong().toDouble())} small-machine hours"
 
     /** The figure's unit. */
     fun unit(total: Double): String = if (total == 1.0) "credit" else "credits"
@@ -502,7 +502,7 @@ private fun CreditsCard(b: BillingInfo) {
 private fun FigureRow(figure: String, unit: String, size: Float, trailing: String? = null, tag: String? = null) {
     val palette = ZeronTheme.palette
     val ts = LocalTypeScale.current
-    // #63: "1,250 credits, about 20 hours" as one TalkBack stop.
+    // #63: "1,250 credits, about 20 small-machine hours" as one TalkBack stop.
     Row(Modifier.fillMaxWidth().semantics(mergeDescendants = true) {}) {
         BasicText(
             figure,
