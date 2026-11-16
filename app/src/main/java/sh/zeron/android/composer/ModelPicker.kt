@@ -9,6 +9,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.stateDescription
 import kotlinx.coroutines.flow.filterIsInstance
@@ -903,7 +904,8 @@ private fun ModelRow(row: ModelPickerRow, current: Boolean, onClick: () -> Unit)
             .drawBehind {
                 scale(plateScale) { drawRoundRect(plate, cornerRadius = CornerRadius(18.dp.toPx())) }
             }
-            .clickable(interactionSource = interaction, indication = null, onClick = onClick)
+            // iOS traits `.button` (+ `.selected` on the current one).
+            .clickable(interactionSource = interaction, indication = null, role = Role.Button, onClick = onClick)
             .padding(start = 14.dp, end = 16.dp, top = 12.dp, bottom = 12.dp)
             .semantics(mergeDescendants = true) {
                 selected = current
