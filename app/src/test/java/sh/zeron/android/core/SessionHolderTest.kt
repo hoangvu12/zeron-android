@@ -176,6 +176,26 @@ class SessionHolderTest {
         assertFalse(built[0].shutDown)
     }
 
+    @Test
+    fun aRestartRelaunchRebuildsTheStoredAccountsClient() {
+        // no-relay-layer: the client boot built has the wrong config.
+        store.store(account())
+        holder.boot()
+        holder.relaunch(clearStored = false, restart = true) { null }
+        assertEquals(2, built.size)
+        assertTrue(built[0].shutDown)
+        assertSame(built[1], holder.clientOrNull())
+        assertEquals(account(), built[1].credentials)
+    }
+
+    @Test
+    fun aRestartRelaunchWithNothingStoredStaysSignedOut() {
+        holder.boot()
+        holder.relaunch(clearStored = false, restart = true) { null }
+        assertTrue(built.isEmpty())
+        assertNull(holder.client.value)
+    }
+
     // ------------------------------------------------------- relay (#130)
 
     @Test

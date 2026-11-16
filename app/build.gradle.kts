@@ -43,8 +43,8 @@ val requestedAbis: List<String> = providers.gradleProperty("zeronAbis")
 // ---------------------------------------------------------------------------
 // The core's own version: the load handshake (CoreLoader) and the app
 // version the core reports compare against it, so it never takes the
-// release build's suffix (#66: a `v0.2.129-2` tag ships versionName
-// 0.2.129-2 on core 0.2.129).
+// release build's suffix (#66: a `v0.3.7-2` tag ships versionName
+// 0.3.7-2 on core 0.3.7).
 val coreVersion: String = ZeronVersion.versionName(zeronDir.resolve("Cargo.toml"))
 val appVersionName: String = ZeronVersion.versionName(
     zeronDir.resolve("Cargo.toml"),

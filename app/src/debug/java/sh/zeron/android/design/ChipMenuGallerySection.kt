@@ -50,6 +50,7 @@ import sh.zeron.android.session.contextChip
 import uniffi.zeron_core.ChatConfig
 import uniffi.zeron_core.ChatIndicator
 import uniffi.zeron_core.ComposerState
+import uniffi.zeron_core.TranscriptLoad
 import uniffi.zeron_core.ContextUsage
 import uniffi.zeron_core.HostCapabilities
 import uniffi.zeron_core.HostInfo
@@ -321,6 +322,7 @@ private fun galleryChatConfig(model: String, reasoning: String?): ChatConfig = C
 )
 
 private fun galleryComposerState(): ComposerState = ComposerState(
+    transcriptLoad = TranscriptLoad.READY,
     chatId = "gallery-session",
     revision = 1uL,
     title = "Session",
@@ -398,6 +400,9 @@ internal fun gallerySessionRow(config: ChatConfig, modelLabel: String): SessionR
     sendState = null,
     parentChatId = null,
     roomGen = 0u,
+    sleepUntilMs = null,
+    wokeAtMs = null,
+    waitsOnProcess = false,
 )
 
 /**

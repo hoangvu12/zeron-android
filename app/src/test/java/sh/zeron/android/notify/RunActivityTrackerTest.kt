@@ -8,6 +8,7 @@ import uniffi.zeron_core.ChatIndicator
 import uniffi.zeron_core.ChatIndicator.AWAITING_INPUT
 import uniffi.zeron_core.ChatIndicator.COMPLETED
 import uniffi.zeron_core.ChatIndicator.IDLE
+import uniffi.zeron_core.ChatIndicator.WAITING
 import uniffi.zeron_core.ChatIndicator.WORKING
 
 /**
@@ -60,6 +61,24 @@ class RunActivityTrackerTest {
         assertTrue(tracker.update(listOf(row("a", WORKING))).working.single().fromThisDevice)
         assertTrue(tracker.update(listOf(row("a", WORKING))).working.single().fromThisDevice)
         // The run ends; the next one, started elsewhere, is not from here.
+        tracker.update(listOf(row("a", COMPLETED)))
+        assertFalse(tracker.update(listOf(row("a", WORKING))).working.single().fromThisDevice)
+    }
+
+    @Test
+    fun waitingChatsAreStillRuns() {
+        // A parent waiting on its child chats is under way, never done.
+        val activity = tracker.update(listOf(row("a", WAITING), row("b", WORKING)))
+        assertEquals(listOf("a", "b"), activity.working.map { it.chatId })
+        assertEquals(0, activity.awaiting)
+    }
+
+    @Test
+    fun aRunFromHereStaysFromHereThroughWaiting() {
+        tracker.update(listOf(row("a", IDLE, sending = true)))
+        assertTrue(tracker.update(listOf(row("a", WORKING))).working.single().fromThisDevice)
+        assertTrue(tracker.update(listOf(row("a", WAITING))).working.single().fromThisDevice)
+        assertTrue(tracker.update(listOf(row("a", WORKING))).working.single().fromThisDevice)
         tracker.update(listOf(row("a", COMPLETED)))
         assertFalse(tracker.update(listOf(row("a", WORKING))).working.single().fromThisDevice)
     }

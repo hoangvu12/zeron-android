@@ -83,9 +83,12 @@ data class SessionRowVM(
 /**
  * `AppModel.status` (`AppModel.swift:440-448`). Exhaustive on purpose: a
  * new FFI case fails to compile instead of silently reading Idle.
+ * Waiting (on background work or child chats) is under way, never done:
+ * drawn as Working, like iOS (`AppModel.swift` `.working, .waiting`) and
+ * upstream Android (`Components.kt`).
  */
 fun statusOf(i: ChatIndicator): SessionRowVM.Status = when (i) {
-    ChatIndicator.WORKING -> SessionRowVM.Status.Working
+    ChatIndicator.WORKING, ChatIndicator.WAITING -> SessionRowVM.Status.Working
     ChatIndicator.AWAITING_INPUT -> SessionRowVM.Status.Awaiting
     ChatIndicator.ERRORED -> SessionRowVM.Status.Errored
     ChatIndicator.COMPLETED -> SessionRowVM.Status.Completed

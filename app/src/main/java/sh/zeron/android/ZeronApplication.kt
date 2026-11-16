@@ -422,9 +422,14 @@ class ZeronApplication : Application() {
      * outlives activity recreation and keeps running with the screen off
      * (its microphone service holds the process). Main thread only.
      */
-    val voice: VoiceController by lazy {
+    private val voiceLazy = lazy {
         VoiceController(this, sessionHolder.client, workspaceFeed.devices, applicationScope)
     }
+
+    val voice: VoiceController by voiceLazy
+
+    /** A call is live (never builds the controller just to ask). */
+    private val voiceLive: Boolean get() = voiceLazy.isInitialized() && voice.live
 
     /**
      * The app-scoped alert state (the [appToaster] precedent): an
@@ -533,12 +538,16 @@ class ZeronApplication : Application() {
         // network state to every client the holder publishes. Right after
         // onForeground() the workspace is re-read (iOS
         // `willEnterForeground` → `refreshWorkspace`), so relative times
-        // are fresh on return.
+        // are fresh on return. 30 s into the background the core lets go
+        // of its sockets (upstream Android's rest), unless a voice call is
+        // live or the delivery hold still runs. The run-watch service gets
+        // no exception: its notification goes quiet with the sockets.
         lifecycleHooks = AppLifecycleHooks.install(
             app = this,
             lifecycle = ProcessLifecycleOwner.get().lifecycle,
             sink = { clientOrNull()?.let(::CoreLifecycleSink) },
             afterForeground = { workspaceFeed.refresh() },
+            busy = { voiceLive || DeliveryService.holding },
         )
         // #39: every workspace refresh sweeps the fresh side chats (iOS
         // `refreshWorkspace` → `sweepFreshSideChats`).
@@ -819,6 +828,8 @@ class ZeronApplication : Application() {
                 val edgeChanged = Endpoints.applyLaunch(options.edge, options.workos)
                 sessionHolder.relaunch(
                     clearStored = options.signedOut || edgeChanged,
+                    // no-relay-layer: the booted client was built with the layer on.
+                    restart = options.noRelayLayer,
                     choose = options::launchCredentials,
                 )
             } finally {

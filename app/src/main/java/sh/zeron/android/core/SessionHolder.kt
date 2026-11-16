@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import sh.zeron.android.BuildConfig
 import sh.zeron.android.session.SessionEventHub
+import sh.zeron.android.shell.LaunchOptions
 import uniffi.zeron_core.ClientEvent
 import uniffi.zeron_core.ClientListener
 import uniffi.zeron_core.CoreClient
@@ -150,10 +151,13 @@ class SessionHolder<C : Any>(
      * a running one out locally (its store is kept). [choose] then picks the
      * account to start, given whether one is still stored; null keeps the
      * stored one. A changed edge comes in as [clearStored] (#130: accounts
-     * are per relay). Blocks.
+     * are per relay). [restart] rebuilds the stored account's client even
+     * when [boot] already started it (an extra that changes the client's
+     * config, `no-relay-layer`). Blocks.
      */
     fun relaunch(
         clearStored: Boolean,
+        restart: Boolean = false,
         choose: (hasStored: Boolean) -> Credentials?,
     ) {
         synchronized(lifecycle) {
@@ -168,7 +172,7 @@ class SessionHolder<C : Any>(
                     }
                 }
                 val stored = credentials.stored()
-                val next = choose(stored != null) ?: stored?.takeIf { booting }
+                val next = choose(stored != null) ?: stored?.takeIf { booting || restart }
                 next?.let(::startLocked)
             } finally {
                 _booted.value = true
@@ -344,6 +348,11 @@ class SessionHolder<C : Any>(
                         // The Zeron version this build runs (#66: never the
                         // release build's suffix, which hosts don't know).
                         appVersion = BuildConfig.CORE_VERSION,
+                        // Not behind a remote flag: rooms have to hear this from the
+                        // build for the 14 days before any engine flips
+                        // (docs/design/relay-mobile.md); the room's answer decides
+                        // the rest. The debug `no-relay-layer` extra turns it off.
+                        relayLayer = !LaunchOptions.current.noRelayLayer,
                     )
                     // The constructor never dials; then warm the likeliest chats (iOS start).
                     CoreClient(config, creds, listener).also { it.preloadSessions() }

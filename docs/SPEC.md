@@ -1,6 +1,6 @@
 # zeron-android — Spec
 
-Status: draft for review · Zeron pin: v0.2.129 · Last updated: 2026-10-29 · Roadmap: #67
+Status: draft for review · Zeron pin: v0.3.7 · Last updated: 2026-11-16 · Roadmap: #67
 
 ## 1. Goal
 
@@ -24,7 +24,8 @@ tablet/foldable layouts, notifications.
 
 - Patching Zeron's Rust core or edge. The core is consumed as-is from the
   submodule. If a gap truly needs a core/edge change it becomes an upstream PR
-  ticket, never a fork-only patch (see D9).
+  ticket, never a fork-only patch. The one exception is D15's agent-message
+  parsing (`core-patches/`).
 - iOS-only surfaces: Live Activity / Dynamic Island (→ an ongoing call
   notification), iPhone Duo-specific code (→ Android foldable handling), the
   iOS debug transcript lab.
@@ -50,7 +51,7 @@ tablet/foldable layouts, notifications.
    window size classes and folding features. Components follow the
    Radix/shadcn model: our look on headless, accessible primitives (Compose
    Foundation, Compose Unstyled), each meeting an accessibility contract (D7).
-4. **No core patches.** Adapt in Kotlin.
+4. **No core patches.** Adapt in Kotlin. (Exception: D15.)
 5. **Nothing builds locally.** All compilation and tests
    run on GitHub Actions; the owner's machine needs only git + gh.
 6. **Small, reviewable PRs**, one ticket each, with CI green. The owner tests
@@ -61,7 +62,7 @@ tablet/foldable layouts, notifications.
 ### 4.1 Repository
 
 ```
-zeron/          submodule → zeronsh/zeron, pinned to a release tag (v0.2.129)
+zeron/          submodule → zeronsh/zeron, pinned to a release tag (v0.3.7)
 app/            the Android app (package sh.zeron.android)
 buildSrc/       Gradle helpers (prebuilt-core import, assets, fonts, chimes, licences)
 tools/          android-assets: SVG → VectorDrawable / PNG (vendored from Roboco)
@@ -79,8 +80,10 @@ docs/port/      the five iOS → Android gap audits (row IDs referenced by ticke
 - `core` workflow: `zeron/scripts/android/build-core.sh` on ubuntu
   (cargo-ndk, NDK 29.0.14206865, arm64-v8a, profile `mobile`; `mobile-dist`
   for releases) → `core-out/{kotlin,jniLibs,host}`. `host/` is a Linux build
-  of the core for Robolectric (JNA). Cached by submodule SHA; only runs when
-  `zeron/` or the workflow changes.
+  of the core for Robolectric (JNA). `core-patches/` are applied to the
+  submodule first (`scripts/core-patches.sh`). Cached by submodule SHA and the
+  patches' contents; only runs when `zeron/`, `core-patches/` or the workflow
+  changes.
 - `app` workflow: consumes `core-out` (`-PzeronCoreDir`), builds the debug APK,
   runs JVM tests, and uploads the APK (signed with the shared test key from
   repo secrets) as an artifact. Every PR gets an installable APK.
@@ -143,6 +146,8 @@ docs/port/      the five iOS → Android gap audits (row IDs referenced by ticke
 | D12 | Demo, dev credentials and routes are debug launch extras only, as on iOS (no "Explore the demo" button) | decided (owner) |
 | D13 | Voice in scope: WebRTC (`io.github.webrtc-sdk:android`), microphone foreground service + CallStyle notification as the Live Activity stand-in | decided (owner) |
 | D14 | Visual shaders/3D need Vulkan; devices without it get the core's software fallback / error state | decided (owner) |
+| D15 | The phone core reads child reports, parent→child messages and Zeron notes the way the v3 nightly desktop writes them: the nightly's `crates/proto/src/agent_messages.rs` changes ride on the pinned tag as `core-patches/0001-nightly-agent-messages.patch` (pure string parsing, nothing on the wire) | decided (owner) |
+| D16 | 30 s into the background the core closes its sockets (`onBackgroundIdle`, upstream Android), except during a live voice call or the delivery hold. The run-watch service gets no exception: its notification stops updating until the app is opened | decided (owner) |
 
 ## 6. Milestones
 

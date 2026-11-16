@@ -3,6 +3,7 @@ package sh.zeron.android.session
 import uniffi.zeron_core.ChatConfig
 import uniffi.zeron_core.ChatIndicator
 import uniffi.zeron_core.ComposerState
+import uniffi.zeron_core.TranscriptLoad
 import uniffi.zeron_core.Connectivity
 import uniffi.zeron_core.ConnectivityState
 import uniffi.zeron_core.ContextUsage
@@ -38,6 +39,7 @@ internal fun composerState(
     chatId: String = "chat-a",
     contextUsage: ContextUsage? = null,
 ): ComposerState = ComposerState(
+    transcriptLoad = TranscriptLoad.READY,
     chatId = chatId,
     revision = 1uL,
     title = title,
@@ -119,6 +121,9 @@ internal fun sessionRow(
     sendState = null,
     parentChatId = parentChatId,
     roomGen = 2u,
+    sleepUntilMs = null,
+    wokeAtMs = null,
+    waitsOnProcess = false,
 )
 
 /** A PR fixture for the chip tests (78). */

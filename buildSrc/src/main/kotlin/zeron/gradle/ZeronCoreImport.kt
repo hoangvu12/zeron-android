@@ -16,8 +16,9 @@ import java.io.File
 
 /**
  * Stages a prebuilt Zeron mobile core into the build. The core is not
- * compiled by Gradle: `zeron/scripts/android/build-core.sh <dir>` (run by the
- * `Core` CI workflow) produces a `core-out` directory:
+ * compiled by Gradle: `scripts/build-core.sh <dir>` (core-patches/ applied to
+ * zeron/, then `zeron/scripts/android/build-core.sh <dir>`, as the `Core` CI
+ * workflow does) produces a `core-out` directory:
  *
  * ```text
  * <dir>/kotlin/uniffi/zeron_core/zeron_core.kt   UniFFI Kotlin bindings
@@ -59,7 +60,7 @@ abstract class ZeronCoreImport : DefaultTask() {
         val path = coreDirPath.orNull?.takeIf { it.isNotBlank() }
             ?: throw GradleException(
                 "No Zeron core. Pass -PzeronCoreDir=<dir> (or set ZERON_CORE_DIR) to a " +
-                    "directory built by `bash zeron/scripts/android/build-core.sh <dir>` " +
+                    "directory built by `bash scripts/build-core.sh <dir> --host` " +
                     "(or the `zeron-core` artifact of the Core workflow): it needs " +
                     "kotlin/, jniLibs/<abi>/libzeron_mobile.so and, for JVM tests, " +
                     "host/libzeron_mobile.so.",

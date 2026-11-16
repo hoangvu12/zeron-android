@@ -58,6 +58,7 @@ import sh.zeron.android.transcript.TranscriptState
 import uniffi.zeron_core.ChatConfig
 import uniffi.zeron_core.ChatIndicator
 import uniffi.zeron_core.ComposerState
+import uniffi.zeron_core.TranscriptLoad
 import uniffi.zeron_core.DeviceView
 import uniffi.zeron_core.HostCapabilities
 import uniffi.zeron_core.HostInfo
@@ -324,6 +325,7 @@ private class GallerySessionCore(private val onLog: (String) -> Unit) : SessionC
     override val engineId: String = "11111111-1111-4111-8111-111111111111"
 
     override fun composer(): ComposerState = ComposerState(
+        transcriptLoad = TranscriptLoad.READY,
         chatId = chatId,
         revision = 1uL,
         title = "Session",

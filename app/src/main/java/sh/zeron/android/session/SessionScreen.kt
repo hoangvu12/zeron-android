@@ -588,6 +588,9 @@ fun SessionScreen(
                     // alpha inside the single graphicsLayer the layers
                     // compose (never a second layer on the host).
                     transcriptAlpha = { state.arrival.transcriptAlpha },
+                    // relay-mobile.md "Show the new state": a chat this
+                    // device has nothing of says why, and ends the hold.
+                    emptyNotice = chrome.emptyNotice,
                 ) {
                     // 77: UIKit's alpha-0.01 hit-test rule — while the
                     // arrival hides it, the transcript takes no taps and

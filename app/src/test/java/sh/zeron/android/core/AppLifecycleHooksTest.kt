@@ -54,6 +54,11 @@ class AppLifecycleHooksTest {
             threads += Thread.currentThread().name
         }
 
+        override fun onBackgroundIdle() {
+            calls += "onBackgroundIdle"
+            threads += Thread.currentThread().name
+        }
+
         override fun setNetworkOnline(online: Boolean) {
             calls += "setNetworkOnline($online)"
             threads += Thread.currentThread().name
@@ -144,6 +149,98 @@ class AppLifecycleHooksTest {
         start()
         stop()
         // No crash; nothing to assert on the sink side.
+    }
+
+    // ---------------------------------------------------------------- rest
+
+    /** A scheduler driven by hand: [advance] runs what is due, in order. */
+    private class ManualScheduler : RestScheduler {
+        var now = 0L
+        val pending = mutableListOf<Pair<Long, Runnable>>()
+
+        override fun schedule(delayMs: Long, task: Runnable) {
+            pending += (now + delayMs) to task
+        }
+
+        override fun cancel(task: Runnable) {
+            pending.removeAll { it.second === task }
+        }
+
+        fun advance(ms: Long) {
+            val until = now + ms
+            while (true) {
+                val next = pending.filter { it.first <= until }.minByOrNull { it.first } ?: break
+                pending.remove(next)
+                now = next.first
+                next.second.run()
+            }
+            now = until
+        }
+    }
+
+    private fun restHooks(scheduler: ManualScheduler, busy: () -> Boolean = { false }): AppLifecycleHooks =
+        AppLifecycleHooks(
+            sink = { sink },
+            executor = DirectExecutor,
+            afterForeground = {},
+            scheduler = scheduler,
+            busy = busy,
+        ).also { owner.lifecycle.addObserver(it) }
+
+    @Test
+    fun thirtySecondsInTheBackgroundLetsGoOfTheSockets() {
+        val scheduler = ManualScheduler()
+        restHooks(scheduler)
+        start()
+        stop()
+        scheduler.advance(AppLifecycleHooks.REST_AFTER_MS - 1)
+        assertEquals(listOf("onForeground", "onBackground"), sink.calls)
+        scheduler.advance(1)
+        assertEquals(listOf("onForeground", "onBackground", "onBackgroundIdle"), sink.calls)
+        // Once: nothing more while it stays in the background.
+        scheduler.advance(10 * AppLifecycleHooks.REST_RECHECK_MS)
+        assertEquals(1, sink.calls.count { it == "onBackgroundIdle" })
+    }
+
+    @Test
+    fun returningBeforeTheRestCancelsIt() {
+        val scheduler = ManualScheduler()
+        restHooks(scheduler)
+        start()
+        stop()
+        scheduler.advance(20_000)
+        owner.registry.handleLifecycleEvent(Lifecycle.Event.ON_START)
+        scheduler.advance(10 * AppLifecycleHooks.REST_AFTER_MS)
+        assertEquals(listOf("onForeground", "onBackground", "onForeground"), sink.calls)
+    }
+
+    @Test
+    fun aSecondBackgroundingRestartsTheClock() {
+        val scheduler = ManualScheduler()
+        restHooks(scheduler)
+        start()
+        stop()
+        scheduler.advance(20_000)
+        owner.registry.handleLifecycleEvent(Lifecycle.Event.ON_START)
+        stop()
+        scheduler.advance(20_000)
+        assertTrue("rested early: ${sink.calls}", "onBackgroundIdle" !in sink.calls)
+        scheduler.advance(10_000)
+        assertEquals("onBackgroundIdle", sink.calls.last())
+    }
+
+    @Test
+    fun aLiveCallOrDeliveryHoldPutsTheRestOffUntilItEnds() {
+        val scheduler = ManualScheduler()
+        var busy = true
+        restHooks(scheduler) { busy }
+        start()
+        stop()
+        scheduler.advance(AppLifecycleHooks.REST_AFTER_MS + 3 * AppLifecycleHooks.REST_RECHECK_MS)
+        assertTrue("rested while busy: ${sink.calls}", "onBackgroundIdle" !in sink.calls)
+        busy = false
+        scheduler.advance(AppLifecycleHooks.REST_RECHECK_MS)
+        assertEquals("onBackgroundIdle", sink.calls.last())
     }
 
     // ------------------------------------------------------------- network

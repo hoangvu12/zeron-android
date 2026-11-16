@@ -63,6 +63,9 @@ internal fun testRow(
     sendState = null,
     parentChatId = null,
     roomGen = 2u,
+    sleepUntilMs = null,
+    wokeAtMs = null,
+    waitsOnProcess = false,
 )
 
 internal fun testSection(id: String, name: String = id, rows: List<SessionRow> = emptyList()) =

@@ -68,6 +68,9 @@ internal object FolderFixtures {
         sendState = null,
         parentChatId = null,
         roomGen = 0u,
+        sleepUntilMs = null,
+        wokeAtMs = null,
+        waitsOnProcess = false,
     )
 
     /** "Streaming veil on transcript rows" (project "zeron", branch "main"). */

@@ -4,6 +4,14 @@ import uniffi.zeron_core.ChatIndicator
 import uniffi.zeron_core.SessionRow
 import uniffi.zeron_core.WorkspaceSnapshot
 
+/**
+ * Working, or Waiting on background work or child chats: under way, never
+ * done (`ChatIndicator::Waiting` is "drawn as Working"; upstream Android
+ * counts both as running in `SessionsScreen.kt`).
+ */
+internal fun underWay(i: ChatIndicator): Boolean =
+    i == ChatIndicator.WORKING || i == ChatIndicator.WAITING
+
 /** What the watcher needs of a session row. */
 data class WatchedRow(
     val id: String,
@@ -39,9 +47,11 @@ data class SessionNotice(
  *   replays old events;
  * - **failed**: the indicator becomes Errored;
  * - **input**: it becomes AwaitingInput (a question or permission prompt);
- * - **done**: Working/AwaitingInput → Completed, or Working → Working with
- *   a new `workingSinceMs` (a queued message started the next turn and
- *   the Completed frame was coalesced away);
+ * - **done**: Working/Waiting/AwaitingInput → Completed, or Working →
+ *   Working with a new `workingSinceMs` (a queued message started the next
+ *   turn and the Completed frame was coalesced away);
+ * - Waiting (on background work or child chats) is under way like Working:
+ *   Working ↔ Waiting is silent, and Waiting → Completed is Done;
  * - Working → Idle is silent (an interrupt, a stale row, or a turn already
  *   seen on another device — the last is a deliberate small divergence
  *   from the edge, which reads `lastCompletedTurn`);
@@ -82,7 +92,9 @@ class SessionWatcher {
             now == ChatIndicator.ERRORED && prev != ChatIndicator.ERRORED -> NotificationKind.Failed
             now == ChatIndicator.AWAITING_INPUT && prev != ChatIndicator.AWAITING_INPUT -> NotificationKind.Input
             now == ChatIndicator.COMPLETED &&
-                (prev == ChatIndicator.WORKING || prev == ChatIndicator.AWAITING_INPUT) -> NotificationKind.Done
+                (underWay(prev) || prev == ChatIndicator.AWAITING_INPUT) -> NotificationKind.Done
+            // Only Working → Working: a chat that sat Waiting and starts a
+            // turn is still the same piece of work, not a finished one.
             now == ChatIndicator.WORKING && prev == ChatIndicator.WORKING &&
                 before.workingSinceMs != null && row.workingSinceMs != null &&
                 row.workingSinceMs != before.workingSinceMs -> NotificationKind.Done
@@ -152,13 +164,13 @@ class RunActivityTracker {
         val live = rows.filter { !it.silent }
         val sentHere = HashSet<String>()
         for (row in live) {
-            val working = row.indicator == ChatIndicator.WORKING
+            val working = underWay(row.indicator)
             if (row.sending || (working && row.id in fromHere)) sentHere += row.id
         }
         fromHere = sentHere
         return RunActivity(
             working = live
-                .filter { it.indicator == ChatIndicator.WORKING }
+                .filter { underWay(it.indicator) }
                 .map { WorkingRun(it.id, it.title, it.deviceName, it.workingSinceMs, fromThisDevice = it.id in sentHere) },
             awaiting = live.count { it.indicator == ChatIndicator.AWAITING_INPUT },
         )
