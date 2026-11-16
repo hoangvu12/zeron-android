@@ -317,7 +317,7 @@ class ZeronIconsTest {
             ZeronIcons.TrayFull to R.drawable.zi_tray_full,
             ZeronIcons.CircleDashed to R.drawable.zi_circle_dashed,
             ZeronIcons.Calendar to R.drawable.zi_calendar,
-            ZeronIcons.XmarkCircle to R.drawable.zi_close_circle,
+            // Stop Waiting's XmarkCircle is the terminal menu's, below.
             ZeronIcons.CircleLeftHalfFilled to R.drawable.zi_circle_half,
             ZeronIcons.SquareStack3dUp to R.drawable.zi_layers,
             ZeronIcons.SquareAndArrowUp to R.drawable.zi_share,

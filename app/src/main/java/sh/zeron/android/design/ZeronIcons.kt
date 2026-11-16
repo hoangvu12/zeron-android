@@ -285,9 +285,6 @@ object ZeronIcons {
     /** SF `calendar` — Sleep's Custom…. */
     val Calendar = ZeronIcon.Vector(R.drawable.zi_calendar)
 
-    /** SF `xmark.circle` — Activity's Stop Waiting. */
-    val XmarkCircle = ZeronIcon.Vector(R.drawable.zi_close_circle)
-
     /** SF `circle.lefthalf.filled` — appearance System, context-usage chip. */
     val CircleLeftHalfFilled = ZeronIcon.Vector(R.drawable.zi_circle_half)
 
@@ -466,7 +463,7 @@ object ZeronIcons {
     /** #51: "Choose on GitHub". */
     val ArrowUpRightSquare = ZeronIcon.Vector(R.drawable.zi_arrow_up_right_square)
 
-    /** SF `xmark.circle` — the terminal's Close Terminal. */
+    /** SF `xmark.circle` — the terminal's Close Terminal; Activity's Stop Waiting. */
     val XmarkCircle = ZeronIcon.Vector(R.drawable.zi_close_circle)
 
     /** SF `textformat.size.smaller` — the terminal's Text Size: Smaller. */
@@ -556,7 +553,6 @@ object ZeronIcons {
         RegistryEntry("TrayFull", listOf("tray.full"), TrayFull),
         RegistryEntry("CircleDashed", listOf("circle.dashed"), CircleDashed),
         RegistryEntry("Calendar", listOf("calendar"), Calendar),
-        RegistryEntry("XmarkCircle", listOf("xmark.circle"), XmarkCircle),
         RegistryEntry("CircleLeftHalfFilled", listOf("circle.lefthalf.filled"), CircleLeftHalfFilled),
         RegistryEntry("SquareStack3dUp", listOf("square.stack.3d.up"), SquareStack3dUp),
         RegistryEntry("SquareAndArrowUp", listOf("square.and.arrow.up"), SquareAndArrowUp),
