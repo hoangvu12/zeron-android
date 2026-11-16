@@ -49,7 +49,8 @@ private const val PercentByte: Byte = 0x25
  * Scheme matching is ASCII case-insensitive (RFC 3986; iOS's
  * case-sensitive `url.scheme == "http"` is adapted). File-shaped links
  * (rows 5–7 and 9) that name an image open the viewer with the link
- * verbatim as the reference — the engine's `ReadImageChunk` resolves it —
+ * verbatim as the reference — the host's `readAttachment` reads it, inside
+ * the uploads folder or a chat's folder only —
  * and stay the TRANSCRIPT-D4 no-ops otherwise.
  */
 fun routeLink(url: String): LinkRoute {

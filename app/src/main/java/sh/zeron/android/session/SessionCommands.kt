@@ -58,6 +58,13 @@ class CoreSessionCommands(
     private val handle: SessionHandle,
     private val chatId: String,
     /**
+     * Runs after the core accepted a send — iOS `app?.forgetFreshSideChat(chatId)`
+     * (`CoreSessionSource.swift:186`): a side chat with a message in it,
+     * even one still waiting offline, is no longer "fresh" and must never
+     * be swept. Any thread.
+     */
+    private val onAccepted: () -> Unit = {},
+    /**
      * `composer.host.deviceId` as of the last chrome refresh (ticket 51's
      * `SessionController.hostDeviceId`) — read at call time, like iOS's
      * cached `hostDevice` (`CoreSessionSource.swift:42`).
@@ -66,8 +73,9 @@ class CoreSessionCommands(
 ) : SessionCommands {
 
     override suspend fun send(text: String, images: List<StagedImage>, mode: DeliveryMode) = withContext(Dispatchers.IO) {
-        // iOS `CoreSessionSource.swift:172`.
-        if (mode == DeliveryMode.Interrupt && handle.composer().live.turnRunning) handle.interrupt()
+        // iOS `CoreSessionSource.swift:184`: `chrome.running`, i.e. only
+        // when a stop can reach the turn.
+        if (mode == DeliveryMode.Interrupt && handle.composer().live.let { it.turnRunning && it.canInterrupt }) handle.interrupt()
         handle.send(
             SendRequest(
                 text = text,
@@ -83,6 +91,7 @@ class CoreSessionCommands(
                 busy = busyPolicyFor(mode),
             ),
         )
+        onAccepted()
         // #58: iOS `app?.noteDeliveryActivity()` after an accepted send.
         DeliveryHold.noteActivity()
         Unit

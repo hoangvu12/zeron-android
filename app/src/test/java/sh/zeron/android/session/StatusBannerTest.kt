@@ -44,7 +44,7 @@ class StatusBannerTest {
     fun aQueuedSendNamesTheOfflineHost() {
         assertEquals(
             SessionChrome.Banner.Failed(queuedCopy),
-            deriveBanner(BannerInputs(sendState = SendLite.Queued, hostName = "MacBook", offline = true)),
+            deriveBanner(BannerInputs(sendState = SendLite.Queued, hostName = "MacBook")),
         )
         assertEquals(
             SessionChrome.Banner.Failed("Host is offline — will send when it's back"),
@@ -57,15 +57,30 @@ class StatusBannerTest {
         // The transcript's setup step says it; nothing below QUEUED is read.
         assertEquals(
             SessionChrome.Banner.None,
-            deriveBanner(BannerInputs(sendState = SendLite.Queued, isCloud = true, offline = true)),
+            deriveBanner(BannerInputs(sendState = SendLite.Queued, isCloud = true)),
         )
     }
 
+    /**
+     * iOS `CoreSessionSource.swift:133-136`: with no network the phone
+     * can't tell whether the host is there, so a waiting send reads
+     * "Offline — sends are saved", never "<host> is offline", and a Cloud
+     * chat says it too.
+     */
     @Test
-    fun sendingBeatsOffline() {
+    fun thePhoneBeingOfflineBeatsAWaitingSend() {
+        listOf(
+            BannerInputs(sendState = SendLite.Queued, hostName = "MacBook", offline = true),
+            BannerInputs(sendState = SendLite.Queued, isCloud = true, offline = true),
+            BannerInputs(sendState = SendLite.Sending, offline = true),
+        ).forEach { assertEquals(SessionChrome.Banner.Offline, deriveBanner(it)) }
+    }
+
+    @Test
+    fun sendingWithANetworkIsSending() {
         assertEquals(
             SessionChrome.Banner.Sending,
-            deriveBanner(BannerInputs(sendState = SendLite.Sending, offline = true)),
+            deriveBanner(BannerInputs(sendState = SendLite.Sending)),
         )
     }
 
@@ -101,7 +116,7 @@ class StatusBannerTest {
         assertEquals(
             listOf(
                 SessionChrome.Banner.Sending,
-                SessionChrome.Banner.Failed(queuedCopy),
+                SessionChrome.Banner.Offline,
                 SessionChrome.Banner.Offline,
                 SessionChrome.Banner.Reconnecting(9_000L),
                 SessionChrome.Banner.None,

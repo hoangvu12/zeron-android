@@ -301,6 +301,23 @@ class SessionChipMenusTest {
         assertTrue("the machine is not asked", core.fake.methodNames().none { it.startsWith("listHarnesses") })
     }
 
+    @Test
+    fun aRowWithNoHarnessLabelNamesItsOwnPageWithTheCoresLabel() {
+        // iOS `row.harnessLabel ?? HarnessNames.label(harness)`, never the raw id.
+        val core = object : ChipMenuCoreDelegate(
+            FakeChipMenuCore(row = chipMenuSessionRow(harnessLabel = null), config = chatConfig(model = "claude-fable-5")),
+        ) {
+            override fun harnessLabel(harness: String): String = "Label($harness)"
+        }
+        val menus = SessionChipMenus(core, io = fakeIo())
+        val shown = mutableListOf<ModelPickerRequest>()
+        menus.modelPicker = ModelPickerPresenter { shown += it }
+        fill(menus, core.fake)
+
+        menus.menu("model", RecordingPlatform())
+        assertEquals("Label(claude-code)", shown.single().tabs.first().label)
+    }
+
     /** A [ChipMenuCore] over [fake] whose members a test can override one by one. */
     private open class ChipMenuCoreDelegate(val fake: FakeChipMenuCore) : ChipMenuCore by fake
 

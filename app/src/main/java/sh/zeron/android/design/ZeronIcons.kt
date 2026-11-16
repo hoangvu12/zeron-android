@@ -445,6 +445,18 @@ object ZeronIcons {
     /** #51: "Choose on GitHub". */
     val ArrowUpRightSquare = ZeronIcon.Vector(R.drawable.zi_arrow_up_right_square)
 
+    /** SF `xmark.circle` — the terminal's Close Terminal. */
+    val XmarkCircle = ZeronIcon.Vector(R.drawable.zi_close_circle)
+
+    /** SF `textformat.size.smaller` — the terminal's Text Size: Smaller. */
+    val TextformatSizeSmaller = ZeronIcon.Vector(R.drawable.zi_textformat_size_smaller)
+
+    /** SF `textformat.size.larger` — the terminal's Text Size: Bigger. */
+    val TextformatSizeLarger = ZeronIcon.Vector(R.drawable.zi_textformat_size_larger)
+
+    /** SF `clear` — the terminal's Clear Screen. */
+    val Clear = ZeronIcon.Vector(R.drawable.zi_clear)
+
     /**
      * Every registry row, in mapping-table order — the single source
      * [bySfName], the design-gallery grid and the registry tests read.
@@ -594,6 +606,11 @@ object ZeronIcons {
         RegistryEntry("Textformat", listOf("textformat"), Textformat),
         RegistryEntry("TextformatSize", listOf("textformat.size"), TextformatSize),
         RegistryEntry("GithubMark", emptyList(), GithubMark),
+        // The terminal's ⋯ menu (iOS TerminalViewController.swift:284-301).
+        RegistryEntry("XmarkCircle", listOf("xmark.circle"), XmarkCircle),
+        RegistryEntry("TextformatSizeSmaller", listOf("textformat.size.smaller"), TextformatSizeSmaller),
+        RegistryEntry("TextformatSizeLarger", listOf("textformat.size.larger"), TextformatSizeLarger),
+        RegistryEntry("Clear", listOf("clear"), Clear),
     )
 
     /** SF name → icon, for strings that arrive at runtime (core widgets, row VMs). */

@@ -33,17 +33,19 @@ data class BannerInputs(
 
 /**
  * The one chrome banner per refresh (#28) — `CoreSessionSource.refresh`'s
- * precedence (`ios:Session/CoreSessionSource.swift:129-145`), first match
+ * precedence (`ios:Session/CoreSessionSource.swift:129-150`), first match
  * wins:
  *
  * 1. `Failed(sendFailure)` — the last send threw, sticky until the next send;
  * 2. `NotDelivered` — `sendState == FAILED`;
- * 3. `QUEUED` — `"<host> is offline — will send when it's back"`; a Cloud
+ * 3. `Offline` — the device has no network while a send waits: the phone
+ *    can't know whether the host is there, so it doesn't blame the host;
+ * 4. `QUEUED` — `"<host> is offline — will send when it's back"`; a Cloud
  *    chat shows nothing (the transcript's setup step says it);
- * 4. `Sending` — `sendState == SENDING`;
- * 5. `Offline` — the device has no network (sends are saved);
- * 6. `Reconnecting(retryAtMs)` — the chat's room is down with a redial due;
- * 7. `None`.
+ * 5. `Sending` — `sendState == SENDING`;
+ * 6. `Offline` — the device has no network (sends are saved);
+ * 7. `Reconnecting(retryAtMs)` — the chat's room is down with a redial due;
+ * 8. `None`.
  *
  * Pure. Never returns `Editing` (a display overlay, [shownBanner]) and
  * never `Working` (the transcript tail owns it).
@@ -51,6 +53,7 @@ data class BannerInputs(
 fun deriveBanner(i: BannerInputs): SessionChrome.Banner = when {
     i.sendFailure != null -> SessionChrome.Banner.Failed(i.sendFailure)
     i.sendState == SendLite.Failed -> SessionChrome.Banner.NotDelivered
+    i.offline && i.sendState != null -> SessionChrome.Banner.Offline
     i.sendState == SendLite.Queued ->
         if (i.isCloud) {
             SessionChrome.Banner.None

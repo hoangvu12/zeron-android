@@ -109,7 +109,7 @@ class TerminalView(context: Context, val tab: TerminalTab) : View(context) {
     var accent: Int = Color.BLUE
         set(value) { field = value; invalidate() }
 
-    var fontSize: Float = prefs.getFloat("fontSize", DEFAULT_SIZE)
+    var fontSize: Float = prefs.getFloat("fontSize", defaultSize(context))
         private set
     private var metrics = TerminalMetrics(context, fontSize, density)
     private val insetLeft = 10 * density
@@ -375,7 +375,8 @@ class TerminalView(context: Context, val tab: TerminalTab) : View(context) {
         actionMode = startActionMode(object : ActionMode.Callback2() {
             override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
                 menu.add(0, 1, 0, "Copy")
-                if (onAddToMessage != null) menu.add(0, 2, 1, "Add to message")
+                // iOS `TerminalView.swift:319`.
+                if (onAddToMessage != null) menu.add(0, 2, 1, "Add to Message")
                 menu.add(0, 3, 2, "Paste")
                 return true
             }
@@ -686,10 +687,23 @@ class TerminalView(context: Context, val tab: TerminalTab) : View(context) {
 
     companion object {
         val NO_MODS = KeyModifiers(ctrl = false, alt = false, shift = false)
+        /** The phone's default size; [defaultSize] is the one to use. */
         const val DEFAULT_SIZE = 12f
+
+        /** A tablet's default size (iOS: 13.5 on iPad). */
+        const val TABLET_DEFAULT_SIZE = 13.5f
         const val MIN_SIZE = 8f
         const val MAX_SIZE = 22f
         private const val BLINK_IDLE_MS = 15_000L
+
+        /**
+         * iOS `TerminalView.defaultFontSize` (`TerminalView.swift:27`): 13.5 on
+         * a tablet (smallest width ≥ 600 dp), else 12.
+         */
+        fun defaultSize(context: Context): Float = defaultSize(context.resources.configuration.smallestScreenWidthDp)
+
+        /** [defaultSize] from the smallest screen width in dp (pure, for tests). */
+        fun defaultSize(smallestWidthDp: Int): Float = if (smallestWidthDp >= 600) TABLET_DEFAULT_SIZE else DEFAULT_SIZE
 
         /** `0xRRGGBBAA` → ARGB. */
         fun argb(rgba: UInt): Int = TerminalColors.argb(rgba)
@@ -698,7 +712,7 @@ class TerminalView(context: Context, val tab: TerminalTab) : View(context) {
 
         /** A rough grid before the view has a size (the shell opens at it, then follows). */
         fun guessGrid(context: Context, widthPx: Int, heightPx: Int, density: Float): Pair<Int, Int> {
-            val m = TerminalMetrics(context, DEFAULT_SIZE, density)
+            val m = TerminalMetrics(context, defaultSize(context), density)
             val w = max(320 * density, widthPx.toFloat()) - 18 * density
             val h = max(400 * density, heightPx * 0.55f)
             return max(20, floor(w / m.cellWidth).toInt()) to max(8, floor(h / m.lineHeight).toInt())

@@ -366,6 +366,10 @@ class ZeronIconsTest {
             ZeronIcons.ArrowUpRightSquare to R.drawable.zi_arrow_up_right_square, // #51
             ZeronIcons.GithubMark to R.drawable.zi_github_mark, // #51
             ZeronIcons.IphoneAndArrowForward to R.drawable.zi_iphone_arrow_forward, // #54
+            ZeronIcons.XmarkCircle to R.drawable.zi_close_circle, // terminal menu
+            ZeronIcons.TextformatSizeSmaller to R.drawable.zi_textformat_size_smaller, // terminal menu
+            ZeronIcons.TextformatSizeLarger to R.drawable.zi_textformat_size_larger, // terminal menu
+            ZeronIcons.Clear to R.drawable.zi_clear, // terminal menu
         )
         assertEquals("every registry constant is covered", ZeronIcons.entries.size, expected.size)
         assertEquals(

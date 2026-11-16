@@ -51,6 +51,7 @@ class SvgPathTokensTest {
             "pi" to 38,
             "opencode" to 24,
             "antigravity" to 43,
+            "muse" to 271,
         )
         assertEquals("every mark pinned", expected.size, BrandMark.entries.size)
         for (mark in BrandMark.entries) {

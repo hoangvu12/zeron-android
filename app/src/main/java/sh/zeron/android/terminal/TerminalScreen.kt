@@ -274,12 +274,14 @@ internal fun TerminalScreen(route: TerminalRoute) {
                     title = TerminalCopy.TextSize,
                     inline = true,
                     children = listOf(
-                        MenuItem(TerminalCopy.Smaller) { resize(-1f) },
-                        MenuItem(TerminalCopy.Reset) { terminalView?.setFontSize(TerminalView.DEFAULT_SIZE) },
-                        MenuItem(TerminalCopy.Bigger) { resize(1f) },
+                        MenuItem(TerminalCopy.Smaller, icon = MenuIcon.Symbol(ZeronIcons.TextformatSizeSmaller)) { resize(-1f) },
+                        MenuItem(TerminalCopy.Reset, icon = MenuIcon.Symbol(ZeronIcons.TextformatSize)) {
+                            terminalView?.setFontSize(TerminalView.defaultSize(context))
+                        },
+                        MenuItem(TerminalCopy.Bigger, icon = MenuIcon.Symbol(ZeronIcons.TextformatSizeLarger)) { resize(1f) },
                     ),
                 ),
-                MenuItem(TerminalCopy.AddOutput, icon = MenuIcon.Symbol(ZeronIcons.BubbleLeft)) {
+                MenuItem(TerminalCopy.AddOutput, icon = MenuIcon.Symbol(ZeronIcons.TextBubble)) {
                     addToMessage(t.session.text(false))
                 },
                 MenuItem(TerminalCopy.CopyAll, icon = MenuIcon.Symbol(ZeronIcons.DocOnDoc)) {
@@ -287,11 +289,11 @@ internal fun TerminalScreen(route: TerminalRoute) {
                         ?.setPrimaryClip(ClipData.newPlainText(TerminalCopy.Terminal, t.session.text(true)))
                     toaster.show(TerminalCopy.Copied)
                 },
-                MenuItem(TerminalCopy.ClearScreen) { clear() },
+                MenuItem(TerminalCopy.ClearScreen, icon = MenuIcon.Symbol(ZeronIcons.Clear)) { clear() },
                 MenuSection(
                     inline = true,
                     children = listOf(
-                        MenuItem(TerminalCopy.CloseTerminal, icon = MenuIcon.Symbol(ZeronIcons.XmarkCircleFill), destructive = true) {
+                        MenuItem(TerminalCopy.CloseTerminal, icon = MenuIcon.Symbol(ZeronIcons.XmarkCircle), destructive = true) {
                             closeCurrent()
                         },
                     ),
