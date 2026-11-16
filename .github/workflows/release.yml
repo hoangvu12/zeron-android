@@ -6,8 +6,8 @@ name: Release
 # version is zeron/Cargo.toml's [workspace.package] version (the core this
 # app runs) and <build> is 1…999 for re-releases on the same core:
 #
-#   v0.2.129    → versionName 0.2.129,   versionCode 2129000
-#   v0.2.129-2  → versionName 0.2.129-2, versionCode 2129002
+#   v0.3.7    → versionName 0.3.7,   versionCode 3007000
+#   v0.3.7-2  → versionName 0.3.7-2, versionCode 3007002
 #
 # versionCode = (major × 1 000 000 + minor × 1 000 + patch) × 1 000 + build,
 # so it only grows as Zeron's version or the build number grows (Android

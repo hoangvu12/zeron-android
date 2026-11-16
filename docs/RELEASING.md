@@ -50,11 +50,11 @@ re-release on the same core:
 
 | Tag | versionName | versionCode |
 |---|---|---|
-| `v0.2.129` | 0.2.129 | 2129000 |
-| `v0.2.129-2` | 0.2.129-2 | 2129002 |
+| `v0.3.7` | 0.3.7 | 3007000 |
+| `v0.3.7-2` | 0.3.7-2 | 3007002 |
 
 ```sh
-git tag v0.2.129 && git push origin v0.2.129
+git tag v0.3.7 && git push origin v0.3.7
 ```
 
 The workflow then builds the core in the `mobile-dist` profile and the arm64
