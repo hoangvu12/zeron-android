@@ -289,7 +289,7 @@ class SidebarToolbarScreenshotTest {
             }
         }
         compose.waitForIdle()
-        compose.onNodeWithTag("sidebar-options").performClick()
+        compose.onNodeWithTag("sessions-options").performClick()
         frame() // the click's write is recomposed by the next frame
         compose.mainClock.advanceTimeBy(600) // past the 0.35 s open spring
         frame()
