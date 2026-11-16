@@ -567,8 +567,13 @@ class SessionChipMenus(
 
 // ── copy (verbatim from the ticket / iOS) ──────────────────────────────────
 
-/** The picker's host line when the row names no computer. */
-const val PICKER_HOST_FALLBACK = "This computer"
+/**
+ * The picker's host line when the row names no computer: iOS names the
+ * host with `app.deviceName(hostDevice)` (CoreSessionSource.swift:329),
+ * which falls back to "Unknown device" (its "This computer" only covers a
+ * missing app model, which a session page never has).
+ */
+const val PICKER_HOST_FALLBACK = "Unknown device"
 
 /** A model row of the picker from the catalog record. */
 private fun ModelInfo.pickerRow(): ModelPickerRow =
