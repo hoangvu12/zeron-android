@@ -110,12 +110,30 @@ internal object NewSessionRequests {
     }
 
     /**
-     * `NewSession(target:config:branch:cwd:title:)` (`:629-630`):
-     * `reasoning = effort` (nil ⇒ the engine chooses), `sandbox` is
-     * always workspace-write on this canvas, `branch` only without a
-     * worktree (with one, the branch becomes the worktree's base).
+     * iOS `AppModel.worktreeSpec` (`AppModel.swift:944-951`, upstream
+     * 922aea4cc): the worktree a new session starts in. Only a **git**
+     * project can make one: the pick outlives a switch to a plain folder
+     * (where its chip is hidden) and the host would refuse the run there,
+     * leaving an empty chat, so it stays in the draft for the next git
+     * project rather than being sent. Base `branch ?: "HEAD"`.
      */
-    fun newSession(d: NewSessionDraft, target: SessionTarget): NewSession = NewSession(
+    fun worktreeSpec(d: NewSessionDraft, project: ProjectOption?): WorktreeSpec? {
+        if (!d.worktree || project == null || !project.git) return null
+        return WorktreeSpec(repoPath = project.path, base = d.branch ?: "HEAD", spaceId = project.id)
+    }
+
+    /** [worktreeSpec] for the draft's picked project among [projects] (iOS `rawProjects.first { … }`). */
+    fun worktreeSpec(d: NewSessionDraft, projects: List<ProjectOption>): WorktreeSpec? =
+        worktreeSpec(d, projects.firstOrNull { it.id == d.projectId })
+
+    /**
+     * `NewSession(target:config:branch:cwd:title:)` (`:966-967`):
+     * `reasoning = effort` (nil ⇒ the engine chooses), `sandbox` is
+     * always workspace-write on this canvas, `branch` only when no
+     * worktree is sent (with one, the branch becomes the worktree's base;
+     * a plain folder keeps the pick in the draft and sends its branch).
+     */
+    fun newSession(d: NewSessionDraft, target: SessionTarget, projects: List<ProjectOption>): NewSession = NewSession(
         target = target,
         config = ChatConfig(
             harness = d.harness,
@@ -124,17 +142,15 @@ internal object NewSessionRequests {
             modelOptions = emptyMap(),
             sandbox = SandboxLevel.WORKSPACE_WRITE,
         ),
-        branch = if (d.worktree) null else d.branch,
+        branch = if (worktreeSpec(d, projects) == null) d.branch else null,
         cwd = null,
         title = null,
     )
 
     /**
-     * `SendRequest` (`:632-637`): the encoded body verbatim, staged
-     * images as JPEG attachments, the worktree spec only when the draft
-     * asks for one **and** the picked project exists (`project.map` — a
-     * worktree without a project is nil), base `branch ?: "HEAD"`,
-     * delivery always `.queue` (a new chat is idle).
+     * `SendRequest` (`:968`): the encoded body verbatim, staged images
+     * as JPEG attachments, the [worktreeSpec] (only for a picked git
+     * project), delivery always `.queue` (a new chat is idle).
      */
     fun sendRequest(
         d: NewSessionDraft,
@@ -151,17 +167,7 @@ internal object NewSessionRequests {
                 data = image.bytes,
             )
         },
-        worktree = if (d.worktree) {
-            projects.firstOrNull { it.id == d.projectId }?.let { project ->
-                WorktreeSpec(
-                    repoPath = project.path,
-                    base = d.branch ?: "HEAD",
-                    spaceId = project.id,
-                )
-            }
-        } else {
-            null
-        },
+        worktree = worktreeSpec(d, projects),
         busy = BusyPolicy.QUEUE,
     )
 }
@@ -203,7 +209,7 @@ class NewSessionCreator(
             try {
                 // Side chats never come here: New Side Chat creates one at
                 // once from the session (`FreshSideChats.create`, #39).
-                val chatId = core.createSession(NewSessionRequests.newSession(d, target))
+                val chatId = core.createSession(NewSessionRequests.newSession(d, target, projects))
                 core.sendFirst(chatId, NewSessionRequests.sendRequest(d, text, images, projects))
                 chatId
             } catch (cancelled: CancellationException) {

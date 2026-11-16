@@ -31,14 +31,14 @@ class NewSessionRequestsTest {
     // ------------------------------------------------------------- fixtures
 
     /** One project row; [online] and [path] are the fields the mapping reads. */
-    private fun project(id: String, path: String = "/repo", online: Boolean = true) = ProjectOption(
+    private fun project(id: String, path: String = "/repo", online: Boolean = true, git: Boolean = true) = ProjectOption(
         id = id,
         name = "Project $id",
         path = path,
         device = "dev-$id",
         deviceName = "dev-$id",
         online = online,
-        git = true,
+        git = git,
         groupKey = "g-$id",
         groupName = "g-$id",
         colorIndex = 0,
@@ -82,7 +82,7 @@ class NewSessionRequestsTest {
             model = "mock-1",
             effort = null,
         )
-        val r = NewSessionRequests.newSession(d, SessionTarget.Project(spaceId = "p1"))
+        val r = NewSessionRequests.newSession(d, SessionTarget.Project(spaceId = "p1"), emptyList())
         val config = checkNotNull(r.config)
         assertEquals("mock", config.harness)
         assertEquals("mock-1", config.model)
@@ -95,7 +95,7 @@ class NewSessionRequestsTest {
     @Test
     fun effortMapsToReasoning() {
         val d = NewSessionDraft(projectId = "p1", effort = "ultrathink")
-        val r = NewSessionRequests.newSession(d, SessionTarget.Projectless(deviceId = "h1"))
+        val r = NewSessionRequests.newSession(d, SessionTarget.Projectless(deviceId = "h1"), emptyList())
         assertEquals("ultrathink", checkNotNull(r.config).reasoning)
     }
 
@@ -104,14 +104,27 @@ class NewSessionRequestsTest {
         val noWorktree = NewSessionRequests.newSession(
             NewSessionDraft(projectId = "p1", branch = "main"),
             SessionTarget.Project(spaceId = "p1"),
+            listOf(project("p1")),
         )
         assertEquals("main", noWorktree.branch)
 
         val worktree = NewSessionRequests.newSession(
             NewSessionDraft(projectId = "p1", branch = "main", worktree = true),
             SessionTarget.Project(spaceId = "p1"),
+            listOf(project("p1")),
         )
         assertNull(worktree.branch) // the branch becomes the worktree's base
+    }
+
+    @Test
+    fun aPlainFolderKeepsItsBranchEvenWithTheWorktreePick() {
+        // iOS AppModel.swift:967: `branch: worktree == nil ? draft.branch : nil`.
+        val r = NewSessionRequests.newSession(
+            NewSessionDraft(projectId = "p1", branch = "main", worktree = true),
+            SessionTarget.Project(spaceId = "p1"),
+            listOf(project("p1", git = false)),
+        )
+        assertEquals("main", r.branch)
     }
 
     @Test
@@ -119,6 +132,7 @@ class NewSessionRequestsTest {
         val r = NewSessionRequests.newSession(
             NewSessionDraft(projectId = "p1"),
             SessionTarget.Project(spaceId = "p1"),
+            emptyList(),
         )
         assertNull(r.cwd)
         assertNull(r.title)
